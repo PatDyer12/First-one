@@ -121,7 +121,8 @@ button { font: inherit; color: inherit; }
 .tab[aria-selected="true"] { color: var(--hero-ink); border-bottom-color: var(--accent); }
 .tab:hover { color: var(--hero-ink); }
 
-main { padding-top: 22px; display: grid; gap: 18px; }
+main { padding-top: 22px; display: grid; grid-template-columns: minmax(0, 1fr); gap: 18px; }
+main > section, .card { min-width: 0; }
 section[hidden] { display: none !important; }
 
 .card { background: var(--surface); border: 1px solid var(--line); border-radius: 14px; box-shadow: var(--shadow); }
@@ -467,7 +468,7 @@ tr.is-mine td:first-child { box-shadow: inset 3px 0 0 var(--accent); }
       <div class="method-grid">
         <div class="step"><span class="k">A</span><h3>Projection model</h3><p>Sleeper's week-by-week rest-of-season projections, scored for your league. Each week a player projects above <b>replacement level</b> counts; below it counts zero. Byes and injuries show up as zero weeks automatically.</p></div>
         <div class="step"><span class="k">B</span><h3>Trade market</h3><p>FantasyCalc values come from thousands of real trades in real leagues, matched to your format (redraft or dynasty, 1QB or superflex). It's what managers actually pay for a player.</p></div>
-        <div class="step"><span class="k">C</span><h3>Blend</h3><p>The model is rescaled onto the market's units, then mixed. Default mix is 50/50 in redraft and 30/70 toward the market in dynasty, where future years matter more than this season's projections. Drag the slider to change it.</p></div>
+        <div class="step"><span class="k">C</span><h3>Blend</h3><p>The model is rescaled onto the market's units, then mixed. Default mix is 50/50 in redraft, 30/70 toward the market in dynasty (future years matter more), and 55/45 toward the model in the 32-team keeper, because the market's 12-team values miss how scarce starters are in a league that big. Drag the slider to change it.</p></div>
         <div class="step"><span class="k">D</span><h3>Consolidation</h3><p>Two quarters ≠ a fifty-cent piece. Each side's best asset counts 100%, then 88%, 76%, 64%… (floor 40%). The side getting the best player gets rewarded for it.</p></div>
         <div class="step"><span class="k">E</span><h3>Lineup impact</h3><p>Your best legal lineup is rebuilt before and after the trade (flex and superflex included). The difference is projected starter points per week for the rest of the season. It's the "does this actually help me win" check.</p></div>
         <div class="step"><span class="k">F</span><h3>Signals</h3><p>When the model rates a player ≥30% above what the market charges, it's a <span class="tag buy">Buy low</span>. When it's ≥30% below, <span class="tag sell">Sell high</span>. That's the market mispricing gap, same idea as a stock trading away from fair value.</p></div>
@@ -488,13 +489,22 @@ tr.is-mine td:first-child { box-shadow: inset 3px 0 0 var(--accent); }
   var POS = ["QB", "RB", "WR", "TE"];
   var R = 19 - D.week; // remaining weeks incl. this one
   var P = {};
-  D.players.forEach(function (p) {
-    p.ros = p.proj.reduce(function (a, b) { return a + b; }, 0);
-    p.games = p.proj.filter(function (x) { return x > 0.5; }).length;
-    p.ppg = p.games ? p.ros / p.games : 0;
-    p.perWk = p.ros / R;
-    P[p.id] = p;
-  });
+  D.players.forEach(function (p) { P[p.id] = p; });
+  var MODE = { redraft: "Redraft", dynasty: "Dynasty", keeper: "Keeper" };
+
+  // Per-league scoring: stored points are full PPR; adjust for reception value and TE premium
+  function stat(p, lg) {
+    p.s = p.s || {};
+    if (p.s[lg.key]) return p.s[lg.key];
+    var cut = 1 - lg.ppr, te = p.pos === "TE" ? (lg.tePrem || 0) : 0;
+    function adj(pts, rec) { return pts == null ? null : Math.round((pts + (te - cut) * (rec || 0)) * 10) / 10; }
+    var proj = (p.proj || []).map(function (x, i) { return adj(x, (p.projRec || [])[i]); });
+    var wk = (p.wk || []).map(function (x, i) { return adj(x, (p.wkRec || [])[i]); });
+    var ros = proj.reduce(function (a, b) { return a + b; }, 0);
+    var games = proj.filter(function (x) { return x > 0.5; }).length;
+    return (p.s[lg.key] = { proj: proj, wk: wk, ros: ros, games: games, ppg: games ? ros / games : 0, perWk: ros / R });
+  }
+  function S(p) { return stat(p, L()); }
 
   // ---------- helpers ----------
   function $(s) { return document.querySelector(s); }
@@ -517,28 +527,45 @@ tr.is-mine td:first-child { box-shadow: inset 3px 0 0 var(--accent); }
 
   // ---------- league context ----------
   var ctxCache = {};
+  var ROUND = ["1st", "2nd", "3rd", "4th"];
   function ctx(lg) {
     if (ctxCache[lg.key]) return ctxCache[lg.key];
-    var dyn = lg.mode === "dynasty";
-    var fk = (dyn ? "d" : "r") + (lg.qbs === 2 ? "2" : "1");
+    var dyn = lg.mode !== "redraft";
+    var sf = lg.qbs === 2 ? "2" : "1";
+    var fk = (lg.mode === "redraft" ? "r" : "d") + sf;
     var pool = D.players.slice();
-    if (dyn) {
+    if (lg.mode === "dynasty") {
       Object.keys(D.picks).forEach(function (name) {
-        if (/\(/.test(name)) return; // skip early/mid/late variants; leagues list plain picks
+        if (/\(/.test(name)) return; // league lists plain picks, not early/mid/late
         var id = "pick:" + name;
-        if (!P[id]) P[id] = { id: id, n: name + " round pick", short: name, pos: "PICK", team: "", age: null, proj: [], wk: [], ros: 0, ppg: 0, perWk: 0, games: 0, fc: D.picks[name] };
+        if (!P[id]) P[id] = { id: id, n: name + " round pick", short: name, pos: "PICK", team: "", age: null, proj: [], wk: [], fc: D.picks[name] };
         pool.push(P[id]);
       });
     }
+    if (lg.mode === "keeper") {
+      // Value a keeper pick by its overall draft slot, mapped onto 12-team dynasty pick values
+      (lg.picks || []).forEach(function (name) {
+        var m = /(\d{4}) Rd (\d+)/.exec(name); if (!m) return;
+        var base = ROUND.map(function (r) { var x = D.picks[m[1] + " " + r]; return x && x["d" + sf] ? x["d" + sf][0] : 0; });
+        var eq = ((+m[2] - 0.5) * lg.teams) / 12 + 0.5, v;
+        if (eq <= 1) v = base[0];
+        else if (eq < 4) { var lo = Math.floor(eq), fr = eq - lo; v = base[lo - 1] * (1 - fr) + base[lo] * fr; }
+        else v = base[3] * Math.pow(0.7, eq - 4);
+        var id = "kpick:" + lg.key + ":" + name;
+        P[id] = { id: id, n: name + " pick", short: name, pos: "PICK", team: "", age: null, proj: [], wk: [], fc: { kv: [v, 0, 0, 0] } };
+        pool.push(P[id]);
+      });
+    }
+    function pw(p) { return stat(p, lg).perWk; }
     // replacement level: fill every team's starting lineup from the projection pool
     var byPos = {}; POS.forEach(function (x) { byPos[x] = []; });
     pool.forEach(function (p) { if (byPos[p.pos]) byPos[p.pos].push(p); });
-    POS.forEach(function (x) { byPos[x].sort(function (a, b) { return b.perWk - a.perWk; }); });
-    var taken = {}, used = {};
+    POS.forEach(function (x) { byPos[x].sort(function (a, b) { return pw(b) - pw(a); }); });
+    var used = {};
     POS.forEach(function (x) { used[x] = lg.teams * (lg.slots[x] || 0); });
     var rest = [];
     POS.forEach(function (x) { byPos[x].slice(used[x]).forEach(function (p) { rest.push(p); }); });
-    rest.sort(function (a, b) { return b.perWk - a.perWk; });
+    rest.sort(function (a, b) { return pw(b) - pw(a); });
     var flexN = lg.teams * (lg.slots.FLEX || 0), sfN = lg.teams * (lg.slots.SFLEX || 0);
     rest.forEach(function (p) {
       if (flexN > 0 && p.pos !== "QB") { flexN--; used[p.pos]++; }
@@ -548,18 +575,21 @@ tr.is-mine td:first-child { box-shadow: inset 3px 0 0 var(--accent); }
     POS.forEach(function (x) {
       var list = byPos[x], n = used[x];
       var next = list.slice(n, n + 3);
-      repl[x] = next.length ? next.reduce(function (a, p) { return a + p.perWk; }, 0) / next.length : 0;
+      repl[x] = next.length ? next.reduce(function (a, p) { return a + pw(p); }, 0) / next.length : 0;
       var st = list.slice(0, Math.max(1, lg.teams * (lg.slots[x] || 0)));
-      avgStarter[x] = st.reduce(function (a, p) { return a + p.perWk; }, 0) / st.length;
+      avgStarter[x] = st.reduce(function (a, p) { return a + pw(p); }, 0) / st.length;
     });
-    // model value per player
     pool.forEach(function (p) { p._m = p._m || {}; p._m[lg.key] = modelValue(p, lg, repl); });
-    var mkt = function (p) { return p.fc && p.fc[fk] ? p.fc[fk][0] : 0; };
+    var mkt = function (p) {
+      if (!p.fc) return 0;
+      if (p.fc.kv) return p.fc.kv[0];
+      if (lg.mode === "keeper") return 0.5 * (p.fc["r" + sf] ? p.fc["r" + sf][0] : 0) + 0.5 * (p.fc["d" + sf] ? p.fc["d" + sf][0] : 0);
+      return p.fc[fk] ? p.fc[fk][0] : 0;
+    };
     var topM = pool.slice().sort(function (a, b) { return mkt(b) - mkt(a); }).slice(0, 150).reduce(function (a, p) { return a + mkt(p); }, 0);
     var topV = pool.filter(function (p) { return p.pos !== "PICK"; }).sort(function (a, b) { return b._m[lg.key] - a._m[lg.key]; }).slice(0, 150).reduce(function (a, p) { return a + p._m[lg.key]; }, 0);
     var k = topV > 0 ? topM / topV : 1;
     var c = { lg: lg, dyn: dyn, fk: fk, pool: pool, repl: repl, avgStarter: avgStarter, k: k, mkt: mkt };
-    // position ranks by projected pts/week
     POS.forEach(function (x) { byPos[x].forEach(function (p, i) { p._pr = p._pr || {}; p._pr[lg.key] = i + 1; }); });
     ctxCache[lg.key] = c;
     return c;
@@ -579,9 +609,11 @@ tr.is-mine td:first-child { box-shadow: inset 3px 0 0 var(--accent); }
 
   function modelValue(p, lg, repl) {
     if (p.pos === "PICK") return 0;
-    var r = repl[p.pos], v = 0;
-    p.proj.forEach(function (x) { if (x > r) v += x - r; });
-    if (lg.mode === "dynasty") v += Math.max(0, p.ppg - r) * 17 * ageMult(p.pos, p.age);
+    var s = stat(p, lg), r = repl[p.pos], v = 0;
+    s.proj.forEach(function (x) { if (x > r) v += x - r; });
+    // future seasons: full weight in dynasty, half in keeper (only some players can be kept)
+    var fut = lg.mode === "dynasty" ? 1 : lg.mode === "keeper" ? 0.5 : 0;
+    if (fut) v += fut * Math.max(0, s.ppg - r) * 17 * ageMult(p.pos, p.age);
     return v;
   }
 
@@ -613,13 +645,13 @@ tr.is-mine td:first-child { box-shadow: inset 3px 0 0 var(--accent); }
 
   function lineup(c, ids) {
     var s = c.lg.slots, pl = ids.map(function (id) { return P[id]; }).filter(function (p) { return p && p.pos !== "PICK"; })
-      .sort(function (a, b) { return b.perWk - a.perWk; });
+      .sort(function (a, b) { return stat(b, c.lg).perWk - stat(a, c.lg).perWk; });
     var used = {}, out = [], total = 0;
     function take(slot, ok, n) {
       for (var k = 0; k < n; k++) {
         for (var i = 0; i < pl.length; i++) {
           var p = pl[i];
-          if (!used[p.id] && ok(p)) { used[p.id] = 1; out.push({ slot: slot, p: p }); total += p.perWk; break; }
+          if (!used[p.id] && ok(p)) { used[p.id] = 1; out.push({ slot: slot, p: p }); total += stat(p, c.lg).perWk; break; }
         }
       }
     }
@@ -632,7 +664,7 @@ tr.is-mine td:first-child { box-shadow: inset 3px 0 0 var(--accent); }
   // ---------- state ----------
   var leagues = D.leagues.map(function (lg) {
     lg.myIds = lg.ids.slice();
-    (lg.picks || []).forEach(function (pk) { lg.myIds.push("pick:" + pk); });
+    (lg.picks || []).forEach(function (pk) { lg.myIds.push((lg.mode === "keeper" ? "kpick:" + lg.key + ":" : "pick:") + pk); });
     return lg;
   });
   var state = store("state") || {};
@@ -647,7 +679,8 @@ tr.is-mine td:first-child { box-shadow: inset 3px 0 0 var(--accent); }
 
   function L() { return leagues.filter(function (l) { return l.key === state.league; })[0]; }
   function C() { var lg = L(); ctx(lg); return ctxCache[lg.key]; }
-  function W() { var lg = L(); var v = state.blend[lg.key]; return v == null ? (lg.mode === "dynasty" ? 0.7 : 0.5) : v; }
+  function W() { var lg = L(); var v = state.blend[lg.key]; return v == null ? DEFAULT_W[lg.mode] : v; }
+  var DEFAULT_W = { redraft: 0.5, dynasty: 0.7, keeper: 0.45 };
   function T() {
     var lg = L();
     var t = state.trades[lg.key];
@@ -670,7 +703,7 @@ tr.is-mine td:first-child { box-shadow: inset 3px 0 0 var(--accent); }
       return '<button class="lg-btn" type="button" data-lg="' + lg.key + '" aria-pressed="' + (lg.key === state.league) + '">' +
         '<span class="plat">' + esc(lg.platform.slice(0, 1)) + "</span>" +
         '<span class="t">' + esc(lg.name) + "</span>" +
-        '<span class="s">' + esc(lg.platform + " · " + (lg.mode === "dynasty" ? "Dynasty" : "Redraft") + " · " + (lg.qbs === 2 ? "Superflex" : "1QB")) + "</span></button>";
+        '<span class="s">' + esc(lg.platform + " · " + MODE[lg.mode] + " · " + lg.teams + "-team · " + (lg.qbs === 2 ? "SF" : "1QB")) + "</span></button>";
     }).join("");
     document.querySelectorAll(".tab").forEach(function (b) {
       b.setAttribute("aria-selected", String(b.dataset.tab === state.tab));
@@ -681,7 +714,7 @@ tr.is-mine td:first-child { box-shadow: inset 3px 0 0 var(--accent); }
   // ---------- sparkline ----------
   function spark(p) {
     if (p.pos === "PICK") return "";
-    var past = p.wk || [], next = p.proj.slice(0, 4), all = past.concat(next);
+    var sp = S(p), past = sp.wk || [], next = sp.proj.slice(0, 4), all = past.concat(next);
     var max = Math.max(20, Math.max.apply(null, all.map(function (x) { return x || 0; })));
     var bw = 9, gap = 3, h = 30, wTot = all.length * (bw + gap) - gap;
     var s = '<svg class="spark" width="' + wTot + '" height="' + h + '" viewBox="0 0 ' + wTot + " " + h + '" aria-hidden="true">';
@@ -696,8 +729,8 @@ tr.is-mine td:first-child { box-shadow: inset 3px 0 0 var(--accent); }
   }
 
   function trendHTML(c, p) {
-    var t = p.fc && p.fc[c.fk] ? p.fc[c.fk][3] : 0;
-    var m = c.mkt(p) || 1, pct = Math.round((t / Math.max(1, m - t)) * 100);
+    var row = p.fc && p.fc[c.fk], t = row ? row[3] : 0;
+    var pct = row ? Math.round((t / Math.max(300, row[0] - t)) * 100) : 0;
     if (!t) return '<span class="trend flat">—</span>';
     return '<span class="trend ' + (t > 0 ? "up" : "down") + '">' + (t > 0 ? "▲ " : "▼ ") + Math.abs(pct) + "%</span>";
   }
@@ -710,7 +743,7 @@ tr.is-mine td:first-child { box-shadow: inset 3px 0 0 var(--accent); }
     var s = lg.slots;
     var lineupStr = POS.filter(function (x) { return s[x]; }).map(function (x) { return (s[x] > 1 ? s[x] : "") + x; })
       .concat(s.FLEX ? [(s.FLEX > 1 ? s.FLEX : "") + "FLEX"] : []).concat(s.SFLEX ? ["SF"] : []).join(" · ");
-    $("#team-fmt").innerHTML = [lg.teams + " teams", lg.ppr === 1 ? "Full PPR" : lg.ppr + " PPR", lg.mode === "dynasty" ? "Dynasty" : "Redraft", lg.qbs === 2 ? "Superflex" : "1QB", lineupStr].map(function (x) { return "<span>" + esc(x) + "</span>"; }).join("");
+    $("#team-fmt").innerHTML = [lg.teams + " teams", lg.ppr === 1 ? "Full PPR" : lg.ppr === 0.5 ? "Half PPR" : "Standard"].concat(lg.tePrem ? ["TE +" + lg.tePrem + "/rec"] : []).concat([MODE[lg.mode], lg.qbs === 2 ? "Superflex" : "1QB", lineupStr]).map(function (x) { return "<span>" + esc(x) + "</span>"; }).join("");
 
     var lu = lineup(c, lg.myIds);
     var tv = lg.myIds.reduce(function (a, id) { return a + value(c, P[id], w).blend; }, 0);
@@ -729,7 +762,7 @@ tr.is-mine td:first-child { box-shadow: inset 3px 0 0 var(--accent); }
       var n = Math.max(1, s[x] || 0);
       var dedicated = lu.starters.filter(function (st) { return st.slot === x; });
       if (!dedicated.length) return;
-      var myAvg = dedicated.reduce(function (a, st) { return a + st.p.perWk; }, 0) / dedicated.length;
+      var myAvg = dedicated.reduce(function (a, st) { return a + S(st.p).perWk; }, 0) / dedicated.length;
       var avg = c.avgStarter[x];
       var ratio = avg ? myAvg / avg : 1;
       var letter = ratio >= 1.25 ? "A+" : ratio >= 1.12 ? "A" : ratio >= 1.03 ? "B+" : ratio >= 0.95 ? "B" : ratio >= 0.85 ? "C" : ratio >= 0.75 ? "D" : "F";
@@ -753,7 +786,7 @@ tr.is-mine td:first-child { box-shadow: inset 3px 0 0 var(--accent); }
         '<td class="l"><div class="who">' + head(p) + '<div><div class="nm">' + esc(p.short || p.n) + '</div><div class="meta"><span class="pos ' + p.pos + '">' + p.pos + "</span>" +
         (p.pos !== "PICK" ? "<span>" + esc(p.team) + (p.opp ? " vs " + esc(p.opp) : "") + (p.age ? " · " + Math.floor(p.age) + "y" : "") + "</span>" : "") + injTag(p) + "</div></div></div></td>" +
         "<td>" + spark(p) + "</td>" +
-        '<td><span class="big num">' + (p.pos === "PICK" ? "—" : f1(p.ppg)) + "</span></td>" +
+        '<td><span class="big num">' + (p.pos === "PICK" ? "—" : f1(S(p).ppg)) + "</span></td>" +
         '<td class="mono">' + (pr ? p.pos + pr : "—") + "</td>" +
         '<td><span class="big num">' + f0(v.blend) + "</span></td>" +
         "<td>" + trendHTML(c, p) + "</td>" +
@@ -774,7 +807,7 @@ tr.is-mine td:first-child { box-shadow: inset 3px 0 0 var(--accent); }
 
   // ---------- TRADE ----------
   function defaultTrade(lg) {
-    var c = ctx(lg), w = lg.mode === "dynasty" ? 0.7 : 0.5;
+    var c = ctx(lg), w = DEFAULT_W[lg.mode];
     // Start with the roster's strongest sell-high flag, else nothing
     var sells = lg.myIds.filter(function (id) { return signal(c, P[id]) === "sell"; })
       .sort(function (a, b) { return value(c, P[b], w).blend - value(c, P[a], w).blend; });
@@ -798,7 +831,7 @@ tr.is-mine td:first-child { box-shadow: inset 3px 0 0 var(--accent); }
       var p = P[id], v = value(c, p, w), pr = p._pr && p._pr[c.lg.key];
       return '<li class="item">' + head(p, "lg") + '<div><div class="nm">' + esc(p.short || p.n) + '</div><div class="meta"><span class="pos ' + p.pos + '">' + p.pos + "</span>" +
         (p.pos !== "PICK" ? "<span>" + esc(p.team) + (p.age ? " · " + Math.floor(p.age) + "y" : "") + (pr ? " · " + p.pos + pr : "") + "</span>" : "") + injTag(p) + "</div>" +
-        (p.pos !== "PICK" ? '<div class="meta" style="margin-top:6px">' + spark(p) + "<span>" + f1(p.ppg) + " proj/gm</span></div>" : "") + "</div>" +
+        (p.pos !== "PICK" ? '<div class="meta" style="margin-top:6px">' + spark(p) + "<span>" + f1(S(p).ppg) + " proj/gm</span></div>" : "") + "</div>" +
         '<div class="val"><div class="big num">' + f0(v.blend) + '</div><button class="x" type="button" data-rm="' + which + '" data-id="' + esc(id) + '">Remove</button></div></li>';
     }).join("");
   }
@@ -887,13 +920,13 @@ tr.is-mine td:first-child { box-shadow: inset 3px 0 0 var(--accent); }
       sd.rows.forEach(function (r) {
         var p = r.p;
         rows += '<tr><td class="l"><div class="who">' + head(p) + '<span class="nm">' + esc(p.short || p.n) + '</span></div></td><td class="l"><span class="tag ' + (pair[0] === "get" ? "buy" : "sell") + '">' + (pair[0] === "get" ? "You get" : "You give") + "</span></td>" +
-          '<td class="mono">' + (p.pos === "PICK" ? "—" : f0(p.ros) + " pts") + '</td><td class="mono">' + (p.pos === "PICK" ? "—" : f1(c.repl[p.pos]) + "/wk") + '</td><td class="mono">' + (p.pos === "PICK" ? "—" : f0(r.v.model)) + '</td><td class="mono">' + f0(r.v.market) + '</td><td class="mono">' + f0(r.v.blend) + '</td><td class="mono">' + Math.round(r.w * 100) + '%</td><td class="mono"><b>' + f0(r.counts) + "</b></td></tr>";
+          '<td class="mono">' + (p.pos === "PICK" ? "—" : f0(S(p).ros) + " pts") + '</td><td class="mono">' + (p.pos === "PICK" ? "—" : f1(c.repl[p.pos]) + "/wk") + '</td><td class="mono">' + (p.pos === "PICK" ? "—" : f0(r.v.model)) + '</td><td class="mono">' + f0(r.v.market) + '</td><td class="mono">' + f0(r.v.blend) + '</td><td class="mono">' + Math.round(r.w * 100) + '%</td><td class="mono"><b>' + f0(r.counts) + "</b></td></tr>";
       });
       if (sd.rows.length) rows += '<tr class="total"><td class="l" colspan="8">' + (pair[0] === "get" ? "Total you get" : "Total you give") + '</td><td class="mono">' + f0(sd.total) + "</td></tr>";
     });
     $("#work").innerHTML = rows || '<tr><td colspan="9" class="l" style="color:var(--muted)">Add players to see the math.</td></tr>';
     $("#work-note").textContent = "Model value = projected points above replacement (" + POS.map(function (x) { return x + " " + f1(c.repl[x]); }).join(", ") + " pts/wk) summed over weeks " + D.week + "–18" +
-      (c.dyn ? ", plus a future-seasons chunk scaled by age" : "") + ", then rescaled ×" + c.k.toFixed(1) + " onto FantasyCalc's " + (c.dyn ? "dynasty" : "redraft") + " " + (c.lg.qbs === 2 ? "superflex" : "1QB") + " market scale. Blend = " + (100 - Math.round(w * 100)) + "% model + " + Math.round(w * 100) + "% market.";
+      (c.dyn ? ", plus a future-seasons chunk scaled by age" : "") + ", then rescaled ×" + c.k.toFixed(1) + " onto FantasyCalc's " + (c.lg.mode === "keeper" ? "50/50 redraft + dynasty" : MODE[c.lg.mode].toLowerCase()) + " " + (c.lg.qbs === 2 ? "superflex" : "1QB") + " market scale. Blend = " + (100 - Math.round(w * 100)) + "% model + " + Math.round(w * 100) + "% market.";
     save();
   }
 
@@ -931,7 +964,7 @@ tr.is-mine td:first-child { box-shadow: inset 3px 0 0 var(--accent); }
   // ---------- FINDER ----------
   function renderFinder() {
     var c = C(), lg = L(), w = W();
-    $("#finder-sub").textContent = lg.name + " · " + (c.dyn ? "value-first (dynasty)" : "lineup-first (redraft)");
+    $("#finder-sub").textContent = lg.name + " · " + (c.dyn ? "value + lineup (" + MODE[lg.mode].toLowerCase() + ")" : "lineup-first (redraft)");
     document.querySelectorAll("#finder-pos button").forEach(function (b) { b.setAttribute("aria-pressed", String(b.dataset.v === state.finderPos)); });
     var my = lg.myIds, base = lineup(c, my).total;
     var assets = my.map(function (id) { return { id: id, v: value(c, P[id], w).blend }; }).filter(function (a) { return a.v > 150; });
@@ -968,7 +1001,7 @@ tr.is-mine td:first-child { box-shadow: inset 3px 0 0 var(--accent); }
       return '<div class="card idea"><div class="idea-row"><div class="idea-side"><span class="lbl">You give</span>' + give + '</div><span class="arrow">→</span><div class="idea-side"><span class="lbl">You get</span><div class="mini">' + head(p) + '<span class="pos ' + p.pos + '">' + p.pos + '</span><span class="n">' + esc(p.n) + "</span></div>" + (injTag(p) ? '<div class="mini">' + injTag(p) + "</div>" : "") + "</div></div>" +
         '<div class="idea-stats"><div class="stat"><b class="' + (x.b.lu >= 0 ? "pos-c" : "neg-c") + '">' + sgn(x.b.lu, 1) + "</b><span>starter pts/wk</span></div>" +
         '<div class="stat"><b class="' + (x.b.val >= 0 ? "pos-c" : "neg-c") + '">' + sgn(x.b.val) + "</b><span>trade value</span></div>" +
-        '<div class="stat"><b>' + f1(p.ppg) + "</b><span>" + esc(p.team) + " proj/gm</span></div></div>" +
+        '<div class="stat"><b>' + f1(S(p).ppg) + "</b><span>" + esc(p.team) + " proj/gm</span></div></div>" +
         '<button class="btn" type="button" data-load="' + esc(x.b.pk.join(",")) + '" data-target="' + esc(p.id) + '">Open in analyzer</button></div>';
     }).join("") : '<div class="card" style="padding:18px"><p class="sub">No clean fits at this position right now. Try "Any" or drag the value mix on the analyzer.</p></div>';
   }
@@ -980,7 +1013,7 @@ tr.is-mine td:first-child { box-shadow: inset 3px 0 0 var(--accent); }
   ];
   function renderRanks() {
     var c = C(), lg = L(), w = W();
-    $("#ranks-sub").textContent = (c.dyn ? "Dynasty" : "Redraft") + " · " + (lg.qbs === 2 ? "Superflex" : "1QB") + " · " + lg.teams + " teams · FantasyCalc market + Sleeper projections";
+    $("#ranks-sub").textContent = MODE[lg.mode] + " · " + (lg.ppr === 1 ? "PPR" : lg.ppr === 0.5 ? "Half PPR" : "Std") + (lg.tePrem ? " + TE premium" : "") + " · " + (lg.qbs === 2 ? "Superflex" : "1QB") + " · " + lg.teams + " teams · FantasyCalc market + Sleeper projections";
     document.querySelectorAll("#rank-pos button").forEach(function (b) { b.setAttribute("aria-pressed", String(b.dataset.v === state.rankPos)); });
     $("#rank-head").innerHTML = RANK_COLS.map(function (col) {
       var sortable = ["age", "ppg", "model", "market", "blend", "trend"].indexOf(col[0]) >= 0;
@@ -995,13 +1028,13 @@ tr.is-mine td:first-child { box-shadow: inset 3px 0 0 var(--accent); }
     rows.forEach(function (r, i) { r.rank = i + 1; });
     rows = rows.filter(function (r) { return (state.rankPos === "ALL" || r.p.pos === state.rankPos) && (!q || (r.p.n + " " + r.p.team).toLowerCase().indexOf(q) >= 0); });
     var key = state.rankSort;
-    var get = { age: function (r) { return -(r.p.age || 99); }, ppg: function (r) { return r.p.ppg; }, model: function (r) { return r.v.model; }, market: function (r) { return r.v.market; }, blend: function (r) { return r.v.blend; }, trend: function (r) { return r.trend; } }[key];
+    var get = { age: function (r) { return -(r.p.age || 99); }, ppg: function (r) { return S(r.p).ppg; }, model: function (r) { return r.v.model; }, market: function (r) { return r.v.market; }, blend: function (r) { return r.v.blend; }, trend: function (r) { return r.trend; } }[key];
     if (get) rows.sort(function (a, b) { return get(b) - get(a); });
     rows = rows.slice(0, 250);
     $("#ranks").innerHTML = rows.map(function (r) {
       var p = r.p, sg = signal(c, p), isMine = mine(p.id), pr = p._pr && p._pr[lg.key];
       return '<tr class="row' + (isMine ? " is-mine" : "") + '"><td class="l mono">' + r.rank + '</td><td class="l"><div class="who">' + head(p) + '<div><div class="nm">' + esc(p.short || p.n) + '</div><div class="meta"><span class="pos ' + p.pos + '">' + p.pos + "</span>" + injTag(p) + (isMine ? '<span class="tag mine">Yours</span>' : "") + "</div></div></div></td>" +
-        '<td class="l">' + esc(p.team || "") + '</td><td class="mono">' + (p.age ? Math.floor(p.age) : "—") + '</td><td class="mono">' + (p.pos === "PICK" ? "—" : f1(p.ppg)) + '</td><td class="mono">' + (pr ? p.pos + pr : "—") + '</td><td class="mono">' + (p.pos === "PICK" ? "—" : f0(r.v.model)) + '</td><td class="mono">' + f0(r.v.market) + '</td><td><span class="big num">' + f0(r.v.blend) + "</span></td><td>" + trendHTML(c, p) + '</td><td class="l">' + (sg === "sell" ? '<span class="tag sell">Sell high</span>' : sg === "buy" ? '<span class="tag buy">Buy low</span>' : "") + "</td></tr>";
+        '<td class="l">' + esc(p.team || "") + '</td><td class="mono">' + (p.age ? Math.floor(p.age) : "—") + '</td><td class="mono">' + (p.pos === "PICK" ? "—" : f1(S(p).ppg)) + '</td><td class="mono">' + (pr ? p.pos + pr : "—") + '</td><td class="mono">' + (p.pos === "PICK" ? "—" : f0(r.v.model)) + '</td><td class="mono">' + f0(r.v.market) + '</td><td><span class="big num">' + f0(r.v.blend) + "</span></td><td>" + trendHTML(c, p) + '</td><td class="l">' + (sg === "sell" ? '<span class="tag sell">Sell high</span>' : sg === "buy" ? '<span class="tag buy">Buy low</span>' : "") + "</td></tr>";
     }).join("");
   }
 
@@ -1009,11 +1042,11 @@ tr.is-mine td:first-child { box-shadow: inset 3px 0 0 var(--accent); }
   function renderMethod() {
     var c = C(), lg = L();
     $("#formula").textContent =
-      "model  = Σ weeks " + D.week + "–18  max(0, projected pts − replacement)" + (c.dyn ? "\n       + max(0, proj pts/gm − replacement) × 17 × age multiplier" : "") +
+      "model  = Σ weeks " + D.week + "–18  max(0, projected pts − replacement)" + (c.dyn ? "\n       + " + (lg.mode === "keeper" ? "0.5 × " : "") + "max(0, proj pts/gm − replacement) × 17 × age multiplier" : "") +
       "\nvalue  = " + Math.round((1 - W()) * 100) + "% × model × " + c.k.toFixed(2) + "  +  " + Math.round(W() * 100) + "% × FantasyCalc market" +
       "\nside   = best asset × 1.00 + next × 0.88 + next × 0.76 …  (floor 0.40)" +
       "\nreplacement (" + lg.name + "): " + POS.map(function (x) { return x + " " + f1(c.repl[x]); }).join(" · ") + " pts/wk";
-    $("#sources").textContent = "Data: Sleeper API (player info, injuries, weekly stats, week-by-week projections) and FantasyCalc (trade values from real trades), pulled " + new Date(D.fetchedAt).toLocaleString() + ". Scoring uses standard full-PPR points, which matches both of your leagues' settings (4-pt passing TDs, 1 pt per reception). Kickers and defenses aren't modeled. Refresh the data with python3 scripts/fetch_data.py.";
+    $("#sources").textContent = "Data: Sleeper API (player info, injuries, weekly stats, week-by-week projections) and FantasyCalc (trade values from real trades), pulled " + new Date(D.fetchedAt).toLocaleString() + ". Points are rescored per league: full PPR for Buttstuffers and Sleeper Dynasty; half PPR plus a +0.5/catch TE premium for Sleeper Keeper (4-pt passing TDs everywhere). Keeper picks are valued by overall draft slot mapped onto dynasty pick values, so treat those as rough. Kickers and defenses aren't modeled. Refresh the data with python3 scripts/fetch_data.py.";
   }
 
   function renderAll() {

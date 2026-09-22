@@ -100,7 +100,9 @@ def main():
             "inj": sp.get("injury_status"),
             "injNote": sp.get("injury_body_part"),
             "wk": [None] * (week - 1),
+            "wkRec": [0.0] * (week - 1),
             "proj": [0.0] * (19 - week),
+            "projRec": [0.0] * (19 - week),
             "opp": None,
             "fc": {},
         }
@@ -126,12 +128,13 @@ def main():
     for w, rows in projs.items():
         for row in rows:
             pts = row["stats"].get("pts_ppr") or 0
-            if pts < 3 and row["player_id"] not in players:
+            if pts < 1.5 and row["player_id"] not in players:
                 continue
             rec = ensure(row["player_id"])
             if not rec:
                 continue
             rec["proj"][w - week] = round(pts, 1)
+            rec["projRec"][w - week] = round(row["stats"].get("rec") or 0, 1)
             if w == week:
                 rec["opp"] = row.get("opponent")
     for w, rows in stats.items():
@@ -139,6 +142,7 @@ def main():
             rec = players.get(row["player_id"])
             if rec and row["stats"].get("gms_active"):
                 rec["wk"][w - 1] = round(row["stats"].get("pts_ppr") or 0, 1)
+                rec["wkRec"][w - 1] = row["stats"].get("rec") or 0
 
     # Resolve each league's roster names to Sleeper ids
     index = {}
@@ -164,7 +168,7 @@ def main():
     rostered = {i for lg in leagues for i in lg["ids"]}
     keep = {}
     for pid, p in players.items():
-        if pid in rostered or p["fc"] or sum(p["proj"]) >= 25:
+        if pid in rostered or p["fc"] or sum(p["proj"]) >= 12:
             keep[pid] = p
 
     top = sorted(keep.values(), key=lambda p: -max([v[0] for v in p["fc"].values()] or [0]))[:260]

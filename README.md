@@ -1,6 +1,6 @@
 # Fantasy Trade Scale
 
-A fantasy football trade analyzer tuned to two real leagues (Yahoo redraft, Sleeper dynasty superflex).
+A fantasy football trade analyzer tuned to three real leagues (Yahoo redraft, Sleeper dynasty superflex, Sleeper 32-team keeper with half PPR + TE premium).
 Open `index.html` in a browser.
 
 ## Data
