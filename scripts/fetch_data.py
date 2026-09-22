@@ -43,7 +43,8 @@ def pos_query():
 
 
 def weekly(kind, season, week):
-    url = "https://api.sleeper.app/%s/nfl/%s/%d?season_type=regular&%s" % (kind, season, week, pos_query())
+    q = pos_query() + ("&position[]=DEF" if kind == "stats" else "")
+    url = "https://api.sleeper.app/%s/nfl/%s/%d?season_type=regular&%s" % (kind, season, week, q)
     return week, get(url).json()
 
 
@@ -104,6 +105,7 @@ def main():
             "proj": [0.0] * (19 - week),
             "projRec": [0.0] * (19 - week),
             "opp": None,
+            "use": {"snp": 0, "tmSnp": 0, "tgt": 0, "att": 0, "g": 0},
             "fc": {},
         }
         return players[pid]
@@ -137,10 +139,37 @@ def main():
             rec["projRec"][w - week] = round(row["stats"].get("rec") or 0, 1)
             if w == week:
                 rec["opp"] = row.get("opponent")
+    # Team results from defense rows: a defense's points allowed = its opponent's score
+    teams = {}
+    for w, rows in stats.items():
+        allowed = {}
+        for row in rows:
+            if row["player"].get("position") == "DEF" and row["stats"].get("gp"):
+                allowed[row["team"]] = (row["stats"].get("pts_allow") or 0, row.get("opponent"))
+        for team, (pa, opp) in allowed.items():
+            if opp not in allowed:
+                continue
+            pf = allowed[opp][0]
+            t = teams.setdefault(team, {"w": 0, "l": 0, "t": 0, "pf": 0, "pa": 0, "g": 0, "plays": 0})
+            t["pf"] += pf; t["pa"] += pa; t["g"] += 1
+            t["w" if pf > pa else "l" if pf < pa else "t"] += 1
+        for row in rows:
+            st = row["stats"]
+            if row["player"].get("position") in POSITIONS and row.get("team") in teams:
+                teams[row["team"]]["plays"] += (st.get("pass_att") or 0) + (st.get("rush_att") or 0)
+
     for w, rows in stats.items():
         for row in rows:
             rec = players.get(row["player_id"])
-            if rec and row["stats"].get("gms_active"):
+            st = row["stats"]
+            # count a game only if he actually got on the field
+            if rec and st.get("gms_active") and ((st.get("off_snp") or 0) > 0 or (st.get("pts_ppr") or 0) != 0):
+                u = rec["use"]
+                u["snp"] += st.get("off_snp") or 0
+                u["tmSnp"] += st.get("tm_off_snp") or 0
+                u["tgt"] += st.get("rec_tgt") or 0
+                u["att"] += st.get("rush_att") or 0
+                u["g"] += 1
                 rec["wk"][w - 1] = round(row["stats"].get("pts_ppr") or 0, 1)
                 rec["wkRec"][w - 1] = row["stats"].get("rec") or 0
 
@@ -183,7 +212,8 @@ def main():
         "season": int(season),
         "week": week,
         "fetchedAt": datetime.now(timezone.utc).isoformat(timespec="minutes"),
-        "sources": ["Sleeper (stats, projections, injuries)", "FantasyCalc (trade values)"],
+        "sources": ["FantasyCalc (trade values)", "Sleeper: Sportradar stats, RotoWire projections, injuries"],
+        "teams": teams,
         "players": list(keep.values()),
         "picks": picks,
         "leagues": leagues,

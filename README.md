@@ -15,9 +15,14 @@ Rosters and league settings live in `data/leagues.json`. Edit that file after a 
 
 ## Model
 
-- **Projection model**: Σ over remaining weeks of max(0, projected pts − replacement level), where replacement is computed by filling every team's lineup (flex + superflex included) from the projection pool. Dynasty adds `max(0, pts/gm − repl) × 17 × age multiplier`.
-- **Market**: FantasyCalc value for the league's format.
-- **Blend**: model rescaled to market units, then mixed (50/50 redraft, 30/70 dynasty by default, adjustable).
-- **Consolidation**: each side's assets weighted 100%, 88%, 76%… (floor 40%).
-- **Lineup impact**: optimal lineup before vs. after, in projected starter points per week.
-- **Trade Finder**: every 1-for-1 and 2-for-1 package from your roster vs. the top ~220 targets. Keeps fair deals that improve your lineup.
+Public trade market first, then this season, then your roster.
+
+- **Market (primary)**: FantasyCalc value for the league's format (keeper = 50/50 redraft + dynasty).
+- **2026 performance**: actual pts/gm vs. projection, shrunk for small samples, capped ±10%. Usage (snap share vs. positional norm) capped ±4%.
+- **Team environment**: offense quality (projected output + points scored), QB situation (healthy starter's projection, QB1-out flag), winning (record), teammate health. Capped ±10%.
+- Adjustments count 100% in redraft, 75% keeper, 50% dynasty; a slider scales them 0–150%.
+- **Consolidation**: each side weighted 100%, 88%, 76%… (floor 40%).
+- **Roster fit**: best-lineup change (starter pts/wk × weeks left, priced at the market's value per point) × fit weight, capped at ±25% of the deal.
+- **Every effect**: the trade screen breaks out market Δ, adjustments Δ, consolidation, fit, per-player factors, lineup slot changes, position-room grades, roster spots, next-4-weeks vs. rest-of-season, age, and picks.
+
+Sources: FantasyCalc; Sleeper API (Sportradar stats incl. snaps/targets/carries/team scores, RotoWire projections, injuries).
