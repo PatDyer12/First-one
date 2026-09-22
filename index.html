@@ -1,0 +1,911 @@
+<title>Fantasy Trade Scale</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Big+Shoulders+Display:wght@700;800&family=IBM+Plex+Mono:wght@400;600&family=IBM+Plex+Sans:wght@400;500;600&display=swap">
+<style>
+:root {
+  --bg: #EDF1EC;
+  --surface: #FFFFFF;
+  --surface-2: #F6F8F5;
+  --ink: #15201A;
+  --muted: #5A6A60;
+  --line: #D2DAD3;
+  --accent: #D9480F;
+  --accent-soft: #FBE3D6;
+  --on-accent: #FFFFFF;
+  --good: #2A7A4B;
+  --warn: #A96A12;
+  --bad: #BE3A2E;
+  --qb: #B03A6A;
+  --rb: #1F8A5B;
+  --wr: #2565A8;
+  --te: #B06A10;
+  --display: "Big Shoulders Display", "Arial Narrow", Impact, sans-serif;
+  --body: "IBM Plex Sans", system-ui, -apple-system, "Segoe UI", sans-serif;
+  --mono: "IBM Plex Mono", ui-monospace, SFMono-Regular, Menlo, monospace;
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    color-scheme: dark;
+    --bg: #0E1411;
+    --surface: #17201B;
+    --surface-2: #1C2721;
+    --ink: #E5ECE7;
+    --muted: #94A49A;
+    --line: #2A3730;
+    --accent: #FF7A3D;
+    --accent-soft: #3A2217;
+    --on-accent: #1A0D06;
+    --good: #5CC98A;
+    --warn: #E3A948;
+    --bad: #F0776A;
+    --qb: #E07AA3;
+    --rb: #52C48E;
+    --wr: #6FA8E8;
+    --te: #E0A152;
+  }
+}
+:root[data-theme="dark"] {
+  color-scheme: dark;
+  --bg: #0E1411;
+  --surface: #17201B;
+  --surface-2: #1C2721;
+  --ink: #E5ECE7;
+  --muted: #94A49A;
+  --line: #2A3730;
+  --accent: #FF7A3D;
+  --accent-soft: #3A2217;
+  --on-accent: #1A0D06;
+  --good: #5CC98A;
+  --warn: #E3A948;
+  --bad: #F0776A;
+  --qb: #E07AA3;
+  --rb: #52C48E;
+  --wr: #6FA8E8;
+  --te: #E0A152;
+}
+
+* { box-sizing: border-box; }
+body {
+  background: var(--bg);
+  color: var(--ink);
+  font-family: var(--body);
+  font-size: 15px;
+  line-height: 1.5;
+  padding: 0 16px;
+  padding-block: 24px 48px;
+}
+.wrap { max-width: 1120px; margin: 0 auto; display: grid; gap: 20px; }
+
+header.top { display: flex; flex-wrap: wrap; align-items: end; justify-content: space-between; gap: 12px 24px; }
+h1 {
+  font-family: var(--display);
+  font-weight: 800;
+  font-size: clamp(2.2rem, 6vw, 3.4rem);
+  line-height: 0.95;
+  letter-spacing: 0.01em;
+  text-transform: uppercase;
+  margin: 0;
+  text-wrap: balance;
+}
+h1 span { color: var(--accent); }
+.tag { margin: 6px 0 0; color: var(--muted); max-width: 60ch; }
+
+/* settings strip */
+.settings {
+  background: var(--surface);
+  border: 1px solid var(--line);
+  border-radius: 10px;
+  padding: 14px 16px;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 14px 22px;
+  align-items: end;
+}
+.field { display: grid; gap: 5px; }
+.label {
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--muted);
+}
+.seg { display: inline-flex; border: 1px solid var(--line); border-radius: 7px; overflow: hidden; }
+.seg button {
+  font: 500 13px/1 var(--body);
+  color: var(--ink);
+  background: var(--surface);
+  border: 0;
+  border-right: 1px solid var(--line);
+  padding: 8px 11px;
+  cursor: pointer;
+}
+.seg button:last-child { border-right: 0; }
+.seg button[aria-pressed="true"] { background: var(--ink); color: var(--bg); }
+.seg button:focus-visible, button:focus-visible, input:focus-visible, select:focus-visible, summary:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 2px;
+}
+.weeks { display: flex; align-items: center; gap: 10px; }
+.weeks input { width: 140px; accent-color: var(--accent); }
+.weeks output { font-family: var(--mono); font-size: 13px; min-width: 5ch; }
+.toggle { display: flex; align-items: center; gap: 8px; font-size: 13px; cursor: pointer; }
+.toggle input { accent-color: var(--accent); width: 16px; height: 16px; }
+
+/* trade board */
+.board {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(0, 300px) minmax(0, 1fr);
+  gap: 16px;
+  align-items: start;
+}
+.side {
+  background: var(--surface);
+  border: 1px solid var(--line);
+  border-radius: 10px;
+  padding: 16px;
+  display: grid;
+  gap: 12px;
+}
+.side-head { display: flex; justify-content: space-between; align-items: baseline; gap: 8px; }
+.side-head h2 {
+  font-family: var(--display);
+  font-weight: 800;
+  font-size: 1.6rem;
+  text-transform: uppercase;
+  letter-spacing: 0.02em;
+  margin: 0;
+}
+.side-total { font-family: var(--mono); font-size: 13px; color: var(--muted); }
+.side-total b { color: var(--ink); font-weight: 600; }
+
+.adder { display: flex; gap: 8px; }
+.adder input {
+  flex: 1;
+  min-width: 0;
+  font: 14px var(--body);
+  color: var(--ink);
+  background: var(--surface-2);
+  border: 1px solid var(--line);
+  border-radius: 7px;
+  padding: 9px 11px;
+}
+.btn {
+  font: 600 13px/1 var(--body);
+  border-radius: 7px;
+  border: 1px solid var(--ink);
+  background: var(--ink);
+  color: var(--bg);
+  padding: 9px 14px;
+  cursor: pointer;
+  white-space: nowrap;
+}
+.btn.ghost { background: transparent; color: var(--ink); border-color: var(--line); }
+.hint { font-size: 12.5px; color: var(--bad); min-height: 0; margin: -4px 0 0; }
+.hint:empty { display: none; }
+
+.roster { list-style: none; margin: 0; padding: 0; display: grid; gap: 8px; }
+.empty {
+  border: 1px dashed var(--line);
+  border-radius: 8px;
+  padding: 18px 12px;
+  text-align: center;
+  color: var(--muted);
+  font-size: 13.5px;
+}
+.player {
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr) auto;
+  gap: 4px 10px;
+  align-items: center;
+  padding: 10px 10px 10px 0;
+  border-bottom: 1px solid var(--line);
+}
+.player:last-child { border-bottom: 0; }
+.pos {
+  font: 700 11px/1 var(--mono);
+  letter-spacing: 0.04em;
+  color: #fff;
+  border-radius: 5px;
+  padding: 5px 0;
+  width: 34px;
+  text-align: center;
+  align-self: start;
+  margin-top: 2px;
+}
+.pos.QB { background: var(--qb); } .pos.RB { background: var(--rb); }
+.pos.WR { background: var(--wr); } .pos.TE { background: var(--te); }
+:root[data-theme="dark"] .pos { color: #0E1411; }
+@media (prefers-color-scheme: dark) { :root:not([data-theme="light"]) .pos { color: #0E1411; } }
+.pname { font-weight: 600; overflow-wrap: anywhere; }
+.pmeta { display: flex; flex-wrap: wrap; gap: 6px 12px; align-items: center; font-size: 12.5px; color: var(--muted); margin-top: 4px; }
+.pmeta label { display: inline-flex; align-items: center; gap: 5px; }
+.pmeta input, .pmeta select {
+  font: 12.5px var(--mono);
+  color: var(--ink);
+  background: var(--surface-2);
+  border: 1px solid var(--line);
+  border-radius: 5px;
+  padding: 3px 5px;
+}
+.pmeta input { width: 62px; }
+.pval { text-align: right; align-self: start; }
+.pval .num { font-family: var(--display); font-weight: 800; font-size: 1.55rem; line-height: 1; font-variant-numeric: tabular-nums; }
+.pval .unit { font-size: 11px; color: var(--muted); display: block; }
+.remove {
+  background: none;
+  border: 0;
+  color: var(--muted);
+  cursor: pointer;
+  font-size: 12px;
+  padding: 2px 0;
+  text-decoration: underline;
+  text-underline-offset: 2px;
+  margin-top: 4px;
+}
+
+/* verdict */
+.verdict {
+  background: var(--ink);
+  color: var(--bg);
+  border-radius: 10px;
+  padding: 18px 16px;
+  display: grid;
+  gap: 14px;
+  position: sticky;
+  top: calc(env(safe-area-inset-top, 0px) + 12px);
+}
+.verdict .label { color: color-mix(in srgb, var(--bg) 65%, var(--ink)); }
+.v-call {
+  font-family: var(--display);
+  font-weight: 800;
+  font-size: 2.1rem;
+  line-height: 0.95;
+  text-transform: uppercase;
+  margin: 2px 0 0;
+  text-wrap: balance;
+}
+.v-sub { font-size: 13.5px; margin: 0; opacity: 0.85; }
+.meter { display: grid; gap: 6px; }
+.track {
+  position: relative;
+  height: 14px;
+  border-radius: 7px;
+  background: linear-gradient(90deg,
+    color-mix(in srgb, var(--bad) 75%, var(--ink)) 0%,
+    color-mix(in srgb, var(--bg) 25%, var(--ink)) 40%,
+    color-mix(in srgb, var(--bg) 25%, var(--ink)) 60%,
+    color-mix(in srgb, var(--good) 75%, var(--ink)) 100%);
+}
+.track::after {
+  content: "";
+  position: absolute; left: 50%; top: -3px; bottom: -3px; width: 1px;
+  background: var(--bg); opacity: 0.5;
+}
+.needle {
+  position: absolute; top: -5px; width: 6px; height: 24px; margin-left: -3px;
+  background: var(--accent); border-radius: 3px;
+  box-shadow: 0 0 0 2px var(--ink);
+  transition: left 0.35s cubic-bezier(.2,.8,.2,1);
+}
+.ends { display: flex; justify-content: space-between; font-size: 11px; letter-spacing: 0.06em; text-transform: uppercase; opacity: 0.7; }
+.tot { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+.tot div { display: grid; gap: 2px; }
+.tot .big { font-family: var(--display); font-weight: 800; font-size: 1.8rem; line-height: 1; font-variant-numeric: tabular-nums; }
+.v-suggest {
+  font-size: 13px;
+  margin: 0;
+  padding-top: 12px;
+  border-top: 1px solid color-mix(in srgb, var(--bg) 25%, var(--ink));
+}
+.v-suggest:empty { display: none; }
+.v-suggest b { color: var(--accent); }
+
+/* breakdown */
+.panel {
+  background: var(--surface);
+  border: 1px solid var(--line);
+  border-radius: 10px;
+  padding: 18px 16px;
+  display: grid;
+  gap: 14px;
+}
+.panel h2 {
+  font-family: var(--display);
+  font-weight: 800;
+  font-size: 1.6rem;
+  text-transform: uppercase;
+  letter-spacing: 0.02em;
+  margin: 0;
+}
+.formula {
+  font-family: var(--mono);
+  font-size: 13px;
+  background: var(--surface-2);
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  padding: 10px 12px;
+  overflow-x: auto;
+  white-space: nowrap;
+}
+.steps { margin: 0; padding-left: 20px; display: grid; gap: 8px; max-width: 78ch; color: var(--ink); }
+.steps li::marker { color: var(--accent); font-weight: 700; }
+.steps code { font-family: var(--mono); font-size: 12.5px; background: var(--surface-2); padding: 1px 4px; border-radius: 4px; }
+.tablewrap { overflow-x: auto; }
+table { border-collapse: collapse; width: 100%; font-size: 13px; }
+th, td { padding: 8px 10px; text-align: right; border-bottom: 1px solid var(--line); white-space: nowrap; font-variant-numeric: tabular-nums; }
+th { font-size: 11px; font-weight: 600; letter-spacing: 0.06em; text-transform: uppercase; color: var(--muted); }
+th:first-child, td:first-child, th:nth-child(2), td:nth-child(2) { text-align: left; }
+td { font-family: var(--mono); }
+td:first-child { font-family: var(--body); font-weight: 500; }
+tr.subtotal td { font-weight: 600; border-bottom: 2px solid var(--line); }
+.side-pill { font: 600 11px/1 var(--body); padding: 3px 7px; border-radius: 99px; background: var(--surface-2); border: 1px solid var(--line); }
+.side-pill.get { background: var(--accent-soft); border-color: transparent; }
+
+details.custom { font-size: 13.5px; }
+details.custom summary { cursor: pointer; font-weight: 600; }
+.custom-form { display: flex; flex-wrap: wrap; gap: 10px; align-items: end; margin-top: 12px; }
+.custom-form input, .custom-form select {
+  font: 13.5px var(--body);
+  color: var(--ink);
+  background: var(--surface-2);
+  border: 1px solid var(--line);
+  border-radius: 6px;
+  padding: 7px 9px;
+}
+.custom-form input[type="number"] { width: 90px; font-family: var(--mono); }
+.custom-form #c-name { width: 180px; }
+.foot { font-size: 12.5px; color: var(--muted); max-width: 80ch; margin: 0; }
+
+@media (max-width: 900px) {
+  .board { grid-template-columns: minmax(0, 1fr); }
+  .verdict { position: static; order: 3; }
+}
+@media (prefers-reduced-motion: reduce) { .needle { transition: none; } }
+</style>
+
+<div class="wrap">
+  <header class="top">
+    <div>
+      <h1>Fantasy Trade <span>Scale</span></h1>
+      <p class="tag">Put a trade on the scale. Every player is priced in fantasy points over a waiver-wire replacement for the rest of the season, adjusted for your league settings.</p>
+    </div>
+    <button class="btn ghost" id="reset" type="button">Clear trade</button>
+  </header>
+
+  <section class="settings" aria-label="League settings">
+    <div class="field">
+      <span class="label">Scoring</span>
+      <div class="seg" data-key="scoring">
+        <button type="button" data-v="ppr">PPR</button>
+        <button type="button" data-v="half">Half</button>
+        <button type="button" data-v="std">Standard</button>
+      </div>
+    </div>
+    <div class="field">
+      <span class="label">Teams</span>
+      <div class="seg" data-key="teams">
+        <button type="button" data-v="8">8</button>
+        <button type="button" data-v="10">10</button>
+        <button type="button" data-v="12">12</button>
+        <button type="button" data-v="14">14</button>
+      </div>
+    </div>
+    <div class="field">
+      <span class="label">QB slots</span>
+      <div class="seg" data-key="qb">
+        <button type="button" data-v="1qb">1QB</button>
+        <button type="button" data-v="sf">Superflex</button>
+      </div>
+    </div>
+    <div class="field">
+      <span class="label">League</span>
+      <div class="seg" data-key="mode">
+        <button type="button" data-v="redraft">Redraft</button>
+        <button type="button" data-v="dynasty">Dynasty</button>
+      </div>
+    </div>
+    <div class="field">
+      <label class="label" for="weeks">Weeks left</label>
+      <div class="weeks">
+        <input type="range" id="weeks" min="1" max="17" step="1">
+        <output id="weeks-out" for="weeks"></output>
+      </div>
+    </div>
+    <label class="toggle" for="stud">
+      <input type="checkbox" id="stud">
+      Stud premium
+    </label>
+  </section>
+
+  <section class="board">
+    <div class="side" id="side-give">
+      <div class="side-head">
+        <h2>You give</h2>
+        <span class="side-total">counts <b data-total="give">0</b> pts</span>
+      </div>
+      <div class="adder">
+        <input id="add-give" list="player-list" placeholder="Search a player…" autocomplete="off" aria-label="Add a player you give">
+        <button class="btn" type="button" data-add="give">Add</button>
+      </div>
+      <p class="hint" data-hint="give"></p>
+      <ul class="roster" data-roster="give"></ul>
+    </div>
+
+    <aside class="verdict" aria-live="polite">
+      <div>
+        <span class="label">Verdict</span>
+        <p class="v-call" id="v-call">—</p>
+      </div>
+      <p class="v-sub" id="v-sub"></p>
+      <div class="meter">
+        <div class="track"><div class="needle" id="needle" style="left:50%"></div></div>
+        <div class="ends"><span>They win</span><span>Even</span><span>You win</span></div>
+      </div>
+      <div class="tot">
+        <div><span class="label">You give</span><span class="big" id="t-give">0</span></div>
+        <div><span class="label">You get</span><span class="big" id="t-get">0</span></div>
+      </div>
+      <p class="v-suggest" id="v-suggest"></p>
+    </aside>
+
+    <div class="side" id="side-get">
+      <div class="side-head">
+        <h2>You get</h2>
+        <span class="side-total">counts <b data-total="get">0</b> pts</span>
+      </div>
+      <div class="adder">
+        <input id="add-get" list="player-list" placeholder="Search a player…" autocomplete="off" aria-label="Add a player you get">
+        <button class="btn" type="button" data-add="get">Add</button>
+      </div>
+      <p class="hint" data-hint="get"></p>
+      <ul class="roster" data-roster="get"></ul>
+    </div>
+  </section>
+  <datalist id="player-list"></datalist>
+
+  <section class="panel" aria-labelledby="how-h">
+    <h2 id="how-h">Show your work</h2>
+    <div class="formula" id="formula"></div>
+    <ol class="steps">
+      <li><b>Adjust for scoring.</b> Projections are stored as PPR points per game. Half-PPR subtracts <code>0.5 × receptions/gm</code>; Standard subtracts the full receptions.</li>
+      <li><b>Find replacement level.</b> A player is only worth what he scores above someone you could grab off waivers. Replacement is the roughly-last-starter at each position, so it rises in smaller leagues (deeper waivers) and QB replacement drops hard in Superflex (everyone starts two).</li>
+      <li><b>VORP per week</b> = adjusted PPG − replacement PPG, floored at 0. A below-replacement guy is worth about nothing: you'd cut him.</li>
+      <li><b>Multiply by weeks he'll actually play.</b> Weeks left minus weeks missed for injury. In Dynasty, add a future chunk: <code>17 wks × age multiplier</code>, since a 23-year-old RB has years left and a 30-year-old doesn't.</li>
+      <li><b>Stud premium.</b> Two quarters don't equal a fifty-cent piece in fantasy, because you can only start so many players. Each side's best player counts 100%, the second 90%, third 80%, and so on (min 50%). The extra roster spot you give up is already covered: the guy you'd cut is replacement-level, worth 0.</li>
+      <li><b>Compare.</b> The gap as a % of the bigger side decides the call: under 8% is fair, 8–20% leans one way, more than 20% is lopsided.</li>
+    </ol>
+    <div class="tablewrap">
+      <table>
+        <thead>
+          <tr>
+            <th>Player</th><th>Side</th><th>Proj PPG</th><th>Repl.</th><th>VORP/wk</th><th>Weeks</th><th>Age ×</th><th>Raw value</th><th>Weight</th><th>Counts</th>
+          </tr>
+        </thead>
+        <tbody id="breakdown"></tbody>
+      </table>
+    </div>
+  </section>
+
+  <section class="panel" aria-label="Add a custom player">
+    <details class="custom">
+      <summary>Player not on the list? Add your own</summary>
+      <form class="custom-form" id="custom-form">
+        <div class="field"><label class="label" for="c-name">Name</label><input id="c-name" required></div>
+        <div class="field"><label class="label" for="c-pos">Pos</label>
+          <select id="c-pos"><option>QB</option><option>RB</option><option selected>WR</option><option>TE</option></select>
+        </div>
+        <div class="field"><label class="label" for="c-ppg">PPR pts/gm</label><input id="c-ppg" type="number" step="0.1" min="0" value="12" required></div>
+        <div class="field"><label class="label" for="c-rec">Rec/gm</label><input id="c-rec" type="number" step="0.1" min="0" value="4"></div>
+        <div class="field"><label class="label" for="c-age">Age</label><input id="c-age" type="number" step="1" min="20" max="42" value="25"></div>
+        <button class="btn" type="submit">Add to search</button>
+      </form>
+    </details>
+    <p class="foot">The projections here are example preseason estimates, not live data, so treat them as a starting point. Edit any player's PPG right in the trade card to plug in your own numbers (FantasyPros, ESPN, Sleeper, whatever you trust). Ages are approximate for the 2026 season.</p>
+  </section>
+</div>
+
+<script>
+(function () {
+  "use strict";
+
+  // name, pos, PPR pts/game, receptions/game, birth year  (example projections)
+  var RAW = [
+    ["Josh Allen","QB",23.5,0,1996],["Lamar Jackson","QB",23.0,0,1997],["Jayden Daniels","QB",21.5,0,2000],
+    ["Jalen Hurts","QB",21.0,0,1998],["Joe Burrow","QB",21.0,0,1996],["Patrick Mahomes","QB",19.5,0,1995],
+    ["Baker Mayfield","QB",18.5,0,1995],["Bo Nix","QB",18.5,0,2000],["Kyler Murray","QB",18.0,0,1997],
+    ["Brock Purdy","QB",18.0,0,1999],["Drake Maye","QB",18.0,0,2002],["Justin Herbert","QB",17.5,0,1998],
+    ["Caleb Williams","QB",17.5,0,2001],["C.J. Stroud","QB",16.5,0,2001],
+    ["Bijan Robinson","RB",21.0,4.5,2002],["Jahmyr Gibbs","RB",20.5,3.8,2002],["Saquon Barkley","RB",18.5,2.8,1997],
+    ["De'Von Achane","RB",18.5,4.8,2001],["Christian McCaffrey","RB",18.0,4.5,1996],["Jonathan Taylor","RB",17.5,2.2,1999],
+    ["Ashton Jeanty","RB",17.0,2.8,2003],["Derrick Henry","RB",16.5,1.3,1994],["Josh Jacobs","RB",16.0,2.3,1998],
+    ["Bucky Irving","RB",15.5,3.2,2002],["Kyren Williams","RB",15.5,2.0,2000],["Chase Brown","RB",15.5,3.5,2000],
+    ["James Cook","RB",15.5,2.3,1999],["Breece Hall","RB",14.5,3.3,2001],["Omarion Hampton","RB",14.0,2.5,2003],
+    ["Alvin Kamara","RB",13.5,4.0,1995],["Kenneth Walker III","RB",13.0,2.5,2000],["TreVeyon Henderson","RB",13.0,2.8,2002],
+    ["Chuba Hubbard","RB",12.5,2.3,1999],["David Montgomery","RB",12.0,1.8,1997],["Tony Pollard","RB",11.5,2.3,1997],
+    ["Aaron Jones","RB",11.0,2.5,1994],
+    ["Ja'Marr Chase","WR",21.0,7.5,2000],["Puka Nacua","WR",19.0,7.5,2001],["Justin Jefferson","WR",18.5,6.5,1999],
+    ["CeeDee Lamb","WR",18.5,6.8,1999],["Amon-Ra St. Brown","WR",18.0,7.3,1999],["Malik Nabers","WR",18.0,7.0,2003],
+    ["Jaxon Smith-Njigba","WR",17.0,6.5,2002],["Nico Collins","WR",16.5,5.3,1999],["Drake London","WR",16.5,6.5,2001],
+    ["Brian Thomas Jr.","WR",15.5,5.0,2002],["A.J. Brown","WR",15.5,5.3,1997],["Garrett Wilson","WR",15.0,6.3,2000],
+    ["Ladd McConkey","WR",14.5,5.8,2001],["Tee Higgins","WR",14.5,5.0,1999],["George Pickens","WR",14.0,4.8,2001],
+    ["Davante Adams","WR",14.0,5.5,1992],["Tyreek Hill","WR",13.5,5.3,1994],["Mike Evans","WR",13.5,4.3,1993],
+    ["Marvin Harrison Jr.","WR",13.5,4.8,2002],["Tetairoa McMillan","WR",13.5,5.0,2003],["Zay Flowers","WR",13.5,5.3,2000],
+    ["Terry McLaurin","WR",13.5,5.0,1995],["DK Metcalf","WR",13.0,4.5,1997],["Rome Odunze","WR",13.0,4.8,2002],
+    ["DeVonta Smith","WR",13.0,5.0,1998],["Jameson Williams","WR",12.5,3.8,2001],["Chris Olave","WR",12.5,5.0,2000],
+    ["Emeka Egbuka","WR",12.5,4.8,2002],["Jaylen Waddle","WR",12.0,4.5,1998],["Xavier Worthy","WR",12.0,4.3,2003],
+    ["Brock Bowers","TE",15.5,7.0,2002],["Trey McBride","TE",15.5,7.3,1999],["George Kittle","TE",13.5,5.0,1993],
+    ["Sam LaPorta","TE",11.5,4.8,2001],["Travis Kelce","TE",11.0,5.3,1989],["Tucker Kraft","TE",11.0,4.0,2000],
+    ["T.J. Hockenson","TE",10.5,5.0,1997],["Tyler Warren","TE",10.5,4.5,2002],["Mark Andrews","TE",10.0,3.5,1995],
+    ["Dalton Kincaid","TE",9.5,4.0,1999],["David Njoku","TE",9.5,4.0,1996],["Evan Engram","TE",9.0,4.5,1994]
+  ];
+  var SEASON = 2026;
+  var POOL = RAW.map(function (r) {
+    return { id: slug(r[0]), name: r[0], pos: r[1], ppg: r[2], rec: r[3], age: SEASON - r[4] };
+  });
+
+  // Replacement-level PPR pts/gm for a 12-team 1QB league, plus how much each shifts per team
+  var REPL = { QB: 16.0, RB: 10.0, WR: 10.5, TE: 8.0 };
+  var REPL_PER_TEAM = { QB: 0.35, RB: 0.3, WR: 0.25, TE: 0.25 };
+  var REPL_REC = { QB: 0, RB: 2.0, WR: 3.8, TE: 3.3 };
+  var STATUS = {
+    healthy: { label: "Healthy", miss: 0 },
+    q: { label: "Questionable", miss: 0.5 },
+    out2: { label: "Out 1–2 wks", miss: 1.5 },
+    out4: { label: "Out 3–5 wks", miss: 4 },
+    ir: { label: "Out for season", miss: 99 }
+  };
+
+  var DEFAULTS = {
+    settings: { scoring: "ppr", teams: 12, qb: "1qb", mode: "redraft", weeks: 12, stud: true },
+    give: [{ id: "jahmyr-gibbs", status: "healthy", ppg: null }],
+    get: [{ id: "puka-nacua", status: "healthy", ppg: null }, { id: "breece-hall", status: "healthy", ppg: null }]
+  };
+  var STORE_KEY = "fts-state-v1";
+  var CUSTOM_KEY = "fts-custom-v1";
+  var state = load();
+
+  function slug(s) { return s.toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/^-|-$/g, ""); }
+  function byId(id) { for (var i = 0; i < POOL.length; i++) if (POOL[i].id === id) return POOL[i]; return null; }
+  function clone(o) { return JSON.parse(JSON.stringify(o)); }
+  function fmt(n, d) { return (Math.round(n * Math.pow(10, d || 0)) / Math.pow(10, d || 0)).toFixed(d || 0); }
+
+  function load() {
+    try {
+      var custom = JSON.parse(localStorage.getItem(CUSTOM_KEY) || "[]");
+      custom.forEach(function (p) { if (!byId(p.id)) POOL.push(p); });
+    } catch (e) {}
+    try {
+      var s = JSON.parse(localStorage.getItem(STORE_KEY) || "null");
+      if (s && s.settings && Array.isArray(s.give) && Array.isArray(s.get)) {
+        s.give = s.give.filter(function (x) { return byId(x.id); });
+        s.get = s.get.filter(function (x) { return byId(x.id); });
+        s.settings = Object.assign(clone(DEFAULTS.settings), s.settings);
+        return s;
+      }
+    } catch (e) {}
+    return clone(DEFAULTS);
+  }
+  function save() { try { localStorage.setItem(STORE_KEY, JSON.stringify(state)); } catch (e) {} }
+
+  // ---- the model ----
+  function recCut() { return state.settings.scoring === "half" ? 0.5 : state.settings.scoring === "std" ? 1 : 0; }
+
+  function adjPPG(p, item) {
+    var base = item.ppg != null && !isNaN(item.ppg) ? item.ppg : p.ppg;
+    return Math.max(0, base - p.rec * recCut());
+  }
+
+  function replacement(pos) {
+    var s = state.settings;
+    var r = REPL[pos] + (12 - s.teams) * REPL_PER_TEAM[pos] - REPL_REC[pos] * recCut();
+    if (pos === "QB" && s.qb === "sf") r -= 4.5 + (s.teams - 12) * 0.2;
+    return r;
+  }
+
+  function ageMult(pos, age) {
+    var curves = {
+      RB: [[23, 1.35], [24, 1.3], [25, 1.15], [26, 1.0], [27, 0.85], [28, 0.7], [29, 0.55], [99, 0.4]],
+      WR: [[23, 1.35], [24, 1.3], [25, 1.25], [26, 1.15], [27, 1.05], [28, 0.95], [29, 0.85], [30, 0.72], [31, 0.6], [99, 0.5]],
+      TE: [[24, 1.25], [27, 1.2], [28, 1.05], [29, 0.95], [30, 0.85], [31, 0.72], [32, 0.6], [99, 0.5]],
+      QB: [[26, 1.3], [29, 1.2], [31, 1.05], [33, 0.9], [35, 0.75], [99, 0.6]]
+    };
+    var c = curves[pos];
+    for (var i = 0; i < c.length; i++) if (age <= c[i][0]) return c[i][1];
+    return c[c.length - 1][1];
+  }
+
+  function price(item) {
+    var p = byId(item.id);
+    var s = state.settings;
+    var ppg = adjPPG(p, item);
+    var repl = replacement(p.pos);
+    var vorp = Math.max(0, ppg - repl);
+    var weeks = Math.max(0, s.weeks - STATUS[item.status].miss);
+    var mult = s.mode === "dynasty" ? ageMult(p.pos, p.age) : null;
+    var raw = vorp * (weeks + (mult != null ? 17 * mult : 0));
+    return { p: p, item: item, ppg: ppg, repl: repl, vorp: vorp, weeks: weeks, mult: mult, raw: raw };
+  }
+
+  function priceSide(items) {
+    var rows = items.map(price).sort(function (a, b) { return b.raw - a.raw; });
+    var total = 0;
+    rows.forEach(function (r, i) {
+      r.weight = state.settings.stud ? Math.max(0.5, 1 - 0.1 * i) : 1;
+      r.counts = r.raw * r.weight;
+      total += r.counts;
+    });
+    return { rows: rows, total: total };
+  }
+
+  function evaluate(give, get) {
+    var g = priceSide(give), r = priceSide(get);
+    var net = r.total - g.total;
+    var big = Math.max(g.total, r.total);
+    var pct = big > 0 ? net / big : 0;
+    return { give: g, get: r, net: net, pct: pct };
+  }
+
+  // ---- rendering ----
+  var $ = function (sel) { return document.querySelector(sel); };
+
+  function renderSettings() {
+    document.querySelectorAll(".seg").forEach(function (seg) {
+      var key = seg.dataset.key;
+      seg.querySelectorAll("button").forEach(function (b) {
+        b.setAttribute("aria-pressed", String(String(state.settings[key]) === b.dataset.v));
+      });
+    });
+    $("#weeks").value = state.settings.weeks;
+    $("#weeks-out").textContent = state.settings.weeks + (state.settings.weeks === 1 ? " wk" : " wks");
+    $("#stud").checked = state.settings.stud;
+  }
+
+  function renderDatalist() {
+    var dl = $("#player-list");
+    dl.innerHTML = "";
+    POOL.slice().sort(function (a, b) { return a.name.localeCompare(b.name); }).forEach(function (p) {
+      var o = document.createElement("option");
+      o.value = p.name;
+      o.label = p.pos;
+      dl.appendChild(o);
+    });
+  }
+
+  function renderSides() {
+    ["give", "get"].forEach(function (side) {
+      var ul = document.querySelector('[data-roster="' + side + '"]');
+      ul.innerHTML = "";
+      if (!state[side].length) {
+        var li = document.createElement("li");
+        li.className = "empty";
+        li.textContent = side === "give" ? "Nobody yet. Add who you'd send away." : "Nobody yet. Add who you'd get back.";
+        ul.appendChild(li);
+        return;
+      }
+      state[side].forEach(function (item, idx) {
+        var p = byId(item.id);
+        var li = document.createElement("li");
+        li.className = "player";
+        var statusOpts = Object.keys(STATUS).map(function (k) {
+          return '<option value="' + k + '"' + (item.status === k ? " selected" : "") + ">" + STATUS[k].label + "</option>";
+        }).join("");
+        var ppgId = "ppg-" + side + "-" + p.id;
+        var stId = "st-" + side + "-" + p.id;
+        li.innerHTML =
+          '<span class="pos ' + p.pos + '">' + p.pos + "</span>" +
+          "<div>" +
+            '<div class="pname"></div>' +
+            '<div class="pmeta">' +
+              "<span>age ≈" + p.age + "</span>" +
+              '<label for="' + ppgId + '">PPR/gm <input id="' + ppgId + '" type="number" step="0.1" min="0" value="' + (item.ppg != null ? item.ppg : p.ppg) + '"></label>' +
+              '<select id="' + stId + '" aria-label="Injury status">' + statusOpts + "</select>" +
+            "</div>" +
+          "</div>" +
+          '<div class="pval"><span class="num" data-val="' + side + "-" + p.id + '">0</span><span class="unit">pts value</span>' +
+            '<button class="remove" type="button">Remove</button></div>';
+        li.querySelector(".pname").textContent = p.name;
+        li.querySelector("input").addEventListener("input", function (e) {
+          var v = parseFloat(e.target.value);
+          item.ppg = isNaN(v) ? null : (v === p.ppg ? null : v);
+          update();
+        });
+        li.querySelector("select").addEventListener("change", function (e) { item.status = e.target.value; update(); });
+        li.querySelector(".remove").addEventListener("click", function () { state[side].splice(idx, 1); renderSides(); update(); });
+        ul.appendChild(li);
+      });
+    });
+  }
+
+  function update() {
+    var ev = evaluate(state.give, state.get);
+    save();
+
+    ["give", "get"].forEach(function (side) {
+      ev[side].rows.forEach(function (r) {
+        var el = document.querySelector('[data-val="' + side + "-" + r.p.id + '"]');
+        if (el) el.textContent = fmt(r.raw);
+      });
+      document.querySelector('[data-total="' + side + '"]').textContent = fmt(ev[side].total);
+    });
+    $("#t-give").textContent = fmt(ev.give.total);
+    $("#t-get").textContent = fmt(ev.get.total);
+
+    var call, sub, pct = ev.pct, a = Math.abs(pct);
+    var gap = fmt(Math.abs(ev.net));
+    if (!state.give.length && !state.get.length) {
+      call = "Add players"; sub = "Put someone on each side of the scale.";
+    } else if (ev.give.total === 0 && ev.get.total === 0) {
+      call = "Wash"; sub = "Nobody here beats replacement level at these settings.";
+    } else if (a < 0.08) {
+      call = "Fair trade"; sub = "Within " + Math.max(1, Math.round(a * 100)) + "% either way. Decide on roster fit.";
+    } else if (a < 0.2) {
+      call = pct > 0 ? "Leans you" : "Leans them"; sub = (pct > 0 ? "You come out " : "You're down ") + gap + " pts (" + Math.round(a * 100) + "%).";
+    } else {
+      call = pct > 0 ? "You win big" : "Don't do it"; sub = (pct > 0 ? "You come out " : "You're down ") + gap + " pts (" + Math.round(a * 100) + "%).";
+    }
+    $("#v-call").textContent = call;
+    $("#v-sub").textContent = sub;
+    var clamped = Math.max(-0.4, Math.min(0.4, pct));
+    $("#needle").style.left = (50 + clamped / 0.4 * 50) + "%";
+
+    renderSuggestion(ev);
+    renderBreakdown(ev);
+  }
+
+  function renderSuggestion(ev) {
+    var box = $("#v-suggest");
+    box.textContent = "";
+    if (Math.abs(ev.pct) < 0.08 || (!state.give.length && !state.get.length)) return;
+    var addTo = ev.net < 0 ? "get" : "give";
+    var used = {};
+    state.give.concat(state.get).forEach(function (x) { used[x.id] = 1; });
+    var best = null;
+    POOL.forEach(function (p) {
+      if (used[p.id]) return;
+      var trial = clone(state[addTo]);
+      trial.push({ id: p.id, status: "healthy", ppg: null });
+      var t = addTo === "get" ? evaluate(state.give, trial) : evaluate(trial, state.get);
+      var score = Math.abs(t.net);
+      if (!best || score < best.score) best = { p: p, score: score, pct: t.pct };
+    });
+    if (!best || Math.abs(best.pct) >= Math.abs(ev.pct)) return;
+    var lead = addTo === "get" ? "To even it out, ask them to throw in someone like " : "They'll likely push back. Adding someone like ";
+    var tail = addTo === "get" ? "." : " from your side would square it.";
+    box.appendChild(document.createTextNode(lead));
+    var b = document.createElement("b");
+    b.textContent = best.p.name + " (" + best.p.pos + ")";
+    box.appendChild(b);
+    box.appendChild(document.createTextNode(tail));
+  }
+
+  function renderBreakdown(ev) {
+    var s = state.settings;
+    var scoringName = { ppr: "PPR", half: "Half-PPR", std: "Standard" }[s.scoring];
+    $("#formula").textContent = s.mode === "dynasty"
+      ? "value = max(0, PPG − replacement) × (weeks played + 17 × age multiplier)    [" + scoringName + ", " + s.teams + " teams, " + (s.qb === "sf" ? "Superflex" : "1QB") + ", Dynasty]"
+      : "value = max(0, PPG − replacement) × weeks played    [" + scoringName + ", " + s.teams + " teams, " + (s.qb === "sf" ? "Superflex" : "1QB") + ", " + s.weeks + " wks left]";
+    var tb = $("#breakdown");
+    tb.innerHTML = "";
+    ["give", "get"].forEach(function (side) {
+      ev[side].rows.forEach(function (r) {
+        var tr = document.createElement("tr");
+        var cells = [
+          r.p.name,
+          null,
+          fmt(r.ppg, 1),
+          fmt(r.repl, 1),
+          fmt(r.vorp, 1),
+          fmt(r.weeks, 1).replace(/\.0$/, ""),
+          r.mult != null ? fmt(r.mult, 2) : "—",
+          fmt(r.raw),
+          Math.round(r.weight * 100) + "%",
+          fmt(r.counts)
+        ];
+        cells.forEach(function (c, i) {
+          var td = document.createElement("td");
+          if (i === 1) {
+            var pill = document.createElement("span");
+            pill.className = "side-pill" + (side === "get" ? " get" : "");
+            pill.textContent = side === "get" ? "You get" : "You give";
+            td.appendChild(pill);
+          } else td.textContent = c;
+          tr.appendChild(td);
+        });
+        tb.appendChild(tr);
+      });
+      if (ev[side].rows.length) {
+        var st = document.createElement("tr");
+        st.className = "subtotal";
+        st.innerHTML = "<td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td>Total</td><td></td>";
+        st.children[0].textContent = side === "get" ? "Everything you get" : "Everything you give";
+        st.children[9].textContent = fmt(ev[side].total);
+        tb.appendChild(st);
+      }
+    });
+    if (!tb.children.length) {
+      var tr = document.createElement("tr");
+      tr.innerHTML = '<td colspan="10" style="text-align:center;color:var(--muted)">Add players to see the math.</td>';
+      tb.appendChild(tr);
+    }
+  }
+
+  // ---- events ----
+  function addFrom(side) {
+    var input = document.getElementById("add-" + side);
+    var hint = document.querySelector('[data-hint="' + side + '"]');
+    var q = input.value.trim().toLowerCase();
+    if (!q) return;
+    var p = POOL.filter(function (x) { return x.name.toLowerCase() === q; })[0] ||
+            POOL.filter(function (x) { return x.name.toLowerCase().indexOf(q) !== -1; })[0];
+    if (!p) { hint.textContent = "No player matches “" + input.value.trim() + "”. Add them below with your own projection."; return; }
+    var already = state.give.concat(state.get).some(function (x) { return x.id === p.id; });
+    if (already) { hint.textContent = p.name + " is already in this trade."; return; }
+    hint.textContent = "";
+    state[side].push({ id: p.id, status: "healthy", ppg: null });
+    input.value = "";
+    renderSides();
+    update();
+  }
+
+  document.querySelectorAll("[data-add]").forEach(function (b) {
+    b.addEventListener("click", function () { addFrom(b.dataset.add); });
+  });
+  ["give", "get"].forEach(function (side) {
+    var input = document.getElementById("add-" + side);
+    input.addEventListener("keydown", function (e) { if (e.key === "Enter") { e.preventDefault(); addFrom(side); } });
+    input.addEventListener("change", function () {
+      var v = input.value.trim().toLowerCase();
+      if (POOL.some(function (x) { return x.name.toLowerCase() === v; })) addFrom(side);
+    });
+  });
+
+  document.querySelectorAll(".seg").forEach(function (seg) {
+    seg.addEventListener("click", function (e) {
+      var b = e.target.closest("button");
+      if (!b) return;
+      var key = seg.dataset.key;
+      state.settings[key] = key === "teams" ? parseInt(b.dataset.v, 10) : b.dataset.v;
+      renderSettings();
+      update();
+    });
+  });
+  $("#weeks").addEventListener("input", function (e) {
+    state.settings.weeks = parseInt(e.target.value, 10);
+    renderSettings();
+    update();
+  });
+  $("#stud").addEventListener("change", function (e) { state.settings.stud = e.target.checked; update(); });
+  $("#reset").addEventListener("click", function () { state.give = []; state.get = []; renderSides(); update(); });
+
+  $("#custom-form").addEventListener("submit", function (e) {
+    e.preventDefault();
+    var name = $("#c-name").value.trim();
+    if (!name) return;
+    var id = slug(name);
+    if (byId(id)) id = id + "-" + Date.now().toString(36);
+    var p = {
+      id: id, name: name, pos: $("#c-pos").value,
+      ppg: parseFloat($("#c-ppg").value) || 0,
+      rec: parseFloat($("#c-rec").value) || 0,
+      age: parseInt($("#c-age").value, 10) || 25,
+      custom: true
+    };
+    POOL.push(p);
+    try {
+      var custom = JSON.parse(localStorage.getItem(CUSTOM_KEY) || "[]");
+      custom.push(p);
+      localStorage.setItem(CUSTOM_KEY, JSON.stringify(custom));
+    } catch (err) {}
+    renderDatalist();
+    $("#c-name").value = "";
+    $("#add-get").value = name;
+    $("#add-get").focus();
+  });
+
+  renderSettings();
+  renderDatalist();
+  renderSides();
+  update();
+})();
+</script>
