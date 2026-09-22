@@ -743,6 +743,15 @@ input[type="range"]::-webkit-slider-thumb { background: radial-gradient(circle a
 .letter.g, .room .gr .pos-c { color: var(--good); }
 .step .k { color: var(--ink); }
 .head { box-shadow: 0 0 0 2px #fff, var(--drop-sm); }
+
+.weights { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(100%, 260px), 1fr)); gap: 14px; }
+.wcard { position: relative; background: var(--gloss), var(--surface-2); border-radius: 20px; padding: 14px; box-shadow: var(--drop-sm); display: grid; gap: 7px; align-content: start; }
+.wcard-h { display: flex; gap: 8px; align-items: center; flex-wrap: wrap; margin-bottom: 4px; }
+.wcard-h .sub { font-size: 12px; }
+.wrow { display: grid; grid-template-columns: minmax(0, 1.3fr) minmax(0, 1fr) 36px; gap: 8px; align-items: center; font-size: 12.5px; }
+.wbar { height: 7px; border-radius: 99px; background: rgba(11,13,18,.06); overflow: hidden; }
+.wbar i { display: block; height: 100%; border-radius: 99px; background: var(--ink); }
+.wrow b { text-align: right; font-variant-numeric: tabular-nums; }
 </style>
 
 <header class="mast">
@@ -785,7 +794,7 @@ input[type="range"]::-webkit-slider-thumb { background: radial-gradient(circle a
       <div class="card-h"><h2>Roster</h2><span class="sub" id="roster-sub"></span></div>
       <div class="rtable-wrap">
         <table class="rtable">
-          <thead><tr><th class="l">Slot</th><th class="l">Player</th><th>Last weeks · next 4</th><th>2026 / proj</th><th title="How much your lineup drops if he leaves">If traded</th><th>Market</th><th>This-year adj.</th><th>Trade value</th><th class="l">Signal</th><th></th></tr></thead>
+          <thead><tr><th class="l">Slot</th><th class="l">Player</th><th>Last weeks · next 4</th><th>2026 / model</th><th title="How much your lineup drops if he leaves">If traded</th><th>Market</th><th>Model value</th><th>vs market</th><th class="l">Signal</th><th></th></tr></thead>
           <tbody id="roster"></tbody>
         </table>
       </div>
@@ -836,12 +845,6 @@ input[type="range"]::-webkit-slider-thumb { background: radial-gradient(circle a
           <div class="lens"><span class="eyebrow">Trade value</span><span class="v num" id="lens-val">—</span><span class="d" id="lens-val-d"></span></div>
           <div class="lens"><span class="eyebrow">Your lineup</span><span class="v num" id="lens-lu">—</span><span class="d" id="lens-lu-d"></span></div>
         </div>
-        <div class="blend">
-          <div class="blend-row"><label for="adj">This-year factors</label><span id="adj-out"></span></div>
-          <input type="range" id="adj" min="0" max="150" step="10">
-          <div class="blend-row"><label for="fitw">Roster-fit weight</label><span id="fit-out"></span></div>
-          <input type="range" id="fitw" min="0" max="100" step="5">
-        </div>
         <p class="nudge" id="nudge"></p>
       </div>
 
@@ -864,8 +867,8 @@ input[type="range"]::-webkit-slider-thumb { background: radial-gradient(circle a
       <div class="effects">
         <div class="eff">
           <h3>Player values</h3>
-          <p class="sub">FantasyCalc market value, then this season's adjustments. Tap a row for the details.</p>
-          <div class="rtable-wrap"><table class="rtable ledger"><thead><tr><th class="l">Player</th><th>Market</th><th>2026 play</th><th>Usage</th><th>Team env.</th><th>Adjusted</th><th>Weight</th><th>Counts</th></tr></thead><tbody id="ledger"></tbody></table></div>
+          <p class="sub">Preseason FantasyCalc value × the fitted model's update. Tap a row to see every factor.</p>
+          <div class="rtable-wrap"><table class="rtable ledger"><thead><tr><th class="l">Player</th><th>Start mkt</th><th>Model pts/gm</th><th>Multiplier</th><th>Model value</th><th>Current mkt</th><th>Weight</th><th>Counts</th></tr></thead><tbody id="ledger"></tbody></table></div>
         </div>
         <div class="eff-grid">
           <div class="eff">
@@ -922,15 +925,17 @@ input[type="range"]::-webkit-slider-thumb { background: radial-gradient(circle a
   <!-- METHOD -->
   <section id="tab-method" role="tabpanel" hidden>
     <div class="card method">
-      <div><h2>How the model works</h2><p class="sub" style="margin-top:6px">Public trade market first, then this season's reality, then what the trade does to your team.</p></div>
+      <div><h2>How the model works</h2><p class="sub" style="margin-top:6px">Public market first. Every factor weighted by how well it actually predicted results in 2022–2025. One fixed formula.</p></div>
       <div class="method-grid">
-        <div class="step"><span class="k">1</span><h3>Market value (primary)</h3><p>Every player starts at his <b>FantasyCalc</b> value, which comes from thousands of real trades and is matched to your format (redraft/dynasty, 1QB/superflex). The keeper league uses half redraft, half dynasty. Everything else is a small adjustment on top of this.</p></div>
-        <div class="step"><span class="k">2</span><h3>2026 performance</h3><p>Actual points per game this season vs. his projection, shrunk hard toward zero because two games is a tiny sample. Capped at ±10%. <b>Usage</b> gets a separate ±4% based on snap share vs. a normal starter at his position (RB 55%, WR 80%, TE 70%).</p></div>
-        <div class="step"><span class="k">3</span><h3>Team environment</h3><p>Four pieces, capped at ±10% together: <b>offense quality</b> (projected output + points scored), <b>QB situation</b> (the healthy starter's projection; flags when QB1 is out), <b>winning</b> (record; weighs more for RBs because of game script), and <b>teammate health</b> (a key teammate out at another position hurts; at the same position it opens up volume).</p></div>
-        <div class="step"><span class="k">4</span><h3>How much this year counts</h3><p>Adjustments count fully in redraft, 75% in keeper and 50% in dynasty, because long-term value matters more there. The "This-year factors" slider scales all of it from 0% (pure market) to 150%.</p></div>
-        <div class="step"><span class="k">5</span><h3>Roster fit</h3><p>Your best legal lineup is rebuilt before and after the trade. The change in starter points per week × weeks left is priced at the market's rate for points, weighted by the "Roster-fit weight" slider (default 25% redraft, 20% keeper, 10% dynasty), and capped at ±25% of the deal. Market value already pays for a player's points, so fit is a tilt, not a second valuation.</p></div>
-        <div class="step"><span class="k">6</span><h3>Consolidation</h3><p>Each side's best asset counts 100%, then 88%, 76%… (floor 40%). Two quarters ≠ a fifty-cent piece: you can only start so many players, so the side getting the best player gets credit for it.</p></div>
+        <div class="step"><span class="k">1</span><h3>Start from the public market</h3><p>Every player starts at his <b>FantasyCalc</b> value from before the season (value minus its 30-day change), matched to your format. That's the market's read before any games were played. Injured players, and players who haven't played yet, use today's market instead, since it already prices the news.</p></div>
+        <div class="step"><span class="k">2</span><h3>Learn from 2022–2025</h3><p>For every player-season in the last four years, we took everything known after Week 2 and measured how well each factor predicted his points per game the rest of the year, and the next year. A ridge regression gives each factor a weight. Factors that predicted well get big weights, and weak ones shrink toward zero.</p></div>
+        <div class="step"><span class="k">3</span><h3>Prove it on unseen seasons</h3><p>Each model is tested on a season it didn't train on. For each position it keeps the factor set that tested best: all factors, a core set, or preseason info alone. The scores are below.</p></div>
+        <div class="step"><span class="k">4</span><h3>Turn points into value</h3><p>The model's projection ÷ what preseason info alone predicts = how much a player's outlook changed. The market's own price curve, fit from FantasyCalc, turns that into value: value moves about 3× as fast as points per game in redraft and about 1.6× in dynasty.</p></div>
+        <div class="step"><span class="k">5</span><h3>Fixed mix by league</h3><p>Redraft uses the rest-of-season model. Keeper uses 50% this season and 50% next season. Dynasty uses 35% and 65%. Roster fit is a fixed 25% / 20% / 10% of your lineup gain, capped at ±15% of the deal so it only tips close calls. Nothing is adjustable, so the formula stays the same.</p></div>
+        <div class="step"><span class="k">6</span><h3>Signals</h3><p><span class="tag buy">Buy low</span> means the model value is ≥15% above today's market. <span class="tag sell">Sell high</span> means it's ≥15% below. That gap is where you win trades.</p></div>
       </div>
+      <div><h3>What the model learned: factor weights</h3><p class="sub" style="margin-top:4px">Share of each position's rest-of-season model. R² = share of the variation in future points explained, on seasons the model never saw.</p></div>
+      <div class="weights" id="weights"></div>
       <div class="formula" id="formula"></div>
       <p class="foot" id="sources"></p>
     </div>
@@ -1116,59 +1121,54 @@ input[type="range"]::-webkit-slider-thumb { background: radial-gradient(circle a
     return out;
   }
 
-  // ---------- this-year adjustments on top of the market ----------
-  var MODE_SCALE = { redraft: 1, keeper: 0.75, dynasty: 0.5 };
-  var SNAP_BENCH = { RB: 0.55, WR: 0.8, TE: 0.7 };
+  // ---------- fixed model: preseason market × historically-fitted update ----------
+  // Weights come from data/model.json (ridge regression on 2022-2025, see scripts/train_model.py) and never change here.
+  var MW = { redraft: [1, 0], keeper: [0.5, 0.5], dynasty: [0.35, 0.65] };
+  var FMT = {
+    pre: function (x) { return f1(x) + " pts"; }, adp: function (x) { return "ADP " + Math.round(Math.exp(x)); }, act: function (x) { return f1(x) + " pts/gm"; },
+    snap: function (x) { return Math.round(x * 100) + "%"; }, oppShare: function (x) { return Math.round(x * 100) + "%"; }, tgtShare: function (x) { return Math.round(x * 100) + "%"; },
+    rz: function (x) { return f1(x) + "/gm"; }, ypt: function (x) { return f1(x) + " yds"; }, ypa: function (x) { return f1(x) + " yds"; },
+    passAtt: function (x) { return f1(x) + "/gm"; }, rushAtt: function (x) { return f1(x) + "/gm"; }, teamPts: function (x) { return f1(x) + " pts/g"; },
+    winPct: function (x) { return Math.round(x * 100) + "%"; }, qbPre: function (x) { return f1(x) + " proj"; }, age: function (x) { return f1(x) + " yrs"; },
+    age2: function () { return "curve"; }, exp: function (x) { return Math.round(x) + " yrs"; }
+  };
   function clamp(x, lo, hi) { return Math.max(lo, Math.min(hi, x)); }
-  function factors(c, p) {
-    p._f = p._f || {};
-    if (p._f[c.lg.key]) return p._f[c.lg.key];
-    var f = { perf: 0, usage: 0, env: 0, notes: [] };
-    if (p.pos === "PICK") return (p._f[c.lg.key] = f);
-    var sp = stat(p, c.lg), played = (sp.wk || []).filter(function (x) { return x != null; });
-    var n = played.length, actual = n ? played.reduce(function (a, b) { return a + b; }, 0) / n : 0, exp = sp.ppg;
-    f.n = n; f.actual = actual; f.exp = exp;
-    if (n) {
-      var ratio = (actual - exp) / Math.max(exp, 6), shrink = n / (n + 3);
-      f.perf = clamp(ratio * shrink * 0.5, -0.1, 0.1);
-    }
-    var u = p.use || {};
-    f.snap = u.tmSnp ? u.snp / u.tmSnp : null;
-    var tc = teamCtx()[p.team];
-    f.oppShare = tc && tc.rec.plays && u.g ? (u.tgt + u.att) / tc.rec.plays : null;
-    if (f.snap != null && SNAP_BENCH[p.pos]) f.usage = clamp((f.snap - SNAP_BENCH[p.pos]) * 0.2, -0.04, 0.04);
-    if (tc) {
-      f.tc = tc;
-      var isRB = p.pos === "RB", e = 0, parts = [];
-      var offE = tc.offScore * 0.025; e += offE; parts.push(["Offense", offE]);
-      if (p.pos !== "QB") { var qbE = tc.qbPpgZ * (isRB ? 0.012 : 0.025); e += qbE; parts.push(["QB play", qbE]); }
-      var winE = (tc.winPct - 0.5) * (isRB ? 0.06 : 0.03); e += winE; parts.push(["Winning", winE]);
-      var injE = 0;
-      tc.injured.forEach(function (q) {
-        if (q === p || q.pos === "QB") return;
-        injE += q.pos === p.pos ? 0.012 : -0.012;
-      });
-      e += injE; parts.push(["Teammate health", injE]);
-      f.env = clamp(e, -0.1, 0.1); f.envParts = parts;
-    }
-    return (p._f[c.lg.key] = f);
+  function elasticity(c, pos) {
+    var E = D.model.elasticity, sf = c.lg.qbs === 2 ? "2" : "1";
+    if (c.lg.mode === "keeper") return (E["r" + sf][pos] + E["d" + sf][pos]) / 2;
+    return E[(c.lg.mode === "redraft" ? "r" : "d") + sf][pos];
+  }
+  function preMarket(c, p) {
+    function one(k) { var r = p.fc && p.fc[k]; return r ? Math.max(1, r[0] - r[3]) : 0; }
+    var sf = c.lg.qbs === 2 ? "2" : "1";
+    if (c.lg.mode === "keeper") return 0.5 * one("r" + sf) + 0.5 * one("d" + sf);
+    return one(c.fk);
+  }
+  function modelMult(c, p) {
+    var m = p.m;
+    if (!m || p.pos === "PICK") return { mult: 1, why: "pick" };
+    if (!m.g) return { mult: 1, why: "no games yet" };
+    if (OUT[p.inj]) return { mult: 1, why: "injured" };
+    function ratio(t) { var a = m[t]; return !a || a[1] < 3 ? 1 : clamp(a[0] / a[1], 0.5, 1.8); }
+    var w = MW[c.lg.mode], r = w[0] * ratio("ros") + w[1] * ratio("next"), e = elasticity(c, p.pos);
+    return { mult: clamp(Math.pow(r, e), 0.4, 2.2), r: r, e: e };
   }
 
-  function value(c, p, w) {
-    var m = c.mkt(p), est = false;
-    if (p.pos !== "PICK" && m < 1) { m = (p._m[c.lg.key] || 0) * c.k * 0.6; est = true; }
-    if (p.pos === "PICK") return { market: m, adj: 0, perf: 0, usage: 0, env: 0, blend: m, est: false };
-    var f = factors(c, p), sc = w * MODE_SCALE[c.lg.mode];
-    var perf = f.perf * sc, usage = f.usage * sc, env = f.env * sc, adj = perf + usage + env;
-    return { market: m, perf: perf, usage: usage, env: env, adj: adj, blend: m * (1 + adj), est: est };
+  function value(c, p) {
+    var cur = c.mkt(p), est = false;
+    if (p.pos !== "PICK" && cur < 1) { cur = (p._m[c.lg.key] || 0) * c.k * 0.6; est = true; }
+    if (p.pos === "PICK") return { market: cur, current: cur, blend: cur, mult: 1, adj: 0, vs: 0, why: "pick" };
+    var mm = modelMult(c, p), anchor = mm.why || est ? cur : preMarket(c, p) || cur;
+    var v = anchor * mm.mult;
+    return { market: anchor, current: cur, blend: v, mult: mm.mult, r: mm.r, e: mm.e, adj: anchor ? v / anchor - 1 : 0, vs: cur > 1 ? v / cur - 1 : 0, est: est, why: mm.why };
   }
 
   function signal(c, p) {
     if (p.pos === "PICK") return null;
-    var v = value(c, p, 1);
-    if (v.market < 300) return null;
-    if (v.adj >= 0.07) return "buy";
-    if (v.adj <= -0.07) return "sell";
+    var v = value(c, p);
+    if (v.current < 300 || v.why) return null;
+    if (v.vs >= 0.15) return "buy";
+    if (v.vs <= -0.15) return "sell";
     return null;
   }
 
@@ -1218,9 +1218,9 @@ input[type="range"]::-webkit-slider-thumb { background: radial-gradient(circle a
 
   function L() { return leagues.filter(function (l) { return l.key === state.league; })[0]; }
   function C() { var lg = L(); ctx(lg); return ctxCache[lg.key]; }
-  function W() { var v = state.adj[L().key]; return v == null ? 1 : v; }
+  function W() { return 1; }
   var DEFAULT_FIT = { redraft: 0.25, keeper: 0.2, dynasty: 0.1 };
-  function FW() { var lg = L(), v = state.fit[lg.key]; return v == null ? DEFAULT_FIT[lg.mode] : v; }
+  function FW() { return DEFAULT_FIT[L().mode]; }
   function T() {
     var lg = L();
     var t = state.trades[lg.key];
@@ -1294,8 +1294,8 @@ input[type="range"]::-webkit-slider-thumb { background: radial-gradient(circle a
     var flags = lg.myIds.filter(function (id) { return signal(c, P[id]) === "sell"; }).length;
     $("#team-kpis").innerHTML =
       '<div class="kpi"><span class="eyebrow">Starters / week</span><span class="v num">' + f1(lu.total) + '</span><span class="d">Rest-of-season projection for your best lineup</span></div>' +
-      '<div class="kpi"><span class="eyebrow">Roster value</span><span class="v num">' + f0(tv) + '</span><span class="d">Market value with this-year adjustments' + (lg.picks && lg.picks.length ? ", picks included" : "") + "</span></div>" +
-      '<div class="kpi"><span class="eyebrow">Sell-high flags</span><span class="v num">' + flags + '</span><span class="d">2026 play and team situation ≥7% below their market price</span></div>';
+      '<div class="kpi"><span class="eyebrow">Roster value</span><span class="v num">' + f0(tv) + '</span><span class="d">Model value' + (lg.picks && lg.picks.length ? ", picks included" : "") + "</span></div>" +
+      '<div class="kpi"><span class="eyebrow">Sell-high flags</span><span class="v num">' + flags + '</span><span class="d">Market pays ≥15% more than the model says they\'re worth</span></div>';
 
     // position grades
     var html = "";
@@ -1324,18 +1324,19 @@ input[type="range"]::-webkit-slider-thumb { background: radial-gradient(circle a
     var picks = lg.myIds.filter(function (id) { return P[id] && P[id].pos === "PICK"; }).map(function (id) { return P[id]; });
     var baseLu = lu.total;
     function row(p, slot) {
-      var v = value(c, p, w), sg = signal(c, p), f = factors(c, p);
+      var v = value(c, p), sg = signal(c, p), m = p.m || {};
+      var played = (S(p).wk || []).filter(function (x) { return x != null; }), act = played.length ? played.reduce(function (a2, b2) { return a2 + b2; }, 0) / played.length : null;
       var drop = p.pos === "PICK" ? 0 : lineup(c, lg.myIds.filter(function (id) { return id !== p.id; })).total - baseLu;
       return '<tr class="row"><td class="slot">' + esc(slot) + "</td>" +
         '<td class="l"><div class="who">' + head(p) + '<div><div class="nm">' + esc(p.short || p.n) + '</div><div class="meta"><span class="pos ' + p.pos + '">' + p.pos + "</span>" +
         (p.pos !== "PICK" ? "<span>" + esc(p.team) + (p.opp ? " vs " + esc(p.opp) : "") + (p.age ? " · " + Math.floor(p.age) + "y" : "") + "</span>" : "") + injTag(p) + "</div></div></div></td>" +
         "<td>" + spark(p) + "</td>" +
-        '<td class="mono">' + (p.pos === "PICK" ? "—" : (f.n ? f1(f.actual) : "—") + ' <span class="sub">/ ' + f1(f.exp) + "</span>") + "</td>" +
+        '<td class="mono">' + (p.pos === "PICK" ? "—" : (act != null ? f1(act) : "—") + ' <span class="sub">/ ' + (m.ros ? f1(m.ros[0]) : "—") + "</span>") + "</td>" +
         '<td class="mono ' + (drop < -0.05 ? "neg-c" : "") + '">' + (p.pos === "PICK" ? "—" : Math.abs(drop) < 0.05 ? "depth" : sgn(drop, 1) + "/wk") + "</td>" +
-        '<td class="mono">' + f0(v.market) + (v.est ? "*" : "") + "</td>" +
-        "<td>" + (p.pos === "PICK" ? "—" : pctHTML(v.adj)) + "</td>" +
+        '<td class="mono">' + f0(v.current) + (v.est ? "*" : "") + "</td>" +
         '<td><span class="big num">' + f0(v.blend) + "</span></td>" +
-        '<td class="l">' + (sg === "sell" ? '<span class="tag sell">Sell high</span>' : sg === "buy" ? '<span class="tag buy">Rising</span>' : "") + "</td>" +
+        "<td>" + (p.pos === "PICK" ? "—" : pctHTML(v.vs)) + "</td>" +
+        '<td class="l">' + (sg === "sell" ? '<span class="tag sell">Sell high</span>' : sg === "buy" ? '<span class="tag buy">Buy / hold</span>' : "") + "</td>" +
         '<td><button class="act" type="button" data-shop="' + esc(p.id) + '">Shop</button></td></tr>';
     }
     rows += '<tr class="group"><td colspan="10">Starters</td></tr>';
@@ -1347,7 +1348,7 @@ input[type="range"]::-webkit-slider-thumb { background: radial-gradient(circle a
       picks.forEach(function (p) { rows += row(p, "PK"); });
     }
     $("#roster").innerHTML = rows;
-    $("#roster-sub").textContent = "Bars = weeks 1–" + (D.week - 1) + " actual · outlines = next 4 projected · \"If traded\" = how much your lineup drops without him";
+    $("#roster-sub").textContent = "2026 / model = pts per game so far vs. the model's rest-of-season projection · \"If traded\" = how much your lineup drops without him";
   }
 
   // ---------- TRADE ----------
@@ -1366,9 +1367,9 @@ input[type="range"]::-webkit-slider-thumb { background: radial-gradient(circle a
     var lb = lineup(c, my), la = lineup(c, afterIds);
     var lu = la.total - lb.total;
     // lineup gain in points over the rest of the season, priced like the market prices points
-    // market values already price a player's points, so fit is a capped tilt (±25% of the deal), not a second full valuation
+    // market values already price a player's points, so fit is a capped tilt (±15% of the deal), not a second full valuation
     var big = Math.max(g.total, r.total, 1);
-    var fitRaw = lu * R * c.k * fw, fit = clamp(fitRaw, -0.25 * big, 0.25 * big);
+    var fitRaw = lu * R * c.k * fw, fit = clamp(fitRaw, -0.15 * big, 0.15 * big);
     var net = r.total - g.total, score = net + fit;
     return { g: g, r: r, net: net, fit: fit, fitCapped: fit !== fitRaw, score: score, pct: score / big, valPct: net / big, lu: lu, lb: lb, la: la, afterIds: afterIds };
   }
@@ -1382,7 +1383,7 @@ input[type="range"]::-webkit-slider-thumb { background: radial-gradient(circle a
       return '<li class="item">' + head(p, "lg") + '<div><div class="nm">' + esc(p.short || p.n) + '</div><div class="meta"><span class="pos ' + p.pos + '">' + p.pos + "</span>" +
         (p.pos !== "PICK" ? "<span>" + esc(p.team) + (p.age ? " · " + Math.floor(p.age) + "y" : "") + (pr ? " · " + p.pos + pr : "") + "</span>" : "") + injTag(p) + "</div>" +
         (p.pos !== "PICK" ? '<div class="meta" style="margin-top:6px">' + spark(p) + "<span>" + f1(S(p).ppg) + " proj/gm</span></div>" : "") + "</div>" +
-        '<div class="val"><div class="big num">' + f0(v.blend) + "</div>" + (p.pos !== "PICK" ? '<div class="sub" style="font-size:11.5px">mkt ' + f0(v.market) + " " + pctHTML(v.adj) + "</div>" : "") + '<button class="x" type="button" data-rm="' + which + '" data-id="' + esc(id) + '">Remove</button></div></li>';
+        '<div class="val"><div class="big num">' + f0(v.blend) + "</div>" + (p.pos !== "PICK" ? '<div class="sub" style="font-size:11.5px">mkt ' + f0(v.current) + " " + pctHTML(v.vs) + "</div>" : "") + '<button class="x" type="button" data-rm="' + which + '" data-id="' + esc(id) + '">Remove</button></div></li>';
     }).join("");
   }
 
@@ -1425,18 +1426,24 @@ input[type="range"]::-webkit-slider-thumb { background: radial-gradient(circle a
   }
   function detailChips(c, p, v) {
     if (p.pos === "PICK") return '<div class="chips"><span class="chip">Draft pick · valued by FantasyCalc' + (p.fc && p.fc.kv ? " (mapped from overall slot)" : "") + "</span></div>";
-    var f = factors(c, p), tc = f.tc, ch = [];
+    var ch = [], m = p.m, spec = D.model.positions[p.pos] && D.model.positions[p.pos].ros;
     function chip(label, val, cls) { ch.push('<span class="chip ' + (cls || "") + '"><i>' + label + "</i>" + val + "</span>"); }
-    chip("2026", f.n ? f1(f.actual) + " pts/gm in " + f.n + " gm" + (f.n > 1 ? "s" : "") + " vs " + f1(f.exp) + " proj" : "no games yet", f.n ? (f.actual >= f.exp ? "g" : "b") : "");
-    if (f.snap != null) chip("Snaps", Math.round(f.snap * 100) + "%", SNAP_BENCH[p.pos] ? (f.snap >= SNAP_BENCH[p.pos] ? "g" : "b") : "");
-    if (f.oppShare != null && p.pos !== "QB") chip("Opportunity share", Math.round(f.oppShare * 100) + "% of team plays");
+    if (v.why) chip("Model", v.why === "injured" ? "injured, so the current market is used (it already prices the injury)" : "hasn't played yet, so the current market is used");
+    else if (m && m.ros) chip("Model", "projects " + f1(m.ros[0]) + " pts/gm vs " + f1(m.ros[1]) + " from preseason info → value ×" + v.mult.toFixed(2), v.mult >= 1 ? "g" : "b");
+    if (m && spec && m.c && !v.why) {
+      var items = spec.features.map(function (k, i) { return { k: k, x: m.x[i], c: m.c[i], w: spec.importance[i] }; })
+        .sort(function (a, b) { return Math.abs(b.c) - Math.abs(a.c); });
+      items.forEach(function (it) {
+        if (it.k === "age2") return;
+        var lbl = D.model.labels[it.k] || it.k;
+        chip(lbl + " · " + Math.round(it.w * 100) + "% wt", (FMT[it.k] ? FMT[it.k](it.x) : f1(it.x)) + " → " + (it.c >= 0 ? "+" : "−") + f1(Math.abs(it.c)) + " pts/gm", Math.abs(it.c) < 0.15 ? "" : it.c > 0 ? "g" : "b");
+      });
+    }
+    var tc = teamCtx()[p.team];
     if (tc) {
-      chip(p.team, tc.rec.w + "-" + tc.rec.l + (tc.rec.t ? "-" + tc.rec.t : "") + " · " + f1(tc.pfg) + " pts/g", tc.winPct > 0.5 ? "g" : tc.winPct < 0.5 ? "b" : "");
-      chip("Offense rank", "#" + (1 + Object.keys(teamCtx()).filter(function (t) { return teamCtx()[t].offScore > tc.offScore; }).length) + " of " + Object.keys(teamCtx()).length);
-      if (p.pos !== "QB" && tc.qb) chip("QB", esc(tc.qb.n) + " (QB" + tc.qbRank + " proj)" + (tc.qbOut ? " · " + esc(tc.qb1.n) + " out" : ""), tc.qbOut || tc.qbRank > 20 ? "b" : tc.qbRank <= 10 ? "g" : "");
+      chip(p.team + " now", tc.rec.w + "-" + tc.rec.l + " · QB " + esc(tc.qb ? tc.qb.n : "?") + (tc.qbOut ? " (" + esc(tc.qb1.n) + " out)" : ""));
       var inj = tc.injured.filter(function (q) { return q !== p; });
-      chip("Team injuries", inj.length ? inj.map(function (q) { return esc(q.n.split(" ").slice(-1)[0]) + " (" + q.inj + ")"; }).join(", ") : "key players healthy", inj.length ? "b" : "g");
-      (f.envParts || []).forEach(function (pt) { if (Math.abs(pt[1]) >= 0.001) chip(pt[0], (pt[1] > 0 ? "+" : "−") + (Math.abs(pt[1] * W() * MODE_SCALE[c.lg.mode]) * 100).toFixed(1) + "%", pt[1] > 0 ? "g" : "b"); });
+      if (inj.length) chip("Team injuries", inj.map(function (q) { return esc(q.n.split(" ").slice(-1)[0]) + " (" + q.inj + ")"; }).join(", "), "b");
     }
     if (v.est) chip("Market", "not in FantasyCalc, estimated from projections", "b");
     return '<div class="chips">' + ch.join("") + "</div>";
@@ -1469,15 +1476,11 @@ input[type="range"]::-webkit-slider-thumb { background: radial-gradient(circle a
 
     var lv = $("#lens-val"); lv.textContent = has ? sgn(ev.net) : "—";
     lv.className = "v num " + (ev.valPct >= 0.02 ? "pos-c" : ev.valPct <= -0.02 ? "neg-c" : "");
-    $("#lens-val-d").textContent = "Market + this-year adjustments, after consolidation";
+    $("#lens-val-d").textContent = "Model value after consolidation";
     var lu = $("#lens-lu"); lu.textContent = has ? sgn(ev.lu, 1) : "—";
     lu.className = "v num " + (ev.lu > 0.05 ? "pos-c" : ev.lu < -0.05 ? "neg-c" : "");
-    $("#lens-lu-d").textContent = "Starter pts/week · worth " + sgn(ev.fit) + " in value";
+    $("#lens-lu-d").textContent = "Starter pts/week · worth " + sgn(ev.fit) + " (fixed " + Math.round(fw * 100) + "% weight)";
 
-    $("#adj").value = Math.round(w * 100);
-    $("#adj-out").textContent = Math.round(w * 100) + "%";
-    $("#fitw").value = Math.round(fw * 100);
-    $("#fit-out").textContent = Math.round(fw * 100) + "%";
 
     // nudge
     var nudge = $("#nudge"); nudge.innerHTML = "";
@@ -1502,10 +1505,10 @@ input[type="range"]::-webkit-slider-thumb { background: radial-gradient(circle a
     // ---- tally: where the score comes from ----
     function tl(label, v, d, cls) { return '<div class="t ' + (cls || "") + '"><span>' + label + '</span><b class="' + (v > 0.5 ? "pos-c" : v < -0.5 ? "neg-c" : "") + '">' + (has ? sgn(v) : "—") + "</b><span>" + d + "</span></div>"; }
     $("#tally").innerHTML = has ? (
-      tl("Market value", ev.r.market - ev.g.market, "FantasyCalc, straight up") +
-      tl("This-year adjustments", ev.r.adjust - ev.g.adjust, "2026 play, usage, team environment") +
+      tl("Starting market", ev.r.market - ev.g.market, "FantasyCalc before the season (current if injured)") +
+      tl("Model update", ev.r.adjust - ev.g.adjust, "Fitted on 2022–25: what weeks 1–" + (D.week - 1) + " really predict") +
       tl("Consolidation", ev.r.consol - ev.g.consol, "Stud premium / depth discount") +
-      tl("Roster fit", ev.fit, sgn(ev.lu, 1) + " starter pts/wk × " + Math.round(fw * 100) + "% weight" + (ev.fitCapped ? " · capped at 25%" : "")) +
+      tl("Roster fit", ev.fit, sgn(ev.lu, 1) + " starter pts/wk, fixed " + Math.round(fw * 100) + "% weight" + (ev.fitCapped ? ", capped" : "")) +
       '<div class="t sum"><span>Trade score</span><b>' + sgn(ev.score) + "</b><span>" + (ev.score >= 0 ? "In your favor" : "In their favor") + " · " + Math.round(a * 100) + "%</span></div>"
     ) : '<p class="sub">Add players to both sides to see every effect.</p>';
 
@@ -1518,7 +1521,7 @@ input[type="range"]::-webkit-slider-thumb { background: radial-gradient(circle a
       sd.rows.forEach(function (r) {
         var p = r.p, v = r.v, id = "d-" + pair[0] + "-" + p.id.replace(/[^a-z0-9]/gi, "");
         rows += '<tr class="main row" data-toggle="' + id + '"><td class="l"><div class="who">' + head(p) + '<div><div class="nm">' + esc(p.short || p.n) + '</div><div class="meta"><span class="pos ' + p.pos + '">' + p.pos + "</span>" + (p.team ? "<span>" + esc(p.team) + "</span>" : "") + injTag(p) + "</div></div></div></td>" +
-          '<td class="mono">' + f0(v.market) + (v.est ? "*" : "") + "</td><td>" + pctHTML(v.perf) + "</td><td>" + pctHTML(v.usage) + "</td><td>" + pctHTML(v.env) + '</td><td class="mono">' + f0(v.blend) + '</td><td class="mono">' + Math.round(r.w * 100) + '%</td><td class="mono"><b>' + f0(r.counts) + "</b></td></tr>" +
+          '<td class="mono">' + f0(v.market) + (v.est ? "*" : "") + '</td><td class="mono">' + (p.m && p.m.ros && !v.why ? f1(p.m.ros[0]) + ' <span class="sub">/ ' + f1(p.m.ros[1]) + "</span>" : "—") + '</td><td class="mono ' + (v.mult > 1.005 ? "pos-c" : v.mult < 0.995 ? "neg-c" : "") + '">×' + v.mult.toFixed(2) + '</td><td class="mono">' + f0(v.blend) + '</td><td class="mono">' + f0(v.current) + '</td><td class="mono">' + Math.round(r.w * 100) + '%</td><td class="mono"><b>' + f0(r.counts) + "</b></td></tr>" +
           '<tr class="detail" id="' + id + '"' + (state.open && state.open[id] ? "" : " hidden") + '><td colspan="8">' + detailChips(c, p, v) + "</td></tr>";
       });
       rows += '<tr class="total"><td class="l" colspan="7">Total ' + (pair[0] === "get" ? "you get" : "you give") + '</td><td class="mono">' + f0(sd.total) + "</td></tr>";
@@ -1656,38 +1659,40 @@ input[type="range"]::-webkit-slider-thumb { background: radial-gradient(circle a
 
   // ---------- RANKINGS ----------
   var RANK_COLS = [
-    ["rank", "#", "l"], ["name", "Player", "l"], ["team", "Team", "l"], ["age", "Age"], ["actual", "2026 pts/g"], ["ppg", "Proj/g"], ["snap", "Snap%"],
-    ["market", "Market"], ["perf", "Play"], ["env", "Team env."], ["blend", "Value"], ["trend", "30-day"], ["sig", "Signal", "l"]
+    ["rank", "#", "l"], ["name", "Player", "l"], ["team", "Team", "l"], ["age", "Age"], ["actual", "2026 pts/g"], ["model", "Model pts/g"], ["snap", "Snap%"],
+    ["start", "Start mkt"], ["current", "Current mkt"], ["blend", "Model value"], ["vs", "vs mkt"], ["trend", "30-day"], ["sig", "Signal", "l"]
   ];
   function renderRanks() {
-    var c = C(), lg = L(), w = W();
-    $("#ranks-sub").textContent = MODE[lg.mode] + " · " + (lg.ppr === 1 ? "PPR" : lg.ppr === 0.5 ? "Half PPR" : "Std") + (lg.tePrem ? " + TE premium" : "") + " · " + (lg.qbs === 2 ? "Superflex" : "1QB") + " · " + lg.teams + " teams · FantasyCalc market, adjusted for 2026 play and team situation";
+    var c = C(), lg = L();
+    $("#ranks-sub").textContent = MODE[lg.mode] + " · " + (lg.ppr === 1 ? "PPR" : lg.ppr === 0.5 ? "Half PPR" : "Std") + (lg.tePrem ? " + TE premium" : "") + " · " + (lg.qbs === 2 ? "Superflex" : "1QB") + " · " + lg.teams + " teams · preseason FantasyCalc × model fitted on 2022–25";
     document.querySelectorAll("#rank-pos button").forEach(function (b) { b.setAttribute("aria-pressed", String(b.dataset.v === state.rankPos)); });
-    var SORTABLE = ["age", "actual", "ppg", "snap", "market", "perf", "env", "blend", "trend"];
+    var SORTABLE = ["age", "actual", "model", "snap", "start", "current", "blend", "vs", "trend"];
     $("#rank-head").innerHTML = RANK_COLS.map(function (col) {
       var sortable = SORTABLE.indexOf(col[0]) >= 0;
       return "<th" + (col[2] ? ' class="l' + (sortable ? " sortable" : "") + '"' : sortable ? ' class="sortable"' : "") + (sortable ? ' data-sort="' + col[0] + '"' : "") + (state.rankSort === col[0] ? ' aria-sort="descending"' : "") + ">" + col[1] + (state.rankSort === col[0] ? " ▾" : "") + "</th>";
     }).join("");
     var q = ($("#rank-q").value || "").trim().toLowerCase();
     var rows = c.pool.map(function (p) {
-      var v = value(c, p, w), f = factors(c, p);
-      return { p: p, v: v, f: f, trend: p.fc && p.fc[c.fk] ? p.fc[c.fk][3] : 0 };
+      var v = value(c, p), played = (S(p).wk || []).filter(function (x) { return x != null; });
+      var u = p.use || {};
+      return { p: p, v: v, act: played.length ? played.reduce(function (a, b) { return a + b; }, 0) / played.length : null,
+        snap: u.tmSnp ? u.snp / u.tmSnp : null, model: p.m && p.m.ros ? p.m.ros[0] : null, trend: p.fc && p.fc[c.fk] ? p.fc[c.fk][3] : 0 };
     }).filter(function (r) { return r.v.blend > 50 && !r.v.est; });
     rows.sort(function (a, b) { return b.v.blend - a.v.blend; });
     rows.forEach(function (r, i) { r.rank = i + 1; });
     rows = rows.filter(function (r) { return (state.rankPos === "ALL" || r.p.pos === state.rankPos) && (!q || (r.p.n + " " + r.p.team).toLowerCase().indexOf(q) >= 0); });
     var get = {
-      age: function (r) { return -(r.p.age || 99); }, actual: function (r) { return r.f.n ? r.f.actual : -1; }, ppg: function (r) { return S(r.p).ppg; },
-      snap: function (r) { return r.f.snap || 0; }, market: function (r) { return r.v.market; }, perf: function (r) { return r.v.perf + r.v.usage; },
-      env: function (r) { return r.v.env; }, blend: function (r) { return r.v.blend; }, trend: function (r) { return r.trend; }
+      age: function (r) { return -(r.p.age || 99); }, actual: function (r) { return r.act == null ? -1 : r.act; }, model: function (r) { return r.model || 0; },
+      snap: function (r) { return r.snap || 0; }, start: function (r) { return r.v.market; }, current: function (r) { return r.v.current; },
+      blend: function (r) { return r.v.blend; }, vs: function (r) { return r.v.vs; }, trend: function (r) { return r.trend; }
     }[state.rankSort];
     if (get) rows.sort(function (a, b) { return get(b) - get(a); });
     rows = rows.slice(0, 250);
     $("#ranks").innerHTML = rows.map(function (r) {
       var p = r.p, sg = signal(c, p), isMine = mine(p.id), pk = p.pos === "PICK";
       return '<tr class="row' + (isMine ? " is-mine" : "") + '"><td class="l mono">' + r.rank + '</td><td class="l"><div class="who">' + head(p) + '<div><div class="nm">' + esc(p.short || p.n) + '</div><div class="meta"><span class="pos ' + p.pos + '">' + p.pos + "</span>" + injTag(p) + (isMine ? '<span class="tag mine">Yours</span>' : "") + "</div></div></div></td>" +
-        '<td class="l">' + esc(p.team || "") + '</td><td class="mono">' + (p.age ? Math.floor(p.age) : "—") + '</td><td class="mono">' + (pk || !r.f.n ? "—" : f1(r.f.actual)) + '</td><td class="mono">' + (pk ? "—" : f1(S(p).ppg)) + '</td><td class="mono">' + (r.f.snap != null ? Math.round(r.f.snap * 100) + "%" : "—") +
-        '</td><td class="mono">' + f0(r.v.market) + "</td><td>" + (pk ? "—" : pctHTML(r.v.perf + r.v.usage)) + "</td><td>" + (pk ? "—" : pctHTML(r.v.env)) + '</td><td><span class="big num">' + f0(r.v.blend) + "</span></td><td>" + trendHTML(c, p) + '</td><td class="l">' + (sg === "sell" ? '<span class="tag sell">Sell high</span>' : sg === "buy" ? '<span class="tag buy">Buy now</span>' : "") + "</td></tr>";
+        '<td class="l">' + esc(p.team || "") + '</td><td class="mono">' + (p.age ? Math.floor(p.age) : "—") + '</td><td class="mono">' + (pk || r.act == null ? "—" : f1(r.act)) + '</td><td class="mono">' + (pk || r.model == null ? "—" : f1(r.model)) + '</td><td class="mono">' + (r.snap != null ? Math.round(r.snap * 100) + "%" : "—") +
+        '</td><td class="mono">' + f0(r.v.market) + '</td><td class="mono">' + f0(r.v.current) + '</td><td><span class="big num">' + f0(r.v.blend) + "</span></td><td>" + (pk ? "—" : pctHTML(r.v.vs)) + "</td><td>" + trendHTML(c, p) + '</td><td class="l">' + (sg === "sell" ? '<span class="tag sell">Sell high</span>' : sg === "buy" ? '<span class="tag buy">Buy low</span>' : "") + "</td></tr>";
     }).join("");
   }
 
@@ -1695,11 +1700,20 @@ input[type="range"]::-webkit-slider-thumb { background: radial-gradient(circle a
   function renderMethod() {
     var c = C(), lg = L();
     $("#formula").textContent =
-      "player value = FantasyCalc market × (1 + play + usage + team env)   [adjustments × " + Math.round(W() * MODE_SCALE[lg.mode] * 100) + "% in " + MODE[lg.mode].toLowerCase() + "]" +
+      "model pts/gm = Σ factor weight × factor   (ridge regression, fit on " + D.model.trainedOn.join(", ") + ", frozen)" +
+      "\nratio        = " + (lg.mode === "redraft" ? "model ROS ÷ preseason-only ROS" : (lg.mode === "keeper" ? "0.50" : "0.35") + " × ROS ratio + " + (lg.mode === "keeper" ? "0.50" : "0.65") + " × next-season ratio") +
+      "\nplayer value = preseason FantasyCalc × ratio ^ market elasticity   (" + POS.map(function (x) { return x + " " + elasticity(c, x).toFixed(2); }).join(", ") + ")" +
       "\nside value   = best × 1.00 + next × 0.88 + next × 0.76 …  (floor 0.40)" +
-      "\nroster fit   = Δ starter pts/wk × " + R + " weeks × " + c.k.toFixed(1) + " value/pt × " + Math.round(FW() * 100) + "%" +
-      "\ntrade score  = (get − give) + roster fit";
-    $("#sources").textContent = "Sources: FantasyCalc (trade values from real trades). Sleeper API: game stats from Sportradar (points, snaps, targets, carries, team scores) and week-by-week projections from RotoWire, plus injury status. Pulled " + new Date(D.fetchedAt).toLocaleString() + ". Points are rescored per league: full PPR for Buttstuffers and Sleeper Dynasty; half PPR plus a +0.5/catch TE premium for Sleeper Keeper (4-pt passing TDs everywhere). Keeper picks are valued by overall draft slot mapped onto dynasty pick values, so treat those as rough. Kickers and defenses aren't modeled. Refresh the data with python3 scripts/fetch_data.py.";
+      "\ntrade score  = (get − give) + roster fit (" + Math.round(FW() * 100) + "% of lineup gain, capped ±15%)";
+    $("#weights").innerHTML = POS.map(function (x) {
+      var m = D.model.positions[x] && D.model.positions[x].ros;
+      if (!m) return "";
+      var items = m.features.map(function (k, i) { return { k: k, w: m.importance[i] }; }).sort(function (a, b) { return b.w - a.w; });
+      var mx = items[0].w || 1;
+      return '<div class="wcard"><div class="wcard-h"><span class="pos ' + x + '">' + x + '</span><span class="sub">R² ' + m.cvR2.toFixed(2) + " vs " + m.baseR2.toFixed(2) + " preseason-only · " + m.n + " seasons · " + esc(m.chosen) + "</span></div>" +
+        items.map(function (it) { return '<div class="wrow"><span>' + esc(D.model.labels[it.k] || it.k) + '</span><span class="wbar"><i style="width:' + (it.w / mx * 100) + '%"></i></span><b>' + Math.round(it.w * 100) + "%</b></div>"; }).join("") + "</div>";
+    }).join("");
+    $("#sources").textContent = "Sources: FantasyCalc (trade values from real trades). Sleeper API: game stats from Sportradar (points, snaps, targets, carries, team scores), RotoWire projections incl. preseason projections and ADP for 2022–2026, plus injury status. Lineups and roster fit use RotoWire's week-by-week projections so byes and injuries count. Not modeled: teammate injuries and offensive line (no reliable history for these). Pulled " + new Date(D.fetchedAt).toLocaleString() + ". Points are rescored per league: full PPR for Buttstuffers and Sleeper Dynasty; half PPR plus a +0.5/catch TE premium for Sleeper Keeper (4-pt passing TDs everywhere). Keeper picks are valued by overall draft slot mapped onto dynasty pick values, so treat those as rough. Kickers and defenses aren't modeled. Refresh the data with python3 scripts/fetch_data.py.";
   }
 
   function renderAll() {
@@ -1728,8 +1742,6 @@ input[type="range"]::-webkit-slider-thumb { background: radial-gradient(circle a
     if ((b = e.target.closest("[data-toggle]"))) { var d = document.getElementById(b.dataset.toggle); if (d) { d.hidden = !d.hidden; state.open = state.open || {}; state.open[b.dataset.toggle] = !d.hidden; } return; }
     if (e.target.closest("#clear")) { var t3 = T(); t3.give = []; t3.get = []; renderTrade(); return; }
   });
-  $("#adj").addEventListener("input", function (e) { state.adj[L().key] = +e.target.value / 100; renderTrade(); });
-  $("#fitw").addEventListener("input", function (e) { state.fit[L().key] = +e.target.value / 100; renderTrade(); });
   $("#rank-q").addEventListener("input", renderRanks);
   setupSearch("give"); setupSearch("get");
 

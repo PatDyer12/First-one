@@ -19,6 +19,9 @@ from datetime import datetime, timezone
 
 import requests
 
+sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
+import features as F  # noqa: E402
+
 ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 OUT = os.path.join(ROOT, "data", "fts-data.js")
 LEAGUES = os.path.join(ROOT, "data", "leagues.json")
@@ -208,12 +211,44 @@ def main():
             if uri:
                 keep[pid]["img"] = uri
 
+    # Apply the frozen model (data/model.json, fit by train_model.py) to this season's first weeks
+    model = json.load(open(os.path.join(ROOT, "data", "model.json")))
+    early_rows = [F.stats_week(season, w, cache=False) for w in range(1, week)]
+    live = F.build_rows(int(season), allp, early_rows, F.preseason(season), 0)
+
+    def predict(m, f):
+        x = F.vectorize(f, m["features"], m["means"])
+        z = [(xi - mu) / sd for xi, mu, sd in zip(x, m["mu"], m["sd"])]
+        contrib = [round(zi * b, 2) for zi, b in zip(z, m["coef"])]
+        return m["intercept"] + sum(contrib), contrib, x
+
+    for pid, p in keep.items():
+        f = live.get(pid)
+        pm = model["positions"].get(p["pos"])
+        if not f or not pm:
+            continue
+        out = {"g": f["g"], "pre": round(f["pre"], 2), "adp": f["adp"]}
+        for tgt in ("ros", "next"):
+            m = pm.get(tgt)
+            if not m:
+                continue
+            full, contrib, x = predict(m, f)
+            base, _, _ = predict(m["baseline"], f)
+            out[tgt] = [round(full, 2), round(base, 2)]
+            if tgt == "ros":
+                out["x"] = [round(v, 3) for v in x]
+                out["c"] = contrib
+        p["m"] = out
+
     data = {
         "season": int(season),
         "week": week,
         "fetchedAt": datetime.now(timezone.utc).isoformat(timespec="minutes"),
         "sources": ["FantasyCalc (trade values)", "Sleeper: Sportradar stats, RotoWire projections, injuries"],
         "teams": teams,
+        "model": {"trainedOn": model["trainedOn"], "labels": model["labels"], "elasticity": model["elasticity"],
+                  "positions": {pos: {t: {k: v for k, v in m.items() if k in ("features", "importance", "cvR2", "chosen", "tested", "n")} | {"baseR2": m["baseline"]["cvR2"]}
+                                      for t, m in e.items()} for pos, e in model["positions"].items()}},
         "players": list(keep.values()),
         "picks": picks,
         "leagues": leagues,
