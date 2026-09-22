@@ -252,6 +252,7 @@ def main():
         "players": list(keep.values()),
         "picks": picks,
         "leagues": leagues,
+        "overrides": json.load(open(os.path.join(ROOT, "data", "overrides.json"))) if os.path.exists(os.path.join(ROOT, "data", "overrides.json")) else {},
     }
     with open(OUT, "w") as f:
         f.write("window.FTS_DATA=")

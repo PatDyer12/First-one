@@ -892,7 +892,7 @@ input[type="range"]::-webkit-slider-thumb { background: radial-gradient(circle a
   <section id="tab-finder" role="tabpanel" hidden>
     <div class="card finder-h">
       <div class="card-h" style="padding:0"><h2>Trade Finder</h2><span class="sub" id="finder-sub"></span></div>
-      <p class="sub" style="max-width:80ch">Every 1-for-1 and 2-for-1 package from your roster, checked against every player worth trading for. It keeps deals that are fair by the numbers, so the other manager should say yes, and that make your starting lineup better, ranked by how many points a week you gain.</p>
+      <p class="sub" style="max-width:86ch">Every 1-for-1 and 2-for-1 from your roster, checked against every healthy player worth trading for. A deal only shows if <b>they</b> come out even or ahead on the public market (FantasyCalc, what they'll check), <b>you</b> come out ahead on the fitted model and/or your lineup, and the positions make sense: you send back someone who can fill the spot they lose, QBs only move for QBs in 1QB leagues, and there's no filler.</p>
       <div style="display:flex;flex-wrap:wrap;gap:10px;align-items:center">
         <span class="eyebrow">Target</span>
         <div class="seg" id="finder-pos">
@@ -954,6 +954,13 @@ input[type="range"]::-webkit-slider-thumb { background: radial-gradient(circle a
   var R = 19 - D.week; // remaining weeks incl. this one
   var P = {};
   D.players.forEach(function (p) { P[p.id] = p; });
+  // manual overrides (data/overrides.json)
+  D.players.forEach(function (p) {
+    var o = (D.overrides || {})[p.n];
+    if (!o) return;
+    p.override = o;
+    if (o.outForSeason) { p.proj = p.proj.map(function () { return 0; }); p.inj = p.inj || "Out"; p.injNote = "Season"; }
+  });
   var MODE = { redraft: "Redraft", dynasty: "Dynasty", keeper: "Keeper" };
 
   // Per-league scoring: stored points are full PPR; adjust for reception value and TE premium
@@ -1190,6 +1197,7 @@ input[type="range"]::-webkit-slider-thumb { background: radial-gradient(circle a
     var cur = c.mkt(p), est = false;
     if (p.pos !== "PICK" && cur < 1) { cur = (p._m[c.lg.key] || 0) * c.k * 0.6; est = true; }
     if (p.pos === "PICK") return { market: cur, current: cur, blend: cur, mult: 1, adj: 0, vs: 0, why: "pick" };
+    if (p.override && p.override.value != null) return { market: cur, current: cur, blend: p.override.value, mult: 1, av: { factor: 0, out: 0 }, adj: 0, vs: cur > 1 ? p.override.value / cur - 1 : 0, override: true, why: "override" };
     var mm = modelMult(c, p), av = availability(c, p);
     // injured/suspended players start from the pre-injury market and take an explicit time-out penalty (no double count)
     var anchor = est ? cur : (mm.why === "no games yet" && !p.inj) ? cur : preMarket(c, p) || cur;
@@ -1463,7 +1471,8 @@ input[type="range"]::-webkit-slider-thumb { background: radial-gradient(circle a
     var ch = [], m = p.m, spec = D.model.positions[p.pos] && D.model.positions[p.pos].ros;
     function chip(label, val, cls) { ch.push('<span class="chip ' + (cls || "") + '"><i>' + label + "</i>" + val + "</span>"); }
     if (v.av && (v.av.out || p.inj === "Questionable")) chip("Availability", (v.av.out ? outText(v.av) + " (" + esc(v.av.why) + ")" : "questionable this week") + " → value ×" + v.av.factor.toFixed(2), "b");
-    if (v.why) chip("Model", p.inj ? "no healthy games yet, so it starts from the pre-injury market" : "hasn't played yet, so the current market is used");
+    if (v.override) chip("Override", esc(p.override.note || "manual value") + " → value " + f0(v.blend), "b");
+    else if (v.why) chip("Model", p.inj ? "no healthy games yet, so it starts from the pre-injury market" : "hasn't played yet, so the current market is used");
     else if (m && m.ros) chip("Model", "projects " + f1(m.ros[0]) + " pts/gm vs " + f1(m.ros[1]) + " from preseason info → value ×" + v.mult.toFixed(2), v.mult >= 1 ? "g" : "b");
     if (m && spec && m.c && !v.why) {
       var items = spec.features.map(function (k, i) { return { k: k, x: m.x[i], c: m.c[i], w: spec.importance[i] }; })
@@ -1649,47 +1658,77 @@ input[type="range"]::-webkit-slider-thumb { background: radial-gradient(circle a
 
   // ---------- FINDER ----------
   function renderFinder() {
-    var c = C(), lg = L(), w = W();
-    $("#finder-sub").textContent = lg.name + " · " + (c.dyn ? "value + lineup (" + MODE[lg.mode].toLowerCase() + ")" : "lineup-first (redraft)");
+    var c = C(), lg = L(), fw = FW();
+    $("#finder-sub").textContent = lg.name + " · healthy players only · fair for them on the public market, a win for you on the model";
     document.querySelectorAll("#finder-pos button").forEach(function (b) { b.setAttribute("aria-pressed", String(b.dataset.v === state.finderPos)); });
+    var FLEX = { RB: 1, WR: 1 }, oneQB = lg.qbs !== 2;   // TEs have a dedicated slot, so a TE only moves for a TE
+    function healthy(p) { return p.pos === "PICK" || (!p.inj && !p.override); }
+    function pw(p) { return p.pos === "PICK" ? 0 : stat(p, lg).perWk; }
+    function consol(vals) { return vals.slice().sort(function (a, b) { return b - a; }).reduce(function (t, v, i) { return t + v * WEIGHTS(i); }, 0); }
+
     var my = lg.myIds, base = lineup(c, my).total;
-    var assets = my.map(function (id) { return { id: id, v: value(c, P[id], w).blend }; }).filter(function (a) { return a.v > 150; });
+    var assets = my.map(function (id) { var p = P[id], v = value(c, p); return { id: id, p: p, mkt: v.current, mod: v.blend }; })
+      .filter(function (a) { return healthy(a.p) && a.mkt > 150; });
     var packs = [];
     assets.forEach(function (a, i) {
-      packs.push([a.id]);
-      for (var j = i + 1; j < assets.length; j++) packs.push([a.id, assets[j].id]);
+      packs.push([a]);
+      for (var j = i + 1; j < assets.length; j++) packs.push([a, assets[j]]);
     });
-    var targets = c.pool.filter(function (p) { return !mine(p.id) && p.pos !== "PICK" && (state.finderPos === "ALL" || p.pos === state.finderPos); })
-      .map(function (p) { return { p: p, v: value(c, p, w).blend }; })
-      .filter(function (x) { return x.v > 300; })
-      .sort(function (a, b) { return b.v - a.v; }).slice(0, 220);
-    var packVals = packs.map(function (pk) { return side(c, pk, w).total; });
+    packs = packs.map(function (pk) {
+      return { pk: pk, ids: pk.map(function (a) { return a.id; }), mkt: consol(pk.map(function (a) { return a.mkt; })), mod: consol(pk.map(function (a) { return a.mod; })) };
+    });
+    var targets = c.pool.filter(function (p) { return !mine(p.id) && p.pos !== "PICK" && healthy(p) && (state.finderPos === "ALL" || p.pos === state.finderPos); })
+      .map(function (p) { var v = value(c, p); return { p: p, mkt: v.current, mod: v.blend }; })
+      .filter(function (x) { return x.mkt > 400 && !value(c, x.p).est; })
+      .sort(function (a, b) { return b.mod - a.mod; }).slice(0, 220);
+
     var ideas = [];
     targets.forEach(function (tg) {
-      var best = null;
-      packs.forEach(function (pk, i) {
-        var gv = packVals[i];
-        if (tg.v > gv * 1.02 || tg.v < gv * 0.85) return; // fair enough that they say yes, not a big overpay
-        var after = lineup(c, my.filter(function (id) { return pk.indexOf(id) < 0; }).concat([tg.p.id])).total;
-        var lu = after - base, valGain = tg.v - gv;
-        var score = c.dyn ? valGain / 400 + lu : lu + valGain / 3000;
-        if ((lu > 0.4 || (c.dyn && valGain > 0 && lu > -0.5)) && (!best || score > best.score)) best = { pk: pk, lu: lu, val: valGain, gv: gv, score: score };
+      var best = null, t = tg.p, tpw = pw(t);
+      packs.forEach(function (pk) {
+        // 1) they win (or break even) on the public market, and we don't wildly overpay
+        if (pk.mkt < tg.mkt * 0.98 || pk.mkt > tg.mkt * 1.3) return;
+        // 2) positions make sense for them
+        var hasQB = pk.pk.some(function (a) { return a.p.pos === "QB"; });
+        if (oneQB && (t.pos === "QB") !== hasQB) return;
+        var replace = pk.pk.filter(function (a) {
+          if (a.p.pos === "PICK") return false;
+          if (a.p.pos === t.pos) return pw(a.p) >= 0.6 * tpw;
+          return FLEX[t.pos] && FLEX[a.p.pos] && pw(a.p) >= 0.75 * tpw;
+        })[0];
+        if (!replace && !(lg.mode !== "redraft" && pk.pk.length === 1 && pk.pk[0].p.pos === "PICK")) return;
+        // 3) no filler: every piece has to matter to them
+        if (pk.pk.length > 1 && pk.pk.some(function (a) { return a.mkt < 0.15 * tg.mkt; })) return;
+        // 4) we win on the model and/or the lineup
+        var after = lineup(c, my.filter(function (id) { return pk.ids.indexOf(id) < 0; }).concat([t.id])).total;
+        var lu = after - base, gain = tg.mod - pk.mod;
+        var big = Math.max(tg.mod, pk.mod, 1), fit = clamp(lu * R * c.k * fw, -0.15 * big, 0.15 * big);
+        var score = gain + fit;
+        if (score <= 0.03 * big || gain < -0.05 * big || (lg.mode === "redraft" && lu < -0.3)) return;
+        if (!best || score > best.score) best = { pk: pk, lu: lu, gain: gain, fit: fit, score: score, them: pk.mkt - tg.mkt, replace: replace, big: big };
       });
       if (best) ideas.push({ t: tg, b: best });
     });
-    ideas.sort(function (a, b) { return b.b.score - a.b.score; });
-    // don't repeat the same give package over and over
+    ideas.sort(function (a, b) { return b.b.score / b.b.big - a.b.score / a.b.big || b.b.score - a.b.score; });
     var seen = {}, out = [];
-    ideas.forEach(function (x) { var k = x.b.pk.join("+"); seen[k] = (seen[k] || 0) + 1; if (seen[k] <= 2 && out.length < 12) out.push(x); });
+    ideas.forEach(function (x) {
+      var used = x.b.pk.ids.some(function (id) { return (seen[id] || 0) >= 2; });
+      if (used || out.length >= 12) return;
+      x.b.pk.ids.forEach(function (id) { seen[id] = (seen[id] || 0) + 1; });
+      out.push(x);
+    });
     $("#ideas").innerHTML = out.length ? out.map(function (x) {
-      var give = x.b.pk.map(function (id) { var p = P[id]; return '<div class="mini">' + head(p) + '<span class="pos ' + p.pos + '">' + p.pos + '</span><span class="n">' + esc(p.short || p.n) + "</span></div>"; }).join("");
-      var p = x.t.p;
-      return '<div class="card idea"><div class="idea-row"><div class="idea-side"><span class="lbl">You give</span>' + give + '</div><span class="arrow">→</span><div class="idea-side"><span class="lbl">You get</span><div class="mini">' + head(p) + '<span class="pos ' + p.pos + '">' + p.pos + '</span><span class="n">' + esc(p.n) + "</span></div>" + (injTag(p) ? '<div class="mini">' + injTag(p) + "</div>" : "") + "</div></div>" +
-        '<div class="idea-stats"><div class="stat"><b class="' + (x.b.lu >= 0 ? "pos-c" : "neg-c") + '">' + sgn(x.b.lu, 1) + "</b><span>starter pts/wk</span></div>" +
-        '<div class="stat"><b class="' + (x.b.val >= 0 ? "pos-c" : "neg-c") + '">' + sgn(x.b.val) + "</b><span>trade value</span></div>" +
-        '<div class="stat"><b>' + f1(S(p).ppg) + "</b><span>" + esc(p.team) + " proj/gm</span></div></div>" +
-        '<button class="btn" type="button" data-load="' + esc(x.b.pk.join(",")) + '" data-target="' + esc(p.id) + '">Open in analyzer</button></div>';
-    }).join("") : '<div class="card" style="padding:18px"><p class="sub">No clean fits at this position right now. Try "Any" or drag the value mix on the analyzer.</p></div>';
+      var give = x.b.pk.pk.map(function (a) { var p = a.p; return '<div class="mini">' + head(p) + '<span class="pos ' + p.pos + '">' + p.pos + '</span><span class="n">' + esc(p.short || p.n) + "</span></div>"; }).join("");
+      var p = x.t.p, r = x.b.replace;
+      var whyThem = (x.b.them >= 0 ? "they gain +" + f0(x.b.them) + " on FantasyCalc" : "about even on FantasyCalc (" + f0(x.b.them) + ", within 2%)") +
+        (r ? " · " + esc(r.p.n.split(" ").slice(-1)[0]) + " replaces " + esc(p.n.split(" ").slice(-1)[0]) + (r.p.pos === p.pos ? " at " + p.pos : " in their flex") + " (" + f1(pw(r.p)) + " vs " + f1(pw(p)) + " pts/wk)" : " · a pick for a rebuilding team");
+      return '<div class="card idea"><div class="idea-row"><div class="idea-side"><span class="lbl">You give</span>' + give + '</div><span class="arrow">→</span><div class="idea-side"><span class="lbl">You get</span><div class="mini">' + head(p) + '<span class="pos ' + p.pos + '">' + p.pos + '</span><span class="n">' + esc(p.n) + "</span></div></div></div>" +
+        '<div class="idea-stats"><div class="stat"><b class="' + (x.b.gain >= 0 ? "pos-c" : "neg-c") + '">' + sgn(x.b.gain) + "</b><span>model value for you</span></div>" +
+        '<div class="stat"><b class="' + (x.b.lu >= 0 ? "pos-c" : "neg-c") + '">' + sgn(x.b.lu, 1) + "</b><span>your starter pts/wk</span></div>" +
+        '<div class="stat"><b>' + f1(pw(p)) + "</b><span>" + esc(p.team) + " proj/wk</span></div></div>" +
+        '<p class="sub" style="margin:0;font-size:12.5px"><b style="color:var(--ink)">Why they say yes:</b> ' + whyThem + "</p>" +
+        '<button class="btn" type="button" data-load="' + esc(x.b.pk.ids.join(",")) + '" data-target="' + esc(p.id) + '">Open in analyzer</button></div>';
+    }).join("") : '<div class="card" style="padding:18px"><p class="sub">No trades pass every check at this position right now. Try "Any", or check back after the next data refresh.</p></div>';
   }
 
   // ---------- RANKINGS ----------

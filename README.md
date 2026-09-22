@@ -25,6 +25,10 @@ One frozen formula, fit on history. Nothing in the app is adjustable.
 
 Out-of-sample R² (rest of season): QB 0.33 (vs 0.33 preseason-only), RB 0.54 (0.49), WR 0.63 (0.54), TE 0.57 (0.41).
 
+**Trade Finder** only suggests healthy players (no injury tag or suspension on either side). A deal must be even or better for the other manager on current FantasyCalc value (within 2%, never more than a 30% overpay), a win for you on model value and/or lineup, and make positional sense: you send back someone who can fill the spot they lose (same position ≥60% of the target's projection, or RB↔WR ≥75%), TEs only for TEs, QBs only for QBs in 1QB leagues, and no filler pieces under 15% of the target's value.
+
+**Overrides**: `data/overrides.json` pins a player's value by name (currently Josh Jacobs = 0, out for season). Survives data refreshes.
+
 Re-fit only on purpose: `python3 scripts/train_model.py`. Weekly refresh: `python3 scripts/fetch_data.py` (applies the frozen weights).
 
 Sources: FantasyCalc; Sleeper API (Sportradar stats incl. snaps/targets/carries/team scores, RotoWire projections and ADP, injuries).
