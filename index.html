@@ -1,911 +1,1050 @@
 <title>Fantasy Trade Scale</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Big+Shoulders+Display:wght@700;800&family=IBM+Plex+Mono:wght@400;600&family=IBM+Plex+Sans:wght@400;500;600&display=swap">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Barlow:wght@400;500;600;700&family=Big+Shoulders+Display:wght@700;800;900&family=JetBrains+Mono:wght@500;700&display=swap">
 <style>
 :root {
-  --bg: #EDF1EC;
+  --bg: #F3F5FA;
   --surface: #FFFFFF;
-  --surface-2: #F6F8F5;
-  --ink: #15201A;
-  --muted: #5A6A60;
-  --line: #D2DAD3;
-  --accent: #D9480F;
-  --accent-soft: #FBE3D6;
-  --on-accent: #FFFFFF;
-  --good: #2A7A4B;
-  --warn: #A96A12;
-  --bad: #BE3A2E;
-  --qb: #B03A6A;
-  --rb: #1F8A5B;
-  --wr: #2565A8;
-  --te: #B06A10;
+  --surface-2: #F6F8FC;
+  --line: #DEE3EE;
+  --ink: #0E1526;
+  --ink-2: #334060;
+  --muted: #5B6784;
+  --accent: #FFC53D;
+  --accent-text: #875A00;
+  --on-accent: #1B1300;
+  --good: #13804D;
+  --good-soft: #DDF3E7;
+  --bad: #C73636;
+  --bad-soft: #FBE3E3;
+  --warn: #A86400;
+  --warn-soft: #FFF1D6;
+  --qb: #B8326A; --rb: #0B8577; --wr: #2F5FD0; --te: #B2600C; --pick: #7A4FD0;
+  --chip-ink: #FFFFFF;
+  --hero-bg: #0E1526;
+  --hero-ink: #E8EDF7;
+  --hero-muted: #8D99B5;
+  --hero-line: #26324B;
+  --shadow: 0 1px 2px rgba(14,21,38,.06), 0 8px 24px -12px rgba(14,21,38,.18);
   --display: "Big Shoulders Display", "Arial Narrow", Impact, sans-serif;
-  --body: "IBM Plex Sans", system-ui, -apple-system, "Segoe UI", sans-serif;
-  --mono: "IBM Plex Mono", ui-monospace, SFMono-Regular, Menlo, monospace;
+  --body: "Barlow", system-ui, -apple-system, "Segoe UI", sans-serif;
+  --mono: "JetBrains Mono", ui-monospace, SFMono-Regular, Menlo, monospace;
 }
 @media (prefers-color-scheme: dark) {
   :root:not([data-theme="light"]) {
     color-scheme: dark;
-    --bg: #0E1411;
-    --surface: #17201B;
-    --surface-2: #1C2721;
-    --ink: #E5ECE7;
-    --muted: #94A49A;
-    --line: #2A3730;
-    --accent: #FF7A3D;
-    --accent-soft: #3A2217;
-    --on-accent: #1A0D06;
-    --good: #5CC98A;
-    --warn: #E3A948;
-    --bad: #F0776A;
-    --qb: #E07AA3;
-    --rb: #52C48E;
-    --wr: #6FA8E8;
-    --te: #E0A152;
+    --bg: #0B1120; --surface: #121A2C; --surface-2: #18223A; --line: #243049;
+    --ink: #E8EDF7; --ink-2: #C3CBDD; --muted: #8D99B5;
+    --accent: #FFC53D; --accent-text: #FFC53D; --on-accent: #1B1300;
+    --good: #3DD68C; --good-soft: #10301F; --bad: #FF6B6B; --bad-soft: #3A1518; --warn: #FFB547; --warn-soft: #36270A;
+    --qb: #E0558A; --rb: #1AAE9F; --wr: #4C8FEF; --te: #D98A35; --pick: #9E86F0;
+    --chip-ink: #0B1120;
+    --hero-bg: #070C18; --hero-ink: #E8EDF7; --hero-muted: #8D99B5; --hero-line: #1E2940;
+    --shadow: 0 1px 0 rgba(255,255,255,.03) inset, 0 12px 30px -16px rgba(0,0,0,.7);
   }
 }
 :root[data-theme="dark"] {
   color-scheme: dark;
-  --bg: #0E1411;
-  --surface: #17201B;
-  --surface-2: #1C2721;
-  --ink: #E5ECE7;
-  --muted: #94A49A;
-  --line: #2A3730;
-  --accent: #FF7A3D;
-  --accent-soft: #3A2217;
-  --on-accent: #1A0D06;
-  --good: #5CC98A;
-  --warn: #E3A948;
-  --bad: #F0776A;
-  --qb: #E07AA3;
-  --rb: #52C48E;
-  --wr: #6FA8E8;
-  --te: #E0A152;
+  --bg: #0B1120; --surface: #121A2C; --surface-2: #18223A; --line: #243049;
+  --ink: #E8EDF7; --ink-2: #C3CBDD; --muted: #8D99B5;
+  --accent: #FFC53D; --accent-text: #FFC53D; --on-accent: #1B1300;
+  --good: #3DD68C; --good-soft: #10301F; --bad: #FF6B6B; --bad-soft: #3A1518; --warn: #FFB547; --warn-soft: #36270A;
+  --qb: #E0558A; --rb: #1AAE9F; --wr: #4C8FEF; --te: #D98A35; --pick: #9E86F0;
+  --chip-ink: #0B1120;
+  --hero-bg: #070C18; --hero-ink: #E8EDF7; --hero-muted: #8D99B5; --hero-line: #1E2940;
+  --shadow: 0 1px 0 rgba(255,255,255,.03) inset, 0 12px 30px -16px rgba(0,0,0,.7);
 }
 
 * { box-sizing: border-box; }
-body {
-  background: var(--bg);
-  color: var(--ink);
-  font-family: var(--body);
-  font-size: 15px;
-  line-height: 1.5;
-  padding: 0 16px;
-  padding-block: 24px 48px;
-}
-.wrap { max-width: 1120px; margin: 0 auto; display: grid; gap: 20px; }
+body { background: var(--bg); color: var(--ink); font: 15px/1.45 var(--body); padding: 0 16px; padding-block: 0 56px; }
+.wrap { max-width: 1180px; margin: 0 auto; }
+button { font: inherit; color: inherit; }
+:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; border-radius: 4px; }
+.num { font-variant-numeric: tabular-nums; }
+.mono { font-family: var(--mono); }
 
-header.top { display: flex; flex-wrap: wrap; align-items: end; justify-content: space-between; gap: 12px 24px; }
-h1 {
-  font-family: var(--display);
-  font-weight: 800;
-  font-size: clamp(2.2rem, 6vw, 3.4rem);
-  line-height: 0.95;
-  letter-spacing: 0.01em;
-  text-transform: uppercase;
-  margin: 0;
-  text-wrap: balance;
+/* ---------- masthead ---------- */
+.mast {
+  background: var(--hero-bg);
+  color: var(--hero-ink);
+  margin: 0 -16px;
+  padding: 18px 16px 0;
+  position: relative;
+  overflow: hidden;
 }
-h1 span { color: var(--accent); }
-.tag { margin: 6px 0 0; color: var(--muted); max-width: 60ch; }
+.mast::before {
+  /* yard lines */
+  content: ""; position: absolute; inset: 0;
+  background: repeating-linear-gradient(90deg, transparent 0 119px, var(--hero-line) 119px 120px);
+  opacity: .55; pointer-events: none;
+}
+.mast .wrap { position: relative; display: grid; gap: 16px; }
+.mast-top { display: flex; flex-wrap: wrap; justify-content: space-between; align-items: center; gap: 12px; }
+.brand { display: flex; align-items: baseline; gap: 10px; }
+.brand b {
+  font: 900 30px/0.9 var(--display); letter-spacing: .02em; text-transform: uppercase;
+}
+.brand b i { font-style: normal; color: var(--accent); }
+.fresh {
+  display: inline-flex; align-items: center; gap: 8px;
+  font: 500 12px/1 var(--mono); color: var(--hero-muted);
+  border: 1px solid var(--hero-line); border-radius: 99px; padding: 7px 11px;
+}
+.fresh .dot { width: 7px; height: 7px; border-radius: 50%; background: var(--good); box-shadow: 0 0 0 3px color-mix(in srgb, var(--good) 25%, transparent); }
 
-/* settings strip */
-.settings {
-  background: var(--surface);
-  border: 1px solid var(--line);
-  border-radius: 10px;
-  padding: 14px 16px;
-  display: flex;
-  flex-wrap: wrap;
-  gap: 14px 22px;
-  align-items: end;
+.leagues { display: flex; gap: 10px; flex-wrap: wrap; }
+.lg-btn {
+  display: grid; grid-template-columns: auto 1fr; gap: 2px 10px; align-items: center;
+  text-align: left; cursor: pointer;
+  background: transparent; color: var(--hero-ink);
+  border: 1px solid var(--hero-line); border-radius: 10px; padding: 9px 14px 9px 10px;
+  min-width: 0;
 }
-.field { display: grid; gap: 5px; }
-.label {
-  font-size: 11px;
-  font-weight: 600;
-  letter-spacing: 0.08em;
-  text-transform: uppercase;
-  color: var(--muted);
+.lg-btn .plat {
+  grid-row: span 2; width: 34px; height: 34px; border-radius: 8px;
+  display: grid; place-items: center; font: 800 13px/1 var(--display); letter-spacing: .04em;
+  background: var(--hero-line); color: var(--hero-muted);
 }
-.seg { display: inline-flex; border: 1px solid var(--line); border-radius: 7px; overflow: hidden; }
-.seg button {
-  font: 500 13px/1 var(--body);
-  color: var(--ink);
-  background: var(--surface);
-  border: 0;
-  border-right: 1px solid var(--line);
-  padding: 8px 11px;
-  cursor: pointer;
+.lg-btn .t { font-weight: 700; font-size: 15px; }
+.lg-btn .s { font-size: 12px; color: var(--hero-muted); }
+.lg-btn[aria-pressed="true"] { border-color: var(--accent); background: color-mix(in srgb, var(--accent) 9%, transparent); }
+.lg-btn[aria-pressed="true"] .plat { background: var(--accent); color: var(--on-accent); }
+
+.tabs { display: flex; gap: 2px; overflow-x: auto; scrollbar-width: none; margin-top: 2px; }
+.tabs::-webkit-scrollbar { display: none; }
+.tab {
+  background: none; border: 0; cursor: pointer; white-space: nowrap;
+  font: 800 17px/1 var(--display); letter-spacing: .06em; text-transform: uppercase;
+  color: var(--hero-muted); padding: 12px 14px 14px; border-bottom: 3px solid transparent;
 }
+.tab[aria-selected="true"] { color: var(--hero-ink); border-bottom-color: var(--accent); }
+.tab:hover { color: var(--hero-ink); }
+
+main { padding-top: 22px; display: grid; gap: 18px; }
+section[hidden] { display: none !important; }
+
+.card { background: var(--surface); border: 1px solid var(--line); border-radius: 14px; box-shadow: var(--shadow); }
+.card-h { display: flex; flex-wrap: wrap; align-items: baseline; justify-content: space-between; gap: 6px 14px; padding: 16px 18px 0; }
+h2 { font: 800 24px/1 var(--display); letter-spacing: .03em; text-transform: uppercase; margin: 0; }
+h3 { font: 800 18px/1 var(--display); letter-spacing: .04em; text-transform: uppercase; margin: 0; }
+.eyebrow { font: 600 11px/1.2 var(--body); letter-spacing: .12em; text-transform: uppercase; color: var(--muted); }
+.sub { color: var(--muted); font-size: 13.5px; margin: 0; }
+
+/* chips */
+.pos {
+  display: inline-grid; place-items: center; width: 34px; height: 20px; border-radius: 5px;
+  font: 700 10.5px/1 var(--mono); letter-spacing: .02em; color: var(--chip-ink); flex: none;
+}
+.pos.QB { background: var(--qb); } .pos.RB { background: var(--rb); } .pos.WR { background: var(--wr); }
+.pos.TE { background: var(--te); } .pos.PICK { background: var(--pick); }
+.tag {
+  display: inline-flex; align-items: center; gap: 4px; height: 20px; padding: 0 7px; border-radius: 5px;
+  font: 700 10.5px/1 var(--mono); letter-spacing: .03em; text-transform: uppercase; white-space: nowrap;
+}
+.tag.inj { background: var(--bad-soft); color: var(--bad); }
+.tag.q { background: var(--warn-soft); color: var(--warn); }
+.tag.sell { background: var(--bad-soft); color: var(--bad); }
+.tag.buy { background: var(--good-soft); color: var(--good); }
+.tag.mine { background: color-mix(in srgb, var(--accent) 22%, transparent); color: var(--accent-text); }
+.fmt { display: flex; flex-wrap: wrap; gap: 6px; }
+.fmt span { font: 600 12px/1 var(--body); padding: 6px 9px; border-radius: 6px; background: var(--surface-2); border: 1px solid var(--line); color: var(--ink-2); }
+
+.head {
+  width: 38px; height: 38px; border-radius: 50%; flex: none; object-fit: cover;
+  background: var(--surface-2); border: 1px solid var(--line);
+  display: grid; place-items: center; font: 700 12px/1 var(--body); color: var(--muted); overflow: hidden;
+}
+.head.lg { width: 52px; height: 52px; }
+
+.trend { font: 600 11.5px/1 var(--mono); }
+.trend.up { color: var(--good); } .trend.down { color: var(--bad); } .trend.flat { color: var(--muted); }
+
+/* ---------- team tab ---------- */
+.team-top { display: grid; grid-template-columns: minmax(0, 1.25fr) minmax(0, 1fr); gap: 18px; }
+.team-id { padding: 18px; display: grid; gap: 14px; align-content: start; }
+.team-id .name { font: 900 clamp(34px, 5vw, 50px)/.9 var(--display); text-transform: uppercase; letter-spacing: .01em; margin: 0; text-wrap: balance; }
+.kpis { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 10px; }
+.kpi { background: var(--surface-2); border: 1px solid var(--line); border-radius: 10px; padding: 11px 12px; display: grid; gap: 4px; }
+.kpi .v { font: 800 30px/1 var(--display); letter-spacing: .01em; }
+.kpi .d { font-size: 12px; color: var(--muted); }
+
+.grades { padding: 16px 18px 18px; display: grid; gap: 12px; }
+.grade-row { display: grid; grid-template-columns: 34px minmax(0, 1fr) 34px; align-items: center; gap: 10px; }
+.bar { position: relative; height: 10px; background: var(--surface-2); border: 1px solid var(--line); border-radius: 99px; }
+.bar i { position: absolute; left: 0; top: -1px; bottom: -1px; border-radius: 99px; }
+.bar .avg { position: absolute; top: -5px; bottom: -5px; width: 2px; background: var(--ink); opacity: .45; border-radius: 1px; }
+.letter { font: 900 24px/1 var(--display); text-align: right; }
+.letter.g { color: var(--good); } .letter.m { color: var(--ink-2); } .letter.b { color: var(--bad); }
+.grade-note { font-size: 12.5px; color: var(--muted); margin: 0; }
+
+.roster-card { padding-bottom: 6px; }
+.rtable-wrap { overflow-x: auto; margin-top: 10px; }
+.rtable { width: 100%; border-collapse: collapse; min-width: 720px; }
+.rtable th { font: 600 10.5px/1 var(--body); letter-spacing: .1em; text-transform: uppercase; color: var(--muted); text-align: right; padding: 10px 12px; border-bottom: 1px solid var(--line); white-space: nowrap; }
+.rtable td { padding: 9px 12px; border-bottom: 1px solid var(--line); text-align: right; white-space: nowrap; font-variant-numeric: tabular-nums; }
+.rtable th:first-child, .rtable td:first-child, .rtable th.l, .rtable td.l { text-align: left; }
+.rtable tr.group td { background: var(--surface-2); font: 800 13px/1 var(--display); letter-spacing: .1em; text-transform: uppercase; color: var(--muted); padding: 8px 12px; }
+.rtable tbody tr.row:hover { background: var(--surface-2); }
+.slot { font: 700 11px/1 var(--mono); color: var(--muted); width: 44px; }
+.who { display: flex; align-items: center; gap: 10px; min-width: 0; }
+.who .nm { font-weight: 700; }
+.who .meta { font-size: 12px; color: var(--muted); display: flex; gap: 6px; align-items: center; flex-wrap: wrap; }
+.big { font: 800 20px/1 var(--display); letter-spacing: .01em; }
+.act { background: none; border: 1px solid var(--line); border-radius: 6px; padding: 5px 8px; cursor: pointer; font: 600 12px/1 var(--body); color: var(--ink-2); }
+.act:hover { border-color: var(--ink-2); }
+.spark { display: block; }
+
+/* ---------- trade tab ---------- */
+.trade-grid { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1.08fr) minmax(0, 1fr); gap: 18px; align-items: start; }
+.side { padding: 16px; display: grid; gap: 12px; }
+.side-h { display: flex; justify-content: space-between; align-items: baseline; gap: 8px; }
+.side-h .tot { font: 800 22px/1 var(--display); }
+.search { position: relative; }
+.search input {
+  width: 100%; font: 500 15px var(--body); color: var(--ink);
+  background: var(--surface-2); border: 1px solid var(--line); border-radius: 9px; padding: 10px 12px 10px 34px;
+}
+.search svg { position: absolute; left: 11px; top: 50%; transform: translateY(-50%); color: var(--muted); }
+.results {
+  position: absolute; z-index: 20; left: 0; right: 0; top: calc(100% + 4px);
+  background: var(--surface); border: 1px solid var(--line); border-radius: 10px; box-shadow: var(--shadow);
+  max-height: 320px; overflow-y: auto; padding: 4px;
+}
+.res { width: 100%; display: flex; align-items: center; gap: 10px; padding: 7px 8px; border: 0; background: none; border-radius: 7px; cursor: pointer; text-align: left; }
+.res:hover, .res.on { background: var(--surface-2); }
+.res .head { width: 30px; height: 30px; }
+.res .rv { margin-left: auto; font: 700 13px/1 var(--mono); color: var(--muted); }
+.quick { display: flex; flex-wrap: wrap; gap: 6px; }
+.quick button { display: inline-flex; align-items: center; gap: 6px; background: var(--surface-2); border: 1px solid var(--line); border-radius: 99px; padding: 4px 10px 4px 4px; cursor: pointer; font-size: 12.5px; font-weight: 600; }
+.quick button:hover { border-color: var(--ink-2); }
+.quick .pos { width: 30px; height: 18px; font-size: 10px; border-radius: 99px; }
+.quick-h { display: flex; justify-content: space-between; align-items: center; }
+.linkbtn { background: none; border: 0; padding: 0; cursor: pointer; font-size: 12.5px; font-weight: 600; color: var(--muted); text-decoration: underline; text-underline-offset: 2px; }
+
+.slip { list-style: none; margin: 0; padding: 0; display: grid; gap: 8px; }
+.slip li.item { display: grid; grid-template-columns: auto minmax(0, 1fr) auto; gap: 10px; align-items: center; background: var(--surface-2); border: 1px solid var(--line); border-radius: 11px; padding: 9px 10px; }
+.slip .nm { font-weight: 700; line-height: 1.15; }
+.slip .meta { font-size: 12px; color: var(--muted); display: flex; gap: 6px; align-items: center; flex-wrap: wrap; margin-top: 3px; }
+.slip .val { text-align: right; }
+.slip .x { background: none; border: 0; cursor: pointer; color: var(--muted); font-size: 12px; padding: 2px 0 0; text-decoration: underline; }
+.empty { border: 1.5px dashed var(--line); border-radius: 11px; padding: 20px 12px; text-align: center; color: var(--muted); font-size: 13.5px; }
+
+.verdict { background: var(--hero-bg); color: var(--hero-ink); border-radius: 16px; padding: 18px; display: grid; gap: 14px; position: sticky; top: calc(env(safe-area-inset-top, 0px) + 12px); box-shadow: var(--shadow); }
+.verdict .eyebrow { color: var(--hero-muted); }
+.scale-svg { width: 100%; height: auto; display: block; }
+.call { font: 900 38px/.92 var(--display); text-transform: uppercase; letter-spacing: .01em; margin: 0; text-align: center; text-wrap: balance; }
+.call-sub { text-align: center; margin: -6px 0 0; color: var(--hero-muted); font-size: 14px; }
+.lenses { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+.lens { border: 1px solid var(--hero-line); border-radius: 11px; padding: 11px 12px; display: grid; gap: 5px; }
+.lens .v { font: 800 28px/1 var(--display); }
+.lens .d { font-size: 12px; color: var(--hero-muted); }
+.pos-c { color: var(--good); } .neg-c { color: var(--bad); }
+.blend { display: grid; gap: 6px; }
+.blend-row { display: flex; justify-content: space-between; font-size: 12px; color: var(--hero-muted); }
+.blend input { width: 100%; accent-color: var(--accent); }
+.nudge { font-size: 13.5px; margin: 0; padding-top: 12px; border-top: 1px solid var(--hero-line); color: var(--hero-ink); }
+.nudge b { color: var(--accent); }
+.nudge:empty { display: none; }
+
+.work { padding: 0 0 6px; }
+.work .rtable { min-width: 760px; }
+.work-note { padding: 12px 18px 0; margin: 0; font-size: 13px; color: var(--muted); max-width: 90ch; }
+tr.total td { font-weight: 700; border-bottom: 2px solid var(--line); }
+
+/* ---------- finder ---------- */
+.finder-h { padding: 18px; display: grid; gap: 12px; }
+.seg { display: inline-flex; border: 1px solid var(--line); border-radius: 9px; overflow: hidden; background: var(--surface-2); flex-wrap: wrap; }
+.seg button { border: 0; background: none; padding: 8px 12px; cursor: pointer; font-weight: 600; font-size: 13px; color: var(--ink-2); border-right: 1px solid var(--line); }
 .seg button:last-child { border-right: 0; }
 .seg button[aria-pressed="true"] { background: var(--ink); color: var(--bg); }
-.seg button:focus-visible, button:focus-visible, input:focus-visible, select:focus-visible, summary:focus-visible {
-  outline: 2px solid var(--accent);
-  outline-offset: 2px;
-}
-.weeks { display: flex; align-items: center; gap: 10px; }
-.weeks input { width: 140px; accent-color: var(--accent); }
-.weeks output { font-family: var(--mono); font-size: 13px; min-width: 5ch; }
-.toggle { display: flex; align-items: center; gap: 8px; font-size: 13px; cursor: pointer; }
-.toggle input { accent-color: var(--accent); width: 16px; height: 16px; }
+.ideas { display: grid; grid-template-columns: repeat(auto-fill, minmax(min(100%, 370px), 1fr)); gap: 14px; }
+.idea { padding: 14px; display: grid; gap: 12px; align-content: start; }
+.idea-row { display: grid; grid-template-columns: minmax(0, 1fr) auto minmax(0, 1fr); gap: 10px; align-items: center; }
+.idea-side { display: grid; gap: 6px; min-width: 0; }
+.idea-side .lbl { font: 600 10.5px/1 var(--body); letter-spacing: .1em; text-transform: uppercase; color: var(--muted); }
+.mini { display: flex; align-items: center; gap: 7px; min-width: 0; }
+.mini .head { width: 28px; height: 28px; }
+.mini span.n { font-weight: 700; font-size: 13.5px; line-height: 1.2; overflow-wrap: anywhere; }
+.arrow { font: 900 22px/1 var(--display); color: var(--muted); }
+.idea-stats { display: flex; gap: 8px; flex-wrap: wrap; }
+.stat { flex: 1; min-width: 96px; background: var(--surface-2); border: 1px solid var(--line); border-radius: 9px; padding: 8px 10px; }
+.stat b { display: block; font: 800 20px/1 var(--display); }
+.stat span { font-size: 11.5px; color: var(--muted); }
+.btn { border: 0; border-radius: 9px; padding: 10px 14px; cursor: pointer; font: 700 14px/1 var(--body); background: var(--accent); color: var(--on-accent); }
+.btn.ghost { background: none; border: 1px solid var(--line); color: var(--ink); }
 
-/* trade board */
-.board {
-  display: grid;
-  grid-template-columns: minmax(0, 1fr) minmax(0, 300px) minmax(0, 1fr);
-  gap: 16px;
-  align-items: start;
-}
-.side {
-  background: var(--surface);
-  border: 1px solid var(--line);
-  border-radius: 10px;
-  padding: 16px;
-  display: grid;
-  gap: 12px;
-}
-.side-head { display: flex; justify-content: space-between; align-items: baseline; gap: 8px; }
-.side-head h2 {
-  font-family: var(--display);
-  font-weight: 800;
-  font-size: 1.6rem;
-  text-transform: uppercase;
-  letter-spacing: 0.02em;
-  margin: 0;
-}
-.side-total { font-family: var(--mono); font-size: 13px; color: var(--muted); }
-.side-total b { color: var(--ink); font-weight: 600; }
+/* ---------- rankings ---------- */
+.rank-tools { display: flex; flex-wrap: wrap; gap: 10px; align-items: center; padding: 14px 18px 0; }
+.rank-tools input { font: 500 14px var(--body); color: var(--ink); background: var(--surface-2); border: 1px solid var(--line); border-radius: 9px; padding: 8px 11px; min-width: 0; width: 220px; max-width: 100%; }
+.rtable th.sortable { cursor: pointer; }
+.rtable th.sortable:hover { color: var(--ink); }
+.rtable th[aria-sort] { color: var(--ink); }
+tr.is-mine td:first-child { box-shadow: inset 3px 0 0 var(--accent); }
 
-.adder { display: flex; gap: 8px; }
-.adder input {
-  flex: 1;
-  min-width: 0;
-  font: 14px var(--body);
-  color: var(--ink);
-  background: var(--surface-2);
-  border: 1px solid var(--line);
-  border-radius: 7px;
-  padding: 9px 11px;
-}
-.btn {
-  font: 600 13px/1 var(--body);
-  border-radius: 7px;
-  border: 1px solid var(--ink);
-  background: var(--ink);
-  color: var(--bg);
-  padding: 9px 14px;
-  cursor: pointer;
-  white-space: nowrap;
-}
-.btn.ghost { background: transparent; color: var(--ink); border-color: var(--line); }
-.hint { font-size: 12.5px; color: var(--bad); min-height: 0; margin: -4px 0 0; }
-.hint:empty { display: none; }
+/* ---------- method ---------- */
+.method { padding: 20px 18px; display: grid; gap: 18px; }
+.method-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(100%, 300px), 1fr)); gap: 14px; }
+.step { background: var(--surface-2); border: 1px solid var(--line); border-radius: 12px; padding: 14px; display: grid; gap: 6px; align-content: start; }
+.step .k { font: 900 30px/1 var(--display); color: var(--accent-text); }
+.step p { margin: 0; font-size: 14px; color: var(--ink-2); }
+.formula { font: 500 13px/1.6 var(--mono); background: var(--surface-2); border: 1px solid var(--line); border-radius: 10px; padding: 12px 14px; overflow-x: auto; white-space: pre; }
+.foot { font-size: 12.5px; color: var(--muted); margin: 0; max-width: 90ch; }
 
-.roster { list-style: none; margin: 0; padding: 0; display: grid; gap: 8px; }
-.empty {
-  border: 1px dashed var(--line);
-  border-radius: 8px;
-  padding: 18px 12px;
-  text-align: center;
-  color: var(--muted);
-  font-size: 13.5px;
+@media (max-width: 980px) {
+  .trade-grid { grid-template-columns: minmax(0, 1fr); }
+  .verdict { position: static; order: -1; }
+  .team-top { grid-template-columns: minmax(0, 1fr); }
 }
-.player {
-  display: grid;
-  grid-template-columns: auto minmax(0, 1fr) auto;
-  gap: 4px 10px;
-  align-items: center;
-  padding: 10px 10px 10px 0;
-  border-bottom: 1px solid var(--line);
+@media (max-width: 520px) {
+  .kpis { grid-template-columns: 1fr 1fr; }
+  .call { font-size: 32px; }
+  .lg-btn { flex: 1 1 100%; }
 }
-.player:last-child { border-bottom: 0; }
-.pos {
-  font: 700 11px/1 var(--mono);
-  letter-spacing: 0.04em;
-  color: #fff;
-  border-radius: 5px;
-  padding: 5px 0;
-  width: 34px;
-  text-align: center;
-  align-self: start;
-  margin-top: 2px;
-}
-.pos.QB { background: var(--qb); } .pos.RB { background: var(--rb); }
-.pos.WR { background: var(--wr); } .pos.TE { background: var(--te); }
-:root[data-theme="dark"] .pos { color: #0E1411; }
-@media (prefers-color-scheme: dark) { :root:not([data-theme="light"]) .pos { color: #0E1411; } }
-.pname { font-weight: 600; overflow-wrap: anywhere; }
-.pmeta { display: flex; flex-wrap: wrap; gap: 6px 12px; align-items: center; font-size: 12.5px; color: var(--muted); margin-top: 4px; }
-.pmeta label { display: inline-flex; align-items: center; gap: 5px; }
-.pmeta input, .pmeta select {
-  font: 12.5px var(--mono);
-  color: var(--ink);
-  background: var(--surface-2);
-  border: 1px solid var(--line);
-  border-radius: 5px;
-  padding: 3px 5px;
-}
-.pmeta input { width: 62px; }
-.pval { text-align: right; align-self: start; }
-.pval .num { font-family: var(--display); font-weight: 800; font-size: 1.55rem; line-height: 1; font-variant-numeric: tabular-nums; }
-.pval .unit { font-size: 11px; color: var(--muted); display: block; }
-.remove {
-  background: none;
-  border: 0;
-  color: var(--muted);
-  cursor: pointer;
-  font-size: 12px;
-  padding: 2px 0;
-  text-decoration: underline;
-  text-underline-offset: 2px;
-  margin-top: 4px;
-}
-
-/* verdict */
-.verdict {
-  background: var(--ink);
-  color: var(--bg);
-  border-radius: 10px;
-  padding: 18px 16px;
-  display: grid;
-  gap: 14px;
-  position: sticky;
-  top: calc(env(safe-area-inset-top, 0px) + 12px);
-}
-.verdict .label { color: color-mix(in srgb, var(--bg) 65%, var(--ink)); }
-.v-call {
-  font-family: var(--display);
-  font-weight: 800;
-  font-size: 2.1rem;
-  line-height: 0.95;
-  text-transform: uppercase;
-  margin: 2px 0 0;
-  text-wrap: balance;
-}
-.v-sub { font-size: 13.5px; margin: 0; opacity: 0.85; }
-.meter { display: grid; gap: 6px; }
-.track {
-  position: relative;
-  height: 14px;
-  border-radius: 7px;
-  background: linear-gradient(90deg,
-    color-mix(in srgb, var(--bad) 75%, var(--ink)) 0%,
-    color-mix(in srgb, var(--bg) 25%, var(--ink)) 40%,
-    color-mix(in srgb, var(--bg) 25%, var(--ink)) 60%,
-    color-mix(in srgb, var(--good) 75%, var(--ink)) 100%);
-}
-.track::after {
-  content: "";
-  position: absolute; left: 50%; top: -3px; bottom: -3px; width: 1px;
-  background: var(--bg); opacity: 0.5;
-}
-.needle {
-  position: absolute; top: -5px; width: 6px; height: 24px; margin-left: -3px;
-  background: var(--accent); border-radius: 3px;
-  box-shadow: 0 0 0 2px var(--ink);
-  transition: left 0.35s cubic-bezier(.2,.8,.2,1);
-}
-.ends { display: flex; justify-content: space-between; font-size: 11px; letter-spacing: 0.06em; text-transform: uppercase; opacity: 0.7; }
-.tot { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
-.tot div { display: grid; gap: 2px; }
-.tot .big { font-family: var(--display); font-weight: 800; font-size: 1.8rem; line-height: 1; font-variant-numeric: tabular-nums; }
-.v-suggest {
-  font-size: 13px;
-  margin: 0;
-  padding-top: 12px;
-  border-top: 1px solid color-mix(in srgb, var(--bg) 25%, var(--ink));
-}
-.v-suggest:empty { display: none; }
-.v-suggest b { color: var(--accent); }
-
-/* breakdown */
-.panel {
-  background: var(--surface);
-  border: 1px solid var(--line);
-  border-radius: 10px;
-  padding: 18px 16px;
-  display: grid;
-  gap: 14px;
-}
-.panel h2 {
-  font-family: var(--display);
-  font-weight: 800;
-  font-size: 1.6rem;
-  text-transform: uppercase;
-  letter-spacing: 0.02em;
-  margin: 0;
-}
-.formula {
-  font-family: var(--mono);
-  font-size: 13px;
-  background: var(--surface-2);
-  border: 1px solid var(--line);
-  border-radius: 8px;
-  padding: 10px 12px;
-  overflow-x: auto;
-  white-space: nowrap;
-}
-.steps { margin: 0; padding-left: 20px; display: grid; gap: 8px; max-width: 78ch; color: var(--ink); }
-.steps li::marker { color: var(--accent); font-weight: 700; }
-.steps code { font-family: var(--mono); font-size: 12.5px; background: var(--surface-2); padding: 1px 4px; border-radius: 4px; }
-.tablewrap { overflow-x: auto; }
-table { border-collapse: collapse; width: 100%; font-size: 13px; }
-th, td { padding: 8px 10px; text-align: right; border-bottom: 1px solid var(--line); white-space: nowrap; font-variant-numeric: tabular-nums; }
-th { font-size: 11px; font-weight: 600; letter-spacing: 0.06em; text-transform: uppercase; color: var(--muted); }
-th:first-child, td:first-child, th:nth-child(2), td:nth-child(2) { text-align: left; }
-td { font-family: var(--mono); }
-td:first-child { font-family: var(--body); font-weight: 500; }
-tr.subtotal td { font-weight: 600; border-bottom: 2px solid var(--line); }
-.side-pill { font: 600 11px/1 var(--body); padding: 3px 7px; border-radius: 99px; background: var(--surface-2); border: 1px solid var(--line); }
-.side-pill.get { background: var(--accent-soft); border-color: transparent; }
-
-details.custom { font-size: 13.5px; }
-details.custom summary { cursor: pointer; font-weight: 600; }
-.custom-form { display: flex; flex-wrap: wrap; gap: 10px; align-items: end; margin-top: 12px; }
-.custom-form input, .custom-form select {
-  font: 13.5px var(--body);
-  color: var(--ink);
-  background: var(--surface-2);
-  border: 1px solid var(--line);
-  border-radius: 6px;
-  padding: 7px 9px;
-}
-.custom-form input[type="number"] { width: 90px; font-family: var(--mono); }
-.custom-form #c-name { width: 180px; }
-.foot { font-size: 12.5px; color: var(--muted); max-width: 80ch; margin: 0; }
-
-@media (max-width: 900px) {
-  .board { grid-template-columns: minmax(0, 1fr); }
-  .verdict { position: static; order: 3; }
-}
-@media (prefers-reduced-motion: reduce) { .needle { transition: none; } }
+@media (prefers-reduced-motion: reduce) { * { transition: none !important; } }
+.scale-beam, .scale-pan { transition: transform .6s cubic-bezier(.2,.9,.25,1.15); }
 </style>
 
-<div class="wrap">
-  <header class="top">
-    <div>
-      <h1>Fantasy Trade <span>Scale</span></h1>
-      <p class="tag">Put a trade on the scale. Every player is priced in fantasy points over a waiver-wire replacement for the rest of the season, adjusted for your league settings.</p>
+<header class="mast">
+  <div class="wrap">
+    <div class="mast-top">
+      <div class="brand"><b>Trade <i>Scale</i></b></div>
+      <span class="fresh" id="fresh"><span class="dot"></span><span></span></span>
     </div>
-    <button class="btn ghost" id="reset" type="button">Clear trade</button>
-  </header>
+    <div class="leagues" id="leagues"></div>
+    <nav class="tabs" role="tablist" aria-label="Sections">
+      <button class="tab" role="tab" data-tab="team">My Team</button>
+      <button class="tab" role="tab" data-tab="trade">Trade Analyzer</button>
+      <button class="tab" role="tab" data-tab="finder">Trade Finder</button>
+      <button class="tab" role="tab" data-tab="ranks">Rankings</button>
+      <button class="tab" role="tab" data-tab="method">How it works</button>
+    </nav>
+  </div>
+</header>
 
-  <section class="settings" aria-label="League settings">
-    <div class="field">
-      <span class="label">Scoring</span>
-      <div class="seg" data-key="scoring">
-        <button type="button" data-v="ppr">PPR</button>
-        <button type="button" data-v="half">Half</button>
-        <button type="button" data-v="std">Standard</button>
-      </div>
-    </div>
-    <div class="field">
-      <span class="label">Teams</span>
-      <div class="seg" data-key="teams">
-        <button type="button" data-v="8">8</button>
-        <button type="button" data-v="10">10</button>
-        <button type="button" data-v="12">12</button>
-        <button type="button" data-v="14">14</button>
-      </div>
-    </div>
-    <div class="field">
-      <span class="label">QB slots</span>
-      <div class="seg" data-key="qb">
-        <button type="button" data-v="1qb">1QB</button>
-        <button type="button" data-v="sf">Superflex</button>
-      </div>
-    </div>
-    <div class="field">
-      <span class="label">League</span>
-      <div class="seg" data-key="mode">
-        <button type="button" data-v="redraft">Redraft</button>
-        <button type="button" data-v="dynasty">Dynasty</button>
-      </div>
-    </div>
-    <div class="field">
-      <label class="label" for="weeks">Weeks left</label>
-      <div class="weeks">
-        <input type="range" id="weeks" min="1" max="17" step="1">
-        <output id="weeks-out" for="weeks"></output>
-      </div>
-    </div>
-    <label class="toggle" for="stud">
-      <input type="checkbox" id="stud">
-      Stud premium
-    </label>
-  </section>
-
-  <section class="board">
-    <div class="side" id="side-give">
-      <div class="side-head">
-        <h2>You give</h2>
-        <span class="side-total">counts <b data-total="give">0</b> pts</span>
-      </div>
-      <div class="adder">
-        <input id="add-give" list="player-list" placeholder="Search a player…" autocomplete="off" aria-label="Add a player you give">
-        <button class="btn" type="button" data-add="give">Add</button>
-      </div>
-      <p class="hint" data-hint="give"></p>
-      <ul class="roster" data-roster="give"></ul>
-    </div>
-
-    <aside class="verdict" aria-live="polite">
-      <div>
-        <span class="label">Verdict</span>
-        <p class="v-call" id="v-call">—</p>
-      </div>
-      <p class="v-sub" id="v-sub"></p>
-      <div class="meter">
-        <div class="track"><div class="needle" id="needle" style="left:50%"></div></div>
-        <div class="ends"><span>They win</span><span>Even</span><span>You win</span></div>
-      </div>
-      <div class="tot">
-        <div><span class="label">You give</span><span class="big" id="t-give">0</span></div>
-        <div><span class="label">You get</span><span class="big" id="t-get">0</span></div>
-      </div>
-      <p class="v-suggest" id="v-suggest"></p>
-    </aside>
-
-    <div class="side" id="side-get">
-      <div class="side-head">
-        <h2>You get</h2>
-        <span class="side-total">counts <b data-total="get">0</b> pts</span>
-      </div>
-      <div class="adder">
-        <input id="add-get" list="player-list" placeholder="Search a player…" autocomplete="off" aria-label="Add a player you get">
-        <button class="btn" type="button" data-add="get">Add</button>
-      </div>
-      <p class="hint" data-hint="get"></p>
-      <ul class="roster" data-roster="get"></ul>
-    </div>
-  </section>
-  <datalist id="player-list"></datalist>
-
-  <section class="panel" aria-labelledby="how-h">
-    <h2 id="how-h">Show your work</h2>
-    <div class="formula" id="formula"></div>
-    <ol class="steps">
-      <li><b>Adjust for scoring.</b> Projections are stored as PPR points per game. Half-PPR subtracts <code>0.5 × receptions/gm</code>; Standard subtracts the full receptions.</li>
-      <li><b>Find replacement level.</b> A player is only worth what he scores above someone you could grab off waivers. Replacement is the roughly-last-starter at each position, so it rises in smaller leagues (deeper waivers) and QB replacement drops hard in Superflex (everyone starts two).</li>
-      <li><b>VORP per week</b> = adjusted PPG − replacement PPG, floored at 0. A below-replacement guy is worth about nothing: you'd cut him.</li>
-      <li><b>Multiply by weeks he'll actually play.</b> Weeks left minus weeks missed for injury. In Dynasty, add a future chunk: <code>17 wks × age multiplier</code>, since a 23-year-old RB has years left and a 30-year-old doesn't.</li>
-      <li><b>Stud premium.</b> Two quarters don't equal a fifty-cent piece in fantasy, because you can only start so many players. Each side's best player counts 100%, the second 90%, third 80%, and so on (min 50%). The extra roster spot you give up is already covered: the guy you'd cut is replacement-level, worth 0.</li>
-      <li><b>Compare.</b> The gap as a % of the bigger side decides the call: under 8% is fair, 8–20% leans one way, more than 20% is lopsided.</li>
-    </ol>
-    <div class="tablewrap">
-      <table>
-        <thead>
-          <tr>
-            <th>Player</th><th>Side</th><th>Proj PPG</th><th>Repl.</th><th>VORP/wk</th><th>Weeks</th><th>Age ×</th><th>Raw value</th><th>Weight</th><th>Counts</th>
-          </tr>
-        </thead>
-        <tbody id="breakdown"></tbody>
-      </table>
-    </div>
-  </section>
-
-  <section class="panel" aria-label="Add a custom player">
-    <details class="custom">
-      <summary>Player not on the list? Add your own</summary>
-      <form class="custom-form" id="custom-form">
-        <div class="field"><label class="label" for="c-name">Name</label><input id="c-name" required></div>
-        <div class="field"><label class="label" for="c-pos">Pos</label>
-          <select id="c-pos"><option>QB</option><option>RB</option><option selected>WR</option><option>TE</option></select>
+<main class="wrap">
+  <!-- MY TEAM -->
+  <section id="tab-team" role="tabpanel">
+    <div class="team-top">
+      <div class="card team-id">
+        <div>
+          <span class="eyebrow" id="team-plat"></span>
+          <h1 class="name" id="team-name"></h1>
         </div>
-        <div class="field"><label class="label" for="c-ppg">PPR pts/gm</label><input id="c-ppg" type="number" step="0.1" min="0" value="12" required></div>
-        <div class="field"><label class="label" for="c-rec">Rec/gm</label><input id="c-rec" type="number" step="0.1" min="0" value="4"></div>
-        <div class="field"><label class="label" for="c-age">Age</label><input id="c-age" type="number" step="1" min="20" max="42" value="25"></div>
-        <button class="btn" type="submit">Add to search</button>
-      </form>
-    </details>
-    <p class="foot">The projections here are example preseason estimates, not live data, so treat them as a starting point. Edit any player's PPG right in the trade card to plug in your own numbers (FantasyPros, ESPN, Sleeper, whatever you trust). Ages are approximate for the 2026 season.</p>
+        <div class="fmt" id="team-fmt"></div>
+        <div class="kpis" id="team-kpis"></div>
+      </div>
+      <div class="card">
+        <div class="card-h"><h3>Position rooms</h3><span class="sub">your starters vs. an average league starter</span></div>
+        <div class="grades" id="grades"></div>
+      </div>
+    </div>
+    <div class="card roster-card" style="margin-top:18px">
+      <div class="card-h"><h2>Roster</h2><span class="sub" id="roster-sub"></span></div>
+      <div class="rtable-wrap">
+        <table class="rtable">
+          <thead><tr><th class="l">Slot</th><th class="l">Player</th><th>Last weeks · next 4</th><th>Proj pts/gm</th><th>Pos rank</th><th>Trade value</th><th>30-day</th><th class="l">Signal</th><th></th></tr></thead>
+          <tbody id="roster"></tbody>
+        </table>
+      </div>
+    </div>
   </section>
-</div>
 
+  <!-- TRADE -->
+  <section id="tab-trade" role="tabpanel" hidden>
+    <div class="trade-grid">
+      <div class="card side">
+        <div class="side-h"><h2>You give</h2><span class="tot num" id="give-tot">0</span></div>
+        <div class="search">
+          <svg width="16" height="16" viewBox="0 0 16 16" fill="none" aria-hidden="true"><circle cx="7" cy="7" r="5" stroke="currentColor" stroke-width="1.8"/><path d="M11 11l3.5 3.5" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg>
+          <input id="q-give" placeholder="Search your roster…" autocomplete="off" aria-label="Search players you give">
+          <div class="results" id="r-give" hidden></div>
+        </div>
+        <ul class="slip" id="slip-give"></ul>
+        <div class="quick-h"><span class="eyebrow">Tap to add from your roster</span></div>
+        <div class="quick" id="quick-give"></div>
+      </div>
+
+      <div class="verdict" aria-live="polite">
+        <svg class="scale-svg" viewBox="0 0 360 170" role="img" aria-label="Trade balance scale">
+          <rect x="176" y="40" width="8" height="110" rx="3" fill="var(--hero-line)"/>
+          <path d="M140 160 h80 l-10 -12 h-60 z" fill="var(--hero-line)"/>
+          <g class="scale-beam" id="beam" style="transform-origin:180px 40px">
+            <rect x="40" y="36" width="280" height="8" rx="4" fill="var(--hero-muted)"/>
+          </g>
+          <circle cx="180" cy="40" r="9" fill="var(--accent)"/>
+          <g class="scale-pan" id="pan-l">
+            <line x1="40" y1="40" x2="14" y2="96" stroke="var(--hero-muted)" stroke-width="1.5"/>
+            <line x1="40" y1="40" x2="66" y2="96" stroke="var(--hero-muted)" stroke-width="1.5"/>
+            <path d="M6 96 h68 a34 16 0 0 1 -68 0z" fill="var(--hero-line)"/>
+            <text x="40" y="92" text-anchor="middle" fill="var(--hero-muted)" font-family="Barlow, sans-serif" font-size="10" font-weight="600" letter-spacing="1">GIVE</text>
+            <text id="pan-l-v" x="40" y="126" text-anchor="middle" fill="var(--hero-ink)" font-family="'Big Shoulders Display', Impact, sans-serif" font-size="22" font-weight="800">0</text>
+          </g>
+          <g class="scale-pan" id="pan-r">
+            <line x1="320" y1="40" x2="294" y2="96" stroke="var(--hero-muted)" stroke-width="1.5"/>
+            <line x1="320" y1="40" x2="346" y2="96" stroke="var(--hero-muted)" stroke-width="1.5"/>
+            <path d="M286 96 h68 a34 16 0 0 1 -68 0z" fill="var(--hero-line)"/>
+            <text x="320" y="92" text-anchor="middle" fill="var(--hero-muted)" font-family="Barlow, sans-serif" font-size="10" font-weight="600" letter-spacing="1">GET</text>
+            <text id="pan-r-v" x="320" y="126" text-anchor="middle" fill="var(--hero-ink)" font-family="'Big Shoulders Display', Impact, sans-serif" font-size="22" font-weight="800">0</text>
+          </g>
+        </svg>
+        <p class="call" id="call">—</p>
+        <p class="call-sub" id="call-sub"></p>
+        <div class="lenses">
+          <div class="lens"><span class="eyebrow">Trade value</span><span class="v num" id="lens-val">—</span><span class="d" id="lens-val-d"></span></div>
+          <div class="lens"><span class="eyebrow">Your lineup</span><span class="v num" id="lens-lu">—</span><span class="d" id="lens-lu-d"></span></div>
+        </div>
+        <div class="blend">
+          <div class="blend-row"><label for="blend">Projections</label><span id="blend-out"></span><span>Market</span></div>
+          <input type="range" id="blend" min="0" max="100" step="5">
+        </div>
+        <p class="nudge" id="nudge"></p>
+      </div>
+
+      <div class="card side">
+        <div class="side-h"><h2>You get</h2><span class="tot num" id="get-tot">0</span></div>
+        <div class="search">
+          <svg width="16" height="16" viewBox="0 0 16 16" fill="none" aria-hidden="true"><circle cx="7" cy="7" r="5" stroke="currentColor" stroke-width="1.8"/><path d="M11 11l3.5 3.5" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg>
+          <input id="q-get" placeholder="Search any player or pick…" autocomplete="off" aria-label="Search players you get">
+          <div class="results" id="r-get" hidden></div>
+        </div>
+        <ul class="slip" id="slip-get"></ul>
+        <div class="quick-h"><span class="eyebrow">Similar value to what you're giving</span></div>
+        <div class="quick" id="quick-get"></div>
+      </div>
+    </div>
+
+    <div class="card work" style="margin-top:18px">
+      <div class="card-h"><h2>Show your work</h2><button class="linkbtn" id="clear" type="button">Clear trade</button></div>
+      <p class="work-note" id="work-note"></p>
+      <div class="rtable-wrap">
+        <table class="rtable">
+          <thead><tr><th class="l">Player</th><th class="l">Side</th><th>ROS proj</th><th>Repl. level</th><th>Model value</th><th>Market value</th><th>Blend</th><th>Weight</th><th>Counts</th></tr></thead>
+          <tbody id="work"></tbody>
+        </table>
+      </div>
+    </div>
+  </section>
+
+  <!-- FINDER -->
+  <section id="tab-finder" role="tabpanel" hidden>
+    <div class="card finder-h">
+      <div class="card-h" style="padding:0"><h2>Trade Finder</h2><span class="sub" id="finder-sub"></span></div>
+      <p class="sub" style="max-width:80ch">Every 1-for-1 and 2-for-1 package from your roster, checked against every player worth trading for. It keeps deals that are fair by the numbers, so the other manager should say yes, and that make your starting lineup better, ranked by how many points a week you gain.</p>
+      <div style="display:flex;flex-wrap:wrap;gap:10px;align-items:center">
+        <span class="eyebrow">Target</span>
+        <div class="seg" id="finder-pos">
+          <button type="button" data-v="ALL">Any</button><button type="button" data-v="QB">QB</button><button type="button" data-v="RB">RB</button><button type="button" data-v="WR">WR</button><button type="button" data-v="TE">TE</button>
+        </div>
+      </div>
+    </div>
+    <div class="ideas" id="ideas"></div>
+  </section>
+
+  <!-- RANKINGS -->
+  <section id="tab-ranks" role="tabpanel" hidden>
+    <div class="card">
+      <div class="card-h"><h2>Rankings</h2><span class="sub" id="ranks-sub"></span></div>
+      <div class="rank-tools">
+        <div class="seg" id="rank-pos">
+          <button type="button" data-v="ALL">All</button><button type="button" data-v="QB">QB</button><button type="button" data-v="RB">RB</button><button type="button" data-v="WR">WR</button><button type="button" data-v="TE">TE</button><button type="button" data-v="PICK">Picks</button>
+        </div>
+        <input id="rank-q" placeholder="Filter by name or team" aria-label="Filter rankings">
+      </div>
+      <div class="rtable-wrap">
+        <table class="rtable">
+          <thead><tr id="rank-head"></tr></thead>
+          <tbody id="ranks"></tbody>
+        </table>
+      </div>
+    </div>
+  </section>
+
+  <!-- METHOD -->
+  <section id="tab-method" role="tabpanel" hidden>
+    <div class="card method">
+      <div><h2>How the model works</h2><p class="sub" style="margin-top:6px">Two independent reads on every player, blended, then run through your actual lineup.</p></div>
+      <div class="method-grid">
+        <div class="step"><span class="k">A</span><h3>Projection model</h3><p>Sleeper's week-by-week rest-of-season projections, scored for your league. Each week a player projects above <b>replacement level</b> counts; below it counts zero. Byes and injuries show up as zero weeks automatically.</p></div>
+        <div class="step"><span class="k">B</span><h3>Trade market</h3><p>FantasyCalc values come from thousands of real trades in real leagues, matched to your format (redraft or dynasty, 1QB or superflex). It's what managers actually pay for a player.</p></div>
+        <div class="step"><span class="k">C</span><h3>Blend</h3><p>The model is rescaled onto the market's units, then mixed. Default mix is 50/50 in redraft and 30/70 toward the market in dynasty, where future years matter more than this season's projections. Drag the slider to change it.</p></div>
+        <div class="step"><span class="k">D</span><h3>Consolidation</h3><p>Two quarters ≠ a fifty-cent piece. Each side's best asset counts 100%, then 88%, 76%, 64%… (floor 40%). The side getting the best player gets rewarded for it.</p></div>
+        <div class="step"><span class="k">E</span><h3>Lineup impact</h3><p>Your best legal lineup is rebuilt before and after the trade (flex and superflex included). The difference is projected starter points per week for the rest of the season. It's the "does this actually help me win" check.</p></div>
+        <div class="step"><span class="k">F</span><h3>Signals</h3><p>When the model rates a player ≥30% above what the market charges, it's a <span class="tag buy">Buy low</span>. When it's ≥30% below, <span class="tag sell">Sell high</span>. That's the market mispricing gap, same idea as a stock trading away from fair value.</p></div>
+      </div>
+      <div class="formula" id="formula"></div>
+      <p class="foot" id="sources"></p>
+    </div>
+  </section>
+</main>
+
+<script src="data/fts-data.js"></script>
 <script>
 (function () {
   "use strict";
+  var D = window.FTS_DATA;
+  if (!D) { document.querySelector("main").innerHTML = '<div class="card" style="padding:18px">Data file failed to load. Run <code>python3 scripts/fetch_data.py</code>.</div>'; return; }
 
-  // name, pos, PPR pts/game, receptions/game, birth year  (example projections)
-  var RAW = [
-    ["Josh Allen","QB",23.5,0,1996],["Lamar Jackson","QB",23.0,0,1997],["Jayden Daniels","QB",21.5,0,2000],
-    ["Jalen Hurts","QB",21.0,0,1998],["Joe Burrow","QB",21.0,0,1996],["Patrick Mahomes","QB",19.5,0,1995],
-    ["Baker Mayfield","QB",18.5,0,1995],["Bo Nix","QB",18.5,0,2000],["Kyler Murray","QB",18.0,0,1997],
-    ["Brock Purdy","QB",18.0,0,1999],["Drake Maye","QB",18.0,0,2002],["Justin Herbert","QB",17.5,0,1998],
-    ["Caleb Williams","QB",17.5,0,2001],["C.J. Stroud","QB",16.5,0,2001],
-    ["Bijan Robinson","RB",21.0,4.5,2002],["Jahmyr Gibbs","RB",20.5,3.8,2002],["Saquon Barkley","RB",18.5,2.8,1997],
-    ["De'Von Achane","RB",18.5,4.8,2001],["Christian McCaffrey","RB",18.0,4.5,1996],["Jonathan Taylor","RB",17.5,2.2,1999],
-    ["Ashton Jeanty","RB",17.0,2.8,2003],["Derrick Henry","RB",16.5,1.3,1994],["Josh Jacobs","RB",16.0,2.3,1998],
-    ["Bucky Irving","RB",15.5,3.2,2002],["Kyren Williams","RB",15.5,2.0,2000],["Chase Brown","RB",15.5,3.5,2000],
-    ["James Cook","RB",15.5,2.3,1999],["Breece Hall","RB",14.5,3.3,2001],["Omarion Hampton","RB",14.0,2.5,2003],
-    ["Alvin Kamara","RB",13.5,4.0,1995],["Kenneth Walker III","RB",13.0,2.5,2000],["TreVeyon Henderson","RB",13.0,2.8,2002],
-    ["Chuba Hubbard","RB",12.5,2.3,1999],["David Montgomery","RB",12.0,1.8,1997],["Tony Pollard","RB",11.5,2.3,1997],
-    ["Aaron Jones","RB",11.0,2.5,1994],
-    ["Ja'Marr Chase","WR",21.0,7.5,2000],["Puka Nacua","WR",19.0,7.5,2001],["Justin Jefferson","WR",18.5,6.5,1999],
-    ["CeeDee Lamb","WR",18.5,6.8,1999],["Amon-Ra St. Brown","WR",18.0,7.3,1999],["Malik Nabers","WR",18.0,7.0,2003],
-    ["Jaxon Smith-Njigba","WR",17.0,6.5,2002],["Nico Collins","WR",16.5,5.3,1999],["Drake London","WR",16.5,6.5,2001],
-    ["Brian Thomas Jr.","WR",15.5,5.0,2002],["A.J. Brown","WR",15.5,5.3,1997],["Garrett Wilson","WR",15.0,6.3,2000],
-    ["Ladd McConkey","WR",14.5,5.8,2001],["Tee Higgins","WR",14.5,5.0,1999],["George Pickens","WR",14.0,4.8,2001],
-    ["Davante Adams","WR",14.0,5.5,1992],["Tyreek Hill","WR",13.5,5.3,1994],["Mike Evans","WR",13.5,4.3,1993],
-    ["Marvin Harrison Jr.","WR",13.5,4.8,2002],["Tetairoa McMillan","WR",13.5,5.0,2003],["Zay Flowers","WR",13.5,5.3,2000],
-    ["Terry McLaurin","WR",13.5,5.0,1995],["DK Metcalf","WR",13.0,4.5,1997],["Rome Odunze","WR",13.0,4.8,2002],
-    ["DeVonta Smith","WR",13.0,5.0,1998],["Jameson Williams","WR",12.5,3.8,2001],["Chris Olave","WR",12.5,5.0,2000],
-    ["Emeka Egbuka","WR",12.5,4.8,2002],["Jaylen Waddle","WR",12.0,4.5,1998],["Xavier Worthy","WR",12.0,4.3,2003],
-    ["Brock Bowers","TE",15.5,7.0,2002],["Trey McBride","TE",15.5,7.3,1999],["George Kittle","TE",13.5,5.0,1993],
-    ["Sam LaPorta","TE",11.5,4.8,2001],["Travis Kelce","TE",11.0,5.3,1989],["Tucker Kraft","TE",11.0,4.0,2000],
-    ["T.J. Hockenson","TE",10.5,5.0,1997],["Tyler Warren","TE",10.5,4.5,2002],["Mark Andrews","TE",10.0,3.5,1995],
-    ["Dalton Kincaid","TE",9.5,4.0,1999],["David Njoku","TE",9.5,4.0,1996],["Evan Engram","TE",9.0,4.5,1994]
-  ];
-  var SEASON = 2026;
-  var POOL = RAW.map(function (r) {
-    return { id: slug(r[0]), name: r[0], pos: r[1], ppg: r[2], rec: r[3], age: SEASON - r[4] };
+  var POS = ["QB", "RB", "WR", "TE"];
+  var R = 19 - D.week; // remaining weeks incl. this one
+  var P = {};
+  D.players.forEach(function (p) {
+    p.ros = p.proj.reduce(function (a, b) { return a + b; }, 0);
+    p.games = p.proj.filter(function (x) { return x > 0.5; }).length;
+    p.ppg = p.games ? p.ros / p.games : 0;
+    p.perWk = p.ros / R;
+    P[p.id] = p;
   });
 
-  // Replacement-level PPR pts/gm for a 12-team 1QB league, plus how much each shifts per team
-  var REPL = { QB: 16.0, RB: 10.0, WR: 10.5, TE: 8.0 };
-  var REPL_PER_TEAM = { QB: 0.35, RB: 0.3, WR: 0.25, TE: 0.25 };
-  var REPL_REC = { QB: 0, RB: 2.0, WR: 3.8, TE: 3.3 };
-  var STATUS = {
-    healthy: { label: "Healthy", miss: 0 },
-    q: { label: "Questionable", miss: 0.5 },
-    out2: { label: "Out 1–2 wks", miss: 1.5 },
-    out4: { label: "Out 3–5 wks", miss: 4 },
-    ir: { label: "Out for season", miss: 99 }
-  };
-
-  var DEFAULTS = {
-    settings: { scoring: "ppr", teams: 12, qb: "1qb", mode: "redraft", weeks: 12, stud: true },
-    give: [{ id: "jahmyr-gibbs", status: "healthy", ppg: null }],
-    get: [{ id: "puka-nacua", status: "healthy", ppg: null }, { id: "breece-hall", status: "healthy", ppg: null }]
-  };
-  var STORE_KEY = "fts-state-v1";
-  var CUSTOM_KEY = "fts-custom-v1";
-  var state = load();
-
-  function slug(s) { return s.toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/^-|-$/g, ""); }
-  function byId(id) { for (var i = 0; i < POOL.length; i++) if (POOL[i].id === id) return POOL[i]; return null; }
-  function clone(o) { return JSON.parse(JSON.stringify(o)); }
-  function fmt(n, d) { return (Math.round(n * Math.pow(10, d || 0)) / Math.pow(10, d || 0)).toFixed(d || 0); }
-
-  function load() {
-    try {
-      var custom = JSON.parse(localStorage.getItem(CUSTOM_KEY) || "[]");
-      custom.forEach(function (p) { if (!byId(p.id)) POOL.push(p); });
-    } catch (e) {}
-    try {
-      var s = JSON.parse(localStorage.getItem(STORE_KEY) || "null");
-      if (s && s.settings && Array.isArray(s.give) && Array.isArray(s.get)) {
-        s.give = s.give.filter(function (x) { return byId(x.id); });
-        s.get = s.get.filter(function (x) { return byId(x.id); });
-        s.settings = Object.assign(clone(DEFAULTS.settings), s.settings);
-        return s;
-      }
-    } catch (e) {}
-    return clone(DEFAULTS);
+  // ---------- helpers ----------
+  function $(s) { return document.querySelector(s); }
+  function esc(s) { return String(s == null ? "" : s).replace(/[&<>"']/g, function (c) { return { "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]; }); }
+  function f0(n) { return Math.round(n).toLocaleString(); }
+  function f1(n) { return (Math.round(n * 10) / 10).toFixed(1); }
+  function sgn(n, d) { var s = d ? f1(Math.abs(n)) : f0(Math.abs(n)); return (n > 0.05 ? "+" : n < -0.05 ? "−" : "") + s; }
+  function initials(n) { return n.split(" ").map(function (w) { return w[0]; }).join("").slice(0, 2); }
+  function head(p, cls) {
+    if (p.img) return '<img class="head ' + (cls || "") + '" src="' + p.img + '" alt="" loading="lazy">';
+    return '<span class="head ' + (cls || "") + '">' + esc(p.pos === "PICK" ? "PK" : initials(p.n)) + "</span>";
   }
-  function save() { try { localStorage.setItem(STORE_KEY, JSON.stringify(state)); } catch (e) {} }
-
-  // ---- the model ----
-  function recCut() { return state.settings.scoring === "half" ? 0.5 : state.settings.scoring === "std" ? 1 : 0; }
-
-  function adjPPG(p, item) {
-    var base = item.ppg != null && !isNaN(item.ppg) ? item.ppg : p.ppg;
-    return Math.max(0, base - p.rec * recCut());
+  function injTag(p) {
+    if (!p.inj) return "";
+    var s = p.inj, cls = /Questionable|Probable/.test(s) ? "q" : "inj";
+    var label = { Questionable: "Q", Doubtful: "D", Out: "OUT", IR: "IR", PUP: "PUP", NA: "NA", Sus: "SUS", DNR: "DNR" }[s] || s;
+    return '<span class="tag ' + cls + '" title="' + esc(s + (p.injNote ? " · " + p.injNote : "")) + '">' + esc(label) + "</span>";
   }
+  function store(k, v) { try { if (v === undefined) return JSON.parse(localStorage.getItem("fts2-" + k)); localStorage.setItem("fts2-" + k, JSON.stringify(v)); } catch (e) { return null; } }
 
-  function replacement(pos) {
-    var s = state.settings;
-    var r = REPL[pos] + (12 - s.teams) * REPL_PER_TEAM[pos] - REPL_REC[pos] * recCut();
-    if (pos === "QB" && s.qb === "sf") r -= 4.5 + (s.teams - 12) * 0.2;
-    return r;
+  // ---------- league context ----------
+  var ctxCache = {};
+  function ctx(lg) {
+    if (ctxCache[lg.key]) return ctxCache[lg.key];
+    var dyn = lg.mode === "dynasty";
+    var fk = (dyn ? "d" : "r") + (lg.qbs === 2 ? "2" : "1");
+    var pool = D.players.slice();
+    if (dyn) {
+      Object.keys(D.picks).forEach(function (name) {
+        if (/\(/.test(name)) return; // skip early/mid/late variants; leagues list plain picks
+        var id = "pick:" + name;
+        if (!P[id]) P[id] = { id: id, n: name + " round pick", short: name, pos: "PICK", team: "", age: null, proj: [], wk: [], ros: 0, ppg: 0, perWk: 0, games: 0, fc: D.picks[name] };
+        pool.push(P[id]);
+      });
+    }
+    // replacement level: fill every team's starting lineup from the projection pool
+    var byPos = {}; POS.forEach(function (x) { byPos[x] = []; });
+    pool.forEach(function (p) { if (byPos[p.pos]) byPos[p.pos].push(p); });
+    POS.forEach(function (x) { byPos[x].sort(function (a, b) { return b.perWk - a.perWk; }); });
+    var taken = {}, used = {};
+    POS.forEach(function (x) { used[x] = lg.teams * (lg.slots[x] || 0); });
+    var rest = [];
+    POS.forEach(function (x) { byPos[x].slice(used[x]).forEach(function (p) { rest.push(p); }); });
+    rest.sort(function (a, b) { return b.perWk - a.perWk; });
+    var flexN = lg.teams * (lg.slots.FLEX || 0), sfN = lg.teams * (lg.slots.SFLEX || 0);
+    rest.forEach(function (p) {
+      if (flexN > 0 && p.pos !== "QB") { flexN--; used[p.pos]++; }
+      else if (sfN > 0) { sfN--; used[p.pos]++; }
+    });
+    var repl = {}, avgStarter = {};
+    POS.forEach(function (x) {
+      var list = byPos[x], n = used[x];
+      var next = list.slice(n, n + 3);
+      repl[x] = next.length ? next.reduce(function (a, p) { return a + p.perWk; }, 0) / next.length : 0;
+      var st = list.slice(0, Math.max(1, lg.teams * (lg.slots[x] || 0)));
+      avgStarter[x] = st.reduce(function (a, p) { return a + p.perWk; }, 0) / st.length;
+    });
+    // model value per player
+    pool.forEach(function (p) { p._m = p._m || {}; p._m[lg.key] = modelValue(p, lg, repl); });
+    var mkt = function (p) { return p.fc && p.fc[fk] ? p.fc[fk][0] : 0; };
+    var topM = pool.slice().sort(function (a, b) { return mkt(b) - mkt(a); }).slice(0, 150).reduce(function (a, p) { return a + mkt(p); }, 0);
+    var topV = pool.filter(function (p) { return p.pos !== "PICK"; }).sort(function (a, b) { return b._m[lg.key] - a._m[lg.key]; }).slice(0, 150).reduce(function (a, p) { return a + p._m[lg.key]; }, 0);
+    var k = topV > 0 ? topM / topV : 1;
+    var c = { lg: lg, dyn: dyn, fk: fk, pool: pool, repl: repl, avgStarter: avgStarter, k: k, mkt: mkt };
+    // position ranks by projected pts/week
+    POS.forEach(function (x) { byPos[x].forEach(function (p, i) { p._pr = p._pr || {}; p._pr[lg.key] = i + 1; }); });
+    ctxCache[lg.key] = c;
+    return c;
   }
 
   function ageMult(pos, age) {
+    if (age == null) return 1;
     var curves = {
       RB: [[23, 1.35], [24, 1.3], [25, 1.15], [26, 1.0], [27, 0.85], [28, 0.7], [29, 0.55], [99, 0.4]],
       WR: [[23, 1.35], [24, 1.3], [25, 1.25], [26, 1.15], [27, 1.05], [28, 0.95], [29, 0.85], [30, 0.72], [31, 0.6], [99, 0.5]],
       TE: [[24, 1.25], [27, 1.2], [28, 1.05], [29, 0.95], [30, 0.85], [31, 0.72], [32, 0.6], [99, 0.5]],
       QB: [[26, 1.3], [29, 1.2], [31, 1.05], [33, 0.9], [35, 0.75], [99, 0.6]]
-    };
-    var c = curves[pos];
-    for (var i = 0; i < c.length; i++) if (age <= c[i][0]) return c[i][1];
-    return c[c.length - 1][1];
+    }[pos];
+    for (var i = 0; i < curves.length; i++) if (Math.floor(age) <= curves[i][0]) return curves[i][1];
+    return 0.4;
   }
 
-  function price(item) {
-    var p = byId(item.id);
-    var s = state.settings;
-    var ppg = adjPPG(p, item);
-    var repl = replacement(p.pos);
-    var vorp = Math.max(0, ppg - repl);
-    var weeks = Math.max(0, s.weeks - STATUS[item.status].miss);
-    var mult = s.mode === "dynasty" ? ageMult(p.pos, p.age) : null;
-    var raw = vorp * (weeks + (mult != null ? 17 * mult : 0));
-    return { p: p, item: item, ppg: ppg, repl: repl, vorp: vorp, weeks: weeks, mult: mult, raw: raw };
+  function modelValue(p, lg, repl) {
+    if (p.pos === "PICK") return 0;
+    var r = repl[p.pos], v = 0;
+    p.proj.forEach(function (x) { if (x > r) v += x - r; });
+    if (lg.mode === "dynasty") v += Math.max(0, p.ppg - r) * 17 * ageMult(p.pos, p.age);
+    return v;
   }
 
-  function priceSide(items) {
-    var rows = items.map(price).sort(function (a, b) { return b.raw - a.raw; });
-    var total = 0;
-    rows.forEach(function (r, i) {
-      r.weight = state.settings.stud ? Math.max(0.5, 1 - 0.1 * i) : 1;
-      r.counts = r.raw * r.weight;
-      total += r.counts;
-    });
-    return { rows: rows, total: total };
+  function value(c, p, w) {
+    var m = c.mkt(p);
+    if (p.pos === "PICK") return { market: m, model: m, blend: m };
+    var model = p._m[c.lg.key] * c.k;
+    return { market: m, model: model, blend: w * m + (1 - w) * model };
   }
 
-  function evaluate(give, get) {
-    var g = priceSide(give), r = priceSide(get);
-    var net = r.total - g.total;
-    var big = Math.max(g.total, r.total);
-    var pct = big > 0 ? net / big : 0;
-    return { give: g, get: r, net: net, pct: pct };
+  function signal(c, p) {
+    if (p.pos === "PICK") return null;
+    var v = value(c, p, 0.5);
+    if (v.market < 600 && v.model < 600) return null;
+    var ratio = (v.model + 150) / (v.market + 150);
+    if (ratio >= 1.3) return "buy";
+    if (ratio <= 0.7) return "sell";
+    return null;
   }
 
-  // ---- rendering ----
-  var $ = function (sel) { return document.querySelector(sel); };
-
-  function renderSettings() {
-    document.querySelectorAll(".seg").forEach(function (seg) {
-      var key = seg.dataset.key;
-      seg.querySelectorAll("button").forEach(function (b) {
-        b.setAttribute("aria-pressed", String(String(state.settings[key]) === b.dataset.v));
-      });
-    });
-    $("#weeks").value = state.settings.weeks;
-    $("#weeks-out").textContent = state.settings.weeks + (state.settings.weeks === 1 ? " wk" : " wks");
-    $("#stud").checked = state.settings.stud;
+  var WEIGHTS = function (i) { return Math.max(0.4, 1 - 0.12 * i); };
+  function side(c, ids, w) {
+    var rows = ids.map(function (id) { var p = P[id]; var v = value(c, p, w); return { p: p, v: v }; })
+      .sort(function (a, b) { return b.v.blend - a.v.blend; });
+    var tot = 0;
+    rows.forEach(function (r, i) { r.w = WEIGHTS(i); r.counts = r.v.blend * r.w; tot += r.counts; });
+    return { rows: rows, total: tot };
   }
 
-  function renderDatalist() {
-    var dl = $("#player-list");
-    dl.innerHTML = "";
-    POOL.slice().sort(function (a, b) { return a.name.localeCompare(b.name); }).forEach(function (p) {
-      var o = document.createElement("option");
-      o.value = p.name;
-      o.label = p.pos;
-      dl.appendChild(o);
-    });
-  }
-
-  function renderSides() {
-    ["give", "get"].forEach(function (side) {
-      var ul = document.querySelector('[data-roster="' + side + '"]');
-      ul.innerHTML = "";
-      if (!state[side].length) {
-        var li = document.createElement("li");
-        li.className = "empty";
-        li.textContent = side === "give" ? "Nobody yet. Add who you'd send away." : "Nobody yet. Add who you'd get back.";
-        ul.appendChild(li);
-        return;
+  function lineup(c, ids) {
+    var s = c.lg.slots, pl = ids.map(function (id) { return P[id]; }).filter(function (p) { return p && p.pos !== "PICK"; })
+      .sort(function (a, b) { return b.perWk - a.perWk; });
+    var used = {}, out = [], total = 0;
+    function take(slot, ok, n) {
+      for (var k = 0; k < n; k++) {
+        for (var i = 0; i < pl.length; i++) {
+          var p = pl[i];
+          if (!used[p.id] && ok(p)) { used[p.id] = 1; out.push({ slot: slot, p: p }); total += p.perWk; break; }
+        }
       }
-      state[side].forEach(function (item, idx) {
-        var p = byId(item.id);
-        var li = document.createElement("li");
-        li.className = "player";
-        var statusOpts = Object.keys(STATUS).map(function (k) {
-          return '<option value="' + k + '"' + (item.status === k ? " selected" : "") + ">" + STATUS[k].label + "</option>";
-        }).join("");
-        var ppgId = "ppg-" + side + "-" + p.id;
-        var stId = "st-" + side + "-" + p.id;
-        li.innerHTML =
-          '<span class="pos ' + p.pos + '">' + p.pos + "</span>" +
-          "<div>" +
-            '<div class="pname"></div>' +
-            '<div class="pmeta">' +
-              "<span>age ≈" + p.age + "</span>" +
-              '<label for="' + ppgId + '">PPR/gm <input id="' + ppgId + '" type="number" step="0.1" min="0" value="' + (item.ppg != null ? item.ppg : p.ppg) + '"></label>' +
-              '<select id="' + stId + '" aria-label="Injury status">' + statusOpts + "</select>" +
-            "</div>" +
-          "</div>" +
-          '<div class="pval"><span class="num" data-val="' + side + "-" + p.id + '">0</span><span class="unit">pts value</span>' +
-            '<button class="remove" type="button">Remove</button></div>';
-        li.querySelector(".pname").textContent = p.name;
-        li.querySelector("input").addEventListener("input", function (e) {
-          var v = parseFloat(e.target.value);
-          item.ppg = isNaN(v) ? null : (v === p.ppg ? null : v);
-          update();
-        });
-        li.querySelector("select").addEventListener("change", function (e) { item.status = e.target.value; update(); });
-        li.querySelector(".remove").addEventListener("click", function () { state[side].splice(idx, 1); renderSides(); update(); });
-        ul.appendChild(li);
-      });
-    });
+    }
+    POS.forEach(function (x) { take(x, function (p) { return p.pos === x; }, s[x] || 0); });
+    take("FLEX", function (p) { return p.pos !== "QB"; }, s.FLEX || 0);
+    take("SF", function () { return true; }, s.SFLEX || 0);
+    return { starters: out, total: total, used: used };
   }
 
-  function update() {
-    var ev = evaluate(state.give, state.get);
+  // ---------- state ----------
+  var leagues = D.leagues.map(function (lg) {
+    lg.myIds = lg.ids.slice();
+    (lg.picks || []).forEach(function (pk) { lg.myIds.push("pick:" + pk); });
+    return lg;
+  });
+  var state = store("state") || {};
+  state.league = leagues.some(function (l) { return l.key === state.league; }) ? state.league : leagues[0].key;
+  state.trades = state.trades || {};
+  state.blend = state.blend || {};
+  state.finderPos = state.finderPos || "ALL";
+  state.rankPos = state.rankPos || "ALL";
+  state.rankSort = state.rankSort || "blend";
+  var hashTab = (location.hash || "").replace("#", "");
+  state.tab = ["team", "trade", "finder", "ranks", "method"].indexOf(hashTab) >= 0 ? hashTab : (state.tab || "team");
+
+  function L() { return leagues.filter(function (l) { return l.key === state.league; })[0]; }
+  function C() { var lg = L(); ctx(lg); return ctxCache[lg.key]; }
+  function W() { var lg = L(); var v = state.blend[lg.key]; return v == null ? (lg.mode === "dynasty" ? 0.7 : 0.5) : v; }
+  function T() {
+    var lg = L();
+    var t = state.trades[lg.key];
+    if (!t) {
+      t = defaultTrade(lg);
+      state.trades[lg.key] = t;
+    }
+    t.give = t.give.filter(function (id) { return P[id]; });
+    t.get = t.get.filter(function (id) { return P[id]; });
+    return t;
+  }
+  function save() { store("state", state); }
+  function mine(id) { return L().myIds.indexOf(id) >= 0; }
+
+  // ---------- masthead ----------
+  function renderMast() {
+    var dt = new Date(D.fetchedAt);
+    $("#fresh span:last-child").textContent = "Live data · Week " + D.week + " · pulled " + dt.toLocaleDateString(undefined, { month: "short", day: "numeric" }) + " " + dt.toLocaleTimeString(undefined, { hour: "numeric", minute: "2-digit" });
+    $("#leagues").innerHTML = leagues.map(function (lg) {
+      return '<button class="lg-btn" type="button" data-lg="' + lg.key + '" aria-pressed="' + (lg.key === state.league) + '">' +
+        '<span class="plat">' + esc(lg.platform.slice(0, 1)) + "</span>" +
+        '<span class="t">' + esc(lg.name) + "</span>" +
+        '<span class="s">' + esc(lg.platform + " · " + (lg.mode === "dynasty" ? "Dynasty" : "Redraft") + " · " + (lg.qbs === 2 ? "Superflex" : "1QB")) + "</span></button>";
+    }).join("");
+    document.querySelectorAll(".tab").forEach(function (b) {
+      b.setAttribute("aria-selected", String(b.dataset.tab === state.tab));
+    });
+    ["team", "trade", "finder", "ranks", "method"].forEach(function (t) { $("#tab-" + t).hidden = t !== state.tab; });
+  }
+
+  // ---------- sparkline ----------
+  function spark(p) {
+    if (p.pos === "PICK") return "";
+    var past = p.wk || [], next = p.proj.slice(0, 4), all = past.concat(next);
+    var max = Math.max(20, Math.max.apply(null, all.map(function (x) { return x || 0; })));
+    var bw = 9, gap = 3, h = 30, wTot = all.length * (bw + gap) - gap;
+    var s = '<svg class="spark" width="' + wTot + '" height="' + h + '" viewBox="0 0 ' + wTot + " " + h + '" aria-hidden="true">';
+    all.forEach(function (v, i) {
+      var isPast = i < past.length, x = i * (bw + gap);
+      var val = v == null ? 0 : Math.max(0, v), bh = Math.max(2, (val / max) * (h - 2));
+      var label = (isPast ? "Wk " + (i + 1) + ": " + (v == null ? "did not play" : f1(v) + " pts") : "Wk " + (D.week + i - past.length) + " proj: " + f1(val));
+      if (isPast) s += '<rect x="' + x + '" y="' + (h - bh) + '" width="' + bw + '" height="' + bh + '" rx="2" fill="' + (v == null ? "var(--line)" : "var(--ink-2)") + '"><title>' + label + "</title></rect>";
+      else s += '<rect x="' + (x + 0.75) + '" y="' + (h - bh + 0.75) + '" width="' + (bw - 1.5) + '" height="' + Math.max(1, bh - 1.5) + '" rx="2" fill="none" stroke="var(--muted)" stroke-width="1.5" stroke-dasharray="' + (val < 0.5 ? "2 2" : "0") + '"><title>' + label + "</title></rect>";
+    });
+    return s + "</svg>";
+  }
+
+  function trendHTML(c, p) {
+    var t = p.fc && p.fc[c.fk] ? p.fc[c.fk][3] : 0;
+    var m = c.mkt(p) || 1, pct = Math.round((t / Math.max(1, m - t)) * 100);
+    if (!t) return '<span class="trend flat">—</span>';
+    return '<span class="trend ' + (t > 0 ? "up" : "down") + '">' + (t > 0 ? "▲ " : "▼ ") + Math.abs(pct) + "%</span>";
+  }
+
+  // ---------- MY TEAM ----------
+  function renderTeam() {
+    var lg = L(), c = C(), w = W();
+    $("#team-plat").textContent = lg.platform + (lg.record ? " · " + lg.record : "");
+    $("#team-name").textContent = lg.name;
+    var s = lg.slots;
+    var lineupStr = POS.filter(function (x) { return s[x]; }).map(function (x) { return (s[x] > 1 ? s[x] : "") + x; })
+      .concat(s.FLEX ? [(s.FLEX > 1 ? s.FLEX : "") + "FLEX"] : []).concat(s.SFLEX ? ["SF"] : []).join(" · ");
+    $("#team-fmt").innerHTML = [lg.teams + " teams", lg.ppr === 1 ? "Full PPR" : lg.ppr + " PPR", lg.mode === "dynasty" ? "Dynasty" : "Redraft", lg.qbs === 2 ? "Superflex" : "1QB", lineupStr].map(function (x) { return "<span>" + esc(x) + "</span>"; }).join("");
+
+    var lu = lineup(c, lg.myIds);
+    var tv = lg.myIds.reduce(function (a, id) { return a + value(c, P[id], w).blend; }, 0);
+    var leagueAvg = 0;
+    lu.starters.forEach(function (st) { leagueAvg += c.avgStarter[st.slot] != null ? c.avgStarter[st.slot] : c.avgStarter[st.p.pos]; });
+    var flags = lg.myIds.filter(function (id) { return signal(c, P[id]) === "sell"; }).length;
+    $("#team-kpis").innerHTML =
+      '<div class="kpi"><span class="eyebrow">Starters / week</span><span class="v num">' + f1(lu.total) + '</span><span class="d">Rest-of-season projection for your best lineup</span></div>' +
+      '<div class="kpi"><span class="eyebrow">Roster value</span><span class="v num">' + f0(tv) + '</span><span class="d">Sum of blended trade values' + (lg.picks && lg.picks.length ? ", picks included" : "") + "</span></div>" +
+      '<div class="kpi"><span class="eyebrow">Sell-high flags</span><span class="v num">' + flags + '</span><span class="d">Market pays more than they project to give you</span></div>';
+
+    // position grades
+    var html = "";
+    POS.forEach(function (x) {
+      var mineP = lu.starters.filter(function (st) { return st.p.pos === x; });
+      var n = Math.max(1, s[x] || 0);
+      var dedicated = lu.starters.filter(function (st) { return st.slot === x; });
+      if (!dedicated.length) return;
+      var myAvg = dedicated.reduce(function (a, st) { return a + st.p.perWk; }, 0) / dedicated.length;
+      var avg = c.avgStarter[x];
+      var ratio = avg ? myAvg / avg : 1;
+      var letter = ratio >= 1.25 ? "A+" : ratio >= 1.12 ? "A" : ratio >= 1.03 ? "B+" : ratio >= 0.95 ? "B" : ratio >= 0.85 ? "C" : ratio >= 0.75 ? "D" : "F";
+      var cls = ratio >= 1.03 ? "g" : ratio >= 0.9 ? "m" : "b";
+      var scaleMax = avg * 1.6, pct = Math.min(100, (myAvg / scaleMax) * 100), avgPct = (avg / scaleMax) * 100;
+      var names = dedicated.map(function (st) { return st.p.n.split(" ").slice(-1)[0]; }).join(", ");
+      html += '<div class="grade-row"><span class="pos ' + x + '">' + x + '</span><div><div class="bar"><i style="width:' + pct + '%;background:var(--' + x.toLowerCase() + ')"></i><span class="avg" style="left:' + avgPct + '%" title="League-average starter"></span></div>' +
+        '<p class="grade-note">' + esc(names) + " · " + f1(myAvg) + " pts/wk vs " + f1(avg) + " avg" + (mineP.length > dedicated.length ? " · +" + (mineP.length - dedicated.length) + " in flex" : "") + '</p></div><span class="letter ' + cls + '">' + letter + "</span></div>";
+    });
+    $("#grades").innerHTML = html + '<p class="grade-note">Tick mark = the average starter at that position in a ' + lg.teams + "-team league. Grades use projected points per week from here on, so injuries and byes count.</p>";
+
+    // roster table
+    var rows = "", starters = lu.starters, onStart = {};
+    starters.forEach(function (st) { onStart[st.p.id] = st.slot; });
+    var bench = lg.myIds.filter(function (id) { return !onStart[id] && P[id] && P[id].pos !== "PICK"; }).map(function (id) { return P[id]; })
+      .sort(function (a, b) { return value(c, b, w).blend - value(c, a, w).blend; });
+    var picks = lg.myIds.filter(function (id) { return P[id] && P[id].pos === "PICK"; }).map(function (id) { return P[id]; });
+    function row(p, slot) {
+      var v = value(c, p, w), sg = signal(c, p), pr = p._pr && p._pr[lg.key];
+      return '<tr class="row"><td class="slot">' + esc(slot) + "</td>" +
+        '<td class="l"><div class="who">' + head(p) + '<div><div class="nm">' + esc(p.short || p.n) + '</div><div class="meta"><span class="pos ' + p.pos + '">' + p.pos + "</span>" +
+        (p.pos !== "PICK" ? "<span>" + esc(p.team) + (p.opp ? " vs " + esc(p.opp) : "") + (p.age ? " · " + Math.floor(p.age) + "y" : "") + "</span>" : "") + injTag(p) + "</div></div></div></td>" +
+        "<td>" + spark(p) + "</td>" +
+        '<td><span class="big num">' + (p.pos === "PICK" ? "—" : f1(p.ppg)) + "</span></td>" +
+        '<td class="mono">' + (pr ? p.pos + pr : "—") + "</td>" +
+        '<td><span class="big num">' + f0(v.blend) + "</span></td>" +
+        "<td>" + trendHTML(c, p) + "</td>" +
+        '<td class="l">' + (sg === "sell" ? '<span class="tag sell">Sell high</span>' : sg === "buy" ? '<span class="tag buy">Undervalued</span>' : "") + "</td>" +
+        '<td><button class="act" type="button" data-shop="' + esc(p.id) + '">Shop</button></td></tr>';
+    }
+    rows += '<tr class="group"><td colspan="9">Starters</td></tr>';
+    starters.forEach(function (st) { rows += row(st.p, st.slot === "SF" ? "SFLX" : st.slot); });
+    rows += '<tr class="group"><td colspan="9">Bench</td></tr>';
+    bench.forEach(function (p) { rows += row(p, "BN"); });
+    if (picks.length) {
+      rows += '<tr class="group"><td colspan="9">Draft picks</td></tr>';
+      picks.forEach(function (p) { rows += row(p, "PK"); });
+    }
+    $("#roster").innerHTML = rows;
+    $("#roster-sub").textContent = "Bars = fantasy points in weeks 1–" + (D.week - 1) + " · outlines = projected next 4 weeks";
+  }
+
+  // ---------- TRADE ----------
+  function defaultTrade(lg) {
+    var c = ctx(lg), w = lg.mode === "dynasty" ? 0.7 : 0.5;
+    // Start with the roster's strongest sell-high flag, else nothing
+    var sells = lg.myIds.filter(function (id) { return signal(c, P[id]) === "sell"; })
+      .sort(function (a, b) { return value(c, P[b], w).blend - value(c, P[a], w).blend; });
+    return { give: sells.slice(0, 1), get: [] };
+  }
+
+  function evalTrade(c, give, get, w) {
+    var g = side(c, give, w), r = side(c, get, w);
+    var net = r.total - g.total, big = Math.max(g.total, r.total);
+    var my = c.lg.myIds;
+    var before = lineup(c, my).total;
+    var after = lineup(c, my.filter(function (id) { return give.indexOf(id) < 0; }).concat(get)).total;
+    return { g: g, r: r, net: net, pct: big ? net / big : 0, lu: after - before };
+  }
+
+  function renderSlip(which) {
+    var c = C(), t = T(), w = W(), ids = t[which];
+    var el = $("#slip-" + which);
+    if (!ids.length) { el.innerHTML = '<li class="empty">' + (which === "give" ? "Pick who you'd send away" : "Search who you'd get back") + "</li>"; return; }
+    el.innerHTML = ids.map(function (id) {
+      var p = P[id], v = value(c, p, w), pr = p._pr && p._pr[c.lg.key];
+      return '<li class="item">' + head(p, "lg") + '<div><div class="nm">' + esc(p.short || p.n) + '</div><div class="meta"><span class="pos ' + p.pos + '">' + p.pos + "</span>" +
+        (p.pos !== "PICK" ? "<span>" + esc(p.team) + (p.age ? " · " + Math.floor(p.age) + "y" : "") + (pr ? " · " + p.pos + pr : "") + "</span>" : "") + injTag(p) + "</div>" +
+        (p.pos !== "PICK" ? '<div class="meta" style="margin-top:6px">' + spark(p) + "<span>" + f1(p.ppg) + " proj/gm</span></div>" : "") + "</div>" +
+        '<div class="val"><div class="big num">' + f0(v.blend) + '</div><button class="x" type="button" data-rm="' + which + '" data-id="' + esc(id) + '">Remove</button></div></li>';
+    }).join("");
+  }
+
+  function renderQuick() {
+    var c = C(), t = T(), w = W(), lg = L();
+    var inTrade = {}; t.give.concat(t.get).forEach(function (id) { inTrade[id] = 1; });
+    var mineList = lg.myIds.filter(function (id) { return !inTrade[id]; }).map(function (id) { return P[id]; })
+      .sort(function (a, b) { return value(c, b, w).blend - value(c, a, w).blend; });
+    $("#quick-give").innerHTML = mineList.map(function (p) {
+      return '<button type="button" data-add="give" data-id="' + esc(p.id) + '"><span class="pos ' + p.pos + '">' + p.pos + "</span>" + esc(p.short || p.n) + "</button>";
+    }).join("");
+    // Suggest targets near the give side's value
+    var ev = evalTrade(c, t.give, t.get, w);
+    var need = ev.g.total - ev.r.total;
+    var box = $("#quick-get");
+    if (need <= 0) { box.innerHTML = '<span class="sub">Add players to the give side to see matches.</span>'; return; }
+    var cands = c.pool.filter(function (p) { return !inTrade[p.id] && !mine(p.id); })
+      .map(function (p) { var trial = t.get.concat([p.id]); var e = evalTrade(c, t.give, trial, w); return { p: p, gap: Math.abs(e.pct), lu: e.lu }; })
+      .filter(function (x) { return x.gap < 0.12; })
+      .sort(function (a, b) { return b.lu - a.lu || a.gap - b.gap; }).slice(0, 8);
+    box.innerHTML = cands.length ? cands.map(function (x) {
+      return '<button type="button" data-add="get" data-id="' + esc(x.p.id) + '"><span class="pos ' + x.p.pos + '">' + x.p.pos + "</span>" + esc(x.p.short || x.p.n) + "</button>";
+    }).join("") : '<span class="sub">No single player lands within 12% — try a 2-for-1.</span>';
+  }
+
+  function renderTrade() {
+    var c = C(), t = T(), w = W();
+    renderSlip("give"); renderSlip("get"); renderQuick();
+    var ev = evalTrade(c, t.give, t.get, w);
+    $("#give-tot").textContent = f0(ev.g.total);
+    $("#get-tot").textContent = f0(ev.r.total);
+    $("#pan-l-v").textContent = f0(ev.g.total);
+    $("#pan-r-v").textContent = f0(ev.r.total);
+    // tilt: heavier side goes down
+    var pct = Math.max(-0.5, Math.min(0.5, ev.pct)), ang = pct / 0.5 * 12;
+    var rad = ang * Math.PI / 180;
+    $("#beam").style.transform = "rotate(" + ang + "deg)";
+    var dxL = 140 - 140 * Math.cos(rad), dyL = -140 * Math.sin(rad);
+    $("#pan-l").style.transform = "translate(" + dxL + "px," + dyL + "px)";
+    $("#pan-r").style.transform = "translate(" + (-dxL) + "px," + (-dyL) + "px)";
+
+    var a = Math.abs(ev.pct), call, sub;
+    if (!t.give.length && !t.get.length) { call = "Load a trade"; sub = "Pick players for each side of the scale."; }
+    else if (!t.give.length || !t.get.length) { call = "One-sided"; sub = "Add players to both sides."; }
+    else if (a < 0.07) { call = ev.lu >= 0.3 ? "Fair — and it helps" : ev.lu <= -0.3 ? "Fair, but it hurts" : "Dead even"; sub = "Values within " + Math.max(1, Math.round(a * 100)) + "% of each other."; }
+    else if (ev.pct > 0) { call = a < 0.2 ? "You win this" : "Smash accept"; sub = "You gain " + Math.round(a * 100) + "% in trade value."; }
+    else { call = a < 0.2 ? "You're overpaying" : "Hard decline"; sub = "You give up " + Math.round(a * 100) + "% more value than you get."; }
+    $("#call").textContent = call;
+    $("#call-sub").textContent = sub;
+
+    var lv = $("#lens-val"); lv.textContent = t.give.length || t.get.length ? sgn(ev.net) : "—";
+    lv.className = "v num " + (ev.pct >= 0.02 ? "pos-c" : ev.pct <= -0.02 ? "neg-c" : "");
+    $("#lens-val-d").textContent = "Blended value after the consolidation discount";
+    var lu = $("#lens-lu"); lu.textContent = t.give.length || t.get.length ? sgn(ev.lu, 1) : "—";
+    lu.className = "v num " + (ev.lu > 0.05 ? "pos-c" : ev.lu < -0.05 ? "neg-c" : "");
+    $("#lens-lu-d").textContent = "Starter pts/week, rest of season";
+
+    var wv = Math.round(w * 100);
+    $("#blend").value = wv;
+    $("#blend-out").textContent = (100 - wv) + " / " + wv;
+
+    // nudge
+    var nudge = $("#nudge"); nudge.innerHTML = "";
+    if (t.give.length && t.get.length && a >= 0.07) {
+      var addTo = ev.net < 0 ? "get" : "give";
+      var inTrade = {}; t.give.concat(t.get).forEach(function (id) { inTrade[id] = 1; });
+      var cands = (addTo === "get" ? c.pool.filter(function (p) { return !mine(p.id); }) : L().myIds.map(function (id) { return P[id]; }))
+        .filter(function (p) { return !inTrade[p.id]; });
+      var best = null;
+      cands.forEach(function (p) {
+        var g = addTo === "give" ? t.give.concat([p.id]) : t.give, r = addTo === "get" ? t.get.concat([p.id]) : t.get;
+        var e = evalTrade(c, g, r, w);
+        if (!best || Math.abs(e.pct) < Math.abs(best.e.pct)) best = { p: p, e: e };
+      });
+      if (best && Math.abs(best.e.pct) < a) {
+        nudge.innerHTML = (addTo === "get" ? "Ask them to add " : "To get them to yes, add ") + "<b>" + esc(best.p.short || best.p.n) + "</b>" +
+          (addTo === "get" ? " to even it out" : " from your side") + " (gap drops to " + Math.round(Math.abs(best.e.pct) * 100) + "%).";
+      }
+    }
+
+    // work table
+    var rows = "";
+    [["give", ev.g], ["get", ev.r]].forEach(function (pair) {
+      var sd = pair[1];
+      sd.rows.forEach(function (r) {
+        var p = r.p;
+        rows += '<tr><td class="l"><div class="who">' + head(p) + '<span class="nm">' + esc(p.short || p.n) + '</span></div></td><td class="l"><span class="tag ' + (pair[0] === "get" ? "buy" : "sell") + '">' + (pair[0] === "get" ? "You get" : "You give") + "</span></td>" +
+          '<td class="mono">' + (p.pos === "PICK" ? "—" : f0(p.ros) + " pts") + '</td><td class="mono">' + (p.pos === "PICK" ? "—" : f1(c.repl[p.pos]) + "/wk") + '</td><td class="mono">' + (p.pos === "PICK" ? "—" : f0(r.v.model)) + '</td><td class="mono">' + f0(r.v.market) + '</td><td class="mono">' + f0(r.v.blend) + '</td><td class="mono">' + Math.round(r.w * 100) + '%</td><td class="mono"><b>' + f0(r.counts) + "</b></td></tr>";
+      });
+      if (sd.rows.length) rows += '<tr class="total"><td class="l" colspan="8">' + (pair[0] === "get" ? "Total you get" : "Total you give") + '</td><td class="mono">' + f0(sd.total) + "</td></tr>";
+    });
+    $("#work").innerHTML = rows || '<tr><td colspan="9" class="l" style="color:var(--muted)">Add players to see the math.</td></tr>';
+    $("#work-note").textContent = "Model value = projected points above replacement (" + POS.map(function (x) { return x + " " + f1(c.repl[x]); }).join(", ") + " pts/wk) summed over weeks " + D.week + "–18" +
+      (c.dyn ? ", plus a future-seasons chunk scaled by age" : "") + ", then rescaled ×" + c.k.toFixed(1) + " onto FantasyCalc's " + (c.dyn ? "dynasty" : "redraft") + " " + (c.lg.qbs === 2 ? "superflex" : "1QB") + " market scale. Blend = " + (100 - Math.round(w * 100)) + "% model + " + Math.round(w * 100) + "% market.";
     save();
+  }
 
-    ["give", "get"].forEach(function (side) {
-      ev[side].rows.forEach(function (r) {
-        var el = document.querySelector('[data-val="' + side + "-" + r.p.id + '"]');
-        if (el) el.textContent = fmt(r.raw);
-      });
-      document.querySelector('[data-total="' + side + '"]').textContent = fmt(ev[side].total);
-    });
-    $("#t-give").textContent = fmt(ev.give.total);
-    $("#t-get").textContent = fmt(ev.get.total);
-
-    var call, sub, pct = ev.pct, a = Math.abs(pct);
-    var gap = fmt(Math.abs(ev.net));
-    if (!state.give.length && !state.get.length) {
-      call = "Add players"; sub = "Put someone on each side of the scale.";
-    } else if (ev.give.total === 0 && ev.get.total === 0) {
-      call = "Wash"; sub = "Nobody here beats replacement level at these settings.";
-    } else if (a < 0.08) {
-      call = "Fair trade"; sub = "Within " + Math.max(1, Math.round(a * 100)) + "% either way. Decide on roster fit.";
-    } else if (a < 0.2) {
-      call = pct > 0 ? "Leans you" : "Leans them"; sub = (pct > 0 ? "You come out " : "You're down ") + gap + " pts (" + Math.round(a * 100) + "%).";
-    } else {
-      call = pct > 0 ? "You win big" : "Don't do it"; sub = (pct > 0 ? "You come out " : "You're down ") + gap + " pts (" + Math.round(a * 100) + "%).";
+  // search dropdowns
+  function setupSearch(which) {
+    var input = $("#q-" + which), box = $("#r-" + which), sel = 0, list = [];
+    function run() {
+      var q = input.value.trim().toLowerCase(), c = C(), w = W(), t = T();
+      var inTrade = {}; t.give.concat(t.get).forEach(function (id) { inTrade[id] = 1; });
+      var src = which === "give" ? L().myIds.map(function (id) { return P[id]; }) : c.pool.filter(function (p) { return !mine(p.id); });
+      list = src.filter(function (p) { return !inTrade[p.id] && (!q || (p.n + " " + p.team + " " + p.pos).toLowerCase().indexOf(q) >= 0); })
+        .sort(function (a, b) { return value(c, b, w).blend - value(c, a, w).blend; }).slice(0, 12);
+      sel = 0;
+      if (!list.length) { box.innerHTML = '<div class="sub" style="padding:10px">No match. Players need a projection or trade value to show up.</div>'; box.hidden = false; return; }
+      box.innerHTML = list.map(function (p, i) {
+        return '<button type="button" class="res' + (i === 0 ? " on" : "") + '" data-i="' + i + '">' + head(p) + '<span class="pos ' + p.pos + '">' + p.pos + '</span><span><b>' + esc(p.short || p.n) + '</b> <span class="sub">' + esc(p.team || "") + "</span></span>" + injTag(p) + '<span class="rv">' + f0(value(c, p, w).blend) + "</span></button>";
+      }).join("");
+      box.hidden = false;
     }
-    $("#v-call").textContent = call;
-    $("#v-sub").textContent = sub;
-    var clamped = Math.max(-0.4, Math.min(0.4, pct));
-    $("#needle").style.left = (50 + clamped / 0.4 * 50) + "%";
-
-    renderSuggestion(ev);
-    renderBreakdown(ev);
-  }
-
-  function renderSuggestion(ev) {
-    var box = $("#v-suggest");
-    box.textContent = "";
-    if (Math.abs(ev.pct) < 0.08 || (!state.give.length && !state.get.length)) return;
-    var addTo = ev.net < 0 ? "get" : "give";
-    var used = {};
-    state.give.concat(state.get).forEach(function (x) { used[x.id] = 1; });
-    var best = null;
-    POOL.forEach(function (p) {
-      if (used[p.id]) return;
-      var trial = clone(state[addTo]);
-      trial.push({ id: p.id, status: "healthy", ppg: null });
-      var t = addTo === "get" ? evaluate(state.give, trial) : evaluate(trial, state.get);
-      var score = Math.abs(t.net);
-      if (!best || score < best.score) best = { p: p, score: score, pct: t.pct };
+    function pick(i) { var p = list[i]; if (!p) return; T()[which].push(p.id); input.value = ""; box.hidden = true; renderTrade(); }
+    input.addEventListener("focus", run);
+    input.addEventListener("input", run);
+    input.addEventListener("keydown", function (e) {
+      if (box.hidden) return;
+      if (e.key === "ArrowDown" || e.key === "ArrowUp") {
+        e.preventDefault(); sel = (sel + (e.key === "ArrowDown" ? 1 : -1) + list.length) % list.length;
+        box.querySelectorAll(".res").forEach(function (b, i) { b.classList.toggle("on", i === sel); });
+      } else if (e.key === "Enter") { e.preventDefault(); pick(sel); }
+      else if (e.key === "Escape") { box.hidden = true; }
     });
-    if (!best || Math.abs(best.pct) >= Math.abs(ev.pct)) return;
-    var lead = addTo === "get" ? "To even it out, ask them to throw in someone like " : "They'll likely push back. Adding someone like ";
-    var tail = addTo === "get" ? "." : " from your side would square it.";
-    box.appendChild(document.createTextNode(lead));
-    var b = document.createElement("b");
-    b.textContent = best.p.name + " (" + best.p.pos + ")";
-    box.appendChild(b);
-    box.appendChild(document.createTextNode(tail));
+    box.addEventListener("mousedown", function (e) { var b = e.target.closest(".res"); if (b) { e.preventDefault(); pick(+b.dataset.i); } });
+    input.addEventListener("blur", function () { setTimeout(function () { box.hidden = true; }, 120); });
   }
 
-  function renderBreakdown(ev) {
-    var s = state.settings;
-    var scoringName = { ppr: "PPR", half: "Half-PPR", std: "Standard" }[s.scoring];
-    $("#formula").textContent = s.mode === "dynasty"
-      ? "value = max(0, PPG − replacement) × (weeks played + 17 × age multiplier)    [" + scoringName + ", " + s.teams + " teams, " + (s.qb === "sf" ? "Superflex" : "1QB") + ", Dynasty]"
-      : "value = max(0, PPG − replacement) × weeks played    [" + scoringName + ", " + s.teams + " teams, " + (s.qb === "sf" ? "Superflex" : "1QB") + ", " + s.weeks + " wks left]";
-    var tb = $("#breakdown");
-    tb.innerHTML = "";
-    ["give", "get"].forEach(function (side) {
-      ev[side].rows.forEach(function (r) {
-        var tr = document.createElement("tr");
-        var cells = [
-          r.p.name,
-          null,
-          fmt(r.ppg, 1),
-          fmt(r.repl, 1),
-          fmt(r.vorp, 1),
-          fmt(r.weeks, 1).replace(/\.0$/, ""),
-          r.mult != null ? fmt(r.mult, 2) : "—",
-          fmt(r.raw),
-          Math.round(r.weight * 100) + "%",
-          fmt(r.counts)
-        ];
-        cells.forEach(function (c, i) {
-          var td = document.createElement("td");
-          if (i === 1) {
-            var pill = document.createElement("span");
-            pill.className = "side-pill" + (side === "get" ? " get" : "");
-            pill.textContent = side === "get" ? "You get" : "You give";
-            td.appendChild(pill);
-          } else td.textContent = c;
-          tr.appendChild(td);
-        });
-        tb.appendChild(tr);
+  // ---------- FINDER ----------
+  function renderFinder() {
+    var c = C(), lg = L(), w = W();
+    $("#finder-sub").textContent = lg.name + " · " + (c.dyn ? "value-first (dynasty)" : "lineup-first (redraft)");
+    document.querySelectorAll("#finder-pos button").forEach(function (b) { b.setAttribute("aria-pressed", String(b.dataset.v === state.finderPos)); });
+    var my = lg.myIds, base = lineup(c, my).total;
+    var assets = my.map(function (id) { return { id: id, v: value(c, P[id], w).blend }; }).filter(function (a) { return a.v > 150; });
+    var packs = [];
+    assets.forEach(function (a, i) {
+      packs.push([a.id]);
+      for (var j = i + 1; j < assets.length; j++) packs.push([a.id, assets[j].id]);
+    });
+    var targets = c.pool.filter(function (p) { return !mine(p.id) && p.pos !== "PICK" && (state.finderPos === "ALL" || p.pos === state.finderPos); })
+      .map(function (p) { return { p: p, v: value(c, p, w).blend }; })
+      .filter(function (x) { return x.v > 300; })
+      .sort(function (a, b) { return b.v - a.v; }).slice(0, 220);
+    var packVals = packs.map(function (pk) { return side(c, pk, w).total; });
+    var ideas = [];
+    targets.forEach(function (tg) {
+      var best = null;
+      packs.forEach(function (pk, i) {
+        var gv = packVals[i];
+        if (tg.v > gv * 1.02 || tg.v < gv * 0.85) return; // fair enough that they say yes, not a big overpay
+        var after = lineup(c, my.filter(function (id) { return pk.indexOf(id) < 0; }).concat([tg.p.id])).total;
+        var lu = after - base, valGain = tg.v - gv;
+        var score = c.dyn ? valGain / 400 + lu : lu + valGain / 3000;
+        if ((lu > 0.4 || (c.dyn && valGain > 0 && lu > -0.5)) && (!best || score > best.score)) best = { pk: pk, lu: lu, val: valGain, gv: gv, score: score };
       });
-      if (ev[side].rows.length) {
-        var st = document.createElement("tr");
-        st.className = "subtotal";
-        st.innerHTML = "<td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td>Total</td><td></td>";
-        st.children[0].textContent = side === "get" ? "Everything you get" : "Everything you give";
-        st.children[9].textContent = fmt(ev[side].total);
-        tb.appendChild(st);
-      }
+      if (best) ideas.push({ t: tg, b: best });
     });
-    if (!tb.children.length) {
-      var tr = document.createElement("tr");
-      tr.innerHTML = '<td colspan="10" style="text-align:center;color:var(--muted)">Add players to see the math.</td>';
-      tb.appendChild(tr);
-    }
+    ideas.sort(function (a, b) { return b.b.score - a.b.score; });
+    // don't repeat the same give package over and over
+    var seen = {}, out = [];
+    ideas.forEach(function (x) { var k = x.b.pk.join("+"); seen[k] = (seen[k] || 0) + 1; if (seen[k] <= 2 && out.length < 12) out.push(x); });
+    $("#ideas").innerHTML = out.length ? out.map(function (x) {
+      var give = x.b.pk.map(function (id) { var p = P[id]; return '<div class="mini">' + head(p) + '<span class="pos ' + p.pos + '">' + p.pos + '</span><span class="n">' + esc(p.short || p.n) + "</span></div>"; }).join("");
+      var p = x.t.p;
+      return '<div class="card idea"><div class="idea-row"><div class="idea-side"><span class="lbl">You give</span>' + give + '</div><span class="arrow">→</span><div class="idea-side"><span class="lbl">You get</span><div class="mini">' + head(p) + '<span class="pos ' + p.pos + '">' + p.pos + '</span><span class="n">' + esc(p.n) + "</span></div>" + (injTag(p) ? '<div class="mini">' + injTag(p) + "</div>" : "") + "</div></div>" +
+        '<div class="idea-stats"><div class="stat"><b class="' + (x.b.lu >= 0 ? "pos-c" : "neg-c") + '">' + sgn(x.b.lu, 1) + "</b><span>starter pts/wk</span></div>" +
+        '<div class="stat"><b class="' + (x.b.val >= 0 ? "pos-c" : "neg-c") + '">' + sgn(x.b.val) + "</b><span>trade value</span></div>" +
+        '<div class="stat"><b>' + f1(p.ppg) + "</b><span>" + esc(p.team) + " proj/gm</span></div></div>" +
+        '<button class="btn" type="button" data-load="' + esc(x.b.pk.join(",")) + '" data-target="' + esc(p.id) + '">Open in analyzer</button></div>';
+    }).join("") : '<div class="card" style="padding:18px"><p class="sub">No clean fits at this position right now. Try "Any" or drag the value mix on the analyzer.</p></div>';
   }
 
-  // ---- events ----
-  function addFrom(side) {
-    var input = document.getElementById("add-" + side);
-    var hint = document.querySelector('[data-hint="' + side + '"]');
-    var q = input.value.trim().toLowerCase();
-    if (!q) return;
-    var p = POOL.filter(function (x) { return x.name.toLowerCase() === q; })[0] ||
-            POOL.filter(function (x) { return x.name.toLowerCase().indexOf(q) !== -1; })[0];
-    if (!p) { hint.textContent = "No player matches “" + input.value.trim() + "”. Add them below with your own projection."; return; }
-    var already = state.give.concat(state.get).some(function (x) { return x.id === p.id; });
-    if (already) { hint.textContent = p.name + " is already in this trade."; return; }
-    hint.textContent = "";
-    state[side].push({ id: p.id, status: "healthy", ppg: null });
-    input.value = "";
-    renderSides();
-    update();
+  // ---------- RANKINGS ----------
+  var RANK_COLS = [
+    ["rank", "#", "l"], ["name", "Player", "l"], ["team", "Team", "l"], ["age", "Age"], ["ppg", "Proj/gm"], ["pr", "Pos rk"],
+    ["model", "Model"], ["market", "Market"], ["blend", "Value"], ["trend", "30-day"], ["sig", "Signal", "l"]
+  ];
+  function renderRanks() {
+    var c = C(), lg = L(), w = W();
+    $("#ranks-sub").textContent = (c.dyn ? "Dynasty" : "Redraft") + " · " + (lg.qbs === 2 ? "Superflex" : "1QB") + " · " + lg.teams + " teams · FantasyCalc market + Sleeper projections";
+    document.querySelectorAll("#rank-pos button").forEach(function (b) { b.setAttribute("aria-pressed", String(b.dataset.v === state.rankPos)); });
+    $("#rank-head").innerHTML = RANK_COLS.map(function (col) {
+      var sortable = ["age", "ppg", "model", "market", "blend", "trend"].indexOf(col[0]) >= 0;
+      return "<th" + (col[2] ? ' class="l' + (sortable ? " sortable" : "") + '"' : sortable ? ' class="sortable"' : "") + (sortable ? ' data-sort="' + col[0] + '"' : "") + (state.rankSort === col[0] ? ' aria-sort="descending"' : "") + ">" + col[1] + (state.rankSort === col[0] ? " ▾" : "") + "</th>";
+    }).join("");
+    var q = ($("#rank-q").value || "").trim().toLowerCase();
+    var rows = c.pool.map(function (p) {
+      var v = value(c, p, w);
+      return { p: p, v: v, trend: p.fc && p.fc[c.fk] ? p.fc[c.fk][3] : 0 };
+    }).filter(function (r) { return r.v.blend > 50; });
+    rows.sort(function (a, b) { return b.v.blend - a.v.blend; });
+    rows.forEach(function (r, i) { r.rank = i + 1; });
+    rows = rows.filter(function (r) { return (state.rankPos === "ALL" || r.p.pos === state.rankPos) && (!q || (r.p.n + " " + r.p.team).toLowerCase().indexOf(q) >= 0); });
+    var key = state.rankSort;
+    var get = { age: function (r) { return -(r.p.age || 99); }, ppg: function (r) { return r.p.ppg; }, model: function (r) { return r.v.model; }, market: function (r) { return r.v.market; }, blend: function (r) { return r.v.blend; }, trend: function (r) { return r.trend; } }[key];
+    if (get) rows.sort(function (a, b) { return get(b) - get(a); });
+    rows = rows.slice(0, 250);
+    $("#ranks").innerHTML = rows.map(function (r) {
+      var p = r.p, sg = signal(c, p), isMine = mine(p.id), pr = p._pr && p._pr[lg.key];
+      return '<tr class="row' + (isMine ? " is-mine" : "") + '"><td class="l mono">' + r.rank + '</td><td class="l"><div class="who">' + head(p) + '<div><div class="nm">' + esc(p.short || p.n) + '</div><div class="meta"><span class="pos ' + p.pos + '">' + p.pos + "</span>" + injTag(p) + (isMine ? '<span class="tag mine">Yours</span>' : "") + "</div></div></div></td>" +
+        '<td class="l">' + esc(p.team || "") + '</td><td class="mono">' + (p.age ? Math.floor(p.age) : "—") + '</td><td class="mono">' + (p.pos === "PICK" ? "—" : f1(p.ppg)) + '</td><td class="mono">' + (pr ? p.pos + pr : "—") + '</td><td class="mono">' + (p.pos === "PICK" ? "—" : f0(r.v.model)) + '</td><td class="mono">' + f0(r.v.market) + '</td><td><span class="big num">' + f0(r.v.blend) + "</span></td><td>" + trendHTML(c, p) + '</td><td class="l">' + (sg === "sell" ? '<span class="tag sell">Sell high</span>' : sg === "buy" ? '<span class="tag buy">Buy low</span>' : "") + "</td></tr>";
+    }).join("");
   }
 
-  document.querySelectorAll("[data-add]").forEach(function (b) {
-    b.addEventListener("click", function () { addFrom(b.dataset.add); });
-  });
-  ["give", "get"].forEach(function (side) {
-    var input = document.getElementById("add-" + side);
-    input.addEventListener("keydown", function (e) { if (e.key === "Enter") { e.preventDefault(); addFrom(side); } });
-    input.addEventListener("change", function () {
-      var v = input.value.trim().toLowerCase();
-      if (POOL.some(function (x) { return x.name.toLowerCase() === v; })) addFrom(side);
-    });
-  });
+  // ---------- METHOD ----------
+  function renderMethod() {
+    var c = C(), lg = L();
+    $("#formula").textContent =
+      "model  = Σ weeks " + D.week + "–18  max(0, projected pts − replacement)" + (c.dyn ? "\n       + max(0, proj pts/gm − replacement) × 17 × age multiplier" : "") +
+      "\nvalue  = " + Math.round((1 - W()) * 100) + "% × model × " + c.k.toFixed(2) + "  +  " + Math.round(W() * 100) + "% × FantasyCalc market" +
+      "\nside   = best asset × 1.00 + next × 0.88 + next × 0.76 …  (floor 0.40)" +
+      "\nreplacement (" + lg.name + "): " + POS.map(function (x) { return x + " " + f1(c.repl[x]); }).join(" · ") + " pts/wk";
+    $("#sources").textContent = "Data: Sleeper API (player info, injuries, weekly stats, week-by-week projections) and FantasyCalc (trade values from real trades), pulled " + new Date(D.fetchedAt).toLocaleString() + ". Scoring uses standard full-PPR points, which matches both of your leagues' settings (4-pt passing TDs, 1 pt per reception). Kickers and defenses aren't modeled. Refresh the data with python3 scripts/fetch_data.py.";
+  }
 
-  document.querySelectorAll(".seg").forEach(function (seg) {
-    seg.addEventListener("click", function (e) {
-      var b = e.target.closest("button");
-      if (!b) return;
-      var key = seg.dataset.key;
-      state.settings[key] = key === "teams" ? parseInt(b.dataset.v, 10) : b.dataset.v;
-      renderSettings();
-      update();
-    });
-  });
-  $("#weeks").addEventListener("input", function (e) {
-    state.settings.weeks = parseInt(e.target.value, 10);
-    renderSettings();
-    update();
-  });
-  $("#stud").addEventListener("change", function (e) { state.settings.stud = e.target.checked; update(); });
-  $("#reset").addEventListener("click", function () { state.give = []; state.get = []; renderSides(); update(); });
+  function renderAll() {
+    renderMast();
+    var t = state.tab;
+    if (t === "team") renderTeam();
+    if (t === "trade") renderTrade();
+    if (t === "finder") renderFinder();
+    if (t === "ranks") renderRanks();
+    if (t === "method") renderMethod();
+    save();
+  }
 
-  $("#custom-form").addEventListener("submit", function (e) {
-    e.preventDefault();
-    var name = $("#c-name").value.trim();
-    if (!name) return;
-    var id = slug(name);
-    if (byId(id)) id = id + "-" + Date.now().toString(36);
-    var p = {
-      id: id, name: name, pos: $("#c-pos").value,
-      ppg: parseFloat($("#c-ppg").value) || 0,
-      rec: parseFloat($("#c-rec").value) || 0,
-      age: parseInt($("#c-age").value, 10) || 25,
-      custom: true
-    };
-    POOL.push(p);
-    try {
-      var custom = JSON.parse(localStorage.getItem(CUSTOM_KEY) || "[]");
-      custom.push(p);
-      localStorage.setItem(CUSTOM_KEY, JSON.stringify(custom));
-    } catch (err) {}
-    renderDatalist();
-    $("#c-name").value = "";
-    $("#add-get").value = name;
-    $("#add-get").focus();
+  // ---------- events ----------
+  document.addEventListener("click", function (e) {
+    var b;
+    if ((b = e.target.closest("[data-lg]"))) { state.league = b.dataset.lg; renderAll(); return; }
+    if ((b = e.target.closest(".tab"))) { state.tab = b.dataset.tab; try { history.replaceState(null, "", "#" + state.tab); } catch (err) {} renderAll(); return; }
+    if ((b = e.target.closest("[data-add]"))) { T()[b.dataset.add].push(b.dataset.id); renderTrade(); return; }
+    if ((b = e.target.closest("[data-rm]"))) { var arr = T()[b.dataset.rm]; arr.splice(arr.indexOf(b.dataset.id), 1); renderTrade(); return; }
+    if ((b = e.target.closest("[data-shop]"))) { var t = T(); t.give = [b.dataset.shop]; t.get = []; state.tab = "trade"; renderAll(); return; }
+    if ((b = e.target.closest("[data-load]"))) { var t2 = T(); t2.give = b.dataset.load.split(","); t2.get = [b.dataset.target]; state.tab = "trade"; renderAll(); window.scrollTo({ top: 0, behavior: "smooth" }); return; }
+    if ((b = e.target.closest("#finder-pos button"))) { state.finderPos = b.dataset.v; renderFinder(); save(); return; }
+    if ((b = e.target.closest("#rank-pos button"))) { state.rankPos = b.dataset.v; renderRanks(); save(); return; }
+    if ((b = e.target.closest("th[data-sort]"))) { state.rankSort = b.dataset.sort; renderRanks(); save(); return; }
+    if (e.target.closest("#clear")) { var t3 = T(); t3.give = []; t3.get = []; renderTrade(); return; }
   });
+  $("#blend").addEventListener("input", function (e) { state.blend[L().key] = +e.target.value / 100; renderTrade(); });
+  $("#rank-q").addEventListener("input", renderRanks);
+  setupSearch("give"); setupSearch("get");
 
-  renderSettings();
-  renderDatalist();
-  renderSides();
-  update();
+  renderAll();
 })();
 </script>

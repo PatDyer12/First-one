@@ -1,0 +1,41 @@
+[
+  {
+    "key": "yahoo",
+    "name": "Buttstuffers LLC",
+    "platform": "Yahoo",
+    "mode": "redraft",
+    "teams": 12,
+    "qbs": 1,
+    "ppr": 1,
+    "record": "0-2",
+    "slots": { "QB": 1, "RB": 2, "WR": 2, "TE": 1, "FLEX": 1, "SFLEX": 0 },
+    "roster": [
+      "Drake Maye", "Chase Brown", "De'Von Achane", "Tetairoa McMillan", "Zay Flowers",
+      "Kyle Pitts", "Rome Odunze", "DK Metcalf", "Josh Jacobs", "Wan'Dale Robinson",
+      "Bo Nix", "Jaylen Wright", "Kenyon Sadiq", "Zach Charbonnet"
+    ],
+    "picks": []
+  },
+  {
+    "key": "sleeper",
+    "name": "Sleeper Dynasty",
+    "platform": "Sleeper",
+    "mode": "dynasty",
+    "teams": 12,
+    "qbs": 2,
+    "ppr": 1,
+    "slots": { "QB": 1, "RB": 2, "WR": 3, "TE": 1, "FLEX": 2, "SFLEX": 1 },
+    "roster": [
+      "Jordan Love", "Christian McCaffrey", "Jaylen Warren", "Ja'Marr Chase", "Terry McLaurin",
+      "DK Metcalf", "Colston Loveland", "Travis Kelce", "Rico Dowdle", "Baker Mayfield",
+      "Quinn Ewers", "Demond Claiborne", "James Conner", "Josh Jacobs", "Brian Robinson",
+      "Keaton Mitchell", "Devontez Walker", "Chimere Dike", "Cooper Kupp", "Ja'Tavion Sanders",
+      "Darren Waller", "Jake Tonges"
+    ],
+    "picks": [
+      "2027 2nd", "2027 3rd", "2027 4th",
+      "2028 1st", "2028 2nd", "2028 3rd", "2028 4th",
+      "2029 1st", "2029 2nd", "2029 3rd", "2029 4th"
+    ]
+  }
+]
