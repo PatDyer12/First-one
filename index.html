@@ -305,7 +305,7 @@ tr.is-mine td:first-child { box-shadow: inset 3px 0 0 var(--accent); }
 .eff { display: grid; gap: 6px; align-content: start; }
 .eff > h3, .eff > .sub { padding: 0 18px; }
 .eff-grid { display: grid; grid-template-columns: minmax(0, 1.2fr) minmax(0, 1fr); gap: 18px; }
-.ledger { min-width: 700px; }
+.ledger { min-width: 780px; }
 .ledger tr.main { cursor: pointer; }
 .ledger tr.detail td { background: var(--surface-2); white-space: normal; text-align: left; padding: 10px 14px 12px; }
 .chips { display: flex; flex-wrap: wrap; gap: 6px; }
@@ -868,7 +868,7 @@ input[type="range"]::-webkit-slider-thumb { background: radial-gradient(circle a
         <div class="eff">
           <h3>Player values</h3>
           <p class="sub">Preseason FantasyCalc value × the fitted model's update. Tap a row to see every factor.</p>
-          <div class="rtable-wrap"><table class="rtable ledger"><thead><tr><th class="l">Player</th><th>Start mkt</th><th>Model pts/gm</th><th>Multiplier</th><th>Model value</th><th>Current mkt</th><th>Weight</th><th>Counts</th></tr></thead><tbody id="ledger"></tbody></table></div>
+          <div class="rtable-wrap"><table class="rtable ledger"><thead><tr><th class="l">Player</th><th>Start mkt</th><th>Model pts/gm</th><th>Multiplier</th><th>Health</th><th>Model value</th><th>Current mkt</th><th>Weight</th><th>Counts</th></tr></thead><tbody id="ledger"></tbody></table></div>
         </div>
         <div class="eff-grid">
           <div class="eff">
@@ -927,12 +927,13 @@ input[type="range"]::-webkit-slider-thumb { background: radial-gradient(circle a
     <div class="card method">
       <div><h2>How the model works</h2><p class="sub" style="margin-top:6px">Public market first. Every factor weighted by how well it actually predicted results in 2022–2025. One fixed formula.</p></div>
       <div class="method-grid">
-        <div class="step"><span class="k">1</span><h3>Start from the public market</h3><p>Every player starts at his <b>FantasyCalc</b> value from before the season (value minus its 30-day change), matched to your format. That's the market's read before any games were played. Injured players, and players who haven't played yet, use today's market instead, since it already prices the news.</p></div>
+        <div class="step"><span class="k">1</span><h3>Start from the public market</h3><p>Every player starts at his <b>FantasyCalc</b> value from before the season (value minus its 30-day change), matched to your format. That's the market's read before any games were played. Healthy players who haven't played yet use today's market.</p></div>
         <div class="step"><span class="k">2</span><h3>Learn from 2022–2025</h3><p>For every player-season in the last four years, we took everything known after Week 2 and measured how well each factor predicted his points per game the rest of the year, and the next year. A ridge regression gives each factor a weight. Factors that predicted well get big weights, and weak ones shrink toward zero.</p></div>
         <div class="step"><span class="k">3</span><h3>Prove it on unseen seasons</h3><p>Each model is tested on a season it didn't train on. For each position it keeps the factor set that tested best: all factors, a core set, or preseason info alone. The scores are below.</p></div>
         <div class="step"><span class="k">4</span><h3>Turn points into value</h3><p>The model's projection ÷ what preseason info alone predicts = how much a player's outlook changed. The market's own price curve, fit from FantasyCalc, turns that into value: value moves about 3× as fast as points per game in redraft and about 1.6× in dynasty.</p></div>
         <div class="step"><span class="k">5</span><h3>Fixed mix by league</h3><p>Redraft uses the rest-of-season model. Keeper uses 50% this season and 50% next season. Dynasty uses 35% and 65%. Roster fit is a fixed 25% / 20% / 10% of your lineup gain, capped at ±15% of the deal so it only tips close calls. Nothing is adjustable, so the formula stays the same.</p></div>
-        <div class="step"><span class="k">6</span><h3>Signals</h3><p><span class="tag buy">Buy low</span> means the model value is ≥15% above today's market. <span class="tag sell">Sell high</span> means it's ≥15% below. That gap is where you win trades.</p></div>
+        <div class="step"><span class="k">6</span><h3>Injuries & suspensions</h3><p>Expected weeks out is the <b>longest</b> of: weeks projected at 0 points from now, the status minimum (Out/Doubtful/Suspended 1 week, IR/PUP 4), and season-ending injuries (ACL, Achilles, Lisfranc). Value × (share of the season available)<sup>1.5</sup>. Out all season in redraft = 0. In keeper/dynasty only this season's share (50% / 35%) is lost.</p></div>
+        <div class="step"><span class="k">7</span><h3>Signals</h3><p><span class="tag buy">Buy low</span> means the model value is ≥15% above today's market. <span class="tag sell">Sell high</span> means it's ≥15% below. That gap is where you win trades.</p></div>
       </div>
       <div><h3>What the model learned: factor weights</h3><p class="sub" style="margin-top:4px">Share of each position's rest-of-season model. R² = share of the variation in future points explained, on seasons the model never saw.</p></div>
       <div class="weights" id="weights"></div>
@@ -984,7 +985,8 @@ input[type="range"]::-webkit-slider-thumb { background: radial-gradient(circle a
     if (!p.inj) return "";
     var s = p.inj, cls = /Questionable|Probable/.test(s) ? "q" : "inj";
     var label = { Questionable: "Q", Doubtful: "D", Out: "OUT", IR: "IR", PUP: "PUP", NA: "NA", Sus: "SUS", DNR: "DNR" }[s] || s;
-    return '<span class="tag ' + cls + '" title="' + esc(s + (p.injNote ? " · " + p.injNote : "")) + '">' + esc(label) + "</span>";
+    var av = p._av && p._av[state.league], ot = outText(av);
+    return '<span class="tag ' + cls + '" title="' + esc(s + (p.injNote ? " · " + p.injNote : "")) + '">' + esc(label) + (ot ? " · " + esc(ot.replace("out ", "").replace(" · back ~Wk ", " → Wk ")) : "") + "</span>";
   }
   function store(k, v) { try { if (v === undefined) return JSON.parse(localStorage.getItem("fts2-" + k)); localStorage.setItem("fts2-" + k, JSON.stringify(v)); } catch (e) { return null; } }
 
@@ -1101,7 +1103,8 @@ input[type="range"]::-webkit-slider-thumb { background: radial-gradient(circle a
       out[t] = {
         team: t, rec: rec, off: off, pfg: rec.g ? rec.pf / rec.g : 0, winPct: rec.g ? (rec.w + 0.5 * rec.t) / rec.g : 0.5,
         qb: starter, qb1: qb1, qbOut: qb1 && starter && qb1 !== starter && OUT[qb1.inj], qbPpg: starter ? rawPpg(starter) : 0,
-        key: key, injured: key.filter(function (p) { return OUT[p.inj]; })
+        key: key, injured: key.filter(function (p) { return OUT[p.inj]; }),
+        bye: (list[0] ? list[0].proj : []).map(function (_, k) { return list.some(function (p) { return p.proj[k] > 0.5; }) ? null : k; }).filter(function (k) { return k != null; })
       };
     });
     function z(field) {
@@ -1148,19 +1151,50 @@ input[type="range"]::-webkit-slider-thumb { background: radial-gradient(circle a
     var m = p.m;
     if (!m || p.pos === "PICK") return { mult: 1, why: "pick" };
     if (!m.g) return { mult: 1, why: "no games yet" };
-    if (OUT[p.inj]) return { mult: 1, why: "injured" };
     function ratio(t) { var a = m[t]; return !a || a[1] < 3 ? 1 : clamp(a[0] / a[1], 0.5, 1.8); }
     var w = MW[c.lg.mode], r = w[0] * ratio("ros") + w[1] * ratio("next"), e = elasticity(c, p.pos);
     return { mult: clamp(Math.pow(r, e), 0.4, 2.2), r: r, e: e };
+  }
+
+  // ---------- availability: expected weeks out, fixed rules ----------
+  var SEASON_ENDING = /ACL|Achilles|Lisfranc|Season/i;
+  var MIN_OUT = { Out: 1, Doubtful: 1, Sus: 1, NA: 1, DNR: 1, IR: 4, PUP: 4 };
+  var AV_POWER = 1.5;                                           // late returns and setback risk: missing half the season costs ~65% of value
+  var AV_NOW = { redraft: 1, keeper: 0.5, dynasty: 0.35 };      // share of value that is this season (same mix as the model)
+  function availability(c, p) {
+    if (p.pos === "PICK" || !p.proj) return { factor: 1, out: 0 };
+    p._av = p._av || {};
+    if (p._av[c.lg.key]) return p._av[c.lg.key];
+    var tc = teamCtx()[p.team], bye = tc ? tc.bye : [];
+    var sched = p.proj.map(function (_, k) { return k; }).filter(function (k) { return bye.indexOf(k) < 0; });
+    var n = sched.length || 1, out = 0, why = "";
+    if (p.inj && p.inj !== "Questionable" && p.inj !== "Probable") {
+      var fromProj = 0;
+      for (var i = 0; i < sched.length && p.proj[sched[i]] < 0.5; i++) fromProj++;
+      out = Math.max(fromProj, MIN_OUT[p.inj] || 0);
+      why = fromProj >= (MIN_OUT[p.inj] || 0) ? "projections" : p.inj + " minimum";
+      if (SEASON_ENDING.test(p.injNote || "")) { out = n; why = p.injNote; }
+    }
+    var missed = Math.min(n, out) + (p.inj === "Questionable" ? 0.25 : 0);
+    var avail = Math.max(0, 1 - missed / n);
+    var thisSeason = Math.pow(avail, AV_POWER), share = AV_NOW[c.lg.mode];
+    var res = { out: Math.min(n, out), avail: avail, factor: 1 - share * (1 - thisSeason), back: out >= n ? null : D.week + (sched[Math.min(out, n - 1)] || 0), why: why };
+    return (p._av[c.lg.key] = res);
+  }
+  function outText(av) {
+    if (!av || !av.out) return "";
+    return av.back == null ? "out for season" : "out ~" + av.out + " wk" + (av.out > 1 ? "s" : "") + " · back ~Wk " + av.back;
   }
 
   function value(c, p) {
     var cur = c.mkt(p), est = false;
     if (p.pos !== "PICK" && cur < 1) { cur = (p._m[c.lg.key] || 0) * c.k * 0.6; est = true; }
     if (p.pos === "PICK") return { market: cur, current: cur, blend: cur, mult: 1, adj: 0, vs: 0, why: "pick" };
-    var mm = modelMult(c, p), anchor = mm.why || est ? cur : preMarket(c, p) || cur;
-    var v = anchor * mm.mult;
-    return { market: anchor, current: cur, blend: v, mult: mm.mult, r: mm.r, e: mm.e, adj: anchor ? v / anchor - 1 : 0, vs: cur > 1 ? v / cur - 1 : 0, est: est, why: mm.why };
+    var mm = modelMult(c, p), av = availability(c, p);
+    // injured/suspended players start from the pre-injury market and take an explicit time-out penalty (no double count)
+    var anchor = est ? cur : (mm.why === "no games yet" && !p.inj) ? cur : preMarket(c, p) || cur;
+    var v = anchor * mm.mult * av.factor;
+    return { market: anchor, current: cur, blend: v, mult: mm.mult, av: av, r: mm.r, e: mm.e, adj: anchor ? v / anchor - 1 : 0, vs: cur > 1 ? v / cur - 1 : 0, est: est, why: mm.why };
   }
 
   function signal(c, p) {
@@ -1428,7 +1462,8 @@ input[type="range"]::-webkit-slider-thumb { background: radial-gradient(circle a
     if (p.pos === "PICK") return '<div class="chips"><span class="chip">Draft pick · valued by FantasyCalc' + (p.fc && p.fc.kv ? " (mapped from overall slot)" : "") + "</span></div>";
     var ch = [], m = p.m, spec = D.model.positions[p.pos] && D.model.positions[p.pos].ros;
     function chip(label, val, cls) { ch.push('<span class="chip ' + (cls || "") + '"><i>' + label + "</i>" + val + "</span>"); }
-    if (v.why) chip("Model", v.why === "injured" ? "injured, so the current market is used (it already prices the injury)" : "hasn't played yet, so the current market is used");
+    if (v.av && (v.av.out || p.inj === "Questionable")) chip("Availability", (v.av.out ? outText(v.av) + " (" + esc(v.av.why) + ")" : "questionable this week") + " → value ×" + v.av.factor.toFixed(2), "b");
+    if (v.why) chip("Model", p.inj ? "no healthy games yet, so it starts from the pre-injury market" : "hasn't played yet, so the current market is used");
     else if (m && m.ros) chip("Model", "projects " + f1(m.ros[0]) + " pts/gm vs " + f1(m.ros[1]) + " from preseason info → value ×" + v.mult.toFixed(2), v.mult >= 1 ? "g" : "b");
     if (m && spec && m.c && !v.why) {
       var items = spec.features.map(function (k, i) { return { k: k, x: m.x[i], c: m.c[i], w: spec.importance[i] }; })
@@ -1505,8 +1540,8 @@ input[type="range"]::-webkit-slider-thumb { background: radial-gradient(circle a
     // ---- tally: where the score comes from ----
     function tl(label, v, d, cls) { return '<div class="t ' + (cls || "") + '"><span>' + label + '</span><b class="' + (v > 0.5 ? "pos-c" : v < -0.5 ? "neg-c" : "") + '">' + (has ? sgn(v) : "—") + "</b><span>" + d + "</span></div>"; }
     $("#tally").innerHTML = has ? (
-      tl("Starting market", ev.r.market - ev.g.market, "FantasyCalc before the season (current if injured)") +
-      tl("Model update", ev.r.adjust - ev.g.adjust, "Fitted on 2022–25: what weeks 1–" + (D.week - 1) + " really predict") +
+      tl("Starting market", ev.r.market - ev.g.market, "FantasyCalc before the season") +
+      tl("Model + health", ev.r.adjust - ev.g.adjust, "Fitted 2022–25 update, minus expected time out") +
       tl("Consolidation", ev.r.consol - ev.g.consol, "Stud premium / depth discount") +
       tl("Roster fit", ev.fit, sgn(ev.lu, 1) + " starter pts/wk, fixed " + Math.round(fw * 100) + "% weight" + (ev.fitCapped ? ", capped" : "")) +
       '<div class="t sum"><span>Trade score</span><b>' + sgn(ev.score) + "</b><span>" + (ev.score >= 0 ? "In your favor" : "In their favor") + " · " + Math.round(a * 100) + "%</span></div>"
@@ -1517,16 +1552,16 @@ input[type="range"]::-webkit-slider-thumb { background: radial-gradient(circle a
     [["give", ev.g], ["get", ev.r]].forEach(function (pair) {
       var sd = pair[1];
       if (!sd.rows.length) return;
-      rows += '<tr class="group"><td colspan="8">' + (pair[0] === "get" ? "You get" : "You give") + "</td></tr>";
+      rows += '<tr class="group"><td colspan="9">' + (pair[0] === "get" ? "You get" : "You give") + "</td></tr>";
       sd.rows.forEach(function (r) {
         var p = r.p, v = r.v, id = "d-" + pair[0] + "-" + p.id.replace(/[^a-z0-9]/gi, "");
         rows += '<tr class="main row" data-toggle="' + id + '"><td class="l"><div class="who">' + head(p) + '<div><div class="nm">' + esc(p.short || p.n) + '</div><div class="meta"><span class="pos ' + p.pos + '">' + p.pos + "</span>" + (p.team ? "<span>" + esc(p.team) + "</span>" : "") + injTag(p) + "</div></div></div></td>" +
-          '<td class="mono">' + f0(v.market) + (v.est ? "*" : "") + '</td><td class="mono">' + (p.m && p.m.ros && !v.why ? f1(p.m.ros[0]) + ' <span class="sub">/ ' + f1(p.m.ros[1]) + "</span>" : "—") + '</td><td class="mono ' + (v.mult > 1.005 ? "pos-c" : v.mult < 0.995 ? "neg-c" : "") + '">×' + v.mult.toFixed(2) + '</td><td class="mono">' + f0(v.blend) + '</td><td class="mono">' + f0(v.current) + '</td><td class="mono">' + Math.round(r.w * 100) + '%</td><td class="mono"><b>' + f0(r.counts) + "</b></td></tr>" +
-          '<tr class="detail" id="' + id + '"' + (state.open && state.open[id] ? "" : " hidden") + '><td colspan="8">' + detailChips(c, p, v) + "</td></tr>";
+          '<td class="mono">' + f0(v.market) + (v.est ? "*" : "") + '</td><td class="mono">' + (p.m && p.m.ros && !v.why ? f1(p.m.ros[0]) + ' <span class="sub">/ ' + f1(p.m.ros[1]) + "</span>" : "—") + '</td><td class="mono ' + (v.mult > 1.005 ? "pos-c" : v.mult < 0.995 ? "neg-c" : "") + '">×' + v.mult.toFixed(2) + '</td><td class="mono ' + (v.av && v.av.factor < 0.995 ? "neg-c" : "") + '">' + (v.av && v.av.factor < 0.995 ? "×" + v.av.factor.toFixed(2) : "—") + '</td><td class="mono">' + f0(v.blend) + '</td><td class="mono">' + f0(v.current) + '</td><td class="mono">' + Math.round(r.w * 100) + '%</td><td class="mono"><b>' + f0(r.counts) + "</b></td></tr>" +
+          '<tr class="detail" id="' + id + '"' + (state.open && state.open[id] ? "" : " hidden") + '><td colspan="9">' + detailChips(c, p, v) + "</td></tr>";
       });
-      rows += '<tr class="total"><td class="l" colspan="7">Total ' + (pair[0] === "get" ? "you get" : "you give") + '</td><td class="mono">' + f0(sd.total) + "</td></tr>";
+      rows += '<tr class="total"><td class="l" colspan="8">Total ' + (pair[0] === "get" ? "you get" : "you give") + '</td><td class="mono">' + f0(sd.total) + "</td></tr>";
     });
-    $("#ledger").innerHTML = rows || '<tr><td colspan="8" class="l" style="color:var(--muted)">Add players to see the math.</td></tr>';
+    $("#ledger").innerHTML = rows || '<tr><td colspan="9" class="l" style="color:var(--muted)">Add players to see the math.</td></tr>';
 
     // ---- lineup diff ----
     var slots = [], seen = {};
