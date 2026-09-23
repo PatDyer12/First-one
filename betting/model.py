@@ -341,19 +341,40 @@ def current_card(df, current):
         best = {}
         for market, book, name, w, pu, lo, odds, side, line in options(r, *pm, offers=books.get((r.away, r.home))):
             ev, stake = evaluate(w, pu, lo, odds)
-            if ev > LEAN_EV and (market not in best or ev > best[market]["ev"]):
-                best[market] = {"game_id": r.game_id, "side": side, "game": f"{r.away} @ {r.home}", "market": market,
-                                "line": None if market == "ml" else line, "book": book, "bet": name,
-                                "odds": int(odds) if pd.notna(odds) else -110, "win%": round(100 * w / max(w + lo, 1e-9), 1),
-                                "push%": round(100 * pu, 1), "ev": ev,
-                                "stake%": round(100 * stake, 2) if ev > MIN_EV[market] else 0.0,
-                                "tier": "BET" if ev > MIN_EV[market] else "lean"}
+            if market in best and ev <= best[market]["ev"]:
+                continue
+            tier = "BET" if ev > MIN_EV[market] else "lean" if ev > LEAN_EV else "watch"
+            best[market] = {"game_id": r.game_id, "side": side, "game": f"{r.away} @ {r.home}", "market": market,
+                            "line": None if market == "ml" else line, "book": book, "bet": name,
+                            "odds": int(odds) if pd.notna(odds) else -110, "win%": round(100 * w / max(w + lo, 1e-9), 1),
+                            "push%": round(100 * pu, 1), "ev": ev, "stake%": round(100 * stake, 2) if tier == "BET" else 0.0,
+                            "tier": tier, "target": target_price(r, pm, market, side, line)}
         picks += best.values()
     picks = pd.DataFrame(picks)
     if len(picks):
-        picks = picks.sort_values("ev", ascending=False)
+        order = {"BET": 0, "lean": 1, "watch": 2}
+        picks = picks.sort_values(["tier", "ev"], key=lambda c: c.map(order) if c.name == "tier" else -c)
         picks["ev%"] = (100 * picks.pop("ev")).round(1)
     return week, (pd.DataFrame(rows), picks, float(wk.w_spread.iloc[0]), float(wk.w_total.iloc[0]))
+
+
+def need_odds(w, lo, thr):
+    """Worst American odds that still give expected value >= thr for a bet winning w, losing lo."""
+    b = (thr + lo) / max(w, 1e-9)
+    return round(100 * b) if b >= 1 else -round(100 / b)
+
+
+def target_price(r, pm, market, side, line):
+    """The price to look for on FanDuel/DraftKings: odds needed for a BET at this line, and at half a point better."""
+    def fmt(o):
+        return f"{o:+d}" if abs(o) < 1000 else "no"
+    w, pu, lo = price(r, pm, market, side, line)
+    out = f"{fmt(need_odds(w, lo, MIN_EV[market]))} or better"
+    if market != "ml":
+        better = line - 0.5 if side in ("home", "over") else line + 0.5
+        w2, _p, lo2 = price(r, pm, market, side, better)
+        out += f"; at {label(r, market, side, better)}: {fmt(need_odds(w2, lo2, MIN_EV[market]))}"
+    return out
 
 
 def book_offers():
@@ -410,9 +431,12 @@ def main():
         print(f"\n{current} week {week}: fair lines (model weight spread {ws:.2f}, total {wt:.2f})")
         print(board.to_string(index=False))
         n = int((picks["tier"] == "BET").sum()) if len(picks) else 0
-        print(f"\n{n} bet(s) clear the {100 * MIN_EV['spread']:.0f}% EV bar; leans are 1%+ (track them, don't bet them)")
+        if not book_offers():
+            print("\nNo FanDuel/DraftKings odds loaded (add betting/odds_api_key.txt). Prices below are consensus:"
+                  " check your FD/DK app against the target column.")
+        print(f"\n{n} bet(s) clear the {100 * MIN_EV['spread']:.0f}% EV bar. lean = 1-3%, watch = model's side but no edge at this price")
         if len(picks):
-            print(picks.drop(columns=["game_id", "side", "line"]).to_string(index=False))
+            print(picks.drop(columns=["game_id", "side", "line", "push%"]).to_string(index=False))
         import track
         log = track.grade(track.log_picks(picks.to_dict("records")), df, no_vig, payout)
         track.save(log)

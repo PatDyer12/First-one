@@ -15,6 +15,11 @@ one run uses 1) and put it in `betting/odds_api_key.txt` (ignored by git) or the
 Then only FanDuel and DraftKings prices are bettable, and the model tells you which of the two has the better
 number for each bet. Without a key it prices the consensus line. `betting/my_lines.csv` still overrides anything by hand.
 
+**The card** shows a spread, moneyline and total pick for every game: BET (3%+ edge), lean (1–3%), or
+watch (the model's side, no edge at today's price). Each has a **"bet it at"** price: the FD/DK odds (and the
+odds at half a point better, if you buy or find an alt line) where it becomes a BET. With no odds key, check
+those targets in your FanDuel/DraftKings app yourself.
+
 **Bet tracker:** every BET is logged to `betting/bet_log.csv` at the line when it was first recommended,
 then graded against the result and the **closing line** (CLV). Set `placed` to `no` for bets you skip.
 
