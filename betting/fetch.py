@@ -10,6 +10,11 @@ Writes to betting/data/:
   games.csv       schedule + lines + results
   team_games.csv  one row per team per game: offensive EPA/play, success, pass/rush EPA, plays
   qb_games.csv    one row per QB per game: dropbacks and EPA
+  injuries.csv    weekly injury reports (Out / Doubtful / Questionable), 2012+
+  snaps.csv       snap share for every player in every game, 2012+
+  weather.csv     kickoff forecast (Open-Meteo) for the upcoming week's outdoor games
+  book_odds.csv   FanDuel + DraftKings current spread / total / moneyline (The Odds API, optional:
+                  free key from the-odds-api.com in env ODDS_API_KEY or betting/odds_api_key.txt; 1 request per run)
 
 Usage: python3 betting/fetch.py            (only re-downloads the current season's plays)
        python3 betting/fetch.py --all      (re-download every season)
@@ -17,9 +22,12 @@ Usage: python3 betting/fetch.py            (only re-downloads the current season
 import io
 import os
 import sys
+import time
 
 import pandas as pd
 import requests
+
+sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 
 HERE = os.path.dirname(os.path.abspath(__file__))
 DATA = os.path.join(HERE, "data")
@@ -27,6 +35,8 @@ CACHE = os.path.join(DATA, "pbp")
 GAMES_URL = "https://raw.githubusercontent.com/nflverse/nfldata/master/data/games.csv"
 PBP_URL = "https://github.com/nflverse/nflverse-data/releases/download/pbp/play_by_play_{}.parquet"
 FIRST = 2009
+FIRST_PLAYERS = 2012
+REL = "https://github.com/nflverse/nflverse-data/releases/download/{0}/{0}_{1}.parquet"
 COLS = ["game_id", "season", "week", "posteam", "defteam", "play_type", "pass", "rush", "epa", "success",
         "qb_epa", "passer_player_id", "passer_player_name", "rusher_player_id", "qb_dropback",
         "interception", "fumble_lost", "wp", "half_seconds_remaining", "qtr"]
@@ -61,22 +71,138 @@ def season_tables(season):
     return team, qb.rename(columns={"posteam": "team", "passer_player_id": "qb_id"})
 
 
+def player_tables(season):
+    inj = pd.read_parquet(io.BytesIO(get(REL.format("injuries", season))))
+    inj = inj[["season", "week", "team", "gsis_id", "full_name", "position", "report_status"]]
+    inj.to_csv(os.path.join(CACHE, f"injuries_{season}.csv"), index=False)
+    try:
+        sn = pd.read_parquet(io.BytesIO(get(REL.format("snap_counts", season))))
+    except requests.HTTPError:
+        return
+    sn = sn[["game_id", "season", "week", "team", "pfr_player_id", "player", "position", "offense_pct", "defense_pct"]]
+    sn.to_csv(os.path.join(CACHE, f"snaps_{season}.csv"), index=False)
+
+
+def weather(games, season):
+    """Kickoff-hour forecast for next week's games that are played outdoors (one batched request)."""
+    import stadiums
+    up = games[(games["season"] == season) & games["result"].isna()]
+    rows = []
+    wk = up[(up["week"] == up["week"].min()) & ~up["roof"].isin(["dome", "closed", "retractable"])] if len(up) else up
+    if len(wk):
+        sites = [stadiums.game_site(g.home_team, g.season, g.stadium_id, g.location == "Neutral") for g in wk.itertuples()]
+        params = {"latitude": ",".join(str(s[0]) for s in sites), "longitude": ",".join(str(s[1]) for s in sites),
+                  "hourly": "temperature_2m,wind_speed_10m,precipitation", "wind_speed_unit": "mph",
+                  "temperature_unit": "fahrenheit", "timezone": "America/New_York",
+                  "start_date": wk["gameday"].min(), "end_date": wk["gameday"].max()}
+        data = None
+        for attempt in range(4):
+            try:
+                data = requests.get("https://api.open-meteo.com/v1/forecast", params=params, timeout=60).json()
+                break
+            except Exception as e:
+                print("weather retry", attempt + 1, e)
+                time.sleep(2 ** (attempt + 1))
+        if isinstance(data, dict):
+            data = [data]
+        for g, loc in zip(wk.itertuples(), data or []):
+            h = loc.get("hourly")
+            if not h:
+                continue
+            stamp = f"{g.gameday}T{int(str(g.gametime)[:2]) + 1:02d}:00"  # middle of the game
+            if stamp in h["time"]:
+                i = h["time"].index(stamp)
+                rows.append({"game_id": g.game_id, "temp": h["temperature_2m"][i], "wind": h["wind_speed_10m"][i],
+                             "precip": h["precipitation"][i]})
+    pd.DataFrame(rows, columns=["game_id", "temp", "wind", "precip"]).to_csv(os.path.join(DATA, "weather.csv"), index=False)
+    print("weather forecasts:", len(rows))
+
+
+NAMES = {"Arizona Cardinals": "ARI", "Atlanta Falcons": "ATL", "Baltimore Ravens": "BAL", "Buffalo Bills": "BUF",
+         "Carolina Panthers": "CAR", "Chicago Bears": "CHI", "Cincinnati Bengals": "CIN", "Cleveland Browns": "CLE",
+         "Dallas Cowboys": "DAL", "Denver Broncos": "DEN", "Detroit Lions": "DET", "Green Bay Packers": "GB",
+         "Houston Texans": "HOU", "Indianapolis Colts": "IND", "Jacksonville Jaguars": "JAX", "Kansas City Chiefs": "KC",
+         "Las Vegas Raiders": "LV", "Los Angeles Chargers": "LAC", "Los Angeles Rams": "LA", "Miami Dolphins": "MIA",
+         "Minnesota Vikings": "MIN", "New England Patriots": "NE", "New Orleans Saints": "NO", "New York Giants": "NYG",
+         "New York Jets": "NYJ", "Philadelphia Eagles": "PHI", "Pittsburgh Steelers": "PIT", "San Francisco 49ers": "SF",
+         "Seattle Seahawks": "SEA", "Tampa Bay Buccaneers": "TB", "Tennessee Titans": "TEN", "Washington Commanders": "WAS"}
+
+
+BOOKS = ["fanduel", "draftkings"]  # the books you can bet at
+
+
+def book_odds():
+    """Current lines at FanDuel and DraftKings. Taking the better of the two is an edge no model can take away."""
+    key = os.environ.get("ODDS_API_KEY")
+    key_file = os.path.join(HERE, "odds_api_key.txt")
+    if not key and os.path.exists(key_file):
+        key = open(key_file).read().strip()
+    out = os.path.join(DATA, "book_odds.csv")
+    if not key:
+        if os.path.exists(out):
+            os.remove(out)
+        print("book odds: skipped (no ODDS_API_KEY)")
+        return
+    r = requests.get("https://api.the-odds-api.com/v4/sports/americanfootball_nfl/odds", timeout=60, params={
+        "apiKey": key, "bookmakers": ",".join(BOOKS), "markets": "h2h,spreads,totals", "oddsFormat": "american"})
+    r.raise_for_status()
+    rows = parse_odds(r.json())
+    pd.DataFrame(rows, columns=["away", "home", "book", "market", "side", "line", "odds"]).to_csv(out, index=False)
+    print(f"book odds: {len(rows)} prices, {r.headers.get('x-requests-remaining', '?')} API requests left this month")
+
+
+def parse_odds(events):
+    rows = []
+    for ev in events:
+        home, away = NAMES.get(ev["home_team"]), NAMES.get(ev["away_team"])
+        if not home or not away:
+            continue
+        for bk in ev.get("bookmakers", []):
+            for mk in bk.get("markets", []):
+                for o in mk.get("outcomes", []):
+                    if mk["key"] == "h2h":
+                        side, line = ("home" if o["name"] == ev["home_team"] else "away"), 0
+                        market = "ml"
+                    elif mk["key"] == "spreads":
+                        side = "home" if o["name"] == ev["home_team"] else "away"
+                        # spread_line convention: expected home margin (home -3 -> 3)
+                        line = -o["point"] if side == "home" else o["point"]
+                        market = "spread"
+                    elif mk["key"] == "totals":
+                        side, line, market = o["name"].lower(), o["point"], "total"
+                    else:
+                        continue
+                    rows.append({"away": away, "home": home, "book": bk["title"], "market": market,
+                                 "side": side, "line": line, "odds": o["price"]})
+    return rows
+
+
 def main():
     os.makedirs(CACHE, exist_ok=True)
     games = pd.read_csv(io.BytesIO(get(GAMES_URL)))
+    # upcoming games at retractable-roof stadiums have no roof listed yet: use the stadium's usual setting
+    usual = games.dropna(subset=["roof"]).groupby("stadium_id")["roof"].agg(lambda r: r.mode()[0])
+    games["roof"] = games["roof"].fillna(games["stadium_id"].map(usual)).fillna("outdoors")
     games.to_csv(os.path.join(DATA, "games.csv"), index=False)
     current = int(games.loc[games["result"].notna(), "season"].max())
     for season in range(FIRST, current + 1):
         tf, qf = (os.path.join(CACHE, f"{k}_{season}.csv") for k in ("team", "qb"))
         if os.path.exists(tf) and season != current and "--all" not in sys.argv:
-            continue
-        print("plays", season, flush=True)
-        team, qb = season_tables(season)
-        team.to_csv(tf, index=False)
-        qb.to_csv(qf, index=False)
-    for k in ("team", "qb"):
-        parts = [pd.read_csv(os.path.join(CACHE, f"{k}_{s}.csv")) for s in range(FIRST, current + 1)]
-        pd.concat(parts).to_csv(os.path.join(DATA, f"{k}_games.csv"), index=False)
+            if season < FIRST_PLAYERS or os.path.exists(os.path.join(CACHE, f"injuries_{season}.csv")):
+                continue
+        else:
+            print("plays", season, flush=True)
+            team, qb = season_tables(season)
+            team.to_csv(tf, index=False)
+            qb.to_csv(qf, index=False)
+        if season >= FIRST_PLAYERS:
+            player_tables(season)
+    for k, first in (("team", FIRST), ("qb", FIRST), ("injuries", FIRST_PLAYERS), ("snaps", FIRST_PLAYERS)):
+        parts = [pd.read_csv(os.path.join(CACHE, f"{k}_{s}.csv")) for s in range(first, current + 1)
+                 if os.path.exists(os.path.join(CACHE, f"{k}_{s}.csv"))]
+        pd.concat(parts).to_csv(os.path.join(DATA, f"{k}.csv" if k in ("injuries", "snaps") else f"{k}_games.csv"), index=False)
+    weather(games, current)
+    book_odds()
     print("games through", games.loc[games["result"].notna(), "gameday"].max())
 
 

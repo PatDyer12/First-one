@@ -45,7 +45,7 @@ def write(out):
         parts.append(f"<h2>This week's card: {len(bets)} bet{'s' if len(bets) != 1 else ''}, "
                      f"{len(picks) - len(bets)} lean{'s' if len(picks) - len(bets) != 1 else ''}</h2>")
         if picks:
-            parts.append(table(picks, [("", "tier"), ("Game", "game"), ("Bet", "bet"), ("Odds", "odds"),
+            parts.append(table(picks, [("", "tier"), ("Game", "game"), ("Book", "book"), ("Bet", "bet"), ("Odds", "odds"),
                                        ("Win %", "win%"), ("Push %", "push%"), ("Edge (EV)", "ev%"), ("Stake % bankroll", "stake%")],
                                {"tier": lambda v, r: f"<span class='tag {v}'>{v.upper()}</span>",
                                 "odds": lambda v, r: f"{int(v):+d}",
@@ -61,15 +61,31 @@ def write(out):
                                          ("Model only", "model_spread"), ("Fair", "fair_spread"), ("Mkt total", "market_total"),
                                          ("Model total", "model_total"), ("Fair total", "fair_total"), ("Home win %", "home_win%"),
                                          ("Fair ML", "fair_ml")]))
+    tr = out.get("tracker") or {}
+    parts.append("<h2>Your bet tracker</h2>")
+    sm = tr.get("summary")
+    if sm:
+        parts.append("<div class='grid'>" + "".join(f"<div class='stat'><b>{E(str(v))}</b><span>{E(k)}</span></div>" for k, v in (
+            ("Record", sm["record"]), ("Units", f"{sm['units']:+}"), ("ROI", f"{sm['roi%']:+}%"),
+            ("Avg CLV (points)", sm["avg_clv_pts"]), ("Beat the closing line", f"{sm['beat_close%']}%"), ("Open bets", sm["open"]))) + "</div>")
+    else:
+        parts.append("<p class='note'>No graded bets yet. Every BET the model makes is logged in <code>betting/bet_log.csv</code> "
+                     "at the line when it was first recommended, then graded against the result and the closing line.</p>")
+    if tr.get("recent"):
+        parts.append(table(tr["recent"][::-1], [("Logged", "logged"), ("Game", "game"), ("Book", "book"), ("Bet", "bet"), ("Odds", "odds"),
+                                                ("Close", "close_line"), ("CLV pts", "clv_pts"), ("Result", "result"), ("Units", "units")]))
+    parts.append("<p class='note'>Closing-line value (CLV) is the real scoreboard. If the line keeps moving your way after you bet, "
+                 "you're beating the market, even through losing streaks. Win/loss alone needs 500+ bets to mean anything.</p>")
     if bt:
         acc = bt["accuracy"]
-        parts.append(f"<h2>Backtest {bt['from']}–{bt['to']}, every bet placed at the closing line</h2>")
+        parts.append(f"<h2>Backtest: every bet placed at the closing line</h2>")
         parts.append("<div class='grid'>" + "".join(
             f"<div class='stat'><b>{acc[m]['closing line']:.2f} / {acc[m]['model alone']:.2f} / {acc[m]['blend']:.2f}</b>"
             f"<span>{m} RMSE: closing line / model alone / blend (points)</span></div>" for m in ("spread", "total")) + "</div>")
-        parts.append("<p class='note'>No leakage: every season is predicted by a model trained only on earlier seasons. "
-                     "Break-even at -110 is 52.4%.</p>")
-        parts.append(table(bt["table"], [("Market", "market"), ("Min edge", "min_ev"), ("Bets", "bets"), ("W-L-P", "record"),
+        parts.append(f"<p class='note'>No leakage: every season is predicted by a model trained only on earlier seasons. "
+                     f"Features and settings were chosen on 2014–2018 (<b>tuning</b>), so {bt['from']}–{bt['to']} (<b>holdout</b>) is "
+                     f"the honest estimate. Break-even at -110 is 52.4%.</p>")
+        parts.append(table(bt["table"], [("Period", "period"), ("Market", "market"), ("Min edge", "min_ev"), ("Bets", "bets"), ("W-L-P", "record"),
                                          ("Win %", "win%"), ("Units", "units"), ("ROI", "roi%"), ("¼-Kelly bankroll ×", "kelly_bankroll_x")],
                            {"min_ev": lambda v, r: f"{v:.0%}",
                             "units": lambda v, r: f"<span class='{'pos' if v > 0 else 'neg'}'>{v:+.1f}</span>",

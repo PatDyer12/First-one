@@ -26,6 +26,8 @@ import os
 import sys
 import warnings
 
+os.environ.setdefault("OMP_NUM_THREADS", "1")  # small data: threads only add overhead
+
 import numpy as np
 import pandas as pd
 from sklearn.ensemble import HistGradientBoostingRegressor
@@ -39,8 +41,11 @@ import features as F  # noqa: E402
 warnings.filterwarnings("ignore")
 HERE = os.path.dirname(os.path.abspath(__file__))
 FIRST_TRAIN = 2010   # 2009 only warms up the ratings
+MODEL_CFG = {"alpha": 100.0, "depth": 3, "trees": 250, "leaf": 120, "ridge_w": 0.5, "resid": True}
 FIRST_BASE_TEST = 2012
-FIRST_REPORT = 2015
+TUNE_FROM = 2014
+BLEND_HALF_LIFE = 1.5
+FIRST_REPORT = 2019  # 2014-2018 were used to choose features/settings; 2019+ is untouched
 MIN_EV = {"spread": 0.03, "total": 0.03, "ml": 0.03}
 LEAN_EV = 0.01
 KELLY_FRACTION = 0.25
@@ -51,19 +56,44 @@ SCORES = np.arange(-80, 121)
 
 
 # ---------- base models ----------
-def fit_base(train, target, cols):
-    X, y = train[cols].values, train[target].values
-    ridge = make_pipeline(StandardScaler(), Ridge(alpha=30.0)).fit(X, y)
-    gbm = HistGradientBoostingRegressor(max_depth=3, learning_rate=0.03, max_iter=250, min_samples_leaf=60,
-                                        l2_regularization=5.0, random_state=0).fit(X, y)
-    return lambda d: 0.5 * ridge.predict(d[cols].values) + 0.5 * gbm.predict(d[cols].values)
+def fit_base(train, target, cols, line=None, cfg=None):
+    """Ridge + boosted trees, averaged. With `line`, both learn the gap between result and market line
+    (what a bet actually depends on) and the prediction is line + gap; games without a line fall back
+    to a direct model."""
+    cfg = dict(MODEL_CFG, **(cfg or {}))
+    def pair(X, y):
+        ridge = make_pipeline(StandardScaler(), Ridge(alpha=cfg["alpha"])).fit(X, y)
+        gbm = HistGradientBoostingRegressor(max_depth=cfg["depth"], learning_rate=0.03, max_iter=cfg["trees"],
+                                            min_samples_leaf=cfg["leaf"], l2_regularization=5.0, random_state=0).fit(X, y)
+        wr = cfg["ridge_w"]
+        return lambda X2: wr * ridge.predict(X2) + (1 - wr) * gbm.predict(X2)
+    direct = pair(train[cols].values, train[target].values)
+    if not line or not cfg["resid"]:
+        return lambda d: direct(d[cols].values)
+    t = train.dropna(subset=[line])
+    xc = cols + [line]
+    gap = pair(t[xc].values, (t[target] - t[line]).values)
+
+    def predict(d):
+        out = direct(d[cols].values)
+        has = d[line].notna().values
+        if has.any():
+            out[has] = d[line].values[has] + gap(d.loc[has, xc].values)
+        return out
+    return predict
 
 
 def blend_weight(hist, target, line):
-    """Least-squares w in [0, 1] for  target - line = w * (model - line)."""
+    """Least-squares w in [0, 1] for  target - line = w * (model - line), recent seasons weighted most
+    (half-life 1.5 seasons). Markets get sharper over time (legal betting since 2018 made closing lines
+    much harder to beat), so an edge the model had years ago must not decide how much we trust it now."""
     h = hist.dropna(subset=[target, line, "base"])
+    if not len(h):
+        return 0.0
+    age = h["season"].max() - h["season"]
+    sw = 0.5 ** (age / BLEND_HALF_LIFE)
     x, y = (h["base"] - h[line]).values, (h[target] - h[line]).values
-    return float(np.clip((x @ y) / max(x @ x, 1e-9), 0, 1)) if len(h) else 0.0
+    return float(np.clip((sw * x) @ y / max((sw * x) @ x, 1e-9), 0, 1))
 
 
 # ---------- score distributions ----------
@@ -133,33 +163,56 @@ def logit(p):
     return math.log(p / (1 - p))
 
 
-def anchored(fair_pmf, mkt_pmf, L, market_p):
-    """Win/push/lose for the 'over L' side: start from the market's no-vig price and move it only by
-    how far our fair line sits from the market line (measured with the real score distribution)."""
-    w_f, pu, lo_f = over_under(fair_pmf, L)
-    w_m, _pm, lo_m = over_under(mkt_pmf, L)
-    shift = logit(w_f / (w_f + lo_f)) - logit(w_m / (w_m + lo_m))
-    q = 1 / (1 + math.exp(-(logit(market_p) + shift)))
-    return q * (1 - pu), pu, (1 - q) * (1 - pu)
+def price(row, pm, market, side, line):
+    """Win/push/lose for one offer (any book's line), anchored to the consensus no-vig price: the market's
+    probability at its own line, moved by our fair distribution at the offered line."""
+    sp, sp_mkt, tot, tot_mkt = pm
+    if market == "spread":
+        fair, mkt, L_cons, p_cons = sp, sp_mkt, row.spread_line, no_vig(row.home_spread_odds, row.away_spread_odds)
+    elif market == "total":
+        fair, mkt, L_cons, p_cons = tot, tot_mkt, row.total_line, no_vig(row.over_odds, row.under_odds)
+    else:
+        fair, mkt, L_cons, line = sp, sp_mkt, 0, 0
+        p_cons = no_vig(row.home_ml, row.away_ml) if pd.notna(row.home_ml) and pd.notna(row.away_ml) else 0.5
+    w_f, pu, lo_f = over_under(fair, line)
+    w_m, _pm, lo_m = over_under(mkt, L_cons)
+    q = 1 / (1 + math.exp(-(logit(p_cons) + logit(w_f / (w_f + lo_f)) - logit(w_m / (w_m + lo_m)))))
+    w, lo = q * (1 - pu), (1 - q) * (1 - pu)
+    return (w, pu, lo) if side in ("home", "over") else (lo, pu, w)
 
 
-def options(row, sp, sp_mkt, tot, tot_mkt):
-    """Every bet on the board for a game with our win/push/lose probabilities."""
+def label(row, market, side, line):
+    team = row.home if side == "home" else row.away
+    if market == "spread":
+        return f"{team} {(-line if side == 'home' else line):+g}"
+    if market == "ml":
+        return f"{team} ML"
+    return f"{side.title()} {line:g}"
+
+
+def consensus_offers(row):
     out = []
     if pd.notna(row.spread_line):
-        L = row.spread_line
-        w, pu, lo = anchored(sp, sp_mkt, L, no_vig(row.home_spread_odds, row.away_spread_odds))
-        out.append(("spread", row.home, f"{row.home} {-L:+g}", w, pu, lo, row.home_spread_odds, "home"))
-        out.append(("spread", row.away, f"{row.away} {L:+g}", lo, pu, w, row.away_spread_odds, "away"))
+        out += [("spread", "home", row.spread_line, row.home_spread_odds), ("spread", "away", row.spread_line, row.away_spread_odds)]
     if pd.notna(row.home_ml) and pd.notna(row.away_ml):
-        w, pu, lo = anchored(sp, sp_mkt, 0, no_vig(row.home_ml, row.away_ml))
-        out.append(("ml", row.home, f"{row.home} ML", w, pu, lo, row.home_ml, "home"))
-        out.append(("ml", row.away, f"{row.away} ML", lo, pu, w, row.away_ml, "away"))
+        out += [("ml", "home", 0, row.home_ml), ("ml", "away", 0, row.away_ml)]
     if pd.notna(row.total_line):
-        L = row.total_line
-        w, pu, lo = anchored(tot, tot_mkt, L, no_vig(row.over_odds, row.under_odds))
-        out.append(("total", "over", f"Over {L:g}", w, pu, lo, row.over_odds, "over"))
-        out.append(("total", "under", f"Under {L:g}", lo, pu, w, row.under_odds, "under"))
+        out += [("total", "over", row.total_line, row.over_odds), ("total", "under", row.total_line, row.under_odds)]
+    return out
+
+
+def options(row, sp, sp_mkt, tot, tot_mkt, offers=None):
+    """Every bet on the board for a game with our win/push/lose probabilities.
+    offers: (market, side, line, odds, book) from your books (FanDuel/DraftKings). When given, only those are
+    bettable; the consensus line still anchors the probabilities. Without them, consensus prices stand in."""
+    pm = (sp, sp_mkt, tot, tot_mkt)
+    allo = list(offers) if offers else [o + ("consensus",) for o in consensus_offers(row)]
+    out = []
+    for market, side, line, odds, book in allo:
+        if (market == "spread" and pd.isna(row.spread_line)) or (market == "total" and pd.isna(row.total_line)):
+            continue
+        w, pu, lo = price(row, pm, market, side, line)
+        out.append((market, book, label(row, market, side, line), w, pu, lo, odds, side, line))
     return out
 
 
@@ -187,7 +240,7 @@ def predict_season(df, season, oos):
     test = df[df.season == season].copy()
     info = {}
     for m, (target, line, cols, bw, grid) in MARKETS.items():
-        test[f"base_{m}"] = fit_base(train, target, cols)(test)
+        test[f"base_{m}"] = fit_base(train, target, cols, line)(test)
         hist = oos[m][oos[m].season < season] if len(oos[m]) else oos[m]
         w = blend_weight(hist, target, line) if len(hist) else 0.5
         test[f"w_{m}"] = w
@@ -208,20 +261,19 @@ def run():
             done = test[test[target].notna()][["season", target, line, f"base_{m}"]].rename(columns={f"base_{m}": "base"})
             oos[m] = pd.concat([oos[m], done])
         seasons_out.append(test)
-        if season < FIRST_REPORT:
+        if season < TUNE_FROM:
             continue
         for r in test[test.result.notna()].itertuples(index=False):
-            for market, _t, label, w, pu, lo, odds, side in options(r, *game_pmfs(r, (info["spread"][1], info["total"][1]))):
+            for market, _b, name, w, pu, lo, odds, side, _l in options(r, *game_pmfs(r, (info["spread"][1], info["total"][1]))):
                 ev, stake = evaluate(w, pu, lo, odds)
                 bets.append({"season": r.season, "week": r.week, "game_id": r.game_id, "market": market,
-                             "bet": label, "p": w, "ev": ev, "stake": stake,
+                             "bet": name, "p": w, "ev": ev, "stake": stake,
                              "units": settle(r, market, side, odds)})
     all_games = pd.concat(seasons_out)
     return df, all_games, pd.DataFrame(bets), info, current
 
 
 def summarize(games, bets):
-    lines = []
     g = games[(games.season >= FIRST_REPORT) & games.result.notna()]
     rm = lambda a, b: float(np.sqrt(np.mean((a - b) ** 2)))  # noqa: E731
     acc = {
@@ -229,21 +281,22 @@ def summarize(games, bets):
                    "blend": rm(g.result, g.fair_spread)},
         "total": {"closing line": rm(g.total, g.total_line), "model alone": rm(g.total, g.base_total),
                   "blend": rm(g.total, g.fair_total)}}
-    weights = g.groupby("season")[["w_spread", "w_total"]].first().round(2)
+    weights = games[games.season >= TUNE_FROM].groupby("season")[["w_spread", "w_total"]].first().round(2)
     table = []
-    for m in ("spread", "total", "ml"):
-        for thr in (0.0, 0.02, 0.03, 0.05, 0.08):
-            b = bets[(bets.market == m) & (bets.ev > thr)]
-            # one bet per game per market: the side with the higher EV
-            b = b.sort_values("ev").groupby(["game_id"]).tail(1)
-            if not len(b):
-                continue
-            wins, losses, pushes = (b.units > 0).sum(), (b.units < 0).sum(), (b.units == 0).sum()
-            kelly_growth = float(np.prod(1 + b.stake * b.units))
-            table.append({"market": m, "min_ev": thr, "bets": len(b), "record": f"{wins}-{losses}-{pushes}",
-                          "win%": round(100 * wins / max(wins + losses, 1), 1),
-                          "units": round(b.units.sum(), 1), "roi%": round(100 * b.units.mean(), 1),
-                          "kelly_bankroll_x": round(kelly_growth, 2)})
+    periods = {"holdout": bets.season >= FIRST_REPORT, "tuning": bets.season < FIRST_REPORT}
+    for period, mask in periods.items():
+        for m in ("spread", "total", "ml"):
+            for thr in (0.0, 0.02, 0.03, 0.05):
+                b = bets[mask & (bets.market == m) & (bets.ev > thr)]
+                # one bet per game per market: the side with the higher EV
+                b = b.sort_values("ev").groupby(["game_id"]).tail(1)
+                if not len(b):
+                    continue
+                wins, losses, pushes = (b.units > 0).sum(), (b.units < 0).sum(), (b.units == 0).sum()
+                table.append({"period": period, "market": m, "min_ev": thr, "bets": len(b),
+                              "record": f"{wins}-{losses}-{pushes}", "win%": round(100 * wins / max(wins + losses, 1), 1),
+                              "units": round(b.units.sum(), 1), "roi%": round(100 * b.units.mean(), 1),
+                              "kelly_bankroll_x": round(float(np.prod(1 + b.stake * b.units)), 2)})
     return acc, weights, pd.DataFrame(table)
 
 
@@ -261,24 +314,24 @@ def current_card(df, current):
         test = df[(df.season == season) & df.result.notna()]
         for m, (target, line, cols, *_r) in MARKETS.items():
             t = test[["season", target, line]].copy()
-            t["base"] = fit_base(train, target, cols)(test)
+            t["base"] = fit_base(train, target, cols, line)(test)
             oos[m] = pd.concat([oos[m], t])
     train = df[(df.season >= FIRST_TRAIN) & df.result.notna()]
     wk = df[(df.season == current) & (df.week == week)].copy()
     pmfs = {}
     for m, (target, line, cols, bw, grid) in MARKETS.items():
-        wk[f"base_{m}"] = fit_base(train, target, cols)(wk)
+        wk[f"base_{m}"] = fit_base(train, target, cols, line)(wk)
         w = blend_weight(oos[m], target, line)
         wk[f"w_{m}"] = w
         wk[f"fair_{m}"] = (w * wk[f"base_{m}"] + (1 - w) * wk[line]).fillna(wk[f"base_{m}"])
         pmfs[m] = pmf_table(train, target, line, bw, grid, m == "spread")
+    books = book_offers()
     rows, picks = [], []
     for r in wk.itertuples(index=False):
         pm = game_pmfs(r, (pmfs["spread"], pmfs["total"]))
         home_win = over_under(pm[0], 0)
         if pd.notna(r.home_ml) and pd.notna(r.away_ml):
-            hw = anchored(pm[0], pm[1], 0, no_vig(r.home_ml, r.away_ml))
-            home_win = (hw[0], hw[1])
+            home_win = price(r, pm, "ml", "home", 0)[:2]
         rows.append({"game": f"{r.away} @ {r.home}", "gameday": r.gameday, "qbs": f"{r.away_qb or '?'} / {r.home_qb or '?'}",
                      "market_spread": f"{r.home} {-r.spread_line:+g}" if pd.notna(r.spread_line) else "",
                      "model_spread": f"{r.home} {-r.base_spread:+.1f}", "fair_spread": f"{r.home} {-r.fair_spread:+.1f}",
@@ -286,10 +339,11 @@ def current_card(df, current):
                      "home_win%": round(100 * (home_win[0] + home_win[1] / 2), 1),
                      "fair_ml": f"{r.home} {to_american(home_win[0] + home_win[1] / 2):+d}"})
         best = {}
-        for market, _t, label, w, pu, lo, odds, side in options(r, *pm):
+        for market, book, name, w, pu, lo, odds, side, line in options(r, *pm, offers=books.get((r.away, r.home))):
             ev, stake = evaluate(w, pu, lo, odds)
             if ev > LEAN_EV and (market not in best or ev > best[market]["ev"]):
-                best[market] = {"game": f"{r.away} @ {r.home}", "market": market, "bet": label,
+                best[market] = {"game_id": r.game_id, "side": side, "game": f"{r.away} @ {r.home}", "market": market,
+                                "line": None if market == "ml" else line, "book": book, "bet": name,
                                 "odds": int(odds) if pd.notna(odds) else -110, "win%": round(100 * w / max(w + lo, 1e-9), 1),
                                 "push%": round(100 * pu, 1), "ev": ev,
                                 "stake%": round(100 * stake, 2) if ev > MIN_EV[market] else 0.0,
@@ -300,6 +354,17 @@ def current_card(df, current):
         picks = picks.sort_values("ev", ascending=False)
         picks["ev%"] = (100 * picks.pop("ev")).round(1)
     return week, (pd.DataFrame(rows), picks, float(wk.w_spread.iloc[0]), float(wk.w_total.iloc[0]))
+
+
+def book_offers():
+    """(away, home) -> [(market, side, line, odds, book)] from betting/data/book_odds.csv (fetch.py, needs an API key)."""
+    path = os.path.join(HERE, "data", "book_odds.csv")
+    if not os.path.exists(path):
+        return {}
+    out = {}
+    for r in pd.read_csv(path).itertuples(index=False):
+        out.setdefault((r.away, r.home), []).append((r.market, r.side, r.line, r.odds, r.book))
+    return out
 
 
 def apply_my_lines(df, season, week):
@@ -334,7 +399,7 @@ def main():
             print(" ", m, {k: round(v, 3) for k, v in d.items()})
         print("\nBlend weight on the model each season (0 = trust the market fully)")
         print(weights.to_string())
-        print(f"\nBacktest {FIRST_REPORT}-{current} vs CLOSING lines, 1 unit flat bets")
+        print(f"\nBacktest vs CLOSING lines, 1 unit flat bets. holdout = {FIRST_REPORT}-{current} (never used for tuning)")
         print(table.to_string(index=False))
         out["backtest"] = {"accuracy": acc, "weights": weights.reset_index().to_dict("records"),
                            "table": table.to_dict("records"), "from": FIRST_REPORT, "to": current}
@@ -347,7 +412,11 @@ def main():
         n = int((picks["tier"] == "BET").sum()) if len(picks) else 0
         print(f"\n{n} bet(s) clear the {100 * MIN_EV['spread']:.0f}% EV bar; leans are 1%+ (track them, don't bet them)")
         if len(picks):
-            print(picks.to_string(index=False))
+            print(picks.drop(columns=["game_id", "side", "line"]).to_string(index=False))
+        import track
+        log = track.grade(track.log_picks(picks.to_dict("records")), df, no_vig, payout)
+        track.save(log)
+        out["tracker"] = {"summary": track.summary(log), "recent": log.tail(25).fillna("").to_dict("records")}
         out["week"] = {"season": current, "week": week, "board": board.to_dict("records"),
                        "picks": picks.to_dict("records"), "w_spread": ws, "w_total": wt}
     path = os.path.join(HERE, "data", "card.json")
