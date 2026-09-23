@@ -3,6 +3,8 @@
 A fantasy football trade analyzer tuned to three real leagues (Yahoo redraft, Sleeper dynasty superflex, Sleeper 32-team keeper with half PPR + TE premium).
 Open `index.html` in a browser.
 
+Also here: an NFL spread/total/moneyline betting model in [`betting/`](betting/README.md).
+
 ## Data
 
 `python3 scripts/fetch_data.py` pulls fresh data into `data/fts-data.js`:
