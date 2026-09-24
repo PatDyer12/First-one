@@ -128,53 +128,16 @@ NAMES = {"Arizona Cardinals": "ARI", "Atlanta Falcons": "ATL", "Baltimore Ravens
          "Seattle Seahawks": "SEA", "Tampa Bay Buccaneers": "TB", "Tennessee Titans": "TEN", "Washington Commanders": "WAS"}
 
 
-BOOKS = ["fanduel", "draftkings"]  # the books you can bet at
+ESPN_ABBR = {"WSH": "WAS", "LAR": "LA"}
 
 
 def book_odds():
-    """Current lines at FanDuel and DraftKings. Taking the better of the two is an edge no model can take away."""
-    key = os.environ.get("ODDS_API_KEY")
-    key_file = os.path.join(HERE, "odds_api_key.txt")
-    if not key and os.path.exists(key_file):
-        key = open(key_file).read().strip()
-    out = os.path.join(DATA, "book_odds.csv")
-    if not key:
-        if os.path.exists(out):
-            os.remove(out)
-        print("book odds: skipped (no ODDS_API_KEY)")
-        return
-    r = requests.get("https://api.the-odds-api.com/v4/sports/americanfootball_nfl/odds", timeout=60, params={
-        "apiKey": key, "bookmakers": ",".join(BOOKS), "markets": "h2h,spreads,totals", "oddsFormat": "american"})
-    r.raise_for_status()
-    rows = parse_odds(r.json())
-    pd.DataFrame(rows, columns=["away", "home", "book", "market", "side", "line", "odds"]).to_csv(out, index=False)
-    print(f"book odds: {len(rows)} prices, {r.headers.get('x-requests-remaining', '?')} API requests left this month")
-
-
-def parse_odds(events):
-    rows = []
-    for ev in events:
-        home, away = NAMES.get(ev["home_team"]), NAMES.get(ev["away_team"])
-        if not home or not away:
-            continue
-        for bk in ev.get("bookmakers", []):
-            for mk in bk.get("markets", []):
-                for o in mk.get("outcomes", []):
-                    if mk["key"] == "h2h":
-                        side, line = ("home" if o["name"] == ev["home_team"] else "away"), 0
-                        market = "ml"
-                    elif mk["key"] == "spreads":
-                        side = "home" if o["name"] == ev["home_team"] else "away"
-                        # spread_line convention: expected home margin (home -3 -> 3)
-                        line = -o["point"] if side == "home" else o["point"]
-                        market = "spread"
-                    elif mk["key"] == "totals":
-                        side, line, market = o["name"].lower(), o["point"], "total"
-                    else:
-                        continue
-                    rows.append({"away": away, "home": home, "book": bk["title"], "market": market,
-                                 "side": side, "line": line, "odds": o["price"]})
-    return rows
+    """FanDuel + DraftKings prices for this week (DraftKings is free via ESPN; FanDuel needs an Odds API key)."""
+    import books
+    status = books.fetch("nfl", "americanfootball_nfl",
+                         key_of=lambda c: ESPN_ABBR.get(c["team"]["abbreviation"], c["team"]["abbreviation"]),
+                         key_of_name=NAMES.get, out_path=os.path.join(DATA, "book_odds.csv"))
+    print("book odds:", status)
 
 
 def main():

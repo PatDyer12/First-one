@@ -34,10 +34,10 @@ def table(rows, cols, fmt=None):
     return f'<div class="card"><table><thead><tr>{head}</tr></thead><tbody>{body}</tbody></table></div>'
 
 
-def write(out):
+def write(out, path=os.path.join(HERE, "card.html"), title="NFL Betting Model"):
     wk = out.get("week") or {}
     bt = out.get("backtest") or {}
-    parts = [f"<h1>NFL Betting Model</h1><p class='sub'>Updated {datetime.now():%b %d, %Y %H:%M}"
+    parts = [f"<h1>{E(title)}</h1><p class='sub'>Updated {datetime.now():%b %d, %Y %H:%M}"
              + (f" · {wk['season']} Week {wk['week']}" if wk else "") + "</p>"]
     if wk:
         picks = wk["picks"]
@@ -103,6 +103,6 @@ def write(out):
                             "units": lambda v, r: f"<span class='{'pos' if v > 0 else 'neg'}'>{v:+.1f}</span>",
                             "roi%": lambda v, r: f"<span class='{'pos' if v > 0 else 'neg'}'>{v:+.1f}%</span>"}))
     doc = (f"<!doctype html><html lang='en'><head><meta charset='utf-8'><meta name='viewport' content='width=device-width,initial-scale=1'>"
-           f"<title>NFL Betting Model</title><style>{CSS}</style></head><body><main>{''.join(parts)}</main></body></html>")
-    with open(os.path.join(HERE, "card.html"), "w") as f:
+           f"<title>{E(title)}</title><style>{CSS}</style></head><body><main>{''.join(parts)}</main></body></html>")
+    with open(path, "w") as f:
         f.write(doc)

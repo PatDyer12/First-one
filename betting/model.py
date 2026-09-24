@@ -53,6 +53,21 @@ MAX_STAKE = 0.03
 MARKETS = {"spread": ("result", "spread_line", F.SPREAD_FEATURES, 0.75, np.arange(-30, 30.5, 0.5)),
            "total": ("total", "total_line", F.TOTAL_FEATURES, 1.0, np.arange(28, 70.5, 0.5))}
 SCORES = np.arange(-80, 121)
+# where this sport's files live; cfb_model.py swaps these (and MARKETS, BUILD, seasons) for college football
+BUILD = F.build
+DATA = os.path.join(HERE, "data")
+MY_LINES = os.path.join(HERE, "my_lines.csv")
+CARD_HTML = os.path.join(HERE, "card.html")
+BET_LOG = os.path.join(HERE, "bet_log.csv")
+TITLE = "NFL Betting Model"
+CARD_NEEDS_LINE = False  # college: only price games a book has posted
+BOOK_KEYS = ("away", "home")  # columns that match book_odds.csv team keys (college uses ESPN team ids)
+MAX_ML_FAVORITE = -1000  # moneylines steeper than this are never worth showing
+
+
+def configure(**kw):
+    """Point the engine at another sport (see cfb_model.py)."""
+    globals().update(kw)
 
 
 # ---------- base models ----------
@@ -251,7 +266,7 @@ def predict_season(df, season, oos):
 
 
 def run():
-    df = F.build()
+    df = BUILD()
     current = int(df.loc[df.result.notna(), "season"].max())
     oos = {m: pd.DataFrame() for m in MARKETS}
     bets, seasons_out = [], []
@@ -318,6 +333,8 @@ def current_card(df, current):
             oos[m] = pd.concat([oos[m], t])
     train = df[(df.season >= FIRST_TRAIN) & df.result.notna()]
     wk = df[(df.season == current) & (df.week == week)].copy()
+    if CARD_NEEDS_LINE:
+        wk = wk[wk.spread_line.notna() | wk.total_line.notna()]
     pmfs = {}
     for m, (target, line, cols, bw, grid) in MARKETS.items():
         wk[f"base_{m}"] = fit_base(train, target, cols, line)(wk)
@@ -339,7 +356,9 @@ def current_card(df, current):
                      "home_win%": round(100 * (home_win[0] + home_win[1] / 2), 1),
                      "fair_ml": f"{r.home} {to_american(home_win[0] + home_win[1] / 2):+d}"})
         best = {}
-        for market, book, name, w, pu, lo, odds, side, line in options(r, *pm, offers=books.get((r.away, r.home))):
+        for market, book, name, w, pu, lo, odds, side, line in options(r, *pm, offers=books.get(tuple(getattr(r, k) for k in BOOK_KEYS))):
+            if market == "ml" and pd.notna(odds) and odds < MAX_ML_FAVORITE:
+                continue
             ev, stake = evaluate(w, pu, lo, odds)
             if market in best and ev <= best[market]["ev"]:
                 continue
@@ -379,7 +398,7 @@ def target_price(r, pm, market, side, line):
 
 def book_offers():
     """(away, home) -> [(market, side, line, odds, book)] from betting/data/book_odds.csv (fetch.py, needs an API key)."""
-    path = os.path.join(HERE, "data", "book_odds.csv")
+    path = os.path.join(DATA, "book_odds.csv")
     if not os.path.exists(path):
         return {}
     out = {}
@@ -390,7 +409,7 @@ def book_offers():
 
 def apply_my_lines(df, season, week):
     """betting/my_lines.csv lets you price games at the numbers your own book is offering."""
-    path = os.path.join(HERE, "my_lines.csv")
+    path = MY_LINES
     if not os.path.exists(path):
         return df
     df = df.copy()
@@ -409,7 +428,7 @@ def apply_my_lines(df, season, week):
 
 def main():
     week_only = "--week" in sys.argv
-    df = F.build()
+    df = BUILD()
     current = int(df.loc[df.result.notna(), "season"].max())
     out = {}
     if not week_only:
@@ -424,7 +443,7 @@ def main():
         print(table.to_string(index=False))
         out["backtest"] = {"accuracy": acc, "weights": weights.reset_index().to_dict("records"),
                            "table": table.to_dict("records"), "from": FIRST_REPORT, "to": current}
-        bets.to_csv(os.path.join(HERE, "data", "backtest_bets.csv"), index=False)
+        bets.to_csv(os.path.join(DATA, "backtest_bets.csv"), index=False)
     week, card = current_card(df, current)
     if card:
         board, picks, ws, wt = card
@@ -438,19 +457,20 @@ def main():
         if len(picks):
             print(picks.drop(columns=["game_id", "side", "line", "push%"]).to_string(index=False))
         import track
+        track.LOG = BET_LOG
         log = track.grade(track.log_picks(picks.to_dict("records")), df, no_vig, payout)
         track.save(log)
         out["tracker"] = {"summary": track.summary(log), "recent": log.tail(25).fillna("").to_dict("records")}
         out["week"] = {"season": current, "week": week, "board": board.to_dict("records"),
                        "picks": picks.to_dict("records"), "w_spread": ws, "w_total": wt}
-    path = os.path.join(HERE, "data", "card.json")
+    path = os.path.join(DATA, "card.json")
     if week_only and os.path.exists(path):
         with open(path) as f:
             out["backtest"] = json.load(f).get("backtest")
     with open(path, "w") as f:
         json.dump(out, f, indent=1, default=str)
     import report
-    report.write(out)
+    report.write(out, CARD_HTML, TITLE)
 
 
 if __name__ == "__main__":

@@ -1,4 +1,4 @@
-# NFL Betting Model (spread · total · moneyline)
+# NFL + College Football Betting Models (spread · total · moneyline)
 
 Open `betting/card.html` for this week's card, fair lines for every game, and the backtest.
 
@@ -10,10 +10,10 @@ python3 betting/model.py        # retrain, backtest, price this week -> betting/
 ```
 Run it again **Saturday** (final injury reports, fresher weather) and right before you bet (fresh odds).
 
-**FanDuel + DraftKings odds (optional, recommended):** get a free key at the-odds-api.com (500 requests/month;
-one run uses 1) and put it in `betting/odds_api_key.txt` (ignored by git) or the `ODDS_API_KEY` env variable.
-Then only FanDuel and DraftKings prices are bettable, and the model tells you which of the two has the better
-number for each bet. Without a key it prices the consensus line. `betting/my_lines.csv` still overrides anything by hand.
+**FanDuel + DraftKings odds:** DraftKings comes free from ESPN's feed on every run, no setup needed. For FanDuel too,
+get a free key at the-odds-api.com (500 requests/month; each fetch uses 1) and put it in `betting/odds_api_key.txt`
+(ignored by git) or the `ODDS_API_KEY` env variable. Only FD/DK prices are bettable; the market consensus
+line is used only to anchor probabilities. `betting/my_lines.csv` still overrides anything by hand.
 
 **The card** shows a spread, moneyline and total pick for every game: BET (3%+ edge), lean (1–3%), or
 watch (the model's side, no edge at today's price). Each has a **"bet it at"** price: the FD/DK odds (and the
@@ -51,3 +51,25 @@ decision (May 2018). Far more money is now bet into these lines, and they're muc
 - Two edges are still real and don't depend on predictions: **line shopping** (FanDuel vs DraftKings) and **betting early**,
   before lines move. Judge yourself by CLV in the tracker, not by win-loss. Win-loss needs 500+ bets to mean anything.
 - Totals backtests use actual game-day wind, not the forecast bettors had, so they're a bit optimistic.
+
+## College football version
+```
+python3 betting/cfb_fetch.py    # schedules, ESPN play-by-play + lines 2010-now, DraftKings/FanDuel for this week
+python3 betting/cfb_model.py    # backtest + this week's card -> betting/cfb_card.html (tracker: cfb_bet_log.csv)
+```
+Same engine as the NFL model: gap-to-line ridge + boosted trees, recency-weighted market blend, key-number
+score distributions learned from college results, no-vig anchoring, quarter-Kelly staking.
+College ratings (`cfb_features.py`): Elo (FCS and lower divisions start well below FBS), opponent-adjusted EPA,
+success rate, pass/rush split with Bill Connelly's garbage-time rule, pace, points, market power ratings
+and line movement, rest, conference games, division gaps.
+
+What testing showed:
+- College **closing** lines are very efficient, even before 2019. The model's edge correlation vs the close is ~0.
+  Holdout 2019–2026: spreads +2% ROI on 243 bets (any edge), totals −0.4% on 798. A zero-edge bettor averages about
+  −4.5% at -110, so there's maybe a sliver on totals, but nothing proven.
+- Overs have beaten closing college totals lately (+1.3 to +1.4 pts/game in 2023, 2024, 2026). The model has picked
+  that up a little.
+- The softness people talk about in college is in **opening** lines and small games early in the week. Historical
+  opening lines aren't in the free data, so bet early and let the tracker's CLV tell you whether it's working.
+- Not included (no free data): starting QBs, injuries, returning production, recruiting/transfer talent, weather.
+  Historical lines come without odds, so the backtest assumes -110 and can't grade moneylines.

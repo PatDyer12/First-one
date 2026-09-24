@@ -1,0 +1,4 @@
+# Optional (college): numbers your book offers this week. Team names as ESPN writes them (e.g. "Texas A&M"). Any row here overrides the consensus
+# line for that game. Use the book's format: home_spread -3.5 means the home team is favored by 3.5.
+# Leave a cell blank to keep the consensus number. Delete the example row or add your own.
+away,home,home_spread,home_spread_odds,away_spread_odds,total,over_odds,under_odds,home_ml,away_ml
