@@ -62,6 +62,7 @@ BET_LOG = os.path.join(HERE, "bet_log.csv")
 TITLE = "NFL Betting Model"
 CARD_NEEDS_LINE = False  # college: only price games a book has posted
 BOOK_KEYS = ("away", "home")  # columns that match book_odds.csv team keys (college uses ESPN team ids)
+PREFERRED_BOOK = "FanDuel"  # bet here unless DraftKings has a strictly better line or price
 MAX_ML_FAVORITE = -1000  # moneylines steeper than this are never worth showing
 SYSTEM_STAKE = 0.01  # flat 1% of bankroll per system bet
 # Situational systems that survived systems.py (15-season search, luck-adjusted, walk-forward). Each: market, side,
@@ -422,7 +423,7 @@ def system_card(df, wk, books):
                     (r.home_spread_odds if side == "home" else r.away_spread_odds)
                 offers = [(m, side, line, odds, "consensus")]
             # best price: the better number first, then the better odds
-            better = (lambda o: (-o[2] if side in ("over", "home") else o[2], payout(o[3])))
+            better = (lambda o: (-o[2] if side in ("over", "home") else o[2], payout(o[3]), o[4] == PREFERRED_BOOK))
             _m, _s, line, odds, book = max(offers, key=better)
             if pd.isna(line):
                 continue
@@ -466,6 +467,9 @@ def book_offers():
     out = {}
     for r in pd.read_csv(path).itertuples(index=False):
         out.setdefault((r.away, r.home), []).append((r.market, r.side, r.line, r.odds, r.book))
+    # FanDuel first: every comparison keeps the earlier offer on a tie, so DraftKings only wins when strictly better
+    for k in out:
+        out[k].sort(key=lambda o: o[4] != PREFERRED_BOOK)
     return out
 
 

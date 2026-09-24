@@ -13,7 +13,8 @@ Run it again **Saturday** (final injury reports, fresher weather) and right befo
 **FanDuel + DraftKings odds:** DraftKings comes free from ESPN's feed on every run, no setup needed. For FanDuel too,
 get a free key at the-odds-api.com (500 requests/month; each fetch uses 1) and put it in `betting/odds_api_key.txt`
 (ignored by git) or the `ODDS_API_KEY` env variable. Only FD/DK prices are bettable; the market consensus
-line is used only to anchor probabilities. `betting/my_lines.csv` still overrides anything by hand.
+line is used only to anchor probabilities. **FanDuel is the default book**: a bet moves to DraftKings only when DK
+has a strictly better line or price (`PREFERRED_BOOK` in `model.py`). `betting/my_lines.csv` still overrides anything by hand.
 
 **The card** shows a spread, moneyline and total pick for every game: BET (3%+ edge), lean (1–3%), or
 watch (the model's side, no edge at today's price). Each has a **"bet it at"** price: the FD/DK odds (and the
