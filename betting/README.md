@@ -23,6 +23,26 @@ those targets in your FanDuel/DraftKings app yourself.
 **Bet tracker:** every BET is logged to `betting/bet_log.csv` at the line when it was first recommended,
 then graded against the result and the **closing line** (CLV). Set `placed` to `no` for bets you skip.
 
+## The strategy search: what actually made money (`systems.py`)
+`python3 betting/systems.py` tests every market/side crossed with one or two situational filters, plus the model at
+several edge thresholds: 2,055 NFL and 1,192 college strategies over 2011–2025. It checks four things:
+- **Luck test:** a bootstrap reality check (White 2000) of how good the best of that many strategies would look
+  if none had any edge.
+- **Walk-forward:** each season, bet whatever had been best in the seasons before it.
+- **Persistence:** do 2011–18 winners keep winning in 2019–25?
+- **Proven + hot:** strategies profitable long-term that are also best over the last two seasons.
+
+| System (on the cards) | Long-term | 2025–26 | Verdict |
+|---|---|---|---|
+| **College Blowout over**: Over when spread > 30 | 750-581, +7.5% ROI; overs improve steadily with spread size; passes the luck test | 103-77, **+9.2%** (+16.6 u) | **Real edge**, 1% stakes |
+| NFL Close road team, daytime: road team, spread ≤ 3, not primetime | 627-546, +4.4% | 49-39, +6.4% | Weak (t = 1.5), 0.5% stakes, only at -110 or better |
+| NFL Wind under: outdoors, 12–20 mph forecast wind | 327-238, +12.4% | 15-17, −10% | Probable but cold, 0.5% stakes |
+| Everything else, including the spread/ML models | Top 10% of 2011–18 strategies: +10% ROI → −2 to −4% in 2019–25 | | Luck. Don't bet |
+
+Picking by "proven + hot" worked in college historically (top 3: +2.2% ROI, 8 of 10 seasons up) but not in the
+NFL (hot streaks didn't carry over). Each system has a minimum price: the win rates are only a few points above
+break-even, so a -120 price can erase the edge. The card marks those games SKIP.
+
 ## How a prediction is made
 1. **Ratings** (`features.py`), built only from games before kickoff: Elo, opponent-adjusted EPA/success
    (pass and rush, garbage time removed), QB EPA per dropback, points, **market power ratings** (what past

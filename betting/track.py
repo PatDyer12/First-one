@@ -14,7 +14,7 @@ import pandas as pd
 
 HERE = os.path.dirname(os.path.abspath(__file__))
 LOG = os.path.join(HERE, "bet_log.csv")
-COLS = ["logged", "game_id", "game", "market", "side", "book", "bet", "line", "odds", "win_prob", "ev", "stake",
+COLS = ["logged", "tier", "game_id", "game", "market", "side", "book", "bet", "line", "odds", "win_prob", "ev", "stake",
         "placed", "close_line", "close_odds", "clv_pts", "clv_prob", "result", "units"]
 
 
@@ -29,9 +29,9 @@ def log_picks(picks):
     have = set(zip(log.game_id, log.market, log.side))
     new = []
     for p in picks:
-        if p["tier"] != "BET" or (p["game_id"], p["market"], p["side"]) in have:
+        if p["tier"] not in ("BET", "SYSTEM") or (p["game_id"], p["market"], p["side"]) in have:
             continue
-        new.append({"logged": datetime.now().strftime("%Y-%m-%d %H:%M"), "game_id": p["game_id"], "game": p["game"],
+        new.append({"logged": datetime.now().strftime("%Y-%m-%d %H:%M"), "tier": p.get("system", p["tier"]), "game_id": p["game_id"], "game": p["game"],
                     "market": p["market"], "side": p["side"], "book": p.get("book", ""), "bet": p["bet"], "line": p["line"], "odds": p["odds"],
                     "win_prob": p["win%"] / 100, "ev": p["ev%"] / 100, "stake": p["stake%"] / 100, "placed": "yes"})
     if new:
@@ -85,7 +85,7 @@ def grade(log, games, no_vig, payout):
 
 
 def save(log):
-    log[COLS].to_csv(LOG, index=False)
+    log.reindex(columns=COLS).to_csv(LOG, index=False)
 
 
 def summary(log):

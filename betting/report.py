@@ -39,6 +39,17 @@ def write(out, path=os.path.join(HERE, "card.html"), title="NFL Betting Model"):
     bt = out.get("backtest") or {}
     parts = [f"<h1>{E(title)}</h1><p class='sub'>Updated {datetime.now():%b %d, %Y %H:%M}"
              + (f" · {wk['season']} Week {wk['week']}" if wk else "") + "</p>"]
+    for sy in out.get("systems") or []:
+        parts.append(f"<h2>System: {E(sy['name'])} ({len(sy['games'])} play{'s' if len(sy['games']) != 1 else ''} this week)</h2>")
+        parts.append("<div class='grid'>" + "".join(f"<div class='stat'><b>{E(str(v))}</b><span>{E(k)}</span></div>" for k, v in (
+            ("Record since 2011", sy["record"]), ("ROI since 2011", f"{sy['roi%']:+}%"), ("Units since 2011", f"{sy['units']:+}"),
+            (f"ROI since 2019 ({sy['bets_2019']} bets)", f"{sy['roi_2019%']:+}%"))) + "</div>")
+        parts.append(f"<p class='note'>{E(sy['why'])}</p>")
+        if sy["games"]:
+            parts.append(table(sy["games"], [("Game", "game"), ("Bet", "bet"), ("Book", "book"), ("Odds", "odds"), ("Stake", "stake%")],
+                               {"book": lambda v, r: "check FD/DK" if v == "consensus" else E(v),
+                                "odds": lambda v, r: f"{int(v):+d}",
+                                "stake%": lambda v, r: f"{v}%" if r["tier"] != "SKIP" else f"<span class='neg'>skip: {E(r['skip'])}</span>"}))
     if wk:
         picks = wk["picks"]
         bets = [p for p in picks if p["tier"] == "BET"]

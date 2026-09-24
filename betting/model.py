@@ -63,6 +63,20 @@ TITLE = "NFL Betting Model"
 CARD_NEEDS_LINE = False  # college: only price games a book has posted
 BOOK_KEYS = ("away", "home")  # columns that match book_odds.csv team keys (college uses ESPN team ids)
 MAX_ML_FAVORITE = -1000  # moneylines steeper than this are never worth showing
+SYSTEM_STAKE = 0.01  # flat 1% of bankroll per system bet
+# Situational systems that survived systems.py (15-season search, luck-adjusted, walk-forward). Each: market, side,
+# and the filter, applied to pre-game info only. Wind uses the kickoff forecast for upcoming games.
+SYSTEMS = [
+    {"name": "Wind under", "market": "total", "side": "under", "stake": 0.005, "min_odds": -112,
+     "why": "Outdoor games with 12-20 mph forecast wind: passing and kicking suffer and totals don't drop enough. "
+            "Strong long-term record but cooled off in 2025, and the backtest used actual wind while you bet the "
+            "forecast. Probable edge, not proven: half stakes.",
+     "when": lambda d: (d["dome"] == 0) & (d["wind"] >= 12) & (d["wind"] < 20)},
+    {"name": "Close road team, daytime", "market": "spread", "side": "away", "stake": 0.005, "min_odds": -110,
+     "why": "Road team when the spread is 3 or less, non-primetime. The best NFL strategy that was profitable in "
+            "2011-2024 and again in 2025-2026. Weak signal (t = 1.5): half stakes.",
+     "when": lambda d: (d["spread_line"].abs() <= 3) & (d["prime"] == 0)},
+]
 
 
 def configure(**kw):
@@ -374,7 +388,55 @@ def current_card(df, current):
         order = {"BET": 0, "lean": 1, "watch": 2}
         picks = picks.sort_values(["tier", "ev"], key=lambda c: c.map(order) if c.name == "tier" else -c)
         picks["ev%"] = (100 * picks.pop("ev")).round(1)
-    return week, (pd.DataFrame(rows), picks, float(wk.w_spread.iloc[0]), float(wk.w_total.iloc[0]))
+    systems = system_card(df, wk, books)
+    return week, (pd.DataFrame(rows), picks, float(wk.w_spread.iloc[0]), float(wk.w_total.iloc[0]), systems)
+
+
+def system_card(df, wk, books):
+    """This week's qualifying games for each system, at the best FD/DK price, plus the system's record."""
+    out = []
+    for sysd in SYSTEMS:
+        m, side = sysd["market"], sysd["side"]
+        h = df[df.result.notna() & (df.season >= 2011)]
+        h = h[sysd["when"](h).fillna(False).values]
+        if m == "total":
+            d, odds = h.total - h.total_line, h.over_odds if side == "over" else h.under_odds
+            d = d if side == "over" else -d
+        else:
+            d, odds = h.result - h.spread_line, h.home_spread_odds if side == "home" else h.away_spread_odds
+            d = d if side == "home" else -d
+        ok = d.notna()
+        u = pd.Series(np.where(d > 0, [payout(o) for o in odds], np.where(d < 0, -1.0, 0.0)), index=h.index)[ok]
+        seas = h.season[ok]
+        recent = u[seas >= 2025]
+        record = {"record": f"{(u > 0).sum()}-{(u < 0).sum()}-{(u == 0).sum()}", "roi%": round(100 * u.mean(), 1),
+                  "units": round(u.sum(), 1), "recent_record": f"{(recent > 0).sum()}-{(recent < 0).sum()}-{(recent == 0).sum()}",
+                  "recent_roi%": round(100 * recent.mean(), 1) if len(recent) else 0.0,
+                  "recent_units": round(recent.sum(), 1), "by_season": {int(k): round(v, 1) for k, v in u.groupby(seas).sum().items()}}
+        games = []
+        for r in wk[sysd["when"](wk).fillna(False).values].itertuples(index=False):
+            offers = [o for o in (books.get(tuple(getattr(r, k) for k in BOOK_KEYS)) or []) if o[0] == m and o[1] == side]
+            if not offers:
+                line = r.total_line if m == "total" else r.spread_line
+                odds = (r.over_odds if side == "over" else r.under_odds) if m == "total" else \
+                    (r.home_spread_odds if side == "home" else r.away_spread_odds)
+                offers = [(m, side, line, odds, "consensus")]
+            # best price: the better number first, then the better odds
+            better = (lambda o: (-o[2] if side in ("over", "home") else o[2], payout(o[3])))
+            _m, _s, line, odds, book = max(offers, key=better)
+            if pd.isna(line):
+                continue
+            odds = odds if pd.notna(odds) else -110
+            if payout(odds) < payout(sysd.get("min_odds", -110)):
+                games.append({"game": f"{r.away} @ {r.home}", "bet": label(r, m, side, line), "book": book, "odds": int(odds),
+                              "stake%": 0.0, "tier": "SKIP", "skip": f"price too expensive (need {sysd.get('min_odds', -110):+d} or better)"})
+                continue
+            games.append({"game_id": r.game_id, "game": f"{r.away} @ {r.home}", "market": m, "side": side, "line": line,
+                          "bet": label(r, m, side, line), "book": book, "odds": int(odds) if pd.notna(odds) else -110,
+                          "win%": 0.0, "ev%": 0.0, "stake%": round(100 * sysd.get("stake", SYSTEM_STAKE), 2), "tier": "SYSTEM",
+                          "system": sysd["name"], "wind": round(float(getattr(r, "wind", 0) or 0), 1)})
+        out.append({"name": sysd["name"], "why": sysd["why"], **record, "games": games})
+    return out
 
 
 def need_odds(w, lo, thr):
@@ -446,7 +508,13 @@ def main():
         bets.to_csv(os.path.join(DATA, "backtest_bets.csv"), index=False)
     week, card = current_card(df, current)
     if card:
-        board, picks, ws, wt = card
+        board, picks, ws, wt, systems = card
+        for sy in systems:
+            print(f"\nSYSTEM {sy['name']}: {sy['record']} ({sy['roi%']:+}% ROI since 2011); 2025-26: {sy['recent_record']} "
+                  f"({sy['recent_roi%']:+}%, {sy['recent_units']:+} units)")
+            for g in sy["games"]:
+                print(f"   {g['game']}: {g['bet']} {g['odds']:+d} at {g['book']}, " +
+                      (f"SKIP - {g['skip']}" if g["tier"] == "SKIP" else f"stake {g['stake%']}%"))
         print(f"\n{current} week {week}: fair lines (model weight spread {ws:.2f}, total {wt:.2f})")
         print(board.to_string(index=False))
         n = int((picks["tier"] == "BET").sum()) if len(picks) else 0
@@ -458,9 +526,11 @@ def main():
             print(picks.drop(columns=["game_id", "side", "line", "push%"]).to_string(index=False))
         import track
         track.LOG = BET_LOG
-        log = track.grade(track.log_picks(picks.to_dict("records")), df, no_vig, payout)
+        sys_picks = [g for sy in systems for g in sy["games"] if g["tier"] == "SYSTEM"]
+        log = track.grade(track.log_picks(picks.to_dict("records") + sys_picks), df, no_vig, payout)
         track.save(log)
         out["tracker"] = {"summary": track.summary(log), "recent": log.tail(25).fillna("").to_dict("records")}
+        out["systems"] = systems
         out["week"] = {"season": current, "week": week, "board": board.to_dict("records"),
                        "picks": picks.to_dict("records"), "w_spread": ws, "w_total": wt}
     path = os.path.join(DATA, "card.json")

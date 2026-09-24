@@ -28,6 +28,12 @@ M.configure(
     FIRST_TRAIN=2011, FIRST_BASE_TEST=2012, TUNE_FROM=2014, FIRST_REPORT=2019,
     DATA=os.path.join(HERE, "data", "cfb"), MY_LINES=os.path.join(HERE, "cfb_my_lines.csv"),
     CARD_HTML=os.path.join(HERE, "cfb_card.html"), BET_LOG=os.path.join(HERE, "cfb_bet_log.csv"),
+    SYSTEMS=[{"name": "Blowout over", "market": "total", "side": "over", "stake": 0.01, "min_odds": -115,
+              "why": "Spread over 30 points: the big underdog scores ~1 point more than the market expects (backups, "
+                     "garbage time). Overs get better the bigger the spread (14-21: -7% ROI, 30-40: +6%, 40+: +10%). "
+                     "Passed the luck test across 1,192 strategies, profitable 2011-2024 AND the best proven strategy "
+                     "of 2025-2026. Strongest vs FCS opponents. Books keep limits low on these games.",
+              "when": lambda d: d["spread_line"].abs() > 30}],
     TITLE="College Football Betting Model", CARD_NEEDS_LINE=True, BOOK_KEYS=("away_id", "home_id"))
 
 if __name__ == "__main__":
