@@ -73,10 +73,19 @@ SYSTEMS = [
             "Strong long-term record but cooled off in 2025, and the backtest used actual wind while you bet the "
             "forecast. Probable edge, not proven: half stakes.",
      "when": lambda d: (d["dome"] == 0) & (d["wind"] >= 12) & (d["wind"] < 20)},
-    {"name": "Close road team, daytime", "market": "spread", "side": "away", "stake": 0.005, "min_odds": -110,
+    {"name": "Close road team", "market": "spread", "side": "away", "stake": 0.005, "min_odds": -110,
      "why": "Road team when the spread is 3 or less, non-primetime. The best NFL strategy that was profitable in "
             "2011-2024 and again in 2025-2026. Weak signal (t = 1.5): half stakes.",
      "when": lambda d: (d["spread_line"].abs() <= 3) & (d["prime"] == 0)},
+    {"name": "Close road team ML", "market": "ml", "side": "away", "stake": 0.005, "min_odds": -135, "pair": "Close road team",
+     "why": "Same games as Close road team, on the moneyline: +4.2% ROI since 2011, +3.4% in 2025-26. "
+            "Bet the spread OR the moneyline for each game, not both.",
+     "when": lambda d: (d["spread_line"].abs() <= 3) & (d["prime"] == 0)},
+    {"name": "Buy-low underdog", "market": "spread", "side": "dog", "stake": 0.005, "min_odds": -110,
+     "why": "Take the underdog when the road team has been failing to cover lately (smoothed cover margin -4 or worse). "
+            "The market over-corrects on teams that keep missing the number. +7.3% ROI since 2011 (8 of 14 seasons up), "
+            "+15% in 2025-26. Weak signal (t = 1.4): half stakes.",
+     "when": lambda d: (d["a_ats"] <= -4) & (d["spread_line"] != 0)},
 ]
 
 
@@ -350,6 +359,8 @@ def current_card(df, current):
     wk = df[(df.season == current) & (df.week == week)].copy()
     if CARD_NEEDS_LINE:
         wk = wk[wk.spread_line.notna() | wk.total_line.notna()]
+    today = pd.Timestamp.now(tz="America/New_York").strftime("%Y-%m-%d")
+    wk = wk[wk.gameday.astype(str).str[:10] >= today]  # games already played can't be bet
     pmfs = {}
     for m, (target, line, cols, bw, grid) in MARKETS.items():
         wk[f"base_{m}"] = fit_base(train, target, cols, line)(wk)
@@ -393,50 +404,81 @@ def current_card(df, current):
     return week, (pd.DataFrame(rows), picks, float(wk.w_spread.iloc[0]), float(wk.w_total.iloc[0]), systems)
 
 
+def _side(side, r):
+    """Resolve 'dog'/'fav' to home/away for one game (spread_line > 0 means the home team is favored)."""
+    if side in ("dog", "fav"):
+        home_fav = r.spread_line > 0
+        return ("away" if home_fav else "home") if side == "dog" else ("home" if home_fav else "away")
+    return side
+
+
+def _settle_system(r, m, side, line, odds):
+    if m == "total":
+        d = (r.total - line) * (1 if side == "over" else -1)
+    elif m == "spread":
+        d = (r.result - line) * (1 if side == "home" else -1)
+    else:
+        d = r.result * (1 if side == "home" else -1)
+    return None if pd.isna(d) else payout(odds) if d > 0 else -1.0 if d < 0 else 0.0
+
+
+def _consensus(r, m, side):
+    if m == "total":
+        return r.total_line, (r.over_odds if side == "over" else r.under_odds)
+    if m == "spread":
+        return r.spread_line, (r.home_spread_odds if side == "home" else r.away_spread_odds)
+    return 0, (r.home_ml if side == "home" else r.away_ml)
+
+
 def system_card(df, wk, books):
     """This week's qualifying games for each system, at the best FD/DK price, plus the system's record."""
     out = []
     for sysd in SYSTEMS:
-        m, side = sysd["market"], sysd["side"]
+        m = sysd["market"]
         h = df[df.result.notna() & (df.season >= 2011)]
         h = h[sysd["when"](h).fillna(False).values]
-        if m == "total":
-            d, odds = h.total - h.total_line, h.over_odds if side == "over" else h.under_odds
-            d = d if side == "over" else -d
-        else:
-            d, odds = h.result - h.spread_line, h.home_spread_odds if side == "home" else h.away_spread_odds
-            d = d if side == "home" else -d
-        ok = d.notna()
-        u = pd.Series(np.where(d > 0, [payout(o) for o in odds], np.where(d < 0, -1.0, 0.0)), index=h.index)[ok]
-        seas = h.season[ok]
+        us, seas = [], []
+        for r in h.itertuples(index=False):
+            side = _side(sysd["side"], r)
+            line, odds = _consensus(r, m, side)
+            if pd.isna(line) or (m == "ml" and pd.isna(odds)):
+                continue
+            u = _settle_system(r, m, side, line, odds)
+            if u is not None:
+                us.append(u)
+                seas.append(r.season)
+        u, seas = pd.Series(us, dtype=float), pd.Series(seas)
         recent = u[seas >= 2025]
-        record = {"record": f"{(u > 0).sum()}-{(u < 0).sum()}-{(u == 0).sum()}", "roi%": round(100 * u.mean(), 1),
+        record = {"record": f"{(u > 0).sum()}-{(u < 0).sum()}-{(u == 0).sum()}", "roi%": round(100 * u.mean(), 1) if len(u) else 0.0,
                   "units": round(u.sum(), 1), "recent_record": f"{(recent > 0).sum()}-{(recent < 0).sum()}-{(recent == 0).sum()}",
                   "recent_roi%": round(100 * recent.mean(), 1) if len(recent) else 0.0,
                   "recent_units": round(recent.sum(), 1), "by_season": {int(k): round(v, 1) for k, v in u.groupby(seas).sum().items()}}
         games = []
         for r in wk[sysd["when"](wk).fillna(False).values].itertuples(index=False):
+            if m != "total" and pd.isna(r.spread_line):
+                continue
+            side = _side(sysd["side"], r)
             offers = [o for o in (books.get(tuple(getattr(r, k) for k in BOOK_KEYS)) or []) if o[0] == m and o[1] == side]
             if not offers:
-                line = r.total_line if m == "total" else r.spread_line
-                odds = (r.over_odds if side == "over" else r.under_odds) if m == "total" else \
-                    (r.home_spread_odds if side == "home" else r.away_spread_odds)
+                line, odds = _consensus(r, m, side)
                 offers = [(m, side, line, odds, "consensus")]
-            # best price: the better number first, then the better odds
-            better = (lambda o: (-o[2] if side in ("over", "home") else o[2], payout(o[3]), o[4] == PREFERRED_BOOK))
+            # best price: the better number first, then the better odds, FanDuel on ties
+            better = (lambda o: (0 if m == "ml" else -o[2] if side in ("over", "home") else o[2], payout(o[3]), o[4] == PREFERRED_BOOK))
             _m, _s, line, odds, book = max(offers, key=better)
-            if pd.isna(line):
+            if pd.isna(line) or (m == "ml" and pd.isna(odds)):
                 continue
             odds = odds if pd.notna(odds) else -110
+            name = label(r, m, side, line)
             if payout(odds) < payout(sysd.get("min_odds", -110)):
-                games.append({"game": f"{r.away} @ {r.home}", "bet": label(r, m, side, line), "book": book, "odds": int(odds),
-                              "stake%": 0.0, "tier": "SKIP", "skip": f"price too expensive (need {sysd.get('min_odds', -110):+d} or better)"})
+                games.append({"game": f"{r.away} @ {r.home}", "bet": name, "book": book, "odds": int(odds), "stake%": 0.0,
+                              "tier": "SKIP", "skip": f"price too expensive (need {sysd.get('min_odds', -110):+d} or better)"})
                 continue
-            games.append({"game_id": r.game_id, "game": f"{r.away} @ {r.home}", "market": m, "side": side, "line": line,
-                          "bet": label(r, m, side, line), "book": book, "odds": int(odds) if pd.notna(odds) else -110,
+            games.append({"game_id": r.game_id, "game": f"{r.away} @ {r.home}", "market": m, "side": side,
+                          "line": None if m == "ml" else line, "bet": name, "book": book, "odds": int(odds),
                           "win%": 0.0, "ev%": 0.0, "stake%": round(100 * sysd.get("stake", SYSTEM_STAKE), 2), "tier": "SYSTEM",
                           "system": sysd["name"], "wind": round(float(getattr(r, "wind", 0) or 0), 1)})
-        out.append({"name": sysd["name"], "why": sysd["why"], **record, "games": games})
+        out.append({"name": sysd["name"], "why": sysd["why"], "group": sysd.get("group", "sides" if m != "total" else "totals"),
+                    "market": m, "pair": sysd.get("pair"), **record, "games": games})
     return out
 
 

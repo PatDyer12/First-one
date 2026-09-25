@@ -33,7 +33,13 @@ M.configure(
                      "garbage time). Overs get better the bigger the spread (14-21: -7% ROI, 30-40: +6%, 40+: +10%). "
                      "Passed the luck test across 1,192 strategies, profitable 2011-2024 AND the best proven strategy "
                      "of 2025-2026. Strongest vs FCS opponents. Books keep limits low on these games.",
-              "when": lambda d: d["spread_line"].abs() > 30}],
+              "when": lambda d: d["spread_line"].abs() > 30},
+             {"name": "Rested home team", "market": "spread", "side": "home", "stake": 0.005, "min_odds": -110,
+              "why": "Home team with 3+ more days of rest, when the line has moved 3+ points toward them versus our "
+                     "market ratings. Profitable in 11 of 14 seasons, but a small sample (t = 1.3) and mostly big home "
+                     "favorites: half stakes. College moneylines can't be backtested (no historical prices in the "
+                     "free data), so there's no college moneyline system.",
+              "when": lambda d: (d["rest_diff"] >= 3) & (d["line_move"] >= 3)}],
     TITLE="College Football Betting Model", CARD_NEEDS_LINE=True, BOOK_KEYS=("away_id", "home_id"))
 
 if __name__ == "__main__":

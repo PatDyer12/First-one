@@ -201,7 +201,7 @@ def system_reason(S, sy, g):
         wind = f"{w['wind']:.0f} mph wind, {w['temp']:.0f}°F" if w is not None else "12+ mph wind"
         return (f"Kickoff forecast: <b>{wind}</b>. Wind cuts into passing and kicking, and totals historically "
                 f"don't drop enough (unders +12% ROI in 12–20 mph wind since 2011). Cooled off in 2025, so half stake.")
-    if sy["name"] == "Close road team, daytime":
+    if sy["name"] in ("Close road team", "Close road team ML"):
         line = g["bet"].split()[-1]
         txt = (f"Road team in a coin-flip daytime game. Home field is worth less than short lines assume "
                f"(fair line {b.get('fair_spread')}).")
@@ -406,43 +406,107 @@ def cfb_qb_watch(S, ours, max_items=6):
 
 
 # ---------------------------------------------------------------- build page
+SYSTEM_COPY = {
+    "Blowout over": ("Blowout Overs",
+                     "When the spread is over 30, bet the Over. Books price the favorite right but underrate the underdog: "
+                     "backups on both sides and garbage-time drives add points the market doesn't expect. The bigger the "
+                     "spread, the better overs have done (14–21 pts −7% ROI · 30–40 +6% · 40+ +10%). The only trend that "
+                     "passed our luck test across 1,192 strategies."),
+    "Wind under": ("Wind Unders",
+                   "Outdoor games with a 12–20 mph kickoff forecast. Wind cuts into passing and kicking, and totals "
+                   "historically don't drop enough. Cooled off in 2025 and the history uses actual (not forecast) wind, "
+                   "so half stakes."),
+    "Close road team": ("Close Road Team",
+                        "Road team in a daytime game with a spread of 3 or less. Home field is worth less than these short "
+                        "lines assume. Take the spread <b>or</b> the moneyline for each game, not both; the moneyline pays more "
+                        "when the road team is the underdog."),
+    "Buy-low underdog": ("Buy-Low Underdog",
+                         "Take the underdog when the road team has been missing the spread lately (smoothed cover margin "
+                         "−4 or worse). The market overcorrects on teams that keep failing to cover. Half stakes (t = 1.4)."),
+    "Rested home team": ("Rested Home Team",
+                         "Home team with 3+ more days of rest when the line has moved 3+ points toward them. Profitable in "
+                         "11 of 14 seasons, but a small sample. College moneylines can't be backtested (no historical prices in "
+                         "free data), so there's no college moneyline system."),
+}
+
+
+def side_reason(S, sy, g):
+    r = S.rows.get(g["game"])
+    if sy["name"] == "Buy-low underdog" and r is not None:
+        return (f"{E(r.away)} has missed the spread by about <b>{-r.a_ats:.0f} pts</b> a game lately (smoothed), "
+                f"the kind of slump the market overreacts to. The underdog here gets that inflated number.")
+    if sy["name"] == "Rested home team" and r is not None:
+        return f"{E(r.home)} has {r.rest_diff:.0f} more days of rest and the line has moved {r.line_move:.1f} pts their way."
+    return system_reason(S, sy, g)
+
+
 def gather(sport):
     S = Sport(sport)
     card = S.card
-    best, table_plays, leans, watch = [], [], [], []
+    best, leans, watch = [], [], []
     for p in card["week"]["picks"]:
         if not S.upcoming(p["game"]):
             continue
         if p["tier"] == "BET":
             best.append({"game": p["game"], "pick": p["bet"], "odds": p["odds"], "u": units(p["stake%"]),
-                         "tag": "Model", "edge": f"+{p['ev%']}% edge", "why": model_reason(S, p), "rank": -p["ev%"]})
+                         "edge": f"+{p['ev%']}% edge", "why": model_reason(S, p), "rank": -p["ev%"]})
         elif p["tier"] == "lean":
             b = S.board.get(p["game"], {})
             leans.append({"game": p["game"], "pick": p["bet"], "odds": p["odds"],
                           "why": f"Model edge +{p['ev%']}%, wins ~{p['win%']:.0f}%. "
                                  + (f"Fair total {b.get('fair_total')}." if p["market"] == "total"
                                     else f"Fair line {b.get('fair_spread')}.")})
-    systems = card.get("systems", [])
-    for sy in systems:
-        for g in sy["games"]:
-            if not S.upcoming(g["game"]):
-                continue
-            if g["tier"] == "SKIP":
-                need = g["skip"].split("need ")[-1].rstrip(")")
-                watch.append({"game": g["game"], "pick": g["bet"], "odds": g["odds"],
-                              "why": f"{sy['name']} system play, price too steep. Bet it at {need}."})
-            elif sy["name"] == "Blowout over":
-                table_plays.append({"game": g["game"], "pick": g["bet"], "odds": g["odds"], "u": units(g["stake%"]),
-                                    "why": system_reason(S, sy, g)})
-            else:
-                best.append({"game": g["game"], "pick": g["bet"], "odds": g["odds"], "u": units(g["stake%"]),
-                             "tag": sy["name"], "edge": "System", "why": system_reason(S, sy, g), "rank": 1})
     best.sort(key=lambda x: x["rank"])
-    ours = {x["game"]: x["pick"] for x in best + table_plays}
+    systems = card.get("systems", [])
+    paired = {sy["pair"]: sy for sy in systems if sy.get("pair")}
+    totals, sides = [], []
+    for sy in systems:
+        if sy.get("pair"):
+            continue
+        games = [g for g in sy["games"] if S.upcoming(g["game"])]
+        if sy["group"] == "totals":
+            plays = []
+            for g in games:
+                if g["tier"] == "SKIP":
+                    need = g["skip"].split("need ")[-1].rstrip(")")
+                    watch.append({"game": g["game"], "pick": g["bet"], "odds": g["odds"],
+                                  "why": f"{SYSTEM_COPY.get(sy['name'], (sy['name'],))[0]} play, price too steep. Bet it at {need}."})
+                else:
+                    plays.append(dict(g, u=units(g["stake%"]), why=system_reason(S, sy, g)))
+            totals.append((sy, plays))
+        else:
+            ml = paired.get(sy["name"])
+            ml_games = {g["game"]: g for g in (ml["games"] if ml else []) if S.upcoming(g["game"])}
+            rows = []
+            for g in games:
+                rows.append({"game": g["game"], "spread": g, "ml": ml_games.pop(g["game"], None),
+                             "why": side_reason(S, sy, g)})
+            for gm, g in ml_games.items():
+                rows.append({"game": gm, "spread": None, "ml": g, "why": side_reason(S, sy, g)})
+            sides.append((sy, ml, rows))
+    ours = {x["game"]: x["pick"] for x in best}
+    for sy, plays in totals:
+        ours.update({x["game"]: x["bet"] for x in plays})
     qb = nfl_qb_watch(S) if sport == "nfl" else cfb_qb_watch(S, ours)
     odd_path = os.path.join(HERE, f"oddball_{sport}.json")
     odd = json.load(open(odd_path)) if os.path.exists(odd_path) else None
-    return S, best, table_plays, leans, watch, systems, qb, streaks(S), odd
+    return S, best, totals, sides, leans, watch, qb, streaks(S), odd
+
+
+def record_line(sy):
+    return (f"<b>{sy['record']}</b> since 2011 ({sy['roi%']:+}% ROI) · <b>{sy['recent_record']}</b> in 2025–26 "
+            f"({sy['recent_roi%']:+}%, {sy['recent_units']:+}u)")
+
+
+def cell_play(g):
+    if g is None:
+        return "<span class='meta'>—</span>"
+    if g["tier"] == "SKIP":
+        need = g["skip"].split("need ")[-1].rstrip(")")
+        return (f"<span class='skip'>{E(g['bet'])} {fmt_odds(g['odds'])}</span>"
+                f"<div class='meta'>skip · need {E(need.replace(' or better', ''))}</div>")
+    return (f"<span class='nw'><b>{E(g['bet'])}</b> <span class='n'>{fmt_odds(g['odds'])}</span></span>"
+            f"<div class='meta'>{units(g['stake%']):g}u</div>")
 
 
 CSS = """
@@ -492,6 +556,12 @@ td.b { font-weight:650; white-space:nowrap; }
 td.n { white-space:nowrap; color:var(--ink2); }
 .panel { border:1px solid var(--line); border-radius:12px; padding:10px 13px; break-inside:avoid; margin-bottom:8px; }
 .panel.green { background:var(--greenbg); border-color:#cfeadc; }
+.panel.blue { background:#eef3fd; border-color:#d9e3f8; }
+.rec { margin-top:6px; font-size:8.2pt; color:var(--ink2); }
+.skip { color:var(--mute); text-decoration:line-through; white-space:nowrap; }
+.nw { white-space:nowrap; }
+.keep { break-inside: avoid; }
+thead, tr:first-child th { break-after: avoid; }
 .panel h3 { margin:0 0 3px; font-size:11pt; letter-spacing:-.01em; }
 .qb { display:grid; grid-template-columns: 34px 1fr auto; column-gap:11px; align-items:start; }
 .qb .name { font-weight:700; font-size:10.5pt; }
@@ -532,7 +602,8 @@ def ensure_font():
 
 def render(sport):
     ensure_font()
-    S, best, table_plays, leans, watch, systems, qb, st, odd = gather(sport)
+    S, best, totals, sides, leans, watch, qb, st, odd = gather(sport)
+    systems = S.card.get("systems", [])
     label = "NFL" if sport == "nfl" else "College Football"
     accent = "#0b1f3a" if sport == "nfl" else "#123b2c"
     dates = sorted(d for d in (S.teams(g)[2] for g in S.rows) if d)
@@ -541,9 +612,12 @@ def render(sport):
         d0 = datetime.fromisoformat(dates[0].replace("Z", "+00:00")).astimezone(ET)
         d1 = datetime.fromisoformat(dates[-1].replace("Z", "+00:00")).astimezone(ET)
         rng = d0.strftime("%b %-d") + ("" if d0.date() == d1.date() else "–" + d1.strftime("%-d" if d0.month == d1.month else "%b %-d")) + d1.strftime(", %Y")
-    n_plays = len(best) + len(table_plays)
-    tot_u = sum(b["u"] for b in best) + sum(t["u"] for t in table_plays)
-    main_sys = max(systems, key=lambda s: s["recent_roi%"]) if systems else None
+    side_rows = [r for _sy, _ml, rows in sides for r in rows
+                 if (r["spread"] and r["spread"]["tier"] == "SYSTEM") or (r["ml"] and r["ml"]["tier"] == "SYSTEM")]
+    n_plays = len(best) + sum(len(p) for _s, p in totals) + len(side_rows)
+    tot_u = (sum(b["u"] for b in best) + sum(t["u"] for _s, p in totals for t in p)
+             + sum(units((r["spread"] if r["spread"] and r["spread"]["tier"] == "SYSTEM" else r["ml"])["stake%"]) for r in side_rows))
+    main_sys = max((x for x in systems if not x.get("pair")), key=lambda s: s["recent_roi%"]) if systems else None
     h = [f"<style>{CSS % {'accent': accent}}</style>",
          "<div class='hero'><div>",
          f"<div class='eyebrow'>{label} · Week {S.week} · {rng}</div>",
@@ -555,35 +629,60 @@ def render(sport):
         h.append(f"<div class='kpi'><b>{main_sys['recent_roi%']:+.1f}%</b><span>{E(main_sys['name'])} 25–26</span></div>")
     h.append("</div></div>")
 
-    # best bets
+    # best bets (model)
     h.append("<h2>Best Bets</h2>")
-    h.append("<div class='note'>Model plays clear a 3% edge at the listed price. System plays come from trends that held "
-             "up over 15 seasons of results.</div>")
+    h.append("<div class='note'>Model plays: at least a 3% edge at the listed DraftKings price.</div>")
     for b in best:
-        tag_cls = "tag" if b["tag"] == "Model" else "tag sys"
         h.append(f"<div class='bet'><div class='lg'>{S.logos(b['game'])}</div>"
                  f"<div><div class='pick'>{E(b['pick'])}<span class='odds'>{fmt_odds(b['odds'])}</span></div>"
                  f"<div class='meta'>{E(b['game'])} · {S.when(b['game'])}</div></div>"
-                 f"<div class='right'><span class='u'>{b['u']:g}u</span><span class='{tag_cls}'>"
-                 f"{E(b['edge'] if b['tag'] == 'Model' else b['tag'])}</span></div>"
+                 f"<div class='right'><span class='u'>{b['u']:g}u</span><span class='tag'>{E(b['edge'])}</span></div>"
                  f"<div class='why'>{b['why']}</div></div>")
-    if table_plays:
-        sy = next(s for s in systems if s["name"] == "Blowout over")
-        h.append(f"<div class='panel green'><h3>Blowout Overs · {len(table_plays)} plays · 1u each</h3>"
-                 f"<div>When the spread is over 30, bet the Over. Books price the favorite right but underrate the "
-                 f"underdog: backups on both sides and garbage-time drives add points the market doesn't expect. "
-                 f"The bigger the spread, the better overs have done (14–21 pts −7% ROI · 30–40 +6% · 40+ +10%). "
-                 f"The only trend that passed our luck test across 1,192 strategies. "
-                 f"<b>{sy['record']} since 2011 ({sy['roi%']:+}%) · {sy['recent_record']} in 2025–26 "
-                 f"({sy['recent_roi%']:+}%)</b>.</div></div>")
-        h.append("<table><tr><th style='width:60px'></th><th>Play</th><th>Price</th><th>Game</th><th>Why this one</th></tr>")
-        for t in table_plays:
-            h.append(f"<tr><td class='lgc'>{S.logos(t['game'], 18)}</td><td class='b'>{E(t['pick'])}</td>"
-                     f"<td class='n'>{fmt_odds(t['odds'])}</td>"
-                     f"<td class='n'>{E(t['game'])}<div class='meta'>{S.when(t['game'])}</div></td><td>{t['why']}</td></tr>")
-        h.append("</table>")
-    if not best and not table_plays:
-        h.append("<p class='empty'>No plays clear the bar this week.</p>")
+    if not best:
+        h.append("<p class='empty'>No model plays clear the 3% bar this week. The system sections below are the card.</p>")
+
+    # totals systems (Blowout Overs / Wind Unders)
+    for sy, plays in totals:
+        title, copy = SYSTEM_COPY.get(sy["name"], (sy["name"], E(sy["why"])))
+        h.append(f"<h2>{E(title)}</h2>")
+        h.append("<div class='keep'>" if len(plays) <= 5 else "<div>")
+        h.append(f"<div class='panel green'><h3>{E(title)} · {len(plays)} play{'s' if len(plays) != 1 else ''}"
+                 f"{' · ' + format(sum(p['u'] for p in plays), 'g') + 'u' if plays else ''}</h3>"
+                 f"<div>{copy}</div><div class='rec'>{record_line(sy)}</div></div>")
+        if plays:
+            h.append("<table><tr><th style='width:60px'></th><th>Play</th><th>Price</th><th>Game</th><th>Why this one</th></tr>")
+            for t in plays:
+                h.append(f"<tr><td class='lgc'>{S.logos(t['game'], 18)}</td><td class='b'>{E(t['bet'])}"
+                         f"<div class='meta'>{t['u']:g}u</div></td><td class='n'>{fmt_odds(t['odds'])}</td>"
+                         f"<td class='n'>{E(t['game'])}<div class='meta'>{S.when(t['game'])}</div></td><td>{t['why']}</td></tr>")
+            h.append("</table>")
+        else:
+            h.append("<p class='empty'>No qualifying games at a bettable price this week.</p>")
+        h.append("</div>")
+
+    # spread & moneyline systems
+    h.append("<h2>Spread &amp; Moneyline Systems</h2>")
+    h.append("<div class='note'>Situational systems on sides. Weaker evidence than the totals systems above, so every play "
+             "is a half unit, and only at the listed price or better.</div>")
+    for sy, ml, rows in sides:
+        title, copy = SYSTEM_COPY.get(sy["name"], (sy["name"], E(sy["why"])))
+        live = [r for r in rows if (r["spread"] and r["spread"]["tier"] == "SYSTEM") or (r["ml"] and r["ml"]["tier"] == "SYSTEM")]
+        rec = f"Spread: {record_line(sy)}" + (f"<br>Moneyline: {record_line(ml)}" if ml else "")
+        h.append("<div class='keep'>" if len(rows) <= 8 else "<div>")
+        h.append(f"<div class='panel blue'><h3>{E(title)} · {len(live)} play{'s' if len(live) != 1 else ''}</h3>"
+                 f"<div>{copy}</div><div class='rec'>{rec}</div></div>")
+        if rows:
+            head = "<th style='width:112px'>Spread</th>" + ("<th style='width:112px'>or Moneyline</th>" if ml else "")
+            h.append(f"<table><tr><th style='width:60px'></th><th>Game</th>{head}<th>Why</th></tr>")
+            for r in rows:
+                mlc = f"<td>{cell_play(r['ml'])}</td>" if ml else ""
+                h.append(f"<tr><td class='lgc'>{S.logos(r['game'], 18)}</td><td class='n'>{E(r['game'])}"
+                         f"<div class='meta'>{S.when(r['game'])}</div></td><td>{cell_play(r['spread'])}</td>{mlc}"
+                         f"<td>{r['why']}</td></tr>")
+            h.append("</table>")
+        else:
+            h.append("<p class='empty'>No qualifying games this week.</p>")
+        h.append("</div>")
 
     # leans
     h.append("<h2>Leans &amp; Price Watch</h2>")
