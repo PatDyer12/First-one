@@ -24,6 +24,18 @@ those targets in your FanDuel/DraftKings app yourself.
 **Bet tracker:** every BET is logged to `betting/bet_log.csv` at the line when it was first recommended,
 then graded against the result and the **closing line** (CLV). Set `placed` to `no` for bets you skip.
 
+## Shareable weekly cards (PDF)
+```
+python3 betting/share/weekly.py          # -> betting/share/nfl_week<N>.pdf and cfb_week<N>.pdf
+```
+Run the models first. Each card has these sections:
+- **Best Bets**, each with a reason.
+- **Leans & Price Watch**: system plays waiting on a better price.
+- **QB Watch.** NFL: live ESPN injury report; each starter is marked *avoid* or *bet against*, depending on whether the
+  line has already moved as much as we think the drop-off is worth. College: passer changes from play-by-play.
+- **Streaks & Trends**: straight-up, against-the-spread and over/under streaks.
+- **Oddball Matchup of the Week**: write it each week in `betting/share/oddball_nfl.json` / `oddball_cfb.json`.
+
 ## The strategy search: what actually made money (`systems.py`)
 `python3 betting/systems.py` tests every market/side crossed with one or two situational filters, plus the model at
 several edge thresholds: 2,055 NFL and 1,192 college strategies over 2011–2025. It checks four things:
