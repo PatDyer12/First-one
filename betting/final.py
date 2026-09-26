@@ -161,10 +161,14 @@ def build(sport):
                                "text": f"{x['detail']} {x['why']} Record {x['record']} vs the closing number since 2011 "
                                        f"({x['roi']:+}% ROI, profitable {x['up']} seasons; {x['recent']} in 2025-26)"
                                        + (f"; {wm[0]:+}% when our model agreed ({wm[1]} bets)." if wm[1] else ".")})
-        if model is not None and (model_bet or agrees):
-            backup.append({"title": "Model" + (" · 3%+ edge" if model_bet else " agrees"),
+        if model is not None and model_bet:
+            backup.append({"title": "Model · 3%+ edge",
                            "text": f"Our model makes this side a {model['win']:.0f}% winner "
                                    f"({model['ev']:+.1f}% expected value at the card price)."})
+        elif model is not None and agrees:
+            backup.append({"title": "Model leans the same way",
+                           "text": f"On its own the model has this side at about {model['win']:.0f}%, not enough to bet by "
+                                   f"itself, but it points the same direction (angles won more often when it did)."})
         plays.append({"game": game, "game_id": info["game_id"], "date": str(info["date"])[:10], "market": market, "side": side,
                       "bet": fmt_line(market, side, off["line"], info["home"], info["away"]),
                       "odds": int(off["odds"]), "book": off["book"], "line": off["line"], "units": units,

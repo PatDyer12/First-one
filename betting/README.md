@@ -24,6 +24,30 @@ those targets in your FanDuel/DraftKings app yourself.
 **Bet tracker:** every BET is logged to `betting/bet_log.csv` at the line when it was first recommended,
 then graded against the result and the **closing line** (CLV). Set `placed` to `no` for bets you skip.
 
+## Final card: model + systems + situational angles (`final.py`, `angles.py`)
+```
+python3 betting/fetch.py && python3 betting/model.py --week
+python3 betting/cfb_fetch.py && python3 betting/cfb_model.py --week
+python3 betting/final.py            # decision layer -> data/final_nfl.json, data/cfb/final_cfb.json (+ tracker)
+python3 betting/share/cards.py      # -> betting/share/nfl_week<N>.pdf, cfb_week<N>.pdf
+```
+`angles.py` has separate NFL and college angle books, each defined up front with a reason and graded on 2011–2026
+closing lines. The ones that survived:
+
+| Angle | Record | ROI | Seasons up | 2025–26 | With model agreeing |
+|---|---|---|---|---|---|
+| NFL Upset Letdown: fade a team that just won outright as a 6+ pt dog | 170-133 | +9.4% | 11/15 | 12-6 | +14.3% |
+| NFL West-Coast Early Kickoff: back West-coast teams at 1pm ET (the fade lost) | 149-112 | +11.3% | 11/15 | 12-10 | +15.2% |
+| College Rest Edge (weak) | 148-115 | +7.4% | 10/15 | 12-9 | |
+| College Service Academy Dog: stack-only (plays only when the model agrees) | 128-102 | +6.1% | 9/15 | 9-9 | +10.5% |
+
+Revenge, lookahead, bounce-back, home dogs, off-bye, primetime and division unders all tested at about zero or worse.
+
+`final.py` collects every signal per bet: model edge, systems and angles. It passes on conflicts and sizes the stake
+from the strongest signal plus 0.5u per extra agreeing signal (max 2u). One bet per team (spread by default,
+moneyline only if the spread price is too steep). Prices: FanDuel unless DraftKings is strictly better. Each play
+carries its backup: the game-specific reason plus every signal's record.
+
 ## Shareable weekly cards (PDF)
 ```
 python3 betting/share/weekly.py          # -> betting/share/nfl_week<N>.pdf and cfb_week<N>.pdf
