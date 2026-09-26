@@ -14,4 +14,4 @@ logged,tier,game_id,game,market,side,book,bet,line,odds,win_prob,ev,stake,placed
 2026-09-25 17:02,Close road team ML,2026_03_LV_NO,LV @ NO,ml,away,DraftKings,LV ML,,154,0.0,0.0,0.005,yes,,154.0,,-0.0241,,
 2026-09-25 17:02,Buy-low underdog,2026_03_LAC_BUF,LAC @ BUF,spread,away,DraftKings,LAC +7,7.0,-108,0.0,0.0,0.005,yes,7.0,-105.0,0.0,,,
 2026-09-26 07:30,Wind under,2026_03_CIN_PIT,CIN @ PIT,total,under,DraftKings,Under 42.5,42.5,-108,0.0,0.0,0.005,yes,42.5,-108.0,0.0,,,
-2026-09-26 07:31,Upset letdown,2026_03_CAR_CLE,CAR @ CLE,spread,away,DraftKings,CAR -2.5,-2.5,-112,0.0,0.0,0.005,yes,,,,,,
+2026-09-26 07:31,Upset letdown,2026_03_CAR_CLE,CAR @ CLE,spread,away,DraftKings,CAR -2.5,-2.5,-112,0.0,0.0,0.005,yes,-2.5,-112.0,0.0,,,

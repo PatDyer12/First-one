@@ -33,6 +33,8 @@ SYSTEM_GRADE = {"Blowout over": "Strong", "Wind under": "Moderate", "Close road 
                 "Close road team ML": "Moderate", "Buy-low underdog": "Moderate", "Rested home team": "Weak"}
 BASE_UNITS = {"Strong": 1.0, "Moderate": 0.5, "Weak": 0.5, "Stack only": 0.5}
 MAX_UNITS = 2.0
+MODEL_ONLY_MAX = 1.0   # the model alone hasn't proven itself against closing lines: bigger stakes need stacking
+MAX_ML_DOG = 400
 
 
 def payout(o):
@@ -114,6 +116,7 @@ def build(sport):
             "record": s["record"], "roi": s["roi%"], "recent": s["recent_record"], "recent_roi": s["recent_roi%"],
             "up": s["up"], "why": a["why"], "detail": a["detail"], "with_model": a["with_model"]})
 
+    qb_avoid = qb_flags(sport)
     plays, conflicts, leans = [], [], []
     for (game, market, side), sigs in sig.items():
         info = keys[game]
@@ -137,12 +140,18 @@ def build(sport):
                 leans.append({"game": game, "market": market, "side": side, "why": f"{x['name']}: {x.get('detail', '')}",
                               "note": "plays only when the model agrees; it doesn't this week"})
             continue
-        units = max([BASE_UNITS.get(x["grade"], 0.5) for x in live] +
-                    ([max(0.5, round(model["stake"] * 100 * 2) / 2)] if model_bet else []))
+        model_units = min(MODEL_ONLY_MAX, max(0.5, round(model["stake"] * 100 * 2) / 2)) if model_bet else 0
+        units = max([BASE_UNITS.get(x["grade"], 0.5) for x in live] + ([model_units] if model_bet else []))
         n_signals = len(live) + (1 if model_bet else 0) + (1 if (agrees and not model_bet and model and model["ev"] > 0) else 0)
         units = min(MAX_UNITS, units + 0.5 * max(0, n_signals - 1))
         off = best_offer(offers.get(info["key"], []), market, side)
-        if off is None:
+        if off is None or (market == "ml" and off["odds"] > MAX_ML_DOG):
+            continue
+        team = info["home"] if side == "home" else info["away"] if side == "away" else None
+        if team and team in qb_avoid:
+            leans.append({"game": game, "market": market, "side": side,
+                          "why": " + ".join([x["name"] for x in live] + (["Model"] if model_bet else [])),
+                          "note": f"skip: QB Watch flags {team} ({qb_avoid[team]})"})
             continue
         if payout(off["odds"]) < payout(MIN_ODDS[market]):
             leans.append({"game": game, "market": market, "side": side,
@@ -202,6 +211,19 @@ def build(sport):
     with open(out_p, "w") as f:
         json.dump(out, f, indent=1, default=str)
     return out
+
+
+def qb_flags(sport):
+    """Teams we won't bet ON this week because of QB uncertainty (NFL: ESPN injury report / new starter)."""
+    if sport != "nfl":
+        return {}
+    try:
+        sys.path.insert(0, os.path.join(HERE, "share"))
+        import weekly as W
+        return {x["team"]: f"{x['qb']} {x['status'].lower()}" for x in W.nfl_qb_watch(W.Sport("nfl"))}
+    except Exception as e:  # network trouble shouldn't kill the card
+        print("QB watch unavailable:", e)
+        return {}
 
 
 def log_plays(sport, plays):

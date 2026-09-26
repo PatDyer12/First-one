@@ -60,7 +60,7 @@ def lead(S, p):
         cp = next((x for x in S.card["week"]["picks"] if x["game"] == p["game"] and x["market"] == p["market"]
                    and x["side"] == p["side"]), None)
         if cp:
-            return W.model_reason(S, dict(cp, bet=p["bet"], odds=p["odds"]))
+            return W.model_reason(S, dict(cp, bet=p["bet"], odds=p["odds"], book=p["book"]))
     for name in ("Wind under", "Blowout over", "Close road team", "Close road team ML"):
         if name in sig:
             return W.system_reason(S, {"name": name, "why": ""}, p)

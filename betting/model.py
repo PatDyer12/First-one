@@ -64,6 +64,7 @@ CARD_NEEDS_LINE = False  # college: only price games a book has posted
 BOOK_KEYS = ("away", "home")  # columns that match book_odds.csv team keys (college uses ESPN team ids)
 PREFERRED_BOOK = "FanDuel"  # bet here unless DraftKings has a strictly better line or price
 MAX_ML_FAVORITE = -1000  # moneylines steeper than this are never worth showing
+MAX_ML_DOG = 400  # long shots are overpriced (big dogs won 7.9% vs 12.1% implied since 2010): never bet past +400
 SYSTEM_STAKE = 0.01  # flat 1% of bankroll per system bet
 # Situational systems that survived systems.py (15-season search, luck-adjusted, walk-forward). Each: market, side,
 # and the filter, applied to pre-game info only. Wind uses the kickoff forecast for upcoming games.
@@ -212,9 +213,13 @@ def price(row, pm, market, side, line):
         fair, mkt, L_cons, p_cons = tot, tot_mkt, row.total_line, no_vig(row.over_odds, row.under_odds)
     else:
         fair, mkt, L_cons, line = sp, sp_mkt, 0, 0
-        p_cons = no_vig(row.home_ml, row.away_ml) if pd.notna(row.home_ml) and pd.notna(row.away_ml) else 0.5
+        # no consensus moneyline (books often skip them on mismatches): the market's own view is its spread,
+        # so the anchor is the win probability implied by the spread itself
+        p_cons = no_vig(row.home_ml, row.away_ml) if pd.notna(row.home_ml) and pd.notna(row.away_ml) else None
     w_f, pu, lo_f = over_under(fair, line)
     w_m, _pm, lo_m = over_under(mkt, L_cons)
+    if p_cons is None:
+        p_cons = w_m / (w_m + lo_m)
     q = 1 / (1 + math.exp(-(logit(p_cons) + logit(w_f / (w_f + lo_f)) - logit(w_m / (w_m + lo_m)))))
     w, lo = q * (1 - pu), (1 - q) * (1 - pu)
     return (w, pu, lo) if side in ("home", "over") else (lo, pu, w)
@@ -383,7 +388,7 @@ def current_card(df, current):
                      "fair_ml": f"{r.home} {to_american(home_win[0] + home_win[1] / 2):+d}"})
         best = {}
         for market, book, name, w, pu, lo, odds, side, line in options(r, *pm, offers=books.get(tuple(getattr(r, k) for k in BOOK_KEYS))):
-            if market == "ml" and pd.notna(odds) and odds < MAX_ML_FAVORITE:
+            if market == "ml" and pd.notna(odds) and (odds < MAX_ML_FAVORITE or odds > MAX_ML_DOG):
                 continue
             ev, stake = evaluate(w, pu, lo, odds)
             if market in best and ev <= best[market]["ev"]:
@@ -465,7 +470,7 @@ def system_card(df, wk, books):
             # best price: the better number first, then the better odds, FanDuel on ties
             better = (lambda o: (0 if m == "ml" else -o[2] if side in ("over", "home") else o[2], payout(o[3]), o[4] == PREFERRED_BOOK))
             _m, _s, line, odds, book = max(offers, key=better)
-            if pd.isna(line) or (m == "ml" and pd.isna(odds)):
+            if pd.isna(line) or (m == "ml" and (pd.isna(odds) or odds > MAX_ML_DOG)):
                 continue
             odds = odds if pd.notna(odds) else -110
             name = label(r, m, side, line)

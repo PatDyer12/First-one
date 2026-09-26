@@ -180,7 +180,8 @@ def model_reason(S, p):
         if cons is not None and abs(cons - line) >= 0.5:
             better = (line < cons) if side == "Over" else (line > cons)
             if better:
-                out.append(f"DraftKings is dealing {line:g} while the wider market is at {cons:g}, a better number for this side.")
+                out.append(f"{p.get('book', 'DraftKings')} is dealing {line:g} while the wider market is at {cons:g}, "
+                           f"a better number for this side.")
         w = S.weather(p.get("game_id"))
         if w is not None:
             out.append(f"Forecast: {w['temp']:.0f}°F, {w['wind']:.0f} mph wind.")

@@ -60,6 +60,33 @@ def season_tables(season):
     return team, lines[["game_id", "spread_line", "total_line"]]
 
 
+# The Odds API spells some schools differently from ESPN
+ODDS_API_ALIASES = {
+    "Appalachian State Mountaineers": "App State Mountaineers", "Gardner-Webb Runnin Bulldogs": "Gardner-Webb Runnin' Bulldogs",
+    "Hawaii Rainbow Warriors": "Hawai'i Rainbow Warriors", "Houston Baptist Huskies": "Houston Christian Huskies",
+    "LIU Sharks": "Long Island University Sharks", "Louisiana Ragin Cajuns": "Louisiana Ragin' Cajuns",
+    "Sam Houston State Bearkats": "Sam Houston Bearkats", "Southern Mississippi Golden Eagles": "Southern Miss Golden Eagles",
+    "UMass Minutemen": "Massachusetts Minutemen", "William and Mary Tribe": "William & Mary Tribe",
+}
+
+
+def _norm(name):
+    return "".join(ch for ch in name.lower().replace("&", "and") if ch.isalnum())
+
+
+def team_matcher(espn_names):
+    """Odds API full name -> ESPN team id, via aliases and punctuation-insensitive matching."""
+    by_norm = {_norm(k): v for k, v in espn_names.items()}
+    missing = set()
+
+    def match(name):
+        k = espn_names.get(ODDS_API_ALIASES.get(name, name)) or by_norm.get(_norm(ODDS_API_ALIASES.get(name, name)))
+        if k is None:
+            missing.add(name)
+        return k
+    return match, missing
+
+
 def main():
     os.makedirs(CACHE, exist_ok=True)
     sched = []
@@ -102,10 +129,13 @@ def main():
         names = {x["team"]["displayName"]: int(x["team"]["id"]) for x in t["sports"][0]["leagues"][0]["teams"]}
     except Exception as e:  # only needed to match FanDuel names
         print("team list failed:", e)
+    match, missing = team_matcher(names)
     status = books.fetch("college-football", "americanfootball_ncaaf", key_of=lambda c: int(c["team"]["id"]),
-                         key_of_name=names.get, out_path=os.path.join(DATA, "book_odds.csv"),
+                         key_of_name=match, out_path=os.path.join(DATA, "book_odds.csv"),
                          espn_params={"groups": 80, "limit": 400})
     print("book odds:", status)
+    if missing:
+        print("  unmatched Odds API team names (add to ODDS_API_ALIASES):", ", ".join(sorted(missing)))
     done = games[games["completed"] == True]  # noqa: E712
     print(f"{len(games)} games, {len(done)} final, lines on {games['spread_line'].notna().mean():.0%}; "
           f"latest {done['start_date'].max()}")
