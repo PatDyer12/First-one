@@ -48,6 +48,10 @@ from the strongest signal plus 0.5u per extra agreeing signal (max 2u). One bet 
 moneyline only if the spread price is too steep). Prices: FanDuel unless DraftKings is strictly better. Each play
 carries its backup: the game-specific reason plus every signal's record.
 
+## Unit size
+`betting/share/settings.json` sets the dollar value of a unit (`unit_dollars`) and your bankroll. Cards show every play
+in units and dollars. Stakes were designed for 1 unit ≈ 1% of bankroll; bigger units mean proportionally more risk.
+
 ## Shareable weekly cards (PDF)
 ```
 python3 betting/share/weekly.py          # -> betting/share/nfl_week<N>.pdf and cfb_week<N>.pdf

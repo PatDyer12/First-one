@@ -56,14 +56,16 @@ def fmt_line(market, side, line, home, away):
 
 
 def best_offer(offers, market, side):
-    """Better number first, then better price, FanDuel on a tie."""
+    """Best number among offers at a playable price (FanDuel on a tie); if none is playable, the best overall
+    (so the card can list it as a price-watch lean)."""
     o = [x for x in offers if x["market"] == market and x["side"] == side]
     if not o:
         return None
     def key(x):
         num = 0 if market == "ml" else (-x["line"] if side in ("home", "over") else x["line"])
         return (num, payout(x["odds"]), x["book"] == PREFERRED)
-    return max(o, key=key)
+    ok = [x for x in o if payout(x["odds"]) >= payout(MIN_ODDS[market])]
+    return max(ok or o, key=key)
 
 
 def build(sport):

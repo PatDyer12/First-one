@@ -469,7 +469,8 @@ def system_card(df, wk, books):
                 offers = [(m, side, line, odds, "consensus")]
             # best price: the better number first, then the better odds, FanDuel on ties
             better = (lambda o: (0 if m == "ml" else -o[2] if side in ("over", "home") else o[2], payout(o[3]), o[4] == PREFERRED_BOOK))
-            _m, _s, line, odds, book = max(offers, key=better)
+            playable = [o for o in offers if pd.notna(o[3]) and payout(o[3]) >= payout(sysd.get("min_odds", -110))]
+            _m, _s, line, odds, book = max(playable or offers, key=better)  # best number among playable prices
             if pd.isna(line) or (m == "ml" and (pd.isna(odds) or odds > MAX_ML_DOG)):
                 continue
             odds = odds if pd.notna(odds) else -110
