@@ -29,7 +29,7 @@ def log_picks(picks):
     have = set(zip(log.game_id, log.market, log.side))
     new = []
     for p in picks:
-        if p["tier"] not in ("BET", "SYSTEM") or (p["game_id"], p["market"], p["side"]) in have:
+        if p["tier"] not in ("BET", "SYSTEM", "FINAL") or (p["game_id"], p["market"], p["side"]) in have:
             continue
         new.append({"logged": datetime.now().strftime("%Y-%m-%d %H:%M"), "tier": p.get("system", p["tier"]), "game_id": p["game_id"], "game": p["game"],
                     "market": p["market"], "side": p["side"], "book": p.get("book", ""), "bet": p["bet"], "line": p["line"], "odds": p["odds"],
