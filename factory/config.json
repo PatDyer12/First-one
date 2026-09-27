@@ -1,0 +1,19 @@
+{
+  "blueprint_id": 12,
+  "print_provider_id": 29,
+  "shirt_colors": ["White", "Natural"],
+  "sizes": ["S", "M", "L", "XL", "2XL", "3XL"],
+  "daily_count": 3,
+  "printify": {
+    "base_cost": 11.5,
+    "shipping": 4.75
+  },
+  "etsy": {
+    "listing_fee": 0.2,
+    "transaction_pct": 0.065,
+    "processing_pct": 0.03,
+    "processing_flat": 0.25,
+    "offsite_ads_pct": 0.15,
+    "offsite_ads_share": 0.1
+  }
+}

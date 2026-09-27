@@ -1,0 +1,189 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Factory Terminal</title>
+<style>
+  :root {
+    --bg: #07090b; --panel: #0d1215; --line: #1e3a2f; --text: #b8f5c9; --dim: #5f8a70;
+    --green: #39ff88; --amber: #ffc857; --red: #ff6b6b; --cyan: #5ce1e6;
+    --mono: ui-monospace, "SF Mono", Menlo, Consolas, monospace;
+  }
+  * { box-sizing: border-box; }
+  body { margin: 0; background: var(--bg); color: var(--text); font: 13px/1.5 var(--mono); }
+  body::after { content: ""; position: fixed; inset: 0; pointer-events: none;
+    background: repeating-linear-gradient(0deg, rgba(0,0,0,.18) 0 1px, transparent 1px 3px); }
+  .wrap { max-width: 1200px; margin: 0 auto; padding: 16px; }
+  header { display: flex; flex-wrap: wrap; gap: 8px 24px; align-items: baseline; border-bottom: 1px solid var(--line); padding-bottom: 10px; }
+  h1 { font-size: 15px; margin: 0; color: var(--green); letter-spacing: .08em; }
+  h2 { font-size: 11px; margin: 0 0 10px; color: var(--amber); letter-spacing: .14em; text-transform: uppercase; font-weight: 600; }
+  .dim { color: var(--dim); }
+  .panel { background: var(--panel); border: 1px solid var(--line); padding: 14px; margin-top: 14px; }
+  .kpis { display: grid; grid-template-columns: repeat(auto-fit, minmax(140px, 1fr)); gap: 10px; margin-top: 14px; }
+  .kpi { background: var(--panel); border: 1px solid var(--line); padding: 10px 12px; }
+  .kpi b { display: block; font-size: 22px; color: var(--green); font-weight: 600; font-variant-numeric: tabular-nums; }
+  .kpi span { font-size: 10px; letter-spacing: .12em; color: var(--dim); text-transform: uppercase; }
+  .pipe { display: grid; grid-template-columns: repeat(4, 1fr); gap: 6px; }
+  .stage { border: 1px solid var(--line); padding: 8px; }
+  .stage b { color: var(--cyan); font-size: 18px; font-weight: 600; }
+  .bar { height: 6px; background: #13201a; margin-top: 6px; }
+  .bar i { display: block; height: 100%; background: linear-gradient(90deg, var(--green), var(--amber)); }
+  .grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(190px, 1fr)); gap: 10px; }
+  .card { border: 1px solid var(--line); background: #0a0f11; cursor: pointer; }
+  .card:hover { border-color: var(--green); }
+  .card img { width: 100%; display: block; aspect-ratio: 5/6; object-fit: cover; }
+  .card .meta { padding: 8px; }
+  .card .t { color: var(--text); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+  .chip { display: inline-block; font-size: 10px; padding: 1px 6px; border: 1px solid; letter-spacing: .08em; text-transform: uppercase; }
+  .designed { color: var(--dim); } .draft { color: var(--amber); } .published { color: var(--green); }
+  .row { display: flex; justify-content: space-between; gap: 8px; }
+  .cols { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; }
+  .cols > * { min-width: 0; }
+  @media (max-width: 760px) { .pipe { grid-template-columns: 1fr 1fr; } .cols { grid-template-columns: 1fr; } }
+  label { display: flex; justify-content: space-between; align-items: center; gap: 8px; padding: 4px 0; color: var(--dim); }
+  input { width: 90px; background: #050708; color: var(--green); border: 1px solid var(--line); font: inherit; padding: 3px 6px; text-align: right; }
+  .out { border-top: 1px dashed var(--line); margin-top: 8px; padding-top: 8px; }
+  .out .row b { color: var(--green); font-weight: 600; }
+  .neg { color: var(--red) !important; }
+  .log { max-height: 260px; overflow: auto; font-size: 12px; }
+  .log div { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .ag { color: var(--amber); display: inline-block; width: 62px; }
+  dialog { background: var(--panel); color: var(--text); border: 1px solid var(--green); max-width: 560px; width: calc(100% - 32px); font: inherit; }
+  dialog::backdrop { background: rgba(0,0,0,.7); }
+  dialog img { width: 100%; max-width: 280px; display: block; margin: 0 auto 10px; }
+  .tags span { display: inline-block; border: 1px solid var(--line); padding: 0 5px; margin: 2px; font-size: 11px; }
+  button { background: none; color: var(--green); border: 1px solid var(--green); font: inherit; padding: 4px 10px; cursor: pointer; }
+  .empty { color: var(--dim); padding: 20px; text-align: center; }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header>
+    <h1>▣ FACTORY // ETSY OPS</h1>
+    <span class="dim" id="built"></span>
+    <span class="dim" id="mode"></span>
+  </header>
+
+  <div class="kpis" id="kpis"></div>
+
+  <div class="panel">
+    <h2>Pipeline</h2>
+    <div class="pipe" id="pipe"></div>
+  </div>
+
+  <div class="panel">
+    <h2>Products</h2>
+    <div class="grid" id="grid"></div>
+  </div>
+
+  <div class="cols">
+    <div class="panel">
+      <h2>Unit economics · one sale</h2>
+      <label>Retail price $ <input id="c-price" type="number" step="0.5"></label>
+      <label>Printify base cost $ <input id="c-base" type="number" step="0.25"></label>
+      <label>Printify shipping $ <input id="c-ship" type="number" step="0.25"></label>
+      <label>Share of sales from Etsy offsite ads % <input id="c-ads" type="number" step="5"></label>
+      <label>Monthly profit goal $ <input id="c-goal" type="number" step="100"></label>
+      <div class="out" id="c-out"></div>
+    </div>
+    <div class="panel">
+      <h2>Agent log</h2>
+      <div class="log" id="log"></div>
+    </div>
+  </div>
+</div>
+
+<dialog id="dlg"></dialog>
+
+<script>
+const DATA = /*__DATA__*/null;
+const { state, cfg } = DATA;
+const $ = (id) => document.getElementById(id);
+const money = (n) => (n < 0 ? "-$" : "$") + Math.abs(n).toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+const esc = (s) => String(s).replace(/[&<>"]/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" }[c]));
+
+const P = state.products;
+const count = (s) => P.filter((p) => p.status === s).length;
+const avgProfit = P.length ? P.reduce((a, p) => a + p.unit.profit, 0) / P.length : 0;
+const sales = state.sales;
+
+$("built").textContent = "built " + DATA.built + " UTC";
+$("mode").textContent = sales ? "ledger synced " + sales.synced : "ledger: no orders synced yet";
+
+const kpis = [
+  ["Designs", P.length],
+  ["Printify drafts", count("draft")],
+  ["Live on Etsy", count("published")],
+  ["Avg profit / sale", money(avgProfit)],
+  ["Orders", sales ? sales.orders : "—"],
+  ["Revenue", sales ? money(sales.revenue) : "—"],
+  ["Est. profit", sales ? money(sales.profit_est) : "—"],
+];
+$("kpis").innerHTML = kpis.map(([k, v]) => `<div class="kpi"><b>${v}</b><span>${k}</span></div>`).join("");
+
+const stages = [
+  ["SCOUT · ideas", P.length],
+  ["FORGE · designs", P.length],
+  ["RELAY · drafts", count("draft") + count("published")],
+  ["LIVE · Etsy", count("published")],
+];
+const maxS = Math.max(1, P.length);
+$("pipe").innerHTML = stages.map(([k, v]) =>
+  `<div class="stage"><div class="dim">${k}</div><b>${v}</b><div class="bar"><i style="width:${(v / maxS) * 100}%"></i></div></div>`).join("");
+
+$("grid").innerHTML = P.length ? P.slice().reverse().map((p) => `
+  <div class="card" data-id="${p.id}">
+    <img src="${p.thumb}" alt="${esc(p.lines.join(" "))}">
+    <div class="meta">
+      <div class="t">${esc(p.title)}</div>
+      <div class="row"><span class="dim">${esc(p.niche)}</span><span class="chip ${p.status}">${p.status}</span></div>
+      <div class="row"><span>${money(p.price)}</span><span class="${p.unit.profit < 0 ? "neg" : ""}">+${money(p.unit.profit)}/sale</span></div>
+    </div>
+  </div>`).join("") : `<div class="empty">No products yet. Run: python factory/factory.py run --demo</div>`;
+
+document.querySelectorAll(".card").forEach((el) => el.addEventListener("click", () => {
+  const p = P.find((x) => x.id === el.dataset.id);
+  const d = $("dlg");
+  d.innerHTML = `<img src="${p.thumb}" alt="">
+    <h2>${esc(p.id)} · ${esc(p.status)}${p.printify_id ? " · printify " + esc(p.printify_id) : ""}</h2>
+    <p>${esc(p.title)}</p>
+    <p class="dim" style="white-space:pre-wrap">${esc(p.description)}</p>
+    <div class="tags">${p.tags.map((t) => `<span>${esc(t)}</span>`).join("")}</div>
+    <p>${money(p.unit.price)} − Etsy ${money(p.unit.etsy_fees)} − Printify ${money(p.unit.production)} = <b style="color:var(--green)">${money(p.unit.profit)}</b></p>
+    <p class="dim">design file: factory/${esc(p.design)}</p>
+    <form method="dialog"><button>close</button></form>`;
+  d.showModal();
+}));
+
+$("log").innerHTML = state.log.slice().reverse().map((l) =>
+  `<div><span class="dim">${esc(l.t.slice(5))}</span> <span class="ag">${esc(l.agent)}</span>${esc(l.msg)}</div>`).join("") || `<div class="dim">quiet</div>`;
+
+// Same formula as ledger.py, live.
+const fees = cfg.etsy;
+const inputs = { price: 26, base: cfg.printify.base_cost, ship: cfg.printify.shipping, ads: fees.offsite_ads_share * 100, goal: 1000 };
+for (const k in inputs) {
+  const el = $("c-" + k);
+  el.value = inputs[k];
+  el.addEventListener("input", calc);
+}
+function calc() {
+  const v = (k) => parseFloat($("c-" + k).value) || 0;
+  const price = v("price");
+  const etsy = fees.listing_fee + price * (fees.transaction_pct + fees.processing_pct) + fees.processing_flat
+    + price * fees.offsite_ads_pct * (v("ads") / 100);
+  const prod = v("base") + v("ship");
+  const profit = price - etsy - prod;
+  const need = profit > 0 ? Math.ceil(v("goal") / profit) : Infinity;
+  const views = profit > 0 ? Math.round(need / 0.01) : Infinity;
+  $("c-out").innerHTML = `
+    <div class="row"><span>Etsy fees</span><b>${money(etsy)}</b></div>
+    <div class="row"><span>Printify (shirt + ship)</span><b>${money(prod)}</b></div>
+    <div class="row"><span>Profit per sale</span><b class="${profit < 0 ? "neg" : ""}">${money(profit)} (${price ? Math.round((profit / price) * 100) : 0}%)</b></div>
+    <div class="row"><span>Sales / month for goal</span><b>${isFinite(need) ? need + " (~" + Math.ceil(need / 30) + "/day)" : "never"}</b></div>
+    <div class="row"><span>Listing visits needed @1% conv.</span><b>${isFinite(views) ? views.toLocaleString() : "—"}</b></div>`;
+}
+calc();
+</script>
+</body>
+</html>

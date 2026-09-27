@@ -32,3 +32,7 @@ Out-of-sample R² (rest of season): QB 0.33 (vs 0.33 preseason-only), RB 0.54 (0
 Re-fit only on purpose: `python3 scripts/train_model.py`. Weekly refresh: `python3 scripts/fetch_data.py` (applies the frozen weights).
 
 Sources: FantasyCalc; Sleeper API (Sportradar stats incl. snaps/targets/carries/team scores, RotoWire projections and ADP, injuries).
+
+## Etsy Factory
+
+`factory/` is a separate project: an automated Etsy print-on-demand pipeline (Claude ideas, rendered designs, Printify listings, profit tracking). See [factory/README.md](factory/README.md).

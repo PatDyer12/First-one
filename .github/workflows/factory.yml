@@ -1,0 +1,40 @@
+name: factory
+
+# Daily: Claude drafts new shirt concepts, renders designs, and creates Printify drafts.
+# Drafts are NOT published; review them in Printify (or run `factory.py publish`).
+# Scheduled runs only fire from the default branch.
+on:
+  schedule:
+    - cron: "17 13 * * *"
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  run:
+    runs-on: ubuntu-latest
+    env:
+      ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
+      PRINTIFY_API_TOKEN: ${{ secrets.PRINTIFY_API_TOKEN }}
+      PRINTIFY_SHOP_ID: ${{ secrets.PRINTIFY_SHOP_ID }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - run: pip install -r factory/requirements.txt
+      - name: Run factory
+        run: |
+          if [ -z "$ANTHROPIC_API_KEY" ] || [ -z "$PRINTIFY_API_TOKEN" ] || [ -z "$PRINTIFY_SHOP_ID" ]; then
+            echo "Secrets not set; skipping."; exit 0
+          fi
+          python factory/factory.py run
+          python factory/factory.py sync || true
+      - name: Save state
+        run: |
+          [ -f factory/state.json ] || exit 0
+          git config user.name "factory-bot"
+          git config user.email "factory-bot@users.noreply.github.com"
+          git add -f factory/state.json
+          git diff --cached --quiet || (git commit -m "factory: daily run" && git push)

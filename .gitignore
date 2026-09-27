@@ -1,2 +1,5 @@
 .cache/
 __pycache__/
+factory/output/
+factory/state.json
+factory/dashboard.html
