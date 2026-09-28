@@ -1,6 +1,6 @@
 # ECON 385 -- Group Assignment: NFL Data Analysis
 #
-# Group members:
+# Group members: Andrew Mount, Pat Dyer
 #
 # INSTRUCTIONS
 # 1. Place this script and nfl_games_2002_2020.csv in the same folder.
