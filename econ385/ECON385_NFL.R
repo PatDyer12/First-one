@@ -170,6 +170,7 @@ q7_table
 # into bins of the pregame probability elo_prob1.
 
 games_dec <- subset(nfl, result1 != 0.5)
+nrow(games_dec)   # number of decisive games used in Q8
 games_dec$prob_bin <- cut(games_dec$elo_prob1,
                           breaks = seq(0, 1, by = 0.1),
                           include.lowest = TRUE)
