@@ -1,10 +1,10 @@
 <!doctype html>
 <html><head><meta charset="utf-8"><title>ECON 385 Exam 1 Sheet</title>
 <style>
-@page { size: letter portrait; margin: 0.22in; }
+@page { size: letter portrait; margin: 0.16in; }
 * { box-sizing: border-box; }
-body { margin:0; font-family: "Helvetica Neue", Arial, sans-serif; font-size: 7.3pt; line-height: 1.17; color:#000; background:#fff; }
-.cols { column-count: 3; column-gap: 0.12in; column-rule: 0.5pt solid #999; }
+body { margin:0; font-family: "Helvetica Neue", Arial, sans-serif; font-size: 6.8pt; line-height: 1.17; color:#000; background:#fff; }
+.cols { column-count: 3; column-gap: 0.09in; column-rule: 0.5pt solid #999; }
 h1 { font-size: 8pt; margin: 0 0 2px; padding: 1px 3px; background:#000; color:#fff; column-span: all; }
 h2 { font-size: 7.1pt; margin: 3px 0 1px; padding: 0.5px 3px; background:#d9d9d9; border-left: 3px solid #000; break-after: avoid; }
 h3 { font-size: 6.7pt; margin: 2px 0 0; text-decoration: underline; break-after: avoid; }
@@ -22,6 +22,8 @@ th { background:#e6e6e6; }
 .f { font-family: "Cambria Math", "Times New Roman", serif; font-size: 7pt; }
 sub, sup { font-size: 70%; line-height: 0; }
 .ol { text-decoration: overline; }
+
+.gp { font-size: 6.6pt; line-height: 1.16; margin-bottom: 1.5px; }
 .m { font-family: "DejaVu Sans", sans-serif; font-size: 0.95em; }
 </style></head><body>
 <h1>ECON 385 · Exam 1 Cheat Sheet (Topics 1–3) · Show work, give UNITS, say “associated with” not “causes”</h1>
@@ -141,5 +143,10 @@ P(X≤b)=Φ(z<sub>b</sub>); &nbsp; P(X&gt;b)=1−Φ(z<sub>b</sub>); &nbsp; <b>P(
 
 <h2>6 · EXAM TACTICS</h2>
 <p>Write formula → plug in → answer with <b>units</b> → one-sentence interpretation. Check PMF sums to 1 &amp; Σû=0. Name the <b>reference group</b> for conditional probs. For any “does this prove causation?” → <b>No</b> + name a confounder/selection/reverse causality + what design fixes it (RCT). Distinguish estimator vs estimate, population vs sample, u vs û.</p>
+<h2>7 · SYMBOL GLOSSARY</h2>
+<p class="gp"><u><b>Causality:</b></u> <b>Y<sub>i</sub>(1)</b> outcome for unit i IF treated (potential outcome) · <b>Y<sub>i</sub>(0)</b> outcome for unit i if NOT treated · <b>Y<sub>i</sub></b> outcome actually observed for i · <b>D<sub>i</sub></b> treatment indicator: 1 = treated, 0 = control · <b>τ<sub>i</sub> (tau)</b> individual treatment effect Y<sub>i</sub>(1)−Y<sub>i</sub>(0) · <b>ATE</b> avg treatment effect, whole population · <b>ATT</b> avg treatment effect on the treated (D=1) · <b>RCT</b> randomized controlled trial · <b><span class="m">Ȳ</span><sub>T</sub>, <span class="m">Ȳ</span><sub>C</sub></b> sample mean outcome, treatment / control group · <b>n<sub>T</sub>, n<sub>C</sub></b> # in treatment / control group · <b>⊥ or ⊥⊥</b> “is independent of” · <b>IV, DiD, RD</b> instrumental variables, difference-in-differences, regression discontinuity (quasi-expt designs) · <b>i, t</b> index for unit (person/district) and time period</p>
+<p class="gp"><u><b>Probability &amp; statistics:</b></u> <b>X (capital)</b> random variable (value not yet known) · <b>x (lowercase)</b> a realized/observed value of X · <b>Ω, ω</b> set of all possible outcomes; one outcome · <b>p<sub>X</sub>(x)</b> PMF = P(X=x) (discrete) · <b>f<sub>X</sub>(x)</b> PDF = density height (continuous; not a prob) · <b>F<sub>X</sub>(x)</b> CDF = P(X ≤ x) · <b>P(A∩B)</b> prob. A AND B both happen · <b>P(A|B)</b> prob. of A GIVEN B happened · <b>E[X], μ (mu)</b> expected value / population mean · <b>Var(X), σ²</b> population variance · <b>σ (sigma), SD</b> population standard deviation · <b>Cov(X,Y), σ<sub>XY</sub></b> population covariance · <b>Corr, ρ (rho)</b> population correlation · <b>N, n</b> population size, sample size · <b><span class="m">X̄</span>, <span class="m">x̄</span></b> sample mean (“X-bar”) · <b>s², s</b> sample variance, sample SD (n−1) · <b>s<sub>XY</sub>, r<sub>XY</sub></b> sample covariance, sample correlation · <b>~</b> “is distributed as” · <b>N(μ, σ²)</b> normal dist. with mean μ, VARIANCE σ² · <b>Z, z</b> standard normal N(0,1) variable; z-score · <b>Φ(z) (phi)</b> standard normal CDF = P(Z ≤ z) · <b>Bernoulli(p)</b> 0/1 variable, P(=1) = p · <b>1{·}</b> indicator: 1 if condition true, else 0 · <b>iid</b> independent &amp; identically distributed · <b>Σ, ∫</b> sum; integral (area under curve)</p>
+<p class="gp"><u><b>Estimators:</b></u> <b>θ (theta)</b> generic unknown population parameter · <b><span class="m">θ̂</span></b> estimator of θ (“theta-hat”) · <b>g(X<sub>1</sub>,…,X<sub>n</sub>)</b> the rule/function that makes the estimator · <b>p</b> true population probability/share · <b>S</b> ΣX<sub>i</sub> = # of 1s (successes) in sample · <b><span class="m">p̂</span></b> S/n, sample proportion · <b><span class="m">p̃</span></b> (S+1)/(n+2), “add-two” (p-tilde) · <b>p<sub>1</sub>, X<sub>1</sub></b> just the first observation · <b>X<sub>i</sub></b> observation i in the sample · <b>ε (epsilon)</b> any small positive number · <b>→<sup>p</sup></b> converges in probability (consistency) · <b>Bias, MSE</b> E[<span class="m">θ̂</span>]−θ; mean squared error</p>
+<p class="gp"><u><b>Regression:</b></u> <b>Y</b> dependent var. / outcome / LHS · <b>X</b> independent var. / regressor / RHS · <b>β<sub>0</sub> (beta)</b> population intercept (unknown) · <b>β<sub>1</sub></b> population slope (unknown) · <b>u</b> population error: all other factors (unobserved) · <b><span class="m">β̂</span><sub>0</sub>, <span class="m">β̂</span><sub>1</sub></b> OLS estimates of intercept, slope · <b><span class="m">Ŷ</span>, <span class="m">ŷ</span><sub>i</sub></b> fitted/predicted value on the line · <b><span class="m">û</span><sub>i</sub></b> residual = y<sub>i</sub> − <span class="m">ŷ</span><sub>i</sub> (sample, observed) · <b>E[Y|X=x]</b> conditional mean of Y among units with X=x · <b>E[u|X]=0</b> zero conditional mean assumption · <b>b<sub>0</sub>, b<sub>1</sub></b> any candidate intercept/slope · <b>Q, SSR</b> sum of squared residuals Σ(y−b<sub>0</sub>−b<sub>1</sub>x)² · <b>arg min</b> the values that minimize · <b>∂Q/∂b</b> partial derivative (FOC: set = 0) · <b>OLS</b> ordinary least squares · <b>df</b> residual degrees of freedom = n − 2 · <b>STR</b> student–teacher ratio (class size) · <b>OVB</b> omitted variable bias · <b>lm(Y~X)</b> R command: regress Y on X</p>
 </div>
 </body></html>
