@@ -130,7 +130,7 @@ P(X≤b)=Φ(z<sub>b</sub>); &nbsp; P(X&gt;b)=1−Φ(z<sub>b</sub>); &nbsp; <b>P(
 <tr><td>y* = y + a</td><td>same</td><td><span class="m">β̂</span><sub>0</sub>+a</td></tr>
 <tr><td>x* = x + a</td><td>same</td><td><span class="m">β̂</span><sub>0</sub> − <span class="m">β̂</span><sub>1</sub>a</td></tr>
 </table>
-<p class="sm">Why: Σ(x−x̄)(y−ȳ) scales by c<sub>x</sub>c<sub>y</sub>, Σ(x−x̄)² by c<sub>x</sub>². Units only relabel — same fit, same R². $→cents: slope ×100.</p>
+<p class="sm">Why: Σ(x−x̄)(y−ȳ) scales by c<sub>x</sub>c<sub>y</sub>, Σ(x−x̄)² by c<sub>x</sub>². Units only relabel — same fit. $→cents: slope ×100.</p>
 <h3>Interpretation templates</h3>
 <p><b>Slope:</b> “A one-[unit X] increase in X is <b>associated with</b> a <span class="m">β̂</span><sub>1</sub> [units of Y] higher/lower Y, on average.” (units = Y per unit X)<br>
 <b>Intercept:</b> fitted Y when X=0; if 0 outside data range ⇒ extrapolation, little meaning.<br>
@@ -138,7 +138,6 @@ P(X≤b)=Φ(z<sub>b</sub>); &nbsp; P(X&gt;b)=1−Φ(z<sub>b</sub>); &nbsp; <b>P(
 <b>Not causal because:</b> no random assignment; selection/confounders in u (ability, motivation, income); reverse causality; small n.</p>
 <h3>Reading R output</h3>
 <p>Intercept &amp; slope “Estimate” column ⇒ ŷ = b<sub>0</sub> + b<sub>1</sub>x. <b>Residual df = n − 2</b> (2 coefs) ⇒ <b>n = df + 2</b>. Class-size: Score^ = 698.93 − 2.28·STR, df 418 ⇒ n=420; STR 22→18: +9.12 pts (not proven causal).</p>
-<p><b>R²</b> = SSE/SST = 1 − SSR/SST ∈[0,1] = <b>share of sample variation in Y explained</b> by the fitted line (in-sample, descriptive; low R² ≠ zero slope; high R² ≠ causal). R²=.05124 ⇒ STR explains ≈5.1% of score variation; 94.9% in residuals. SST=Σ(y−ȳ)², SSE=Σ(ŷ−ȳ)², SSR=Σû², SST=SSE+SSR. Simple reg: R² = r². SER=√(SSR/(n−2)) = typical residual size (Y units).</p>
 
 <h2>6 · EXAM TACTICS</h2>
 <p>Write formula → plug in → answer with <b>units</b> → one-sentence interpretation. Check PMF sums to 1 &amp; Σû=0. Name the <b>reference group</b> for conditional probs. For any “does this prove causation?” → <b>No</b> + name a confounder/selection/reverse causality + what design fixes it (RCT). Distinguish estimator vs estimate, population vs sample, u vs û.</p>
