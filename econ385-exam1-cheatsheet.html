@@ -1,0 +1,146 @@
+<!doctype html>
+<html><head><meta charset="utf-8"><title>ECON 385 Exam 1 Sheet</title>
+<style>
+@page { size: letter portrait; margin: 0.22in; }
+* { box-sizing: border-box; }
+body { margin:0; font-family: "Helvetica Neue", Arial, sans-serif; font-size: 7.3pt; line-height: 1.17; color:#000; background:#fff; }
+.cols { column-count: 3; column-gap: 0.12in; column-rule: 0.5pt solid #999; }
+h1 { font-size: 8pt; margin: 0 0 2px; padding: 1px 3px; background:#000; color:#fff; column-span: all; }
+h2 { font-size: 7.1pt; margin: 3px 0 1px; padding: 0.5px 3px; background:#d9d9d9; border-left: 3px solid #000; break-after: avoid; }
+h3 { font-size: 6.7pt; margin: 2px 0 0; text-decoration: underline; break-after: avoid; }
+p, ul { margin: 0 0 1.5px; }
+ul { padding-left: 9px; }
+li { margin: 0; }
+b { font-weight: 700; }
+.box { border: 0.7pt solid #000; padding: 1px 2px; margin: 1.5px 0; break-inside: avoid; }
+.key { background:#f0f0f0; }
+table { border-collapse: collapse; width: 100%; margin: 1px 0 2px; break-inside: avoid; }
+td, th { border: 0.5pt solid #777; padding: 0 2px; text-align: left; vertical-align: top; }
+th { background:#e6e6e6; }
+.z td, .z th { text-align:center; padding: 0; font-size: 5.9pt; letter-spacing:-0.1px; }
+.sm { font-size: 6.5pt; }
+.f { font-family: "Cambria Math", "Times New Roman", serif; font-size: 7pt; }
+sub, sup { font-size: 70%; line-height: 0; }
+.ol { text-decoration: overline; }
+.m { font-family: "DejaVu Sans", sans-serif; font-size: 0.95em; }
+</style></head><body>
+<h1>ECON 385 · Exam 1 Cheat Sheet (Topics 1–3) · Show work, give UNITS, say “associated with” not “causes”</h1>
+<div class="cols">
+
+<h2>1 · CAUSALITY (Rubin potential outcomes)</h2>
+<p><b>Y<sub>i</sub>(1)</b> = outcome if treated, <b>Y<sub>i</sub>(0)</b> = if not. D<sub>i</sub>=1 treated. Observed: Y<sub>i</sub> = D<sub>i</sub>Y<sub>i</sub>(1) + (1−D<sub>i</sub>)Y<sub>i</sub>(0).</p>
+<p><b>Individual effect</b> τ<sub>i</sub> = Y<sub>i</sub>(1) − Y<sub>i</sub>(0) &nbsp;(heterogeneous: τ<sub>i</sub> ≠ τ<sub>j</sub>)</p>
+<p><b>ATE</b> = E[Y(1)−Y(0)] = avg τ over <u>everyone</u> = E[Y(1)]−E[Y(0)]</p>
+<p><b>ATT</b> = E[Y(1)−Y(0) | D=1] = avg τ over <u>treated only</u></p>
+<div class="box key"><b>Observed diff</b> E[Y(1)|D=1] − E[Y(0)|D=0]<br>
+&nbsp;= <b>ATT</b> + <b>Selection bias</b> {E[Y(0)|D=1] − E[Y(0)|D=0]}<br>
+<span class="sm">Selection bias = how treated would've done WITHOUT treatment vs. controls. &gt;0 ⇒ observed gap overstates effect.</span></div>
+<p><b>Table recipe:</b> (1) τ each row (2) ATE = mean τ all rows (3) Observed = mean Y(1) of D=1 rows − mean Y(0) of D=0 rows (4) ATT = mean τ of D=1 rows (5) Sel = mean Y(0) of D=1 − mean Y(0) of D=0 (6) CHECK ATT+Sel = Observed. <span class="sm">Slides ex: 35.75 = 20.75 + 15; ATE=17.5</span></p>
+<p><b>Fundamental problem of causal inference</b> (Holland 1986): observe at most ONE potential outcome per unit at a time; the other is the <b>counterfactual</b> (missing). Clones = perfect control (thought experiment).</p>
+<p><b>RCT:</b> random assignment ⇒ D ⊥ (Y(0),Y(1)) ⇒ E[Y(0)|D=1]=E[Y(0)|D=0] ⇒ <b>selection = 0</b> ⇒ <span class="m">Ȳ</span><sub>T</sub> − <span class="m">Ȳ</span><sub>C</sub> estimates <b>ATE</b> (=ATT). Control group stands in for treated's missing Y(0). Balances traits <i>in expectation</i> (not clones; small samples can be unbalanced by chance).</p>
+<p><b>RCT limits:</b> noncompliance, attrition, spillovers, subjects know they're studied, small-sample imbalance, cost/ethics/infeasible, <b>external validity</b>, short run only.</p>
+<p><b>No RCT?</b> Natural expt / quasi-expt / observational. Draft lottery (Angrist ’90), quarter of birth IV (Angrist–Krueger ’91), Indonesia schools (Duflo ’01), Mariel boatlift (Card ’90), NJ vs PA min wage DiD (Card–Krueger ’94), close elections RD (Lee ’08), Oregon Medicaid lottery. LaLonde ’86: observational methods failed to match RCT.</p>
+<p><b>Why X,Y correlate:</b> X→Y causal; <b>reverse</b> Y→X; <b>confounder</b> Z→both; selection; common time <b>trends</b>; chance/data mining (spurious: margarine–divorce r=.99). Correlation = symmetric, descriptive; causation = directional, needs counterfactual + design.</p>
+<p><b>Prediction vs policy:</b> X can predict Y well as a <i>proxy</i> for confounders; intervening on X doesn't move the confounders ⇒ good forecast ≠ causal effect.</p>
+<p><b>Deterministic</b> Y=f(X) exactly (F=9/5·C+32; tax=τ·price; dist=speed·time; C=30+8X). <b>Stochastic</b> Y=β<sub>0</sub>+β<sub>1</sub>X+u (wage on educ): same X, different Y. Econometrics = stats + econ theory + math (Frisch 1933).</p>
+
+<h3>Data structures</h3>
+<table class="sm">
+<tr><th>Type</th><th>What</th><th>+ / −</th></tr>
+<tr><td><b>Cross section</b></td><td>many units, ONE time (Y<sub>i</sub>)</td><td>+big, rich variation / −selection, OVB, timing unclear</td></tr>
+<tr><td><b>Time series</b></td><td>ONE unit/aggregate, many times (Y<sub>t</sub>) e.g. GDP</td><td>+dynamics, forecasting / −serial dependence, spurious trends, breaks</td></tr>
+<tr><td><b>Repeated cross sec.</b> (pooled)</td><td>NEW sample each period</td><td>+tracks population change / −can't see individual transitions; composition shifts</td></tr>
+<tr><td><b>Panel</b> (longitudinal)</td><td>SAME units, many times (Y<sub>it</sub>)</td><td>+<b>within-unit change</b>, fixed effects remove time-invariant traits / −attrition, complex</td></tr>
+</table>
+<p class="sm">“Same people revisited” = panel. “Fresh sample each year/month” = repeated cross section. Only panel shows <b>within-person/district change</b>.</p>
+
+<h2>2 · PROBABILITY &amp; STATS</h2>
+<p><b>RV</b> maps outcomes→numbers (X: Ω→ℝ). Capital X = random; lowercase x = realized. <b>Discrete</b> (countable) vs <b>continuous</b> (interval).</p>
+<p><b>PMF</b> p(x)=P(X=x); valid iff all p ≥ 0 AND Σp = 1. <b>CDF</b> F(x)=P(X≤x)=Σ<sub>t≤x</sub>p(t). Discrete CDF = <b>step function</b>: flat between values, jumps = p(x) at each value; 0 left of min, 1 at/after max; never decreases.</p>
+<p>P(X&gt;x)=1−F(x); P(a&lt;X≤b)=F(b)−F(a); P(X≥2)=1−P(X≤1).</p>
+<div class="box"><b>E[X]</b> = Σ x·p(x) &nbsp; <b>E[X²]</b> = Σ x²·p(x)<br>
+<b>Var(X)</b> = E[(X−μ)²] = <b>E[X²] − (E[X])²</b> &nbsp; SD = √Var<br>
+<b>E[a+bX] = a+bE[X]</b>; &nbsp; <b>Var(a+bX) = b²Var(X)</b>; &nbsp; SD(a+bX)=|b|SD<br>
+Var(X±Y)=VarX+VarY±2Cov; indep ⇒ Cov=0<br>
+Indicator D∈{0,1}: E[D]=P(D=1)=p, Var=p(1−p)</div>
+<p><b>Units:</b> E, SD, median = units of X; Var = units². +a shifts center only (spread unchanged).</p>
+<p><b>Mean</b> (uses all, outlier-sensitive), <b>median</b> (middle; robust), <b>mode</b> (most frequent). Right skew ⇒ mean &gt; median.</p>
+<h3>Sample statistics (use n−1!)</h3>
+<p><span class="m">X̄</span> = Σx<sub>i</sub>/n; &nbsp; <b>s² = Σ(x<sub>i</sub>−<span class="m">x̄</span>)²/(n−1)</b>; s=√s². n−1 because <span class="m">x̄</span> used up 1 df (corrects downward bias). Population: μ, σ², ρ, N (fixed, unknown). Sample: <span class="m">X̄</span>, s², r, n (random).</p>
+<p><b>Rescale data by c</b> (e.g. min→sec c=60): mean×c, median×c, SD×c, <b>var×c²</b>. Add a: mean+a, var same.</p>
+<h3>Covariance &amp; correlation</h3>
+<p><b>Cov(X,Y)</b> = E[(X−μ<sub>X</sub>)(Y−μ<sub>Y</sub>)] = <b>E[XY]−E[X]E[Y]</b>; sample s<sub>XY</sub>=Σ(x−<span class="m">x̄</span>)(y−<span class="m">ȳ</span>)/(n−1). Cov(X,X)=Var X. Cov(a+bX,c+dY)=bd·Cov (unit-dependent).</p>
+<p><b>Corr</b> ρ = Cov/(σ<sub>X</sub>σ<sub>Y</sub>), ∈[−1,1], unit-free, symmetric; mult. one var by negative flips sign. <b>Corr=0 ≠ no relationship</b>: X symmetric about 0, Y=X² ⇒ Cov=E[X³]=0 but perfectly dependent (only LINEAR assoc. measured). Corr ≠ causation.</p>
+<h3>Conditional probability / joint tables</h3>
+<p><b>P(A|B) = P(A∩B)/P(B)</b> — denominator = <b>reference group</b> (“among B cases…”). Marginals = row/col totals. P(A|B) ≠ P(B|A) generally.</p>
+<p><b>Independent</b> iff P(A∩B)=P(A)P(B) ⇔ P(A|B)=P(A). Show one numeric comparison. Indicators R,L: E[RL]=P(R=1,L=1); Cov(R,L)=P(both)−P(R)P(L). Cov&gt;0 = occur together, NOT causal.</p>
+<p><b>Prediction w/ 0.5 cutoff:</b> predict yes if P&gt;.5; accuracy = share correct. Conditioning on informative var improves forecasts.</p>
+
+<h2>3 · CONTINUOUS &amp; NORMAL</h2>
+<p><b>PDF</b> f(x)≥0, total area 1; <b>P(a≤X≤b) = area</b> = ∫f. <b>P(X=c)=0</b> (point has zero width) but interval has positive area ≈ f·width; density height can exceed 1 (not a prob). Endpoints don't matter: P(a&lt;X&lt;b)=P(a≤X≤b).</p>
+<div class="box key"><b>X ~ N(μ, σ²)</b> — 2nd number is VARIANCE (N(20,5²) ⇒ σ=5)<br>
+<b>Z = (X−μ)/σ ~ N(0,1)</b>; z = # SDs from mean (unit-free, compare across dists)<br>
+P(X≤b)=Φ(z<sub>b</sub>); &nbsp; P(X&gt;b)=1−Φ(z<sub>b</sub>); &nbsp; <b>P(a≤X≤b)=Φ(z<sub>b</sub>)−Φ(z<sub>a</sub>)</b><br>
+<b>Φ(−z) = 1−Φ(z)</b>; &nbsp; P(−k≤Z≤k) = 2Φ(k)−1; symmetric, mean=median=mode</div>
+<p><b>68–95–99.7:</b> μ±1σ ≈68% (16% each tail), μ±2σ ≈95% (2.5% each tail), μ±3σ ≈99.7% (.15%). Central 95% ≈ [μ−2σ, μ+2σ] (exact ±1.96σ).</p>
+<table class="z">
+<tr><th>Φ(z)</th><th>.0</th><th>.1</th><th>.2</th><th>.3</th><th>.4</th><th>.5</th><th>.6</th><th>.7</th><th>.8</th><th>.9</th></tr>
+<tr><th>0.</th><td>.5000</td><td>.5398</td><td>.5793</td><td>.6179</td><td>.6554</td><td>.6915</td><td>.7257</td><td>.7580</td><td>.7881</td><td>.8159</td></tr>
+<tr><th>1.</th><td>.8413</td><td>.8643</td><td>.8849</td><td>.9032</td><td>.9192</td><td>.9332</td><td>.9452</td><td>.9554</td><td>.9641</td><td>.9713</td></tr>
+<tr><th>2.</th><td>.9772</td><td>.9821</td><td>.9861</td><td>.9893</td><td>.9918</td><td>.9938</td><td>.9953</td><td>.9965</td><td>.9974</td><td>.9981</td></tr>
+</table>
+<p class="sm">Φ(3)=.9987 · Φ(1.645)=.95 · Φ(1.96)=.975 · Φ(2.576)=.995. Ex: P(70≤X≤85), X~N(75,10²): Φ(1)−Φ(−.5)=.8413−.3085=.5328</p>
+
+<h2>4 · ESTIMATORS</h2>
+<p><b>Estimator</b> <span class="m">θ̂</span>=g(X<sub>1</sub>..X<sub>n</sub>) = a RULE, random variable w/ sampling distribution. <b>Estimate</b> = the NUMBER from one observed sample. Parameter θ fixed, unknown.</p>
+<div class="box key"><b>Bias</b> = E[<span class="m">θ̂</span>] − θ &nbsp;(unbiased: E[<span class="m">θ̂</span>]=θ, cluster centered on bullseye)<br>
+<b>Efficiency</b>: among UNBIASED estimators, smaller Var wins<br>
+<b>Consistent</b>: P(|<span class="m">θ̂</span><sub>n</sub>−θ|&gt;ε)→0 as n→∞. Check: <b>Bias→0 AND Var→0</b><br>
+<b>MSE</b> = E[(<span class="m">θ̂</span>−θ)²] = <b>Var(<span class="m">θ̂</span>) + Bias²</b> (small bias OK if Var drops a lot; ranking depends on true θ)</div>
+<p><b>Tools (iid):</b> E[<span class="m">X̄</span>]=μ, <b>Var(<span class="m">X̄</span>)=σ²/n</b>, SD(<span class="m">X̄</span>)=σ/√n; E[ΣX]=nμ, Var(ΣX)=nσ². E[c<span class="m">θ̂</span>]=cE[<span class="m">θ̂</span>], Var(c<span class="m">θ̂</span>)=c²Var(<span class="m">θ̂</span>). Constants add to E only.<br>
+<b>Bernoulli(p):</b> E[X<sub>i</sub>]=p, Var=p(1−p). S=ΣX<sub>i</sub>: <b>E[S]=np, Var(S)=np(1−p)</b>.</p>
+<p><b>General:</b> <span class="m">θ̂</span>=(aS+b)/c ⇒ E=(a·np+b)/c, Var=a²·np(1−p)/c².</p>
+<table class="sm">
+<tr><th>Estimator</th><th>E</th><th>Bias</th><th>Var</th><th>Cons?</th></tr>
+<tr><td><b><span class="m">p̂</span>=S/n</b></td><td>p</td><td>0</td><td>p(1−p)/n</td><td>Yes</td></tr>
+<tr><td><b><span class="m">p̃</span>=(S+1)/(n+2)</b></td><td>(np+1)/(n+2)</td><td>(1−2p)/(n+2)</td><td>np(1−p)/(n+2)²</td><td>Yes</td></tr>
+<tr><td><b>p<sub>1</sub>=X<sub>1</sub></b></td><td>p</td><td>0</td><td>p(1−p)</td><td><b>No</b></td></tr>
+<tr><td><b><span class="m">X̄</span></b></td><td>μ</td><td>0</td><td>σ²/n</td><td>Yes</td></tr>
+<tr><td><b>X<sub>1</sub></b></td><td>μ</td><td>0</td><td>σ² (ignores extra data)</td><td><b>No</b></td></tr>
+<tr><td><b>k<span class="m">X̄</span></b>, k=n/(n+1)</td><td>kμ</td><td>−μ/(n+1)</td><td>k²σ²/n = nσ²/(n+1)²</td><td>Yes</td></tr>
+</table>
+<p class="sm">MSE(n/(n+1)·<span class="m">X̄</span>) = (nσ²+μ²)/(n+1)². Add-two shrinks toward .5 ⇒ lower Var, biased unless p=.5; p=.52,n=9: MSE .0186 &lt; .0277 (S/n). p=.52,n=11: .0163 &lt; .0227. X̄ more efficient than X<sub>1</sub> for n&gt;1.</p>
+<p><b>Median/mode of 0/1 data</b> = 1{S&gt;n/2} (odd n): estimates the <b>majority outcome</b> 1{p&gt;.5}, NOT the size of p; →1 if p&gt;.5 ⇒ inconsistent for p.</p>
+
+<h2>5 · SIMPLE REGRESSION (OLS)</h2>
+<p><b>Population:</b> Y = β<sub>0</sub> + β<sub>1</sub>X + u. Y dependent/outcome/LHS; X regressor/RHS. β's fixed, unknown. <b>u</b> = all other determinants + nonlinearity + measurement error (unobserved).</p>
+<div class="box key"><b>Zero conditional mean E[u|X=x]=0</b>: among units with same X, unobservables average 0 ⇒ <b>E[Y|X=x]=β<sub>0</sub>+β<sub>1</sub>x</b> (line = conditional mean); β<sub>1</sub> = change in E[Y|X] per +1 X. u⊥X &amp; E[u]=0 is stronger/sufficient. <b>NOT needed to CALCULATE OLS</b> — only to INTERPRET (only need variation in x).</div>
+<p><b>OVB story:</b> income ∈ u, affects score, correlated w/ class size ⇒ E[u|STR]≠0 ⇒ slope mixes STR effect with income ⇒ not causal (still valid description).</p>
+<p><b>OLS:</b> choose b<sub>0</sub>,b<sub>1</sub> to min <b>Q=SSR=Σ(y<sub>i</sub>−b<sub>0</sub>−b<sub>1</sub>x<sub>i</sub>)²</b>. Why squares: Σû cancels (+8,−8); squares smooth/differentiable, closed form, penalize big misses, target cond. mean. |û| → median regression, not diff. at 0.</p>
+<p><b>FOCs:</b> ∂Q/∂b<sub>0</sub> = −2Σ(y<sub>i</sub>−b<sub>0</sub>−b<sub>1</sub>x<sub>i</sub>)=0 ⇒ <b>Σû<sub>i</sub>=0</b> ⇒ <span class="m">ȳ</span>=<span class="m">β̂</span><sub>0</sub>+<span class="m">β̂</span><sub>1</sub><span class="m">x̄</span> ⇒ line passes through <b>(<span class="m">x̄</span>,<span class="m">ȳ</span>)</b>.<br>
+∂Q/∂b<sub>1</sub> = −2Σx<sub>i</sub>(y<sub>i</sub>−b<sub>0</sub>−b<sub>1</sub>x<sub>i</sub>)=0 ⇒ <b>Σx<sub>i</sub>û<sub>i</sub>=0</b>. These are <u>algebraic sample identities</u>; they hold always and do NOT prove population E[u|X]=0.</p>
+<div class="box key f"><b><span class="m">β̂</span><sub>1</sub> = Σ(x<sub>i</sub>−<span class="m">x̄</span>)(y<sub>i</sub>−<span class="m">ȳ</span>) / Σ(x<sub>i</sub>−<span class="m">x̄</span>)²</b> = s<sub>XY</sub>/s²<sub>X</sub> = <b>r<sub>XY</sub>·s<sub>Y</sub>/s<sub>X</sub></b><br>
+&nbsp;&nbsp;= (Σxy − n<span class="m">x̄</span><span class="m">ȳ</span>)/(Σx² − n<span class="m">x̄</span>²) &nbsp;&nbsp; <b><span class="m">β̂</span><sub>0</sub> = <span class="m">ȳ</span> − <span class="m">β̂</span><sub>1</sub><span class="m">x̄</span></b></div>
+<p>sign(<span class="m">β̂</span><sub>1</sub>) = sign(r) = sign(Cov) since s<sub>X</sub>,s<sub>Y</sub>&gt;0. <b>Residual</b> û<sub>i</sub>=y<sub>i</sub>−ŷ<sub>i</sub> (units of Y; + = point above line).</p>
+<p><b>Hand-calc table:</b> x | y | x−<span class="m">x̄</span> | y−<span class="m">ȳ</span> | (x−<span class="m">x̄</span>)² | (x−<span class="m">x̄</span>)(y−<span class="m">ȳ</span>) → sum last two → <span class="m">β̂</span><sub>1</sub>, <span class="m">β̂</span><sub>0</sub> → ŷ=<span class="m">β̂</span><sub>0</sub>+<span class="m">β̂</span><sub>1</sub>x → û=y−ŷ → check Σû=0, Σxû=0 (rounding ≈0). <span class="sm">Ex (1,2)(2,3)(3,5): <span class="m">β̂</span><sub>1</sub>=1.5, <span class="m">β̂</span><sub>0</sub>=1/3.</span></p>
+<table class="sm">
+<tr><th>Change</th><th>New <span class="m">β̂</span><sub>1</sub></th><th>New <span class="m">β̂</span><sub>0</sub></th></tr>
+<tr><td>y* = c·y</td><td>c·<span class="m">β̂</span><sub>1</sub></td><td>c·<span class="m">β̂</span><sub>0</sub></td></tr>
+<tr><td>x* = c·x</td><td><span class="m">β̂</span><sub>1</sub>/c</td><td>same</td></tr>
+<tr><td>y* = y + a</td><td>same</td><td><span class="m">β̂</span><sub>0</sub>+a</td></tr>
+<tr><td>x* = x + a</td><td>same</td><td><span class="m">β̂</span><sub>0</sub> − <span class="m">β̂</span><sub>1</sub>a</td></tr>
+</table>
+<p class="sm">Why: Σ(x−x̄)(y−ȳ) scales by c<sub>x</sub>c<sub>y</sub>, Σ(x−x̄)² by c<sub>x</sub>². Units only relabel — same fit, same R². $→cents: slope ×100.</p>
+<h3>Interpretation templates</h3>
+<p><b>Slope:</b> “A one-[unit X] increase in X is <b>associated with</b> a <span class="m">β̂</span><sub>1</sub> [units of Y] higher/lower Y, on average.” (units = Y per unit X)<br>
+<b>Intercept:</b> fitted Y when X=0; if 0 outside data range ⇒ extrapolation, little meaning.<br>
+<b>Prediction:</b> ŷ(x<sub>0</sub>)=<span class="m">β̂</span><sub>0</sub>+<span class="m">β̂</span><sub>1</sub>x<sub>0</sub> estimates E[Y|X=x<sub>0</sub>] (avg for such units, not each one). Change: Δŷ = <span class="m">β̂</span><sub>1</sub>·Δx. Beware x<sub>0</sub> outside observed range.<br>
+<b>Not causal because:</b> no random assignment; selection/confounders in u (ability, motivation, income); reverse causality; small n.</p>
+<h3>Reading R output</h3>
+<p>Intercept &amp; slope “Estimate” column ⇒ ŷ = b<sub>0</sub> + b<sub>1</sub>x. <b>Residual df = n − 2</b> (2 coefs) ⇒ <b>n = df + 2</b>. Class-size: Score^ = 698.93 − 2.28·STR, df 418 ⇒ n=420; STR 22→18: +9.12 pts (not proven causal).</p>
+<p><b>R²</b> = SSE/SST = 1 − SSR/SST ∈[0,1] = <b>share of sample variation in Y explained</b> by the fitted line (in-sample, descriptive; low R² ≠ zero slope; high R² ≠ causal). R²=.05124 ⇒ STR explains ≈5.1% of score variation; 94.9% in residuals. SST=Σ(y−ȳ)², SSE=Σ(ŷ−ȳ)², SSR=Σû², SST=SSE+SSR. Simple reg: R² = r². SER=√(SSR/(n−2)) = typical residual size (Y units).</p>
+
+<h2>6 · EXAM TACTICS</h2>
+<p>Write formula → plug in → answer with <b>units</b> → one-sentence interpretation. Check PMF sums to 1 &amp; Σû=0. Name the <b>reference group</b> for conditional probs. For any “does this prove causation?” → <b>No</b> + name a confounder/selection/reverse causality + what design fixes it (RCT). Distinguish estimator vs estimate, population vs sample, u vs û.</p>
+</div>
+</body></html>
