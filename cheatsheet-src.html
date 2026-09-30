@@ -4,7 +4,7 @@
 <style>
 @page { size: letter portrait; margin: 0.15in; }
 * { box-sizing: border-box; }
-body { margin:0; font-family: "Liberation Sans", Arial, sans-serif; font-size: 6.9pt; line-height: 1.19; color:#111; background:#fff; }
+body { margin:0; font-family: "Liberation Sans", Arial, sans-serif; font-size: 6.6pt; line-height: 1.19; color:#111; background:#fff; }
 .katex { font-size: 1.08em; }
 .cols { height: 10.42in; column-fill: auto; overflow: hidden; column-count: 3; column-gap: 0.14in; column-rule: 0.6pt solid #bbb; }
 header { display:flex; justify-content:space-between; align-items:baseline; border-bottom: 1.5pt solid #1f3a60; margin-bottom: 3px; padding-bottom: 1px; }
@@ -27,6 +27,12 @@ table.t { width:100%; border-collapse: collapse; margin: 2px 0 3px; break-inside
 table.t th, table.t td { border: 0.5pt solid #9aa; padding: 0.5px 3px; text-align:left; vertical-align: top; }
 table.t th { background:#e4ebf3; }
 .z td, .z th { text-align:center !important; padding: 0.5px 1px !important; font-size: 6.6pt; }
+.gloss { width:100%; border-collapse: collapse; font-size: 6.5pt; line-height: 1.12; margin-top: 1px; }
+.gloss td { padding: 0.3px 2px; border-bottom: 0.3pt solid #dde3ea; vertical-align: top; }
+.gloss td.s { white-space: nowrap; font-weight: 700; width: 1%; }
+.gloss td.s + td { border-right: 0.5pt solid #9fb3cc; }
+.gloss .katex { font-size: 1.0em; }
+.gloss tr.g td { background:#e4ebf3; font-weight:700; color:#1f3a60; border-right:none; }
 .warn { font-weight:700; color:#8a1c1c; }
 .note { font-size: 6.9pt; color:#333; }
 </style></head><body>
@@ -35,12 +41,6 @@ table.t th { background:#e4ebf3; }
 
 <!-- ===================== 1 ===================== -->
 <h2>1. CAUSALITY — does X actually cause Y?</h2>
-<table class="key"><caption>Symbols</caption>
-<tr><td>$Y_i(1)$</td><td>person $i$'s outcome <b>if treated</b></td></tr>
-<tr><td>$Y_i(0)$</td><td>person $i$'s outcome <b>if not treated</b></td></tr>
-<tr><td>$D_i$</td><td>treatment: 1 = treated, 0 = not treated</td></tr>
-<tr><td>$\tau_i$ (“tau”)</td><td>person $i$'s treatment effect</td></tr>
-</table>
 <div class="card">
 <p><b>Individual effect:</b> $\tau_i = Y_i(1) - Y_i(0)$</p>
 <p><b>ATE</b> (average treatment effect) = average of $\tau_i$ over <b>everyone</b></p>
@@ -82,13 +82,6 @@ table.t th { background:#e4ebf3; }
 
 <!-- ===================== 2 ===================== -->
 <h2>2. PROBABILITY &amp; STATISTICS</h2>
-<table class="key"><caption>Symbols</caption>
-<tr><td>$X$ vs. $x$</td><td>random variable (not known yet) vs. an actual value</td></tr>
-<tr><td>$\mu$ (“mu”) $=E[X]$</td><td>population mean (expected value)</td></tr>
-<tr><td>$\sigma^2$ (“sigma sq.”)</td><td>population variance; $\sigma$ = standard deviation</td></tr>
-<tr><td>$\bar X$ (“X-bar”), $n$</td><td>sample mean, sample size</td></tr>
-<tr><td>$s^2,\ s$</td><td>sample variance, sample SD</td></tr>
-</table>
 <div class="card">
 <p><b>PMF</b> = the table of $P(X=x)$. Valid if every value is $\ge 0$ and they <b>add to 1</b>.</p>
 <p><b>CDF</b> $F(x)=P(X\le x)$ = running total. Looks like a <b>staircase</b>: flat between values, jumps up at each value.</p>
@@ -142,12 +135,6 @@ table.t th { background:#e4ebf3; }
 
 <!-- ===================== 4 ===================== -->
 <h2>4. ESTIMATORS — how good is a guess?</h2>
-<table class="key"><caption>Symbols</caption>
-<tr><td>$\theta$ (“theta”)</td><td>the true unknown number we want</td></tr>
-<tr><td>$\hat\theta$ (“theta-hat”)</td><td>our guess of it, from the sample</td></tr>
-<tr><td>$p$</td><td>true probability (e.g. chance of heads)</td></tr>
-<tr><td>$S$, $\hat p=S/n$</td><td>number of 1s in sample; sample share</td></tr>
-</table>
 <p><b>Estimator</b> = the formula/rule (random — changes from sample to sample). <b>Estimate</b> = the actual number you get from your data.</p>
 <div class="card">
 <p><b>Bias</b> $= E[\hat\theta] - \theta$. &nbsp;<b>Unbiased</b> = right on average.</p>
@@ -169,15 +156,6 @@ table.t th { background:#e4ebf3; }
 
 <!-- ===================== 5 ===================== -->
 <h2>5. REGRESSION (OLS)</h2>
-<table class="key"><caption>Symbols</caption>
-<tr><td>$Y$</td><td>outcome (dependent variable)</td></tr>
-<tr><td>$X$</td><td>explanatory variable (independent / regressor)</td></tr>
-<tr><td>$\beta_0,\ \beta_1$ (“beta”)</td><td>TRUE intercept and slope (unknown)</td></tr>
-<tr><td>$u$</td><td>error: everything else that affects $Y$</td></tr>
-<tr><td>$\hat\beta_0,\ \hat\beta_1$</td><td>our estimated intercept and slope</td></tr>
-<tr><td>$\hat y$ (“y-hat”)</td><td>predicted value on the line</td></tr>
-<tr><td>$\hat u$ (“u-hat”)</td><td>residual = actual − predicted $= y-\hat y$</td></tr>
-</table>
 <p><b>Model:</b> $Y = \beta_0 + \beta_1 X + u$. &nbsp;<b>OLS</b> picks the line that makes the <b>sum of squared residuals</b> as small as possible.</p>
 <div class="card">
 <p>$\hat\beta_1 = \dfrac{\sum (x_i-\bar x)(y_i-\bar y)}{\sum (x_i-\bar x)^2}$ &nbsp;&nbsp;&nbsp; $\hat\beta_0 = \bar y - \hat\beta_1\,\bar x$</p>
@@ -213,5 +191,42 @@ table.t th { background:#e4ebf3; }
 </div>
 <p><b>Reading R output:</b> the “Estimate” column gives the line, e.g. $\widehat{\text{Score}} = 698.93 - 2.28\cdot\text{ClassSize}$. Degrees of freedom $= n-2$, so 418 df → $n = 420$.</p>
 
+<h2>6. GLOSSARY — every symbol</h2>
+<table class="gloss">
+<tr class="g"><td colspan="4">Greek letters</td></tr>
+<tr><td class="s">$\beta_0,\beta_1$</td><td>true intercept, slope</td><td class="s">$\hat\beta_0,\hat\beta_1$</td><td>estimated int., slope</td></tr>
+<tr><td class="s">$\mu$ (mu)</td><td>population mean</td><td class="s">$\sigma$, $\sigma^2$</td><td>pop. SD, variance</td></tr>
+<tr><td class="s">$\sigma_{XY}$</td><td>pop. covariance</td><td class="s">$\rho$ (rho)</td><td>pop. correlation</td></tr>
+<tr><td class="s">$\tau_i$ (tau)</td><td>i's treatment effect</td><td class="s">$\theta$, $\hat\theta$</td><td>true value; our guess</td></tr>
+<tr><td class="s">$\Phi(z)$ (phi)</td><td>$P(Z\le z)$ (table)</td><td class="s">$\varepsilon$ (epsilon)</td><td>tiny positive no.</td></tr>
+<tr><td class="s">$\Omega$, $\omega$</td><td>all outcomes; one</td><td class="s">$\Sigma$ (sigma)</td><td>add them all up</td></tr>
+<tr class="g"><td colspan="4">Letters</td></tr>
+<tr><td class="s">$X$ vs. $x$</td><td>random var. vs. value</td><td class="s">$X_i$, $x_i$</td><td>observation no. $i$</td></tr>
+<tr><td class="s">$Y$, $X$</td><td>outcome; explanatory</td><td class="s">$Y_i(1)$, $Y_i(0)$</td><td>if treated / not</td></tr>
+<tr><td class="s">$D_i$</td><td>1 = treated, 0 = not</td><td class="s">$u$</td><td>error: other factors</td></tr>
+<tr><td class="s">$\hat y$, $\hat u$</td><td>predicted; residual</td><td class="s">$\bar X$, $\bar x$</td><td>sample mean</td></tr>
+<tr><td class="s">$s^2$, $s$</td><td>sample variance, SD</td><td class="s">$s_{XY}$, $r_{XY}$</td><td>sample cov., corr.</td></tr>
+<tr><td class="s">$N$, $n$</td><td>pop. size, sample size</td><td class="s">$p$, $\hat p$, $\tilde p$</td><td>true prob.; estimates</td></tr>
+<tr><td class="s">$S$</td><td>number of 1s in sample</td><td class="s">$Z$, $z$</td><td>std. normal; z-score</td></tr>
+<tr><td class="s">$b_0,b_1$</td><td>candidate int./slope</td><td class="s">$Q$</td><td>sum sq. residuals</td></tr>
+<tr><td class="s">$c$, $a$, $b$</td><td>constants</td><td class="s">hat, bar</td><td>estimate, average</td></tr>
+<tr class="g"><td colspan="4">Functions &amp; operators</td></tr>
+<tr><td class="s">$E[X]$</td><td>expected value (avg)</td><td class="s">$E[Y\mid X{=}x]$</td><td>avg Y at that X</td></tr>
+<tr><td class="s">Var, SD</td><td>variance, std. dev.</td><td class="s">Cov, Corr</td><td>cov., correlation</td></tr>
+<tr><td class="s">$P(A)$</td><td>probability of A</td><td class="s">$P(A\mid B)$</td><td>A given B</td></tr>
+<tr><td class="s">$A \cap B$</td><td>A and B both</td><td class="s">$p_X(x)$ PMF</td><td>$P(X=x)$</td></tr>
+<tr><td class="s">$f_X(x)$ PDF</td><td>density height</td><td class="s">$F_X(x)$ CDF</td><td>$P(X\le x)$</td></tr>
+<tr><td class="s">$\sim$</td><td>“distributed as”</td><td class="s">$N(\mu,\sigma^2)$</td><td>normal (var. $\sigma^2$)</td></tr>
+<tr><td class="s">Bernoulli($p$)</td><td>0/1, $P(1)=p$</td><td class="s">$\mathbf{1}\{\cdot\}$</td><td>1 if true, 0 if not</td></tr>
+<tr><td class="s">$\perp$</td><td>“independent of”</td><td class="s">$\xrightarrow{p}$</td><td>converges as $n$↑</td></tr>
+<tr><td class="s">$\partial Q/\partial b$</td><td>derivative</td><td class="s">arg min</td><td>values that minimize</td></tr>
+<tr class="g"><td colspan="4">Abbreviations</td></tr>
+<tr><td class="s">ATE / ATT</td><td>effect: all / treated</td><td class="s">RCT</td><td>randomized trial</td></tr>
+<tr><td class="s">MSE</td><td>mean squared error</td><td class="s">OLS</td><td>ordinary least squares</td></tr>
+<tr><td class="s">SSR</td><td>sum sq. residuals</td><td class="s">df</td><td>deg. of freedom $=n-2$</td></tr>
+<tr><td class="s">iid</td><td>indep., same distrib.</td><td class="s">STR</td><td>class size</td></tr>
+<tr><td class="s">OVB</td><td>omitted variable bias</td><td class="s">IV / DiD / RD</td><td>quasi-expt designs</td></tr>
+<tr><td class="s">lm(Y~X)</td><td>R: regress Y on X</td><td class="s"></td><td></td></tr>
+</table>
 </div>
 </body></html>
