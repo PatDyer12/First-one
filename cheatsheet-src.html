@@ -19,15 +19,15 @@ li { margin-bottom: 0.5px; }
 .card p:last-child { margin-bottom: 0; }
 .w { color:#444; font-style: italic; }
 .w::before { content: "In words: "; font-style: normal; font-weight: 700; color:#1f3a60; }
-.key { width:100%; border-collapse: collapse; margin: 1px 0 3px; break-inside: avoid; font-size: 7pt; }
+.key { width:100%; border-collapse: collapse; margin: 1px 0 3px; break-inside: avoid; font-size: 6.6pt; }
 .key td { padding: 0.5px 3px; border-bottom: 0.4pt solid #dde3ea; vertical-align: top; }
 .key td:first-child { white-space: nowrap; width: 1%; font-weight: 700; }
 .key caption { caption-side: top; text-align:left; font-weight:700; font-size:6.8pt; color:#1f3a60; text-transform: uppercase; letter-spacing: .3px; }
-table.t { width:100%; border-collapse: collapse; margin: 2px 0 3px; break-inside: avoid; font-size: 7pt; }
+table.t { width:100%; border-collapse: collapse; margin: 2px 0 3px; break-inside: avoid; font-size: 6.6pt; }
 table.t th, table.t td { border: 0.5pt solid #9aa; padding: 0.5px 3px; text-align:left; vertical-align: top; }
 table.t th { background:#e4ebf3; }
 .z td, .z th { text-align:center !important; padding: 0.5px 1px !important; font-size: 6.6pt; }
-.gloss { width:100%; border-collapse: collapse; font-size: 6.5pt; line-height: 1.12; margin-top: 1px; }
+.gloss { width:100%; border-collapse: collapse; font-size: 6.2pt; line-height: 1.12; margin-top: 1px; }
 .gloss td { padding: 0.3px 2px; border-bottom: 0.3pt solid #dde3ea; vertical-align: top; }
 .gloss td.s { white-space: nowrap; font-weight: 700; width: 1%; }
 .gloss td.s + td { border-right: 0.5pt solid #9fb3cc; }
@@ -67,7 +67,8 @@ table.t th { background:#e4ebf3; }
 <li><b>Fundamental problem of causal inference:</b> we only ever see ONE outcome per person (treated or not). The other one — what would have happened — is the <b>counterfactual</b>, and it's missing.</li>
 <li><b>Randomized experiment (RCT):</b> chance decides who is treated, so the groups are alike on average → selection bias $=0$ → (treatment avg − control avg) estimates the <b>ATE</b>.</li>
 <li><b>RCT problems:</b> dropouts/non-compliance, cost, ethics, may not apply elsewhere (<b>external validity</b>).</li>
-<li><b>Correlation ≠ causation</b> (and prediction ≠ causation). Other reasons X and Y move together: Y causes X (<b>reverse causality</b>); a third factor drives both (<b>confounder</b>); both just trend over time; pure chance.</li>
+<li><b>Prediction ≠ causation:</b> X can predict Y because it tracks hidden factors; a policy that changes X doesn't change those factors, so Y may not move.</li>
+<li><b>Correlation ≠ causation.</b> Other reasons X and Y move together: Y causes X (<b>reverse causality</b>); a third factor drives both (<b>confounder</b>); both just trend over time; pure chance.</li>
 <li><b>Deterministic:</b> Y is known exactly from X (°F = 1.8·°C + 32). <b>Stochastic:</b> $Y=\beta_0+\beta_1X+u$ — there's a random part $u$.</li>
 </ul>
 <h3>Four types of data</h3>
@@ -111,6 +112,7 @@ table.t th { background:#e4ebf3; }
 <p>$P(A\mid B) = \dfrac{P(A \text{ and } B)}{P(B)}$</p>
 <p class="w">“out of the B cases, what share are also A?” — B is the reference group. In a 2×2 table: “A and B” = inside cell, $P(B)$ = its total.</p>
 <p><b>Independent</b> if $P(A \text{ and } B) = P(A)\cdot P(B)$ &nbsp;(same as $P(A\mid B)=P(A)$)</p>
+<p><b>If A is inside B</b> (e.g. $X\ge2$ is inside $X\ge1$): $P(A\text{ and }B)=P(A)$, so $P(X{\ge}2\mid X{\ge}1)=\dfrac{P(X\ge2)}{P(X\ge1)}$.</p>
 </div>
 <p><b>0/1 variables</b> R and L: $E[RL] = P(\text{both}=1)$, so $\text{Cov} = P(\text{both}) - P(R)P(L)$. Positive Cov still doesn't prove causation.</p>
 
@@ -144,6 +146,7 @@ table.t th { background:#e4ebf3; }
 <p class="w">a little bias can be worth it if the variance drops a lot.</p>
 </div>
 <p><b>Tools:</b> $E[\bar X]=\mu$, &nbsp;$\text{Var}(\bar X)=\sigma^2/n$. For 0/1 data: $E[S]=np$, &nbsp;$\text{Var}(S)=np(1-p)$.</p>
+<p><b>Any rule $\frac{aS+b}{c}$:</b> $E=\frac{a\,np+b}{c}$, &nbsp;$\text{Var}=\frac{a^2\,np(1-p)}{c^2}$, &nbsp;Bias $=E-p$. (Same idea for $\bar X$: $E[k\bar X]=k\mu$, $\text{Var}=k^2\sigma^2/n$.)</p>
 <table class="t">
 <tr><th>Estimator</th><th>Bias</th><th>Variance</th><th>Consistent?</th></tr>
 <tr><td>$\hat p = S/n$</td><td>0</td><td>$p(1-p)/n$</td><td>Yes</td></tr>
@@ -175,12 +178,12 @@ table.t th { background:#e4ebf3; }
 <p>$\frac{\partial Q}{\partial b_1} = -2\sum x_i(y_i-b_0-b_1x_i)=0$ → $\sum x_i\hat u_i = 0$</p>
 <p>Divide the first by $n$: $\bar y = \hat\beta_0 + \hat\beta_1\bar x$ → the line always passes through $(\bar x,\bar y)$.</p>
 </div>
-<p><b>Changing units:</b> multiply $y$ by $c$ → slope and intercept both $\times c$. Multiply $x$ by $c$ → slope $\div c$, intercept same. (Dollars → cents: slope $\times 100$.)</p>
+<p><b>Changing units:</b> multiply $y$ by $c$ → slope and intercept both $\times c$. Multiply $x$ by $c$ → slope $\div c$, intercept same. (Dollars → cents: slope $\times 100$.) <i>Why:</i> the top of the $\hat\beta_1$ formula scales by $c_xc_y$, the bottom by $c_x^2$; then $\hat\beta_0=\bar y-\hat\beta_1\bar x$. Same fitted line, just new units.</p>
 <h3>How to interpret (fill in the blanks)</h3>
 <div class="card">
 <p><b>Slope:</b> “Each additional [unit of X] is <b>associated with</b> a $\hat\beta_1$ [units of Y] change in Y, on average.”</p>
 <p><b>Intercept:</b> predicted Y when X = 0 (often meaningless if X = 0 is outside the data).</p>
-<p><b>Prediction:</b> plug x into $\hat y=\hat\beta_0+\hat\beta_1x$.</p>
+<p><b>Prediction:</b> plug x into $\hat y=\hat\beta_0+\hat\beta_1x$. If x is outside the data range → <b>extrapolation</b>, less reliable.</p>
 <p><b>Not causal because:</b> units with more X may differ in other ways (ability, income) that sit in $u$; no random assignment.</p>
 </div>
 <div class="card">
@@ -189,7 +192,7 @@ table.t th { background:#e4ebf3; }
 <p>If true, the line gives the <b>average Y at each X</b>. You <u>don't</u> need it just to calculate $\hat\beta$ — only to interpret it. It fails if, e.g., family income affects test scores AND is related to class size.</p>
 <p class="note">Residuals always adding to 0 is just math — it does <u>not</u> prove $E[u\mid X]=0$.</p>
 </div>
-<p><b>Reading R output:</b> the “Estimate” column gives the line, e.g. $\widehat{\text{Score}} = 698.93 - 2.28\cdot\text{ClassSize}$. Degrees of freedom $= n-2$, so 418 df → $n = 420$.</p>
+<p><b>Reading R output:</b> the “Estimate” column gives the line, e.g. $\widehat{\text{Score}} = 698.93 - 2.28\cdot\text{ClassSize}$. Degrees of freedom $= n-2$, so 418 df → $n = 420$. <b>$R^2$</b> (e.g. .051) = share of the variation in Y explained by the line (5.1%). Descriptive only — not causal.</p>
 
 <h2>6. GLOSSARY — every symbol</h2>
 <table class="gloss">
