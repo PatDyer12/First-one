@@ -1,0 +1,217 @@
+<!doctype html>
+<html><head><meta charset="utf-8"><title>ECON 385 Exam 1 Sheet</title>
+<link rel="stylesheet" href="KATEX_CSS">
+<style>
+@page { size: letter portrait; margin: 0.15in; }
+* { box-sizing: border-box; }
+body { margin:0; font-family: "Liberation Sans", Arial, sans-serif; font-size: 6.9pt; line-height: 1.19; color:#111; background:#fff; }
+.katex { font-size: 1.08em; }
+.cols { height: 10.42in; column-fill: auto; overflow: hidden; column-count: 3; column-gap: 0.14in; column-rule: 0.6pt solid #bbb; }
+header { display:flex; justify-content:space-between; align-items:baseline; border-bottom: 1.5pt solid #1f3a60; margin-bottom: 3px; padding-bottom: 1px; }
+header .t { font-size: 11pt; font-weight: 700; color:#1f3a60; }
+header .s { font-size: 7.6pt; }
+h2 { font-size: 8.4pt; margin: 5px 0 2px; padding: 1.5px 4px; background:#1f3a60; color:#fff; border-radius: 2px; break-after: avoid; }
+h3 { font-size: 7.6pt; margin: 4px 0 1px; color:#1f3a60; break-after: avoid; }
+p { margin: 0 0 2.5px; }
+ol, ul { margin: 0 0 2.5px; padding-left: 12px; }
+li { margin-bottom: 0.5px; }
+.card { border: 0.7pt solid #9fb3cc; background:#f2f6fb; border-radius: 3px; padding: 1.5px 4px; margin: 1.5px 0 2.5px; break-inside: avoid; }
+.card p:last-child { margin-bottom: 0; }
+.w { color:#444; font-style: italic; }
+.w::before { content: "In words: "; font-style: normal; font-weight: 700; color:#1f3a60; }
+.key { width:100%; border-collapse: collapse; margin: 1px 0 3px; break-inside: avoid; font-size: 7pt; }
+.key td { padding: 0.5px 3px; border-bottom: 0.4pt solid #dde3ea; vertical-align: top; }
+.key td:first-child { white-space: nowrap; width: 1%; font-weight: 700; }
+.key caption { caption-side: top; text-align:left; font-weight:700; font-size:6.8pt; color:#1f3a60; text-transform: uppercase; letter-spacing: .3px; }
+table.t { width:100%; border-collapse: collapse; margin: 2px 0 3px; break-inside: avoid; font-size: 7pt; }
+table.t th, table.t td { border: 0.5pt solid #9aa; padding: 0.5px 3px; text-align:left; vertical-align: top; }
+table.t th { background:#e4ebf3; }
+.z td, .z th { text-align:center !important; padding: 0.5px 1px !important; font-size: 6.6pt; }
+.warn { font-weight:700; color:#8a1c1c; }
+.note { font-size: 6.9pt; color:#333; }
+</style></head><body>
+<header><span class="t">ECON 385 — Exam 1 Cheat Sheet</span><span class="s">Every answer: <b>formula → plug in → answer with units → one sentence in words</b></span></header>
+<div class="cols">
+
+<!-- ===================== 1 ===================== -->
+<h2>1. CAUSALITY — does X actually cause Y?</h2>
+<table class="key"><caption>Symbols</caption>
+<tr><td>$Y_i(1)$</td><td>person $i$'s outcome <b>if treated</b></td></tr>
+<tr><td>$Y_i(0)$</td><td>person $i$'s outcome <b>if not treated</b></td></tr>
+<tr><td>$D_i$</td><td>treatment: 1 = treated, 0 = not treated</td></tr>
+<tr><td>$\tau_i$ (“tau”)</td><td>person $i$'s treatment effect</td></tr>
+</table>
+<div class="card">
+<p><b>Individual effect:</b> $\tau_i = Y_i(1) - Y_i(0)$</p>
+<p><b>ATE</b> (average treatment effect) = average of $\tau_i$ over <b>everyone</b></p>
+<p><b>ATT</b> (effect on the treated) = average of $\tau_i$ over <b>treated people only</b></p>
+</div>
+<div class="card">
+<p><b>The key equation:</b></p>
+<p>Observed gap $=$ ATT $+$ Selection bias</p>
+<p>Observed gap $= E[Y(1)\mid D{=}1] - E[Y(0)\mid D{=}0]$</p>
+<p>Selection bias $= E[Y(0)\mid D{=}1] - E[Y(0)\mid D{=}0]$</p>
+<p class="w">selection bias asks: were the treated people already different, even without treatment?</p>
+</div>
+<h3>Steps for a potential-outcomes table</h3>
+<ol>
+<li>$\tau$ for each row $= Y(1) - Y(0)$</li>
+<li><b>ATE</b> = average $\tau$ of <u>all</u> rows</li>
+<li><b>Observed gap</b> = avg $Y(1)$ of treated rows − avg $Y(0)$ of untreated rows</li>
+<li><b>ATT</b> = average $\tau$ of <u>treated</u> rows</li>
+<li><b>Selection</b> = avg $Y(0)$ of treated − avg $Y(0)$ of untreated</li>
+<li><b>Check:</b> ATT + Selection = Observed gap</li>
+</ol>
+<h3>Big ideas</h3>
+<ul>
+<li><b>Fundamental problem of causal inference:</b> we only ever see ONE outcome per person (treated or not). The other one — what would have happened — is the <b>counterfactual</b>, and it's missing.</li>
+<li><b>Randomized experiment (RCT):</b> chance decides who is treated, so the groups are alike on average → selection bias $=0$ → (treatment avg − control avg) estimates the <b>ATE</b>.</li>
+<li><b>RCT problems:</b> dropouts/non-compliance, cost, ethics, may not apply elsewhere (<b>external validity</b>).</li>
+<li><b>Correlation ≠ causation</b> (and prediction ≠ causation). Other reasons X and Y move together: Y causes X (<b>reverse causality</b>); a third factor drives both (<b>confounder</b>); both just trend over time; pure chance.</li>
+<li><b>Deterministic:</b> Y is known exactly from X (°F = 1.8·°C + 32). <b>Stochastic:</b> $Y=\beta_0+\beta_1X+u$ — there's a random part $u$.</li>
+</ul>
+<h3>Four types of data</h3>
+<table class="t">
+<tr><th>Type</th><th>Who / when</th><th>Example</th></tr>
+<tr><td><b>Cross section</b></td><td>many units, one time</td><td>survey of workers in 2024</td></tr>
+<tr><td><b>Time series</b></td><td>one unit, many times</td><td>U.S. GDP every quarter</td></tr>
+<tr><td><b>Repeated cross sections</b></td><td><b>new</b> sample each period</td><td>different students surveyed each fall</td></tr>
+<tr><td><b>Panel</b></td><td><b>same</b> units every period</td><td>same students re-surveyed each fall</td></tr>
+</table>
+<p class="note">Only a <b>panel</b> shows how the <u>same</u> person/district changes over time.</p>
+
+<!-- ===================== 2 ===================== -->
+<h2>2. PROBABILITY &amp; STATISTICS</h2>
+<table class="key"><caption>Symbols</caption>
+<tr><td>$X$ vs. $x$</td><td>random variable (not known yet) vs. an actual value</td></tr>
+<tr><td>$\mu$ (“mu”) $=E[X]$</td><td>population mean (expected value)</td></tr>
+<tr><td>$\sigma^2$ (“sigma sq.”)</td><td>population variance; $\sigma$ = standard deviation</td></tr>
+<tr><td>$\bar X$ (“X-bar”), $n$</td><td>sample mean, sample size</td></tr>
+<tr><td>$s^2,\ s$</td><td>sample variance, sample SD</td></tr>
+</table>
+<div class="card">
+<p><b>PMF</b> = the table of $P(X=x)$. Valid if every value is $\ge 0$ and they <b>add to 1</b>.</p>
+<p><b>CDF</b> $F(x)=P(X\le x)$ = running total. Looks like a <b>staircase</b>: flat between values, jumps up at each value.</p>
+<p>$P(X>x) = 1-F(x)$ &nbsp;&nbsp; $P(X\ge 2)=1-P(X\le 1)$</p>
+</div>
+<div class="card">
+<p><b>Mean:</b> $E[X] = \sum x\cdot P(X=x)$</p>
+<p><b>Variance:</b> $\text{Var}(X) = E[X^2] - (E[X])^2$, with $E[X^2]=\sum x^2 \cdot P(X=x)$</p>
+<p><b>SD</b> $=\sqrt{\text{Var}}$ — same units as $X$ (variance is in units²)</p>
+<p class="w">mean = probability-weighted average; SD = typical distance from the mean.</p>
+</div>
+<div class="card">
+<p><b>If $C = a + bX$</b> (e.g. $C = 30 + 8X$):</p>
+<p>$E[C] = a + b\,E[X]$ &nbsp;&nbsp; $\text{Var}(C) = b^2\,\text{Var}(X)$ &nbsp;&nbsp; $\text{SD}(C)=|b|\,\text{SD}(X)$</p>
+<p class="w">adding a constant moves the mean but not the spread.</p>
+</div>
+<h3>Sample statistics (from a list of numbers)</h3>
+<p>$\bar x = \dfrac{\text{sum}}{n}$ &nbsp;&nbsp;&nbsp; $s^2 = \dfrac{\sum (x_i-\bar x)^2}{n-1}$ &nbsp; <span class="warn">← divide by $n-1$, not $n$</span></p>
+<p><b>Steps for $s^2$:</b> find the mean → subtract it from each value → square each → add up → divide by $n-1$. Then $s=\sqrt{s^2}$.</p>
+<p><b>Median</b> = middle value once sorted. <b>Mode</b> = most common. <b>Change units</b> (multiply every value by $c$, e.g. minutes → seconds, $c=60$): mean, median, SD all $\times c$; variance $\times c^2$.</p>
+<h3>Covariance &amp; correlation</h3>
+<p>$\text{Cov}(X,Y) = E[XY] - E[X]E[Y]$ &nbsp; + means they move together, − means opposite.</p>
+<p>$\text{Corr} = \rho = \dfrac{\text{Cov}(X,Y)}{\sigma_X\,\sigma_Y}$ &nbsp; always between −1 and 1, no units.</p>
+<p><b>Corr = 0 only means no straight-line relationship.</b> Example: $Y=X^2$ with $X$ centered at 0 has Corr = 0 but $Y$ depends completely on $X$.</p>
+<h3>Conditional probability</h3>
+<div class="card">
+<p>$P(A\mid B) = \dfrac{P(A \text{ and } B)}{P(B)}$</p>
+<p class="w">“out of the B cases, what share are also A?” — B is the reference group. In a 2×2 table: “A and B” = inside cell, $P(B)$ = its total.</p>
+<p><b>Independent</b> if $P(A \text{ and } B) = P(A)\cdot P(B)$ &nbsp;(same as $P(A\mid B)=P(A)$)</p>
+</div>
+<p><b>0/1 variables</b> R and L: $E[RL] = P(\text{both}=1)$, so $\text{Cov} = P(\text{both}) - P(R)P(L)$. Positive Cov still doesn't prove causation.</p>
+
+<!-- ===================== 3 ===================== -->
+<h2>3. THE NORMAL DISTRIBUTION</h2>
+<p class="warn">$N(20,\,5^2)$ means SD = 5 (the 2nd number is the VARIANCE).</p>
+<div class="card">
+<p><b>Step 1:</b> z-score (# of SDs from mean): &nbsp; $z = \dfrac{x-\mu}{\sigma}$</p>
+<p><b>Step 2:</b> look up $\Phi(z)=P(Z\le z)$ (“phi”) in the table and use:</p>
+<p>$P(X\le b)=\Phi(z_b)$ &nbsp;&nbsp; $P(X> b)=1-\Phi(z_b)$</p>
+<p>$P(a\le X\le b)=\Phi(z_b)-\Phi(z_a)$ &nbsp;&nbsp; $\Phi(-z)=1-\Phi(z)$</p>
+</div>
+<p><b>68–95–99.7 rule:</b> about 68% within 1 SD of the mean, 95% within 2 SD, 99.7% within 3 SD. 95% range ≈ $\mu \pm 2\sigma$.</p>
+<p><b>Why $P(X = 20) = 0$:</b> for a continuous variable, probability = <b>area</b> under the curve. A single point has no width → zero area. A range like 19 to 21 has width → positive area.</p>
+<table class="t z">
+<tr><th>$z$</th><th>.0</th><th>.1</th><th>.2</th><th>.3</th><th>.4</th><th>.5</th><th>.6</th><th>.7</th><th>.8</th><th>.9</th></tr>
+<tr><th>0.</th><td>.500</td><td>.540</td><td>.579</td><td>.618</td><td>.655</td><td>.691</td><td>.726</td><td>.758</td><td>.788</td><td>.816</td></tr>
+<tr><th>1.</th><td>.841</td><td>.864</td><td>.885</td><td>.903</td><td>.919</td><td>.933</td><td>.945</td><td>.955</td><td>.964</td><td>.971</td></tr>
+<tr><th>2.</th><td>.977</td><td>.982</td><td>.986</td><td>.989</td><td>.992</td><td>.994</td><td>.995</td><td>.997</td><td>.997</td><td>.998</td></tr>
+</table>
+<p class="note">$\Phi(1.3)$: row “1.”, column “.3” → .903. &nbsp;$\Phi(1.96)=.975$</p>
+
+<!-- ===================== 4 ===================== -->
+<h2>4. ESTIMATORS — how good is a guess?</h2>
+<table class="key"><caption>Symbols</caption>
+<tr><td>$\theta$ (“theta”)</td><td>the true unknown number we want</td></tr>
+<tr><td>$\hat\theta$ (“theta-hat”)</td><td>our guess of it, from the sample</td></tr>
+<tr><td>$p$</td><td>true probability (e.g. chance of heads)</td></tr>
+<tr><td>$S$, $\hat p=S/n$</td><td>number of 1s in sample; sample share</td></tr>
+</table>
+<p><b>Estimator</b> = the formula/rule (random — changes from sample to sample). <b>Estimate</b> = the actual number you get from your data.</p>
+<div class="card">
+<p><b>Bias</b> $= E[\hat\theta] - \theta$. &nbsp;<b>Unbiased</b> = right on average.</p>
+<p><b>Efficient:</b> among unbiased ones, the one with <b>smaller variance</b>.</p>
+<p><b>Consistent:</b> gets closer to the truth as $n$ grows (bias → 0 <u>and</u> variance → 0).</p>
+<p><b>MSE</b> $=\text{Variance} + \text{Bias}^2$ &nbsp; (lower is better)</p>
+<p class="w">a little bias can be worth it if the variance drops a lot.</p>
+</div>
+<p><b>Tools:</b> $E[\bar X]=\mu$, &nbsp;$\text{Var}(\bar X)=\sigma^2/n$. For 0/1 data: $E[S]=np$, &nbsp;$\text{Var}(S)=np(1-p)$.</p>
+<table class="t">
+<tr><th>Estimator</th><th>Bias</th><th>Variance</th><th>Consistent?</th></tr>
+<tr><td>$\hat p = S/n$</td><td>0</td><td>$p(1-p)/n$</td><td>Yes</td></tr>
+<tr><td>$\tilde p=\frac{S+1}{n+2}$</td><td>$\frac{1-2p}{n+2}$</td><td>$\frac{np(1-p)}{(n+2)^2}$</td><td>Yes</td></tr>
+<tr><td>$X_1$ (for $p$ or $\mu$)</td><td>0</td><td>$p(1-p)$ or $\sigma^2$</td><td><b>No</b> — ignores extra data</td></tr>
+<tr><td>$\bar X$</td><td>0</td><td>$\sigma^2/n$</td><td>Yes</td></tr>
+<tr><td>$\frac{n}{n+1}\bar X$</td><td>$\frac{-\mu}{n+1}$</td><td>$\frac{n\sigma^2}{(n+1)^2}$</td><td>Yes</td></tr>
+</table>
+<p class="note">$\bar X$ beats $X_1$ (smaller variance). Median of 0/1 data only tells you whether most answers are 1 — it doesn't estimate $p$.</p>
+
+<!-- ===================== 5 ===================== -->
+<h2>5. REGRESSION (OLS)</h2>
+<table class="key"><caption>Symbols</caption>
+<tr><td>$Y$</td><td>outcome (dependent variable)</td></tr>
+<tr><td>$X$</td><td>explanatory variable (independent / regressor)</td></tr>
+<tr><td>$\beta_0,\ \beta_1$ (“beta”)</td><td>TRUE intercept and slope (unknown)</td></tr>
+<tr><td>$u$</td><td>error: everything else that affects $Y$</td></tr>
+<tr><td>$\hat\beta_0,\ \hat\beta_1$</td><td>our estimated intercept and slope</td></tr>
+<tr><td>$\hat y$ (“y-hat”)</td><td>predicted value on the line</td></tr>
+<tr><td>$\hat u$ (“u-hat”)</td><td>residual = actual − predicted $= y-\hat y$</td></tr>
+</table>
+<p><b>Model:</b> $Y = \beta_0 + \beta_1 X + u$. &nbsp;<b>OLS</b> picks the line that makes the <b>sum of squared residuals</b> as small as possible.</p>
+<div class="card">
+<p>$\hat\beta_1 = \dfrac{\sum (x_i-\bar x)(y_i-\bar y)}{\sum (x_i-\bar x)^2}$ &nbsp;&nbsp;&nbsp; $\hat\beta_0 = \bar y - \hat\beta_1\,\bar x$</p>
+<p>Also $\hat\beta_1 = r\cdot\dfrac{s_Y}{s_X}$ → slope has the <b>same sign as the correlation</b>.</p>
+</div>
+<h3>Steps by hand</h3>
+<ol>
+<li>Find $\bar x$ and $\bar y$.</li>
+<li>Make columns: $x-\bar x$, &nbsp;$y-\bar y$, &nbsp;$(x-\bar x)^2$, &nbsp;$(x-\bar x)(y-\bar y)$.</li>
+<li>Add up the last two columns → plug into $\hat\beta_1$, then $\hat\beta_0$.</li>
+<li>Predicted: $\hat y = \hat\beta_0+\hat\beta_1 x$. Residual: $\hat u = y-\hat y$.</li>
+<li><b>Check:</b> residuals add to 0, and $\sum x\hat u = 0$.</li>
+</ol>
+<div class="card">
+<p><b>Where formulas come from:</b> minimize $Q=\sum (y_i-b_0-b_1x_i)^2$ (squared so + and − misses don't cancel). Set derivatives to 0:</p>
+<p>$\frac{\partial Q}{\partial b_0} = -2\sum(y_i-b_0-b_1x_i)=0$ → $\sum \hat u_i = 0$</p>
+<p>$\frac{\partial Q}{\partial b_1} = -2\sum x_i(y_i-b_0-b_1x_i)=0$ → $\sum x_i\hat u_i = 0$</p>
+<p>Divide the first by $n$: $\bar y = \hat\beta_0 + \hat\beta_1\bar x$ → the line always passes through $(\bar x,\bar y)$.</p>
+</div>
+<p><b>Changing units:</b> multiply $y$ by $c$ → slope and intercept both $\times c$. Multiply $x$ by $c$ → slope $\div c$, intercept same. (Dollars → cents: slope $\times 100$.)</p>
+<h3>How to interpret (fill in the blanks)</h3>
+<div class="card">
+<p><b>Slope:</b> “Each additional [unit of X] is <b>associated with</b> a $\hat\beta_1$ [units of Y] change in Y, on average.”</p>
+<p><b>Intercept:</b> predicted Y when X = 0 (often meaningless if X = 0 is outside the data).</p>
+<p><b>Prediction:</b> plug x into $\hat y=\hat\beta_0+\hat\beta_1x$.</p>
+<p><b>Not causal because:</b> units with more X may differ in other ways (ability, income) that sit in $u$; no random assignment.</p>
+</div>
+<div class="card">
+<p><b>Key assumption:</b> $E[u\mid X]=0$</p>
+<p class="w">the “other factors” average out to zero at every value of X.</p>
+<p>If true, the line gives the <b>average Y at each X</b>. You <u>don't</u> need it just to calculate $\hat\beta$ — only to interpret it. It fails if, e.g., family income affects test scores AND is related to class size.</p>
+<p class="note">Residuals always adding to 0 is just math — it does <u>not</u> prove $E[u\mid X]=0$.</p>
+</div>
+<p><b>Reading R output:</b> the “Estimate” column gives the line, e.g. $\widehat{\text{Score}} = 698.93 - 2.28\cdot\text{ClassSize}$. Degrees of freedom $= n-2$, so 418 df → $n = 420$.</p>
+
+</div>
+</body></html>
