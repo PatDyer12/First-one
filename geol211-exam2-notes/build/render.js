@@ -1,75 +1,50 @@
-// Renders the notes HTML to a US Letter PDF + one PNG per page, and runs layout checks.
+// Renders the study guide HTML to a US Letter PDF (with page-number footer) and runs layout checks.
+// PNGs are made from the PDF afterwards by rasterize.py so they match the PDF exactly.
 const path = require('path');
-const fs = require('fs');
 const { chromium } = require('/opt/node22/lib/node_modules/playwright');
 
 const ROOT = path.resolve(__dirname, '..');
-const HTML = path.join(ROOT, 'geol211_exam2_notes.html');
-const PNG_DIR = path.join(ROOT, 'pages');
+const HTML = path.join(ROOT, 'geol211_exam2_study_guide.html');
+const PDF = path.join(ROOT, 'geol211_exam2_study_guide.pdf');
 
 (async () => {
   const browser = await chromium.launch();
-  const page = await browser.newPage({ viewport: { width: 860, height: 1100 }, deviceScaleFactor: 2 });
+  const page = await browser.newPage({ viewport: { width: 900, height: 1200 } });
   await page.goto('file://' + HTML);
   await page.evaluate(() => document.fonts.ready);
+  await page.emulateMedia({ media: 'print' });
 
-  // ---- checks
+  // Check: nothing wider than the text column (7.3in = 700.8px), no clipped SVG content.
   const report = await page.evaluate(() => {
-    const RULE0 = 96, GAP = 27, SIT = 1.5;
-    const out = { baseline: [], overflow: [], tight: [], diagrams: [], pageOverflow: [] };
-    document.querySelectorAll('.page').forEach((pg, pi) => {
-      const pr = pg.getBoundingClientRect();
-      pg.querySelectorAll('.ln').forEach(ln => {
-        const n = +ln.dataset.line;
-        const t = ln.querySelector('.t');
-        // baseline probe
-        const probe = document.createElement('span');
-        probe.style.cssText = 'display:inline-block;width:0;height:0;vertical-align:baseline';
-        t.appendChild(probe);
-        const by = probe.getBoundingClientRect().top - pr.top;
-        probe.remove();
-        const want = RULE0 + GAP * (n - 1) - SIT;
-        if (Math.abs(by - want) > 0.6) out.baseline.push({ page: pi + 1, line: n, by, want, text: t.textContent.slice(0, 40) });
-        const avail = ln.clientWidth, used = t.getBoundingClientRect().width;
-        if (used > avail + 0.5) out.overflow.push({ page: pi + 1, line: n, used: Math.round(used), avail, text: t.textContent });
-        else if (!ln.classList.contains("tag") && !ln.classList.contains("idx") && used > avail * 0.93 && avail > 300)
-          out.tight.push({ page: pi + 1, line: n, pct: Math.round(100 * used / avail), text: t.textContent });
-        const r = ln.getBoundingClientRect();
-        if (r.right > pr.right || r.bottom > pr.bottom) out.pageOverflow.push({ page: pi + 1, line: n });
+    const body = document.body.getBoundingClientRect();
+    const out = { wide: [], svgClip: [], fontOk: document.fonts.check('14px SS3') };
+    document.querySelectorAll('body *').forEach(el => {
+      const r = el.getBoundingClientRect();
+      if (r.width && (r.right > body.right + 0.5 || r.left < body.left - 0.5))
+        out.wide.push({ tag: el.tagName, cls: el.className && el.className.baseVal !== undefined ? el.className.baseVal : el.className,
+                        right: Math.round(r.right - body.right), text: (el.textContent || '').slice(0, 50) });
+    });
+    document.querySelectorAll('svg.dia').forEach((svg, i) => {
+      const box = svg.getBoundingClientRect();
+      let bad = [];
+      svg.querySelectorAll('*').forEach(el => {
+        const b = el.getBoundingClientRect();
+        if (!b.width && !b.height) return;
+        if (b.left < box.left - 1 || b.right > box.right + 1 || b.top < box.top - 1 || b.bottom > box.bottom + 1)
+          bad.push((el.textContent || el.tagName).slice(0, 30));
       });
-      pg.querySelectorAll('.dwrap').forEach(dw => {
-        const box = dw.getBoundingClientRect();
-        const svg = dw.querySelector('svg');
-        let minx = 1e9, miny = 1e9, maxx = -1e9, maxy = -1e9;
-        svg.querySelectorAll('*').forEach(el => {
-          if (!el.getBBox) return;
-          const b = el.getBoundingClientRect();
-          if (b.width === 0 && b.height === 0) return;
-          minx = Math.min(minx, b.left); miny = Math.min(miny, b.top);
-          maxx = Math.max(maxx, b.right); maxy = Math.max(maxy, b.bottom);
-        });
-        const d = { page: pi + 1, lines: dw.dataset.lines,
-          outL: Math.round(box.left - minx), outT: Math.round(box.top - miny),
-          outR: Math.round(maxx - box.right), outB: Math.round(maxy - box.bottom) };
-        if (d.outL > 1 || d.outT > 1 || d.outR > 1 || d.outB > 1) out.diagrams.push(d);
-      });
+      if (bad.length) out.svgClip.push({ svg: i, near: svg.closest('article') ? svg.closest('article').id : '', bad: bad.slice(0, 5) });
     });
     return out;
   });
   console.log(JSON.stringify(report, null, 1));
 
-  // ---- PNGs
-  fs.rmSync(PNG_DIR, { recursive: true, force: true });
-  fs.mkdirSync(PNG_DIR, { recursive: true });
-  const pages = await page.$$('.page');
-  for (let i = 0; i < pages.length; i++) {
-    await pages[i].screenshot({ path: path.join(PNG_DIR, `page-${String(i + 1).padStart(2, '0')}.png`) });
-  }
-  // ---- PDF
-  await page.emulateMedia({ media: 'print' });
-  await page.pdf({ path: path.join(ROOT, 'geol211_exam2_notes.pdf'), width: '8.5in', height: '11in',
-                   printBackground: true, margin: { top: 0, right: 0, bottom: 0, left: 0 },
-                   preferCSSPageSize: true });
-  console.log('pages rendered:', pages.length);
+  await page.pdf({
+    path: PDF, width: '8.5in', height: '11in', printBackground: true, preferCSSPageSize: true,
+    displayHeaderFooter: true, headerTemplate: '<div></div>',
+    footerTemplate: '<div style="width:100%;font-size:8.5px;color:#777;font-family:Arial,sans-serif;text-align:center;">' +
+      'GEOL 211 · Exam 2 Study Guide · page <span class="pageNumber"></span> of <span class="totalPages"></span></div>',
+  });
+  console.log('pdf written');
   await browser.close();
 })();
