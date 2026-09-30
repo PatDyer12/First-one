@@ -4,8 +4,9 @@ const path = require('path');
 const { chromium } = require('/opt/node22/lib/node_modules/playwright');
 
 const ROOT = path.resolve(__dirname, '..');
-const HTML = path.join(ROOT, 'geol211_exam2_study_guide.html');
-const PDF = path.join(ROOT, 'geol211_exam2_study_guide.pdf');
+const NAME = process.argv[2] || 'geol211_exam2_study_guide';
+const HTML = path.join(ROOT, NAME + '.html');
+const PDF = path.join(ROOT, NAME + '.pdf');
 
 (async () => {
   const browser = await chromium.launch();
@@ -43,7 +44,7 @@ const PDF = path.join(ROOT, 'geol211_exam2_study_guide.pdf');
     path: PDF, width: '8.5in', height: '11in', printBackground: true, preferCSSPageSize: true,
     displayHeaderFooter: true, headerTemplate: '<div></div>',
     footerTemplate: '<div style="width:100%;font-size:8.5px;color:#777;font-family:Arial,sans-serif;text-align:center;">' +
-      'GEOL 211 · Exam 2 Study Guide · page <span class="pageNumber"></span> of <span class="totalPages"></span></div>',
+      'GEOL 211 · Exam 2 · page <span class="pageNumber"></span> of <span class="totalPages"></span></div>',
   });
   console.log('pdf written');
   await browser.close();
