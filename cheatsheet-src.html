@@ -4,18 +4,18 @@
 <style>
 @page { size: letter portrait; margin: 0.12in; }
 * { box-sizing: border-box; }
-body { margin:0; font-family: "Liberation Sans", Arial, sans-serif; font-size: 7.0pt; line-height: 1.15; color:#111; background:#fff; }
+body { margin:0; font-family: "Liberation Sans", Arial, sans-serif; font-size: 7.0pt; line-height: 1.12; color:#111; background:#fff; }
 .katex { font-size: 1.08em; }
 .cols { height: 10.47in; column-fill: auto; overflow: hidden; column-count: 3; column-gap: 0.12in; column-rule: 0.6pt solid #bbb; }
 header { display:flex; justify-content:space-between; align-items:baseline; border-bottom: 1.5pt solid #1f3a60; margin-bottom: 3px; padding-bottom: 1px; }
 header .t { font-size: 11pt; font-weight: 700; color:#1f3a60; }
 header .s { font-size: 7.6pt; }
-h2 { font-size: 8.4pt; margin: 3.5px 0 1.5px; padding: 1.5px 4px; background:#1f3a60; color:#fff; border-radius: 2px; break-after: avoid; }
+h2 { font-size: 8.4pt; margin: 2.5px 0 1px; padding: 1.5px 4px; background:#1f3a60; color:#fff; border-radius: 2px; break-after: avoid; }
 h3 { font-size: 7.6pt; margin: 2.5px 0 0.5px; color:#1f3a60; break-after: avoid; }
-p { margin: 0 0 1.5px; }
+p { margin: 0 0 1px; }
 ol, ul { margin: 0 0 1.5px; padding-left: 12px; }
 li { margin-bottom: 0; break-inside: avoid; }
-.card { border: 0.7pt solid #9fb3cc; background:#f2f6fb; border-radius: 3px; padding: 1px 3.5px; margin: 1px 0 2px; break-inside: avoid; }
+.card { border: 0.7pt solid #9fb3cc; background:#f2f6fb; border-radius: 3px; padding: 1px 3.5px; margin: 1px 0 1.5px; break-inside: avoid; }
 .card p:last-child { margin-bottom: 0; }
 .w { color:#444; font-style: italic; }
 .w::before { content: "In words: "; font-style: normal; font-weight: 700; color:#1f3a60; }
@@ -33,11 +33,11 @@ table.t th { background:#e4ebf3; }
 .gloss td.s + td { border-right: 0.5pt solid #9fb3cc; }
 .gloss .katex { font-size: 1.0em; }
 .gloss tr.g td { background:#e4ebf3; font-weight:700; color:#1f3a60; border-right:none; }
-.steps { border: 0.9pt solid #1f3a60; border-left: 3.5px solid #1f3a60; background:#fff; border-radius: 3px; padding: 0 3.5px 1px; margin: 1.5px 0 2.5px; break-inside: avoid; }
+.steps { border: 0.9pt solid #1f3a60; border-left: 3.5px solid #1f3a60; background:#fff; border-radius: 3px; padding: 0 3.5px 1px; margin: 1px 0 2px; break-inside: avoid; }
 .steps .st { display:block; margin: 0 -3.5px 1px; padding: 0.5px 4px; background:#dbe6f3; color:#1f3a60; font-weight:700; font-size: 7.2pt; }
 .steps .st i { font-weight: 400; color:#444; font-size: 6.6pt; }
 .steps ol { margin: 0; padding-left: 11px; }
-.steps li { margin-bottom: 0.6px; }
+.steps li { margin-bottom: 0.2px; }
 .steps li::marker { font-weight: 700; color:#1f3a60; }
 .lay { font-family: "DejaVu Sans Mono", monospace; font-size: 6.2pt; background:#f2f6fb; padding: 0 2px; border-radius: 2px; white-space: nowrap; }
 .warn { font-weight:700; color:#8a1c1c; }
@@ -140,15 +140,16 @@ table.t th { background:#e4ebf3; }
 <p><b>Bias</b> $= E[\hat\theta] - \theta$. <b>Unbiased</b> = right on average. &nbsp;<b>Efficient:</b> among unbiased, <b>smaller variance</b>.</p>
 <p><b>Consistent:</b> closer to the truth as $n$ grows (bias → 0 <u>and</u> variance → 0). &nbsp;<b>MSE</b> $=\text{Var} + \text{Bias}^2$ (lower is better).</p>
 </div>
-<div class="steps"><span class="st">STEPS: compare estimators <i>(Practice Q5, Q6)</i></span>
+<div class="steps"><span class="st">Steps for estimator questions</span>
 <ol>
-<li><b>Estimates:</b> count $S$ = # of 1s, $n$ = sample size, plug into each formula.</li>
-<li><b>E:</b> write it as $(aS+b)/c$ → $E=(a\cdot np+b)/c$ (uses $E[S]=np$). For $k\bar X$: $E=k\mu$.</li>
-<li><b>Bias</b> = E − true value ($p$ or $\mu$). Bias = 0 → unbiased.</li>
-<li><b>Var:</b> $(aS+b)/c$ → $a^2\cdot np(1-p)/c^2$ (uses $\text{Var}(S)=np(1-p)$). For $k\bar X$: $k^2\sigma^2/n$.</li>
-<li><b>MSE</b> = Var + Bias². Plug in numbers (e.g. $p=.52$, $n=11$) → smaller MSE wins.</li>
-<li><b>Consistent?</b> Let $n\to\infty$: do bias AND Var → 0? ($n$ in denominator → yes; $X_1$ → no.)</li>
-<li><b>Efficient?</b> Among the unbiased ones, pick the smaller Var.</li>
+<li>Rewrite as $a + b\times$(base). Base $=\bar X$, $X_1$, or $S$. (e.g. $(S+1)/(n+2) = 1/(n+2) + [1/(n+2)]\cdot S$)</li>
+<li>Look up base: $E[\bar X]=\mu$, $\text{Var}=\sigma^2/n$ &nbsp;|&nbsp; $E[X_1]=\mu$, $\text{Var}=\sigma^2$ &nbsp;|&nbsp; $E[S]=np$, $\text{Var}=np(1-p)$</li>
+<li>$E = a + b\times E[\text{base}]$</li>
+<li>Bias $= E -$ truth ($\mu$ or $p$)</li>
+<li>$\text{Var} = b^2\times \text{Var}[\text{base}]$ ($a$ disappears)</li>
+<li>MSE $=$ Var $+$ Bias². Tip: compute $p(1-p)$ once first ($p=.52$ → $.2496$)</li>
+<li>Consistent? Huge $n$ → bias → 0 AND Var → 0? Both yes = consistent.</li>
+<li>Efficient? Only compare UNBIASED ones → smaller Var wins.</li>
 </ol></div>
 <table class="t">
 <tr><th>Estimator</th><th>Bias</th><th>Variance</th><th>Consistent?</th></tr>
@@ -158,6 +159,7 @@ table.t th { background:#e4ebf3; }
 <tr><td>$\bar X$</td><td>0</td><td>$\sigma^2/n$</td><td>Yes</td></tr>
 <tr><td>$\frac{n}{n+1}\bar X$</td><td>$\frac{-\mu}{n+1}$</td><td>$\frac{n\sigma^2}{(n+1)^2}$</td><td>Yes</td></tr>
 </table>
+<p class="note">At $p = .52$, $n = 11$: MSE($\hat p$) $= .0227$ vs MSE($\tilde p$) $= .0163$ → $\tilde p$ wins. MSE of $\frac{n}{n+1}\cdot\bar X = \frac{n\sigma^2 + \mu^2}{(n+1)^2}$.</p>
 <p class="note">$\bar X$ beats $X_1$ (smaller variance). Median of 0/1 data only tells you whether most answers are 1 — it doesn't estimate $p$.</p>
 
 <!-- ===================== 5 ===================== -->
