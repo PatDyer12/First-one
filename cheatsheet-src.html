@@ -2,20 +2,20 @@
 <html><head><meta charset="utf-8"><title>ECON 385 Exam 1 Sheet</title>
 <link rel="stylesheet" href="KATEX_CSS">
 <style>
-@page { size: letter portrait; margin: 0.15in; }
+@page { size: letter portrait; margin: 0.12in; }
 * { box-sizing: border-box; }
-body { margin:0; font-family: "Liberation Sans", Arial, sans-serif; font-size: 6.6pt; line-height: 1.19; color:#111; background:#fff; }
+body { margin:0; font-family: "Liberation Sans", Arial, sans-serif; font-size: 6.6pt; line-height: 1.15; color:#111; background:#fff; }
 .katex { font-size: 1.08em; }
-.cols { height: 10.42in; column-fill: auto; overflow: hidden; column-count: 3; column-gap: 0.14in; column-rule: 0.6pt solid #bbb; }
+.cols { height: 10.47in; column-fill: auto; overflow: hidden; column-count: 3; column-gap: 0.12in; column-rule: 0.6pt solid #bbb; }
 header { display:flex; justify-content:space-between; align-items:baseline; border-bottom: 1.5pt solid #1f3a60; margin-bottom: 3px; padding-bottom: 1px; }
 header .t { font-size: 11pt; font-weight: 700; color:#1f3a60; }
 header .s { font-size: 7.6pt; }
-h2 { font-size: 8.4pt; margin: 5px 0 2px; padding: 1.5px 4px; background:#1f3a60; color:#fff; border-radius: 2px; break-after: avoid; }
-h3 { font-size: 7.6pt; margin: 4px 0 1px; color:#1f3a60; break-after: avoid; }
-p { margin: 0 0 2.5px; }
-ol, ul { margin: 0 0 2.5px; padding-left: 12px; }
-li { margin-bottom: 0.5px; }
-.card { border: 0.7pt solid #9fb3cc; background:#f2f6fb; border-radius: 3px; padding: 1.5px 4px; margin: 1.5px 0 2.5px; break-inside: avoid; }
+h2 { font-size: 8.4pt; margin: 3.5px 0 1.5px; padding: 1.5px 4px; background:#1f3a60; color:#fff; border-radius: 2px; break-after: avoid; }
+h3 { font-size: 7.6pt; margin: 2.5px 0 0.5px; color:#1f3a60; break-after: avoid; }
+p { margin: 0 0 1.5px; }
+ol, ul { margin: 0 0 1.5px; padding-left: 12px; }
+li { margin-bottom: 0; break-inside: avoid; }
+.card { border: 0.7pt solid #9fb3cc; background:#f2f6fb; border-radius: 3px; padding: 1px 3.5px; margin: 1px 0 2px; break-inside: avoid; }
 .card p:last-child { margin-bottom: 0; }
 .w { color:#444; font-style: italic; }
 .w::before { content: "In words: "; font-style: normal; font-weight: 700; color:#1f3a60; }
@@ -23,7 +23,7 @@ li { margin-bottom: 0.5px; }
 .key td { padding: 0.5px 3px; border-bottom: 0.4pt solid #dde3ea; vertical-align: top; }
 .key td:first-child { white-space: nowrap; width: 1%; font-weight: 700; }
 .key caption { caption-side: top; text-align:left; font-weight:700; font-size:6.8pt; color:#1f3a60; text-transform: uppercase; letter-spacing: .3px; }
-table.t { width:100%; border-collapse: collapse; margin: 2px 0 3px; break-inside: avoid; font-size: 6.6pt; }
+table.t { width:100%; border-collapse: collapse; margin: 1.5px 0 2px; break-inside: avoid; font-size: 6.6pt; }
 table.t th, table.t td { border: 0.5pt solid #9aa; padding: 0.5px 3px; text-align:left; vertical-align: top; }
 table.t th { background:#e4ebf3; }
 .z td, .z th { text-align:center !important; padding: 0.5px 1px !important; font-size: 6.6pt; }
@@ -86,6 +86,7 @@ table.t th { background:#e4ebf3; }
 <div class="card">
 <p><b>PMF</b> = the table of $P(X=x)$. Valid if every value is $\ge 0$ and they <b>add to 1</b>.</p>
 <p><b>CDF</b> $F(x)=P(X\le x)$ = running total. Looks like a <b>staircase</b>: flat between values, jumps up at each value.</p>
+<p><b>1 − rule:</b> “greater than,” “at least,” or “not” → 1 − (the other side). $P(X\ge 1)=1-P(0)$. $P(X>b)=1-F(b)$. $P(Z>z)=1-\Phi(z)$. $\Phi(-z)=1-\Phi(z)$.</p>
 <p>$P(X>x) = 1-F(x)$ &nbsp;&nbsp; $P(X\ge 2)=1-P(X\le 1)$</p>
 </div>
 <div class="card">
@@ -93,6 +94,7 @@ table.t th { background:#e4ebf3; }
 <p><b>Variance:</b> $\text{Var}(X) = E[X^2] - (E[X])^2$, with $E[X^2]=\sum x^2 \cdot P(X=x)$</p>
 <p><b>SD</b> $=\sqrt{\text{Var}}$ — same units as $X$ (variance is in units²)</p>
 <p class="w">mean = probability-weighted average; SD = typical distance from the mean.</p>
+<p><b>Order:</b> $E[X]$ first → $E[X^2]$ (square each x, THEN × its prob, add) → $\text{Var}=E[X^2]-(E[X])^2$ → $\text{SD}=\sqrt{\text{Var}}$. Don't square $E[X^2]$ again.</p>
 </div>
 <div class="card">
 <p><b>If $C = a + bX$</b> (e.g. $C = 30 + 8X$):</p>
@@ -111,7 +113,7 @@ table.t th { background:#e4ebf3; }
 <div class="card">
 <p>$P(A\mid B) = \dfrac{P(A \text{ and } B)}{P(B)}$</p>
 <p class="w">“out of the B cases, what share are also A?” — B is the reference group. In a 2×2 table: “A and B” = inside cell, $P(B)$ = its total.</p>
-<p><b>Independent</b> if $P(A \text{ and } B) = P(A)\cdot P(B)$ &nbsp;(same as $P(A\mid B)=P(A)$)</p>
+<p><b>Independence test:</b> compute $P(A)\cdot P(B)$ from the totals, compare to the inside cell $P(A \text{ and } B)$. <span class="warn">SAME → independent. DIFFERENT → NOT independent</span> (dependent). Write: “$P(A)P(B) = \_\_ \neq \_\_ = P(A\cap B)$, so not independent.”</p>
 <p><b>If A is inside B</b> (e.g. $X\ge2$ is inside $X\ge1$): $P(A\text{ and }B)=P(A)$, so $P(X{\ge}2\mid X{\ge}1)=\dfrac{P(X\ge2)}{P(X\ge1)}$.</p>
 </div>
 <p><b>0/1 variables</b> R and L: $E[RL] = P(\text{both}=1)$, so $\text{Cov} = P(\text{both}) - P(R)P(L)$. Positive Cov still doesn't prove causation.</p>
@@ -134,6 +136,7 @@ table.t th { background:#e4ebf3; }
 <tr><th>2.</th><td>.977</td><td>.982</td><td>.986</td><td>.989</td><td>.992</td><td>.994</td><td>.995</td><td>.997</td><td>.997</td><td>.998</td></tr>
 </table>
 <p class="note">$\Phi(1.3)$: row “1.”, column “.3” → .903. &nbsp;$\Phi(1.96)=.975$</p>
+<p class="note"><b>Ex (between, negative z):</b> $N(20,\,5^2)$, $P(15\le T\le 25)$: $z=-1$ and $+1$ → $\Phi(1)-\Phi(-1) = .841-(1-.841) = .841-.159 = .682$</p>
 
 <!-- ===================== 4 ===================== -->
 <h2>4. ESTIMATORS — how good is a guess?</h2>
@@ -169,8 +172,9 @@ table.t th { background:#e4ebf3; }
 <li>Find $\bar x$ and $\bar y$.</li>
 <li>Make columns: $x-\bar x$, &nbsp;$y-\bar y$, &nbsp;$(x-\bar x)^2$, &nbsp;$(x-\bar x)(y-\bar y)$.</li>
 <li>Add up the last two columns → plug into $\hat\beta_1$, then $\hat\beta_0$.</li>
-<li>Predicted: $\hat y = \hat\beta_0+\hat\beta_1 x$. Residual: $\hat u = y-\hat y$.</li>
+<li>Predicted: $\hat y = \hat\beta_0+\hat\beta_1 x$. Residual: $\hat u = y-\hat y$. $\hat u>0$ → point is ABOVE the line.</li>
 <li><b>Check:</b> residuals add to 0, and $\sum x\hat u = 0$.</li>
+<li><b>Check:</b> plug $\bar x$ into your line, you must get $\bar y$. If not, the intercept is wrong. (Write $\hat\beta_0=\bar y-\hat\beta_1\bar x$ with letters BEFORE plugging in numbers.)</li>
 </ol>
 <div class="card">
 <p><b>Where formulas come from:</b> minimize $Q=\sum (y_i-b_0-b_1x_i)^2$ (squared so + and − misses don't cancel). Set derivatives to 0:</p>
