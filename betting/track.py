@@ -20,7 +20,7 @@ COLS = ["logged", "tier", "game_id", "game", "market", "side", "book", "bet", "l
 
 def load():
     if os.path.exists(LOG):
-        return pd.read_csv(LOG, dtype={"placed": str})
+        return pd.read_csv(LOG, dtype={"placed": str, "result": object})
     return pd.DataFrame(columns=COLS)
 
 

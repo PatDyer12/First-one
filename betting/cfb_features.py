@@ -16,6 +16,7 @@ import pandas as pd
 from features import Ew
 
 DATA = os.path.join(os.path.dirname(os.path.abspath(__file__)), "data", "cfb")
+WEATHER = ["wind", "temp", "precip", "indoor", "wind8", "wet8"]
 PARAMS = {"decay": 0.88, "carry": 0.35, "prior_games": 2.5, "elo_k": 30.0, "elo_revert": 0.4,
           "mkt_rate": 0.4, "mkt_carry": 0.6}
 ELO_START = {"fbs": 1500.0, "fcs": 1250.0, "ii": 1050.0, "iii": 950.0}
@@ -50,6 +51,13 @@ def load():
                 g.at[i, "under_odds"] = dk.get(k + ("total", "under"), (None, np.nan))[1]
             if (k + ("ml", "home")) in dk and (k + ("ml", "away")) in dk:
                 g.at[i, "home_ml"], g.at[i, "away_ml"] = dk[k + ("ml", "home")][1], dk[k + ("ml", "away")][1]
+    wpath = os.path.join(DATA, "weather.csv")
+    if os.path.exists(wpath):  # kickoff weather (cfb_weather.py): station history + this week's forecast
+        w = pd.read_csv(wpath)
+        g = g.merge(w[["game_id"] + [c for c in WEATHER if c in w]], on="game_id", how="left")
+    for c in WEATHER:
+        if c not in g:
+            g[c] = np.nan
     g["start_date"] = pd.to_datetime(g["start_date"], utc=True, errors="coerce")
     g = g.sort_values(["start_date", "game_id"]).reset_index(drop=True)
     t = pd.read_csv(os.path.join(DATA, "team_games.csv"))
@@ -66,6 +74,7 @@ def build(params=None):
         league[k].add(v, 50, 1)
     mkt = {"hfa": 2.8, "total": 52.0}
     season_seen, last_game = {}, {}
+    form = {}  # (team, season) -> list of (covered, went_over) in games with lines
 
     def team(tid, div):
         if tid not in teams:
@@ -119,6 +128,19 @@ def build(params=None):
                 f[f"{side}_def_{k}"] = rating(tid, "def_" + k)
             for k in PLAIN_STATS:
                 f[f"{side}_{k}"] = rating(tid, k)
+        for side, tid in (("h", h), ("a", a)):
+            fl = form.get((tid, gm.season), [])
+            last3 = fl[-3:]
+            f[f"{side}_cov3"] = sum(1 for c, _o in last3 if c is True) if len(last3) == 3 else np.nan
+            f[f"{side}_ats3_lost"] = sum(1 for c, _o in last3 if c is False) if len(last3) == 3 else np.nan
+            f[f"{side}_over3"] = sum(1 for _c, o in last3 if o is True) if len(last3) == 3 else np.nan
+            f[f"{side}_under3"] = sum(1 for _c, o in last3 if o is False) if len(last3) == 3 else np.nan
+        f["wind"] = 0.0 if gm.indoor == 1 else gm.wind
+        f["temp"] = 70.0 if gm.indoor == 1 else gm.temp
+        f["precip"] = 0.0 if gm.indoor == 1 else gm.precip
+        f["wind8"] = 0.0 if gm.indoor == 1 else gm.wind8  # steady weather, kickoff -3h to +4h
+        f["wet8"] = 0.0 if gm.indoor == 1 else gm.wet8
+        f["indoor"] = gm.indoor
         f["lg_pts"] = lg("pts")
         f["mkt_hfa"] = mkt["hfa"] * (1 - neutral)
         f["mkt_spread"] = hs["mkt"] - as_["mkt"] + f["mkt_hfa"]
@@ -141,6 +163,12 @@ def build(params=None):
             continue
         for tid in (h, a):
             last_game[tid] = gm.start_date
+        if pd.notna(gm.spread_line):
+            cov_h = gm.result - gm.spread_line
+            ou = (gm.total - gm.total_line) if pd.notna(gm.total_line) else np.nan
+            for tid, c in ((h, cov_h), (a, -cov_h)):
+                form.setdefault((tid, gm.season), []).append(
+                    (None if c == 0 else c > 0, None if (pd.isna(ou) or ou == 0) else ou > 0))
         margin = gm.result
         elo_d = hs["elo"] - as_["elo"] + ELO_HFA * (1 - neutral)
         exp_h = 1 / (1 + 10 ** (-elo_d / 400))
@@ -178,6 +206,36 @@ def build(params=None):
     df["sum_pts"] = df["h_pts_for"] + df["h_pts_against"] + df["a_pts_for"] + df["a_pts_against"]
     df["pace_sum"] = df["h_pace"] + df["a_pace"]
     df["game_type"] = np.where(df["postseason"] == 1, "POST", "REG")
+    return add_stat_model(df)
+
+
+STAT_SIDE = ["elo_diff", "net_epa", "net_sr", "net_pass_epa", "net_rush_epa", "net_pts", "hfa", "rest_diff",
+             "div_diff", "conf", "early"]
+STAT_TOTAL = ["sum_epa", "sum_sr", "sum_pass_epa", "sum_rush_epa", "sum_pts", "pace_sum", "lg_pts", "postseason", "early"]
+
+
+def add_stat_model(df):
+    """Stats-only power ratings: margin and total predicted from offense/defense numbers alone (no betting line),
+    walk-forward (each season predicted by a ridge model trained only on earlier seasons)."""
+    from sklearn.linear_model import Ridge
+    from sklearn.pipeline import make_pipeline
+    from sklearn.preprocessing import StandardScaler
+    df = df.copy()
+    df["stat_margin"] = np.nan
+    df["stat_total"] = np.nan
+    for season in sorted(df["season"].unique()):
+        if season < 2012:
+            continue
+        tr = df[(df["season"] < season) & (df["season"] >= 2010) & df["result"].notna()]
+        te = df["season"] == season
+        for cols, target, out in ((STAT_SIDE, "result", "stat_margin"), (STAT_TOTAL, "total", "stat_total")):
+            t = tr.dropna(subset=cols + [target])
+            m = make_pipeline(StandardScaler(), Ridge(alpha=10.0)).fit(t[cols].values, t[target].values)
+            x = df.loc[te, cols]
+            ok = x.notna().all(axis=1)
+            df.loc[x[ok].index, out] = m.predict(x[ok].values)
+    df["stat_edge_spread"] = df["stat_margin"] - df["spread_line"]
+    df["stat_edge_total"] = df["stat_total"] - df["total_line"]
     return df
 
 

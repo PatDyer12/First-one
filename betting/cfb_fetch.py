@@ -7,7 +7,7 @@ Sources (free):
                             (sportsdataverse-data release espn_cfb_pbp)
   ESPN scoreboard           this week's DraftKings spread / total / moneyline (FanDuel via Odds API key)
 
-Writes betting/data/cfb/: games.csv, team_games.csv, book_odds.csv
+Writes betting/data/cfb/: games.csv, team_games.csv, book_odds.csv, qb_games_<season>.csv (passers by game)
 
 Usage: python3 betting/cfb_fetch.py         (re-downloads only the current season's plays)
        python3 betting/cfb_fetch.py --all
@@ -37,7 +37,10 @@ PBP_COLS = ["game_id", "pos_team_id", "def_pos_team_id", "EPA", "EPA_success", "
 def season_tables(season):
     raw = requests.get(PBP.format(season), timeout=300)
     raw.raise_for_status()
-    p = pd.read_parquet(io.BytesIO(raw.content), columns=PBP_COLS)
+    p = pd.read_parquet(io.BytesIO(raw.content), columns=PBP_COLS + ["week", "passer_player_name"])
+    # passers by game (the card's QB Changes section): attempts and total EPA
+    qb = (p[(p["pass"] == True) & p["passer_player_name"].notna() & p["EPA"].notna()]  # noqa: E712
+          .groupby(["game_id", "week", "pos_team_id", "passer_player_name"])["EPA"].agg(att="size", epa="sum").reset_index())
     lines = p.groupby("game_id").agg(spread_line=("homeTeamSpread", "first"), total_line=("overUnder", "first"),
                                      has_line=("gameSpreadAvailable", "first")).reset_index()
     lines.loc[lines["has_line"] != True, ["spread_line", "total_line"]] = np.nan  # noqa: E712
@@ -57,7 +60,7 @@ def season_tables(season):
     allp = p[(p["scrimmage_play"] == True)].groupby(["game_id", "pos_team_id"]).size().rename("all_plays")  # noqa: E712
     team = team.join(pas, on=["game_id", "pos_team_id"]).join(rus, on=["game_id", "pos_team_id"]).join(allp, on=["game_id", "pos_team_id"])
     team = team.rename(columns={"pos_team_id": "team", "def_pos_team_id": "opp"})
-    return team, lines[["game_id", "spread_line", "total_line"]]
+    return team, lines[["game_id", "spread_line", "total_line"]], qb
 
 
 # The Odds API spells some schools differently from ESPN
@@ -67,6 +70,7 @@ ODDS_API_ALIASES = {
     "LIU Sharks": "Long Island University Sharks", "Louisiana Ragin Cajuns": "Louisiana Ragin' Cajuns",
     "Sam Houston State Bearkats": "Sam Houston Bearkats", "Southern Mississippi Golden Eagles": "Southern Miss Golden Eagles",
     "UMass Minutemen": "Massachusetts Minutemen", "William and Mary Tribe": "William & Mary Tribe",
+    "San Jose State Spartans": "San José State Spartans",
 }
 
 
@@ -105,12 +109,14 @@ def main():
             continue
         print("plays", season, flush=True)
         try:
-            team, lines = season_tables(season)
+            team, lines, qb = season_tables(season)
         except requests.HTTPError as e:
             print("  no play-by-play:", e)
             continue
         team.to_csv(tf, index=False)
         lines.to_csv(lf, index=False)
+        if season == current:
+            qb.to_csv(os.path.join(DATA, f"qb_games_{season}.csv"), index=False)
     team = pd.concat(pd.read_csv(os.path.join(CACHE, f"team_{s}.csv")) for s in range(FIRST, current + 1)
                      if os.path.exists(os.path.join(CACHE, f"team_{s}.csv")))
     lines = pd.concat(pd.read_csv(os.path.join(CACHE, f"lines_{s}.csv")) for s in range(FIRST, current + 1)

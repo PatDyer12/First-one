@@ -218,6 +218,26 @@ def system_reason(S, sy, g):
         bucket = "40+ pt spreads: overs +10% ROI" if spread > 40 else "30–40 pt spreads: overs +6% ROI"
         return (f"{g['game'].split(' @ ')[1]} by {spread:g}: the market has {E(dog)} scoring only "
                 f"<b>~{(total - spread) / 2:.0f}</b>. {bucket} since 2010. Model total {b.get('model_total')}.")
+    r = S.rows.get(g["game"])
+    if sy["name"] in ("Steady wind under", "Steady rain under") and r is not None:
+        wet = int(r.wet8) if pd.notna(r.wet8) else 0
+        bits = []
+        if pd.notna(r.wind8) and r.wind8 >= 10:
+            bits.append(f"wind averaging <b>{r.wind8:.0f} mph</b>")
+        if wet:
+            bits.append(f"rain in <b>{wet} of the 8 hours</b> around the game")
+        bits.append(f"{r.temp:.0f}°F at kickoff")
+        why = []
+        if pd.notna(r.wind8) and r.wind8 >= 15:
+            why.append("wind like this knocks down deep balls and field goals")
+        if wet >= 3:
+            why.append("a wet ball means fumbles and more running")
+        both = " Wind <b>and</b> rain: two separate weather systems agree." if len(why) == 2 else ""
+        return (f"Forecast: {', '.join(bits)}. At {r.total_line:g}, the total hasn't dropped enough: "
+                + " and ".join(why) + f".{both} Re-check the forecast before kickoff.")
+    if sy["name"] == "Over-streak fade" and r is not None:
+        return (f"{E(r.away)} has gone over in {int(r.a_over3)} of its last 3 and {E(r.home)} in {int(r.h_over3)} of 3. "
+                f"Recent shootouts inflate the total ({r.total_line:g}); our model likes the under too.")
     return E(sy["why"])
 
 
@@ -364,7 +384,7 @@ def nfl_qb_watch(S):
 
 
 def cfb_qb_watch(S, ours, max_items=6):
-    path = os.path.join(BET, "data", "cfb", "qb_games_2026.csv")
+    path = os.path.join(BET, "data", "cfb", f"qb_games_{S.season}.csv")  # written by cfb_fetch.py
     if not os.path.exists(path):
         return []
     q = pd.read_csv(path)
@@ -428,6 +448,18 @@ SYSTEM_COPY = {
                          "Home team with 3+ more days of rest when the line has moved 3+ points toward them. Profitable in "
                          "11 of 14 seasons, but a small sample. College moneylines can't be backtested (no historical prices in "
                          "free data), so there's no college moneyline system."),
+    "Steady wind under": ("Steady Wind Unders",
+                          "Outdoor games with wind averaging 15+ mph from 3 hours before kickoff to 4 after. Totals drop "
+                          "about a point for wind like this, but these games still finish about 2 more points under. "
+                          "Profitable in 11 of 15 seasons; strongest in November. Half stakes: the history uses measured "
+                          "wind, and this week's numbers are forecasts."),
+    "Steady rain under": ("Steady Rain Unders",
+                          "Rain in at least 3 of the 8 hours around the game. A wet ball means fumbles, short passes and "
+                          "more running, and totals barely move for it. Profitable in 11 of 15 seasons and best in weeks "
+                          "5–9 (+10.9% ROI). Half stakes: the history uses measured rain, this week's is a forecast."),
+    "Over-streak fade": ("Over-Streak Fade",
+                         "Both teams have gone over in 5 or 6 of their combined last 6 games. Recent shootouts push "
+                         "totals up more than they should. A small edge, so it only plays when our model likes the under too."),
 }
 
 

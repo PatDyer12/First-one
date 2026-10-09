@@ -27,7 +27,7 @@ then graded against the result and the **closing line** (CLV). Set `placed` to `
 ## Final card: model + systems + situational angles (`final.py`, `angles.py`)
 ```
 python3 betting/fetch.py && python3 betting/model.py --week
-python3 betting/cfb_fetch.py && python3 betting/cfb_model.py --week
+python3 betting/cfb_fetch.py && python3 betting/cfb_weather.py && python3 betting/cfb_model.py --week
 python3 betting/final.py            # decision layer -> data/final_nfl.json, data/cfb/final_cfb.json (+ tracker)
 python3 betting/share/cards.py      # -> betting/share/nfl_week<N>.pdf, cfb_week<N>.pdf
 ```
@@ -59,6 +59,8 @@ python3 betting/share/weekly.py          # -> betting/share/nfl_week<N>.pdf and 
 Run the models first. Each card has these sections:
 - **Best Bets**: model plays, each with a reason.
 - **Totals system**: Blowout Overs (college) or Wind Unders (NFL).
+- **Weather Desk** (college): steady-wind and steady-rain unders, with the forecast wind and wet hours for each game.
+- **Systems Lab** (college): every system `cfb_lab.py` tested, its ROI overall and in weeks 5–9, and whether it made the card.
 - **Spread & Moneyline Systems.** NFL: Close Road Team (spread *or* moneyline, pick one) and Buy-Low Underdog.
   College: Rested Home Team. There's no college moneyline system because the free data has no historical moneylines.
 - **Leans & Price Watch**: system plays waiting on a better price.
@@ -84,6 +86,9 @@ several edge thresholds: 2,055 NFL and 1,192 college strategies over 2011–2025
 | NFL Buy-low underdog: the dog when the road team keeps missing the spread | 223-179, +7.3% | 20-13, +15.3% | Weak (t = 1.4), 0.5% stakes |
 | College Rested home team: 3+ days more rest and the line moved 3+ toward them | 157-122, +7.4%, 11 of 14 seasons up | 14-11, +6.9% | Weak, 0.5% stakes |
 | NFL Wind under: outdoors, 12–20 mph forecast wind | 327-238, +12.4% | 15-17, −10% | Probable but cold, 0.5% stakes |
+| College Steady wind under: wind averaging 15+ mph from 3 h before kickoff to 4 h after | 329-251, +8.2%, 11 of 15 seasons up | 15-9, +19.3% | Moderate (t = 2.1), 0.5% stakes |
+| College Steady rain under: rain in 3+ of those 8 hours | 370-285, +7.7%, 11 of 15 seasons up; **+10.9% in weeks 5–9** | 41-33, +5.8% | Moderate (t = 2.1), 0.5% stakes |
+| College Over-streak fade: both teams over in 5+ of their combined last 6 | 434-367, +3.4% | 47-39, +4.3% | Weak (t = 1.0): plays only with the model |
 | Everything else, including the spread/ML models | Top 10% of 2011–18 strategies: +10% ROI → −2 to −4% in 2019–25 | | Luck. Don't bet |
 
 Picking by "proven + hot" worked in college historically (top 3: +2.2% ROI, 8 of 10 seasons up) but not in the
@@ -138,5 +143,39 @@ What testing showed:
   that up a little.
 - The softness people talk about in college is in **opening** lines and small games early in the week. Historical
   opening lines aren't in the free data, so bet early and let the tracker's CLV tell you whether it's working.
-- Not included (no free data): starting QBs, injuries, returning production, recruiting/transfer talent, weather.
+- Not included (no free data): starting QBs, injuries, returning production, recruiting/transfer talent.
   Historical lines come without odds, so the backtest assumes -110 and can't grade moneylines.
+
+### College systems lab (`cfb_lab.py`, `cfb_weather.py`)
+```
+python3 betting/cfb_weather.py   # kickoff weather: Meteostat station history 2011-now + Open-Meteo forecast this week
+python3 betting/cfb_lab.py       # grade every system -> data/cfb/lab.json (the card's Systems Lab) + this week's plays
+```
+Weather comes from the nearest Meteostat station with hourly records (all 141 home stadiums have one within 60 km;
+6 are indoors). Each game gets kickoff wind/temp/rain plus *steady* measures over the 8 hours from 3 before kickoff to
+4 after: average wind (`wind8`) and wet hours (`wet8`, hours with more than 0.2 mm of rain). This week's games use the
+same windows from the hourly forecast.
+
+23 systems in 8 categories, each written down with a reason before testing, graded on 2011–2026 closing lines at
+-110 with early (weeks 0–4), mid-season (5–9) and late (10+) splits:
+
+| Category | Systems | Verdict |
+|---|---|---|
+| Weather | wind under (kickoff 15+ / 12+, steady 15+), rain under (kickoff, steady), cold under, wind dog | Wind and rain unders pass (+5 to +10% ROI, t ≈ 2). The card uses the **steady** versions. Cold under and wind dog fail |
+| Blowout | spread over 30 → over | Strong (t = 2.9), but mostly an early-season system: +2.1% in weeks 5–9 |
+| Trend | fade 3 straight covers, back 3 straight non-covers, fade over streaks | Only the over-streak fade survives (weak) |
+| Underdog | conference dogs 7–17, mid-season conference road dogs | −5.2% / −1.8%: no edge |
+| Big dog | 21+ point dogs, big dog with a low total | −3.5% / −6.6% |
+| Stats-only | a walk-forward ridge on offense/defense EPA, success rate, pass/rush, points, pace (`stat_margin`, `stat_total`); bet when it's 7+ or 10+ off the line | −4 to −6%: the line already knows the box-score numbers |
+| Season phase | conference unders weeks 5–9, early-season overs, November unders | −1.7 to −4.5% |
+| Edge | our prediction model at 3%/5% edge | too few bets to grade |
+
+Also tested and cut (mid-season ideas): conference home dogs, off-bye teams, following/fading line steam, fading big
+total moves, letdown after an upset win, bounce-back after an upset loss or a blowout, two-good-defense unders, big
+conference favorites. None beat -110.
+
+Weather caveat: the history uses **measured** weather, but you bet on a **forecast**. Two checks say the edge isn't
+only hindsight: (1) closing totals do drop about a point in 15+ mph wind or rain, yet those games still finish 1–2
+points further under; (2) the steady (all-day, forecastable) versions hold up as well as the kickoff ones.
+Wind **and** rain on the same game went 35-16 to the under (+30%, small sample), so the card stacks them to 1u.
+A Blowout over that meets any under system is a pass (those overs lost with each one: 15-20, 15-17, 26-32).

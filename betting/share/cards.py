@@ -19,6 +19,8 @@ import subprocess
 import sys
 from datetime import datetime
 
+import pandas as pd
+
 HERE = os.path.dirname(os.path.abspath(__file__))
 BET = os.path.dirname(HERE)
 sys.path.insert(0, HERE)
@@ -28,7 +30,9 @@ import weekly as W  # noqa: E402
 E, ET = W.E, W.ET
 SETTINGS = json.load(open(os.path.join(HERE, "settings.json"))) if os.path.exists(os.path.join(HERE, "settings.json")) else {}
 UNIT = float(SETTINGS.get("unit_dollars", 10))
-SYSTEMS = {"Blowout over", "Wind under", "Close road team", "Close road team ML", "Buy-low underdog", "Rested home team"}
+SYSTEMS = {"Blowout over", "Wind under", "Close road team", "Close road team ML", "Buy-low underdog", "Rested home team",
+           "Steady wind under", "Steady rain under", "Over-streak fade"}
+WEATHER = ("Steady wind under", "Steady rain under")
 FONTS = {"BebasNeue-Regular.ttf": "bebasneue/BebasNeue-Regular.ttf", "Graduate-Regular.ttf": "graduate/Graduate-Regular.ttf"}
 
 
@@ -133,6 +137,45 @@ CFB_CSS = """
 h2 { font-family:'Varsity'; font-weight:400; font-size:12.5pt; letter-spacing:.02em; color:#14532d; text-transform:none; margin:22px 0 9px; }
 h2::after { background:var(--accent2); height:2px; opacity:.7; }
 
+/* weather desk */
+.wx { border:1px solid #d6e2ea; border-radius:12px; overflow:hidden; background:#fff; }
+.wx-row { display:grid; grid-template-columns:7px 58px 1.15fr 122px 1.6fr 112px; align-items:center; column-gap:10px;
+          border-bottom:1px solid #e6eef3; padding:8px 10px 8px 0; break-inside:avoid; }
+.wx-row:last-child { border-bottom:0; }
+.wx-row .stripe { align-self:stretch; background:linear-gradient(180deg, var(--c1) 0 50%, var(--c2) 50% 100%); }
+.wx-row .game b { display:block; font-size:9pt; }
+.tiles { display:flex; gap:5px; }
+.tile { flex:1; border-radius:8px; text-align:center; padding:5px 3px 4px; background:#eef3f6; color:#4b5d68; }
+.tile b { display:block; font-family:'Varsity'; font-weight:400; font-size:14pt; line-height:1; }
+.tile span { font-size:5.8pt; letter-spacing:.08em; text-transform:uppercase; font-weight:700; }
+.tile.hot.wind { background:#1e3a5f; color:#cfe1f5; } .tile.hot.wind b { color:#fff; }
+.tile.hot.rain { background:#0f5257; color:#c9ece9; } .tile.hot.rain b { color:#fff; }
+.wx-row .sbwhy { font-size:8.2pt; color:var(--ink2); }
+.windbar { height:5px; background:#e6eef3; border-radius:3px; margin-top:4px; }
+.windbar i { display:block; height:5px; border-radius:3px; background:linear-gradient(90deg, #7fb3d5, #1e3a5f); }
+.wx-row .sbbet { text-align:right; font-size:8.2pt; color:var(--ink2); }
+.wx-row .sbbet b { font-family:'Varsity'; font-weight:400; font-size:12.5pt; color:#1e3a5f; display:block; line-height:1.15; }
+.wx-row .sbbet .usd { font-weight:750; color:var(--green); }
+
+/* systems lab */
+.lab { display:grid; grid-template-columns:1fr 1fr; gap:8px; }
+.labcat { border:1px solid #e3dcc6; border-radius:10px; background:#fff; padding:8px 10px 6px; break-inside:avoid; }
+.labcat h4 { margin:0 0 4px; font-family:'Varsity'; font-weight:400; font-size:10pt; color:#14532d; display:flex;
+             justify-content:space-between; align-items:center; }
+.labcat h4 small { font-family:inherit; font-size:6.4pt; letter-spacing:.1em; text-transform:uppercase; color:#8a7a4a; }
+.labrow { display:grid; grid-template-columns:1fr 54px 54px 92px; column-gap:6px; align-items:center; font-size:7.6pt;
+          padding:3px 0; border-top:1px dashed #eee6cf; }
+.labrow .nm { color:var(--ink); } .labrow .nm i { display:block; font-style:normal; color:var(--ink2); font-size:6.8pt; }
+.labrow .n { text-align:right; font-variant-numeric:tabular-nums; }
+.labrow .pos { color:var(--green); font-weight:700; } .labrow .neg { color:#9a3b2f; }
+.verdict { font-size:6.4pt; font-weight:750; letter-spacing:.05em; text-transform:uppercase; border-radius:20px;
+           padding:2px 6px; text-align:center; }
+.verdict.on { background:#14532d; color:#ffd46b; } .verdict.alt { background:#e7efe9; color:#14532d; }
+.verdict.off { background:#f1ede2; color:#8a7a4a; }
+.labhead { display:grid; grid-template-columns:1fr 54px 54px 92px; column-gap:6px; font-size:6pt; letter-spacing:.1em;
+           text-transform:uppercase; color:#8a7a4a; font-weight:750; }
+.labhead span { text-align:right; } .labhead span:first-child { text-align:left; }
+
 /* scoreboard for blowout overs */
 .sb { border:1px solid #e3dcc6; border-radius:12px; overflow:hidden; background:#fff; }
 .sb-row { display:grid; grid-template-columns:7px 58px 1.25fr 74px 1.7fr 112px; align-items:center; column-gap:10px;
@@ -203,7 +246,7 @@ def lead(S, p):
                    and x["side"] == p["side"]), None)
         if cp:
             return W.model_reason(S, dict(cp, bet=p["bet"], odds=p["odds"], book=p["book"]))
-    for name in ("Wind under", "Blowout over", "Close road team", "Close road team ML"):
+    for name in WEATHER + ("Wind under", "Blowout over", "Close road team", "Close road team ML", "Over-streak fade"):
         if name in sig:
             return W.system_reason(S, {"name": name, "why": ""}, p)
     if "Buy-low underdog" in sig:
@@ -415,24 +458,93 @@ def blowout_board(S, blow):
     return h
 
 
+def weather_desk(S, plays):
+    h = ["<div class='wx'>"]
+    for p in plays:
+        r = S.rows.get(p["game"])
+        c1, c2 = team_colors(S, p["game"])
+        wind = float(r.wind8) if r is not None and pd.notna(r.wind8) else 0.0
+        wet = int(r.wet8) if r is not None and pd.notna(r.wet8) else 0
+        reason = W.system_reason(S, {"name": next(x for x in WEATHER if x in p["signals"]), "why": ""}, p)
+        extra = [x for x in p["signals"] if x not in WEATHER]
+        stack = f" <b>Also:</b> {E(', '.join(extra))}." if extra else ""
+        h.append(f"<div class='wx-row' style='--c1:{c1};--c2:{c2}'><div class='stripe'></div><div>{S.logos(p['game'], 22)}</div>"
+                 f"<div class='game'><b>{E(p['game'])}</b><span class='meta'>{S.when(p['game'])}</span></div>"
+                 f"<div class='tiles'><div class='tile wind{' hot' if wind >= 15 else ''}'><b>{wind:.0f}</b><span>mph wind</span></div>"
+                 f"<div class='tile rain{' hot' if wet >= 3 else ''}'><b>{wet}/8</b><span>wet hrs</span></div></div>"
+                 f"<div class='sbwhy'>{reason}{stack}<div class='windbar'><i style='width:{min(100, wind / 30 * 100):.0f}%'></i></div></div>"
+                 f"<div class='sbbet'><b>{E(p['bet'])}</b>{W.fmt_odds(p['odds'])} · {E(p['book'])}"
+                 f"<div><span class='usd'>{p['units']:g}u · {money(p['units'])}</span></div></div></div>")
+    h.append("</div>")
+    return h
+
+
+LAB_ORDER = ["Weather", "Blowout", "Trend", "Underdog", "Big dog", "Stats-only", "Season phase", "Edge"]
+LAB_BLURB = {"Weather": "wind, rain, cold", "Blowout": "30+ pt spreads", "Trend": "ATS & over streaks",
+             "Underdog": "conference & road dogs", "Big dog": "21+ pt dogs", "Stats-only": "offense/defense numbers only",
+             "Season phase": "early, mid-season, November", "Edge": "our model vs the line"}
+
+
+def lab_board(S):
+    path = os.path.join(BET, "data", "cfb", "lab.json")
+    if not os.path.exists(path):
+        return []
+    lab = json.load(open(path))
+    cats = {}
+    for x in lab:
+        cats.setdefault(x["category"], []).append(x)
+    h = ["<div class='lab'>"]
+    for cat in [c for c in LAB_ORDER if c in cats]:
+        h.append(f"<div class='labcat'><h4>{E(cat)}<small>{E(LAB_BLURB.get(cat, ''))}</small></h4>"
+                 "<div class='labhead'><span>System</span><span>ROI</span><span>Wk 5–9</span><span>Verdict</span></div>")
+        for x in cats[cat]:
+            if x["on_card"] and x["grade"]:
+                v, cls = f"On card · {x['grade']}", "on"
+            elif x["grade"] and ("kickoff" in x["name"] or "12+" in x["name"]):
+                v, cls = "Steady version used", "alt"
+            elif x["grade"]:
+                v, cls = f"Passed · {x['grade']}", "alt"
+            elif x["bets"] < 100:
+                v, cls = "Too few bets", "off"
+            else:
+                v, cls = "Benched", "off"
+            live = f" · this week: {len(x['live'])}" if x["on_card"] and x["live"] else ""
+            mid = x["mid"]
+            since = "2014" if x["category"] == "Edge" else "2011"
+            h.append(f"<div class='labrow'><div class='nm'>{E(x['name'])}<i>{x['record']} since {since}{live}</i></div>"
+                     f"<div class='n {'pos' if x['roi'] > 0 else 'neg'}'>{x['roi']:+.1f}%</div>"
+                     f"<div class='n {'pos' if mid['roi%'] > 0 else 'neg'}'>{(format(mid['roi%'], '+.1f') + '%') if mid['bets'] else '—'}</div>"
+                     f"<div class='verdict {cls}'>{E(v)}</div></div>")
+        h.append("</div>")
+    h.append("</div>")
+    return h
+
+
 def render_cfb():
     S, F = W.Sport("cfb"), load_final("cfb")
     plays = [p for p in F["plays"] if S.upcoming(p["game"])]
     blow = sorted([p for p in plays if "Blowout over" in p["signals"]], key=lambda p: S.teams(p["game"])[2] or "")
-    other = [p for p in plays if p not in blow]
+    wx = [p for p in plays if p not in blow and any(x in p["signals"] for x in WEATHER)]
+    other = [p for p in plays if p not in blow and p not in wx]
     sy = next((x for x in S.card.get("systems", []) if x["name"] == "Blowout over"), None)
     risk = sum(p["units"] for p in plays)
     h = hero(S, "cfb", f"College Football · Week {S.week} · {date_range(S)}", "Saturday Slate",
              [(len(plays), "Plays"), (f"{risk:g}u", "Units"), (money(risk), "Risked")])
     h += ["<h2>Blowout Overs</h2>"]
     if sy:
-        h.append(f"<div class='intro'><h3>{len(blow)} plays · {sum(p['units'] for p in blow):g}u · "
+        h.append(f"<div class='intro'><h3>{len(blow)} play{'' if len(blow) == 1 else 's'} · {sum(p['units'] for p in blow):g}u · "
                  f"{money(sum(p['units'] for p in blow))}</h3><div>{W.SYSTEM_COPY['Blowout over'][1]}</div>"
                  f"<div class='rec'>{W.record_line(sy)}</div></div>")
     h += blowout_board(S, blow) if blow else ["<p class='empty'>No blowout games at a playable price.</p>"]
-    h += ["<h2>Other Plays</h2>", "<div class='note'>Model edges and situational spots outside the Blowout Over system.</div>"]
+    h += ["<h2>Weather Desk</h2>", "<div class='note'>Outdoor games with steady 15+ mph wind or rain in 3+ of the 8 hours "
+          "around kickoff (hourly forecast). Two weather systems on one game stack to a bigger stake.</div>"]
+    h += weather_desk(S, wx) if wx else ["<p class='empty'>No steady wind or rain games at a playable price this week.</p>"]
+    h += ["<h2>Other Plays</h2>", "<div class='note'>Model edges, trend fades and situational spots.</div>"]
     h += [play_card(S, p) for p in other] or [
-        "<p class='empty'>Nothing outside the Blowout Overs cleared the bar this week. The strongest near-misses are below.</p>"]
+        "<p class='empty'>Nothing else cleared the bar this week. The strongest near-misses are below.</p>"]
+    h += ["<h2>Systems Lab</h2>", "<div class='note'>Every college system we tested, graded on 2011–2026 closing lines at "
+          "−110. Only the ones that held up make the card; the rest are shown so you know they were checked.</div>"]
+    h += lab_board(S)
     ours = {p["game"]: p["bet"] for p in plays}
     h += ["<h2>QB Changes</h2>", "<div class='note'>Teams whose passer changed last game (from play-by-play; college injury "
           "reports aren't public). Confirm the starter before betting either side.</div>"]

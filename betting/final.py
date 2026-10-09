@@ -3,7 +3,8 @@
 
 For every possible bet (game x market x side) it collects the signals that point at it:
   model    the prediction model's edge at the best FanDuel/DraftKings price (a BET needs 3%+)
-  system   a long-run betting system (Blowout Over, Wind Under, Close Road Team, Buy-Low Underdog, Rested Home Team)
+  system   a long-run betting system (Blowout Over, Wind Under, Close Road Team, Buy-Low Underdog, Rested Home Team;
+           college Steady Wind/Rain Under and Over-Streak Fade from cfb_lab.py)
   angle    a situational spot that held up on 15 seasons of closing lines (angles.py)
 Then:
   - conflicts (signals on both sides of the same market) are passed, and listed
@@ -30,7 +31,8 @@ import angles as A  # noqa: E402
 PREFERRED = "FanDuel"
 MIN_ODDS = {"spread": -115, "total": -115, "ml": -200}
 SYSTEM_GRADE = {"Blowout over": "Strong", "Wind under": "Moderate", "Close road team": "Moderate",
-                "Close road team ML": "Moderate", "Buy-low underdog": "Moderate", "Rested home team": "Weak"}
+                "Close road team ML": "Moderate", "Buy-low underdog": "Moderate", "Rested home team": "Weak",
+                "Steady wind under": "Moderate", "Steady rain under": "Moderate", "Over-streak fade": "Weak"}
 BASE_UNITS = {"Strong": 1.0, "Moderate": 0.5, "Weak": 0.5, "Stack only": 0.5}
 MAX_UNITS = 2.0
 MODEL_ONLY_MAX = 1.0   # the model alone hasn't proven itself against closing lines: bigger stakes need stacking

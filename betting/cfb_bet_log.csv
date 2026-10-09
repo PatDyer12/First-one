@@ -1,15 +1,41 @@
 logged,tier,game_id,game,market,side,book,bet,line,odds,win_prob,ev,stake,placed,close_line,close_odds,clv_pts,clv_prob,result,units
-2026-09-24 13:03,Blowout over,401858468,Howard @ Rutgers,total,over,DraftKings,Over 56.5,56.5,-110,0.0,0.0,0.01,yes,,,,,,
-2026-09-24 13:03,Blowout over,401856805,Sam Houston @ Texas Tech,total,over,DraftKings,Over 55.5,55.5,-108,0.0,0.0,0.01,yes,55.5,-115.0,0.0,,,
-2026-09-24 13:03,Blowout over,401858236,Bucknell @ Pittsburgh,total,over,DraftKings,Over 62.5,62.5,-110,0.0,0.0,0.01,yes,63.5,-105.0,1.0,,,
-2026-09-24 13:03,Blowout over,401858237,Central Arkansas @ Florida State,total,over,DraftKings,Over 60.5,60.5,-110,0.0,0.0,0.01,yes,63.5,-105.0,3.0,,,
-2026-09-24 13:03,Blowout over,401866428,Stonehill @ Ohio,total,over,DraftKings,Over 50.5,50.5,-110,0.0,0.0,0.01,yes,53.5,-110.0,3.0,,,
-2026-09-24 13:03,Blowout over,401862781,North Carolina Central @ East Carolina,total,over,DraftKings,Over 54.5,54.5,-110,0.0,0.0,0.01,yes,56.5,-108.0,2.0,,,
-2026-09-24 13:03,Blowout over,401867909,Long Island University @ Florida International,total,over,DraftKings,Over 50.5,50.5,-110,0.0,0.0,0.01,yes,53.5,-115.0,3.0,,,
-2026-09-24 13:03,Blowout over,401858238,Central Michigan @ Miami,total,over,DraftKings,Over 54.5,54.5,-112,0.0,0.0,0.01,yes,53.5,-112.0,-1.0,,,
-2026-09-24 13:03,Blowout over,401870745,Mercyhurst @ Western Kentucky,total,over,DraftKings,Over 56.5,56.5,-110,0.0,0.0,0.01,yes,58.5,-105.0,2.0,,,
-2026-09-24 13:03,Blowout over,401862783,Houston Christian @ North Texas,total,over,DraftKings,Over 58.5,58.5,-110,0.0,0.0,0.01,yes,60.5,-110.0,2.0,,,
-2026-09-24 13:03,Blowout over,401858241,Missouri State @ SMU,total,over,DraftKings,Over 59.5,59.5,-110,0.0,0.0,0.01,yes,59.5,-110.0,0.0,,,
-2026-09-25 16:52,Blowout over,401858244,William & Mary @ Duke,total,over,DraftKings,Over 62.5,62.5,-115,0.0,0.0,0.01,yes,62.5,-108.0,0.0,,,
-2026-09-25 16:52,Blowout over,401860892,Incarnate Word @ Texas State,total,over,DraftKings,Over 64.5,64.5,100,0.0,0.0,0.01,yes,64.5,-115.0,0.0,,,
-2026-09-26 07:42,BET,401866427,Lindenwood @ Eastern Michigan,total,over,FanDuel,Over 50.5,50.5,-110,0.541,0.033,0.0091,yes,51.5,-105.0,1.0,,,
+2026-09-24 13:03,Blowout over,401858468,Howard @ Rutgers,total,over,DraftKings,Over 56.5,56.5,-110,0.0,0.0,0.01,yes,57.5,,1.0,,W,0.9090909090909092
+2026-09-24 13:03,Blowout over,401856805,Sam Houston @ Texas Tech,total,over,DraftKings,Over 55.5,55.5,-108,0.0,0.0,0.01,yes,55.5,,0.0,,W,0.925925925925926
+2026-09-24 13:03,Blowout over,401858236,Bucknell @ Pittsburgh,total,over,DraftKings,Over 62.5,62.5,-110,0.0,0.0,0.01,yes,63.5,,1.0,,L,-1.0
+2026-09-24 13:03,Blowout over,401858237,Central Arkansas @ Florida State,total,over,DraftKings,Over 60.5,60.5,-110,0.0,0.0,0.01,yes,62.5,,2.0,,L,-1.0
+2026-09-24 13:03,Blowout over,401866428,Stonehill @ Ohio,total,over,DraftKings,Over 50.5,50.5,-110,0.0,0.0,0.01,yes,53.5,,3.0,,L,-1.0
+2026-09-24 13:03,Blowout over,401862781,North Carolina Central @ East Carolina,total,over,DraftKings,Over 54.5,54.5,-110,0.0,0.0,0.01,yes,58.5,,4.0,,L,-1.0
+2026-09-24 13:03,Blowout over,401867909,Long Island University @ Florida International,total,over,DraftKings,Over 50.5,50.5,-110,0.0,0.0,0.01,yes,54.5,,4.0,,L,-1.0
+2026-09-24 13:03,Blowout over,401858238,Central Michigan @ Miami,total,over,DraftKings,Over 54.5,54.5,-112,0.0,0.0,0.01,yes,52.5,,-2.0,,W,0.8928571428571429
+2026-09-24 13:03,Blowout over,401870745,Mercyhurst @ Western Kentucky,total,over,DraftKings,Over 56.5,56.5,-110,0.0,0.0,0.01,yes,58.5,,2.0,,W,0.9090909090909092
+2026-09-24 13:03,Blowout over,401862783,Houston Christian @ North Texas,total,over,DraftKings,Over 58.5,58.5,-110,0.0,0.0,0.01,yes,60.5,,2.0,,W,0.9090909090909092
+2026-09-24 13:03,Blowout over,401858241,Missouri State @ SMU,total,over,DraftKings,Over 59.5,59.5,-110,0.0,0.0,0.01,yes,60.5,,1.0,,L,-1.0
+2026-09-25 16:52,Blowout over,401858244,William & Mary @ Duke,total,over,DraftKings,Over 62.5,62.5,-115,0.0,0.0,0.01,yes,61.5,,-1.0,,W,0.8695652173913043
+2026-09-25 16:52,Blowout over,401860892,Incarnate Word @ Texas State,total,over,DraftKings,Over 64.5,64.5,100,0.0,0.0,0.01,yes,66.5,,2.0,,W,1.0
+2026-09-26 07:42,BET,401866427,Lindenwood @ Eastern Michigan,total,over,FanDuel,Over 50.5,50.5,-110,0.541,0.033,0.0091,yes,53.5,,3.0,,L,-1.0
+2026-10-09 22:48,Blowout over,401858482,Ball State @ Northwestern,total,over,FanDuel,Over 52.5,52.5,-115,0.0,0.0,0.01,yes,53.5,-112.0,1.0,,,
+2026-10-09 22:48,Blowout over,401858257,Stanford @ Notre Dame,total,over,DraftKings,Over 54.5,54.5,-110,0.0,0.0,0.01,yes,54.5,-110.0,0.0,,,
+2026-10-09 22:48,Blowout over,401858483,Maryland @ Ohio State,total,over,DraftKings,Over 56.5,56.5,-110,0.0,0.0,0.01,yes,56.5,-110.0,0.0,,,
+2026-10-09 22:48,Rested home team,401856824,UCF @ Oklahoma State,spread,home,FanDuel,Oklahoma State -10.5,10.5,-105,0.0,0.0,0.005,yes,10.5,-112.0,0.0,,,
+2026-10-09 22:48,Rested home team,401869843,Old Dominion @ App State,spread,home,DraftKings,App State -10,10.0,-108,0.0,0.0,0.005,yes,10.0,-108.0,0.0,,,
+2026-10-09 22:48,Steady wind under,401858481,Indiana @ Nebraska,total,under,FanDuel,Under 48.5,48.5,-115,0.0,0.0,0.005,yes,47.5,-105.0,1.0,,,
+2026-10-09 22:48,Steady wind under,401869843,Old Dominion @ App State,total,under,FanDuel,Under 47.5,47.5,-106,0.0,0.0,0.005,yes,47.5,-108.0,0.0,,,
+2026-10-09 22:48,Steady wind under,401856715,LSU @ Kentucky,total,under,DraftKings,Under 50.5,50.5,-112,0.0,0.0,0.005,yes,50.5,-112.0,0.0,,,
+2026-10-09 22:48,Steady wind under,401864518,North Dakota State @ UNLV,total,under,FanDuel,Under 47.5,47.5,-104,0.0,0.0,0.005,yes,47.5,-105.0,0.0,,,
+2026-10-09 22:48,Steady rain under,401858260,Wake Forest @ NC State,total,under,DraftKings,Under 58.5,58.5,-110,0.0,0.0,0.005,yes,58.5,-110.0,0.0,,,
+2026-10-09 22:48,Steady rain under,401869843,Old Dominion @ App State,total,under,FanDuel,Under 47.5,47.5,-106,0.0,0.0,0.005,yes,47.5,-108.0,0.0,,,
+2026-10-09 22:48,Steady rain under,401856718,Ole Miss @ Vanderbilt,total,under,FanDuel,Under 54.5,54.5,-106,0.0,0.0,0.005,yes,54.5,-112.0,0.0,,,
+2026-10-09 22:48,Steady rain under,401856715,LSU @ Kentucky,total,under,DraftKings,Under 50.5,50.5,-112,0.0,0.0,0.005,yes,50.5,-112.0,0.0,,,
+2026-10-09 22:48,Steady rain under,401862798,UAB @ Memphis,total,under,DraftKings,Under 53.5,53.5,-110,0.0,0.0,0.005,yes,53.5,-110.0,0.0,,,
+2026-10-09 22:48,Steady rain under,401869943,Coastal Carolina @ Marshall,total,under,FanDuel,Under 58.5,58.5,-105,0.0,0.0,0.005,yes,58.5,-105.0,0.0,,,
+2026-10-09 22:48,Steady rain under,401856712,Georgia @ Alabama,total,under,FanDuel,Under 51.5,51.5,-110,0.0,0.0,0.005,yes,51.5,-115.0,0.0,,,
+2026-10-09 22:48,Over-streak fade,401856823,Arizona @ West Virginia,total,under,DraftKings,Under 60.5,60.5,-105,0.0,0.0,0.005,yes,60.5,-105.0,0.0,,,
+2026-10-09 22:48,Over-streak fade,401858482,Ball State @ Northwestern,total,under,DraftKings,Under 53.5,53.5,-108,0.0,0.0,0.005,yes,53.5,-108.0,0.0,,,
+2026-10-09 22:48,Over-streak fade,401856714,South Carolina @ Florida,total,under,DraftKings,Under 58.5,58.5,-105,0.0,0.0,0.005,yes,58.5,-105.0,0.0,,,
+2026-10-09 22:48,Over-streak fade,401858484,UCLA @ Oregon,total,under,DraftKings,Under 58.5,58.5,-115,0.0,0.0,0.005,yes,58.5,-115.0,0.0,,,
+2026-10-09 22:48,Over-streak fade,401866437,Buffalo @ Toledo,total,under,FanDuel,Under 55.5,55.5,-110,0.0,0.0,0.005,yes,55.5,-110.0,0.0,,,
+2026-10-09 22:48,Over-streak fade,401858483,Maryland @ Ohio State,total,under,FanDuel,Under 56.5,56.5,-106,0.0,0.0,0.005,yes,56.5,-110.0,0.0,,,
+2026-10-09 22:48,Over-streak fade,401869943,Coastal Carolina @ Marshall,total,under,FanDuel,Under 58.5,58.5,-105,0.0,0.0,0.005,yes,58.5,-105.0,0.0,,,
+2026-10-09 22:48,Over-streak fade,401856712,Georgia @ Alabama,total,under,FanDuel,Under 51.5,51.5,-110,0.0,0.0,0.005,yes,51.5,-115.0,0.0,,,
+2026-10-09 22:48,Over-streak fade,401858485,USC @ Penn State,total,under,DraftKings,Under 54.5,54.5,-108,0.0,0.0,0.005,yes,54.5,-108.0,0.0,,,
+2026-10-09 22:48,Over-streak fade,401869949,James Madison @ Georgia Southern,total,under,FanDuel,Under 51.5,51.5,-106,0.0,0.0,0.005,yes,51.5,-110.0,0.0,,,

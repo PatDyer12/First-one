@@ -39,7 +39,24 @@ M.configure(
                      "market ratings. Profitable in 11 of 14 seasons, but a small sample (t = 1.3) and mostly big home "
                      "favorites: half stakes. College moneylines can't be backtested (no historical prices in the "
                      "free data), so there's no college moneyline system.",
-              "when": lambda d: (d["rest_diff"] >= 3) & (d["line_move"] >= 3)}],
+              "when": lambda d: (d["rest_diff"] >= 3) & (d["line_move"] >= 3)},
+             # from the systems lab (cfb_lab.py): the weather and trend rules that survived 2011-2026 closing lines
+             {"name": "Steady wind under", "market": "total", "side": "under", "stake": 0.005, "min_odds": -115,
+              "why": "Outdoor game with wind averaging 15+ mph from 3 hours before kickoff to 4 after (station records "
+                     "for history, the hourly forecast this week). Totals drop about a point for wind like this, but these "
+                     "games still finish about 2 points further under than normal. Profitable in 11 of 15 seasons; "
+                     "best in November, flat in weeks 5-9. History uses measured wind, so half stakes.",
+              "when": lambda d: (d["indoor"] == 0) & (d["wind8"] >= 15)},
+             {"name": "Steady rain under", "market": "total", "side": "under", "stake": 0.005, "min_odds": -115,
+              "why": "Rain in at least 3 of the 8 hours around the game: a wet day, not a passing shower. Wet balls mean "
+                     "fumbles, short passes and more running, and totals barely move for it. Profitable in 11 of 15 "
+                     "seasons and strongest in weeks 5-9. History uses measured rain, so half stakes.",
+              "when": lambda d: (d["indoor"] == 0) & (d["wet8"] >= 3)},
+             {"name": "Over-streak fade", "market": "total", "side": "under", "stake": 0.005, "min_odds": -115,
+              "why": "Both teams have gone over in most of their last 3 games (5 or 6 of the 6). Recent shootouts push "
+                     "the total up more than they should. Small edge (t = 1.0), so it only plays when our model also "
+                     "likes the under.",
+              "when": lambda d: (d["h_over3"] + d["a_over3"]) >= 5}],
     TITLE="College Football Betting Model", CARD_NEEDS_LINE=True, BOOK_KEYS=("away_id", "home_id"))
 
 if __name__ == "__main__":
