@@ -503,6 +503,8 @@ body.has-ticker .jumbo { bottom: clamp(40px, 4.6vh, 58px); }
 .jb-bet .st.w { color: var(--win); } .jb-bet .st.l { color: var(--loss); } .jb-bet .st.e { color: var(--gold); }
 .jb-none { color: var(--ink-3); font-size: 2vh; }
 @media (max-width: 780px) { .jumbo { grid-template-columns: 1fr; grid-template-rows: auto minmax(0, 1fr) auto; } .jb-side { max-height: 32vh; overflow-y: auto; border-left: 0; border-top: 1px solid var(--line); } .jb-head > b { font-size: 2.6vh; } .jb-logo { font-size: 2.8vh; } .jb-bug .bt { display: none; } }
+.sheet .field .delayrow input { flex: 1; width: auto; min-width: 0; accent-color: #FFC24B; height: 18px; padding: 0; border: 0; background: none; }
+.sheet .field .delayrow b { min-width: 3.2em; text-align: right; font-family: var(--f-mono); color: var(--gold); }
 .cliplib { display: grid; gap: 6px; max-height: 300px; overflow-y: auto; }
 .cliplib h4 { margin: 6px 0 0; font: 700 12px var(--f-mono); letter-spacing: .08em; text-transform: uppercase; color: var(--ink-3); }
 .sndrow .mood { font: 600 10px var(--f-mono); text-transform: uppercase; letter-spacing: .06em; padding: 2px 6px; border-radius: 6px; margin-left: auto; color: var(--ink-2); border: 1px solid var(--line); white-space: nowrap; }
@@ -769,6 +771,8 @@ body.tv .chart { height: 240px; }
       <span class="lbl">Reaction clips</span>
       <label class="togrow"><input type="checkbox" id="clipsOn"> Pop clips up on this screen</label>
       <span class="hint">While a bet is live, a clip takes over the screen on touchdowns, field goals, turnovers, red-zone trips, home runs, goals, big runs, crunch time and halftime (good or bad for you), and about every 6 minutes if nothing's happened: a winning clip when you're cashing, a losing one when you're not, hype when it's close. Kickoffs and big swings set one off too, and Georgia–Bama plays its own clips on every score. Tap the screen to close one. Turn this off on your phone and leave it on for the monitor.</span>
+      <label class="togrow delayrow">TV delay <input type="range" id="tvDelay" min="0" max="120" step="5"> <b id="tvDelayVal"></b></label>
+      <span class="hint">ESPN's scores run ahead of your TV. The board holds scores, clips and win/loss animations back by this much so nothing spoils a play. If clips still beat the TV, turn it up. If they come late, turn it down. Each screen keeps its own setting.</span>
       <div class="cliplib" id="clipLib"></div>
     </div>
     <div class="field">
@@ -1671,17 +1675,27 @@ body.tv .chart { height: 240px; }
         const r = await fetch(`https://site.api.espn.com/apis/site/v2/sports/${ESPN[sport]}/scoreboard?dates=${ymd}&limit=300${GROUPS[sport] || ""}`);
         if (!r.ok) return false;
         const j = await r.json();
-        for (const e of j.events || []) { try { const g = parseGame(e, sport); S.games.set(g.id, g); } catch (err) {} }
-        boardAt.set(key, Date.now()); return true;
+        const apply = () => { for (const e of j.events || []) { try { const g = parseGame(e, sport); S.games.set(g.id, g); } catch (err) {} } };
+        const first = !boardAt.has(key);
+        boardAt.set(key, Date.now()); return { apply, first };
       } catch (err) { return false; }
     }));
-    if (!got.some(Boolean)) return;
-    S.slateAt = Date.now();
-    render();
-    autoReact();
-    autoSettle();
-    if (!$("#addSheet").hidden) renderGames();
+    const ok = got.filter(Boolean); if (!ok.length) return;
+    const finish = () => {
+      S.slateAt = Date.now();
+      render();
+      autoReact();
+      autoSettle();
+      if (!$("#addSheet").hidden) renderGames();
+    };
+    // the first look shows right away; after that every update waits out the TV delay,
+    // so scores, clips and win/loss animations land when the play shows up on your TV
+    const d = tvDelay() * 1000, now = ok.filter((x) => x.first || !d), later = ok.filter((x) => !x.first && d);
+    if (now.length) { now.forEach((x) => x.apply()); finish(); }
+    if (later.length) setTimeout(() => { later.forEach((x) => x.apply()); finish(); }, d);
   }
+  // ESPN's feed runs ahead of the broadcast; hold it back this many seconds (set per screen in Settings)
+  function tvDelay() { try { const v = localStorage.getItem("sb-delay"); return v == null || !Number.isFinite(Number(v)) ? 30 : Number(v); } catch (e) { return 30; } }
   // every 30s: refresh the scoreboards your open bets live on
   function liveKeys() {
     const keys = new Set(), now = Date.now();
@@ -2653,6 +2667,9 @@ body.tv .chart { height: 240px; }
     const P = CLIPS[Number(btn.dataset.i)], m = P.mood.split(" ")[0];
     closeSheets(); react(anyOpen(), m === "up" ? "good" : m === "down" ? "bad" : "mid", P);
   });
+  const showDelay = () => { $("#tvDelay").value = tvDelay(); $("#tvDelayVal").textContent = tvDelay() + "s"; };
+  showDelay();
+  $("#tvDelay").addEventListener("input", (e) => { try { localStorage.setItem("sb-delay", e.target.value); } catch (err) {} showDelay(); });
   $("#clipsOn").checked = clipsOn();
   $("#clipsOn").addEventListener("change", (e) => { try { localStorage.setItem("sb-clips", e.target.checked ? "on" : "off"); } catch (err) {} if (!e.target.checked) stopStatus(); });
 
@@ -2665,7 +2682,13 @@ body.tv .chart { height: 240px; }
     try {
       const r = await fetch(`https://site.api.espn.com/apis/site/v2/sports/football/college-football/scoreboard?dates=${etDate(Date.now())}&limit=300&groups=80`);
       if (!r.ok) return;
-      const j = await r.json(), now = Date.now(), games = [];
+      const j = await r.json(), d = TK.games.length ? tvDelay() * 1000 : 0;
+      if (d) setTimeout(() => tickerApply(j), d); else tickerApply(j);
+    } catch (e) {}
+  }
+  function tickerApply(j) {
+    try {
+      const now = Date.now(), games = [];
       for (const e of j.events || []) {
         const c = e.competitions && e.competitions[0]; if (!c) continue;
         const t = {}; for (const x of c.competitors || []) t[x.homeAway] = x;
