@@ -657,7 +657,7 @@ body.tv .chart { height: 240px; }
   <div class="nk-tape t"></div><div class="nk-tape b"></div>
   <div class="nk-txt">
     <svg class="nk-sym" viewBox="-50 -50 100 100" aria-hidden="true"><circle r="48" fill="#FFC81E"/><g fill="#111"><circle r="7"/><path d="M0 -11 L-17 -40 A44 44 0 0 1 17 -40 Z" transform="rotate(0)"/><path d="M0 -11 L-17 -40 A44 44 0 0 1 17 -40 Z" transform="rotate(120)"/><path d="M0 -11 L-17 -40 A44 44 0 0 1 17 -40 Z" transform="rotate(240)"/></g></svg>
-    <div class="nk-title">Nuke Inbound</div>
+    <div class="nk-title" id="nkWarnTitle">Nuke Inbound</div>
     <div class="nk-sub" id="nkWarnSub">Tactical nuke armed</div>
     <div class="nk-pick" id="nkWarnPick"></div>
     <div class="nk-amt num" id="nkWarnAmt"></div>
@@ -1582,7 +1582,7 @@ body.tv .chart { height: 240px; }
     }
     return SND.loading[name];
   }
-  function loadSounds() { loadBuf("sounds/" + S.winSound); loadBuf("loss"); loadBuf("sounds/siren"); loadBuf("sounds/nuke"); }
+  function loadSounds() { loadBuf("sounds/" + S.winSound); loadBuf("loss"); loadBuf("sounds/siren"); loadBuf("sounds/nuke"); loadBuf("sounds/nj"); }
   function playBuf(c, buf, vol) { const s = c.createBufferSource(), g = c.createGain(); g.gain.value = vol; s.buffer = buf; s.connect(g).connect(c.destination); s.start(); return s; }
   function unlock() {
     const wasLive = !!SND.ctx && SND.ctx.state === "running";
@@ -1729,6 +1729,7 @@ body.tv .chart { height: 240px; }
   function nukeWarn(b) {
     fx(() => {
       const ov = $("#nkWarn");
+      $("#nkWarnTitle").textContent = "Nuke Inbound";
       $("#nkWarnSub").textContent = `Tactical nuke armed · ${fU(b.units)} on the line`;
       $("#nkWarnPick").textContent = b.pick;
       $("#nkWarnAmt").textContent = `${fUSD(b.units * S.unit)} to win ${fUSD(b.units * ppu(b.odds) * S.unit)}  ·  ${fOdds(b.odds)}`;
@@ -1742,23 +1743,38 @@ body.tv .chart { height: 240px; }
   }
 
   // 2u+ bet wins: flash, boom, shockwave, cloud, then the board burns
+  // the song plays from the top; the bomb drops on "...blow New Jersey UP" (4.96s in)
+  const NJ_DROP = 5.0;
   function nukeHit(pick, n) {
     fx(() => {
-      playSfx("nuke", 1);
-      const flash = document.createElement("div"); flash.className = "nk-flash"; document.body.appendChild(flash);
-      const ring = document.createElement("div"); ring.className = "nk-ring"; document.body.appendChild(ring);
-      setTimeout(() => { flash.remove(); ring.remove(); }, 1700);
-      const app = $(".app"); app.classList.remove("quake"); void app.offsetWidth; app.classList.add("quake");
-      const ov = $("#nkHit");
-      $("#nkHitPick").textContent = pick;
-      $("#nkHitAmt").textContent = `${fUSD(n * S.unit, true)}  ·  ${fU(n, true)}`;
+      const c = ready(), song = SND.bufs["sounds/nj"];
+      if (!c || !song) { if (c) loadBuf("sounds/nj"); detonate(pick, n, false); return 6300; }
+      playBuf(c, song, 0.95);
+      // arming: red alert while the verse builds
+      const ov = $("#nkWarn");
+      $("#nkWarnTitle").textContent = "Nuke Hit";
+      $("#nkWarnSub").textContent = "Target locked · detonating";
+      $("#nkWarnPick").textContent = pick;
+      $("#nkWarnAmt").textContent = `${fUSD(n * S.unit, true)}  ·  ${fU(n, true)}`;
       ov.classList.remove("out"); ov.hidden = false;
-      const stop = reduced ? null : mushroom($("#nkHitCv"), { scale: 1.2, hot: 0.85, dur: 6000 });
-      setTimeout(() => aftermath(16000), 700);
-      setTimeout(() => ov.classList.add("out"), 5400);
-      setTimeout(() => { ov.hidden = true; ov.classList.remove("out"); if (stop) stop(); }, 6250);
-      return 6300;
+      setTimeout(() => { ov.hidden = true; detonate(pick, n, true); }, NJ_DROP * 1000);
+      return NJ_DROP * 1000 + 6300;
     });
+  }
+  function detonate(pick, n, withSong) {
+    playSfx("nuke", withSong ? 0.75 : 1);
+    const flash = document.createElement("div"); flash.className = "nk-flash"; document.body.appendChild(flash);
+    const ring = document.createElement("div"); ring.className = "nk-ring"; document.body.appendChild(ring);
+    setTimeout(() => { flash.remove(); ring.remove(); }, 1700);
+    const app = $(".app"); app.classList.remove("quake"); void app.offsetWidth; app.classList.add("quake");
+    const ov = $("#nkHit");
+    $("#nkHitPick").textContent = pick;
+    $("#nkHitAmt").textContent = `${fUSD(n * S.unit, true)}  ·  ${fU(n, true)}`;
+    ov.classList.remove("out"); ov.hidden = false;
+    const stop = reduced ? null : mushroom($("#nkHitCv"), { scale: 1.2, hot: 0.85, dur: 6000 });
+    setTimeout(() => aftermath(16000), 700);
+    setTimeout(() => ov.classList.add("out"), 5400);
+    setTimeout(() => { ov.hidden = true; ov.classList.remove("out"); if (stop) stop(); }, 6250);
   }
 
   // aftermath: scorched tilted cards, flames, cracked screen, numbers hanging loose
