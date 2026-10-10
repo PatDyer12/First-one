@@ -435,6 +435,30 @@ body.settle .panel, body.settle #h-net, body.settle #h-usd, body.settle .cell b,
 .pip.out { transform: translateX(130%); opacity: 0; transition: transform .5s ease-in, opacity .5s; }
 @keyframes pipIn { from { transform: translateX(130%) rotate(6deg); } to { transform: none; } }
 @media (max-width: 780px) { .pip { width: 40vw; right: 12px; bottom: 90px; } .pip.sq, .pip.kobe { width: 50vw; } .pip.wide { width: 66vw; } }
+/* bottom ticker */
+.ticker { position: fixed; left: 0; right: 0; bottom: 0; z-index: 50; height: clamp(40px, 4.6vh, 58px); display: flex; align-items: stretch; background: #070a10; border-top: 1px solid var(--line); box-shadow: 0 -10px 30px rgba(0,0,0,.5); font-size: clamp(15px, 2vh, 22px); }
+body.has-ticker .app { padding-bottom: calc(clamp(40px, 4.6vh, 58px) + 14px); }
+.tk-lbl { flex: none; display: flex; align-items: center; gap: 8px; padding: 0 16px; font: 800 1em var(--f-display); letter-spacing: .08em; color: #05070b; background: var(--gold); }
+.tk-lbl .dot { width: 9px; height: 9px; border-radius: 50%; background: #c0182b; animation: blink 1.2s infinite; }
+.tk-track { flex: 1; overflow: hidden; display: flex; align-items: center; -webkit-mask-image: linear-gradient(90deg, transparent, #000 30px, #000 calc(100% - 30px), transparent); mask-image: linear-gradient(90deg, transparent, #000 30px, #000 calc(100% - 30px), transparent); }
+.tk-run { display: inline-flex; white-space: nowrap; animation: tkScroll 60s linear infinite; will-change: transform; }
+.tk-half { display: inline-flex; align-items: center; }
+@keyframes tkScroll { to { transform: translateX(-50%); } }
+.ticker span, .ticker b, .ticker i, .ticker em, .ticker u, .ticker small { white-space: nowrap; }
+.tk-g, .tk-a { display: inline-flex; align-items: baseline; gap: .35em; font: 600 1em var(--f-mono); color: var(--ink-2); }
+.ticker b { color: #fff; font-weight: 800; } .ticker b.wn { color: var(--win); }
+.ticker i { font-style: normal; font-size: .75em; color: var(--gold); margin-right: -.15em; }
+.ticker em { font-style: normal; font-size: .82em; color: var(--ink-3); margin-left: .2em; }
+.tk-g.live em { color: var(--loss); }
+.tk-g.mine { background: rgba(255,194,75,.1); border: 1px solid rgba(255,194,75,.45); border-radius: 6px; padding: 2px 8px; }
+.ticker .rz { font: 800 .7em var(--f-mono); text-transform: uppercase; letter-spacing: .08em; color: #fff; background: #c0182b; border-radius: 4px; padding: 2px 6px; align-self: center; }
+.ticker .ball { display: inline-block; width: .5em; height: .5em; border-radius: 50%; background: #c98a4b; align-self: center; }
+.tk-a u { text-decoration: none; font: 800 .74em var(--f-mono); letter-spacing: .1em; text-transform: uppercase; color: #05070b; border-radius: 4px; padding: 3px 7px; align-self: center; }
+.tk-a.sc u { background: var(--win); } .tk-a.up u { background: var(--loss); color: #fff; } .tk-a.ct u { background: var(--gold); } .tk-a.inj u { background: #9B8CFF; }
+.tk-a small { font: 500 .8em var(--f-body); color: var(--ink-2); }
+.tk-a.inj { font-family: var(--f-body); color: #fff; }
+.tk-sep { display: inline-block; width: 6px; height: 6px; border-radius: 50%; background: var(--line); margin: 0 1.1em; align-self: center; }
+@media (prefers-reduced-motion: reduce) { .tk-run { animation-duration: 400s !important; } }
 /* jumbotron: clip fills the screen, live bets down the right */
 .jumbo { --mc: 61,220,151; position: fixed; inset: 0; z-index: 70; display: grid; grid-template-columns: minmax(0, 1fr) min(27vw, 420px); background: #04060a; cursor: pointer; animation: jbIn .35s ease-out both; }
 .jumbo.m-down { --mc: 255,97,112; } .jumbo.m-hype { --mc: 255,194,75; } .jumbo.m-vibe { --mc: 155,140,255; }
@@ -733,6 +757,11 @@ body.tv .chart { height: 240px; }
       <div class="cliplib" id="clipLib"></div>
     </div>
     <div class="field">
+      <span class="lbl">Ticker</span>
+      <label class="togrow"><input type="checkbox" id="tickerOn"> Show the college football ticker on this screen</label>
+      <span class="hint">Runs along the bottom on game days: every FBS score (yours first), touchdowns and field goals as they happen, upset watch when a ranked team is in trouble, crunch time, and injury news.</span>
+    </div>
+    <div class="field">
       <span class="lbl">Your data</span>
       <div style="display:flex;gap:8px;flex-wrap:wrap">
         <button type="button" class="btn sm" id="expCsv">Download spreadsheet (CSV)</button>
@@ -791,6 +820,7 @@ body.tv .chart { height: 240px; }
 </div>
 <canvas id="fire-cv" hidden aria-hidden="true"></canvas>
 <canvas id="flood-cv" hidden aria-hidden="true"></canvas>
+<div class="ticker" id="ticker" hidden><div class="tk-lbl"><i class="dot"></i>CFB</div><div class="tk-track"><div class="tk-run" id="tkRun"></div></div></div>
 <div class="jumbo" id="jumbo" hidden title="Tap to close">
   <div class="jb-main">
     <div class="jb-top"><span class="jb-tag" id="jbTag">Live</span><b id="jbLbl"></b><span class="jb-why" id="jbWhy"></span><span class="jb-x" aria-hidden="true">×</span></div>
@@ -930,7 +960,8 @@ body.tv .chart { height: 240px; }
     const app = $(".app");
     if (!document.body.classList.contains("tv")) { app.style.zoom = ""; return; }
     app.style.zoom = "1";
-    const z = Math.max(1, Math.min(1.8, ((innerHeight - 6) / app.scrollHeight) * 0.98, innerWidth / 1240));
+    const tk = $("#ticker"), tkh = tk && !tk.hidden ? tk.offsetHeight : 0;
+    const z = Math.max(1, Math.min(1.8, ((innerHeight - 6 - tkh) / app.scrollHeight) * 0.98, innerWidth / 1240));
     app.style.zoom = z.toFixed(3);
   }
   let fitT = 0;
@@ -2524,6 +2555,102 @@ body.tv .chart { height: 240px; }
   });
   $("#clipsOn").checked = clipsOn();
   $("#clipsOn").addEventListener("change", (e) => { try { localStorage.setItem("sb-clips", e.target.checked ? "on" : "off"); } catch (err) {} if (!e.target.checked) stopStatus(); });
+
+  // ---------- Bottom ticker: every college football game today, scores as they happen, upset watch, injury news ----------
+  const TK = { games: [], alerts: [], news: [], prev: new Map(), newsAt: 0, html: "", pending: null };
+  function tickerOn() { try { return localStorage.getItem("sb-ticker") !== "off"; } catch (e) { return true; } }
+  const SCORE_WORD = { 1: "Extra point", 2: "Safety / 2-pt", 3: "Field goal", 6: "Touchdown", 7: "Touchdown", 8: "Touchdown + 2" };
+  async function loadTicker() {
+    if (!tickerOn() || document.visibilityState !== "visible") return;
+    try {
+      const r = await fetch(`https://site.api.espn.com/apis/site/v2/sports/football/college-football/scoreboard?dates=${etDate(Date.now())}&limit=300&groups=80`);
+      if (!r.ok) return;
+      const j = await r.json(), now = Date.now(), games = [];
+      for (const e of j.events || []) {
+        const c = e.competitions && e.competitions[0]; if (!c) continue;
+        const t = {}; for (const x of c.competitors || []) t[x.homeAway] = x;
+        if (!t.home || !t.away) continue;
+        const team = (x) => ({ id: x.team.id, ab: x.team.abbreviation || x.team.shortDisplayName, rank: (x.curatedRank && x.curatedRank.current) || 99, sc: Number(x.score) || 0 });
+        const st = e.status.type, sit = c.situation || {}, lp = sit.lastPlay || null;
+        const g = { id: String(e.id), st: st.state, d: st.shortDetail || "", period: e.status.period || 0, a: team(t.away), h: team(t.home), t: Date.parse(e.date), rz: !!sit.isRedZone, pos: sit.possession || null, lp,
+          hp: lp && lp.probability ? lp.probability.homeWinPercentage : null };
+        games.push(g);
+        // a score since the last look: say who and what
+        const was = TK.prev.get(g.id);
+        if (was && g.st === "in") for (const side of ["a", "h"]) {
+          const d = g[side].sc - was[side]; if (d <= 0 || d === 1) continue;
+          const txt = lp && lp.scoreValue > 0 && lp.team && lp.team.id === g[side].id ? lp.text : "";
+          TK.alerts.unshift({ at: now, k: "score", g, side, word: SCORE_WORD[d] || "Score", txt });
+        }
+        TK.prev.set(g.id, { a: g.a.sc, h: g.h.sc });
+      }
+      TK.games = games;
+      TK.alerts = TK.alerts.filter((x) => now - x.at < 15 * 60e3).slice(0, 8);
+      if (now - TK.newsAt > 5 * 60e3) { TK.newsAt = now; loadNews(); }
+      renderTicker();
+    } catch (e) {}
+  }
+  async function loadNews() {
+    try {
+      const r = await fetch("https://site.api.espn.com/apis/site/v2/sports/football/college-football/news?limit=50");
+      const j = await r.json(), now = Date.now();
+      TK.news = (j.articles || []).filter((a) => /injur|ruled out|carted|questionable|doubtful|out for|exits|leaves|left the game|concussion|won't return|will not return|sidelined/i.test(a.headline || "") && now - Date.parse(a.published) < 10 * 3600e3)
+        .slice(0, 6).map((a) => a.headline);
+      renderTicker();
+    } catch (e) {}
+  }
+  const tkTeam = (x, won) => `${x.rank <= 25 ? `<i>#${x.rank}</i>` : ""}<b${won ? ' class="wn"' : ""}>${esc(x.ab)}</b>`;
+  const mineIds = () => { const s = new Set(); for (const b of S.bets.values()) if (b.status === "open") for (const x of selsOf(b)) s.add(String(x.g)); return s; };
+  function renderTicker() {
+    const el = $("#ticker"), now = Date.now(), mine = mineIds();
+    const today = TK.games.filter((g) => g.st === "in" || (g.st === "post" && now - g.t < 9 * 3600e3) || (g.st === "pre" && g.t - now < 4 * 3600e3));
+    const show = tickerOn() && today.length > 0;
+    if (el.hidden === show) { el.hidden = !show; document.body.classList.toggle("has-ticker", show); refit(); }
+    if (!show) return;
+    const items = [];
+    // alerts first: fresh scores, upsets brewing, crunch time, injuries
+    for (const x of TK.alerts) {
+      const g = x.g, s = g[x.side];
+      items.push(`<span class="tk-a sc"><u>${esc(x.word)}</u>${tkTeam(s)}${x.txt ? ` <small>${esc(x.txt.length > 90 ? x.txt.slice(0, 88) + "…" : x.txt)}</small>` : ""} <span class="tk-g">${tkTeam(g.a)} ${g.a.sc} ${tkTeam(g.h)} ${g.h.sc}</span></span>`);
+    }
+    for (const g of today) {
+      const fav = g.a.rank < g.h.rank ? "a" : g.h.rank < g.a.rank ? "h" : null;
+      if (!fav || g[fav].rank > 25) continue;
+      const dog = fav === "a" ? "h" : "a", lead = g[dog].sc - g[fav].sc;
+      const favP = g.hp == null ? null : fav === "h" ? g.hp : 1 - g.hp;
+      if (g.st === "in" && (lead > 0 || (favP != null && favP < 0.4)))
+        items.push(`<span class="tk-a up"><u>Upset watch</u>${tkTeam(g[dog])} ${g[dog].sc} ${tkTeam(g[fav])} ${g[fav].sc} <em>${esc(g.d)}</em>${favP != null ? ` <small>${Math.round(favP * 100)}% for ${esc(g[fav].ab)}</small>` : ""}</span>`);
+      else if (g.st === "post" && lead > 0)
+        items.push(`<span class="tk-a up"><u>Upset</u>${tkTeam(g[dog], true)} ${g[dog].sc} def. ${tkTeam(g[fav])} ${g[fav].sc}</span>`);
+    }
+    for (const g of today) if (g.st === "in" && g.period >= 4 && Math.abs(g.a.sc - g.h.sc) <= 8)
+      items.push(`<span class="tk-a ct"><u>Crunch time</u>${tkTeam(g.a)} ${g.a.sc} ${tkTeam(g.h)} ${g.h.sc} <em>${esc(g.d)}</em></span>`);
+    for (const h of TK.news) items.push(`<span class="tk-a inj"><u>Injury</u>${esc(h)}</span>`);
+    // then every game: yours first, live, finals, coming up
+    const ord = (g) => (mine.has(g.id) ? 0 : 3) + ({ in: 0, post: 1, pre: 2 }[g.st] ?? 2);
+    for (const g of today.slice().sort((x, y) => ord(x) - ord(y) || x.t - y.t)) {
+      const wonA = g.st === "post" && g.a.sc > g.h.sc, wonH = g.st === "post" && g.h.sc > g.a.sc;
+      const when = g.st === "pre" ? tm(g.t) : g.st === "post" ? "Final" : g.d;
+      const pos = (x) => (g.st === "in" && g.pos === x.id ? '<span class="ball"></span>' : "");
+      items.push(`<span class="tk-g${mine.has(g.id) ? " mine" : ""}${g.st === "in" ? " live" : ""}">${pos(g.a)}${tkTeam(g.a, wonA)} ${g.st === "pre" ? "" : g.a.sc} ${pos(g.h)}${tkTeam(g.h, wonH)} ${g.st === "pre" ? "" : g.h.sc} <em>${esc(when)}</em>${g.rz ? '<span class="rz">Red zone</span>' : ""}</span>`);
+    }
+    const html = items.join('<span class="tk-sep"></span>');
+    if (html === TK.html) return;
+    TK.html = html;
+    const run = $("#tkRun");
+    if (!run.innerHTML) applyTicker(); else TK.pending = html; // swap content when the loop comes round, so it doesn't jump
+  }
+  function applyTicker() {
+    const run = $("#tkRun"), html = TK.pending || TK.html; TK.pending = null;
+    run.innerHTML = `<span class="tk-half">${html}<span class="tk-sep"></span></span><span class="tk-half" aria-hidden="true">${html}<span class="tk-sep"></span></span>`;
+    const w = run.firstElementChild.offsetWidth;
+    run.style.animationDuration = Math.max(20, w / 95) + "s"; // about 95px a second
+  }
+  $("#tkRun").addEventListener("animationiteration", () => { if (TK.pending) applyTicker(); });
+  $("#tickerOn").checked = tickerOn();
+  $("#tickerOn").addEventListener("change", (e) => { try { localStorage.setItem("sb-ticker", e.target.checked ? "on" : "off"); } catch (err) {} if (e.target.checked) loadTicker(); else renderTicker(); });
+  loadTicker(); setInterval(loadTicker, 45e3);
+  document.addEventListener("visibilitychange", loadTicker);
 
   // ---------- Coin Alert: full-screen win celebration ----------
   function coinAlert(pick, n) {
