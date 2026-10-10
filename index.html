@@ -202,15 +202,15 @@ button.chip:hover { color: var(--ink); border-color: var(--ink-3); }
 .selcard .x { grid-column: 2; grid-row: 1 / span 2; }
 .linein { display: flex; align-items: center; gap: 10px; }
 .linein label { font: 600 11px var(--f-body); letter-spacing: 0.12em; text-transform: uppercase; color: var(--ink-3); }
-.field .linein input { width: 110px; flex: none; background: var(--ground); border: 1px solid var(--line); border-radius: 10px; padding: 9px 12px; font-size: 16px; }
+.sheet .field .linein input { width: 110px; flex: none; background: var(--ground); border: 1px solid var(--line); border-radius: 10px; padding: 9px 12px; font-size: 16px; }
 .leglist { display: flex; flex-direction: column; gap: 6px; }
 .legrow { display: grid; grid-template-columns: minmax(0, 1fr) auto auto auto; gap: 8px; align-items: center; background: var(--ground); border: 1px solid var(--line); border-radius: 9px; padding: 6px 4px 6px 10px; }
 .legrow .lt { font-weight: 600; font-size: 14px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
-.field .legrow input { width: 70px; background: var(--panel-2); border: 1px solid var(--line); border-radius: 7px; padding: 5px 8px; font-size: 14px; }
+.sheet .field .legrow input { width: 70px; background: var(--panel-2); border: 1px solid var(--line); border-radius: 7px; padding: 5px 8px; font-size: 14px; }
 .legrow .lo { font: 500 12px var(--f-mono); color: var(--ink-3); }
 .legrow .x { font-size: 18px; }
 .addleg { display: flex; gap: 6px; }
-.field .addleg input { flex: 1; width: auto; min-width: 0; background: var(--ground); border: 1px solid var(--line); border-radius: 10px; padding: 9px 12px; font-size: 15px; }
+.sheet .field .addleg input { flex: 1; width: auto; min-width: 0; background: var(--ground); border: 1px solid var(--line); border-radius: 10px; padding: 9px 12px; font-size: 15px; }
 .score-line { grid-column: 2 / -1; display: flex; flex-wrap: wrap; gap: 6px 10px; align-items: center; font: 500 13px var(--f-mono); color: var(--ink); }
 .score-line .sc { background: var(--ground); border-radius: 6px; padding: 3px 8px; }
 .legs small { font: 500 11px var(--f-mono); color: var(--ink-3); margin-left: 4px; }
@@ -289,6 +289,15 @@ button.chip:hover { color: var(--ink); border-color: var(--ink-3); }
 .preview .gold { color: var(--gold); }
 .err { color: var(--loss); font-size: 13px; min-height: 1em; }
 .hint { font-size: 13px; color: var(--ink-3); }
+
+/* Slip scanner */
+.scan { display: flex; align-items: center; justify-content: center; gap: 10px; width: 100%; padding: 14px; border-radius: 12px; border: 1.5px dashed var(--gold); background: rgba(255,194,75,.07); color: var(--gold); font-weight: 700; font-size: 15px; cursor: pointer; }
+.scan:hover { background: rgba(255,194,75,.13); }
+.scan svg { width: 20px; height: 20px; flex: none; }
+.scan.busy { opacity: .7; cursor: progress; }
+.scan-note { font-size: 13px; color: var(--ink-2); background: var(--ground); border: 1px solid var(--line); border-radius: 10px; padding: 10px 12px; display: flex; gap: 10px; align-items: center; flex-wrap: wrap; }
+.scan-note b { color: var(--ink); }
+.scan-note .btn { margin-left: auto; }
 
 /* Sign-in gate */
 .gate { position: fixed; inset: 0; z-index: 80; background: rgba(5,8,13,.86); backdrop-filter: blur(6px); display: grid; place-items: center; padding: 16px; }
@@ -403,6 +412,9 @@ body.tv .chart { height: 240px; }
 <div class="scrim" id="addSheet" hidden>
   <form class="sheet" id="addForm" novalidate>
     <div class="sheet-head"><h3>Log a bet</h3><button type="button" class="x" data-close aria-label="Close">×</button></div>
+    <label class="scan" id="scanBtn" for="scanFile"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 7V5a1 1 0 0 1 1-1h2M17 4h2a1 1 0 0 1 1 1v2M20 17v2a1 1 0 0 1-1 1h-2M7 20H5a1 1 0 0 1-1-1v-2"/><path d="M7 9h10M7 12h10M7 15h6"/></svg><span id="scanLbl">Scan a bet slip screenshot</span></label>
+    <input type="file" id="scanFile" accept="image/*" hidden>
+    <div class="scan-note" id="scanNote" hidden></div>
     <div class="field">
       <span class="lbl">Book</span>
       <div class="radios">
@@ -1176,6 +1188,7 @@ body.tv .chart { height: 240px; }
   function openAdd() {
     $("#addForm").reset(); S.sign = -1; S.day = 0; $("#f-odds").value = "110"; $("#f-units").value = "1"; $("#f-err").textContent = "";
     Object.assign(F, { sel: null, legs: [], q: "", openG: null, custom: false, oddsTouched: false });
+    scanNote(""); slipBets = [];
     renderPicker(); updatePreview(); openSheet("#addSheet"); loadPickerGames();
   }
   $("#addTop").addEventListener("click", openAdd);
@@ -1281,7 +1294,7 @@ body.tv .chart { height: 240px; }
     const c = e.competitions[0], t = {};
     for (const x of c.competitors) t[x.homeAway] = x;
     const st = e.status.type;
-    const team = (k) => { const x = t[k], tm = x.team; return { ab: tm.abbreviation || "", nm: tm.shortDisplayName || tm.name || "", sc: /^\d+$/.test(String(x.score)) ? Number(x.score) : null }; };
+    const team = (k) => { const x = t[k], tm = x.team; return { ab: tm.abbreviation || "", nm: tm.shortDisplayName || tm.name || "", fn: tm.displayName || "", sc: /^\d+$/.test(String(x.score)) ? Number(x.score) : null }; };
     const g = { id: String(e.id), sport, t: Date.parse(e.date), st: st.state || "pre", d: st.shortDetail || "", a: team("away"), h: team("home") };
     const o = (c.odds || [])[0];
     if (o) {
@@ -1338,7 +1351,7 @@ body.tv .chart { height: 240px; }
   function loadPickerGames() {
     const now = Date.now(), keys = [];
     for (const day of [now, now + 864e5]) for (const sp of Object.keys(ESPN)) { const k = sp + "|" + etDate(day); if (now - (boardAt.get(k) || 0) > 120e3) keys.push(k); }
-    if (keys.length) loadBoards(keys);
+    return keys.length ? loadBoards(keys) : Promise.resolve();
   }
 
   // ---------- data export / import ----------
@@ -1377,6 +1390,147 @@ body.tv .chart { height: 240px; }
       if (!Array.isArray(j) && Number(j.unitSize) > 0) await S.db.doc("config/settings").set({ unitSize: Number(j.unitSize) });
       closeSheets(); toast(`Imported ${list.length} bets`);
     } catch (err) { toast("Couldn't read that file. Use a Sweat Board backup (.json)."); }
+  });
+
+
+  // ---------- scan a bet slip (Gemini via Firebase AI Logic) ----------
+  const SLIP_MODELS = ["gemini-3.5-flash-lite", "gemini-3.8-flash"];
+  const SLIP_PROMPT = "You read screenshots of sportsbook bet slips (usually FanDuel or DraftKings) and extract each bet on them.\nRules:\n- One entry per bet. A parlay is ONE bet with several legs; a straight bet has exactly one leg.\n- odds: the American odds of the whole bet as an integer (e.g. -110, 250). For a parlay, the parlay's total odds.\n- stake: the dollar amount wagered. to_win: the dollar payout profit shown, if any.\n- For each leg: pick = the selection as written (team or player and line); team = the team or player name only;\n  market = \"ml\" (moneyline/to win), \"spread\" (point spread, run line, puck line, alt spread), \"total\" (over/under game total) or \"prop\" (anything else);\n  side = \"over\" or \"under\" for totals, else null; line = the signed number for spreads (e.g. -6.5) or the total number (e.g. 48.5), else null;\n  away and home = the two teams of the game if shown (an \"A @ B\" matchup means A is away, B is home), else null;\n  sport = NFL, CFB, NBA, CBB, MLB, NHL or OTHER, judged from the teams and market.\n- book = \"FD\" for FanDuel, \"DK\" for DraftKings, null if you can't tell.\n- Use null for anything not visible. Never invent numbers.";
+  const SLIP_SCHEMA = {"type": "OBJECT", "properties": {"bets": {"type": "ARRAY", "items": {"type": "OBJECT", "properties": {"book": {"type": "STRING", "enum": ["FD", "DK"], "nullable": true}, "kind": {"type": "STRING", "enum": ["straight", "parlay"]}, "odds": {"type": "INTEGER", "nullable": true}, "stake": {"type": "NUMBER", "nullable": true}, "to_win": {"type": "NUMBER", "nullable": true}, "legs": {"type": "ARRAY", "items": {"type": "OBJECT", "properties": {"pick": {"type": "STRING"}, "team": {"type": "STRING", "nullable": true}, "market": {"type": "STRING", "enum": ["ml", "spread", "total", "prop"]}, "side": {"type": "STRING", "enum": ["over", "under"], "nullable": true}, "line": {"type": "NUMBER", "nullable": true}, "odds": {"type": "INTEGER", "nullable": true}, "away": {"type": "STRING", "nullable": true}, "home": {"type": "STRING", "nullable": true}, "sport": {"type": "STRING", "enum": ["NFL", "CFB", "NBA", "CBB", "MLB", "NHL", "OTHER"]}}, "required": ["pick", "market", "sport"]}}}, "required": ["kind", "legs"]}}}, "required": ["bets"]};
+  async function shrink(file) {
+    const url = URL.createObjectURL(file);
+    try {
+      const img = await new Promise((ok, bad) => { const i = new Image(); i.onload = () => ok(i); i.onerror = bad; i.src = url; });
+      const k = Math.min(1, 1600 / Math.max(img.naturalWidth, img.naturalHeight));
+      const c = document.createElement("canvas");
+      c.width = Math.round(img.naturalWidth * k); c.height = Math.round(img.naturalHeight * k);
+      c.getContext("2d").drawImage(img, 0, 0, c.width, c.height);
+      return c.toDataURL("image/jpeg", 0.85).split(",")[1];
+    } finally { URL.revokeObjectURL(url); }
+  }
+  async function readSlip(b64) {
+    const cfg = readCfg();
+    const body = JSON.stringify({
+      contents: [{ role: "user", parts: [{ inlineData: { mimeType: "image/jpeg", data: b64 } }, { text: "Extract the bets on this slip." }] }],
+      systemInstruction: { parts: [{ text: SLIP_PROMPT }] },
+      generationConfig: { responseMimeType: "application/json", responseSchema: SLIP_SCHEMA, temperature: 0 },
+    });
+    let last = "";
+    for (const m of SLIP_MODELS) {
+      const r = await fetch(`https://firebasevertexai.googleapis.com/v1beta/projects/${cfg.projectId}/models/${m}:generateContent`, {
+        method: "POST", headers: { "content-type": "application/json", "x-goog-api-key": cfg.apiKey }, body,
+      });
+      const j = await r.json().catch(() => ({}));
+      if (r.ok) {
+        const parts = (j.candidates && j.candidates[0] && j.candidates[0].content && j.candidates[0].content.parts) || [];
+        const txt = parts.map((p) => p.text || "").join("");
+        return JSON.parse(txt).bets || [];
+      }
+      last = (j.error && j.error.message) || "HTTP " + r.status;
+      if (r.status !== 404 && r.status !== 400) break;
+    }
+    throw new Error(last);
+  }
+  const normName = (s) => String(s || "").toLowerCase().replace(/\bstate\b/g, "st").replace(/[^a-z0-9 ]/g, " ").replace(/\s+/g, " ").trim();
+  function nameHit(slip, t) {
+    if (!slip || !t) return 0;
+    const s = " " + normName(slip) + " ";
+    if (t.fn && normName(t.fn) === normName(slip)) return 3;
+    for (const c of [t.fn, t.nm]) if (c && normName(c).length > 2 && s.includes(" " + normName(c) + " ")) return 2;
+    return 0;
+  }
+  // find the ESPN game (and side) a slip leg is about
+  function matchLeg(leg) {
+    if (!leg || leg.market === "prop") return null;
+    let best = null;
+    for (const g of S.games.values()) {
+      if (leg.sport && leg.sport !== "OTHER" && g.sport !== leg.sport) continue;
+      const pair = Math.max(nameHit(leg.away, g.a) + nameHit(leg.home, g.h), nameHit(leg.away, g.h) + nameHit(leg.home, g.a));
+      const ta = Math.max(nameHit(leg.team, g.a), nameHit(leg.pick, g.a)), th = Math.max(nameHit(leg.team, g.h), nameHit(leg.pick, g.h));
+      const score = pair * 2 + Math.max(ta, th);
+      if (score < 2) continue;
+      if (leg.market !== "total" && !ta && !th) continue;
+      if (!best || score > best.score || (score === best.score && Math.abs(g.t - Date.now()) < Math.abs(best.g.t - Date.now()))) best = { g, score, ta, th };
+    }
+    if (!best) return null;
+    const g = best.g;
+    if (leg.market === "total") {
+      if (leg.side !== "over" && leg.side !== "under") return null;
+      return { g: g.id, m: "tot", s: leg.side === "over" ? "o" : "u", l: leg.line == null ? (g.tot ? g.tot.l : null) : Math.abs(leg.line), o: leg.odds, sport: g.sport };
+    }
+    const side = best.ta >= best.th ? "a" : "h";
+    return { g: g.id, m: leg.market === "spread" ? "sp" : "ml", s: side, l: leg.market === "spread" ? leg.line : null, o: leg.odds, sport: g.sport };
+  }
+  const unitsFor = (stake) => (stake > 0 ? Math.round((stake / S.unit) * 100) / 100 : null);
+  // build a ready-to-save bet from one parsed slip bet (used by "Add all")
+  function betFromSlip(pb, fallbackBook) {
+    const legs = (pb.legs || []).filter((l) => l && l.pick);
+    if (!legs.length || !pb.odds || Math.abs(pb.odds) < 100) return null;
+    const units = unitsFor(pb.stake); if (!units) return null;
+    const data = { book: pb.book || fallbackBook, kind: pb.kind === "parlay" && legs.length > 1 ? "parlay" : "straight", odds: pb.odds, units, status: "open", placedAt: Date.now(), legs: [], sport: "" };
+    const ms = legs.map(matchLeg), starts = [];
+    if (data.kind === "straight") {
+      const m = ms[0], g = m && S.games.get(m.g);
+      if (g && !(m.m !== "ml" && m.l == null)) { data.pick = mkLabel(g, m.m, m.s, m.l); data.sport = g.sport; data.sel = { g: g.id, m: m.m, s: m.s, l: m.l, sp: g.sport, t: g.t }; starts.push(g.t); }
+      else { data.pick = legs[0].pick.slice(0, 80); data.sport = legs[0].sport !== "OTHER" ? legs[0].sport : ""; }
+    } else {
+      data.legs = legs.map((l, i) => { const m = ms[i], g = m && S.games.get(m.g); return g && !(m.m !== "ml" && m.l == null) ? mkLabel(g, m.m, m.s, m.l) : l.pick.slice(0, 80); });
+      data.legSel = ms.map((m) => { const g = m && S.games.get(m.g); if (!g || (m.m !== "ml" && m.l == null)) return null; starts.push(g.t); return { g: g.id, m: m.m, s: m.s, l: m.l, sp: g.sport, t: g.t }; });
+      const sp = [...new Set(legs.map((l) => l.sport).filter((s) => s && s !== "OTHER"))];
+      data.sport = sp.length === 1 ? sp[0] : sp.length ? "Mixed" : "";
+      data.pick = data.legs.length + "-leg parlay";
+    }
+    if (starts.length) data.startAt = Math.min(...starts);
+    return data;
+  }
+  // put one parsed slip bet into the form so it can be checked before saving
+  function fillFromSlip(pb) {
+    if (pb.book === "FD" || pb.book === "DK") document.querySelector(`input[name="book"][value="${pb.book}"]`).checked = true;
+    const legs = (pb.legs || []).filter((l) => l && l.pick);
+    const parlay = pb.kind === "parlay" && legs.length > 1;
+    document.querySelector(`input[name="kind"][value="${parlay ? "parlay" : "straight"}"]`).checked = true;
+    Object.assign(F, { sel: null, legs: [], custom: false, openG: null, oddsTouched: true });
+    if (parlay) {
+      F.legs = legs.map((l) => { const m = matchLeg(l); return m ? { g: m.g, m: m.m, s: m.s, l: m.l, o: m.o, sport: m.sport } : { text: l.pick.slice(0, 80) }; });
+    } else if (legs[0]) {
+      const m = matchLeg(legs[0]);
+      if (m) { F.sel = { g: m.g, m: m.m, s: m.s, l: m.l }; $("#f-line").value = m.l == null ? "" : String(m.l); }
+      else { F.custom = true; $("#f-pick").value = legs[0].pick.slice(0, 80); const sp = document.querySelector(`input[name="sport"][value="${legs[0].sport}"]`); if (sp) sp.checked = true; }
+    }
+    setOdds(pb.odds && Math.abs(pb.odds) >= 100 ? pb.odds : null);
+    const u = unitsFor(pb.stake); if (u) $("#f-units").value = String(u);
+    renderPicker(); updatePreview();
+  }
+  let slipBets = [];
+  function scanNote(html) { const n = $("#scanNote"); n.innerHTML = html; n.hidden = !html; }
+  $("#scanFile").addEventListener("change", async (e) => {
+    const f = e.target.files && e.target.files[0]; e.target.value = "";
+    if (!f) return;
+    const btn = $("#scanBtn");
+    btn.classList.add("busy"); $("#scanLbl").textContent = "Reading your slip…"; scanNote(""); $("#f-err").textContent = "";
+    try {
+      const [b64] = await Promise.all([shrink(f), loadPickerGames()]);
+      const bets = (await readSlip(b64)).filter((b) => b && Array.isArray(b.legs) && b.legs.length);
+      if (!bets.length) { scanNote("Couldn't find a bet on that image. Try a screenshot of the slip or the bet in My Bets."); return; }
+      slipBets = bets;
+      fillFromSlip(bets[0]);
+      const missing = [];
+      if (!bets[0].odds) missing.push("odds"); if (!bets[0].stake) missing.push("stake");
+      scanNote(`<span><b>Filled in from your slip.</b> Check it, then hit Add bet.${missing.length ? " Couldn't read the " + missing.join(" or ") + "." : ""}</span>` +
+        (bets.length > 1 ? `<button type="button" class="btn sm primary" id="addAllSlip">Add all ${bets.length} bets</button>` : ""));
+    } catch (err) {
+      scanNote("The slip reader didn't answer (" + esc(String(err.message || err).slice(0, 120)) + "). You can still pick the game below.");
+    } finally { btn.classList.remove("busy"); $("#scanLbl").textContent = "Scan a bet slip screenshot"; }
+  });
+  $("#scanNote").addEventListener("click", async (e) => {
+    if (e.target.id !== "addAllSlip") return;
+    const book = document.querySelector('input[name="book"]:checked').value;
+    const ready = slipBets.map((b) => betFromSlip(b, book));
+    if (ready.some((d) => !d)) { toast("One of those bets is missing its odds or stake. Add them one at a time."); return; }
+    e.target.disabled = true;
+    let n = 0;
+    for (const d of ready) { const id = "b" + Date.now().toString(36) + Math.random().toString(36).slice(2, 6); if (await putBet(id, d)) n++; }
+    closeSheets(); toast(`Added ${n} bets from your slip`);
   });
 
   // ---------- sign in + connect ----------
