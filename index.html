@@ -404,6 +404,17 @@ body.rebuild #h-net, body.rebuild #h-usd, body.rebuild .cell b, body.rebuild .kp
 @keyframes surface { from { transform: translate(-50%, 85%) rotate(-6deg); } to { transform: translate(-50%, 0) rotate(0); } }
 @keyframes bob { from { transform: translate(-50%, 0) rotate(-1.5deg); } to { transform: translate(-50%, 2.5%) rotate(1.5deg); } }
 
+/* Whale hit: the board floods and everything floats */
+#flood-cv { position: fixed; inset: 0; width: 100%; height: 100%; z-index: 46; pointer-events: none; }
+.wh.flood { background: transparent; }
+.wh.flood #whBack, .wh.flood #whFront { display: none; }
+body.flooded .panel { animation: bobPanel 3.4s ease-in-out infinite alternate; animation-delay: var(--fd, 0s); }
+@keyframes bobPanel { from { transform: translate(var(--fx, 0px), var(--fy, -30px)) rotate(var(--fr, 0deg)); } to { transform: translate(calc(var(--fx, 0px) * -1), calc(var(--fy, -30px) - 22px)) rotate(calc(var(--fr, 0deg) * -1)); } }
+body.flooded #h-net, body.flooded #h-usd, body.flooded .cell b, body.flooded .kpi span, body.flooded .odds b, body.flooded .split .val, body.flooded .row .r > span, body.flooded .brand h1, body.flooded .ph h2, body.flooded .pick, body.flooded .bug, body.flooded .dots, body.flooded .split .nm, body.flooded .row .t {
+  display: inline-block; width: fit-content; animation: floatUp 2.6s ease-in-out infinite alternate; animation-delay: var(--fd, 0s); }
+@keyframes floatUp { from { transform: translate(var(--sx, 0px), var(--up, -24px)) rotate(var(--tw, -5deg)); } to { transform: translate(calc(var(--sx, 0px) * -1), calc(var(--up, -24px) - 26px)) rotate(calc(var(--tw, -5deg) * -1)); } }
+body.settle .panel, body.settle #h-net, body.settle #h-usd, body.settle .cell b, body.settle .kpi span, body.settle .odds b, body.settle .split .val, body.settle .row .r > span, body.settle .brand h1, body.settle .ph h2, body.settle .pick, body.settle .bug, body.settle .dots, body.settle .split .nm, body.settle .row .t { transition: transform 1.3s cubic-bezier(.3,1.3,.5,1); }
+
 /* Win sound picker */
 .sndlist { display: flex; flex-direction: column; gap: 6px; max-height: 260px; overflow-y: auto; }
 .sndrow { display: grid; grid-template-columns: minmax(0, 1fr) auto; gap: 8px; align-items: center; background: var(--ground); border: 1px solid var(--line); border-radius: 10px; padding: 4px 4px 4px 10px; }
@@ -708,6 +719,7 @@ body.tv .chart { height: 240px; }
   </div>
 </div>
 <canvas id="fire-cv" hidden aria-hidden="true"></canvas>
+<canvas id="flood-cv" hidden aria-hidden="true"></canvas>
 <div class="crew" id="crew" hidden aria-hidden="true"><div class="crew-side l"><canvas id="crewL"></canvas></div><div class="crew-side r"><canvas id="crewR"></canvas></div></div>
 <video id="crewVid" muted playsinline preload="none" hidden></video>
 
@@ -1163,7 +1175,7 @@ body.tv .chart { height: 240px; }
   }
   function celebrate(b) {
     const o = outcome(b), n = netOf(b);
-    if (o === "W") { if (isNuke(b)) nukeHit(b.pick, n); else if (isWhale(b)) whaleAlert(b, "win", n); else coinAlert(b.pick, n); return; }
+    if (o === "W") { if (isNuke(b)) nukeHit(b.pick, n); else if (isWhale(b)) whaleSplash(b, n); else coinAlert(b.pick, n); return; }
     if (o === "L") playLoss();
     const word = b.status === "cashout" ? "CASHED" : o === "W" ? "WINNER" : o === "L" ? "LOSS" : "PUSH";
     flash(o, word, b.pick, `${b.book === "DK" ? "DraftKings" : "FanDuel"} · ${fOdds(b.odds)} · ${fU(n, true)} (${fUSD(n * S.unit, true)})`);
@@ -1634,7 +1646,7 @@ body.tv .chart { height: 240px; }
     }
     return SND.loading[name];
   }
-  function loadSounds() { loadBuf("sounds/" + S.winSound); loadBuf("loss"); loadBuf("sounds/siren"); loadBuf("sounds/nuke"); loadBuf("sounds/nj"); loadBuf("sounds/whale"); loadCrew(); loadWhale(); }
+  function loadSounds() { loadBuf("sounds/" + S.winSound); loadBuf("loss"); loadBuf("sounds/siren"); loadBuf("sounds/nuke"); loadBuf("sounds/nj"); loadBuf("sounds/whale"); loadBuf("sounds/splash"); loadCrew(); loadWhale(); }
   function playBuf(c, buf, vol) { const s = c.createBufferSource(), g = c.createGain(); g.gain.value = vol; s.buffer = buf; s.connect(g).connect(c.destination); s.start(); return s; }
   function unlock() {
     const wasLive = !!SND.ctx && SND.ctx.state === "running";
@@ -1913,8 +1925,151 @@ body.tv .chart { height: 240px; }
       return dur + 200;
     });
   }
+
+  // ---------- whale hit: a whale breaches, slams into the water and floods the board ----------
+  const FLOAT_SEL = "#h-net, #h-usd, .cell b, .kpi span, .odds b, .split .val, .row .r > span, .brand h1, .ph h2, .pick, .bug, .dots, .split .nm, .row .t";
+  let floodTimer = 0, floodStop = null;
+  function drawWhale(ctx, L) {
+    // a beluga, facing right, about L long
+    ctx.save(); ctx.scale(L, L);
+    const g = ctx.createLinearGradient(0, -0.2, 0, 0.18);
+    g.addColorStop(0, "#FFFFFF"); g.addColorStop(0.55, "#E3EEF4"); g.addColorStop(1, "#A9C3D2");
+    ctx.beginPath();
+    ctx.moveTo(0.5, 0.0);
+    ctx.bezierCurveTo(0.53, -0.17, 0.3, -0.25, 0.08, -0.19);
+    ctx.bezierCurveTo(-0.14, -0.14, -0.32, -0.07, -0.42, -0.025);
+    ctx.lineTo(-0.6, -0.15); ctx.quadraticCurveTo(-0.55, -0.03, -0.53, 0.0); ctx.quadraticCurveTo(-0.55, 0.03, -0.6, 0.15);
+    ctx.lineTo(-0.42, 0.03);
+    ctx.bezierCurveTo(-0.3, 0.09, -0.1, 0.17, 0.12, 0.16);
+    ctx.bezierCurveTo(0.32, 0.15, 0.49, 0.11, 0.5, 0.0);
+    ctx.closePath(); ctx.fillStyle = g; ctx.fill();
+    ctx.lineWidth = 0.008; ctx.strokeStyle = "rgba(60,100,130,.6)"; ctx.stroke();
+    ctx.beginPath(); ctx.moveTo(0.16, 0.12); ctx.lineTo(0.05, 0.27); ctx.quadraticCurveTo(0.02, 0.17, 0.0, 0.13); ctx.closePath(); ctx.fillStyle = "#C9DCE6"; ctx.fill(); ctx.stroke();
+    ctx.beginPath(); ctx.arc(0.33, -0.03, 0.017, 0, 7); ctx.fillStyle = "#1B2B36"; ctx.fill();
+    ctx.beginPath(); ctx.moveTo(0.5, 0.03); ctx.quadraticCurveTo(0.44, 0.07, 0.37, 0.055); ctx.lineWidth = 0.01; ctx.strokeStyle = "rgba(40,70,90,.7)"; ctx.stroke();
+    ctx.restore();
+  }
+  function flood(cv, total, impactAt) {
+    cv.hidden = false;
+    const dpr = Math.min(2, window.devicePixelRatio || 1);
+    const W = (cv.width = Math.round(innerWidth * dpr)), H = (cv.height = Math.round(innerHeight * dpr));
+    const ctx = cv.getContext("2d"), t0 = performance.now(), drops = [], bubbles = [];
+    const low = H * 0.88, top = H * 0.07, L = Math.min(W * 0.42, H * 0.75);
+    const ix = W * 0.56;
+    let raf = 0, splashed = false;
+    const ease = (u) => 1 - Math.pow(1 - Math.max(0, Math.min(1, u)), 3);
+    const level = (el) => {
+      if (el < impactAt) return low;
+      if (el < impactAt + 1700) return low + (top - low) * ease((el - impactAt) / 1700);
+      if (el < total - 1700) return top;
+      return top + (H + 40 * dpr - top) * ease((el - (total - 1700)) / 1700);
+    };
+    const tick = (now) => {
+      const el = now - t0, s = el / 1000, lv = level(el);
+      ctx.clearRect(0, 0, W, H);
+      // the leap: an arc from off-screen left down into the water
+      if (el < impactAt + 200) {
+        const u = Math.min(1, el / impactAt);
+        const x0 = -L * 0.6, y0 = H * 0.95, x1 = ix, y1 = low + L * 0.05;
+        const x = x0 + (x1 - x0) * u, y = y0 + (y1 - y0) * u - H * 0.7 * 4 * u * (1 - u);
+        const dx = x1 - x0, dy = (y1 - y0) - H * 0.7 * 4 * (1 - 2 * u);
+        ctx.save(); ctx.translate(x, y); ctx.rotate(Math.atan2(dy, dx)); drawWhale(ctx, L); ctx.restore();
+      }
+      // the water
+      const g = ctx.createLinearGradient(0, lv, 0, H);
+      g.addColorStop(0, "rgba(40,170,210,.50)"); g.addColorStop(0.4, "rgba(12,95,145,.58)"); g.addColorStop(1, "rgba(3,32,64,.72)");
+      ctx.beginPath(); ctx.moveTo(0, H);
+      for (let x = 0; x <= W; x += 10 * dpr) ctx.lineTo(x, lv + Math.sin(x * 0.006 / dpr + s * 1.8) * 12 * dpr + Math.sin(x * 0.017 / dpr - s * 2.6) * 5 * dpr);
+      ctx.lineTo(W, H); ctx.closePath(); ctx.fillStyle = g; ctx.fill();
+      ctx.lineWidth = 3 * dpr; ctx.strokeStyle = "rgba(235,252,255,.8)"; ctx.stroke();
+      // light rippling through the water
+      if (lv < H * 0.8) {
+        ctx.save(); ctx.globalCompositeOperation = "lighter"; ctx.lineWidth = 2 * dpr;
+        for (let i = 0; i < 14; i++) {
+          const yy = lv + ((i * 97 + s * 40) % (H - lv)), a = 0.05 + 0.04 * Math.sin(s * 2 + i);
+          ctx.strokeStyle = `rgba(160,235,255,${a})`; ctx.beginPath();
+          for (let x = 0; x <= W; x += 24 * dpr) ctx.lineTo(x, yy + Math.sin(x * 0.01 / dpr + s * 2.2 + i) * 10 * dpr);
+          ctx.stroke();
+        }
+        ctx.restore();
+      }
+      // bubbles
+      if (el > impactAt && Math.random() < 0.85) bubbles.push({ x: Math.random() * W, y: H + 10 * dpr, r: (2 + Math.random() * 7) * dpr, v: (1 + Math.random() * 2.4) * dpr });
+      ctx.strokeStyle = "rgba(220,250,255,.65)"; ctx.lineWidth = 1.5 * dpr;
+      for (const p of bubbles) { p.y -= p.v; p.x += Math.sin(p.y * 0.02) * 0.6 * dpr; if (p.y > lv) { ctx.beginPath(); ctx.arc(p.x, p.y, p.r, 0, 7); ctx.stroke(); } }
+      for (let i = bubbles.length - 1; i >= 0; i--) if (bubbles[i].y <= lv) bubbles.splice(i, 1);
+      // the splash
+      if (!splashed && el >= impactAt) {
+        splashed = true;
+        for (let i = 0; i < 320; i++) {
+          const a = -Math.PI / 2 + (Math.random() - 0.5) * 2.2, v = (8 + Math.random() * 30) * dpr;
+          drops.push({ x: ix + (Math.random() - 0.5) * L * 0.5, y: low, vx: Math.cos(a) * v * 0.8, vy: Math.sin(a) * v, r: (2 + Math.random() * 7) * dpr, mist: Math.random() < 0.25 });
+        }
+      }
+      for (const d of drops) { d.vy += 0.7 * dpr; d.x += d.vx; d.y += d.vy; }
+      for (const d of drops) {
+        if (d.y > H + 50 * dpr) continue;
+        ctx.globalAlpha = d.mist ? 0.25 : 0.9; ctx.fillStyle = d.mist ? "#E8FBFF" : "#D6F5FF";
+        ctx.beginPath(); ctx.arc(d.x, d.y, d.mist ? d.r * 3 : d.r, 0, 7); ctx.fill();
+      }
+      ctx.globalAlpha = 1;
+      if (el < total) raf = requestAnimationFrame(tick); else { ctx.clearRect(0, 0, W, H); cv.hidden = true; }
+    };
+    raf = requestAnimationFrame(tick);
+    return () => { cancelAnimationFrame(raf); ctx.clearRect(0, 0, W, H); cv.hidden = true; };
+  }
+  function floatBoard(on) {
+    const rnd = (a, b) => a + Math.random() * (b - a);
+    if (on) {
+      document.querySelectorAll(".panel").forEach((p) => {
+        p.style.setProperty("--fx", rnd(-14, 14).toFixed(0) + "px"); p.style.setProperty("--fy", rnd(-70, -20).toFixed(0) + "px");
+        p.style.setProperty("--fr", rnd(-4, 4).toFixed(1) + "deg"); p.style.setProperty("--fd", rnd(-3, 0).toFixed(2) + "s");
+      });
+      document.querySelectorAll(FLOAT_SEL).forEach((e) => {
+        e.style.setProperty("--up", rnd(-60, -10).toFixed(0) + "px"); e.style.setProperty("--sx", rnd(-10, 10).toFixed(0) + "px");
+        e.style.setProperty("--tw", rnd(-9, 9).toFixed(1) + "deg"); e.style.setProperty("--fd", rnd(-2.6, 0).toFixed(2) + "s");
+      });
+      document.body.classList.remove("settle"); document.body.classList.add("flooded");
+    } else {
+      document.body.classList.remove("flooded"); document.body.classList.add("settle");
+      setTimeout(() => {
+        document.body.classList.remove("settle");
+        document.querySelectorAll(".panel, " + FLOAT_SEL).forEach((e) => ["--fx", "--fy", "--fr", "--fd", "--up", "--sx", "--tw"].forEach((k) => e.style.removeProperty(k)));
+      }, 1400);
+    }
+  }
+  function whaleSplash(b, n) {
+    fx(() => {
+      const IMPACT = 1300, TOTAL = 14500;
+      playSfx("whale", 0.9);
+      setTimeout(() => playSfx("splash", 1), IMPACT - 500); // the splash recording peaks half a second in
+      if (floodStop) floodStop();
+      floodStop = reduced ? null : flood($("#flood-cv"), TOTAL, IMPACT);
+      clearTimeout(floodTimer);
+      setTimeout(() => {
+        const app = $(".app"); app.classList.remove("quake"); void app.offsetWidth; app.classList.add("quake");
+        floatBoard(true);
+        // title, payout and the beluga surfacing in the flood, with coins sinking through
+        const ov = $("#whale"), v = $("#whaleVid");
+        if (!whaleDraw && !reduced) whaleDraw = alphaGL($("#whaleCv"), v, null);
+        if (v.readyState < 3) loadWhale();
+        ov.classList.add("win", "flood");
+        $("#whTitle").textContent = "Whale Hit";
+        $("#whSub").textContent = "The whale ate";
+        $("#whPick").textContent = b.pick;
+        $("#whAmt").textContent = `${fUSD(n * S.unit, true)}  ·  ${fU(n, true)}`;
+        ov.classList.remove("go", "out"); ov.hidden = false; void ov.offsetWidth; ov.classList.add("go");
+        const stopCoins = reduced ? null : rainCoins($("#whCoins"));
+        const stopVid = playCut(v, reduced ? null : whaleDraw, () => {}, () => {});
+        setTimeout(() => ov.classList.add("out"), 4600);
+        setTimeout(() => { ov.hidden = true; ov.classList.remove("go", "out", "win", "flood"); if (stopCoins) stopCoins(); stopVid(); }, 5400);
+      }, IMPACT + 150);
+      floodTimer = setTimeout(() => floatBoard(false), TOTAL - 1700);
+      return IMPACT + 5600;
+    });
+  }
   $("#whaleTest").addEventListener("click", () => { closeSheets(); whaleAlert({ pick: "Florida −3.5", units: 2, odds: -110 }, "place"); });
-  $("#whaleWinTest").addEventListener("click", () => { closeSheets(); whaleAlert({ pick: "Florida −3.5", units: 2, odds: -110 }, "win", 1.82); });
+  $("#whaleWinTest").addEventListener("click", () => { closeSheets(); whaleSplash({ pick: "Florida −3.5", units: 2, odds: -110 }, 1.82); });
 
   // the song plays from the top; the bomb drops on "...blow New Jersey UP" (4.96s in)
   const NJ_DROP = 5.0;
