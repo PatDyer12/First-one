@@ -1,0 +1,1456 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="theme-color" content="#0A0F17">
+<title>Sweat Board</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Archivo:wght@400;500;600;700&family=Azeret+Mono:wght@400;500;600&family=Big+Shoulders+Display:wght@700;800;900&display=swap">
+<style>
+html,body{margin:0}img{max-width:100%}
+/* Layout: arena scoreboard at night. Wide screens = three columns (score | the sweat | trend); phones stack with a floating + Bet. Single dark look on purpose: it lives on a monitor in a dim room. */
+:root {
+  --ground: #0A0F17;
+  --panel: #111924;
+  --panel-2: #172130;
+  --line: #233142;
+  --ink: #EAF0F7;
+  --ink-2: #9EABBC;
+  --ink-3: #6B798C;
+  --gold: #FFC24B;
+  --win: #3DDC97;
+  --loss: #FF6170;
+  --push: #94A3B8;
+  --fd: #4C9BFF;
+  --dk: #C08BFF;
+  --mood: rgba(255, 194, 75, 0.06);
+  --f-display: "Big Shoulders Display", "Oswald", Impact, "Arial Narrow", sans-serif;
+  --f-body: "Archivo", system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+  --f-mono: "Azeret Mono", ui-monospace, "SFMono-Regular", Menlo, Consolas, monospace;
+  color-scheme: dark;
+}
+html, body { background: var(--ground); color: var(--ink); }
+body { font-family: var(--f-body); font-size: 15px; line-height: 1.45; min-height: 100%; -webkit-font-smoothing: antialiased; }
+body::before {
+  content: ""; position: fixed; inset: 0; pointer-events: none; z-index: 0;
+  background: radial-gradient(1200px 700px at 12% -10%, var(--mood), transparent 70%);
+  transition: background 1.2s ease;
+}
+* { box-sizing: border-box; }
+[hidden] { display: none !important; }
+button, input, select, textarea { font: inherit; color: inherit; }
+button { cursor: pointer; }
+:focus-visible { outline: 2px solid var(--gold); outline-offset: 2px; border-radius: 6px; }
+.num { font-variant-numeric: tabular-nums; }
+
+.app { position: relative; z-index: 1; max-width: 1800px; margin: 0 auto; padding-inline: clamp(16px, 2.4vw, 36px); padding-block: 18px 110px; display: flex; flex-direction: column; gap: 18px; }
+
+/* Header */
+.top { display: flex; flex-wrap: wrap; align-items: center; gap: 12px 18px; }
+.brand { display: flex; align-items: baseline; gap: 12px; margin-right: auto; min-width: 0; }
+.brand h1 { margin: 0; font: 900 30px/1 var(--f-display); letter-spacing: 0.04em; text-transform: uppercase; }
+.brand h1 span { color: var(--gold); }
+.clock { font: 500 13px var(--f-mono); color: var(--ink-2); white-space: nowrap; }
+.status { display: inline-flex; align-items: center; gap: 6px; font: 500 11px var(--f-mono); letter-spacing: 0.08em; text-transform: uppercase; color: var(--ink-3); }
+.status i { width: 7px; height: 7px; border-radius: 50%; background: var(--ink-3); }
+.status.live i { background: var(--win); box-shadow: 0 0 0 0 rgba(61,220,151,.6); animation: ping 2.4s infinite; }
+.status.live { color: var(--win); }
+.status.off i { background: var(--loss); }
+.status.off { color: var(--loss); }
+@keyframes ping { 0% { box-shadow: 0 0 0 0 rgba(61,220,151,.55); } 70%,100% { box-shadow: 0 0 0 8px rgba(61,220,151,0); } }
+
+.seg { display: inline-flex; background: var(--panel); border: 1px solid var(--line); border-radius: 10px; padding: 3px; gap: 2px; }
+.seg button { border: 0; background: transparent; color: var(--ink-2); padding: 7px 12px; border-radius: 7px; font-weight: 600; font-size: 13px; letter-spacing: 0.02em; }
+.seg button[aria-pressed="true"] { background: var(--panel-2); color: var(--ink); box-shadow: inset 0 0 0 1px var(--line); }
+.seg button:hover { color: var(--ink); }
+
+.chip { display: inline-flex; align-items: center; gap: 6px; padding: 6px 10px; border-radius: 999px; border: 1px solid var(--line); background: var(--panel); color: var(--ink-2); font: 500 12px var(--f-mono); white-space: nowrap; }
+button.chip:hover { color: var(--ink); border-color: var(--ink-3); }
+.chip.sample { border-color: rgba(255,194,75,.45); color: var(--gold); }
+
+.btn { display: inline-flex; align-items: center; justify-content: center; gap: 6px; border: 1px solid var(--line); background: var(--panel-2); color: var(--ink); padding: 9px 14px; border-radius: 9px; font-weight: 600; font-size: 14px; }
+.btn:hover { border-color: var(--ink-3); }
+.btn.primary { background: var(--gold); border-color: var(--gold); color: #1A1204; }
+.btn.primary:hover { filter: brightness(1.06); }
+.btn.ghost { background: transparent; }
+.btn.win { background: rgba(61,220,151,.14); border-color: rgba(61,220,151,.4); color: var(--win); }
+.btn.loss { background: rgba(255,97,112,.12); border-color: rgba(255,97,112,.4); color: var(--loss); }
+.btn.push { background: rgba(148,163,184,.12); border-color: rgba(148,163,184,.35); color: var(--push); }
+.btn.danger { color: var(--loss); }
+.btn.sm { padding: 7px 11px; font-size: 13px; }
+
+/* Grid */
+.grid { display: grid; gap: 18px; grid-template-columns: minmax(0, 1fr); align-items: start; }
+.col { display: flex; flex-direction: column; gap: 18px; min-width: 0; }
+@media (min-width: 780px) {
+  .grid { grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); }
+  .hero { grid-column: 1 / -1; }
+}
+@media (min-width: 1200px) {
+  .grid { grid-template-columns: minmax(0, 0.95fr) minmax(0, 1.1fr) minmax(0, 1fr); }
+  .hero { grid-column: auto; position: sticky; top: calc(env(safe-area-inset-top, 0px) + 18px); }
+}
+
+.panel { background: var(--panel); border: 1px solid var(--line); border-radius: 16px; padding: 18px; min-width: 0; }
+.ph { display: flex; justify-content: space-between; align-items: baseline; gap: 10px; margin-bottom: 14px; flex-wrap: wrap; }
+.ph h2 { margin: 0; font: 600 12px var(--f-body); letter-spacing: 0.14em; text-transform: uppercase; color: var(--ink-2); }
+.ph .sub { font: 500 12px var(--f-mono); color: var(--ink-3); }
+
+/* Hero */
+.hero { padding: 22px; background: linear-gradient(180deg, var(--panel-2), var(--panel)); }
+.hero .label { font: 600 12px var(--f-body); letter-spacing: 0.14em; text-transform: uppercase; color: var(--ink-2); display: flex; justify-content: space-between; gap: 8px; }
+.big { font: 900 clamp(72px, 10vw, 150px)/0.9 var(--f-display); letter-spacing: -0.01em; margin: 10px 0 4px; color: var(--ink); transition: color .4s; }
+.big[data-sign="pos"] { color: var(--win); text-shadow: 0 0 40px rgba(61,220,151,.25); }
+.big[data-sign="neg"] { color: var(--loss); text-shadow: 0 0 40px rgba(255,97,112,.22); }
+.usd { font: 600 20px var(--f-mono); color: var(--ink-2); }
+.board { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; margin-top: 22px; }
+.cell { background: var(--ground); border: 1px solid var(--line); border-radius: 12px; padding: 10px 12px 12px; text-align: center; }
+.cell b { display: block; font: 800 46px/1 var(--f-display); }
+.cell small { font: 600 11px var(--f-body); letter-spacing: 0.16em; color: var(--ink-3); }
+.cell.w b { color: var(--win); } .cell.l b { color: var(--loss); } .cell.p b { color: var(--push); }
+.kpis { display: grid; grid-template-columns: repeat(3, minmax(0,1fr)); gap: 8px; margin-top: 14px; }
+.kpi { padding: 8px 2px; }
+.kpi small { display: block; font: 600 11px var(--f-body); letter-spacing: 0.12em; text-transform: uppercase; color: var(--ink-3); }
+.kpi span { font: 600 18px var(--f-mono); }
+.form { margin-top: 18px; padding-top: 16px; border-top: 1px dashed var(--line); }
+.form small { font: 600 11px var(--f-body); letter-spacing: 0.12em; text-transform: uppercase; color: var(--ink-3); }
+.dots { display: grid; grid-template-columns: repeat(10, minmax(0, 1fr)); gap: 6px; margin-top: 8px; max-width: 340px; }
+.dot { height: 26px; border-radius: 7px; display: grid; place-items: center; font: 700 12px var(--f-mono); color: var(--ground); }
+.dot.W { background: var(--win); } .dot.L { background: var(--loss); } .dot.P { background: var(--push); }
+.dot.none { background: transparent; border: 1px dashed var(--line); }
+
+/* Bets */
+.list { display: flex; flex-direction: column; gap: 10px; }
+.bet { display: grid; grid-template-columns: auto minmax(0, 1fr) auto; gap: 6px 12px; align-items: center; padding: 14px; border-radius: 12px; background: var(--panel-2); border: 1px solid transparent; position: relative; transition: border-color .2s, transform .2s; }
+.bet.click { cursor: pointer; }
+.bet.click:hover { border-color: var(--line); }
+.bet.expanded { border-color: var(--ink-3); }
+.book { width: 36px; height: 36px; border-radius: 9px; display: grid; place-items: center; font: 700 12px var(--f-mono); color: #0A0F17; letter-spacing: 0.02em; }
+.book.FD { background: var(--fd); } .book.DK { background: var(--dk); }
+.pick { font-weight: 600; font-size: 17px; overflow-wrap: anywhere; }
+.meta { font: 500 12px var(--f-mono); color: var(--ink-3); display: flex; gap: 8px; flex-wrap: wrap; align-items: center; }
+.meta .tag { color: var(--gold); }
+.meta .smp { color: var(--gold); border: 1px solid rgba(255,194,75,.4); border-radius: 4px; padding: 0 4px; }
+.odds { text-align: right; }
+.odds b { display: block; font: 600 17px var(--f-mono); }
+.odds span { font: 500 12px var(--f-mono); color: var(--ink-2); white-space: nowrap; }
+.sweat { position: absolute; top: 10px; right: 10px; width: 6px; height: 6px; border-radius: 50%; background: var(--gold); opacity: .85; animation: blink 1.8s ease-in-out infinite; }
+@keyframes blink { 50% { opacity: .2; } }
+.legs { grid-column: 2 / -1; margin: 4px 0 0; padding: 0; list-style: none; display: flex; flex-direction: column; gap: 3px; }
+.legs li { font-size: 13px; color: var(--ink-2); padding-left: 14px; position: relative; overflow-wrap: anywhere; }
+.legs li::before { content: ""; position: absolute; left: 2px; top: 8px; width: 6px; height: 1px; background: var(--ink-3); }
+.actions { grid-column: 1 / -1; display: flex; gap: 8px; flex-wrap: wrap; margin-top: 8px; padding-top: 12px; border-top: 1px solid var(--line); align-items: center; }
+.actions .spacer { flex: 1; }
+.actions input { width: 120px; background: var(--ground); border: 1px solid var(--line); border-radius: 8px; padding: 7px 10px; }
+.actions .note { font-size: 13px; color: var(--ink-2); }
+
+.bet.st-cooking { box-shadow: inset 4px 0 0 var(--win); }
+.bet.st-sweating { box-shadow: inset 4px 0 0 var(--gold); }
+.bet.st-trouble { box-shadow: inset 4px 0 0 var(--loss); }
+.bet.st-dead { box-shadow: inset 4px 0 0 var(--loss); background: rgba(255,97,112,.06); }
+.live { display: inline-flex; align-items: center; gap: 5px; color: var(--loss); font-weight: 600; letter-spacing: 0.08em; }
+.live::before { content: ""; width: 7px; height: 7px; border-radius: 50%; background: var(--loss); animation: blink 1.2s ease-in-out infinite; }
+.soon { color: var(--ink-2); }
+.state { font: 600 11px var(--f-mono); letter-spacing: 0.06em; padding: 1px 6px; border-radius: 4px; text-transform: uppercase; }
+.state.cooking { color: var(--win); background: rgba(61,220,151,.13); }
+.state.sweating { color: var(--gold); background: rgba(255,194,75,.13); }
+.state.trouble { color: var(--loss); background: rgba(255,97,112,.13); }
+.state.dead { color: #0A0F17; background: var(--loss); }
+.state.alive { color: #0A0F17; background: var(--win); }
+.note-line { grid-column: 2 / -1; font: 500 13px var(--f-mono); color: var(--ink); background: var(--ground); border-radius: 6px; padding: 5px 8px; justify-self: start; max-width: 100%; overflow-wrap: anywhere; }
+.legs li.leg { padding-left: 0; display: flex; gap: 8px; align-items: baseline; }
+.legs li.leg::before { display: none; }
+.legs li.leg.tap { cursor: pointer; }
+.legs li.leg.tap:hover { color: var(--ink); }
+.legs .mk { flex: none; width: 16px; height: 16px; border-radius: 50%; border: 1.5px solid var(--ink-3); display: inline-grid; place-items: center; font: 700 10px var(--f-mono); transform: translateY(2px); }
+.legs li.hit { color: var(--win); }
+.legs li.hit .mk { background: var(--win); border-color: var(--win); color: #0A0F17; }
+.legs li.miss { color: var(--loss); text-decoration: line-through; }
+.legs li.miss .mk { background: var(--loss); border-color: var(--loss); color: #0A0F17; }
+.odds .prog { display: block; margin-top: 2px; color: var(--ink-3); }
+.actions .lbl { font: 600 11px var(--f-body); letter-spacing: 0.12em; text-transform: uppercase; color: var(--ink-3); width: 100%; }
+.actions .btn.on { box-shadow: inset 0 0 0 2px currentColor; }
+.actions input.notein { flex: 1; min-width: 140px; width: auto; }
+.btn.cook { color: var(--win); } .btn.sweatb { color: var(--gold); } .btn.troub { color: var(--loss); }
+.timein { display: flex; gap: 6px; flex-wrap: wrap; }
+.timein input { flex: 1; min-width: 120px; }
+
+/* Game picker */
+.games { display: flex; flex-direction: column; gap: 6px; max-height: 340px; overflow-y: auto; padding-right: 2px; }
+.g { border: 1px solid var(--line); border-radius: 10px; background: var(--ground); }
+.g.open { border-color: var(--ink-3); }
+.g-head { width: 100%; display: grid; grid-template-columns: 74px minmax(0, 1fr) auto; gap: 10px; align-items: center; background: none; border: 0; padding: 10px 12px; text-align: left; }
+.g-when { font: 500 12px var(--f-mono); color: var(--ink-2); }
+.g-teams { font-weight: 600; font-size: 14px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.g-teams i { font-style: normal; color: var(--ink-3); font-weight: 400; }
+.g-meta { font: 500 11px var(--f-mono); color: var(--ink-3); white-space: nowrap; }
+.mkts { display: grid; grid-template-columns: 1fr 1fr; gap: 6px; padding: 0 10px 10px; }
+.mkt { display: flex; justify-content: space-between; align-items: center; gap: 8px; padding: 9px 10px; border-radius: 8px; border: 1px solid var(--line); background: var(--panel-2); font-size: 13px; font-weight: 600; text-align: left; min-width: 0; }
+.mkt span { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.mkt b { font: 600 12px var(--f-mono); color: var(--gold); flex: none; }
+.mkt:hover { border-color: var(--ink-3); }
+.mkt.on { border-color: var(--gold); background: rgba(255,194,75,.12); }
+.gnone { padding: 18px 12px; text-align: center; color: var(--ink-3); font-size: 13px; border: 1px dashed var(--line); border-radius: 10px; }
+.linkbtn { background: none; border: 0; padding: 2px 0; color: var(--ink-2); font-size: 13px; text-decoration: underline; text-underline-offset: 3px; align-self: flex-start; }
+.linkbtn:hover { color: var(--ink); }
+.fresh { text-transform: none; letter-spacing: 0; font: 500 11px var(--f-mono); color: var(--ink-3); margin-left: 6px; }
+.selcard { display: grid; grid-template-columns: minmax(0, 1fr) auto; gap: 2px 10px; align-items: center; background: var(--ground); border: 1px solid var(--gold); border-radius: 10px; padding: 10px 6px 10px 12px; }
+.selcard b { font-size: 17px; }
+.selcard span { grid-column: 1; font: 500 12px var(--f-mono); color: var(--ink-3); }
+.selcard .x { grid-column: 2; grid-row: 1 / span 2; }
+.linein { display: flex; align-items: center; gap: 10px; }
+.linein label { font: 600 11px var(--f-body); letter-spacing: 0.12em; text-transform: uppercase; color: var(--ink-3); }
+.field .linein input { width: 110px; flex: none; background: var(--ground); border: 1px solid var(--line); border-radius: 10px; padding: 9px 12px; font-size: 16px; }
+.leglist { display: flex; flex-direction: column; gap: 6px; }
+.legrow { display: grid; grid-template-columns: minmax(0, 1fr) auto auto auto; gap: 8px; align-items: center; background: var(--ground); border: 1px solid var(--line); border-radius: 9px; padding: 6px 4px 6px 10px; }
+.legrow .lt { font-weight: 600; font-size: 14px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.field .legrow input { width: 70px; background: var(--panel-2); border: 1px solid var(--line); border-radius: 7px; padding: 5px 8px; font-size: 14px; }
+.legrow .lo { font: 500 12px var(--f-mono); color: var(--ink-3); }
+.legrow .x { font-size: 18px; }
+.addleg { display: flex; gap: 6px; }
+.field .addleg input { flex: 1; width: auto; min-width: 0; background: var(--ground); border: 1px solid var(--line); border-radius: 10px; padding: 9px 12px; font-size: 15px; }
+.score-line { grid-column: 2 / -1; display: flex; flex-wrap: wrap; gap: 6px 10px; align-items: center; font: 500 13px var(--f-mono); color: var(--ink); }
+.score-line .sc { background: var(--ground); border-radius: 6px; padding: 3px 8px; }
+.legs small { font: 500 11px var(--f-mono); color: var(--ink-3); margin-left: 4px; }
+.legs li.hit small, .legs li.miss small { color: inherit; opacity: .8; }
+.final { color: var(--gold); font-weight: 600; letter-spacing: 0.08em; }
+.actions .lbl.hot { color: var(--gold); }
+
+.empty { text-align: center; padding: 34px 12px; color: var(--ink-3); border: 1px dashed var(--line); border-radius: 12px; }
+.empty b { display: block; color: var(--ink-2); font-weight: 600; margin-bottom: 4px; }
+
+/* Chart */
+.chart { width: 100%; height: 200px; }
+.chart svg { display: block; width: 100%; height: 100%; overflow: visible; }
+.chart text { font: 500 11px var(--f-mono); fill: var(--ink-3); }
+
+/* Splits */
+.splits { display: flex; flex-direction: column; gap: 4px; }
+.split { display: grid; grid-template-columns: minmax(96px, 1fr) 48px minmax(48px, 1.2fr) 64px; gap: 10px; align-items: center; padding: 7px 0; }
+.split + .split { border-top: 1px solid var(--line); }
+.split .nm { font-weight: 600; font-size: 14px; display: flex; align-items: center; gap: 8px; min-width: 0; }
+.split .nm i { width: 8px; height: 8px; border-radius: 2px; flex: none; }
+.split .rec { font: 500 13px var(--f-mono); color: var(--ink-2); }
+.split .val { font: 600 14px var(--f-mono); text-align: right; }
+.bar { height: 8px; background: var(--ground); border-radius: 4px; position: relative; overflow: hidden; }
+.bar::after { content: ""; position: absolute; left: 50%; top: 0; bottom: 0; width: 1px; background: var(--line); }
+.bar i { position: absolute; top: 0; bottom: 0; border-radius: 4px; transition: all .5s ease; }
+.pos { color: var(--win); } .neg { color: var(--loss); } .zero { color: var(--ink-2); }
+
+/* Recent */
+.row { display: grid; grid-template-columns: 34px minmax(0, 1fr) auto; gap: 10px; align-items: center; padding: 9px 0; }
+.row + .row { border-top: 1px solid var(--line); }
+.res { width: 30px; height: 26px; border-radius: 6px; display: grid; place-items: center; font: 700 11px var(--f-mono); color: #0A0F17; }
+.res.W { background: var(--win); } .res.L { background: var(--loss); } .res.P { background: var(--push); }
+.row .t { font-weight: 600; font-size: 14px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.row .m { font: 500 11px var(--f-mono); color: var(--ink-3); }
+.row .r { text-align: right; font: 600 14px var(--f-mono); }
+.row .r button { display: block; margin-left: auto; margin-top: 2px; background: none; border: 0; padding: 0; color: var(--ink-3); font: 500 11px var(--f-mono); text-decoration: underline; text-underline-offset: 2px; }
+.row .r button:hover { color: var(--ink); }
+
+/* FAB */
+.fab { position: fixed; right: 16px; bottom: calc(16px + env(safe-area-inset-bottom, 0px)); z-index: 20; padding: 15px 22px; border-radius: 999px; font-size: 16px; box-shadow: 0 10px 30px rgba(0,0,0,.45); }
+@media (min-width: 780px) { .fab { display: none; } }
+@media (max-width: 779px) { .top .add-top { display: none; } .brand h1 { font-size: 26px; } }
+
+/* Sheets */
+.scrim { position: fixed; inset: 0; z-index: 40; background: rgba(3,6,10,.72); display: grid; place-items: center; padding: 16px; backdrop-filter: blur(4px); }
+.sheet { width: 100%; max-width: 520px; max-height: calc(100% - 8px); overflow-y: auto; background: var(--panel); border: 1px solid var(--line); border-radius: 18px; padding: 20px; display: flex; flex-direction: column; gap: 16px; }
+@media (max-width: 560px) {
+  .scrim { place-items: end center; padding: 0; }
+  .sheet { border-radius: 18px 18px 0 0; padding-bottom: calc(20px + env(safe-area-inset-bottom, 0px)); max-height: 92%; }
+}
+.sheet h3 { margin: 0; font: 800 26px/1 var(--f-display); text-transform: uppercase; letter-spacing: 0.03em; }
+.sheet-head { display: flex; justify-content: space-between; align-items: center; }
+.x { background: none; border: 0; color: var(--ink-2); font-size: 22px; line-height: 1; padding: 4px 8px; }
+.field { display: flex; flex-direction: column; gap: 7px; }
+.field > label, .field > .lbl { font: 600 11px var(--f-body); letter-spacing: 0.12em; text-transform: uppercase; color: var(--ink-3); }
+.field input[type="text"], .field input[type="number"], .field input[type="time"], .field textarea, .field input:not([type]) {
+  width: 100%; background: var(--ground); border: 1px solid var(--line); border-radius: 10px; padding: 11px 12px; font-size: 16px;
+}
+.field textarea { min-height: 92px; resize: vertical; }
+.field input:focus, .field textarea:focus { border-color: var(--gold); outline: none; }
+.radios { display: flex; gap: 6px; flex-wrap: wrap; }
+.radios label { position: relative; }
+.radios input { position: absolute; opacity: 0; inset: 0; margin: 0; cursor: pointer; }
+.radios span { display: inline-flex; align-items: center; gap: 7px; padding: 9px 13px; border-radius: 9px; border: 1px solid var(--line); background: var(--ground); color: var(--ink-2); font-weight: 600; font-size: 14px; }
+.radios input:checked + span { border-color: var(--gold); color: var(--ink); background: var(--panel-2); }
+.radios input:focus-visible + span { outline: 2px solid var(--gold); outline-offset: 2px; }
+.radios.small span { padding: 6px 10px; font-size: 12px; font-family: var(--f-mono); }
+.radios span i { width: 10px; height: 10px; border-radius: 3px; }
+.row2 { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+@media (max-width: 420px) { .row2 { grid-template-columns: 1fr; } }
+.oddsin { display: flex; gap: 6px; }
+.oddsin .seg button { padding: 7px 12px; font: 600 16px var(--f-mono); }
+.preview { background: var(--ground); border: 1px solid var(--line); border-radius: 12px; padding: 12px 14px; display: flex; justify-content: space-between; gap: 10px; flex-wrap: wrap; font: 500 13px var(--f-mono); color: var(--ink-2); }
+.preview b { color: var(--ink); font-weight: 600; }
+.preview .gold { color: var(--gold); }
+.err { color: var(--loss); font-size: 13px; min-height: 1em; }
+.hint { font-size: 13px; color: var(--ink-3); }
+
+/* Sign-in gate */
+.gate { position: fixed; inset: 0; z-index: 80; background: rgba(5,8,13,.86); backdrop-filter: blur(6px); display: grid; place-items: center; padding: 16px; }
+.gate-card { width: 100%; max-width: 440px; background: var(--panel); border: 1px solid var(--line); border-radius: 18px; padding: 26px; display: flex; flex-direction: column; gap: 14px; }
+.gate-card h2 { margin: 0; font: 900 34px/1 var(--f-display); text-transform: uppercase; letter-spacing: 0.04em; }
+.gate-card h2 span { color: var(--gold); }
+.gate-card p { margin: 0; color: var(--ink-2); }
+.gate-card > div { display: flex; flex-direction: column; gap: 12px; }
+.gate-card textarea { width: 100%; background: var(--ground); border: 1px solid var(--line); border-radius: 10px; padding: 10px 12px; font: 13px var(--f-mono); resize: vertical; }
+.gate-card code { font-family: var(--f-mono); color: var(--ink); }
+
+/* Flash + toast */
+.flash { position: fixed; left: 50%; top: calc(18px + env(safe-area-inset-top, 0px)); transform: translate(-50%, calc(-100% - 60px)); visibility: hidden; z-index: 60; width: min(720px, calc(100% - 32px)); border-radius: 16px; padding: 16px 22px; display: flex; align-items: center; gap: 18px; background: var(--panel-2); border: 1px solid var(--line); box-shadow: 0 20px 60px rgba(0,0,0,.55); transition: transform .45s cubic-bezier(.2,.9,.25,1.2); }
+.flash.show { transform: translate(-50%, 0); visibility: visible; }
+.flash .word { font: 900 46px/1 var(--f-display); letter-spacing: 0.03em; }
+.flash .what { min-width: 0; flex: 1; }
+.flash .what b { display: block; font-size: 17px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.flash .what span { font: 500 13px var(--f-mono); color: var(--ink-2); }
+.flash.W { border-color: var(--win); } .flash.W .word { color: var(--win); }
+.flash.L { border-color: var(--loss); } .flash.L .word { color: var(--loss); }
+.flash.P .word { color: var(--push); }
+.flash.N { border-color: var(--gold); } .flash.N .word { color: var(--gold); }
+.toast { position: fixed; left: 50%; bottom: calc(24px + env(safe-area-inset-bottom, 0px)); transform: translateX(-50%); z-index: 70; background: var(--ink); color: var(--ground); padding: 10px 16px; border-radius: 10px; font-weight: 600; font-size: 14px; max-width: calc(100% - 32px); }
+.banner { border: 1px solid rgba(255,97,112,.4); background: rgba(255,97,112,.08); color: var(--ink); border-radius: 12px; padding: 10px 14px; font-size: 14px; }
+
+body.pulse-W::after, body.pulse-L::after { content: ""; position: fixed; inset: 0; pointer-events: none; z-index: 50; animation: pulse 1.4s ease-out forwards; }
+body.pulse-W::after { box-shadow: inset 0 0 160px rgba(61,220,151,.55); }
+body.pulse-L::after { box-shadow: inset 0 0 160px rgba(255,97,112,.45); }
+@keyframes pulse { 0% { opacity: 0; } 20% { opacity: 1; } 100% { opacity: 0; } }
+
+/* TV mode: bigger, read-only, no chrome */
+body.tv { font-size: 17px; }
+body.tv .edit, body.tv .fab, body.tv .add-top { display: none !important; }
+body.tv .pick { font-size: 21px; }
+body.tv .odds b { font-size: 20px; }
+body.tv .bet.click { cursor: default; }
+body.tv .chart { height: 240px; }
+
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after { animation: none !important; transition: none !important; }
+}
+</style>
+</head>
+<body>
+
+<div class="app">
+  <header class="top">
+    <div class="brand">
+      <h1>Sweat <span>Board</span></h1>
+      <span class="clock num" id="clock"></span>
+      <span class="status" id="status"><i></i><span>Connecting</span></span>
+    </div>
+    <div class="seg" role="group" aria-label="Time range" id="range">
+      <button type="button" data-r="day" aria-pressed="true">Today</button>
+      <button type="button" data-r="week" aria-pressed="false">7D</button>
+      <button type="button" data-r="month" aria-pressed="false">30D</button>
+      <button type="button" data-r="all" aria-pressed="false">All</button>
+    </div>
+    <button type="button" class="chip sample edit" id="sampleChip" hidden>Sample data · clear</button>
+    <button type="button" class="chip edit" id="unitChip">1u = $15</button>
+    <button type="button" class="btn ghost" id="tvBtn">TV mode</button>
+    <button type="button" class="btn primary add-top edit" id="addTop">+ Bet</button>
+  </header>
+
+  <div class="banner" id="offline" hidden>Can't reach your bet database right now. Check your connection and reload.</div>
+
+  <main class="grid">
+    <section class="panel hero" aria-label="Results">
+      <div class="label"><span id="h-label">Today</span><span class="num" id="h-day"></span></div>
+      <div class="big num" id="h-net" data-sign="zero">0u</div>
+      <div class="usd num" id="h-usd">$0.00</div>
+      <div class="board">
+        <div class="cell w"><b class="num" id="h-w">0</b><small>WON</small></div>
+        <div class="cell l"><b class="num" id="h-l">0</b><small>LOST</small></div>
+        <div class="cell p"><b class="num" id="h-p">0</b><small>PUSH</small></div>
+      </div>
+      <div class="kpis">
+        <div class="kpi"><small>Hit rate</small><span class="num" id="h-hit">–</span></div>
+        <div class="kpi"><small>ROI</small><span class="num" id="h-roi">–</span></div>
+        <div class="kpi"><small>Risked</small><span class="num" id="h-risk">0u</span></div>
+      </div>
+      <div class="form">
+        <small>Last 10 · <span id="h-streak">no streak</span></small>
+        <div class="dots" id="h-dots"></div>
+      </div>
+    </section>
+
+    <section class="panel" aria-label="Active bets">
+      <div class="ph"><h2>The sweat · <span id="a-count">0</span> open</h2><span class="sub num" id="a-sum"></span></div>
+      <div class="list" id="active"><div class="empty"><b>Loading your bets…</b></div></div>
+    </section>
+
+    <div class="col">
+      <section class="panel" aria-label="Profit trend">
+        <div class="ph"><h2>Running P/L</h2><span class="sub" id="c-sub"></span></div>
+        <div class="chart" id="chart"></div>
+      </section>
+      <section class="panel" aria-label="Splits">
+        <div class="ph"><h2>Splits</h2><span class="sub" id="s-sub"></span></div>
+        <div class="splits" id="splits"></div>
+      </section>
+      <section class="panel" aria-label="Settled bets">
+        <div class="ph"><h2>Settled</h2><span class="sub" id="r-sub"></span></div>
+        <div id="recent"></div>
+      </section>
+    </div>
+  </main>
+</div>
+
+<button type="button" class="btn primary fab edit" id="addFab">+ Bet</button>
+
+<div class="scrim" id="addSheet" hidden>
+  <form class="sheet" id="addForm" novalidate>
+    <div class="sheet-head"><h3>Log a bet</h3><button type="button" class="x" data-close aria-label="Close">×</button></div>
+    <div class="field">
+      <span class="lbl">Book</span>
+      <div class="radios">
+        <label><input type="radio" name="book" id="bk-fd" value="FD" checked><span><i style="background:var(--fd)"></i>FanDuel</span></label>
+        <label><input type="radio" name="book" id="bk-dk" value="DK"><span><i style="background:var(--dk)"></i>DraftKings</span></label>
+      </div>
+    </div>
+    <div class="field">
+      <span class="lbl">Type</span>
+      <div class="radios">
+        <label><input type="radio" name="kind" id="kd-s" value="straight" checked><span>Straight</span></label>
+        <label><input type="radio" name="kind" id="kd-p" value="parlay"><span>Parlay</span></label>
+      </div>
+    </div>
+    <div class="field" id="gameField">
+      <span class="lbl">Pick a game<span class="fresh" id="g-fresh"></span></span>
+      <div class="radios small" id="g-sports"></div>
+      <input type="text" id="g-q" autocomplete="off" placeholder="Search a team" aria-label="Search a team">
+      <div class="games" id="g-list"></div>
+      <button type="button" class="linkbtn" id="customToggle">Prop or something not listed? Type it in</button>
+    </div>
+    <div class="field" id="selField" hidden>
+      <span class="lbl">Your pick</span>
+      <div class="selcard"><b id="selText"></b><span id="selGame"></span><button type="button" class="x" id="selClear" aria-label="Clear pick">×</button></div>
+      <div class="linein" id="lineWrap"><label for="f-line">Line</label><input type="text" id="f-line" inputmode="decimal" autocomplete="off"><span class="hint">Match your slip. Prefilled numbers are DraftKings' via ESPN.</span></div>
+    </div>
+    <div class="field" id="customField" hidden>
+      <label for="f-pick">Pick</label>
+      <input type="text" id="f-pick" autocomplete="off" placeholder="Judge 1+ HR">
+      <div class="radios small" id="sports"></div>
+    </div>
+    <div class="field" id="legField" hidden>
+      <span class="lbl">Legs<span class="fresh" id="legCount"></span></span>
+      <div class="leglist" id="legList"></div>
+      <div class="addleg"><input type="text" id="f-leg" autocomplete="off" placeholder="Custom leg, like Judge 1+ HR" aria-label="Custom leg"><button type="button" class="btn sm" id="addLeg">Add leg</button></div>
+    </div>
+    <div class="row2">
+      <div class="field">
+        <label for="f-odds">Odds</label>
+        <div class="oddsin">
+          <div class="seg" role="group" aria-label="Odds sign" id="sign">
+            <button type="button" data-s="-1" aria-pressed="true">−</button>
+            <button type="button" data-s="1" aria-pressed="false">+</button>
+          </div>
+          <input type="text" id="f-odds" inputmode="numeric" autocomplete="off" value="110">
+        </div>
+      </div>
+      <div class="field">
+        <label for="f-units">Units</label>
+        <input type="text" id="f-units" inputmode="decimal" autocomplete="off" value="1">
+        <div class="radios small" id="unitPicks"></div>
+      </div>
+    </div>
+    <div class="field" id="timeField" hidden>
+      <label for="f-time">Game time (optional)</label>
+      <div class="timein">
+        <input type="time" id="f-time">
+        <div class="seg" role="group" aria-label="Game day" id="dayseg">
+          <button type="button" data-d="0" aria-pressed="true">Today</button>
+          <button type="button" data-d="1" aria-pressed="false">Tomorrow</button>
+        </div>
+      </div>
+      <span class="hint">The bet flips to LIVE on the board at this time. For a parlay, use the first game.</span>
+    </div>
+    <div class="preview num" id="f-preview"></div>
+    <div class="err" id="f-err" role="alert"></div>
+    <button type="submit" class="btn primary" id="f-submit">Add bet</button>
+  </form>
+</div>
+
+<div class="scrim" id="setSheet" hidden>
+  <form class="sheet" id="setForm" novalidate>
+    <div class="sheet-head"><h3>Settings</h3><button type="button" class="x" data-close aria-label="Close">×</button></div>
+    <div class="field">
+      <label for="f-unit">Unit size ($)</label>
+      <input type="text" id="f-unit" inputmode="decimal" autocomplete="off">
+      <span class="hint">Every number on the board is in units. Dollars are units × this.</span>
+    </div>
+    <div class="err" id="u-err" role="alert"></div>
+    <button type="submit" class="btn primary">Save unit size</button>
+    <div class="field" id="sampleField" hidden>
+      <span class="lbl">Sample data</span>
+      <span class="hint">The board came with example bets so you could see it working. Clear them before you log your own.</span>
+      <div id="sampleCtl"><button type="button" class="btn danger" id="clearSamples">Clear sample bets</button></div>
+    </div>
+    <div class="field">
+      <span class="lbl">Your data</span>
+      <div style="display:flex;gap:8px;flex-wrap:wrap">
+        <button type="button" class="btn sm" id="expCsv">Download spreadsheet (CSV)</button>
+        <button type="button" class="btn sm" id="expJson">Download backup</button>
+        <label class="btn sm" for="impFile" style="cursor:pointer">Import backup</label>
+        <input type="file" id="impFile" accept=".json,application/json" hidden>
+      </div>
+      <span class="hint">The backup file holds every bet. Import it here to restore or move your board.</span>
+    </div>
+    <div class="field">
+      <span class="lbl">Account</span>
+      <div style="display:flex;gap:10px;align-items:center;flex-wrap:wrap"><span class="hint" id="who"></span><button type="button" class="btn sm ghost" id="signOut">Sign out</button></div>
+    </div>
+    <span class="hint">“Today” runs 4 AM to 4 AM, so late West Coast games count on the day you bet them.</span>
+  </form>
+</div>
+
+<div class="gate" id="gate" hidden>
+  <div class="gate-card">
+    <h2>Sweat <span>Board</span></h2>
+    <div id="gate-signin" hidden>
+      <p>Sign in to load your bets. Use the same Google account on your phone and the monitor.</p>
+      <button type="button" class="btn primary" id="gBtn">Sign in with Google</button>
+    </div>
+    <div id="gate-setup" hidden>
+      <p>Connect your Firebase project. In Firebase, open Project settings → Your apps, copy the <code>firebaseConfig</code> block and paste it here.</p>
+      <textarea id="cfgIn" rows="7" placeholder="const firebaseConfig = { apiKey: &quot;…&quot;, … };" aria-label="Firebase config"></textarea>
+      <button type="button" class="btn primary" id="cfgSave">Save and connect</button>
+    </div>
+    <div id="gate-denied" hidden>
+      <p>This Google account doesn't have access to the bets. Sign in with the account named in your Firestore rules.</p>
+      <button type="button" class="btn" id="signOut2">Use a different account</button>
+    </div>
+    <p class="err" id="gate-err" role="alert"></p>
+  </div>
+</div>
+
+<div class="flash" id="flash" aria-live="polite"><div class="word" id="fl-word"></div><div class="what"><b id="fl-pick"></b><span id="fl-detail"></span></div></div>
+<div class="toast" id="toast" hidden role="status"></div>
+
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-auth-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore-compat.js"></script>
+<script src="config.js"></script>
+<script>
+(function () {
+  "use strict";
+  const $ = (s) => document.querySelector(s);
+  const SPORTS = ["NFL", "CFB", "NBA", "CBB", "MLB", "NHL", "Soccer", "UFC", "Golf", "Tennis", "Other"];
+  const RANGE_LABEL = { day: "Today", week: "Last 7 days", month: "Last 30 days", all: "All time" };
+  const reduced = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+
+  const S = {
+    bets: new Map(), unit: 15, range: "day", db: null, canWrite: true, ready: false, offline: false,
+    open: null, confirmDel: null, cashout: null, sign: -1, day: 0, games: new Map(), slateAt: 0, lastSettled: [], dayKey: 0,
+  };
+  try { const r = localStorage.getItem("sb-range"); if (RANGE_LABEL[r]) S.range = r; } catch (e) {}
+
+  // ---------- math ----------
+  const ppu = (o) => (o > 0 ? o / 100 : 100 / Math.abs(o)); // profit per unit risked
+  function netOf(b) {
+    if (b.status === "won") return b.units * ppu(b.odds);
+    if (b.status === "lost") return -b.units;
+    if (b.status === "cashout") return Number(b.net) || 0;
+    return 0;
+  }
+  function outcome(b) {
+    if (b.status === "won") return "W";
+    if (b.status === "lost") return "L";
+    if (b.status === "push") return "P";
+    const n = netOf(b);
+    return n > 0.004 ? "W" : n < -0.004 ? "L" : "P";
+  }
+  function dayStart(t) {
+    const d = new Date(t); d.setHours(4, 0, 0, 0);
+    if (t < d.getTime()) d.setDate(d.getDate() - 1);
+    return d;
+  }
+  function rangeStart(r) {
+    if (r === "all") return 0;
+    const d = dayStart(Date.now());
+    if (r === "week") d.setDate(d.getDate() - 6);
+    if (r === "month") d.setDate(d.getDate() - 29);
+    return d.getTime();
+  }
+  function stats(list) {
+    const s = { w: 0, l: 0, p: 0, net: 0, risk: 0 };
+    for (const b of list) {
+      const o = outcome(b);
+      if (o === "W") s.w++; else if (o === "L") s.l++; else s.p++;
+      s.net += netOf(b); s.risk += Number(b.units) || 0;
+    }
+    return s;
+  }
+
+  // ---------- format ----------
+  const trim = (n) => n.toFixed(2).replace(/\.?0+$/, "");
+  const sgn = (v) => (v > 0.004 ? "+" : v < -0.004 ? "−" : "");
+  const fU = (v, signed) => (signed ? sgn(v) : (v < -0.004 ? "−" : "")) + trim(Math.abs(v)) + "u";
+  const fUSD = (v, signed) => (signed ? sgn(v) : (v < -0.004 ? "−" : "")) + "$" + Math.abs(v).toFixed(2);
+  const fOdds = (o) => (o > 0 ? "+" + o : "−" + Math.abs(o));
+  const cls = (v) => (v > 0.004 ? "pos" : v < -0.004 ? "neg" : "zero");
+  const tm = (t) => new Date(t).toLocaleTimeString([], { hour: "numeric", minute: "2-digit" });
+  const when = (t) => {
+    if (t >= dayStart(Date.now()).getTime()) return tm(t);
+    return new Date(t).toLocaleDateString([], { weekday: "short", month: "short", day: "numeric" });
+  };
+  const esc = (s) => String(s == null ? "" : s).replace(/[&<>"']/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]));
+  const BOOK = { FD: "FanDuel", DK: "DraftKings" };
+
+  function animateNum(el, to, fmt) {
+    const from = typeof el._v === "number" ? el._v : 0;
+    el._v = to;
+    if (reduced || Math.abs(to - from) < 0.001) { el.textContent = fmt(to); return; }
+    const t0 = performance.now(), dur = 700;
+    cancelAnimationFrame(el._raf);
+    const step = (now) => {
+      const k = Math.min(1, (now - t0) / dur), e = 1 - Math.pow(1 - k, 3);
+      el.textContent = fmt(from + (to - from) * e);
+      if (k < 1) el._raf = requestAnimationFrame(step);
+    };
+    el._raf = requestAnimationFrame(step);
+  }
+
+  // ---------- render ----------
+  function render() {
+    const all = [...S.bets.values()];
+    const start = rangeStart(S.range);
+    const settled = all.filter((b) => b.status !== "open" && b.settledAt && b.settledAt >= start).sort((a, b) => a.settledAt - b.settledAt);
+    const open = all.filter((b) => b.status === "open").sort((a, b) => b.placedAt - a.placedAt);
+    const settledAll = all.filter((b) => b.status !== "open" && b.settledAt).sort((a, b) => b.settledAt - a.settledAt);
+    renderChrome(all);
+    renderHero(settled, settledAll);
+    renderActive(open);
+    S.lastSettled = settled;
+    renderChart(settled);
+    renderSplits(settled);
+    renderRecent(settled);
+  }
+
+  function renderChrome(all) {
+    document.querySelectorAll("#range button").forEach((b) => b.setAttribute("aria-pressed", String(b.dataset.r === S.range)));
+    $("#unitChip").textContent = "1u = $" + trim(S.unit);
+    const hasSample = all.some((b) => b.sample);
+    $("#sampleChip").hidden = !hasSample || !S.canWrite;
+    $("#sampleField").hidden = !hasSample;
+    $("#offline").hidden = !S.offline;
+    document.querySelectorAll(".edit").forEach((el) => { if (el.id !== "sampleChip") el.hidden = !S.canWrite; });
+    const st = $("#status");
+    st.className = "status" + (S.offline ? " off" : S.ready ? " live" : "");
+    st.lastElementChild.textContent = S.offline ? "Not saving" : S.ready ? "Live" : "Connecting";
+  }
+
+  function renderHero(settled, settledAll) {
+    const s = stats(settled);
+    $("#h-label").textContent = RANGE_LABEL[S.range];
+    $("#h-day").textContent = S.range === "day" ? new Date().toLocaleDateString([], { weekday: "long", month: "short", day: "numeric" }) : "";
+    const big = $("#h-net");
+    big.dataset.sign = s.net > 0.004 ? "pos" : s.net < -0.004 ? "neg" : "zero";
+    animateNum(big, s.net, (v) => fU(v, true));
+    animateNum($("#h-usd"), s.net * S.unit, (v) => fUSD(v, true));
+    $("#h-w").textContent = s.w; $("#h-l").textContent = s.l; $("#h-p").textContent = s.p;
+    $("#h-hit").textContent = s.w + s.l ? Math.round((100 * s.w) / (s.w + s.l)) + "%" : "–";
+    const roi = s.risk ? (100 * s.net) / s.risk : null;
+    const roiEl = $("#h-roi");
+    roiEl.textContent = roi == null ? "–" : (roi > 0 ? "+" : roi < 0 ? "−" : "") + Math.abs(roi).toFixed(1) + "%";
+    roiEl.className = "num " + (roi == null ? "" : cls(roi));
+    $("#h-risk").textContent = fU(s.risk, false);
+
+    const last = settledAll.slice(0, 10);
+    const dots = last.slice().reverse().map((b) => { const o = outcome(b); return `<span class="dot ${o}" title="${esc(b.pick)}">${o}</span>`; });
+    while (dots.length < 10) dots.unshift('<span class="dot none"></span>');
+    $("#h-dots").innerHTML = dots.join("");
+    let streak = "no streak";
+    const decided = settledAll.map(outcome).filter((o) => o !== "P");
+    if (decided.length) {
+      let n = 0; while (n < decided.length && decided[n] === decided[0]) n++;
+      if (n >= 2) streak = (decided[0] === "W" ? "won " : "lost ") + n + " straight";
+      else streak = "last: " + (decided[0] === "W" ? "W" : "L");
+    }
+    $("#h-streak").textContent = streak;
+
+    const mood = s.net > 0.004 ? "rgba(61,220,151,0.10)" : s.net < -0.004 ? "rgba(255,97,112,0.09)" : "rgba(255,194,75,0.06)";
+    document.documentElement.style.setProperty("--mood", mood);
+  }
+
+  const LIVE_LABEL = { cooking: "Cooking", sweating: "Sweating", trouble: "In trouble" };
+  const trimL = (v) => String(Math.round(v * 10) / 10);
+  const fLine = (l) => (l > 0 ? "+" + trimL(l) : l < 0 ? "−" + trimL(-l) : "PK");
+  const gameOf = (sel) => (sel && sel.g != null ? S.games.get(String(sel.g)) : null);
+  // live grade of one pick from the latest scores: m > 0 means it's winning
+  function evalSel(sel) {
+    const g = gameOf(sel);
+    if (!g || g.st === "pre" || g.a.sc == null || g.h.sc == null) return null;
+    const a = g.a.sc, h = g.h.sc, diff = sel.s === "a" ? a - h : h - a;
+    let m;
+    if (sel.m === "ml") m = diff;
+    else if (sel.m === "sp") { if (sel.l == null) return null; m = diff + sel.l; }
+    else { if (sel.l == null) return null; m = sel.s === "o" ? a + h - sel.l : sel.l - (a + h); }
+    const res = m > 0 ? "W" : m < 0 ? "L" : "P", fin = g.st === "post", k = trimL(Math.abs(m));
+    let txt;
+    if (sel.m === "ml") txt = m > 0 ? "Up " + k : m < 0 ? "Down " + k : "Tied";
+    else if (sel.m === "sp") txt = m > 0 ? "Covering by " + k : m < 0 ? "Needs " + k : "On the number";
+    else if (sel.s === "o") txt = m > 0 ? "Over by " + k : m < 0 ? "Needs " + k + " more" : "On the number";
+    else txt = m > 0 ? k + " to spare" : m < 0 ? "Over by " + k : "On the number";
+    if (fin) txt = "Final · " + (res === "W" ? "winner" : res === "L" ? "loser" : "push");
+    return { m, res, fin, txt, g };
+  }
+  const scoreTxt = (g) => `${g.a.ab} ${g.a.sc} – ${g.h.ab} ${g.h.sc} · ${g.st === "post" ? "Final" : g.d}`;
+  function linkedGames(b) {
+    const sels = b.kind === "parlay" ? (Array.isArray(b.legSel) ? b.legSel : []) : [b.sel];
+    return sels.map(gameOf).filter(Boolean);
+  }
+  function phase(b) {
+    const gs = linkedGames(b);
+    if (gs.length) {
+      if (gs.every((g) => g.st === "post")) return "final";
+      if (gs.some((g) => g.st !== "pre")) return "live";
+      return "pre";
+    }
+    if (b.startAt && Date.now() < b.startAt) return "pre";
+    if (b.startAt || b.live) return "live";
+    return "none";
+  }
+  function startOf(b) {
+    const pre = linkedGames(b).filter((g) => g.st === "pre").map((g) => g.t);
+    return pre.length ? Math.min(...pre) : b.startAt;
+  }
+  function legsOf(b) {
+    if (b.kind !== "parlay" || !Array.isArray(b.legs)) return [];
+    const st = Array.isArray(b.legStatus) ? b.legStatus : [], sels = Array.isArray(b.legSel) ? b.legSel : [];
+    return b.legs.map((t, i) => {
+      const manual = st[i] === "hit" || st[i] === "miss" ? st[i] : null;
+      const ev = sels[i] ? evalSel(sels[i]) : null;
+      const auto = ev && ev.fin ? (ev.res === "W" ? "hit" : ev.res === "L" ? "miss" : null) : null;
+      return { t, st: manual || auto, manual, ev };
+    });
+  }
+  function startLabel(t) {
+    const d = new Date(t), now = new Date();
+    const tmr = new Date(now); tmr.setDate(now.getDate() + 1);
+    if (d.toDateString() === now.toDateString()) return "Starts " + tm(t);
+    if (d.toDateString() === tmr.toDateString()) return "Tmrw " + tm(t);
+    return d.toLocaleDateString([], { weekday: "short" }) + " " + tm(t);
+  }
+  function sortOpen(list) {
+    const rank = (b) => ({ final: -1, live: 0, pre: 1, none: 2 }[phase(b)]);
+    return list.sort((a, b) => rank(a) - rank(b) || (rank(a) === 1 ? startOf(a) - startOf(b) : b.placedAt - a.placedAt));
+  }
+
+  function renderActive(open) {
+    sortOpen(open);
+    $("#a-count").textContent = open.length;
+    const nLive = open.filter((b) => phase(b) === "live").length;
+    const risk = open.reduce((a, b) => a + b.units, 0);
+    const win = open.reduce((a, b) => a + b.units * ppu(b.odds), 0);
+    const linked = open.some((b) => linkedGames(b).length);
+    $("#a-sum").textContent = open.length ? `${nLive ? nLive + " live · " : ""}${fU(risk)} risk · to win ${fU(win)} (${fUSD(win * S.unit)})${linked && S.slateAt ? " · scores " + tm(S.slateAt) : ""}` : "";
+    const box = $("#active");
+    if (!S.ready) { box.innerHTML = '<div class="empty"><b>Loading your bets…</b></div>'; return; }
+    if (!open.length) {
+      box.innerHTML = `<div class="empty"><b>Nothing open right now</b>${S.canWrite ? "Hit + Bet when you place one and it'll show up here on every screen." : "Open bets show up here."}</div>`;
+      return;
+    }
+    // keep whatever the viewer is typing when the list redraws
+    const ae = document.activeElement, keep = ae && box.contains(ae) && ae.id ? { id: ae.id, v: ae.tagName === "INPUT" ? ae.value : null, s: ae.selectionStart, e: ae.selectionEnd } : null;
+    const tv = document.body.classList.contains("tv");
+    const can = !tv && S.canWrite;
+    box.innerHTML = open.map((b) => {
+      const exp = can && S.open === b.id;
+      const towin = b.units * ppu(b.odds);
+      const ph = phase(b), legs = legsOf(b);
+      const dead = legs.some((l) => l.st === "miss");
+      const hits = legs.filter((l) => l.st === "hit").length;
+      const allHit = legs.length > 0 && hits === legs.length;
+      const ev = b.kind !== "parlay" && b.sel ? evalSel(b.sel) : null;
+      const derived = ev && !ev.fin ? (ev.res === "W" ? "cooking" : ev.res === "L" ? "trouble" : "sweating") : "";
+      const manual = ph === "live" && b.live && (!derived || (b.liveAt || 0) > (S.slateAt || 0)) ? b.live : "";
+      const st = dead ? "dead" : manual || derived;
+      const verdict = ev && ev.fin ? ev.res : legs.length && ph === "final" ? (dead ? "L" : allHit ? "W" : "") : "";
+      const legsHtml = legs.length ? `<ul class="legs">${legs.map((l, i) => `<li class="leg${l.st ? " " + l.st : ""}${can ? " tap" : ""}" data-leg="${i}"${can ? ' title="Tap to mark hit / missed"' : ""}><span class="mk">${l.st === "hit" ? "✓" : l.st === "miss" ? "✕" : ""}</span><span>${esc(l.t)}${l.ev ? `<small>${esc(l.ev.g.st === "post" ? "Final" : l.ev.txt.toLowerCase() + " · " + l.ev.g.d)}</small>` : ""}</span></li>`).join("")}</ul>` : "";
+      const chips = [
+        ph === "live" ? '<span class="live">LIVE</span>' : ph === "final" ? '<span class="final">FINAL</span>' : ph === "pre" ? `<span class="soon">${startLabel(startOf(b))}</span>` : "",
+        dead ? '<span class="state dead">Dead</span>' : allHit ? '<span class="state alive">All legs hit</span>' : ev ? `<span class="state ${ev.fin ? (ev.res === "W" ? "alive" : ev.res === "L" ? "dead" : "sweating") : st}">${esc(ev.txt)}</span>` : st ? `<span class="state ${st}">${LIVE_LABEL[st]}</span>` : "",
+        b.kind === "parlay" ? '<span class="tag">PARLAY</span>' : "",
+        b.sport ? `<span>${esc(b.sport)}</span>` : "",
+        b.sample ? '<span class="smp">sample</span>' : "",
+      ].join("");
+      let actions = "";
+      if (exp) {
+        if (S.confirmDel === b.id) {
+          actions = `<div class="actions"><span class="note">Delete this bet? It won't count anywhere.</span><span class="spacer"></span>
+            <button type="button" class="btn sm" data-act="cancel">Keep</button><button type="button" class="btn sm loss" data-act="del-yes">Delete</button></div>`;
+        } else if (S.cashout === b.id) {
+          actions = `<div class="actions"><label class="note" for="co-${esc(b.id)}">Cashed out for $</label>
+            <input id="co-${esc(b.id)}" inputmode="decimal" autocomplete="off" placeholder="${(b.units * S.unit).toFixed(2)}">
+            <span class="spacer"></span><button type="button" class="btn sm" data-act="cancel">Cancel</button><button type="button" class="btn sm primary" data-act="co-save">Save</button></div>`;
+        } else {
+          const on = (k) => (b.live === k ? " on" : "");
+          actions = `<div class="actions"><span class="lbl">How's it looking?</span>
+            <button type="button" class="btn sm cook${on("cooking")}" data-act="lv" data-v="cooking" aria-pressed="${b.live === "cooking"}">Cooking</button>
+            <button type="button" class="btn sm sweatb${on("sweating")}" data-act="lv" data-v="sweating" aria-pressed="${b.live === "sweating"}">Sweating</button>
+            <button type="button" class="btn sm troub${on("trouble")}" data-act="lv" data-v="trouble" aria-pressed="${b.live === "trouble"}">In trouble</button>
+            <input class="notein" id="nt-${esc(b.id)}" autocomplete="off" maxlength="60" placeholder="Score or note, like Q3 · up 4" value="${esc(b.note || "")}" aria-label="Score or note">
+            <button type="button" class="btn sm" data-act="note">Save note</button></div>
+            <div class="actions"><span class="lbl${verdict ? " hot" : ""}">${verdict === "W" ? "Final says it won. Confirm on your slip, then settle." : verdict === "L" ? (dead ? "A leg missed. Settle it as lost?" : "Final says it lost. Settle it?") : verdict === "P" ? "Final landed on the number. Looks like a push." : dead ? "A leg missed. Settle it as lost?" : allHit ? "Every leg hit. Settle it as won?" : "Settle"}</span>
+            <button type="button" class="btn sm win" data-act="won">Won</button>
+            <button type="button" class="btn sm loss" data-act="lost">Lost</button>
+            <button type="button" class="btn sm push" data-act="push">Push</button>
+            <button type="button" class="btn sm" data-act="co">Cash out</button>
+            <span class="spacer"></span><button type="button" class="btn sm ghost danger" data-act="del">Delete</button></div>`;
+        }
+      }
+      return `<article class="bet${can ? " click" : ""}${exp ? " expanded" : ""}${st ? " st-" + st : ""}" data-id="${esc(b.id)}" ${can ? 'tabindex="0" role="button" aria-expanded="' + exp + '"' : ""}>
+        ${ph === "live" && !dead ? '<span class="sweat" aria-hidden="true"></span>' : ""}
+        <div class="book ${b.book === "DK" ? "DK" : "FD"}" title="${BOOK[b.book] || ""}">${b.book === "DK" ? "DK" : "FD"}</div>
+        <div style="min-width:0"><div class="pick">${esc(b.pick)}</div><div class="meta">${chips}</div></div>
+        <div class="odds num"><b>${fOdds(b.odds)}</b><span>${fU(b.units)} → ${fU(towin, true)}</span>${legs.length ? `<span class="prog">${hits}/${legs.length} legs</span>` : ""}</div>
+        ${ev ? `<div class="score-line"><span class="sc">${esc(scoreTxt(ev.g))}</span></div>` : ""}
+        ${b.note ? `<div class="note-line">${esc(b.note)}</div>` : ""}${legsHtml}${actions}</article>`;
+    }).join("");
+    if (keep) {
+      const el = document.getElementById(keep.id);
+      if (el) { if (keep.v != null) el.value = keep.v; el.focus(); try { if (keep.s != null) el.setSelectionRange(keep.s, keep.e); } catch (err) {} }
+    }
+  }
+
+  function niceStep(x) {
+    const p = Math.pow(10, Math.floor(Math.log10(x))), m = x / p;
+    return (m <= 1 ? 1 : m <= 2 ? 2 : m <= 5 ? 5 : 10) * p;
+  }
+  function renderChart(settled) {
+    const box = $("#chart");
+    const n = settled.length;
+    $("#c-sub").textContent = n ? n + " settled" : "";
+    if (!n) { box.innerHTML = `<div class="empty" style="height:100%;display:grid;place-content:center"><b>No settled bets ${S.range === "day" ? "today" : "in this range"} yet</b>The line starts with your first result.</div>`; return; }
+    const W = Math.max(260, box.clientWidth), H = box.clientHeight || 200;
+    const L = 46, R = 70, T = 14, B = 22;
+    const cum = [0]; for (const b of settled) cum.push(cum[cum.length - 1] + netOf(b));
+    let lo = Math.min(0, ...cum), hi = Math.max(0, ...cum);
+    if (hi - lo < 0.5) { hi += 0.5; lo -= 0.5; }
+    const step = niceStep((hi - lo) / 3);
+    lo = Math.floor(lo / step) * step; hi = Math.ceil(hi / step) * step;
+    const x = (i) => L + (i * (W - L - R)) / n;
+    const y = (v) => T + ((hi - v) * (H - T - B)) / (hi - lo);
+    const end = cum[n], col = end > 0.004 ? "var(--win)" : end < -0.004 ? "var(--loss)" : "var(--ink-2)";
+    let ticks = "";
+    for (let v = lo; v <= hi + step / 2; v += step) {
+      const yy = y(v).toFixed(1), z = Math.abs(v) < step / 1000;
+      ticks += `<line x1="${L}" x2="${W - R + 8}" y1="${yy}" y2="${yy}" stroke="var(--line)" stroke-width="1" ${z ? "" : 'stroke-dasharray="2 4"'}/>`;
+      ticks += `<text x="${L - 8}" y="${yy}" text-anchor="end" dominant-baseline="middle">${z ? "0" : fU(v, true)}</text>`;
+    }
+    const pts = cum.map((v, i) => `${x(i).toFixed(1)},${y(v).toFixed(1)}`);
+    const line = "M" + pts.join("L");
+    const area = line + `L${x(n).toFixed(1)},${y(0).toFixed(1)}L${x(0).toFixed(1)},${y(0).toFixed(1)}Z`;
+    const dots = n <= 40 ? cum.slice(1).map((v, i) => { const o = outcome(settled[i]); const c = o === "W" ? "var(--win)" : o === "L" ? "var(--loss)" : "var(--push)"; return `<circle cx="${x(i + 1).toFixed(1)}" cy="${y(v).toFixed(1)}" r="3" fill="${c}" stroke="var(--panel)" stroke-width="1.5"><title>${esc(settled[i].pick)}: ${fU(netOf(settled[i]), true)}</title></circle>`; }).join("") : "";
+    box.innerHTML = `<svg viewBox="0 0 ${W} ${H}" preserveAspectRatio="none" role="img" aria-label="Running profit, ending at ${fU(end, true)}">
+      <defs><linearGradient id="ga" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="${col}" stop-opacity=".28"/><stop offset="1" stop-color="${col}" stop-opacity="0"/></linearGradient></defs>
+      ${ticks}
+      <path d="${area}" fill="url(#ga)"/>
+      <path d="${line}" fill="none" stroke="${col}" stroke-width="2.5" stroke-linejoin="round" stroke-linecap="round"/>
+      ${dots}
+      <circle cx="${x(n).toFixed(1)}" cy="${y(end).toFixed(1)}" r="6" fill="${col}" stroke="var(--panel)" stroke-width="2"/>
+      <text x="${(x(n) + 12).toFixed(1)}" y="${y(end).toFixed(1)}" dominant-baseline="middle" style="fill:${col};font-weight:600;font-size:13px">${fU(end, true)}</text>
+      <text x="${L}" y="${H - 4}">bet 1</text><text x="${W - R}" y="${H - 4}" text-anchor="end">bet ${n}</text>
+    </svg>`;
+  }
+
+  function renderSplits(settled) {
+    const groups = [
+      { nm: "FanDuel", c: "var(--fd)", f: (b) => b.book !== "DK" },
+      { nm: "DraftKings", c: "var(--dk)", f: (b) => b.book === "DK" },
+      { nm: "Straights", c: "var(--ink-2)", f: (b) => b.kind !== "parlay" },
+      { nm: "Parlays", c: "var(--gold)", f: (b) => b.kind === "parlay" },
+    ].map((g) => ({ ...g, s: stats(settled.filter(g.f)) }));
+    const max = Math.max(0.01, ...groups.map((g) => Math.abs(g.s.net)));
+    $("#s-sub").textContent = RANGE_LABEL[S.range].toLowerCase();
+    $("#splits").innerHTML = groups.map((g) => {
+      const w = (Math.abs(g.s.net) / max) * 50;
+      const left = g.s.net >= 0 ? 50 : 50 - w;
+      const bg = g.s.net > 0.004 ? "var(--win)" : g.s.net < -0.004 ? "var(--loss)" : "var(--push)";
+      return `<div class="split"><span class="nm"><i style="background:${g.c}"></i>${g.nm}</span>
+        <span class="rec num">${g.s.w}-${g.s.l}${g.s.p ? "-" + g.s.p : ""}</span>
+        <span class="bar"><i style="left:${left}%;width:${w}%;background:${bg}"></i></span>
+        <span class="val num ${cls(g.s.net)}">${fU(g.s.net, true)}</span></div>`;
+    }).join("");
+  }
+
+  function renderRecent(settled) {
+    const list = settled.slice().reverse().slice(0, 8);
+    $("#r-sub").textContent = settled.length > 8 ? "latest 8 of " + settled.length : "";
+    if (!list.length) { $("#recent").innerHTML = '<div class="empty"><b>No results yet</b>Settle a bet from the sweat list.</div>'; return; }
+    $("#recent").innerHTML = list.map((b) => {
+      const o = outcome(b), n = netOf(b);
+      const label = b.status === "cashout" ? "CO" : o;
+      return `<div class="row"><span class="res ${o}">${label}</span>
+        <div style="min-width:0"><div class="t">${esc(b.pick)}</div><div class="m">${b.book === "DK" ? "DK" : "FD"} · ${fOdds(b.odds)} · ${fU(b.units)} · ${when(b.settledAt)}${b.sample ? " · sample" : ""}</div></div>
+        <div class="r num"><span class="${cls(n)}">${fU(n, true)}</span>${S.canWrite ? `<button type="button" class="edit" data-reopen="${esc(b.id)}">undo</button>` : ""}</div></div>`;
+    }).join("");
+  }
+
+  // ---------- writes ----------
+  async function write(fn, local) {
+    if (!S.db) { local(); render(); return true; }
+    try { await fn(S.db); return true; }
+    catch (e) {
+      if (e && e.code === "permission-denied") { S.canWrite = false; render(); toast("This account can't change the board. Sign in with yours."); }
+      else toast("Couldn't save that. Check your connection and try again.");
+      return false;
+    }
+  }
+  const putBet = (id, data) => write((db) => db.collection("bets").doc(id).set(data), () => S.bets.set(id, { id, ...data }));
+  const patchBet = (id, patch) => write((db) => db.doc("bets/" + id).update(patch), () => {
+    const b = S.bets.get(id), prev = b && b.status;
+    if (b) {
+      S.bets.set(id, { ...b, ...patch });
+      if (prev === "open" && patch.status && patch.status !== "open") celebrate(S.bets.get(id));
+      else if (patch.legStatus) legFlash(b, S.bets.get(id));
+    }
+  });
+  const delBet = (id) => write((db) => db.doc("bets/" + id).delete(), () => S.bets.delete(id));
+
+  function settle(id, status, net) {
+    const b = S.bets.get(id); if (!b) return;
+    const patch = { status, settledAt: Date.now() };
+    patch.net = status === "cashout" ? net : netOf({ ...b, status });
+    S.open = null; S.cashout = null;
+    patchBet(id, patch);
+  }
+
+  // ---------- flash + toast ----------
+  let flashT, toastT;
+  function flash(kind, word, pick, detail, pulse = true) {
+    const f = $("#flash");
+    f.className = "flash " + kind;
+    $("#fl-word").textContent = word; $("#fl-pick").textContent = pick; $("#fl-detail").textContent = detail;
+    requestAnimationFrame(() => f.classList.add("show"));
+    clearTimeout(flashT); flashT = setTimeout(() => f.classList.remove("show"), 5200);
+    if (pulse && (kind === "W" || kind === "L")) {
+      document.body.classList.remove("pulse-W", "pulse-L"); void document.body.offsetWidth;
+      document.body.classList.add("pulse-" + kind);
+      setTimeout(() => document.body.classList.remove("pulse-" + kind), 1500);
+    }
+  }
+  function celebrate(b) {
+    const o = outcome(b), n = netOf(b);
+    const word = b.status === "cashout" ? "CASHED" : o === "W" ? "WINNER" : o === "L" ? "LOSS" : "PUSH";
+    flash(o, word, b.pick, `${b.book === "DK" ? "DraftKings" : "FanDuel"} · ${fOdds(b.odds)} · ${fU(n, true)} (${fUSD(n * S.unit, true)})`);
+  }
+  function legFlash(prev, d) {
+    const a = legsOf(prev), z = legsOf(d);
+    const hits = z.filter((l) => l.st === "hit").length;
+    for (let i = 0; i < z.length; i++) {
+      if (z[i].st === a[i]?.st || !z[i].st) continue;
+      if (z[i].st === "hit") flash("W", "LEG ✓", z[i].t, hits === z.length ? `${d.pick} · every leg hit, cash it` : `${d.pick} · ${hits}/${z.length} legs in`, false);
+      else flash("L", "LEG ✕", z[i].t, `${d.pick} · parlay's dead`);
+      return;
+    }
+  }
+  function announce(b) {
+    flash("N", "ON", b.pick, `${fU(b.units)} at ${fOdds(b.odds)} to win ${fU(b.units * ppu(b.odds))} (${fUSD(b.units * ppu(b.odds) * S.unit)})`);
+  }
+  function toast(msg) {
+    const t = $("#toast"); t.textContent = msg; t.hidden = false;
+    clearTimeout(toastT); toastT = setTimeout(() => (t.hidden = true), 3200);
+  }
+
+  // ---------- active list interactions ----------
+  $("#active").addEventListener("click", (e) => {
+    if (document.body.classList.contains("tv") || !S.canWrite) return;
+    const card = e.target.closest(".bet"); if (!card) return;
+    const id = card.dataset.id;
+    const leg = e.target.closest("[data-leg]");
+    if (leg) {
+      const b = S.bets.get(id); if (!b) return;
+      const st = legsOf(b).map((l) => l.st), i = Number(leg.dataset.leg);
+      st[i] = st[i] === null ? "hit" : st[i] === "hit" ? "miss" : null;
+      patchBet(id, { legStatus: st }); return;
+    }
+    const act = e.target.closest("[data-act]");
+    if (!act) {
+      if (e.target.closest("input")) return;
+      S.open = S.open === id ? null : id; S.confirmDel = null; S.cashout = null; render(); return;
+    }
+    const a = act.dataset.act;
+    if (a === "won" || a === "lost" || a === "push") settle(id, a);
+    else if (a === "lv") { const b = S.bets.get(id); patchBet(id, { live: b && b.live === act.dataset.v ? null : act.dataset.v, liveAt: Date.now() }); }
+    else if (a === "note") { const i = document.getElementById("nt-" + id); patchBet(id, { note: i ? i.value.trim().slice(0, 60) : "" }).then((ok) => ok && toast("Note saved")); }
+    else if (a === "co") { S.cashout = id; render(); const i = document.getElementById("co-" + id); if (i) i.focus(); }
+    else if (a === "co-save") {
+      const i = document.getElementById("co-" + id); const v = parseFloat(String(i && i.value).replace(/[$,\s]/g, ""));
+      if (!(v >= 0)) { toast("Enter the dollar amount the cash out paid."); return; }
+      const b = S.bets.get(id); settle(id, "cashout", Math.round((v / S.unit - b.units) * 1000) / 1000);
+    }
+    else if (a === "del") { S.confirmDel = id; render(); }
+    else if (a === "del-yes") { S.open = null; S.confirmDel = null; delBet(id).then((ok) => ok && toast("Bet deleted")); }
+    else if (a === "cancel") { S.confirmDel = null; S.cashout = null; render(); }
+  });
+  $("#active").addEventListener("keydown", (e) => {
+    if ((e.key === "Enter" || e.key === " ") && e.target.classList.contains("bet")) { e.preventDefault(); e.target.click(); }
+    if (e.key === "Enter" && e.target.id && e.target.id.startsWith("nt-")) { e.preventDefault(); e.target.closest(".bet").querySelector('[data-act="note"]').click(); }
+    if (e.key === "Enter" && e.target.id && e.target.id.startsWith("co-")) { e.preventDefault(); e.target.closest(".bet").querySelector('[data-act="co-save"]').click(); }
+  });
+  $("#recent").addEventListener("click", (e) => {
+    const btn = e.target.closest("[data-reopen]"); if (!btn) return;
+    patchBet(btn.dataset.reopen, { status: "open", settledAt: null, net: null }).then((ok) => ok && toast("Moved back to open"));
+  });
+
+  // ---------- header ----------
+  $("#range").addEventListener("click", (e) => {
+    const b = e.target.closest("[data-r]"); if (!b) return;
+    S.range = b.dataset.r; try { localStorage.setItem("sb-range", S.range); } catch (err) {}
+    render();
+  });
+  let wake = null;
+  async function grabWake() { try { if (navigator.wakeLock) wake = await navigator.wakeLock.request("screen"); } catch (e) { wake = null; } }
+  $("#tvBtn").addEventListener("click", async () => {
+    const on = !document.body.classList.contains("tv");
+    document.body.classList.toggle("tv", on);
+    $("#tvBtn").textContent = on ? "Exit TV" : "TV mode";
+    S.open = null; render();
+    if (on) {
+      try { if (document.documentElement.requestFullscreen) await document.documentElement.requestFullscreen(); } catch (e) {}
+      grabWake();
+    } else {
+      try { if (document.fullscreenElement) await document.exitFullscreen(); } catch (e) {}
+      try { if (wake) await wake.release(); } catch (e) {} wake = null;
+    }
+  });
+  document.addEventListener("visibilitychange", () => { if (document.visibilityState === "visible" && document.body.classList.contains("tv")) grabWake(); });
+
+  // ---------- sheets ----------
+  function openSheet(id) { $(id).hidden = false; }
+  function closeSheets() { $("#addSheet").hidden = true; $("#setSheet").hidden = true; }
+  document.querySelectorAll(".scrim").forEach((s) => s.addEventListener("click", (e) => { if (e.target === s || e.target.closest("[data-close]")) closeSheets(); }));
+  document.addEventListener("keydown", (e) => { if (e.key === "Escape") closeSheets(); });
+
+  $("#sports").innerHTML = SPORTS.map((s, i) => `<label><input type="radio" name="sport" id="sp-${i}" value="${s}"><span>${s}</span></label>`).join("");
+  $("#unitPicks").innerHTML = ["0.5", "1", "1.5", "2", "3", "5"].map((u, i) => `<label><input type="radio" name="up" id="up-${i}" value="${u}"${u === "1" ? " checked" : ""}><span>${u}u</span></label>`).join("");
+
+  // ----- game picker -----
+  const F = { sel: null, legs: [], sport: "All", q: "", openG: null, custom: false, oddsTouched: false };
+  const kindNow = () => document.querySelector('input[name="kind"]:checked').value;
+  function mkLabel(g, m, s, l) {
+    if (m === "ml") return (s === "a" ? g.a : g.h).nm + " ML";
+    if (m === "sp") return (s === "a" ? g.a : g.h).nm + " " + (l == null ? "spread" : fLine(l));
+    return (s === "o" ? "Over " : "Under ") + (l == null ? "" : trimL(l) + " ") + "· " + g.a.ab + "/" + g.h.ab;
+  }
+  function mkPrefill(g, m, s) {
+    if (m === "ml") return { l: null, o: g.ml ? g.ml[s] : null };
+    if (m === "sp") return { l: g.sp && g.sp[s] ? g.sp[s].l : null, o: g.sp && g.sp[s] ? g.sp[s].o : null };
+    return { l: g.tot ? g.tot.l : null, o: g.tot ? g.tot[s] : null };
+  }
+  function pickable() {
+    const now = Date.now();
+    return [...S.games.values()].filter((g) => g.st !== "post" && g.t > now - 8 * 36e5 && g.t < now + 40 * 36e5)
+      .sort((x, y) => (x.st === "in" ? 0 : 1) - (y.st === "in" ? 0 : 1) || x.t - y.t);
+  }
+  function gWhen(g) {
+    if (g.st === "in") return '<span class="live">LIVE</span>';
+    const d = new Date(g.t), today = new Date().toDateString() === d.toDateString();
+    return (today ? "" : d.toLocaleDateString([], { weekday: "short" }) + " ") + tm(g.t);
+  }
+  function isOn(g, m, s) {
+    if (kindNow() === "straight") return F.sel && F.sel.g === g.id && F.sel.m === m && F.sel.s === s;
+    return F.legs.some((x) => x.g === g.id && x.m === m && x.s === s);
+  }
+  function renderGames() {
+    const all = pickable();
+    $("#g-fresh").textContent = S.slateAt ? "· lines via ESPN, " + tm(S.slateAt) : "";
+    const sports = [...new Set(all.map((g) => g.sport))];
+    if (F.sport !== "All" && !sports.includes(F.sport)) F.sport = "All";
+    $("#g-sports").innerHTML = ["All", ...sports].map((s, i) => `<label><input type="radio" name="gsport" id="gs-${i}" value="${s}"${s === F.sport ? " checked" : ""}><span>${s}</span></label>`).join("");
+    const q = F.q.trim().toLowerCase();
+    const list = all.filter((g) => (F.sport === "All" || g.sport === F.sport) &&
+      (!q || [g.a.nm, g.h.nm, g.a.ab, g.h.ab].some((x) => String(x).toLowerCase().includes(q)))).slice(0, 80);
+    if (!S.games.size) { $("#g-list").innerHTML = '<div class="gnone">Loading games from ESPN…</div>'; return; }
+    if (!list.length) { $("#g-list").innerHTML = '<div class="gnone">No upcoming games match. Try another sport or search.</div>'; return; }
+    $("#g-list").innerHTML = list.map((g) => {
+      const open = F.openG === g.id;
+      let mk = "";
+      if (open) {
+        const btn = (m, s) => { const p = mkPrefill(g, m, s); return `<button type="button" class="mkt${isOn(g, m, s) ? " on" : ""}" data-pick="${esc(g.id)}|${m}|${s}"><span>${esc(mkLabel(g, m, s, p.l))}</span><b>${p.o ? fOdds(p.o) : "—"}</b></button>`; };
+        mk = `<div class="mkts">${btn("ml", "a")}${btn("ml", "h")}${btn("sp", "a")}${btn("sp", "h")}${btn("tot", "o")}${btn("tot", "u")}</div>`;
+      }
+      return `<div class="g${open ? " open" : ""}"><button type="button" class="g-head" data-gopen="${esc(g.id)}" aria-expanded="${open}">
+        <span class="g-when">${gWhen(g)}</span><span class="g-teams">${esc(g.a.nm)} <i>@</i> ${esc(g.h.nm)}</span>
+        <span class="g-meta">${g.st === "in" ? `${g.a.sc}-${g.h.sc} · ${esc(g.d)}` : g.sport}</span></button>${mk}</div>`;
+    }).join("");
+  }
+  const dec = (o) => (o > 0 ? 1 + o / 100 : 1 + 100 / Math.abs(o));
+  function setOdds(o) {
+    if (o == null) { $("#f-odds").value = ""; S.sign = -1; return; }
+    S.sign = o > 0 ? 1 : -1; $("#f-odds").value = String(Math.abs(o));
+  }
+  function parlayOdds() {
+    if (F.oddsTouched || F.legs.length < 2 || F.legs.some((x) => !x.o)) return;
+    const p = F.legs.reduce((a, x) => a * dec(x.o), 1);
+    setOdds(Math.round(p >= 2 ? (p - 1) * 100 : -100 / (p - 1)));
+  }
+  function legText(x) { const g = S.games.get(x.g); return g ? mkLabel(g, x.m, x.s, x.l) : x.text; }
+  function renderPicker() {
+    const parlay = kindNow() === "parlay";
+    $("#gameField").hidden = !parlay && (F.custom || !!F.sel);
+    $("#customToggle").hidden = parlay;
+    $("#selField").hidden = parlay || !F.sel;
+    $("#customField").hidden = parlay || !F.custom;
+    $("#legField").hidden = !parlay;
+    $("#timeField").hidden = parlay ? F.legs.some((x) => x.g) : !F.custom;
+    if (F.sel) {
+      const g = S.games.get(F.sel.g);
+      $("#selText").textContent = g ? mkLabel(g, F.sel.m, F.sel.s, F.sel.l) : "";
+      $("#selGame").textContent = g ? `${g.sport} · ${g.a.nm} @ ${g.h.nm} · ${g.st === "in" ? "live now" : startLabel(g.t)}` : "";
+      $("#lineWrap").hidden = F.sel.m === "ml";
+    }
+    $("#legCount").textContent = F.legs.length ? "· " + F.legs.length + " picked" : "· tap markets below or add your own";
+    $("#legList").innerHTML = F.legs.map((x, i) => `<div class="legrow"><span class="lt">${esc(legText(x))}</span>
+      ${x.g && x.m !== "ml" ? `<input data-ll="${i}" inputmode="decimal" autocomplete="off" value="${x.l == null ? "" : x.l}" aria-label="Line for leg ${i + 1}">` : "<span></span>"}
+      <span class="lo">${x.o ? fOdds(x.o) : ""}</span><button type="button" class="x" data-rm="${i}" aria-label="Remove leg">×</button></div>`).join("");
+    renderGames();
+  }
+  $("#g-list").addEventListener("click", (e) => {
+    const head = e.target.closest("[data-gopen]");
+    if (head) { F.openG = F.openG === head.dataset.gopen ? null : head.dataset.gopen; renderGames(); return; }
+    const pk = e.target.closest("[data-pick]"); if (!pk) return;
+    const [gid, m, s] = pk.dataset.pick.split("|"), g = S.games.get(gid); if (!g) return;
+    const p = mkPrefill(g, m, s);
+    if (kindNow() === "straight") {
+      F.sel = { g: gid, m, s, l: p.l }; F.custom = false;
+      $("#f-line").value = p.l == null ? "" : String(p.l);
+      setOdds(p.o);
+    } else {
+      const i = F.legs.findIndex((x) => x.g === gid && x.m === m && x.s === s);
+      if (i >= 0) F.legs.splice(i, 1); else F.legs.push({ g: gid, m, s, l: p.l, o: p.o, sport: g.sport });
+      parlayOdds();
+    }
+    renderPicker(); updatePreview();
+  });
+  $("#g-q").addEventListener("input", (e) => { F.q = e.target.value; renderGames(); });
+  $("#g-sports").addEventListener("change", (e) => { if (e.target.name === "gsport") { F.sport = e.target.value; renderGames(); } });
+  $("#customToggle").addEventListener("click", () => { F.custom = true; F.sel = null; renderPicker(); updatePreview(); $("#f-pick").focus(); });
+  $("#selClear").addEventListener("click", () => { F.sel = null; renderPicker(); updatePreview(); });
+  $("#f-line").addEventListener("input", (e) => { if (F.sel) { const v = num(e.target.value); F.sel.l = v; $("#selText").textContent = mkLabel(S.games.get(F.sel.g), F.sel.m, F.sel.s, v); } });
+  $("#legList").addEventListener("click", (e) => { const b = e.target.closest("[data-rm]"); if (!b) return; F.legs.splice(Number(b.dataset.rm), 1); parlayOdds(); renderPicker(); updatePreview(); });
+  $("#legList").addEventListener("input", (e) => {
+    const i = e.target.dataset.ll; if (i == null) return;
+    F.legs[i].l = num(e.target.value);
+    e.target.closest(".legrow").querySelector(".lt").textContent = legText(F.legs[i]);
+  });
+  function addCustomLeg() {
+    const v = $("#f-leg").value.trim(); if (!v) return;
+    F.legs.push({ text: v.slice(0, 80) }); $("#f-leg").value = ""; F.oddsTouched = F.oddsTouched || false;
+    renderPicker(); updatePreview(); $("#f-leg").focus();
+  }
+  $("#addLeg").addEventListener("click", addCustomLeg);
+  $("#f-leg").addEventListener("keydown", (e) => { if (e.key === "Enter") { e.preventDefault(); addCustomLeg(); } });
+  $("#f-odds").addEventListener("input", () => { F.oddsTouched = true; });
+
+  function num(v) { const n = parseFloat(String(v).replace(/[−–]/g, "-").replace(/[^\d.+-]/g, "")); return isFinite(n) ? n : null; }
+  function formVals() {
+    const kind = kindNow();
+    const mag = parseInt(String($("#f-odds").value).replace(/[^\d]/g, ""), 10);
+    const odds = mag >= 100 ? S.sign * mag : null;
+    const units = parseFloat(String($("#f-units").value).replace(",", "."));
+    return { kind, odds, units };
+  }
+  function updatePreview() {
+    const { odds, units } = formVals();
+    document.querySelectorAll("#sign button").forEach((b) => b.setAttribute("aria-pressed", String(Number(b.dataset.s) === S.sign)));
+    document.querySelectorAll("#dayseg button").forEach((b) => b.setAttribute("aria-pressed", String(Number(b.dataset.d) === S.day)));
+    document.querySelectorAll('input[name="up"]').forEach((r) => (r.checked = Number(r.value) === units));
+    if (odds && units > 0) {
+      const w = units * ppu(odds);
+      $("#f-preview").innerHTML = `<span>Risk <b>${fU(units)}</b> · ${fUSD(units * S.unit)}</span><span class="gold">To win <b class="gold">${fU(w)}</b> · ${fUSD(w * S.unit)}</span>`;
+    } else $("#f-preview").innerHTML = "<span>Enter odds (100 or more) and units to see the payout.</span>";
+  }
+  $("#addForm").addEventListener("input", updatePreview);
+  $("#addForm").addEventListener("change", (e) => {
+    if (e.target.name === "up") $("#f-units").value = e.target.value;
+    if (e.target.name === "kind") { F.oddsTouched = false; if (e.target.value === "parlay") parlayOdds(); renderPicker(); }
+    updatePreview();
+  });
+  $("#dayseg").addEventListener("click", (e) => { const b = e.target.closest("[data-d]"); if (!b) return; S.day = Number(b.dataset.d); updatePreview(); });
+  $("#sign").addEventListener("click", (e) => { const b = e.target.closest("[data-s]"); if (!b) return; S.sign = Number(b.dataset.s); F.oddsTouched = true; updatePreview(); });
+  function openAdd() {
+    $("#addForm").reset(); S.sign = -1; S.day = 0; $("#f-odds").value = "110"; $("#f-units").value = "1"; $("#f-err").textContent = "";
+    Object.assign(F, { sel: null, legs: [], q: "", openG: null, custom: false, oddsTouched: false });
+    renderPicker(); updatePreview(); openSheet("#addSheet"); loadPickerGames();
+  }
+  $("#addTop").addEventListener("click", openAdd);
+  $("#addFab").addEventListener("click", openAdd);
+  $("#addForm").addEventListener("submit", async (e) => {
+    e.preventDefault();
+    const { kind, odds, units } = formVals();
+    const err = $("#f-err");
+    const data = { book: document.querySelector('input[name="book"]:checked').value, kind, odds, units, status: "open", placedAt: Date.now(), legs: [], sport: "" };
+    let starts = [];
+    if (kind === "straight") {
+      if (F.sel) {
+        const g = S.games.get(F.sel.g);
+        if (!g) { err.textContent = "That game dropped off the list. Pick it again or type it in."; return; }
+        if (F.sel.m !== "ml" && F.sel.l == null) { err.textContent = "Add the line from your slip, like −3.5 or 47.5."; return; }
+        data.pick = mkLabel(g, F.sel.m, F.sel.s, F.sel.l); data.sport = g.sport;
+        data.sel = { g: g.id, m: F.sel.m, s: F.sel.s, l: F.sel.l, sp: g.sport, t: g.t }; starts.push(g.t);
+      } else if (F.custom) {
+        data.pick = $("#f-pick").value.trim().slice(0, 80);
+        if (!data.pick) { err.textContent = "Add the pick, like “Judge 1+ HR”."; return; }
+        const sp = document.querySelector('input[name="sport"]:checked'); data.sport = sp ? sp.value : "";
+      } else { err.textContent = "Tap a game, then the side you bet."; return; }
+    } else {
+      if (F.legs.length < 2) { err.textContent = "A parlay needs at least two legs."; return; }
+      if (F.legs.some((x) => x.g && x.m !== "ml" && x.l == null)) { err.textContent = "One of your legs is missing its line."; return; }
+      data.legs = F.legs.map(legText);
+      data.legSel = F.legs.map((x) => { const g = x.g && S.games.get(x.g); return x.g ? { g: x.g, m: x.m, s: x.s, l: x.l, sp: x.sport, t: g ? g.t : null } : null; });
+      F.legs.forEach((x) => { const g = x.g && S.games.get(x.g); if (g) starts.push(g.t); });
+      const sp = [...new Set(F.legs.map((x) => x.sport).filter(Boolean))];
+      data.sport = sp.length === 1 ? sp[0] : sp.length ? "Mixed" : "";
+      data.pick = data.legs.length + "-leg parlay";
+    }
+    if (!odds) { err.textContent = "Odds need to be 100 or more, like −110 or +250."; return; }
+    if (!(units > 0) || units > 100) { err.textContent = "Units should be a number above 0, like 1 or 0.5."; return; }
+    if (starts.length) data.startAt = Math.min(...starts);
+    else {
+      const tv = $("#f-time").value;
+      if (/^\d{1,2}:\d{2}$/.test(tv)) {
+        const d = new Date(); d.setDate(d.getDate() + S.day);
+        const [hh, mm] = tv.split(":").map(Number); d.setHours(hh, mm, 0, 0);
+        data.startAt = d.getTime();
+      }
+    }
+    const id = "b" + Date.now().toString(36) + Math.random().toString(36).slice(2, 6);
+    $("#f-submit").disabled = true;
+    const ok = await putBet(id, data);
+    $("#f-submit").disabled = false;
+    if (ok) { closeSheets(); if (!S.db) announce({ id, ...data }); }
+  });
+
+  function openSettings() { $("#f-unit").value = trim(S.unit); $("#u-err").textContent = ""; resetClear(); openSheet("#setSheet"); }
+  $("#unitChip").addEventListener("click", openSettings);
+  $("#sampleChip").addEventListener("click", openSettings);
+  $("#setForm").addEventListener("submit", async (e) => {
+    e.preventDefault();
+    const v = parseFloat(String($("#f-unit").value).replace(/[$,\s]/g, ""));
+    if (!(v > 0)) { $("#u-err").textContent = "Enter a dollar amount above 0, like 15."; return; }
+    const ok = await write((db) => db.doc("config/settings").set({ unitSize: v }), () => (S.unit = v));
+    if (ok) { S.unit = v; render(); closeSheets(); toast("Unit size set to $" + trim(v)); }
+  });
+  function resetClear() { $("#sampleCtl").innerHTML = '<button type="button" class="btn danger" id="clearSamples">Clear sample bets</button>'; }
+  $("#sampleCtl").addEventListener("click", async (e) => {
+    if (e.target.id === "clearSamples") {
+      $("#sampleCtl").innerHTML = '<div style="display:flex;gap:8px;flex-wrap:wrap"><button type="button" class="btn" id="clearNo">Keep them</button><button type="button" class="btn loss" id="clearYes">Yes, clear samples</button></div>';
+    } else if (e.target.id === "clearNo") resetClear();
+    else if (e.target.id === "clearYes") {
+      const ids = [...S.bets.values()].filter((b) => b.sample).map((b) => b.id);
+      for (const id of ids) { if (!(await delBet(id))) break; }
+      closeSheets(); toast("Sample bets cleared. The board is all yours.");
+    }
+  });
+
+  // ---------- clock / rollover / resize ----------
+  function tick() {
+    const now = new Date();
+    $("#clock").textContent = now.toLocaleTimeString([], { hour: "numeric", minute: "2-digit" });
+    const k = dayStart(now.getTime()).getTime();
+    if (S.dayKey && k !== S.dayKey) render();
+    else if (S.ready) renderActive([...S.bets.values()].filter((b) => b.status === "open"));
+    S.dayKey = k;
+  }
+  tick(); setInterval(tick, 15000);
+  if (window.ResizeObserver) { let w = 0; new ResizeObserver((en) => { const nw = Math.round(en[0].contentRect.width); if (nw !== w) { w = nw; renderChart(S.lastSettled); } }).observe($("#chart")); }
+
+  render();
+
+  // ---------- live scores straight from ESPN ----------
+  const ESPN = { NFL: "football/nfl", CFB: "football/college-football", NBA: "basketball/nba", CBB: "basketball/mens-college-basketball", MLB: "baseball/mlb", NHL: "hockey/nhl" };
+  const GROUPS = { CFB: "&groups=80", CBB: "&groups=50" };
+  const etFmt = new Intl.DateTimeFormat("en-CA", { timeZone: "America/New_York", year: "numeric", month: "2-digit", day: "2-digit" });
+  const etDate = (t) => etFmt.format(new Date(t)).replace(/-/g, "");
+  const boardAt = new Map(); // "SPORT|yyyymmdd" -> last fetch time
+  function lineNum(s) {
+    if (s == null) return null;
+    const v = String(s).trim().toLowerCase().replace(/^[ou]/, "");
+    if (v === "even" || v === "ev") return 100;
+    if (v === "pk" || v === "pick") return 0;
+    const n = parseFloat(v); return isFinite(n) ? n : null;
+  }
+  const oddsNum = (x) => { const n = lineNum(x); return n != null && Math.abs(n) >= 100 ? Math.round(n) : null; };
+  const closeOf = (side) => (side && (side.close || side.open)) || {};
+  function parseGame(e, sport) {
+    const c = e.competitions[0], t = {};
+    for (const x of c.competitors) t[x.homeAway] = x;
+    const st = e.status.type;
+    const team = (k) => { const x = t[k], tm = x.team; return { ab: tm.abbreviation || "", nm: tm.shortDisplayName || tm.name || "", sc: /^\d+$/.test(String(x.score)) ? Number(x.score) : null }; };
+    const g = { id: String(e.id), sport, t: Date.parse(e.date), st: st.state || "pre", d: st.shortDetail || "", a: team("away"), h: team("home") };
+    const o = (c.odds || [])[0];
+    if (o) {
+      const ml = o.moneyline || {}, sp = o.pointSpread || {}, tot = o.total || {};
+      g.ml = { a: oddsNum(closeOf(ml.away).odds), h: oddsNum(closeOf(ml.home).odds) };
+      g.sp = { a: { l: lineNum(closeOf(sp.away).line), o: oddsNum(closeOf(sp.away).odds) }, h: { l: lineNum(closeOf(sp.home).line), o: oddsNum(closeOf(sp.home).odds) } };
+      g.tot = { l: lineNum(closeOf(tot.over).line) ?? o.overUnder ?? null, o: oddsNum(closeOf(tot.over).odds), u: oddsNum(closeOf(tot.under).odds) };
+      if (g.sp.h.l == null && o.spread != null) g.sp = { h: { l: Number(o.spread), o: null }, a: { l: -Number(o.spread), o: null } };
+    }
+    return g;
+  }
+  async function loadBoards(keys) {
+    const prevSt = new Map([...S.games].map(([k, g]) => [k, g.st]));
+    const got = await Promise.all(keys.map(async (key) => {
+      const [sport, ymd] = key.split("|");
+      try {
+        const r = await fetch(`https://site.api.espn.com/apis/site/v2/sports/${ESPN[sport]}/scoreboard?dates=${ymd}&limit=300${GROUPS[sport] || ""}`);
+        if (!r.ok) return false;
+        const j = await r.json();
+        for (const e of j.events || []) { try { const g = parseGame(e, sport); S.games.set(g.id, g); } catch (err) {} }
+        boardAt.set(key, Date.now()); return true;
+      } catch (err) { return false; }
+    }));
+    if (!got.some(Boolean)) return;
+    S.slateAt = Date.now();
+    for (const b of S.bets.values()) {
+      if (b.status !== "open" || b.kind === "parlay" || !b.sel) continue;
+      const g = gameOf(b.sel), ev = evalSel(b.sel);
+      if (g && ev && ev.fin && prevSt.has(g.id) && prevSt.get(g.id) !== "post") flash(ev.res === "L" ? "L" : ev.res === "W" ? "W" : "P", "FINAL", b.pick, ev.txt + " · tap the bet to settle", false);
+    }
+    render();
+    if (!$("#addSheet").hidden) renderGames();
+  }
+  // every 30s: refresh the scoreboards your open bets live on
+  function liveKeys() {
+    const keys = new Set(), now = Date.now();
+    for (const b of S.bets.values()) {
+      if (b.status !== "open") continue;
+      const sels = b.kind === "parlay" ? (Array.isArray(b.legSel) ? b.legSel : []) : [b.sel];
+      for (const s of sels) {
+        if (!s || s.g == null) continue;
+        const sport = s.sp || b.sport; if (!ESPN[sport]) continue;
+        const t = s.t || b.startAt || now, key = sport + "|" + etDate(t), g = S.games.get(String(s.g));
+        if (g && g.st === "post") continue;
+        if (!boardAt.has(key) || t <= now + 10 * 60e3) keys.add(key);
+      }
+    }
+    return [...keys];
+  }
+  async function pollLive() { if (document.visibilityState === "visible") { const k = liveKeys(); if (k.length) await loadBoards(k); } }
+  setInterval(pollLive, 30000);
+  document.addEventListener("visibilitychange", pollLive);
+  // the bet form needs today's and tomorrow's games for every sport
+  function loadPickerGames() {
+    const now = Date.now(), keys = [];
+    for (const day of [now, now + 864e5]) for (const sp of Object.keys(ESPN)) { const k = sp + "|" + etDate(day); if (now - (boardAt.get(k) || 0) > 120e3) keys.push(k); }
+    if (keys.length) loadBoards(keys);
+  }
+
+  // ---------- data export / import ----------
+  function saveFile(name, text, type) {
+    const a = document.createElement("a");
+    a.href = URL.createObjectURL(new Blob([text], { type }));
+    a.download = name; document.body.appendChild(a); a.click();
+    setTimeout(() => { URL.revokeObjectURL(a.href); a.remove(); }, 1000);
+  }
+  const stamp = () => new Date().toISOString().slice(0, 10);
+  $("#expCsv").addEventListener("click", () => {
+    const q = (v) => `"${String(v == null ? "" : v).replace(/"/g, '""')}"`;
+    const iso = (t) => (t ? new Date(t).toLocaleString() : "");
+    const rows = [["placed", "settled", "book", "type", "sport", "pick", "legs", "odds", "units", "status", "net_units", "net_dollars"]];
+    [...S.bets.values()].sort((a, b) => a.placedAt - b.placedAt).forEach((b) => {
+      const n = b.status === "open" ? "" : netOf(b);
+      rows.push([iso(b.placedAt), iso(b.settledAt), BOOK[b.book] || b.book, b.kind, b.sport, b.pick, (b.legs || []).join(" | "), b.odds, b.units, b.status, n === "" ? "" : n.toFixed(3), n === "" ? "" : (n * S.unit).toFixed(2)]);
+    });
+    saveFile(`sweat-board-bets-${stamp()}.csv`, rows.map((r) => r.map(q).join(",")).join("\n"), "text/csv");
+  });
+  $("#expJson").addEventListener("click", () => {
+    saveFile(`sweat-board-backup-${stamp()}.json`, JSON.stringify({ unitSize: S.unit, bets: [...S.bets.values()] }, null, 1), "application/json");
+  });
+  $("#impFile").addEventListener("change", async (e) => {
+    const f = e.target.files && e.target.files[0]; e.target.value = "";
+    if (!f || !S.db) return;
+    try {
+      const j = JSON.parse(await f.text());
+      const list = (Array.isArray(j) ? j : j.bets || []).filter((b) => b && b.id && typeof b.odds === "number" && typeof b.units === "number");
+      if (!list.length) { toast("That file has no bets in it."); return; }
+      for (let i = 0; i < list.length; i += 400) {
+        const batch = S.db.batch();
+        list.slice(i, i + 400).forEach((b) => { const { id, ...rest } = b; batch.set(S.db.collection("bets").doc(String(id)), rest); });
+        await batch.commit();
+      }
+      if (!Array.isArray(j) && Number(j.unitSize) > 0) await S.db.doc("config/settings").set({ unitSize: Number(j.unitSize) });
+      closeSheets(); toast(`Imported ${list.length} bets`);
+    } catch (err) { toast("Couldn't read that file. Use a Sweat Board backup (.json)."); }
+  });
+
+  // ---------- sign in + connect ----------
+  const gate = (which, msg) => {
+    $("#gate").hidden = !which;
+    ["setup", "signin", "denied"].forEach((k) => ($("#gate-" + k).hidden = k !== which));
+    $("#gate-err").textContent = msg || "";
+  };
+  function readCfg() {
+    if (window.SWEAT_FIREBASE && window.SWEAT_FIREBASE.apiKey) return window.SWEAT_FIREBASE;
+    try { const c = JSON.parse(localStorage.getItem("sb-fbcfg") || "null"); if (c && c.apiKey) return c; } catch (e) {}
+    return null;
+  }
+  $("#cfgSave").addEventListener("click", () => {
+    const txt = $("#cfgIn").value, cfg = {};
+    for (const k of ["apiKey", "authDomain", "projectId", "storageBucket", "messagingSenderId", "appId"]) {
+      const m = txt.match(new RegExp(k + `["']?\\s*:\\s*["']([^"']+)["']`)); if (m) cfg[k] = m[1];
+    }
+    if (!cfg.apiKey || !cfg.projectId || !cfg.authDomain) { $("#gate-err").textContent = "That doesn't look like a firebaseConfig. Copy the whole block from Project settings → Your apps."; return; }
+    try { localStorage.setItem("sb-fbcfg", JSON.stringify(cfg)); } catch (e) {}
+    location.reload();
+  });
+  const cfg = readCfg();
+  S.canWrite = false;
+  if (!window.firebase) { S.offline = true; S.ready = true; render(); gate("setup", "Couldn't load Firebase. Check your connection and reload."); }
+  else if (!cfg) { S.ready = true; render(); gate("setup"); }
+  else {
+    firebase.initializeApp(cfg);
+    const auth = firebase.auth(), db = firebase.firestore();
+    try { db.settings({ ignoreUndefinedProperties: true, merge: true }); } catch (e) {}
+    const provider = new firebase.auth.GoogleAuthProvider();
+    $("#gBtn").addEventListener("click", () => {
+      auth.signInWithPopup(provider).catch((e) => {
+        if (e.code === "auth/popup-blocked" || e.code === "auth/operation-not-supported-in-this-environment") auth.signInWithRedirect(provider);
+        else if (e.code !== "auth/popup-closed-by-user" && e.code !== "auth/cancelled-popup-request") $("#gate-err").textContent = "Sign-in didn't work (" + e.code + "). If this is a new site, add it under Firebase → Authentication → Settings → Authorized domains.";
+      });
+    });
+    const out = () => auth.signOut().then(() => location.reload());
+    $("#signOut").addEventListener("click", out);
+    $("#signOut2").addEventListener("click", out);
+    let unsub = [];
+    auth.onAuthStateChanged((u) => {
+      unsub.forEach((f) => f()); unsub = [];
+      if (!u) { S.db = null; S.canWrite = false; S.ready = true; render(); gate("signin"); return; }
+      gate(null); S.db = db; S.canWrite = true; S.ready = false; S.bets = new Map(); render();
+      $("#who").textContent = u.email || "";
+      const onErr = (e) => {
+        if (e && e.code === "permission-denied") { S.canWrite = false; gate("denied", u.email ? "Signed in as " + u.email + "." : ""); }
+        else toast("Lost the connection to your bets. Reload to reconnect.");
+      };
+      unsub.push(db.collection("bets").onSnapshot((snap) => {
+        const first = !S.ready;
+        for (const ch of snap.docChanges()) {
+          const prev = S.bets.get(ch.doc.id);
+          if (ch.type === "removed") { S.bets.delete(ch.doc.id); continue; }
+          const d = { id: ch.doc.id, ...ch.doc.data() };
+          if (typeof d.odds !== "number" || typeof d.units !== "number") continue;
+          S.bets.set(ch.doc.id, d);
+          if (first) continue;
+          if (prev && prev.status === "open" && d.status !== "open") celebrate(d);
+          else if (prev && d.status === "open" && d.kind === "parlay") legFlash(prev, d);
+          else if (!prev && d.status === "open") announce(d);
+        }
+        const wasReady = S.ready;
+        S.ready = true; render();
+        if (!wasReady) { const k = liveKeys(); if (k.length) loadBoards(k); }
+      }, onErr));
+      unsub.push(db.doc("config/settings").onSnapshot((s) => {
+        const v = s.exists ? Number(s.data().unitSize) : NaN;
+        if (v > 0 && v !== S.unit) { S.unit = v; render(); }
+      }, onErr));
+    });
+  }
+})();
+</script>
+</body>
+</html>
