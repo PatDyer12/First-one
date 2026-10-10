@@ -6,7 +6,8 @@ NFL "Sunday Card"       prime-time navy with yard lines, broadcast-style type, s
                         Sections: Best Bets · Totals · Sides · QB Watch · Price Watch & Model Leans · Streaks · Oddball
 College "Saturday Slate" turf green with chalk lines, varsity lettering, gold pennants; Blowout Overs as a scoreboard
                         showing how few points the market expects from each underdog.
-                        Sections: Blowout Overs · Other Plays · QB Changes · Model Leans · Streaks · Oddball
+                        Sections: Blowout Overs · Weather Desk · Other Plays · Top 25 Watch · QB Changes · Model Leans ·
+                        Streaks · Systems Lab · Oddball
 
 Every play carries a "Why": a game-specific lead with the real numbers, then each supporting signal with its record.
 Units convert to dollars from betting/share/settings.json.
@@ -19,6 +20,7 @@ import subprocess
 import sys
 from datetime import datetime
 
+import numpy as np
 import pandas as pd
 
 HERE = os.path.dirname(os.path.abspath(__file__))
@@ -136,6 +138,19 @@ CFB_CSS = """
 .kpi span { color:#6b5a2a; opacity:1; font-size:6.4pt; letter-spacing:.1em; font-weight:700; }
 h2 { font-family:'Varsity'; font-weight:400; font-size:12.5pt; letter-spacing:.02em; color:#14532d; text-transform:none; margin:22px 0 9px; }
 h2::after { background:var(--accent2); height:2px; opacity:.7; }
+
+/* ranks and records */
+.rk { display:inline-block; background:#e0a526; color:#0e3d21; font-weight:800; font-size:.8em; line-height:1.25;
+      border-radius:4px; padding:0 3px; margin-right:3px; vertical-align:1px; }
+.wl { color:var(--ink2); font-weight:500; font-size:.88em; }
+.t25 td { vertical-align:top; }
+.t25 .gap { font-size:7pt; font-weight:750; border-radius:10px; padding:1px 6px; white-space:nowrap; }
+.t25 .gap.hi { background:#fdecea; color:#9a3b2f; } .t25 .gap.lo { background:#e7efe9; color:#14532d; }
+.t25 .gap.ok { background:#f1ede2; color:#8a7a4a; }
+.labcat .bench { font-size:6.9pt; color:var(--ink2); padding-top:4px; border-top:1px dashed #eee6cf; line-height:1.45; }
+.labcat .bench .pos { color:var(--green); font-weight:700; } .labcat .bench .neg { color:#9a3b2f; }
+.t25 { table-layout:fixed; } .t25 td { font-size:7.8pt; } .t25 .gap { font-size:6.4pt; } .t25 td, .t25 td.b, .t25 td.n { white-space:normal; }
+.labcat .bench b { color:#8a7a4a; font-size:6pt; letter-spacing:.08em; text-transform:uppercase; margin-right:4px; }
 
 /* weather desk */
 .wx { border:1px solid #d6e2ea; border-radius:12px; overflow:hidden; background:#fff; }
@@ -272,7 +287,7 @@ def play_card(S, p):
     return (f"<div class='slip' style='--c1:{c1};--c2:{c2}'><div class='stripe'></div><div class='main'>"
             f"<div class='top'><div class='lg'>{S.logos(p['game'], 26)}</div><div>"
             f"<div class='pk'>{E(p['bet'])}<span class='odds'>{W.fmt_odds(p['odds'])}</span></div>"
-            f"<div class='meta'>{E(p['game'])} · {S.when(p['game'])}</div></div></div>"
+            f"<div class='meta'>{W.matchup(S, p['game'])} · {S.when(p['game'])}</div></div></div>"
             f"{chips(p)}{why_block(S, p)}</div>"
             f"<div class='stub'><div class='units'>{p['units']:g}U</div><div class='usd'>{money(p['units'])}</div>"
             f"<div class='bk'>{E(p['book'])}</div><div class='tier {tier}'>{E(p['tier'])}</div></div></div>")
@@ -336,7 +351,7 @@ def leans_table(S, F, avoid=()):
         return ["<p class='empty'>Nothing else worth tracking this week.</p>"]
     h = ["<table><tr><th style='width:60px'></th><th>Game</th><th>Lean</th><th>Why / price needed</th></tr>"]
     for g, what, why in rows:
-        h.append(f"<tr><td class='lgc'>{S.logos(g, 18)}</td><td class='n'>{E(g)}</td><td class='b'>{E(what)}</td><td>{why}</td></tr>")
+        h.append(f"<tr><td class='lgc'>{S.logos(g, 18)}</td><td class='n'>{W.matchup(S, g)}</td><td class='b'>{E(what)}</td><td>{why}</td></tr>")
     h.append("</table>")
     return h
 
@@ -447,7 +462,7 @@ def blowout_board(S, blow):
         bucket = "40+ pt spreads: overs +10% ROI since 2010" if spread > 40 else "30–40 pt spreads: overs +6% ROI since 2010"
         agree = " Our model's total is above the line too." if p["model_agrees"] else ""
         h.append(f"<div class='sb-row' style='--c1:{c1};--c2:{c2}'><div class='stripe'></div><div>{S.logos(p['game'], 22)}</div>"
-                 f"<div class='game'><b>{E(p['game'])}</b><span class='meta'>{S.when(p['game'])}</span></div>"
+                 f"<div class='game'><b>{W.matchup(S, p['game'])}</b><span class='meta'>{S.when(p['game'])}</span></div>"
                  f"<div class='dog'><b>{dog_pts:.0f}</b><span>{E(dog_abbr)}</span></div>"
                  f"<div class='sbwhy'>{E(fav)} by {spread:g} with a {total:g} total: the market has {E(dog)} scoring only "
                  f"<b>~{dog_pts:.0f}</b>. {bucket}. Model total {b.get('model_total')}.{agree}"
@@ -469,7 +484,7 @@ def weather_desk(S, plays):
         extra = [x for x in p["signals"] if x not in WEATHER]
         stack = f" <b>Also:</b> {E(', '.join(extra))}." if extra else ""
         h.append(f"<div class='wx-row' style='--c1:{c1};--c2:{c2}'><div class='stripe'></div><div>{S.logos(p['game'], 22)}</div>"
-                 f"<div class='game'><b>{E(p['game'])}</b><span class='meta'>{S.when(p['game'])}</span></div>"
+                 f"<div class='game'><b>{W.matchup(S, p['game'])}</b><span class='meta'>{S.when(p['game'])}</span></div>"
                  f"<div class='tiles'><div class='tile wind{' hot' if wind >= 15 else ''}'><b>{wind:.0f}</b><span>mph wind</span></div>"
                  f"<div class='tile rain{' hot' if wet >= 3 else ''}'><b>{wet}/8</b><span>wet hrs</span></div></div>"
                  f"<div class='sbwhy'>{reason}{stack}<div class='windbar'><i style='width:{min(100, wind / 30 * 100):.0f}%'></i></div></div>"
@@ -479,13 +494,17 @@ def weather_desk(S, plays):
     return h
 
 
-LAB_ORDER = ["Weather", "Blowout", "Trend", "Underdog", "Big dog", "Stats-only", "Season phase", "Edge"]
+LAB_ORDER = ["Weather", "Blowout", "Trend", "Rankings", "Records", "Head-to-head", "Matchup", "Underdog", "Big dog",
+             "Stats-only", "Season phase", "Edge"]
 LAB_BLURB = {"Weather": "wind, rain, cold", "Blowout": "30+ pt spreads", "Trend": "ATS & over streaks",
-             "Underdog": "conference & road dogs", "Big dog": "21+ pt dogs", "Stats-only": "offense/defense numbers only",
-             "Season phase": "early, mid-season, November", "Edge": "our model vs the line"}
+             "Rankings": "AP / CFP poll spots", "Records": "W-L, streaks, bowl math", "Head-to-head": "revenge, rivalries",
+             "Matchup": "unit vs unit, pace", "Underdog": "conference & road dogs", "Big dog": "21+ pt dogs",
+             "Stats-only": "offense/defense numbers only", "Season phase": "early, mid-season, November",
+             "Edge": "our model vs the line"}
 
 
 def lab_board(S):
+    """Every tested system by category: the ones that passed in full, the benched ones as a one-line list."""
     path = os.path.join(BET, "data", "cfb", "lab.json")
     if not os.path.exists(path):
         return []
@@ -494,29 +513,78 @@ def lab_board(S):
     for x in lab:
         cats.setdefault(x["category"], []).append(x)
     h = ["<div class='lab'>"]
-    for cat in [c for c in LAB_ORDER if c in cats]:
-        h.append(f"<div class='labcat'><h4>{E(cat)}<small>{E(LAB_BLURB.get(cat, ''))}</small></h4>"
-                 "<div class='labhead'><span>System</span><span>ROI</span><span>Wk 5–9</span><span>Verdict</span></div>")
-        for x in cats[cat]:
-            if x["on_card"] and x["grade"]:
+    for cat in [c for c in LAB_ORDER if c in cats] + [c for c in cats if c not in LAB_ORDER]:
+        xs = cats[cat]
+        good = [x for x in xs if x["grade"]]
+        bench = [x for x in xs if not x["grade"]]
+        h.append(f"<div class='labcat'><h4>{E(cat)}<small>{len(xs)} tested · {E(LAB_BLURB.get(cat, ''))}</small></h4>")
+        if good:
+            h.append("<div class='labhead'><span>System</span><span>ROI</span><span>Wk 5–9</span><span>Verdict</span></div>")
+        for x in good:
+            if x["on_card"]:
                 v, cls = f"On card · {x['grade']}", "on"
-            elif x["grade"] and ("kickoff" in x["name"] or "12+" in x["name"]):
+            elif "kickoff" in x["name"] or "12+" in x["name"]:
                 v, cls = "Steady version used", "alt"
-            elif x["grade"]:
-                v, cls = f"Passed · {x['grade']}", "alt"
-            elif x["bets"] < 100:
-                v, cls = "Too few bets", "off"
             else:
-                v, cls = "Benched", "off"
+                v, cls = f"Passed · {x['grade']}", "alt"
             live = f" · this week: {len(x['live'])}" if x["on_card"] and x["live"] else ""
+            since = "2014" if cat == "Edge" else "2011"
             mid = x["mid"]
-            since = "2014" if x["category"] == "Edge" else "2011"
             h.append(f"<div class='labrow'><div class='nm'>{E(x['name'])}<i>{x['record']} since {since}{live}</i></div>"
                      f"<div class='n {'pos' if x['roi'] > 0 else 'neg'}'>{x['roi']:+.1f}%</div>"
                      f"<div class='n {'pos' if mid['roi%'] > 0 else 'neg'}'>{(format(mid['roi%'], '+.1f') + '%') if mid['bets'] else '—'}</div>"
                      f"<div class='verdict {cls}'>{E(v)}</div></div>")
+        if bench:
+            items = " · ".join(f"{E(x['name'])} <span class='{'pos' if x['roi'] > 0 else 'neg'}'>{x['roi']:+.1f}%</span>"
+                               + (" (too few bets)" if x["bets"] < 100 else "") for x in bench)
+            h.append(f"<div class='bench'><b>{'Benched' if good else 'All benched'}</b>{items}</div>")
         h.append("</div>")
     h.append("</div>")
+    return h
+
+
+def lab_count():
+    path = os.path.join(BET, "data", "cfb", "lab.json")
+    return len(json.load(open(path))) if os.path.exists(path) else 0
+
+
+def top25_watch(S, F):
+    """This week's games with a ranked team: records, poll vs betting-market rank, streaks, last meeting."""
+    games = [(g, r) for g, r in S.rows.items() if pd.notna(getattr(r, "h_rank", np.nan)) or pd.notna(getattr(r, "a_rank", np.nan))]
+    if not games:
+        return ["<p class='empty'>No ranked teams on the board this week.</p>"]
+    games.sort(key=lambda x: min(v for v in (x[1].h_rank, x[1].a_rank) if pd.notna(v)))
+    ours = {}
+    for p in F["plays"]:
+        ours.setdefault(p["game"], []).append(f"{p['bet']} · {p['units']:g}u")
+    h = ["<table class='t25'><tr><th style='width:72px'></th><th style='width:25%'>Matchup</th><th style='width:10%'>Line</th>"
+         "<th style='width:24%'>Poll vs market rank</th><th style='width:21%'>Streaks · last meeting</th><th style='width:13%'>Our play</th></tr>"]
+    for g, r in games:
+        b = S.board.get(g, {})
+        gaps = []
+        for s, name in (("a", r.away), ("h", r.home)):
+            rank, mrank = getattr(r, f"{s}_rank"), getattr(r, f"{s}_mkt_rank")
+            if pd.isna(rank) or pd.isna(mrank):
+                continue
+            d = int(mrank) - int(rank)
+            cls, txt = ("hi", f"poll higher by {d}") if d >= 8 else ("lo", f"market higher by {-d}") if d <= -8 else ("ok", "agree")
+            gaps.append(f"<div>{E(name)} #{int(rank)} · market #{int(mrank)} <span class='gap {cls}'>{txt}</span></div>")
+        streaks = []
+        for s, name in (("a", r.away), ("h", r.home)):
+            k = int(getattr(r, f"{s}_streak"))
+            if abs(k) >= 2:
+                streaks.append(f"{E(name)} {'W' if k > 0 else 'L'}{abs(k)}")
+        form = [" · ".join(streaks)] if streaks else []
+        if pd.notna(r.h2h_ago):
+            m, ago = r.h2h_margin, int(r.h2h_ago)
+            who = r.home if m > 0 else r.away
+            form.append(f"<span class='meta'>Last met {int(r.season) - ago}: {E(who)} by {abs(m):g}</span>")
+        line = f"{E(b.get('market_spread', ''))}<div class='meta'>O/U {E(str(b.get('market_total', '')))}</div>"
+        play = "<br>".join(E(x) for x in ours.get(g, [])) or "<span class='meta'>—</span>"
+        h.append(f"<tr><td class='lgc'>{S.logos(g, 18)}</td><td class='n'>{W.matchup(S, g)}"
+                 f"<div class='meta'>{S.when(g)}</div></td><td class='n'>{line}</td><td>{''.join(gaps)}</td>"
+                 f"<td>{'<br>'.join(form) or '—'}</td><td class='b'>{play}</td></tr>")
+    h.append("</table>")
     return h
 
 
@@ -542,9 +610,10 @@ def render_cfb():
     h += ["<h2>Other Plays</h2>", "<div class='note'>Model edges, trend fades and situational spots.</div>"]
     h += [play_card(S, p) for p in other] or [
         "<p class='empty'>Nothing else cleared the bar this week. The strongest near-misses are below.</p>"]
-    h += ["<h2>Systems Lab</h2>", "<div class='note'>Every college system we tested, graded on 2011–2026 closing lines at "
-          "−110. Only the ones that held up make the card; the rest are shown so you know they were checked.</div>"]
-    h += lab_board(S)
+    h += ["<h2>Top 25 Watch</h2>", "<div class='note'>Ranks at kickoff (AP, or CFP once it's out), records going in, and "
+          "where the betting market ranks each team. Context, not bets: every rank, record and poll-vs-market system we "
+          "tested lost money against the closing line (Systems Lab below).</div>"]
+    h += top25_watch(S, F)
     ours = {p["game"]: p["bet"] for p in plays}
     h += ["<h2>QB Changes</h2>", "<div class='note'>Teams whose passer changed last game (from play-by-play; college injury "
           "reports aren't public). Confirm the starter before betting either side.</div>"]
@@ -553,6 +622,9 @@ def render_cfb():
           "real signals at the wrong price.</div>"] + leans_table(S, F)
     h += ["<h2>Streaks &amp; Trends</h2>", "<div class='note'>Active streaks among this week's teams, back into last season. "
           "Context only.</div>"] + streak_block(W.streaks(S))
+    h += ["<h2>Systems Lab</h2>", f"<div class='note'>All {lab_count()} college systems we tested, graded on 2011–2026 closing "
+          "lines at −110. Only the ones that held up make the card; the rest are listed so you know they were checked.</div>"]
+    h += lab_board(S)
     h += oddball_block(S, "cfb") + footer()
     return S, h
 

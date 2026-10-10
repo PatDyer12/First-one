@@ -58,6 +58,15 @@ def load():
     for c in WEATHER:
         if c not in g:
             g[c] = np.nan
+    rpath = os.path.join(DATA, "rankings.csv")
+    if os.path.exists(rpath):  # top-25 rank at kickoff (cfb_rankings.py); ESPN occasionally swaps home/away
+        r = pd.read_csv(rpath)
+        g = g.merge(r, on="game_id", how="left", suffixes=("", "_r"))
+        flip = g["home_id"] == g["away_id_r"]
+        g.loc[flip, ["home_rank", "away_rank"]] = g.loc[flip, ["away_rank", "home_rank"]].values
+        g = g.drop(columns=["home_id_r", "away_id_r"])
+    else:
+        g["home_rank"] = g["away_rank"] = np.nan
     g["start_date"] = pd.to_datetime(g["start_date"], utc=True, errors="coerce")
     g = g.sort_values(["start_date", "game_id"]).reset_index(drop=True)
     t = pd.read_csv(os.path.join(DATA, "team_games.csv"))
@@ -75,6 +84,27 @@ def build(params=None):
     mkt = {"hfa": 2.8, "total": 52.0}
     season_seen, last_game = {}, {}
     form = {}  # (team, season) -> list of (covered, went_over) in games with lines
+    rec = {}   # (team, season) -> dict(w, l, cw, cl, streak, last_margin, last_rank, last_opp_rank, n)
+    meet = {}  # frozenset(team pair) -> list of (season, {team: margin})
+    # each team's next game, and that opponent's rank as of this week (look-ahead spots)
+    long = pd.concat([g[["game_id", "season", "week", "start_date", "home_id", "away_id", "home_rank"]]
+                      .rename(columns={"home_id": "tid", "away_id": "opp", "home_rank": "rank"}),
+                      g[["game_id", "season", "week", "start_date", "away_id", "home_id", "away_rank"]]
+                      .rename(columns={"away_id": "tid", "home_id": "opp", "away_rank": "rank"})]).sort_values("start_date")
+    long["next_opp"] = long.groupby(["tid", "season"])["opp"].shift(-1)
+    long["next_game"] = long.groupby(["tid", "season"])["game_id"].shift(-1)
+    rank_now = {(r.tid, r.season, r.week): r.rank for r in long.itertuples(index=False)}
+    rank_at = {(r.game_id, r.tid): r.rank for r in long.itertuples(index=False)}
+    next_opp_rank = {}
+    for r in long.itertuples(index=False):
+        if pd.notna(r.next_opp):
+            k = (int(r.next_opp), r.season, r.week)
+            next_opp_rank[(r.game_id, r.tid)] = rank_now[k] if k in rank_now else rank_at.get((r.next_game, int(r.next_opp)))
+    reg_games = g[g["season_type"] != "postseason"].groupby(["season"])[["home_id", "away_id"]]
+    n_reg = {}
+    for season, x in reg_games:
+        for tid, n in pd.concat([x["home_id"], x["away_id"]]).value_counts().items():
+            n_reg[(season, tid)] = int(n)
 
     def team(tid, div):
         if tid not in teams:
@@ -135,6 +165,29 @@ def build(params=None):
             f[f"{side}_ats3_lost"] = sum(1 for c, _o in last3 if c is False) if len(last3) == 3 else np.nan
             f[f"{side}_over3"] = sum(1 for _c, o in last3 if o is True) if len(last3) == 3 else np.nan
             f[f"{side}_under3"] = sum(1 for _c, o in last3 if o is False) if len(last3) == 3 else np.nan
+        post = gm.season_type == "postseason"
+        for side, tid, rank in (("h", h, gm.home_rank), ("a", a, gm.away_rank)):
+            r = rec.get((tid, gm.season), {"w": 0, "l": 0, "cw": 0, "cl": 0, "streak": 0, "n": 0,
+                                           "last_margin": np.nan, "last_rank": np.nan, "last_opp_rank": np.nan})
+            last = rec.get((tid, gm.season - 1))
+            f[f"{side}_rank"] = rank
+            f[f"{side}_w"], f[f"{side}_l"] = r["w"], r["l"]
+            f[f"{side}_cw"], f[f"{side}_cl"] = r["cw"], r["cl"]
+            f[f"{side}_streak"] = r["streak"]
+            f[f"{side}_last_margin"] = r["last_margin"]
+            f[f"{side}_prev_rank"] = r["last_rank"]           # rank going into the team's previous game
+            f[f"{side}_last_opp_rank"] = r["last_opp_rank"]   # rank of the team it played last
+            f[f"{side}_played"] = r["n"]
+            f[f"{side}_last_wpct"] = last["w"] / max(last["w"] + last["l"], 1) if last else np.nan
+            f[f"{side}_rem"] = max(n_reg.get((gm.season, tid), 12) - r["n"] - 1, 0) if not post else 0
+            f[f"{side}_fbs"] = int((gm.home_division if tid == h else gm.away_division) == "fbs")
+            f[f"{side}_mkt"] = (hs if tid == h else as_)["mkt"]
+            f[f"{side}_next_opp_rank"] = next_opp_rank.get((gm.game_id, tid), np.nan)
+        past = meet.get(frozenset((h, a)), [])
+        f["kick_et"] = gm.start_date.tz_convert("America/New_York").hour if pd.notna(gm.start_date) else np.nan
+        f["h2h_margin"] = past[-1][1].get(h, np.nan) if past else np.nan   # home team's margin in the last meeting
+        f["h2h_ago"] = gm.season - past[-1][0] if past else np.nan        # seasons since it
+        f["h2h_n10"] = len({x[0] for x in past if gm.season - 10 <= x[0] < gm.season})  # seasons met, last 10
         f["wind"] = 0.0 if gm.indoor == 1 else gm.wind
         f["temp"] = 70.0 if gm.indoor == 1 else gm.temp
         f["precip"] = 0.0 if gm.indoor == 1 else gm.precip
@@ -163,6 +216,17 @@ def build(params=None):
             continue
         for tid in (h, a):
             last_game[tid] = gm.start_date
+        for tid, m, rank, opp_rank in ((h, gm.result, gm.home_rank, gm.away_rank), (a, -gm.result, gm.away_rank, gm.home_rank)):
+            r = rec.setdefault((tid, gm.season), {"w": 0, "l": 0, "cw": 0, "cl": 0, "streak": 0, "n": 0,
+                                                  "last_margin": np.nan, "last_rank": np.nan, "last_opp_rank": np.nan})
+            won = m > 0
+            r["w" if won else "l"] += 1
+            if gm.conference_game == True:  # noqa: E712
+                r["cw" if won else "cl"] += 1
+            r["streak"] = (max(r["streak"], 0) + 1) if won else (min(r["streak"], 0) - 1)
+            r["last_margin"], r["last_rank"], r["last_opp_rank"] = m, rank, opp_rank
+            r["n"] += 0 if gm.season_type == "postseason" else 1
+        meet.setdefault(frozenset((h, a)), []).append((gm.season, {h: gm.result, a: -gm.result}))
         if pd.notna(gm.spread_line):
             cov_h = gm.result - gm.spread_line
             ou = (gm.total - gm.total_line) if pd.notna(gm.total_line) else np.nan
@@ -206,7 +270,28 @@ def build(params=None):
     df["sum_pts"] = df["h_pts_for"] + df["h_pts_against"] + df["a_pts_for"] + df["a_pts_against"]
     df["pace_sum"] = df["h_pace"] + df["a_pace"]
     df["game_type"] = np.where(df["postseason"] == 1, "POST", "REG")
-    return add_stat_model(df)
+    return add_stat_model(add_week_ranks(df))
+
+
+UNITS = ["off_epa", "def_epa", "off_pass_epa", "def_pass_epa", "off_rush_epa", "def_rush_epa", "pace"]
+
+
+def add_week_ranks(df):
+    """Where each FBS team stands that week among FBS teams playing: market power rank (1 = best) and
+    percentiles for each unit (1.0 = best; for defenses, lower EPA allowed is better)."""
+    long = pd.concat([df[["game_id", "season", "week", "postseason", f"{s}_fbs", f"{s}_mkt"] + [f"{s}_{u}" for u in UNITS]]
+                      .rename(columns=lambda c, s=s: c[2:] if c.startswith(s + "_") else c).assign(side=s)
+                      for s in ("h", "a")], ignore_index=True)
+    fbs = long[long["fbs"] == 1].copy()
+    grp = fbs.groupby(["season", "week", "postseason"])
+    fbs["mkt_rank"] = grp["mkt"].rank(ascending=False, method="min")
+    for u in UNITS:
+        fbs[f"{u}_pct"] = grp[u].rank(pct=True, ascending=not u.startswith("def_"))
+    cols = ["mkt_rank"] + [f"{u}_pct" for u in UNITS]
+    for s in ("h", "a"):
+        x = fbs[fbs["side"] == s].set_index("game_id")[cols].add_prefix(f"{s}_")
+        df = df.join(x, on="game_id")
+    return df
 
 
 STAT_SIDE = ["elo_diff", "net_epa", "net_sr", "net_pass_epa", "net_rush_epa", "net_pts", "hfa", "rest_diff",

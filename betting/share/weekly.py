@@ -165,6 +165,23 @@ class Sport:
         return w.loc[game_id] if game_id in w.index else None
 
 
+# ---------------------------------------------------------------- matchup labels (college: rank and record)
+def team_tag(r, s):
+    name = r.home if s == "h" else r.away
+    rank, w, l = getattr(r, f"{s}_rank", np.nan), getattr(r, f"{s}_w", np.nan), getattr(r, f"{s}_l", np.nan)
+    rk = f"<span class='rk'>#{int(rank)}</span>" if pd.notna(rank) else ""
+    wl = f" <span class='wl'>{int(w)}\u2011{int(l)}</span>" if pd.notna(w) and pd.notna(l) else ""  # no line break in 4-1
+    return f"{rk}{E(name)}{wl}"
+
+
+def matchup(S, game):
+    """'#7 Georgia 4-1 @ #3 Alabama 5-0' for college games (ranks at kickoff, records going in)."""
+    r = S.rows.get(game)
+    if r is None or S.sport != "cfb":
+        return E(game)
+    return f"{team_tag(r, 'a')} @ {team_tag(r, 'h')}"
+
+
 # ---------------------------------------------------------------- reasons
 def model_reason(S, p):
     b = S.board.get(p["game"], {})

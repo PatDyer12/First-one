@@ -27,7 +27,7 @@ then graded against the result and the **closing line** (CLV). Set `placed` to `
 ## Final card: model + systems + situational angles (`final.py`, `angles.py`)
 ```
 python3 betting/fetch.py && python3 betting/model.py --week
-python3 betting/cfb_fetch.py && python3 betting/cfb_weather.py && python3 betting/cfb_model.py --week
+python3 betting/cfb_fetch.py && python3 betting/cfb_rankings.py && python3 betting/cfb_weather.py && python3 betting/cfb_model.py --week
 python3 betting/final.py            # decision layer -> data/final_nfl.json, data/cfb/final_cfb.json (+ tracker)
 python3 betting/share/cards.py      # -> betting/share/nfl_week<N>.pdf, cfb_week<N>.pdf
 ```
@@ -60,7 +60,10 @@ Run the models first. Each card has these sections:
 - **Best Bets**: model plays, each with a reason.
 - **Totals system**: Blowout Overs (college) or Wind Unders (NFL).
 - **Weather Desk** (college): steady-wind and steady-rain unders, with the forecast wind and wet hours for each game.
+- **Top 25 Watch** (college): every game with a ranked team: ranks at kickoff, records going in, poll rank vs the
+  betting market's power rank, streaks and the last meeting. Context only (none of those systems made money).
 - **Systems Lab** (college): every system `cfb_lab.py` tested, its ROI overall and in weeks 5–9, and whether it made the card.
+- College matchups show each team's rank and record (`#7 Indiana 5-0 @ Nebraska 5-0`) everywhere on the card.
 - **Spread & Moneyline Systems.** NFL: Close Road Team (spread *or* moneyline, pick one) and Buy-Low Underdog.
   College: Rested Home Team. There's no college moneyline system because the free data has no historical moneylines.
 - **Leans & Price Watch**: system plays waiting on a better price.
@@ -146,8 +149,9 @@ What testing showed:
 - Not included (no free data): starting QBs, injuries, returning production, recruiting/transfer talent.
   Historical lines come without odds, so the backtest assumes -110 and can't grade moneylines.
 
-### College systems lab (`cfb_lab.py`, `cfb_weather.py`)
+### College systems lab (`cfb_lab.py`, `cfb_weather.py`, `cfb_rankings.py`)
 ```
+python3 betting/cfb_rankings.py  # top-25 rank of both teams at kickoff for every FBS game since 2011 (ESPN: AP, then CFP)
 python3 betting/cfb_weather.py   # kickoff weather: Meteostat station history 2011-now + Open-Meteo forecast this week
 python3 betting/cfb_lab.py       # grade every system -> data/cfb/lab.json (the card's Systems Lab) + this week's plays
 ```
@@ -156,8 +160,15 @@ Weather comes from the nearest Meteostat station with hourly records (all 141 ho
 4 after: average wind (`wind8`) and wet hours (`wet8`, hours with more than 0.2 mm of rain). This week's games use the
 same windows from the hourly forecast.
 
-23 systems in 8 categories, each written down with a reason before testing, graded on 2011–2026 closing lines at
--110 with early (weeks 0–4), mid-season (5–9) and late (10+) splits:
+58 systems in 12 categories, each written down with a reason before testing, graded on 2011–2026 closing lines at
+-110 with early (weeks 0–4), mid-season (5–9) and late (10+) splits. A "mid-season only" pass also has to hold up in
+weeks 3–4 and 10–11 (two candidates looked great in weeks 5–9 and lost 6–34% right outside that window: noise).
+
+Ranking/record/matchup features (`cfb_features.py`): rank at kickoff and in the team's previous game, W-L and
+conference W-L going in, straight-up streak, last season's win %, regular-season games left and bowl-eligibility math,
+the last meeting (margin, how long ago, how many of the last 10 seasons they met), the next opponent's current rank,
+kickoff hour (ET), market power rank among FBS teams that week, and unit percentiles (rush/pass offense and defense,
+pace).
 
 | Category | Systems | Verdict |
 |---|---|---|
@@ -169,6 +180,10 @@ same windows from the hourly forecast.
 | Stats-only | a walk-forward ridge on offense/defense EPA, success rate, pass/rush, points, pace (`stat_margin`, `stat_total`); bet when it's 7+ or 10+ off the line | −4 to −6%: the line already knows the box-score numbers |
 | Season phase | conference unders weeks 5–9, early-season overs, November unders | −1.7 to −4.5% |
 | Edge | our prediction model at 3%/5% edge | too few bets to grade |
+| Rankings (14) | unranked home dog vs ranked, ranked vs ranked dog, ranked favorite laying 14+ in league play, top-10 dog, newly ranked fade, ranked team off a loss, upset-winner fade, poll vs market rank (fade/back), fell out of the poll, line-contradicts-poll favorite, look-ahead, sandwich, night home dog | All benched (best +2.7%, t < 1). Ranked-vs-ranked **favorites** covered 334-263 (+6.7%), but only after flipping a failed idea, t = 1.75, mostly home favorites (road favorites lost) and losing at 7–10.5 point spreads: not trusted |
+| Records (8) | undefeated favorite fade, winless dog, worse record but favored, win streak vs losing streak, bowl push, eliminated favorite fade, last year's 10-win team early, last year's bad team early | All benched (−6.6% to +2.0%) |
+| Head-to-head (4) | revenge after a 14+ loss, blowout-rematch fade, rivalry dog, rivalry-week dog | All benched (−10.4% to +2.2%) |
+| Matchup (7) | run-game and pass-game mismatches, elite defense vs elite offense (side and under), two slow teams under, two fast teams over, service academy under | All benched (−11.7% to −0.4%) |
 
 Also tested and cut (mid-season ideas): conference home dogs, off-bye teams, following/fading line steam, fading big
 total moves, letdown after an upset win, bounce-back after an upset loss or a blowout, two-good-defense unders, big
