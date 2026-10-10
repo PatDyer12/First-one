@@ -425,6 +425,7 @@ body.settle .panel, body.settle #h-net, body.settle #h-usd, body.settle .cell b,
 .pip { position: fixed; right: 24px; bottom: calc(24px + env(safe-area-inset-bottom, 0px)); z-index: 60; width: min(24vw, 300px); aspect-ratio: 9 / 16; border-radius: 18px; overflow: hidden; pointer-events: none;
   border: 3px solid var(--win); box-shadow: 0 0 0 1px rgba(0,0,0,.4), 0 0 50px rgba(61,220,151,.6), 0 20px 60px rgba(0,0,0,.6); background: #000; animation: pipIn .6s cubic-bezier(.2,1.4,.4,1) both; }
 .pip video { width: 100%; height: 100%; object-fit: cover; display: block; }
+.pip.kobe { aspect-ratio: 432 / 468; width: min(30vw, 400px); border-color: #FDB927; box-shadow: 0 0 0 1px rgba(0,0,0,.4), 0 0 50px rgba(253,185,39,.6), 0 20px 60px rgba(0,0,0,.6); }
 .pip span { position: absolute; left: 0; right: 0; top: 0; padding: 10px 12px; font: 900 22px/1 var(--f-display); letter-spacing: 0.06em; text-transform: uppercase; color: #fff; background: linear-gradient(rgba(0,0,0,.7), transparent); }
 .pip.out { transform: translateX(130%); opacity: 0; transition: transform .5s ease-in, opacity .5s; }
 @keyframes pipIn { from { transform: translateX(130%) rotate(6deg); } to { transform: none; } }
@@ -676,6 +677,9 @@ body.tv .chart { height: 240px; }
       <div style="display:flex;gap:8px;flex-wrap:wrap">
         <button type="button" class="btn sm" id="coinTest">Preview Coin Alert</button>
         <button type="button" class="btn sm" id="lossTest">Preview loss sound</button>
+        <button type="button" class="btn sm" id="goodTest">Preview going up</button>
+        <button type="button" class="btn sm" id="badTest">Preview going down</button>
+        <button type="button" class="btn sm" id="firstTest">Preview first leg hit</button>
         <button type="button" class="btn sm" id="whaleTest">Preview whale alert</button>
         <button type="button" class="btn sm" id="whaleWinTest">Preview whale hit</button>
         <button type="button" class="btn sm" id="nukeWarnTest">Preview nuke warning</button>
@@ -741,7 +745,8 @@ body.tv .chart { height: 240px; }
 </div>
 <canvas id="fire-cv" hidden aria-hidden="true"></canvas>
 <canvas id="flood-cv" hidden aria-hidden="true"></canvas>
-<div class="pip" id="pip" hidden aria-hidden="true"><video id="pipVid" muted playsinline preload="none"></video><span>Crowd chop</span></div>
+<div class="pip" id="pip" hidden aria-hidden="true"><video id="pipVid" muted playsinline preload="none"></video><span id="pipLbl">Crowd chop</span></div>
+<video id="pipVid2" muted playsinline preload="none" hidden></video>
 <div class="lockin" id="lockIn" hidden aria-hidden="true"><div>LOCK IN.</div></div>
 <div class="crew" id="crew" hidden aria-hidden="true"><div class="crew-side l"><canvas id="crewL"></canvas></div><div class="crew-side r"><canvas id="crewR"></canvas></div></div>
 <video id="crewVid" muted playsinline preload="none" hidden></video>
@@ -781,7 +786,7 @@ body.tv .chart { height: 240px; }
 
   const S = {
     bets: new Map(), unit: 15, range: "day", db: null, canWrite: true, ready: false, offline: false,
-    open: null, confirmDel: null, cashout: null, sign: -1, day: 0, winSound: "jackpot", games: new Map(), slateAt: 0, lastSettled: [], dayKey: 0,
+    open: null, confirmDel: null, cashout: null, sign: -1, day: 0, winSound: "jackpot", pops: new Map(), games: new Map(), slateAt: 0, lastSettled: [], dayKey: 0,
   };
   try { const r = localStorage.getItem("sb-range"); if (RANGE_LABEL[r]) S.range = r; } catch (e) {}
 
@@ -1029,7 +1034,7 @@ body.tv .chart { height: 240px; }
       const allHit = legs.length > 0 && hits === legs.length;
       const ev = b.kind !== "parlay" && b.sel ? evalSel(b.sel) : null;
       const derived = ev && !ev.fin ? (ev.res === "W" ? "cooking" : ev.res === "L" ? "trouble" : "sweating") : "";
-      const manual = ph === "live" && b.live && (!derived || (b.liveAt || 0) > (S.slateAt || 0)) ? b.live : "";
+      const manual = "";
       const st = dead ? "dead" : manual || derived;
       const verdict = ev && ev.fin ? ev.res : legs.length && ph === "final" ? (dead ? "L" : allHit ? "W" : "") : "";
       const legsHtml = legs.length ? `<ul class="legs">${legs.map((l, i) => `<li class="leg${l.st ? " " + l.st : ""}${can ? " tap" : ""}" data-leg="${i}"${can ? ' title="Tap to mark hit / missed"' : ""}><span class="mk">${l.st === "hit" ? "✓" : l.st === "miss" ? "✕" : ""}</span>${l.sel ? legLogo(l.sel) : ""}<span>${esc(l.t)}${l.ev ? `<small>${esc(l.ev.g.st === "post" ? "Final" : l.ev.txt.toLowerCase() + " · " + l.ev.g.d)}</small>` : ""}</span></li>`).join("")}</ul>` : "";
@@ -1050,11 +1055,7 @@ body.tv .chart { height: 240px; }
             <input id="co-${esc(b.id)}" inputmode="decimal" autocomplete="off" placeholder="${(b.units * S.unit).toFixed(2)}">
             <span class="spacer"></span><button type="button" class="btn sm" data-act="cancel">Cancel</button><button type="button" class="btn sm primary" data-act="co-save">Save</button></div>`;
         } else {
-          const on = (k) => (b.live === k ? " on" : "");
-          actions = `<div class="actions"><span class="lbl">How's it looking?</span>
-            <button type="button" class="btn sm cook${on("cooking")}" data-act="lv" data-v="cooking" aria-pressed="${b.live === "cooking"}">Cooking</button>
-            <button type="button" class="btn sm sweatb${on("sweating")}" data-act="lv" data-v="sweating" aria-pressed="${b.live === "sweating"}">Sweating</button>
-            <button type="button" class="btn sm troub${on("trouble")}" data-act="lv" data-v="trouble" aria-pressed="${b.live === "trouble"}">In trouble</button>
+          actions = `<div class="actions"><span class="lbl">Note</span>
             <input class="notein" id="nt-${esc(b.id)}" autocomplete="off" maxlength="60" placeholder="Score or note, like Q3 · up 4" value="${esc(b.note || "")}" aria-label="Score or note">
             <button type="button" class="btn sm" data-act="note">Save note</button></div>
             <div class="actions"><span class="lbl${verdict ? " hot" : ""}">${verdict === "W" ? "Final says it won. Confirm on your slip, then settle." : verdict === "L" ? (dead ? "A leg missed. Settle it as lost?" : "Final says it lost. Settle it?") : verdict === "P" ? "Final landed on the number. Looks like a push." : dead ? "A leg missed. Settle it as lost?" : allHit ? "Every leg hit. Settle it as won?" : "Settle"}</span>
@@ -1065,7 +1066,7 @@ body.tv .chart { height: 240px; }
             <span class="spacer"></span><button type="button" class="btn sm ghost danger" data-act="del">Delete</button></div>`;
         }
       }
-      const pop = S.pop && S.pop.id === b.id && Date.now() < S.pop.until ? " pop-" + S.pop.kind : "";
+      const pp = S.pops.get(b.id), pop = pp && Date.now() < pp.until ? " pop-" + pp.kind : "";
       return `<article class="bet${can ? " click" : ""}${exp ? " expanded" : ""}${st ? " st-" + st : ""}${pop}" data-id="${esc(b.id)}" ${can ? 'tabindex="0" role="button" aria-expanded="' + exp + '"' : ""}>
         ${ph === "live" && !dead ? '<span class="sweat" aria-hidden="true"></span>' : ""}
         <div class="book ${b.book === "DK" ? "DK" : "FD"}" title="${BOOK[b.book] || ""}">${b.book === "DK" ? "DK" : "FD"}</div>
@@ -1243,7 +1244,6 @@ body.tv .chart { height: 240px; }
     }
     const a = act.dataset.act;
     if (a === "won" || a === "lost" || a === "push") settle(id, a);
-    else if (a === "lv") { const b = S.bets.get(id); patchBet(id, { live: b && b.live === act.dataset.v ? null : act.dataset.v, liveAt: Date.now() }); }
     else if (a === "note") { const i = document.getElementById("nt-" + id); patchBet(id, { note: i ? i.value.trim().slice(0, 60) : "" }).then((ok) => ok && toast("Note saved")); }
     else if (a === "co") { S.cashout = id; render(); const i = document.getElementById("co-" + id); if (i) i.focus(); }
     else if (a === "co-save") {
@@ -1577,6 +1577,7 @@ body.tv .chart { height: 240px; }
     if (!got.some(Boolean)) return;
     S.slateAt = Date.now();
     render();
+    autoReact();
     autoSettle();
     if (!$("#addSheet").hidden) renderGames();
   }
@@ -1670,7 +1671,7 @@ body.tv .chart { height: 240px; }
     }
     return SND.loading[name];
   }
-  function loadSounds() { loadBuf("sounds/" + S.winSound); loadBuf("loss"); loadBuf("sounds/siren"); loadBuf("sounds/nuke"); loadBuf("sounds/nj"); loadBuf("sounds/whale"); loadBuf("sounds/splash"); loadBuf("sounds/chop"); loadBuf("sounds/lockin"); loadVid("#pipVid", "sounds/chop"); loadCrew(); loadWhale(); }
+  function loadSounds() { loadBuf("sounds/" + S.winSound); loadBuf("loss"); loadBuf("sounds/siren"); loadBuf("sounds/nuke"); loadBuf("sounds/nj"); loadBuf("sounds/whale"); loadBuf("sounds/splash"); loadBuf("sounds/chop"); loadBuf("sounds/lockin"); loadBuf("sounds/leg1"); loadVid("#pipVid", "sounds/chop"); loadCrew(); loadWhale(); }
   function playBuf(c, buf, vol) { const s = c.createBufferSource(), g = c.createGain(); g.gain.value = vol; s.buffer = buf; s.connect(g).connect(c.destination); s.start(); return s; }
   function unlock() {
     const wasLive = !!SND.ctx && SND.ctx.state === "running";
@@ -2092,6 +2093,10 @@ body.tv .chart { height: 240px; }
       return IMPACT + 5600;
     });
   }
+  const anyOpen = () => [...S.bets.values()].find((b) => b.status === "open") || { id: "preview" };
+  $("#goodTest").addEventListener("click", () => { closeSheets(); react(anyOpen(), "good"); });
+  $("#badTest").addEventListener("click", () => { closeSheets(); react(anyOpen(), "bad"); });
+  $("#firstTest").addEventListener("click", () => { closeSheets(); react([...S.bets.values()].find((b) => b.status === "open" && b.kind === "parlay") || anyOpen(), "first"); });
   $("#whaleTest").addEventListener("click", () => { closeSheets(); whaleAlert({ pick: "Florida −3.5", units: 1.5, odds: -110 }, "place"); });
   $("#whaleWinTest").addEventListener("click", () => { closeSheets(); whaleSplash({ pick: "Florida −3.5", units: 1.5, odds: -110 }, 1.36); });
 
@@ -2213,31 +2218,83 @@ body.tv .chart { height: 240px; }
     if (!pip.hidden) { pip.classList.add("out"); setTimeout(() => { pip.hidden = true; pip.classList.remove("out"); try { v.pause(); } catch (e) {} }, 500); }
   }
   $("#lockStop").addEventListener("click", stopStatus);
-  function statusFx(d) {
-    const kind = d.live === "cooking" ? "good" : d.live === "trouble" ? "bad" : "mid";
-    S.pop = { id: d.id, kind, until: Date.now() + 3200 };
-    clearTimeout(popT); popT = setTimeout(() => { S.pop = null; render(); }, 3250);
-    stopStatus();
+  const PIPS = {
+    good: { base: "sounds/chop", label: "Crowd chop", ms: 13600, cls: "" },
+    first: { base: "sounds/leg1", label: "Job's not finished", ms: 22700, cls: "kobe" },
+  };
+  function showPip(betId, which) {
+    const P = PIPS[which], pip = $("#pip"), v = $("#pipVid"), c = ready();
+    if (c) loadBuf(P.base).then((buf) => { if (buf && statusBet === betId) statusSrc = playBuf(c, buf, 0.95); });
+    if (v.dataset.base !== P.base) { v.dataset.base = P.base; v.src = vidSrc(P.base); v.load(); }
+    $("#pipLbl").textContent = P.label;
+    pip.className = "pip" + (P.cls ? " " + P.cls : ""); pip.hidden = false;
+    try { v.currentTime = 0; v.play().catch(() => {}); } catch (e) {}
+    pipT = setTimeout(() => { if (statusBet === betId) stopStatus(); }, P.ms);
+  }
+  // kind: "good" (moved into a winning spot), "bad" (slipped into a losing one),
+  // "mid" (dead even), "first" (first parlay leg cashed)
+  function glow(id, kind) {
+    S.pops.set(id, { kind: kind === "first" ? "good" : kind, until: Date.now() + 3200 });
+    clearTimeout(popT); popT = setTimeout(() => { const t = Date.now(); for (const [k, v] of S.pops) if (v.until <= t) S.pops.delete(k); render(); }, 3250);
+  }
+  function react(b, kind) {
+    glow(b.id, kind);
+    render();
     if (kind === "mid") return;
+    stopStatus();
+    statusBet = b.id;
+    if (kind === "good" || kind === "first") { showPip(b.id, kind); return; }
+    const ov = $("#lockIn"); ov.hidden = false; ov.style.animation = "none"; void ov.offsetWidth; ov.style.animation = "";
+    ov.firstElementChild.style.animation = "none"; void ov.offsetWidth; ov.firstElementChild.style.animation = "";
+    setTimeout(() => (ov.hidden = true), 3400);
     const c = ready();
-    statusBet = d.id;
-    if (kind === "good") {
-      if (c) loadBuf("sounds/chop").then((buf) => { if (buf && statusBet === d.id) statusSrc = playBuf(c, buf, 0.95); });
-      const pip = $("#pip"), v = $("#pipVid");
-      loadVid("#pipVid", "sounds/chop");
-      pip.classList.remove("out"); pip.hidden = false;
-      try { v.currentTime = 0; v.play().catch(() => {}); } catch (e) {}
-      pipT = setTimeout(() => { if (statusBet === d.id) stopStatus(); }, 13600);
-    } else {
-      const ov = $("#lockIn"); ov.hidden = false; ov.style.animation = "none"; void ov.offsetWidth; ov.style.animation = "";
-      ov.firstElementChild.style.animation = "none"; void ov.offsetWidth; ov.firstElementChild.style.animation = "";
-      setTimeout(() => (ov.hidden = true), 3400);
-      if (c) loadBuf("sounds/lockin").then((buf) => {
-        if (!buf || statusBet !== d.id) return;
-        statusSrc = playBuf(c, buf, 0.95); $("#lockStop").hidden = false;
-        const me = statusSrc; me.onended = () => { if (statusSrc === me) { statusSrc = null; $("#lockStop").hidden = true; } };
-      });
+    if (c) loadBuf("sounds/lockin").then((buf) => {
+      if (!buf || statusBet !== b.id) return;
+      statusSrc = playBuf(c, buf, 0.95); $("#lockStop").hidden = false;
+      const me = statusSrc; me.onended = () => { if (statusSrc === me) { statusSrc = null; $("#lockStop").hidden = true; } };
+    });
+  }
+  // watch every open bet against the live scores and react when it really swings.
+  // A bet only counts as "up" or "down" once it clears the sport's bar, so normal back-and-forth
+  // (a basketball lead trading by a bucket) doesn't set anything off.
+  const BARS = { NBA: 5, CBB: 5, NFL: 4, CFB: 4, MLB: 1, NHL: 1 }; // points / runs / goals past the number
+  const BET_COOLDOWN = 20 * 60e3, ANY_COOLDOWN = 15 * 60e3;       // each bet: one reaction per 20 min; whole board: one per 15 min
+  const lastRes = new Map(), lastReact = new Map(), legHits = new Map();
+  let lastAny = 0;
+  function swingState(b, ev, prev) {
+    const bar = BARS[(b.sel && b.sel.sp) || b.sport] || 3;
+    if (ev.m >= bar) return "W";
+    if (ev.m <= -bar) return "L";
+    return prev || "E"; // inside the bar: keep the last call ("E" = even, not called yet)
+  }
+  function autoReact() {
+    if (!S.ready) return;
+    const now = Date.now(), swings = [];
+    for (const b of S.bets.values()) {
+      if (b.status !== "open") { lastRes.delete(b.id); legHits.delete(b.id); continue; }
+      if (b.kind === "parlay") {
+        const legs = legsOf(b), hits = legs.filter((l) => l.st === "hit").length, prev = legHits.get(b.id);
+        legHits.set(b.id, hits);
+        if (prev === 0 && hits > 0 && !legs.some((l) => l.st === "miss")) swings.push({ b, kind: "first" });
+        continue;
+      }
+      const ev = b.sel ? evalSel(b.sel) : null;
+      if (!ev || ev.fin) { lastRes.delete(b.id); continue; }
+      const prev = lastRes.get(b.id), cur = swingState(b, ev, prev);
+      lastRes.set(b.id, cur);
+      if (!prev || prev === cur || cur === "E") continue; // first look at this game, or no real swing
+      if (now - (lastReact.get(b.id) || 0) < BET_COOLDOWN) continue;
+      swings.push({ b, kind: cur === "W" ? "good" : "bad" });
     }
+    if (!swings.length) return;
+    swings.forEach((s) => glow(s.b.id, s.kind));
+    // one clip at a time: a first leg cashing beats a bet going down, which beats one going up
+    const rank = { first: 3, bad: 2, good: 1 };
+    const top = swings.reduce((x, s) => (rank[s.kind] > rank[x.kind] ? s : x));
+    swings.forEach((s) => lastReact.set(s.b.id, now));
+    if (top.kind !== "first" && now - lastAny < ANY_COOLDOWN) { render(); return; } // too soon: glow only, no clip
+    lastAny = now;
+    react(top.b, top.kind);
   }
 
   // ---------- Coin Alert: full-screen win celebration ----------
@@ -2522,13 +2579,12 @@ body.tv .chart { height: 240px; }
           S.bets.set(ch.doc.id, d);
           if (first) continue;
           if (prev && prev.status === "open" && d.status !== "open") celebrate(d);
-          else if (prev && d.status === "open" && d.live && d.live !== prev.live && Date.now() - (Number(d.liveAt) || 0) < 30000) statusFx(d);
         else if (prev && d.status === "open" && d.kind === "parlay") legFlash(prev, d);
         if (prev && prev.status === "open" && d.status !== "open" && statusBet === d.id) stopStatus();
           else if (!prev && d.status === "open") announce(d);
         }
         const wasReady = S.ready;
-        S.ready = true; render(); autoSettle();
+        S.ready = true; render(); autoReact(); autoSettle();
         if (!wasReady) { const k = liveKeys(); if (k.length) loadBoards(k); }
       }, onErr));
       unsub.push(db.doc("config/settings").onSnapshot((s) => {
