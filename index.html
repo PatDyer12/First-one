@@ -435,6 +435,35 @@ body.settle .panel, body.settle #h-net, body.settle #h-usd, body.settle .cell b,
 .pip.out { transform: translateX(130%); opacity: 0; transition: transform .5s ease-in, opacity .5s; }
 @keyframes pipIn { from { transform: translateX(130%) rotate(6deg); } to { transform: none; } }
 @media (max-width: 780px) { .pip { width: 40vw; right: 12px; bottom: 90px; } .pip.sq, .pip.kobe { width: 50vw; } .pip.wide { width: 66vw; } }
+/* jumbotron: clip fills the screen, live bets down the right */
+.jumbo { --mc: 61,220,151; position: fixed; inset: 0; z-index: 70; display: grid; grid-template-columns: minmax(0, 1fr) min(27vw, 420px); background: #04060a; cursor: pointer; animation: jbIn .35s ease-out both; }
+.jumbo.m-down { --mc: 255,97,112; } .jumbo.m-hype { --mc: 255,194,75; } .jumbo.m-vibe { --mc: 155,140,255; }
+.jumbo.out { opacity: 0; transition: opacity .4s; }
+@keyframes jbIn { from { opacity: 0; transform: scale(1.03); } to { opacity: 1; transform: none; } }
+.jb-main { display: flex; flex-direction: column; gap: 1.4vh; padding: 2.2vh 1.6vw 2.2vh 2vw; min-width: 0; }
+.jb-top { display: flex; align-items: baseline; gap: 14px; min-width: 0; }
+.jb-tag { flex: none; font: 800 2.2vh/1 var(--f-mono); letter-spacing: .1em; text-transform: uppercase; color: #05070b; background: rgb(var(--mc)); padding: .6vh .8vw; border-radius: 6px; align-self: center; }
+.jb-top b { font: 900 4.4vh/1 var(--f-display); letter-spacing: .03em; text-transform: uppercase; color: #fff; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.jb-why { font: 600 2.2vh/1.2 var(--f-mono); color: var(--ink-2); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; min-width: 0; }
+.jb-x { margin-left: auto; flex: none; font: 400 4vh/1 var(--f-body); color: var(--ink-3); }
+.jb-screen { position: relative; flex: 1; min-height: 0; border-radius: 14px; overflow: hidden; background: #000; border: 3px solid rgb(var(--mc)); box-shadow: 0 0 70px rgba(var(--mc), .35); }
+.jb-screen video { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: contain; }
+.jb-screen #jbBg { object-fit: cover; filter: blur(34px) brightness(.4) saturate(1.3); transform: scale(1.15); }
+.jb-prog { height: 6px; border-radius: 3px; background: rgba(255,255,255,.08); overflow: hidden; }
+.jb-prog i { display: block; height: 100%; width: 0; background: rgb(var(--mc)); }
+.jb-side { display: flex; flex-direction: column; gap: 1.1vh; padding: 2.2vh 1.4vw; background: #0a0e15; border-left: 1px solid var(--line); overflow: hidden; }
+.jb-side h3 { margin: 0 0 .4vh; display: flex; align-items: center; gap: 10px; font: 700 1.9vh/1 var(--f-mono); letter-spacing: .14em; text-transform: uppercase; color: var(--ink-2); }
+.jb-side .dot, .jb-bet .dot { display: inline-block; width: 9px; height: 9px; border-radius: 50%; background: var(--loss); box-shadow: 0 0 10px var(--loss); animation: blink 1.2s infinite; margin-right: 8px; vertical-align: middle; }
+.jb-bet { border: 1px solid var(--line); border-radius: 12px; padding: 1.2vh 1vw; background: rgba(255,255,255,.02); }
+.jb-bet.on { border-color: rgb(var(--mc)); background: rgba(var(--mc), .12); box-shadow: 0 0 30px rgba(var(--mc), .25); }
+.jb-bet .r { display: flex; justify-content: space-between; gap: 10px; align-items: baseline; }
+.jb-bet b { font: 700 2.4vh/1.15 var(--f-body); color: #fff; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.jb-bet .r span { font: 600 1.7vh var(--f-mono); color: var(--ink-3); flex: none; }
+.jb-bet .sc { margin-top: .5vh; font: 600 1.8vh var(--f-mono); color: var(--ink-2); }
+.jb-bet .st { margin-top: .5vh; font: 800 1.8vh var(--f-mono); letter-spacing: .06em; text-transform: uppercase; color: var(--ink-2); }
+.jb-bet .st.w { color: var(--win); } .jb-bet .st.l { color: var(--loss); } .jb-bet .st.e { color: var(--gold); }
+.jb-none { color: var(--ink-3); font-size: 2vh; }
+@media (max-width: 780px) { .jumbo { grid-template-columns: 1fr; grid-template-rows: minmax(0, 1fr) auto; } .jb-side { max-height: 34vh; overflow-y: auto; border-left: 0; border-top: 1px solid var(--line); } .jb-top b { font-size: 3vh; } .jb-why { display: none; } }
 .cliplib { display: grid; gap: 6px; max-height: 300px; overflow-y: auto; }
 .cliplib h4 { margin: 6px 0 0; font: 700 12px var(--f-mono); letter-spacing: .08em; text-transform: uppercase; color: var(--ink-3); }
 .sndrow .mood { font: 600 10px var(--f-mono); text-transform: uppercase; letter-spacing: .06em; padding: 2px 6px; border-radius: 6px; margin-left: auto; color: var(--ink-2); border: 1px solid var(--line); white-space: nowrap; }
@@ -700,7 +729,7 @@ body.tv .chart { height: 240px; }
     <div class="field">
       <span class="lbl">Reaction clips</span>
       <label class="togrow"><input type="checkbox" id="clipsOn"> Pop clips up on this screen</label>
-      <span class="hint">While a college football bet is live, a clip pops up about every 10 minutes: hype when it's close, celebration when you're covering, Saban when you're not. Kickoffs and big swings set one off too. Turn this off on your phone and leave it on for the monitor.</span>
+      <span class="hint">While a bet is live, a clip takes over the screen about every 10 minutes: a winning clip when you're cashing, a losing one when you're not, hype when it's close. Kickoffs and big swings set one off too, and Georgia–Bama plays its own clips on every score. Tap the screen to close one. Turn this off on your phone and leave it on for the monitor.</span>
       <div class="cliplib" id="clipLib"></div>
     </div>
     <div class="field">
@@ -762,7 +791,14 @@ body.tv .chart { height: 240px; }
 </div>
 <canvas id="fire-cv" hidden aria-hidden="true"></canvas>
 <canvas id="flood-cv" hidden aria-hidden="true"></canvas>
-<div class="pip" id="pip" hidden aria-hidden="true"><video id="pipVid" muted playsinline preload="none"></video><span id="pipLbl">Crowd chop</span></div>
+<div class="jumbo" id="jumbo" hidden title="Tap to close">
+  <div class="jb-main">
+    <div class="jb-top"><span class="jb-tag" id="jbTag">Live</span><b id="jbLbl"></b><span class="jb-why" id="jbWhy"></span><span class="jb-x" aria-hidden="true">×</span></div>
+    <div class="jb-screen"><video id="jbBg" muted playsinline preload="none" aria-hidden="true"></video><video id="pipVid" muted playsinline preload="none"></video></div>
+    <div class="jb-prog"><i id="jbProg"></i></div>
+  </div>
+  <aside class="jb-side"><h3><i class="dot"></i>Live bets</h3><div id="jbBets"></div></aside>
+</div>
 <video id="pipVid2" muted playsinline preload="none" hidden></video>
 <div class="lockin" id="lockIn" hidden aria-hidden="true"><div>LOCK IN.</div></div>
 <div class="crew" id="crew" hidden aria-hidden="true"><div class="crew-side l"><canvas id="crewL"></canvas></div><div class="crew-side r"><canvas id="crewR"></canvas></div></div>
@@ -1688,7 +1724,7 @@ body.tv .chart { height: 240px; }
     }
     return SND.loading[name];
   }
-  function loadSounds() { loadBuf("sounds/" + S.winSound); loadBuf("loss"); loadBuf("sounds/siren"); loadBuf("sounds/nuke"); loadBuf("sounds/nj"); loadBuf("sounds/whale"); loadBuf("sounds/splash"); loadBuf("sounds/chop"); loadBuf("sounds/lockin"); loadBuf("sounds/leg1"); loadVid("#pipVid", "sounds/chop"); loadCrew(); loadWhale(); }
+  function loadSounds() { loadBuf("sounds/" + S.winSound); loadBuf("loss"); loadBuf("sounds/nukeplace"); loadBuf("sounds/nuke"); loadBuf("sounds/nj"); loadBuf("sounds/whale"); loadBuf("sounds/splash"); loadBuf("sounds/chop"); loadBuf("sounds/lockin"); loadBuf("sounds/leg1"); loadVid("#pipVid", "sounds/chop"); loadCrew(); loadWhale(); }
   function playBuf(c, buf, vol) { const s = c.createBufferSource(), g = c.createGain(); g.gain.value = vol; s.buffer = buf; s.connect(g).connect(c.destination); s.start(); return s; }
   function unlock() {
     const wasLive = !!SND.ctx && SND.ctx.state === "running";
@@ -1840,11 +1876,11 @@ body.tv .chart { height: 240px; }
       $("#nkWarnPick").textContent = b.pick;
       $("#nkWarnAmt").textContent = `${fUSD(b.units * S.unit)} to win ${fUSD(b.units * ppu(b.odds) * S.unit)}  ·  ${fOdds(b.odds)}`;
       ov.classList.remove("out"); ov.hidden = false;
-      playSfx("siren", 0.85);
-      const stop = reduced ? null : mushroom($("#nkWarnCv"), { scale: 0.85, hot: 0.8, dur: 6300 });
-      setTimeout(() => ov.classList.add("out"), 5600);
-      setTimeout(() => { ov.hidden = true; ov.classList.remove("out"); if (stop) stop(); }, 6450);
-      return 6500;
+      playSfx("nukeplace", 0.95);
+      const stop = reduced ? null : mushroom($("#nkWarnCv"), { scale: 0.85, hot: 0.8, dur: 9500 });
+      setTimeout(() => ov.classList.add("out"), 8900);
+      setTimeout(() => { ov.hidden = true; ov.classList.remove("out"); if (stop) stop(); }, 9750);
+      return 9800;
     });
   }
 
@@ -1878,7 +1914,7 @@ body.tv .chart { height: 240px; }
       if (m2) { m2.clearRect(0, 0, w, h); m2.drawImage(cv, 0, 0); }
     };
   }
-  const vidSrc = (base) => (document.createElement("video").canPlayType('video/webm; codecs="vp9"') ? base + ".webm" : base + ".mp4") + "?v=1";
+  const vidSrc = (base) => (document.createElement("video").canPlayType('video/mp4; codecs="avc1.42E01E"') ? base + ".mp4" : base + ".webm") + "?v=1";
   function loadVid(id, base) { const v = $(id); if (!v.getAttribute("src")) { v.preload = "auto"; v.src = vidSrc(base); v.load(); } }
   // play a cut-out video into its canvas; `then` runs once it's rolling (or right away if it can't)
   function playCut(v, draw, onShow, then) {
@@ -2226,42 +2262,61 @@ body.tv .chart { height: 240px; }
   $("#nukeHitTest").addEventListener("click", () => { closeSheets(); nukeHit("Penn State ML", 1.33); });
 
 
-  // ---------- Reactions: clips that pop up in the corner ----------
-  let statusSrc = null, statusBet = null, popT = 0, pipT = 0, hideT = 0, pipGo = 0;
+  // ---------- Reactions: clips take over the screen like a jumbotron, live bets down the right ----------
+  let statusSrc = null, statusBet = null, popT = 0, pipT = 0, hideT = 0, pipGo = 0, jbTick = 0;
   function stopStatus() {
     pipGo++;
     try { if (statusSrc) statusSrc.stop(); } catch (e) {}
     statusSrc = null; statusBet = null; $("#lockStop").hidden = true;
-    const pip = $("#pip"), v = $("#pipVid"); clearTimeout(pipT); clearTimeout(hideT);
-    if (!pip.hidden) { pip.classList.add("out"); hideT = setTimeout(() => { pip.hidden = true; pip.classList.remove("out"); try { v.pause(); } catch (e) {} }, 500); }
+    const jb = $("#jumbo"), v = $("#pipVid"), bg = $("#jbBg"); clearTimeout(pipT); clearTimeout(hideT); clearInterval(jbTick);
+    if (!jb.hidden) { jb.classList.add("out"); hideT = setTimeout(() => { jb.hidden = true; jb.classList.remove("out"); try { v.pause(); bg.pause(); } catch (e) {} }, 400); }
   }
   $("#lockStop").addEventListener("click", stopStatus);
+  $("#jumbo").addEventListener("click", stopStatus);
   const PIPS = {
-    good: { base: "sounds/chop", label: "Crowd chop", ms: 13600, shape: "tall", mood: "up" },
-    first: { base: "sounds/leg1", label: "Job's not finished", ms: 22700, shape: "kobe", mood: "up" },
+    good: { base: "sounds/chop", label: "Crowd chop", ms: 13600, mood: "up" },
+    first: { base: "sounds/leg1", label: "Job's not finished", ms: 22700, mood: "up" },
   };
-  // clip library by sport. mood: hype = kickoff / tight game, up = bet's cashing, down = bet's in trouble, vibe = filler
-  const clip = (dir, n, label, mood, sec, w, h) => ({ base: `sounds/${dir}/${dir}${n}`, label, mood, ms: sec * 1000, ar: `${w} / ${h}`, shape: w > h * 1.15 ? "wide" : h > w * 1.15 ? "tall" : "sq", lib: true });
-  const CLIPS = {
-    CFB: [
-      clip("cfb", "01", "Saban: Play Nintendo?", "down", 12, 360, 478),
-      clip("cfb", "02", "Saban's effort barometer", "down", 14.6, 360, 474),
-      clip("cfb", "03", "365 days", "hype", 26.8, 400, 442),
-      clip("cfb", "04", "Bama vs. Georgia", "hype", 11.5, 534, 300),
-      clip("cfb", "05", "I don't lose", "down", 28, 400, 448),
-      clip("cfb", "06", "Nick Saban is the Hulk", "up hype", 30, 400, 400),
-      clip("cfb", "07", "Brick by brick", "down", 25.8, 400, 454),
-      clip("cfb", "08", "Sark had me rollin", "up", 5.7, 400, 402),
-      clip("cfb", "09", "You light my fire", "vibe", 27.9, 360, 640),
-      clip("cfb", "10", "Locker room singalong", "vibe", 26.9, 360, 640),
-      clip("cfb", "11", "Nah nah honey I'm good", "up vibe", 29.9, 360, 640),
-      clip("cfb", "12", "Backyard singalong", "vibe", 25.9, 360, 640),
-      clip("cfb", "13", "McAfee: going crazy tonight", "hype", 22, 400, 400),
-      clip("cfb", "14", "You owe them something", "hype down", 33.4, 400, 300),
-      clip("cfb", "15", "After the touchdown", "up", 15, 306, 300),
-    ],
-  };
-  const SPORT_NAME = { CFB: "College football", NFL: "NFL", NBA: "NBA", CBB: "College hoops", MLB: "MLB", NHL: "NHL" };
+  // the library. mood: game = a matchup's own clips, hype = kickoff / tight game, up = winning bet, down = losing bet, vibe = filler.
+  // sport limits a clip to one sport; teams ties "game" clips to that matchup
+  const clip = (path, label, mood, sec, o) => Object.assign({ base: "sounds/" + path, label, mood, ms: sec * 1000, lib: true }, o || {});
+  const CFB = { sport: "CFB" }, UGA_ALA = { sport: "CFB", teams: ["UGA", "ALA"] };
+  const CLIPS = [
+    clip("cfb/cfb01", "Saban: Play Nintendo?", "game", 12, UGA_ALA),
+    clip("cfb/cfb02", "Saban's effort barometer", "game up", 14.6, UGA_ALA),
+    clip("cfb/cfb03", "365 days", "game hype", 26.8, UGA_ALA),
+    clip("cfb/cfb06", "Nick Saban is the Hulk", "game hype", 30, UGA_ALA),
+    clip("cfb/cfb04", "Bama vs. Georgia", "game hype", 11.5, UGA_ALA),
+    clip("cfb/cfb13", "McAfee: going crazy tonight", "game hype", 22, UGA_ALA),
+    clip("clips/g06", "Pregame huddle speeches", "game hype", 30, UGA_ALA),
+    clip("clips/g08", "How 'bout them Dawgs", "game", 30.05, UGA_ALA),
+    clip("clips/l01", "It's not your fault", "down", 30.85),
+    clip("clips/l02", "Baseball heartbreak", "down", 28.35),
+    clip("clips/l03", "Meltdown", "down", 11.25),
+    clip("clips/l04", "Brutal loss", "down", 16.55),
+    clip("clips/l05", "Brewers pain", "down", 24.85),
+    clip("clips/l06", "Vols heartbreak", "down", 18.85),
+    clip("clips/l07", "Streamer losses", "down", 30),
+    clip("cfb/cfb05", "I don't lose", "down", 28, CFB),
+    clip("cfb/cfb07", "Brick by brick", "down", 25.8, CFB),
+    clip("cfb/cfb14", "You owe them something", "down hype", 33.4, CFB),
+    clip("clips/w02", "Car ride laughs", "up", 22.45),
+    clip("clips/w03", "Tiger: Pure.", "up", 30),
+    clip("clips/w04", "Migos carpool", "up vibe", 30),
+    clip("clips/w05", "Melo's Knicks intro", "up", 30),
+    clip("clips/w06", "KD: kiss it", "up", 26.35),
+    clip("clips/w07", "Locker room karaoke", "up vibe", 27.95),
+    clip("cfb/cfb08", "Sark had me rollin", "up", 5.7),
+    clip("clips/w09", "Bryce Underwood", "up", 17.85),
+    clip("cfb/cfb09", "You light my fire", "up vibe", 27.9),
+    clip("cfb/cfb10", "Locker room singalong", "up vibe", 26.9),
+    clip("cfb/cfb11", "Nah nah honey I'm good", "up vibe", 29.9),
+    clip("cfb/cfb12", "Backyard singalong", "up vibe", 25.9),
+    clip("clips/w14", "Drake Maye singing", "up", 17.7),
+    clip("clips/w15", "July 4, 1776", "up vibe", 15.05),
+    clip("clips/w16", "Chuck E. Cheese party", "up vibe", 29.85),
+    clip("cfb/cfb15", "After the touchdown", "up", 15, CFB),
+  ];
   // library clips are big once decoded, so only the last couple stay in memory
   const clipBufs = new Map();
   function clipBuf(base) {
@@ -2277,21 +2332,37 @@ body.tv .chart { height: 240px; }
     const f = () => { v.removeEventListener("canplay", f); ok(); };
     v.addEventListener("canplay", f); setTimeout(f, 4000);
   });
+  const MOOD_TAG = { up: "Cashing", down: "In trouble", hype: "Hype", vibe: "Vibes", game: "Live" };
+  // right-hand rail: every open bet, live ones first, the one this clip is about lit up
+  function jumboBets() {
+    const rank = (b) => ({ live: 0, pre: 1, final: 2 }[phase(b)] ?? 1);
+    const open = [...S.bets.values()].filter((b) => b.status === "open").sort((x, y) => rank(x) - rank(y));
+    $("#jbBets").innerHTML = open.length ? open.map((b) => {
+      const ph = phase(b), legs = legsOf(b), ev = b.kind !== "parlay" && b.sel ? evalSel(b.sel) : null, g = b.sel ? gameOf(b.sel) : null;
+      const cls = ev ? (ev.res === "W" ? "w" : ev.res === "L" ? "l" : "e") : legs.some((l) => l.st === "miss") ? "l" : "";
+      const st = legs.length ? (legs.some((l) => l.st === "miss") ? "Dead" : `${legs.filter((l) => l.st === "hit").length}/${legs.length} legs`) : ev ? ev.txt : ph === "pre" ? startLabel(startOf(b)) : "";
+      const sc = g && g.a.sc != null ? `${esc(g.a.ab)} ${g.a.sc} · ${esc(g.h.ab)} ${g.h.sc} · ${esc(g.d)}` : "";
+      return `<div class="jb-bet${b.id === statusBet ? " on" : ""}"><div class="r"><b>${esc(b.pick)}</b><span>${fU(b.units)}</span></div>${sc ? `<div class="sc">${sc}</div>` : ""}<div class="st ${cls}">${ph === "live" ? '<i class="dot"></i>' : ""}${esc(st)}</div></div>`;
+    }).join("") : '<div class="jb-none">No open bets</div>';
+  }
   // start sound and video together once both are loaded
-  function showPip(betId, P, mood) {
-    const pip = $("#pip"), v = $("#pipVid"), c = ready(), go = ++pipGo;
-    if (v.dataset.base !== P.base) { v.dataset.base = P.base; v.src = vidSrc(P.base); v.load(); }
+  function showPip(b, P, mood, why) {
+    const jb = $("#jumbo"), v = $("#pipVid"), bg = $("#jbBg"), c = ready(), go = ++pipGo, betId = b.id;
+    const src = vidSrc(P.base);
+    if (v.dataset.base !== P.base) { v.dataset.base = P.base; v.src = src; v.load(); bg.src = src; bg.load(); }
     const sound = !c ? null : P.lib ? clipBuf(P.base) : loadBuf(P.base);
     Promise.all([sound, vidReady(v)]).then(([buf]) => {
       if (go !== pipGo || statusBet !== betId) return;
       clearTimeout(hideT);
-      $("#pipLbl").textContent = P.label;
-      pip.className = "pip " + P.shape + " m-" + (mood || P.mood.split(" ")[0]);
-      pip.style.aspectRatio = P.ar || "";
-      pip.hidden = false;
-      try { v.currentTime = 0; v.play().catch(() => {}); } catch (e) {}
+      $("#jbLbl").textContent = P.label;
+      $("#jbTag").textContent = why || MOOD_TAG[mood] || "Live";
+      const ev = b.sel ? evalSel(b.sel) : null;
+      $("#jbWhy").textContent = b.pick ? b.pick + (ev ? " · " + ev.txt : "") : "";
+      jb.className = "jumbo m-" + mood; jb.hidden = false;
+      for (const x of [v, bg]) { try { x.currentTime = 0; x.play().catch(() => {}); } catch (e) {} }
+      const bar = $("#jbProg"); bar.style.transition = "none"; bar.style.width = "0%"; void bar.offsetWidth; bar.style.transition = `width ${P.ms}ms linear`; bar.style.width = "100%";
       if (buf) statusSrc = playBuf(c, buf, 0.95);
-      $("#lockStop").textContent = "Clip playing · stop"; $("#lockStop").hidden = false;
+      jumboBets(); clearInterval(jbTick); jbTick = setInterval(jumboBets, 5000);
       pipT = setTimeout(() => { if (statusBet === betId) stopStatus(); }, P.ms);
     });
   }
@@ -2318,43 +2389,55 @@ body.tv .chart { height: 240px; }
     try { localStorage.setItem("sb-played", JSON.stringify([...played])); } catch (e) {}
     return p;
   }
-  const libFor = (sport, moods) => (CLIPS[sport] || []).filter((c) => moods.some((m) => c.mood.split(" ").includes(m)));
   const sportOf = (b) => (b.sel && b.sel.sp) || b.sport;
+  // the game a bet's clip should be about: its own game, or for a parlay the live leg
+  function gameFor(b) {
+    if (b.sel) return gameOf(b.sel);
+    for (const l of legsOf(b)) { const g = l.sel && gameOf(l.sel); if (g && g.st === "in") return g; }
+    return null;
+  }
+  const isMatchup = (c, g) => !!(g && c.teams && c.teams.includes(g.a.ab) && c.teams.includes(g.h.ab));
+  function libFor(b, moods) {
+    const sp = (gameFor(b) || {}).sport || sportOf(b), g = gameFor(b);
+    return CLIPS.filter((c) => (!c.sport || c.sport === sp) && moods.some((m) => c.mood.split(" ").includes(m)) && (!c.teams || isMatchup(c, g) || !moods.includes("game")));
+  }
+  // this bet's game has its own clips (Georgia–Bama): play those when stuff happens
+  const gamePool = (b) => { const g = gameFor(b); return g ? CLIPS.filter((c) => c.mood.includes("game") && isMatchup(c, g)) : []; };
   // kind: "good" (moved into a winning spot), "bad" (slipped into a losing one),
   // "mid" (dead even / kickoff), "first" (first parlay leg cashed)
   function glow(id, kind) {
     S.pops.set(id, { kind: kind === "first" ? "good" : kind, until: Date.now() + 3200 });
     clearTimeout(popT); popT = setTimeout(() => { const t = Date.now(); for (const [k, v] of S.pops) if (v.until <= t) S.pops.delete(k); render(); }, 3250);
   }
-  // play a reaction for one bet. `P` picks the clip; otherwise it comes from the bet's sport library plus the stock clips
-  function react(b, kind, P) {
+  // play a reaction for one bet. `P` picks the clip; otherwise it comes from the library by how the bet's going
+  function react(b, kind, P, why) {
     glow(b.id, kind);
     render();
     if (!P) {
-      const sp = sportOf(b);
       if (kind === "first") P = PIPS.first;
-      else if (kind === "good") P = pickClip([PIPS.good, ...libFor(sp, ["up"])]);
-      else if (kind === "bad") P = pickClip(["lockin", ...libFor(sp, ["down"])]);
-      else P = pickClip(libFor(sp, ["hype"]));
+      else if (kind === "good") P = pickClip([PIPS.good, ...libFor(b, ["up"])]);
+      else if (kind === "bad") P = pickClip(["lockin", ...libFor(b, ["down"])]);
+      else P = pickClip(gamePool(b).length ? gamePool(b) : libFor(b, ["hype"]));
     }
     if (!P) return;
     stopStatus();
     statusBet = b.id;
-    // border color says why it popped: green covering, red in trouble, gold hype
-    const mood = kind === "good" || kind === "first" ? "up" : kind === "bad" ? "down" : P === "lockin" ? null : P.mood.includes("hype") ? "hype" : P.mood.includes("vibe") ? "vibe" : null;
-    if (P === "lockin") lockIn(b); else showPip(b.id, P, mood);
+    if (P === "lockin") { lockIn(b); return; }
+    // color says why it popped: green cashing, red in trouble, gold hype / the matchup's own clips, purple filler
+    const mood = kind === "good" || kind === "first" ? "up" : kind === "bad" ? "down" : P.mood.includes("game") || P.mood.includes("hype") ? "hype" : P.mood.includes("vibe") ? "vibe" : P.mood.split(" ")[0];
+    showPip(b, P, mood, why);
   }
   // watch every open bet against the live scores and react when it really swings.
   // A bet only counts as "up" or "down" once it clears the sport's bar, so normal back-and-forth
   // (a basketball lead trading by a bucket) doesn't set anything off.
   const BARS = { NBA: 5, CBB: 5, NFL: 4, CFB: 4, MLB: 1, NHL: 1 }; // points / runs / goals past the number
   const BET_COOLDOWN = 10 * 60e3; // each bet swings a clip at most once per 10 min
-  const TRIGGER_GAP = 5 * 60e3;   // swings and kickoffs: at least 5 min apart
+  const TRIGGER_GAP = 4 * 60e3;   // scores, swings and kickoffs: at least 4 min apart
   const POP_EVERY = 10 * 60e3;    // nothing for 10 min while a game's live: pop one anyway
-  const lastRes = new Map(), lastReact = new Map(), legHits = new Map(), gameSt = new Map(), lastFeat = new Map();
+  const lastRes = new Map(), lastReact = new Map(), legHits = new Map(), gameSt = new Map(), gameSc = new Map(), lastM = new Map(), lastFeat = new Map();
   let lastAny = Date.now() - POP_EVERY + 2 * 60e3; // first pop-up no sooner than 2 min after the board opens
   function clipsOn() { try { return localStorage.getItem("sb-clips") !== "off"; } catch (e) { return true; } }
-  const clipBusy = () => fxBusy || !!statusSrc || !$("#pip").hidden;
+  const clipBusy = () => fxBusy || !!statusSrc || !$("#jumbo").hidden;
   function swingState(b, ev, prev) {
     const bar = BARS[(b.sel && b.sel.sp) || b.sport] || 3;
     if (ev.m >= bar) return "W";
@@ -2362,28 +2445,33 @@ body.tv .chart { height: 240px; }
     return prev || "E"; // inside the bar: keep the last call ("E" = even, not called yet)
   }
   const selsOf = (b) => (b.kind === "parlay" ? (Array.isArray(b.legSel) ? b.legSel : []) : [b.sel]).filter((s) => s && s.g != null);
-  // a live game on this bet in a sport that has clips, and how the bet's doing
-  function liveClipSpot(b) {
+  // a live game on this bet, and how the bet's doing
+  function liveSpot(b) {
     if (b.kind === "parlay") {
       const legs = legsOf(b);
       if (legs.some((l) => l.st === "miss")) return null; // dead ticket
-      const s = legs.find((l) => l.sel && !l.st && CLIPS[l.sel.sp || b.sport] && (gameOf(l.sel) || {}).st === "in");
-      return s ? { sport: s.sel.sp || b.sport, state: legs.some((l) => l.st === "hit") ? "W" : "E" } : null;
+      if (!legs.some((l) => l.sel && !l.st && (gameOf(l.sel) || {}).st === "in")) return null;
+      return { state: legs.some((l) => l.st === "hit") ? "W" : "E" };
     }
-    const sp = sportOf(b), g = gameOf(b.sel);
-    if (!CLIPS[sp] || !g || g.st !== "in") return null;
-    return { sport: sp, state: lastRes.get(b.id) || "E" };
+    const g = gameOf(b.sel);
+    return g && g.st === "in" ? { state: lastRes.get(b.id) || "E" } : null;
   }
   function autoReact() {
     if (!S.ready) return;
-    const now = Date.now(), swings = [];
+    const now = Date.now(), swings = [], seenG = new Set();
     for (const b of S.bets.values()) {
-      if (b.status !== "open") { lastRes.delete(b.id); legHits.delete(b.id); continue; }
-      // kickoff: a game on this bet just went live
+      if (b.status !== "open") { lastRes.delete(b.id); legHits.delete(b.id); lastM.delete(b.id); continue; }
       for (const s of selsOf(b)) {
         const g = gameOf(s); if (!g) continue;
-        const was = gameSt.get(g.id); gameSt.set(g.id, g.st);
-        if (was === "pre" && g.st === "in" && CLIPS[s.sp || b.sport]) swings.push({ b, kind: "kick" });
+        // kickoff: a game on this bet just went live
+        if (!seenG.has(g.id)) {
+          const was = gameSt.get(g.id); gameSt.set(g.id, g.st);
+          const sc = g.a.sc == null ? "" : g.a.sc + "-" + g.h.sc, scWas = gameSc.get(g.id); gameSc.set(g.id, sc);
+          if (was === "pre" && g.st === "in") swings.push({ b, kind: "kick" });
+          // a score in a matchup with its own clips (Georgia–Bama)
+          else if (scWas && sc && scWas !== sc && g.st === "in" && gamePool(b).length) swings.push({ b, kind: "score" });
+        }
+        seenG.add(g.id);
       }
       if (b.kind === "parlay") {
         const legs = legsOf(b), hits = legs.filter((l) => l.st === "hit").length, prev = legHits.get(b.id);
@@ -2401,37 +2489,37 @@ body.tv .chart { height: 240px; }
     }
     const on = clipsOn();
     if (swings.length) {
-      swings.forEach((s) => glow(s.b.id, s.kind === "kick" ? "mid" : s.kind));
-      // one clip at a time: a first leg cashing beats a bet going down, then a kickoff, then a bet going up
-      const rank = { first: 4, bad: 3, kick: 2, good: 1 };
+      swings.forEach((s) => glow(s.b.id, s.kind === "kick" || s.kind === "score" ? "mid" : s.kind));
+      // one clip at a time: a first leg cashing beats a bet going down, then a matchup score, then a kickoff, then a bet going up
+      const rank = { first: 5, bad: 4, score: 3, kick: 2, good: 1 };
       const top = swings.reduce((x, s) => (rank[s.kind] > rank[x.kind] ? s : x));
-      swings.forEach((s) => { if (s.kind !== "kick") lastReact.set(s.b.id, now); }); // a kickoff doesn't use up the bet's swing
+      swings.forEach((s) => { if (s.kind === "good" || s.kind === "bad") lastReact.set(s.b.id, now); }); // kickoffs and scores don't use up the bet's swing
       const ok = on && (top.kind === "first" || (now - lastAny >= TRIGGER_GAP && !clipBusy()));
       if (!ok) { render(); return; } // too soon: glow only, no clip
       lastAny = now;
-      react(top.b, top.kind === "kick" ? "mid" : top.kind);
+      if (top.kind === "kick") react(top.b, "mid", null, "Kickoff");
+      else if (top.kind === "score") { const g = gameFor(top.b); react(top.b, "mid", pickClip(gamePool(top.b)), g ? `${g.a.ab} ${g.a.sc} – ${g.h.ab} ${g.h.sc}` : "Score"); }
+      else react(top.b, top.kind);
       return;
     }
     // quiet stretch: pop a clip that fits how one of the live bets is going
     if (!on || now - lastAny < POP_EVERY || clipBusy()) return;
     const live = [];
-    for (const b of S.bets.values()) { if (b.status !== "open") continue; const spot = liveClipSpot(b); if (spot) live.push({ b, ...spot }); }
+    for (const b of S.bets.values()) { if (b.status !== "open") continue; const spot = liveSpot(b); if (spot) live.push({ b, ...spot }); }
     if (!live.length) return;
     const pick = live.sort((x, y) => (lastFeat.get(x.b.id) || 0) - (lastFeat.get(y.b.id) || 0))[0];
-    const moods = pick.state === "W" ? ["up", "vibe"] : pick.state === "L" ? ["down"] : ["hype", "vibe"];
-    const P = pickClip(libFor(pick.sport, moods));
+    const P = pickClip(pick.state === "W" ? libFor(pick.b, ["up"]) : pick.state === "L" ? libFor(pick.b, ["down"]) : gamePool(pick.b).length ? gamePool(pick.b) : libFor(pick.b, ["hype", "vibe"]));
     if (!P) return;
     lastAny = now; lastFeat.set(pick.b.id, now);
     react(pick.b, pick.state === "W" ? "good" : pick.state === "L" ? "bad" : "mid", P);
   }
   setInterval(autoReact, 60e3); // pop-ups keep coming even if the scores haven't changed
   // Settings: the clip library, with a Play button on each
-  const moodLbl = { up: "Covering", down: "Trouble", hype: "Hype", vibe: "Vibes" };
-  $("#clipLib").innerHTML = Object.entries(CLIPS).map(([sp, list]) => `<h4>${esc(SPORT_NAME[sp] || sp)}</h4>` + list.map((c, i) =>
-    `<div class="sndrow"><label>${esc(c.label)}<span class="mood ${c.mood.split(" ")[0]}">${c.mood.split(" ").map((m) => moodLbl[m]).join(" · ")}</span></label><button type="button" class="btn sm" data-sp="${sp}" data-i="${i}">Play</button></div>`).join("")).join("");
+  const LIB_GROUPS = [["Georgia–Bama", (c) => c.mood.includes("game")], ["Winning bet", (c) => !c.mood.includes("game") && c.mood.includes("up")], ["Losing bet", (c) => !c.mood.includes("game") && c.mood.includes("down")]];
+  $("#clipLib").innerHTML = LIB_GROUPS.map(([name, f]) => `<h4>${esc(name)}</h4>` + CLIPS.map((c, i) => (f(c) ? `<div class="sndrow"><label>${esc(c.label)}${c.sport && !c.teams ? `<span class="mood">${esc(c.sport)}</span>` : ""}</label><button type="button" class="btn sm" data-i="${i}">Play</button></div>` : "")).join("")).join("");
   $("#clipLib").addEventListener("click", (e) => {
-    const btn = e.target.closest("button[data-sp]"); if (!btn) return;
-    const P = CLIPS[btn.dataset.sp][Number(btn.dataset.i)], m = P.mood.split(" ")[0];
+    const btn = e.target.closest("button[data-i]"); if (!btn) return;
+    const P = CLIPS[Number(btn.dataset.i)], m = P.mood.split(" ")[0];
     closeSheets(); react(anyOpen(), m === "up" ? "good" : m === "down" ? "bad" : "mid", P);
   });
   $("#clipsOn").checked = clipsOn();
