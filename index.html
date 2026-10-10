@@ -459,35 +459,50 @@ body.has-ticker .app { padding-bottom: calc(clamp(40px, 4.6vh, 58px) + 14px); }
 .tk-a.inj { font-family: var(--f-body); color: #fff; }
 .tk-sep { display: inline-block; width: 6px; height: 6px; border-radius: 50%; background: var(--line); margin: 0 1.1em; align-self: center; }
 @media (prefers-reduced-motion: reduce) { .tk-run { animation-duration: 400s !important; } }
-/* jumbotron: clip fills the screen, live bets down the right */
-.jumbo { --mc: 61,220,151; position: fixed; inset: 0; z-index: 70; display: grid; grid-template-columns: minmax(0, 1fr) min(27vw, 420px); background: #04060a; cursor: pointer; animation: jbIn .35s ease-out both; }
+/* clip screen, framed like RedZone: big video, score bug, active bets down the right; the ticker stays visible */
+.jumbo { --mc: 61,220,151; position: fixed; inset: 0; z-index: 70; display: grid; grid-template-columns: minmax(0, 1fr) min(26vw, 420px); grid-template-rows: auto minmax(0, 1fr); cursor: pointer; animation: jbIn .35s ease-out both;
+  background: linear-gradient(180deg, rgba(4,6,10,.92), rgba(4,6,10,.97)), repeating-linear-gradient(135deg, rgba(200,16,46,.07) 0 14px, transparent 14px 28px); -webkit-backdrop-filter: blur(8px); backdrop-filter: blur(8px); }
+body.has-ticker .jumbo { bottom: clamp(40px, 4.6vh, 58px); }
 .jumbo.m-down { --mc: 255,97,112; } .jumbo.m-hype { --mc: 255,194,75; } .jumbo.m-vibe { --mc: 155,140,255; }
 .jumbo.out { opacity: 0; transition: opacity .4s; }
-@keyframes jbIn { from { opacity: 0; transform: scale(1.03); } to { opacity: 1; transform: none; } }
-.jb-main { display: flex; flex-direction: column; gap: 1.4vh; padding: 2.2vh 1.6vw 2.2vh 2vw; min-width: 0; }
-.jb-top { display: flex; align-items: baseline; gap: 14px; min-width: 0; }
-.jb-tag { flex: none; font: 800 2.2vh/1 var(--f-mono); letter-spacing: .1em; text-transform: uppercase; color: #05070b; background: rgb(var(--mc)); padding: .6vh .8vw; border-radius: 6px; align-self: center; }
-.jb-top b { font: 900 4.4vh/1 var(--f-display); letter-spacing: .03em; text-transform: uppercase; color: #fff; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-.jb-why { font: 600 2.2vh/1.2 var(--f-mono); color: var(--ink-2); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; min-width: 0; }
-.jb-x { margin-left: auto; flex: none; font: 400 4vh/1 var(--f-body); color: var(--ink-3); }
-.jb-screen { position: relative; flex: 1; min-height: 0; border-radius: 14px; overflow: hidden; background: #000; border: 3px solid rgb(var(--mc)); box-shadow: 0 0 70px rgba(var(--mc), .35); }
+@keyframes jbIn { from { opacity: 0; transform: scale(1.02); } to { opacity: 1; transform: none; } }
+.jb-head { grid-column: 1 / -1; display: flex; align-items: center; gap: 16px; min-width: 0; padding: 1.4vh 2vw; background: linear-gradient(90deg, #c8102e, #8a0b20 38%, #0b1222 70%); border-bottom: 3px solid rgb(var(--mc)); }
+.jb-logo { flex: none; font: italic 900 3.6vh/1 var(--f-display); letter-spacing: .02em; color: #fff; text-shadow: 0 2px 0 rgba(0,0,0,.35); }
+.jb-logo b { color: #0b1222; background: #fff; padding: 0 .25em; margin-left: .12em; border-radius: 3px; font-weight: 900; }
+.jb-tag { flex: none; font: 800 2vh/1 var(--f-mono); letter-spacing: .1em; text-transform: uppercase; color: #05070b; background: rgb(var(--mc)); padding: .6vh .8vw; border-radius: 6px; }
+.jb-head > b { font: 900 3.6vh/1 var(--f-display); letter-spacing: .03em; text-transform: uppercase; color: #fff; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; min-width: 0; }
+.jb-x { margin-left: auto; flex: none; font: 400 4vh/1 var(--f-body); color: rgba(255,255,255,.75); }
+.jb-main { display: flex; flex-direction: column; gap: 1.2vh; padding: 2vh 1.4vw 2vh 2vw; min-width: 0; min-height: 0; }
+.jb-screen { position: relative; flex: 1; min-height: 0; border-radius: 10px; overflow: hidden; background: #000; border: 4px solid #fff; outline: 3px solid rgb(var(--mc)); outline-offset: 3px; box-shadow: 0 0 80px rgba(var(--mc), .35), 0 20px 60px rgba(0,0,0,.6); }
 .jb-screen video { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: contain; }
 .jb-screen #jbBg { object-fit: cover; filter: blur(34px) brightness(.4) saturate(1.3); transform: scale(1.15); }
+.jb-bug { position: absolute; left: 2%; bottom: 3%; display: flex; align-items: stretch; max-width: 96%; border-radius: 8px; overflow: hidden; box-shadow: 0 10px 30px rgba(0,0,0,.6); font-size: clamp(14px, 2.3vh, 28px); }
+.jb-bug .gm, .jb-bug .bt { display: flex; align-items: center; gap: .45em; padding: .45em .8em; white-space: nowrap; }
+.jb-bug .gm { background: #0b1222; color: #fff; font: 800 1em var(--f-mono); }
+.jb-bug .gm img { width: 1.3em; height: 1.3em; object-fit: contain; }
+.jb-bug .gm span { font-size: 1.15em; margin-right: .5em; }
+.jb-bug .gm em { font-style: normal; font-size: .75em; color: #ff8b97; border-left: 1px solid rgba(255,255,255,.2); padding-left: .7em; }
+.jb-bug .bt { background: #f4f5f7; color: #0b1222; font: 700 .95em var(--f-body); min-width: 0; }
+.jb-bug .bt b { overflow: hidden; text-overflow: ellipsis; }
+.jb-bug .bt > span { font: 700 .8em var(--f-mono); color: #5b6474; }
+.jb-bug .bt .st { color: #fff; background: #5b6474; padding: .15em .5em; border-radius: 4px; text-transform: uppercase; letter-spacing: .05em; }
+.jb-bug .bt .st.w { background: #14915f; } .jb-bug .bt .st.l { background: #c8102e; } .jb-bug .bt .st.e { background: #b07a00; }
 .jb-prog { height: 6px; border-radius: 3px; background: rgba(255,255,255,.08); overflow: hidden; }
 .jb-prog i { display: block; height: 100%; width: 0; background: rgb(var(--mc)); }
-.jb-side { display: flex; flex-direction: column; gap: 1.1vh; padding: 2.2vh 1.4vw; background: #0a0e15; border-left: 1px solid var(--line); overflow: hidden; }
+.jb-side { display: flex; flex-direction: column; gap: 1.1vh; padding: 2vh 1.4vw; background: rgba(10,14,21,.85); border-left: 1px solid var(--line); overflow: hidden; min-height: 0; }
 .jb-side h3 { margin: 0 0 .4vh; display: flex; align-items: center; gap: 10px; font: 700 1.9vh/1 var(--f-mono); letter-spacing: .14em; text-transform: uppercase; color: var(--ink-2); }
 .jb-side .dot, .jb-bet .dot { display: inline-block; width: 9px; height: 9px; border-radius: 50%; background: var(--loss); box-shadow: 0 0 10px var(--loss); animation: blink 1.2s infinite; margin-right: 8px; vertical-align: middle; }
-.jb-bet { border: 1px solid var(--line); border-radius: 12px; padding: 1.2vh 1vw; background: rgba(255,255,255,.02); }
+.jb-bet { border: 1px solid var(--line); border-left: 4px solid var(--line); border-radius: 10px; padding: 1.1vh .9vw; background: rgba(255,255,255,.03); }
 .jb-bet.on { border-color: rgb(var(--mc)); background: rgba(var(--mc), .12); box-shadow: 0 0 30px rgba(var(--mc), .25); }
 .jb-bet .r { display: flex; justify-content: space-between; gap: 10px; align-items: baseline; }
-.jb-bet b { font: 700 2.4vh/1.15 var(--f-body); color: #fff; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.jb-bet b { font: 700 2.3vh/1.15 var(--f-body); color: #fff; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 .jb-bet .r span { font: 600 1.7vh var(--f-mono); color: var(--ink-3); flex: none; }
-.jb-bet .sc { margin-top: .5vh; font: 600 1.8vh var(--f-mono); color: var(--ink-2); }
+.jb-bet .sc { margin-top: .5vh; display: flex; align-items: center; gap: .35em; font: 600 1.75vh var(--f-mono); color: var(--ink-2); white-space: nowrap; overflow: hidden; }
+.jb-bet .sc img { width: 1.25em; height: 1.25em; object-fit: contain; } .jb-bet .sc i { font-style: normal; color: var(--ink-3); }
 .jb-bet .st { margin-top: .5vh; font: 800 1.8vh var(--f-mono); letter-spacing: .06em; text-transform: uppercase; color: var(--ink-2); }
 .jb-bet .st.w { color: var(--win); } .jb-bet .st.l { color: var(--loss); } .jb-bet .st.e { color: var(--gold); }
 .jb-none { color: var(--ink-3); font-size: 2vh; }
-@media (max-width: 780px) { .jumbo { grid-template-columns: 1fr; grid-template-rows: minmax(0, 1fr) auto; } .jb-side { max-height: 34vh; overflow-y: auto; border-left: 0; border-top: 1px solid var(--line); } .jb-top b { font-size: 3vh; } .jb-why { display: none; } }
+@media (max-width: 780px) { .jumbo { grid-template-columns: 1fr; grid-template-rows: auto minmax(0, 1fr) auto; } .jb-side { max-height: 32vh; overflow-y: auto; border-left: 0; border-top: 1px solid var(--line); } .jb-head > b { font-size: 2.6vh; } .jb-logo { font-size: 2.8vh; } .jb-bug .bt { display: none; } }
 .cliplib { display: grid; gap: 6px; max-height: 300px; overflow-y: auto; }
 .cliplib h4 { margin: 6px 0 0; font: 700 12px var(--f-mono); letter-spacing: .08em; text-transform: uppercase; color: var(--ink-3); }
 .sndrow .mood { font: 600 10px var(--f-mono); text-transform: uppercase; letter-spacing: .06em; padding: 2px 6px; border-radius: 6px; margin-left: auto; color: var(--ink-2); border: 1px solid var(--line); white-space: nowrap; }
@@ -822,12 +837,12 @@ body.tv .chart { height: 240px; }
 <canvas id="flood-cv" hidden aria-hidden="true"></canvas>
 <div class="ticker" id="ticker" hidden><div class="tk-lbl"><i class="dot"></i>CFB</div><div class="tk-track"><div class="tk-run" id="tkRun"></div></div></div>
 <div class="jumbo" id="jumbo" hidden title="Tap to close">
+  <div class="jb-head"><span class="jb-logo">SWEAT<b>ZONE</b></span><span class="jb-tag" id="jbTag">Live</span><b id="jbLbl"></b><span class="jb-x" aria-hidden="true">×</span></div>
   <div class="jb-main">
-    <div class="jb-top"><span class="jb-tag" id="jbTag">Live</span><b id="jbLbl"></b><span class="jb-why" id="jbWhy"></span><span class="jb-x" aria-hidden="true">×</span></div>
-    <div class="jb-screen"><video id="jbBg" muted playsinline preload="none" aria-hidden="true"></video><video id="pipVid" muted playsinline preload="none"></video></div>
+    <div class="jb-screen"><video id="jbBg" muted playsinline preload="none" aria-hidden="true"></video><video id="pipVid" muted playsinline preload="none"></video><div class="jb-bug" id="jbBug" hidden></div></div>
     <div class="jb-prog"><i id="jbProg"></i></div>
   </div>
-  <aside class="jb-side"><h3><i class="dot"></i>Live bets</h3><div id="jbBets"></div></aside>
+  <aside class="jb-side"><h3><i class="dot"></i>Active bets</h3><div id="jbBets"></div></aside>
 </div>
 <video id="pipVid2" muted playsinline preload="none" hidden></video>
 <div class="lockin" id="lockIn" hidden aria-hidden="true"><div>LOCK IN.</div></div>
@@ -2311,7 +2326,7 @@ body.tv .chart { height: 240px; }
   // the library. mood: game = a matchup's own clips, hype = kickoff / tight game, up = winning bet, down = losing bet, vibe = filler.
   // sport limits a clip to one sport; teams ties "game" clips to that matchup
   const clip = (path, label, mood, sec, o) => Object.assign({ base: "sounds/" + path, label, mood, ms: sec * 1000, lib: true }, o || {});
-  const CFB = { sport: "CFB" }, UGA_ALA = { sport: "CFB", teams: ["UGA", "ALA"] };
+  const CFB = { sport: "CFB" }, MLB = { sport: "MLB" }, UGA_ALA = { sport: "CFB", teams: ["UGA", "ALA"] };
   const CLIPS = [
     clip("cfb/cfb01", "Saban: Play Nintendo?", "game", 12, UGA_ALA),
     clip("cfb/cfb02", "Saban's effort barometer", "game up", 14.6, UGA_ALA),
@@ -2347,6 +2362,12 @@ body.tv .chart { height: 240px; }
     clip("clips/w15", "July 4, 1776", "up vibe", 15.05),
     clip("clips/w16", "Chuck E. Cheese party", "up vibe", 29.85),
     clip("cfb/cfb15", "After the touchdown", "up", 15, CFB),
+    clip("mlb/mlb01", "Superior firepower", "up hype vibe", 23.15, MLB),
+    clip("mlb/mlb02", "Back to me", "up hype vibe", 25.45, MLB),
+    clip("mlb/mlb03", "105 up and in", "up hype vibe", 16.75, MLB),
+    clip("mlb/mlb04", "Red October crowd", "up hype vibe", 13.75, MLB),
+    clip("mlb/mlb05", "Three-peat rolls on", "up hype vibe", 30, MLB),
+    clip("mlb/mlb06", "Next opponent: Ohtani", "up hype vibe", 15.25, MLB),
   ];
   // library clips are big once decoded, so only the last couple stay in memory
   const clipBufs = new Map();
@@ -2372,9 +2393,19 @@ body.tv .chart { height: 240px; }
       const ph = phase(b), legs = legsOf(b), ev = b.kind !== "parlay" && b.sel ? evalSel(b.sel) : null, g = b.sel ? gameOf(b.sel) : null;
       const cls = ev ? (ev.res === "W" ? "w" : ev.res === "L" ? "l" : "e") : legs.some((l) => l.st === "miss") ? "l" : "";
       const st = legs.length ? (legs.some((l) => l.st === "miss") ? "Dead" : `${legs.filter((l) => l.st === "hit").length}/${legs.length} legs`) : ev ? ev.txt : ph === "pre" ? startLabel(startOf(b)) : "";
-      const sc = g && g.a.sc != null ? `${esc(g.a.ab)} ${g.a.sc} · ${esc(g.h.ab)} ${g.h.sc} · ${esc(g.d)}` : "";
+      const pre = g && (g.st === "pre" || g.a.sc == null), sc = !g ? "" : `${lg(g.a)}${esc(g.a.ab)}${pre ? "" : " " + g.a.sc}<i>·</i>${lg(g.h)}${esc(g.h.ab)}${pre ? "" : " " + g.h.sc}${pre ? "" : `<i>·</i>${esc(g.d)}`}`;
       return `<div class="jb-bet${b.id === statusBet ? " on" : ""}"><div class="r"><b>${esc(b.pick)}</b><span>${fU(b.units)}</span></div>${sc ? `<div class="sc">${sc}</div>` : ""}<div class="st ${cls}">${ph === "live" ? '<i class="dot"></i>' : ""}${esc(st)}</div></div>`;
     }).join("") : '<div class="jb-none">No open bets</div>';
+  }
+  const lg = (x) => (x.lg ? `<img src="${esc(x.lg)}" alt="">` : "");
+  // lower third, like the RedZone score bug: the game, then your bet and how it's doing
+  function jbBug(b) {
+    const el = $("#jbBug"), g = gameFor(b) || (b.sel ? gameOf(b.sel) : null), ev = b.sel ? evalSel(b.sel) : null;
+    if (!b.pick) { el.hidden = true; return; }
+    const cls = ev ? (ev.res === "W" ? "w" : ev.res === "L" ? "l" : "e") : "";
+    el.innerHTML = (g ? `<div class="gm">${lg(g.a)}<b>${esc(g.a.ab)}</b><span>${g.st === "pre" ? "" : g.a.sc ?? ""}</span>${lg(g.h)}<b>${esc(g.h.ab)}</b><span>${g.st === "pre" ? "" : g.h.sc ?? ""}</span><em>${esc(g.st === "pre" ? startLabel(g.t) : g.d)}</em></div>` : "")
+      + `<div class="bt"><b>${esc(b.pick)}</b><span>${fU(b.units)}</span>${ev ? `<span class="st ${cls}">${esc(ev.txt)}</span>` : ""}</div>`;
+    el.hidden = false;
   }
   // start sound and video together once both are loaded
   function showPip(b, P, mood, why) {
@@ -2387,13 +2418,12 @@ body.tv .chart { height: 240px; }
       clearTimeout(hideT);
       $("#jbLbl").textContent = P.label;
       $("#jbTag").textContent = why || MOOD_TAG[mood] || "Live";
-      const ev = b.sel ? evalSel(b.sel) : null;
-      $("#jbWhy").textContent = b.pick ? b.pick + (ev ? " · " + ev.txt : "") : "";
+      jbBug(b);
       jb.className = "jumbo m-" + mood; jb.hidden = false;
       for (const x of [v, bg]) { try { x.currentTime = 0; x.play().catch(() => {}); } catch (e) {} }
       const bar = $("#jbProg"); bar.style.transition = "none"; bar.style.width = "0%"; void bar.offsetWidth; bar.style.transition = `width ${P.ms}ms linear`; bar.style.width = "100%";
       if (buf) statusSrc = playBuf(c, buf, 0.95);
-      jumboBets(); clearInterval(jbTick); jbTick = setInterval(jumboBets, 5000);
+      jumboBets(); clearInterval(jbTick); jbTick = setInterval(() => { jumboBets(); jbBug(b); }, 5000);
       pipT = setTimeout(() => { if (statusBet === betId) stopStatus(); }, P.ms);
     });
   }
@@ -2413,6 +2443,8 @@ body.tv .chart { height: 240px; }
   try { for (const [k, t] of JSON.parse(localStorage.getItem("sb-played") || "[]")) played.set(k, t); } catch (e) {}
   function pickClip(pool) {
     if (!pool.length) return null;
+    const own = pool.filter((p) => p !== "lockin" && p.sport && !p.teams);
+    if (own.length && Math.random() < 0.6) pool = own; // the sport's own folder gets first dibs
     const key = (p) => (p === "lockin" ? p : p.base);
     const sorted = pool.slice().sort((x, y) => (played.get(key(x)) || 0) - (played.get(key(y)) || 0));
     const p = sorted[Math.floor(Math.random() * Math.max(1, Math.ceil(sorted.length / 2)))];
@@ -2528,7 +2560,7 @@ body.tv .chart { height: 240px; }
       const ok = on && (top.kind === "first" || (now - lastAny >= TRIGGER_GAP && !clipBusy()));
       if (!ok) { render(); return; } // too soon: glow only, no clip
       lastAny = now;
-      if (top.kind === "kick") react(top.b, "mid", null, "Kickoff");
+      if (top.kind === "kick") react(top.b, "mid", null, { MLB: "First pitch", NBA: "Tip-off", CBB: "Tip-off", NHL: "Puck drop" }[(gameFor(top.b) || {}).sport || sportOf(top.b)] || "Kickoff");
       else if (top.kind === "score") { const g = gameFor(top.b); react(top.b, "mid", pickClip(gamePool(top.b)), g ? `${g.a.ab} ${g.a.sc} – ${g.h.ab} ${g.h.sc}` : "Score"); }
       else react(top.b, top.kind);
       return;
@@ -2546,8 +2578,9 @@ body.tv .chart { height: 240px; }
   }
   setInterval(autoReact, 60e3); // pop-ups keep coming even if the scores haven't changed
   // Settings: the clip library, with a Play button on each
-  const LIB_GROUPS = [["Georgia–Bama", (c) => c.mood.includes("game")], ["Winning bet", (c) => !c.mood.includes("game") && c.mood.includes("up")], ["Losing bet", (c) => !c.mood.includes("game") && c.mood.includes("down")]];
-  $("#clipLib").innerHTML = LIB_GROUPS.map(([name, f]) => `<h4>${esc(name)}</h4>` + CLIPS.map((c, i) => (f(c) ? `<div class="sndrow"><label>${esc(c.label)}${c.sport && !c.teams ? `<span class="mood">${esc(c.sport)}</span>` : ""}</label><button type="button" class="btn sm" data-i="${i}">Play</button></div>` : "")).join("")).join("");
+  const LIB_GROUPS = [["Georgia–Bama", (c) => !!c.teams], ["College football only", (c) => c.sport === "CFB" && !c.teams], ["MLB only", (c) => c.sport === "MLB"],
+    ["Winning bet · every sport", (c) => !c.sport && c.mood.includes("up")], ["Losing bet · every sport", (c) => !c.sport && c.mood.includes("down")]];
+  $("#clipLib").innerHTML = LIB_GROUPS.map(([name, f]) => `<h4>${esc(name)}</h4>` + CLIPS.map((c, i) => (f(c) ? `<div class="sndrow"><label>${esc(c.label)}${c.sport && !c.teams ? `<span class="mood">${c.mood.includes("down") ? "Losing" : "Winning"}</span>` : ""}</label><button type="button" class="btn sm" data-i="${i}">Play</button></div>` : "")).join("")).join("");
   $("#clipLib").addEventListener("click", (e) => {
     const btn = e.target.closest("button[data-i]"); if (!btn) return;
     const P = CLIPS[Number(btn.dataset.i)], m = P.mood.split(" ")[0];
