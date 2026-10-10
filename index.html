@@ -300,6 +300,14 @@ button.chip:hover { color: var(--ink); border-color: var(--ink-3); }
 .scan-note b { color: var(--ink); }
 .scan-note .btn { margin-left: auto; }
 
+/* Win sound picker */
+.sndlist { display: flex; flex-direction: column; gap: 6px; max-height: 260px; overflow-y: auto; }
+.sndrow { display: grid; grid-template-columns: minmax(0, 1fr) auto; gap: 8px; align-items: center; background: var(--ground); border: 1px solid var(--line); border-radius: 10px; padding: 4px 4px 4px 10px; }
+.sndrow.on { border-color: var(--gold); background: rgba(255,194,75,.08); }
+.sndrow label { display: flex; align-items: center; gap: 10px; font-size: 14px; font-weight: 600; cursor: pointer; min-width: 0; padding: 6px 0; }
+.sndrow input { accent-color: #FFC24B; margin: 0; flex: none; }
+.sndrow small { font: 500 11px var(--f-mono); color: var(--ink-3); margin-left: auto; padding-left: 8px; }
+
 /* Coin Alert */
 .coin { position: fixed; inset: 0; z-index: 90; display: grid; place-items: center; pointer-events: none; overflow: hidden;
   background: radial-gradient(circle at 50% 45%, rgba(255,194,75,.24), rgba(5,8,13,.8) 72%); }
@@ -523,10 +531,17 @@ body.tv .chart { height: 240px; }
       <div id="sampleCtl"><button type="button" class="btn danger" id="clearSamples">Clear sample bets</button></div>
     </div>
     <div class="field">
-      <span class="lbl">Your data</span>
+      <span class="lbl">Win sound</span>
+      <div class="sndlist" id="sndList"></div>
+      <span class="hint">Tap Play to hear one, then pick it. Your pick plays on every device you're signed in on.</span>
       <div style="display:flex;gap:8px;flex-wrap:wrap">
         <button type="button" class="btn sm" id="coinTest">Preview Coin Alert</button>
         <button type="button" class="btn sm" id="lossTest">Preview loss sound</button>
+      </div>
+    </div>
+    <div class="field">
+      <span class="lbl">Your data</span>
+      <div style="display:flex;gap:8px;flex-wrap:wrap">
         <button type="button" class="btn sm" id="expCsv">Download spreadsheet (CSV)</button>
         <button type="button" class="btn sm" id="expJson">Download backup</button>
         <label class="btn sm" for="impFile" style="cursor:pointer">Import backup</label>
@@ -584,7 +599,7 @@ body.tv .chart { height: 240px; }
 
   const S = {
     bets: new Map(), unit: 15, range: "day", db: null, canWrite: true, ready: false, offline: false,
-    open: null, confirmDel: null, cashout: null, sign: -1, day: 0, games: new Map(), slateAt: 0, lastSettled: [], dayKey: 0,
+    open: null, confirmDel: null, cashout: null, sign: -1, day: 0, winSound: "jackpot", games: new Map(), slateAt: 0, lastSettled: [], dayKey: 0,
   };
   try { const r = localStorage.getItem("sb-range"); if (RANGE_LABEL[r]) S.range = r; } catch (e) {}
 
@@ -1277,7 +1292,7 @@ body.tv .chart { height: 240px; }
     e.preventDefault();
     const v = parseFloat(String($("#f-unit").value).replace(/[$,\s]/g, ""));
     if (!(v > 0)) { $("#u-err").textContent = "Enter a dollar amount above 0, like 15."; return; }
-    const ok = await write((db) => db.doc("config/settings").set({ unitSize: v }), () => (S.unit = v));
+    const ok = await write((db) => db.doc("config/settings").set({ unitSize: v }, { merge: true }), () => (S.unit = v));
     if (ok) { S.unit = v; render(); closeSheets(); toast("Unit size set to $" + trim(v)); }
   });
   function resetClear() { $("#sampleCtl").innerHTML = '<button type="button" class="btn danger" id="clearSamples">Clear sample bets</button>'; }
@@ -1413,7 +1428,7 @@ body.tv .chart { height: 240px; }
         list.slice(i, i + 400).forEach((b) => { const { id, ...rest } = b; batch.set(S.db.collection("bets").doc(String(id)), rest); });
         await batch.commit();
       }
-      if (!Array.isArray(j) && Number(j.unitSize) > 0) await S.db.doc("config/settings").set({ unitSize: Number(j.unitSize) });
+      if (!Array.isArray(j) && Number(j.unitSize) > 0) await S.db.doc("config/settings").set({ unitSize: Number(j.unitSize) }, { merge: true });
       closeSheets(); toast(`Imported ${list.length} bets`);
     } catch (err) { toast("Couldn't read that file. Use a Sweat Board backup (.json)."); }
   });
@@ -1444,8 +1459,8 @@ body.tv .chart { height: 240px; }
     }
     return SND.loading[name];
   }
-  function loadSounds() { loadBuf("win"); loadBuf("loss"); }
-  function playBuf(c, buf, vol) { const s = c.createBufferSource(), g = c.createGain(); g.gain.value = vol; s.buffer = buf; s.connect(g).connect(c.destination); s.start(); }
+  function loadSounds() { loadBuf("sounds/" + S.winSound); loadBuf("loss"); }
+  function playBuf(c, buf, vol) { const s = c.createBufferSource(), g = c.createGain(); g.gain.value = vol; s.buffer = buf; s.connect(g).connect(c.destination); s.start(); return s; }
   function unlock() {
     const wasLive = !!SND.ctx && SND.ctx.state === "running";
     const c = audio();
@@ -1461,39 +1476,48 @@ body.tv .chart { height: 240px; }
     sndChip();
   });
   function ready() { const c = SND.on && audio(); if (!c) return null; if (c.state !== "running") c.resume().catch(() => {}); return c.state === "running" ? c : null; }
-  // one metallic coin hit: a few inharmonic partials with a fast decay
-  function clink(c, out, t, f, vol) {
-    [[1, 1, 0.32], [2.76, 0.42, 0.2], [5.4, 0.22, 0.12], [8.9, 0.1, 0.07]].forEach(([mult, amp, len]) => {
-      const o = c.createOscillator(), g = c.createGain();
-      o.type = "sine"; o.frequency.value = f * mult;
-      g.gain.setValueAtTime(0.0001, t); g.gain.linearRampToValueAtTime(vol * amp, t + 0.003); g.gain.exponentialRampToValueAtTime(0.0001, t + len);
-      o.connect(g).connect(out); o.start(t); o.stop(t + len + 0.02);
-    });
-  }
-  function tone(c, out, t, f, len, vol, type) {
-    const o = c.createOscillator(), g = c.createGain();
-    o.type = type || "triangle"; o.frequency.value = f;
-    g.gain.setValueAtTime(0.0001, t); g.gain.linearRampToValueAtTime(vol, t + 0.01); g.gain.exponentialRampToValueAtTime(0.0001, t + len);
-    o.connect(g).connect(out); o.start(t); o.stop(t + len + 0.02);
-  }
   function playWin() {
     const c = ready(); if (!c) return;
-    if (SND.bufs.win) { playBuf(c, SND.bufs.win, 0.9); return; }
-    loadBuf("win");
-    // the recording isn't loaded yet: play a built-in payout so the win isn't silent
-    const lim = c.createDynamicsCompressor(); lim.threshold.value = -6; lim.ratio.value = 12; lim.connect(c.destination);
-    const out = c.createGain(); out.gain.value = 0.55; out.connect(lim);
-    const t = c.currentTime + 0.03;
-    clink(c, out, t, 2093, 0.55); clink(c, out, t + 0.07, 2794, 0.5);                       // ka-ching
-    [1047, 1319, 1568, 2093].forEach((f) => tone(c, out, t + 0.12, f, 1.5, 0.07));          // register bell
-    [1319, 1568, 2093, 2637, 3136].forEach((f, i) => tone(c, out, t + 0.3 + i * 0.085, f, 0.35, 0.09, "square")); // jackpot run
-    for (let i = 0; i < 30; i++) clink(c, out, t + 0.55 + i * 0.07 + Math.random() * 0.035, 1700 + Math.random() * 1900, 0.12 + Math.random() * 0.12); // coins pouring out
+    loadBuf("sounds/" + S.winSound).then((buf) => buf && playBuf(c, buf, 0.9));
   }
   function playLoss() {
     const c = ready(); if (!c) return;
     loadBuf("loss").then((buf) => buf && playBuf(c, buf, 0.9));
   }
   sndChip();
+
+
+  // ---------- win sound picker ----------
+  const WIN_SOUNDS = [
+    { k: "jackpot", n: "Casino jackpot alarm + coins", d: "5s" },
+    { k: "winalarm", n: "Casino win alarm + coins", d: "5s" },
+    { k: "payout", n: "Slot machine payout alarm", d: "5s" },
+    { k: "slotwin", n: "Slot machine win", d: "5s" },
+    { k: "slotalarm", n: "Slot machine win alarm", d: "5s" },
+    { k: "slotalert", n: "Slot machine win alert", d: "3.5s" },
+    { k: "coinwin", n: "Coin win notification", d: "2.5s" },
+    { k: "coins", n: "Coins sound", d: "1s" },
+    { k: "clink", n: "Clinking coins", d: "1s" },
+  ];
+  let previewSrc = null;
+  function renderSndList() {
+    $("#sndList").innerHTML = WIN_SOUNDS.map((x) => `<div class="sndrow${x.k === S.winSound ? " on" : ""}">
+      <label><input type="radio" name="winsnd" id="ws-${x.k}" value="${x.k}"${x.k === S.winSound ? " checked" : ""}>${x.n}<small>${x.d}</small></label>
+      <button type="button" class="btn sm" data-play="${x.k}">Play</button></div>`).join("");
+  }
+  $("#sndList").addEventListener("click", (e) => {
+    const b = e.target.closest("[data-play]"); if (!b) return;
+    unlock();
+    const c = audio(); if (!c) return;
+    try { if (previewSrc) previewSrc.stop(); } catch (err) {}
+    loadBuf("sounds/" + b.dataset.play).then((buf) => { if (buf) previewSrc = playBuf(c, buf, 0.9); });
+  });
+  $("#sndList").addEventListener("change", (e) => {
+    if (e.target.name !== "winsnd") return;
+    S.winSound = e.target.value; renderSndList();
+    write((db) => db.doc("config/settings").set({ winSound: S.winSound }, { merge: true }), () => {}).then((ok) => ok && toast("Win sound saved"));
+  });
+  renderSndList();
 
   // ---------- Coin Alert: full-screen win celebration ----------
   const coinQ = []; let coinBusy = false;
@@ -1789,6 +1813,8 @@ body.tv .chart { height: 240px; }
       unsub.push(db.doc("config/settings").onSnapshot((s) => {
         const v = s.exists ? Number(s.data().unitSize) : NaN;
         if (v > 0 && v !== S.unit) { S.unit = v; render(); }
+        const ws = s.exists ? s.data().winSound : null;
+        if (ws && WIN_SOUNDS.some((x) => x.k === ws) && ws !== S.winSound) { S.winSound = ws; renderSndList(); if (SND.ctx) loadBuf("sounds/" + ws); }
       }, onErr));
     });
   }
