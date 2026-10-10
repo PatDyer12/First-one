@@ -370,6 +370,40 @@ body.rebuild #h-net, body.rebuild #h-usd, body.rebuild .cell b, body.rebuild .kp
 @keyframes hangdrop { from { transform: rotate(0deg); } to { transform: rotate(var(--ang, 40deg)); } }
 @keyframes swing { from { transform: rotate(calc(var(--ang, 40deg) - 7deg)); } to { transform: rotate(calc(var(--ang, 40deg) + 7deg)); } }
 
+/* The crew: cut-out video dancing over the board during the New Jersey clip */
+.crew { position: fixed; inset: 0; z-index: 93; pointer-events: none; display: flex; justify-content: space-between; align-items: flex-end; overflow: hidden; }
+.crew.out { opacity: 0; transition: opacity .9s ease; }
+.crew-side { height: min(54vh, 38vw * 576 / 656); aspect-ratio: 656 / 576; position: relative; animation: crewIn 1s cubic-bezier(.2,1.25,.4,1) both; transform-origin: bottom center; }
+.crew-side.l { margin-left: -2vw; --rot: 3deg; }
+.crew-side.r { margin-right: -2vw; --rot: -3deg; animation-delay: .12s; }
+.crew-side canvas { width: 100%; height: 100%; display: block;
+  -webkit-mask-image: linear-gradient(to top, transparent 0, #000 14%); mask-image: linear-gradient(to top, transparent 0, #000 14%);
+  filter: drop-shadow(0 0 1.5px rgba(255,255,255,.95)) drop-shadow(0 0 22px rgba(255,50,30,.85)) contrast(1.12) saturate(1.15); animation: aura .48s ease-in-out infinite alternate; }
+.crew-side.r canvas { transform: scaleX(-1); }
+@keyframes crewIn { from { transform: translateY(75%) rotate(var(--rot)) scale(.85); opacity: 0; } to { transform: rotate(var(--rot)); opacity: 1; } }
+@keyframes aura { to { filter: drop-shadow(0 0 1.5px #fff) drop-shadow(0 0 36px rgba(255,140,30,.95)) contrast(1.12) saturate(1.15); } }
+@media (max-width: 780px) { .crew { justify-content: center; } .crew-side { height: 42vh; } .crew-side.r { display: none; } }
+
+/* Whale: 2u to under 3u */
+.wh { position: fixed; inset: 0; z-index: 92; pointer-events: none; overflow: hidden; display: grid; place-items: start center;
+  background: linear-gradient(to top, rgba(2,30,52,.88) 0%, rgba(4,40,70,.55) 45%, rgba(4,30,55,.2) 100%); }
+.wh.out { opacity: 0; transition: opacity .8s ease; }
+.wh canvas.wv { position: absolute; inset: 0; width: 100%; height: 100%; }
+.wh-txt { position: relative; z-index: 3; margin-top: calc(env(safe-area-inset-top, 0px) + 5vh); text-align: center; padding: 0 16px; display: flex; flex-direction: column; align-items: center; gap: 4px; }
+.wh-title { font: 900 clamp(56px, 10vw, 190px)/.86 var(--f-display); text-transform: uppercase; letter-spacing: 0.03em; color: transparent;
+  background: linear-gradient(180deg, #FFFFFF 0%, #CFF6FF 35%, #5FD3F0 70%, #1A7FB0 100%); -webkit-background-clip: text; background-clip: text;
+  filter: drop-shadow(0 6px 0 #0A3E5C) drop-shadow(0 0 40px rgba(90,210,255,.6)); animation: slam .7s cubic-bezier(.2,1.6,.4,1) both; }
+.wh-sub { font: 800 clamp(15px, 2vw, 28px) var(--f-display); letter-spacing: 0.22em; text-transform: uppercase; color: #9BE8FF; animation: rise .5s .35s both; }
+.wh-pick { font-weight: 700; font-size: clamp(18px, 2.3vw, 34px); color: #fff; text-shadow: 0 2px 12px rgba(0,20,40,.8); margin-top: 6px; animation: rise .5s .5s both; }
+.wh-amt { font: 700 clamp(20px, 3vw, 46px) var(--f-mono); color: #FFE27A; text-shadow: 0 2px 12px rgba(0,20,40,.8); animation: rise .5s .6s both; }
+.wh.win .wh-amt { color: var(--win); text-shadow: 0 0 26px rgba(61,220,151,.6), 0 2px 10px rgba(0,20,40,.8); font-size: clamp(28px, 4.6vw, 74px); }
+.wh-bel { position: absolute; left: 50%; bottom: -6vh; z-index: 2; height: min(92vh, 80vw * 768 / 432); aspect-ratio: 432 / 768; transform: translateX(-50%); }
+.wh-bel canvas { width: 100%; height: 100%; display: block; filter: drop-shadow(0 0 2px rgba(255,255,255,.9)) drop-shadow(0 0 26px rgba(120,220,255,.75)); }
+.wh.go .wh-bel { animation: surface 1.1s .35s cubic-bezier(.2,1.25,.4,1) both, bob 2.2s 1.45s ease-in-out infinite alternate; }
+.wh canvas.front { z-index: 2; }
+@keyframes surface { from { transform: translate(-50%, 85%) rotate(-6deg); } to { transform: translate(-50%, 0) rotate(0); } }
+@keyframes bob { from { transform: translate(-50%, 0) rotate(-1.5deg); } to { transform: translate(-50%, 2.5%) rotate(1.5deg); } }
+
 /* Win sound picker */
 .sndlist { display: flex; flex-direction: column; gap: 6px; max-height: 260px; overflow-y: auto; }
 .sndrow { display: grid; grid-template-columns: minmax(0, 1fr) auto; gap: 8px; align-items: center; background: var(--ground); border: 1px solid var(--line); border-radius: 10px; padding: 4px 4px 4px 10px; }
@@ -606,10 +640,12 @@ body.tv .chart { height: 240px; }
     <div class="field">
       <span class="lbl">Win sound</span>
       <div class="sndlist" id="sndList"></div>
-      <span class="hint">Tap Play to hear one, then pick it. Your pick plays on every device you're signed in on. Bets of 2u or more get the nuke instead.</span>
+      <span class="hint">Tap Play to hear one, then pick it. Your pick plays on every device you're signed in on. Bets of 2u or more get the whale, 3u or more get the nuke.</span>
       <div style="display:flex;gap:8px;flex-wrap:wrap">
         <button type="button" class="btn sm" id="coinTest">Preview Coin Alert</button>
         <button type="button" class="btn sm" id="lossTest">Preview loss sound</button>
+        <button type="button" class="btn sm" id="whaleTest">Preview whale alert</button>
+        <button type="button" class="btn sm" id="whaleWinTest">Preview whale hit</button>
         <button type="button" class="btn sm" id="nukeWarnTest">Preview nuke warning</button>
         <button type="button" class="btn sm" id="nukeHitTest">Preview nuke hit</button>
       </div>
@@ -672,7 +708,22 @@ body.tv .chart { height: 240px; }
   </div>
 </div>
 <canvas id="fire-cv" hidden aria-hidden="true"></canvas>
+<div class="crew" id="crew" hidden aria-hidden="true"><div class="crew-side l"><canvas id="crewL"></canvas></div><div class="crew-side r"><canvas id="crewR"></canvas></div></div>
+<video id="crewVid" muted playsinline preload="none" hidden></video>
 
+<div class="wh" id="whale" hidden aria-live="assertive">
+  <canvas class="wv" id="whBack" aria-hidden="true"></canvas>
+  <canvas class="wv" id="whCoins" aria-hidden="true"></canvas>
+  <div class="wh-bel" aria-hidden="true"><canvas id="whaleCv"></canvas></div>
+  <canvas class="wv front" id="whFront" aria-hidden="true"></canvas>
+  <div class="wh-txt">
+    <div class="wh-title" id="whTitle">Whale Alert</div>
+    <div class="wh-sub" id="whSub"></div>
+    <div class="wh-pick" id="whPick"></div>
+    <div class="wh-amt num" id="whAmt"></div>
+  </div>
+</div>
+<video id="whaleVid" muted playsinline preload="none" hidden></video>
 <div class="coin" id="coin" hidden aria-live="assertive">
   <canvas id="coin-cv" aria-hidden="true"></canvas>
   <div class="coin-txt"><div class="coin-word">Coin Alert</div><div class="coin-pick" id="coin-pick"></div><div class="coin-amt num" id="coin-amt"></div></div>
@@ -1112,7 +1163,7 @@ body.tv .chart { height: 240px; }
   }
   function celebrate(b) {
     const o = outcome(b), n = netOf(b);
-    if (o === "W") { if (isNuke(b)) nukeHit(b.pick, n); else coinAlert(b.pick, n); return; }
+    if (o === "W") { if (isNuke(b)) nukeHit(b.pick, n); else if (isWhale(b)) whaleAlert(b, "win", n); else coinAlert(b.pick, n); return; }
     if (o === "L") playLoss();
     const word = b.status === "cashout" ? "CASHED" : o === "W" ? "WINNER" : o === "L" ? "LOSS" : "PUSH";
     flash(o, word, b.pick, `${b.book === "DK" ? "DraftKings" : "FanDuel"} · ${fOdds(b.odds)} · ${fU(n, true)} (${fUSD(n * S.unit, true)})`);
@@ -1129,6 +1180,7 @@ body.tv .chart { height: 240px; }
   }
   function announce(b) {
     if (isNuke(b)) { nukeWarn(b); return; }
+    if (isWhale(b)) { whaleAlert(b, "place"); return; }
     flash("N", "ON", b.pick, `${fU(b.units)} at ${fOdds(b.odds)} to win ${fU(b.units * ppu(b.odds))} (${fUSD(b.units * ppu(b.odds) * S.unit)})`);
   }
   function toast(msg) {
@@ -1582,7 +1634,7 @@ body.tv .chart { height: 240px; }
     }
     return SND.loading[name];
   }
-  function loadSounds() { loadBuf("sounds/" + S.winSound); loadBuf("loss"); loadBuf("sounds/siren"); loadBuf("sounds/nuke"); loadBuf("sounds/nj"); }
+  function loadSounds() { loadBuf("sounds/" + S.winSound); loadBuf("loss"); loadBuf("sounds/siren"); loadBuf("sounds/nuke"); loadBuf("sounds/nj"); loadBuf("sounds/whale"); loadCrew(); loadWhale(); }
   function playBuf(c, buf, vol) { const s = c.createBufferSource(), g = c.createGain(); g.gain.value = vol; s.buffer = buf; s.connect(g).connect(c.destination); s.start(); return s; }
   function unlock() {
     const wasLive = !!SND.ctx && SND.ctx.state === "running";
@@ -1652,7 +1704,7 @@ body.tv .chart { height: 240px; }
     fxBusy = true;
     setTimeout(fxNext, run());
   }
-  const NUKE_UNITS = 2;
+  const NUKE_UNITS = 3;
   const isNuke = (b) => Number(b.units) >= NUKE_UNITS;
   function playSfx(name, vol) { const c = ready(); if (!c) return; loadBuf("sounds/" + name).then((buf) => buf && playBuf(c, buf, vol)); }
 
@@ -1743,12 +1795,134 @@ body.tv .chart { height: 240px; }
   }
 
   // 2u+ bet wins: flash, boom, shockwave, cloud, then the board burns
+
+
+  // ---------- cut-out videos: color | mask side by side, recombined on the GPU ----------
+  function alphaGL(cv, vid, mirror) {
+    const gl = cv.getContext("webgl", { alpha: true, premultipliedAlpha: true, antialias: false });
+    if (!gl) return null;
+    const sh = (type, src) => { const s = gl.createShader(type); gl.shaderSource(s, src); gl.compileShader(s); return s; };
+    const pr = gl.createProgram();
+    gl.attachShader(pr, sh(gl.VERTEX_SHADER, "attribute vec2 p; varying vec2 uv; void main(){ uv = vec2((p.x + 1.0) * 0.5, 1.0 - (p.y + 1.0) * 0.5); gl_Position = vec4(p, 0.0, 1.0); }"));
+    gl.attachShader(pr, sh(gl.FRAGMENT_SHADER, "precision mediump float; varying vec2 uv; uniform sampler2D t; void main(){ vec3 c = texture2D(t, vec2(uv.x * 0.5, uv.y)).rgb; float a = texture2D(t, vec2(0.5 + uv.x * 0.5, uv.y)).r; a = smoothstep(0.38, 0.8, a); gl_FragColor = vec4(c * a, a); }"));
+    gl.linkProgram(pr);
+    if (!gl.getProgramParameter(pr, gl.LINK_STATUS)) return null;
+    gl.useProgram(pr);
+    gl.bindBuffer(gl.ARRAY_BUFFER, gl.createBuffer());
+    gl.bufferData(gl.ARRAY_BUFFER, new Float32Array([-1, -1, 1, -1, -1, 1, 1, 1]), gl.STATIC_DRAW);
+    const loc = gl.getAttribLocation(pr, "p"); gl.enableVertexAttribArray(loc); gl.vertexAttribPointer(loc, 2, gl.FLOAT, false, 0, 0);
+    gl.bindTexture(gl.TEXTURE_2D, gl.createTexture());
+    [gl.TEXTURE_WRAP_S, gl.TEXTURE_WRAP_T].forEach((k) => gl.texParameteri(gl.TEXTURE_2D, k, gl.CLAMP_TO_EDGE));
+    [gl.TEXTURE_MIN_FILTER, gl.TEXTURE_MAG_FILTER].forEach((k) => gl.texParameteri(gl.TEXTURE_2D, k, gl.LINEAR));
+    const m2 = mirror ? mirror.getContext("2d") : null;
+    return () => {
+      if (vid.readyState < 2 || !vid.videoWidth) return;
+      const w = vid.videoWidth / 2, h = vid.videoHeight;
+      if (cv.width !== w) { cv.width = w; cv.height = h; if (mirror) { mirror.width = w; mirror.height = h; } gl.viewport(0, 0, w, h); }
+      gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGBA, gl.RGBA, gl.UNSIGNED_BYTE, vid);
+      gl.clearColor(0, 0, 0, 0); gl.clear(gl.COLOR_BUFFER_BIT); gl.drawArrays(gl.TRIANGLE_STRIP, 0, 4);
+      if (m2) { m2.clearRect(0, 0, w, h); m2.drawImage(cv, 0, 0); }
+    };
+  }
+  const vidSrc = (base) => (document.createElement("video").canPlayType('video/webm; codecs="vp9"') ? base + ".webm" : base + ".mp4") + "?v=1";
+  function loadVid(id, base) { const v = $(id); if (!v.getAttribute("src")) { v.preload = "auto"; v.src = vidSrc(base); v.load(); } }
+  // play a cut-out video into its canvas; `then` runs once it's rolling (or right away if it can't)
+  function playCut(v, draw, onShow, then) {
+    let done = false; const go = () => { if (!done) { done = true; then(); } };
+    if (!draw || v.readyState < 3) { go(); return () => {}; }
+    let raf = 0;
+    v.currentTime = 0;
+    v.play().then(() => {
+      onShow();
+      const loop = () => { draw(); if (!v.paused && !v.ended) raf = requestAnimationFrame(loop); };
+      raf = requestAnimationFrame(loop); go();
+    }).catch(go);
+    setTimeout(go, 700); // never hold an effect up for a slow video
+    return () => { cancelAnimationFrame(raf); try { v.pause(); } catch (e) {} };
+  }
+
+  // ---------- the crew: dancing over the board during the New Jersey clip ----------
+  let crewDraw = null;
+  function loadCrew() { loadVid("#crewVid", "sounds/nj-crew"); }
+  function startCrew(then) {
+    const v = $("#crewVid"), box = $("#crew");
+    if (!crewDraw && !reduced) crewDraw = alphaGL($("#crewL"), v, $("#crewR"));
+    if (v.readyState < 3) loadCrew();
+    const stop = playCut(v, reduced ? null : crewDraw, () => { box.classList.remove("out"); box.hidden = false; }, then);
+    v.onended = () => { box.classList.add("out"); setTimeout(() => { box.hidden = true; box.classList.remove("out"); stop(); }, 950); };
+  }
+
+  // ---------- the whale: ocean rolls in, beluga surfaces squeaking ----------
+  const WHALE_UNITS = 2;
+  const isWhale = (b) => Number(b.units) >= WHALE_UNITS && !isNuke(b);
+  let whaleDraw = null;
+  function loadWhale() { loadVid("#whaleVid", "sounds/whale"); }
+  function waves(back, front, dur) {
+    const dpr = Math.min(2, window.devicePixelRatio || 1);
+    const W = (back.width = front.width = Math.round(innerWidth * dpr)), H = (back.height = front.height = Math.round(innerHeight * dpr));
+    const b = back.getContext("2d"), f = front.getContext("2d"), t0 = performance.now(), bubbles = [], drops = [];
+    let raf = 0, splashed = false;
+    const layer = (ctx, level, amp, k, speed, phase, fill, foam) => {
+      ctx.beginPath(); ctx.moveTo(0, H);
+      for (let x = 0; x <= W; x += 12 * dpr) ctx.lineTo(x, level + Math.sin(x * k + phase + speed) * amp + Math.sin(x * k * 2.3 + phase * 1.7) * amp * 0.35);
+      ctx.lineTo(W, H); ctx.closePath(); ctx.fillStyle = fill; ctx.fill();
+      if (foam) { ctx.strokeStyle = foam; ctx.lineWidth = 3 * dpr; ctx.stroke(); }
+    };
+    const tick = (now) => {
+      const el = now - t0, s = el / 1000;
+      const rise = 1 - Math.pow(1 - Math.min(1, el / 900), 3), out = Math.min(1, Math.max(0, (dur - el) / 700));
+      const base = H - (H * 0.27) * rise * out;
+      b.clearRect(0, 0, W, H); f.clearRect(0, 0, W, H);
+      const g1 = b.createLinearGradient(0, base - 40 * dpr, 0, H); g1.addColorStop(0, "rgba(16,92,130,.92)"); g1.addColorStop(1, "rgba(4,34,60,.98)");
+      layer(b, base - 34 * dpr, 16 * dpr, 0.006 / dpr, s * 1.4, 0.0, g1, "rgba(150,230,255,.35)");
+      if (Math.random() < 0.6) bubbles.push({ x: Math.random() * W, y: H + 10 * dpr, r: (2 + Math.random() * 6) * dpr, v: (0.6 + Math.random() * 1.6) * dpr });
+      b.fillStyle = "rgba(200,245,255,.5)";
+      for (const p of bubbles) { p.y -= p.v; p.x += Math.sin(p.y * 0.03) * 0.4 * dpr; if (p.y > base - 30 * dpr) { b.beginPath(); b.arc(p.x, p.y, p.r, 0, 7); b.fill(); } }
+      for (let i = bubbles.length - 1; i >= 0; i--) if (bubbles[i].y < base - 40 * dpr) bubbles.splice(i, 1);
+      const g2 = f.createLinearGradient(0, base, 0, H); g2.addColorStop(0, "rgba(40,190,215,.9)"); g2.addColorStop(0.35, "rgba(14,110,150,.95)"); g2.addColorStop(1, "rgba(3,30,55,1)");
+      layer(f, base + 10 * dpr, 20 * dpr, 0.0045 / dpr, -s * 1.8, 1.7, g2, "rgba(235,252,255,.85)");
+      if (!splashed && el > 650) {
+        splashed = true;
+        for (let i = 0; i < 90; i++) { const a = -Math.PI / 2 + (Math.random() - 0.5) * 1.9, v = (6 + Math.random() * 14) * dpr; drops.push({ x: W / 2 + (Math.random() - 0.5) * W * 0.16, y: base, vx: Math.cos(a) * v, vy: Math.sin(a) * v, r: (2 + Math.random() * 5) * dpr, life: 0 }); }
+      }
+      f.fillStyle = "rgba(225,250,255,.85)";
+      for (const d of drops) { d.life++; d.vy += 0.45 * dpr; d.x += d.vx; d.y += d.vy; if (d.y < base + 20 * dpr) { f.beginPath(); f.arc(d.x, d.y, d.r, 0, 7); f.fill(); } }
+      if (el < dur) raf = requestAnimationFrame(tick);
+    };
+    raf = requestAnimationFrame(tick);
+    return () => { cancelAnimationFrame(raf); b.clearRect(0, 0, W, H); f.clearRect(0, 0, W, H); };
+  }
+  // kind "place": a 2u bet just went in. kind "win": it cashed (n = units won)
+  function whaleAlert(b, kind, n) {
+    fx(() => {
+      const ov = $("#whale"), v = $("#whaleVid"), dur = 5600;
+      if (!whaleDraw && !reduced) whaleDraw = alphaGL($("#whaleCv"), v, null);
+      if (v.readyState < 3) loadWhale();
+      ov.classList.toggle("win", kind === "win");
+      $("#whTitle").textContent = kind === "win" ? "Whale Hit" : "Whale Alert";
+      $("#whSub").textContent = kind === "win" ? "The whale ate" : `${fU(b.units)} on the line`;
+      $("#whPick").textContent = b.pick;
+      $("#whAmt").textContent = kind === "win" ? `${fUSD(n * S.unit, true)}  ·  ${fU(n, true)}` : `${fUSD(b.units * S.unit)} to win ${fUSD(b.units * ppu(b.odds) * S.unit)}  ·  ${fOdds(b.odds)}`;
+      ov.classList.remove("go", "out"); ov.hidden = false; void ov.offsetWidth; ov.classList.add("go");
+      playSfx("whale", 1);
+      const stopWaves = reduced ? null : waves($("#whBack"), $("#whFront"), dur);
+      const stopCoins = kind === "win" && !reduced ? rainCoins($("#whCoins")) : null;
+      const stopVid = playCut(v, reduced ? null : whaleDraw, () => {}, () => {});
+      setTimeout(() => ov.classList.add("out"), dur - 700);
+      setTimeout(() => { ov.hidden = true; ov.classList.remove("go", "out", "win"); if (stopWaves) stopWaves(); if (stopCoins) stopCoins(); stopVid(); }, dur + 150);
+      return dur + 200;
+    });
+  }
+  $("#whaleTest").addEventListener("click", () => { closeSheets(); whaleAlert({ pick: "Florida −3.5", units: 2, odds: -110 }, "place"); });
+  $("#whaleWinTest").addEventListener("click", () => { closeSheets(); whaleAlert({ pick: "Florida −3.5", units: 2, odds: -110 }, "win", 1.82); });
+
   // the song plays from the top; the bomb drops on "...blow New Jersey UP" (4.96s in)
   const NJ_DROP = 5.0;
   function nukeHit(pick, n) {
     fx(() => {
       const c = ready(), song = SND.bufs["sounds/nj"];
       if (!c || !song) { if (c) loadBuf("sounds/nj"); detonate(pick, n, false); return 6300; }
+      startCrew(() => {
       playBuf(c, song, 0.95);
       // arming: red alert while the verse builds
       const ov = $("#nkWarn");
@@ -1758,7 +1932,8 @@ body.tv .chart { height: 240px; }
       $("#nkWarnAmt").textContent = `${fUSD(n * S.unit, true)}  ·  ${fU(n, true)}`;
       ov.classList.remove("out"); ov.hidden = false;
       setTimeout(() => { ov.hidden = true; detonate(pick, n, true); }, NJ_DROP * 1000);
-      return NJ_DROP * 1000 + 6300;
+      });
+      return NJ_DROP * 1000 + 7000;
     });
   }
   function detonate(pick, n, withSong) {
