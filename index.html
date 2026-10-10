@@ -768,7 +768,7 @@ body.tv .chart { height: 240px; }
     <div class="field">
       <span class="lbl">Reaction clips</span>
       <label class="togrow"><input type="checkbox" id="clipsOn"> Pop clips up on this screen</label>
-      <span class="hint">While a bet is live, a clip takes over the screen about every 10 minutes: a winning clip when you're cashing, a losing one when you're not, hype when it's close. Kickoffs and big swings set one off too, and Georgia–Bama plays its own clips on every score. Tap the screen to close one. Turn this off on your phone and leave it on for the monitor.</span>
+      <span class="hint">While a bet is live, a clip takes over the screen on touchdowns, field goals, turnovers, red-zone trips, home runs, goals, big runs, crunch time and halftime (good or bad for you), and about every 6 minutes if nothing's happened: a winning clip when you're cashing, a losing one when you're not, hype when it's close. Kickoffs and big swings set one off too, and Georgia–Bama plays its own clips on every score. Tap the screen to close one. Turn this off on your phone and leave it on for the monitor.</span>
       <div class="cliplib" id="clipLib"></div>
     </div>
     <div class="field">
@@ -1650,8 +1650,10 @@ body.tv .chart { height: 240px; }
     const c = e.competitions[0], t = {};
     for (const x of c.competitors) t[x.homeAway] = x;
     const st = e.status.type;
-    const team = (k) => { const x = t[k], tm = x.team; return { ab: tm.abbreviation || "", nm: tm.shortDisplayName || tm.name || "", fn: tm.displayName || "", lg: tm.logo || "", sc: /^\d+$/.test(String(x.score)) ? Number(x.score) : null }; };
-    const g = { id: String(e.id), sport, t: Date.parse(e.date), st: st.state || "pre", d: st.shortDetail || "", a: team("away"), h: team("home") };
+    const team = (k) => { const x = t[k], tm = x.team; return { id: tm.id, ab: tm.abbreviation || "", nm: tm.shortDisplayName || tm.name || "", fn: tm.displayName || "", lg: tm.logo || "", sc: /^\d+$/.test(String(x.score)) ? Number(x.score) : null }; };
+    const g = { id: String(e.id), sport, t: Date.parse(e.date), st: st.state || "pre", d: st.shortDetail || "", a: team("away"), h: team("home"), pd: e.status.period || 0, clk: e.status.clock };
+    const si = c.situation, lp = si && si.lastPlay;
+    if (si) g.sit = { rz: !!si.isRedZone, pos: si.possession || null, lp: lp ? { id: String(lp.id), type: (lp.type && lp.type.text) || "", text: lp.text || "", team: lp.team && lp.team.id } : null };
     const o = (c.odds || [])[0];
     if (o) {
       const ml = o.moneyline || {}, sp = o.pointSpread || {}, tot = o.total || {};
@@ -2494,9 +2496,10 @@ body.tv .chart { height: 240px; }
   // A bet only counts as "up" or "down" once it clears the sport's bar, so normal back-and-forth
   // (a basketball lead trading by a bucket) doesn't set anything off.
   const BARS = { NBA: 5, CBB: 5, NFL: 4, CFB: 4, MLB: 1, NHL: 1 }; // points / runs / goals past the number
-  const BET_COOLDOWN = 10 * 60e3; // each bet swings a clip at most once per 10 min
-  const TRIGGER_GAP = 4 * 60e3;   // scores, swings and kickoffs: at least 4 min apart
-  const POP_EVERY = 10 * 60e3;    // nothing for 10 min while a game's live: pop one anyway
+  const BET_COOLDOWN = 5 * 60e3;  // each bet's covering / not-covering swing: once per 5 min
+  const BIG_GAP = 60e3;           // touchdowns, home runs, goals, turnovers, swings: a minute apart
+  const TRIGGER_GAP = 2 * 60e3;   // red zone, field goals, runs, crunch time, halftime, kickoffs: 2 min apart
+  const POP_EVERY = 6 * 60e3;     // nothing for 6 min while a game's live: pop one anyway
   const lastRes = new Map(), lastReact = new Map(), legHits = new Map(), gameSt = new Map(), gameSc = new Map(), lastM = new Map(), lastFeat = new Map();
   let lastAny = Date.now() - POP_EVERY + 2 * 60e3; // first pop-up no sooner than 2 min after the board opens
   function clipsOn() { try { return localStorage.getItem("sb-clips") !== "off"; } catch (e) { return true; } }
@@ -2519,27 +2522,83 @@ body.tv .chart { height: 240px; }
     const g = gameOf(b.sel);
     return g && g.st === "in" ? { state: lastRes.get(b.id) || "E" } : null;
   }
+  // ---------- game situations: what just happened in a game you're on, and whether it helps you ----------
+  const FB = { CFB: 1, NFL: 1 }, HOOPS = { NBA: 1, CBB: 1 };
+  const gPrev = new Map(), gOnce = new Map(), gMargins = new Map();
+  const once = (gid, k) => { const s = gOnce.get(gid) || new Set(); if (s.has(k)) return false; s.add(k); gOnce.set(gid, s); return true; };
+  function gameEvents(g, now) {
+    const p = gPrev.get(g.id), sit = g.sit || {}, lp = sit.lp, out = [];
+    gPrev.set(g.id, { a: g.a.sc, h: g.h.sc, rz: !!sit.rz, pos: sit.pos || null, lp: lp ? lp.id : null, st: g.st });
+    if (!p || g.st !== "in" || g.a.sc == null) return out;
+    const sideOf = (teamId) => (teamId == null ? null : String(teamId) === String(g.a.id) ? "a" : String(teamId) === String(g.h.id) ? "h" : null);
+    const ab = (x) => g[x].ab;
+    // scores
+    for (const x of ["a", "h"]) {
+      const d = g[x].sc - (p[x] ?? g[x].sc); if (d <= 0) continue;
+      if (FB[g.sport]) { if (d >= 6) out.push({ ev: "td", side: x, big: 1, tag: "Touchdown " + ab(x) }); else if (d === 3) out.push({ ev: "fg", side: x, tag: "Field goal " + ab(x) }); else if (d === 2) out.push({ ev: "safety", side: x, big: 1, tag: "Safety " + ab(x) }); }
+      else if (g.sport === "MLB") { const hr = lp && /home run|homers|homered|grand slam/i.test((lp.type || "") + " " + (lp.text || "")); out.push({ ev: hr ? "hr" : "run", side: x, big: 1, tag: (hr ? (/grand slam/i.test(lp.text) ? "Grand slam " : "Home run ") : d > 1 ? `${d} runs ` : "Run scores ") + ab(x) }); }
+      else if (g.sport === "NHL") out.push({ ev: "goal", side: x, big: 1, tag: "Goal " + ab(x) });
+    }
+    if (FB[g.sport]) {
+      // turnover: the ball changed hands on a pick, fumble, block or failed 4th down
+      if (lp && lp.id !== p.lp && sit.pos && p.pos && sit.pos !== p.pos && /interception|fumble|turnover|blocked|downs/i.test((lp.type || "") + " " + (lp.text || "")) && !out.length)
+        { const x = sideOf(sit.pos); if (x) out.push({ ev: "turnover", side: x, big: 1, tag: "Turnover · " + ab(x) + " ball", noTot: 1 }); }
+      // red zone trip
+      if (sit.rz && (!p.rz || sit.pos !== p.pos)) { const x = sideOf(sit.pos); if (x) out.push({ ev: "redzone", side: x, tag: "Red zone · " + ab(x) }); }
+    }
+    if (HOOPS[g.sport]) {
+      // a run: the margin moved 8+ in about 4 minutes
+      const hist = (gMargins.get(g.id) || []).filter((m) => now - m.t < 5 * 60e3), m = g.h.sc - g.a.sc;
+      hist.push({ t: now, m }); gMargins.set(g.id, hist);
+      const old = hist.find((x) => now - x.t >= 2.5 * 60e3);
+      if (old && Math.abs(m - old.m) >= 8 && once(g.id, "run" + Math.floor(now / (6 * 60e3)))) { const x = m > old.m ? "h" : "a"; out.push({ ev: "run", side: x, tag: `${Math.abs(m - old.m)}-pt run · ${ab(x)}` }); }
+    }
+    // crunch time and halftime, once a game
+    const diff = Math.abs(g.a.sc - g.h.sc), clk = g.clk ?? 9999, pd = g.pd || 0;
+    const crunch = FB[g.sport] ? pd >= 4 && clk <= 300 && diff <= 8 : g.sport === "NBA" ? pd >= 4 && clk <= 150 && diff <= 6 : g.sport === "CBB" ? pd >= 2 && clk <= 150 && diff <= 6 : g.sport === "MLB" ? pd >= 9 && diff <= 2 : g.sport === "NHL" ? pd >= 3 && clk <= 300 && diff <= 1 : false;
+    if (crunch && once(g.id, "crunch")) out.push({ ev: "crunch", tag: "Crunch time" });
+    if (/halftime/i.test(g.d) && once(g.id, "half")) out.push({ ev: "half", tag: "Halftime" });
+    if (pd >= 2 && g.sport === "NHL" && /end of 2nd/i.test(g.d) && once(g.id, "int2")) out.push({ ev: "half", tag: "Second intermission" });
+    return out;
+  }
+  // which of your picks ride on this game, and is a play by `side` good (+1) or bad (-1) for each
+  function ridersOf(g) {
+    const r = [];
+    for (const b of S.bets.values()) {
+      if (b.status !== "open") continue;
+      const legs = b.kind === "parlay" ? legsOf(b) : null;
+      if (legs && legs.some((l) => l.st === "miss")) continue; // dead ticket
+      for (const s of selsOf(b)) if (String(s.g) === g.id) { if (legs && legs.find((l) => l.sel === s && l.st)) continue; r.push({ b, s }); }
+    }
+    return r;
+  }
+  const helps = (s, e) => (!e.side ? 0 : s.m === "tot" ? (e.noTot ? 0 : s.s === "o" ? 1 : -1) : e.side === s.s ? 1 : -1);
+  const EV_RANK = { td: 6, hr: 6, goal: 6, safety: 6, turnover: 6, run: 4, fg: 4, redzone: 3, crunch: 3, half: 2 };
   function autoReact() {
     if (!S.ready) return;
     const now = Date.now(), swings = [], seenG = new Set();
     for (const b of S.bets.values()) {
       if (b.status !== "open") { lastRes.delete(b.id); legHits.delete(b.id); lastM.delete(b.id); continue; }
       for (const s of selsOf(b)) {
-        const g = gameOf(s); if (!g) continue;
-        // kickoff: a game on this bet just went live
-        if (!seenG.has(g.id)) {
-          const was = gameSt.get(g.id); gameSt.set(g.id, g.st);
-          const sc = g.a.sc == null ? "" : g.a.sc + "-" + g.h.sc, scWas = gameSc.get(g.id); gameSc.set(g.id, sc);
-          if (was === "pre" && g.st === "in") swings.push({ b, kind: "kick" });
-          // a score in a matchup with its own clips (Georgia–Bama)
-          else if (scWas && sc && scWas !== sc && g.st === "in" && gamePool(b).length) swings.push({ b, kind: "score" });
-        }
+        const g = gameOf(s); if (!g || seenG.has(g.id)) continue;
         seenG.add(g.id);
+        // first pitch / kickoff / tip-off
+        const was = gameSt.get(g.id); gameSt.set(g.id, g.st);
+        if (was === "pre" && g.st === "in") swings.push({ b, kind: "kick", pri: 2 });
+        // everything that just happened in this game, for each bet riding on it
+        for (const e of gameEvents(g, now)) {
+          const riders = ridersOf(g); if (!riders.length) continue;
+          const scored = ["td", "fg", "safety", "hr", "run", "goal"].includes(e.ev);
+          for (const { b: rb, s: rs } of riders) {
+            const h = helps(rs, e);
+            swings.push({ b: rb, kind: "ev", e, h, g, pri: (EV_RANK[e.ev] || 2) + (h < 0 ? 0.5 : 0), matchup: scored && gamePool(rb).length > 0 });
+          }
+        }
       }
       if (b.kind === "parlay") {
         const legs = legsOf(b), hits = legs.filter((l) => l.st === "hit").length, prev = legHits.get(b.id);
         legHits.set(b.id, hits);
-        if (prev === 0 && hits > 0 && !legs.some((l) => l.st === "miss")) swings.push({ b, kind: "first" });
+        if (prev === 0 && hits > 0 && !legs.some((l) => l.st === "miss")) swings.push({ b, kind: "first", pri: 9 });
         continue;
       }
       const ev = b.sel ? evalSel(b.sel) : null;
@@ -2548,21 +2607,29 @@ body.tv .chart { height: 240px; }
       lastRes.set(b.id, cur);
       if (!prev || prev === cur || cur === "E") continue; // first look at this game, or no real swing
       if (now - (lastReact.get(b.id) || 0) < BET_COOLDOWN) continue;
-      swings.push({ b, kind: cur === "W" ? "good" : "bad" });
+      swings.push({ b, kind: cur === "W" ? "good" : "bad", pri: cur === "W" ? 5 : 5.5 });
     }
     const on = clipsOn();
     if (swings.length) {
-      swings.forEach((s) => glow(s.b.id, s.kind === "kick" || s.kind === "score" ? "mid" : s.kind));
-      // one clip at a time: a first leg cashing beats a bet going down, then a matchup score, then a kickoff, then a bet going up
-      const rank = { first: 5, bad: 4, score: 3, kick: 2, good: 1 };
-      const top = swings.reduce((x, s) => (rank[s.kind] > rank[x.kind] ? s : x));
-      swings.forEach((s) => { if (s.kind === "good" || s.kind === "bad") lastReact.set(s.b.id, now); }); // kickoffs and scores don't use up the bet's swing
-      const ok = on && (top.kind === "first" || (now - lastAny >= TRIGGER_GAP && !clipBusy()));
+      const gk = (s) => (s.kind === "good" || s.kind === "first" || (s.kind === "ev" && s.h > 0) ? "good" : s.kind === "bad" || (s.kind === "ev" && s.h < 0) ? "bad" : "mid");
+      swings.forEach((s) => glow(s.b.id, gk(s)));
+      swings.forEach((s) => { if (s.kind === "good" || s.kind === "bad") lastReact.set(s.b.id, now); });
+      // one clip at a time, the biggest moment wins
+      const top = swings.reduce((x, s) => (s.pri > x.pri ? s : x));
+      const big = top.kind === "first" || (top.kind === "ev" && top.e.big) || top.kind === "good" || top.kind === "bad";
+      const gap = big ? BIG_GAP : TRIGGER_GAP;
+      const ok = on && (top.kind === "first" || (now - lastAny >= gap && !clipBusy()));
       if (!ok) { render(); return; } // too soon: glow only, no clip
       lastAny = now;
       if (top.kind === "kick") react(top.b, "mid", null, { MLB: "First pitch", NBA: "Tip-off", CBB: "Tip-off", NHL: "Puck drop" }[(gameFor(top.b) || {}).sport || sportOf(top.b)] || "Kickoff");
-      else if (top.kind === "score") { const g = gameFor(top.b); react(top.b, "mid", pickClip(gamePool(top.b)), g ? `${g.a.ab} ${g.a.sc} – ${g.h.ab} ${g.h.sc}` : "Score"); }
-      else react(top.b, top.kind);
+      else if (top.kind === "ev") {
+        const e = top.e, k = gk(top);
+        // a clip filed under this exact moment wins; otherwise the matchup's own clips on a score, else winning / losing / hype
+        const exact = CLIPS.filter((c) => c.mood.split(" ").includes(e.ev) && (!c.sport || c.sport === top.g.sport) && (!c.teams || isMatchup(c, top.g)));
+        const pool = exact.length ? exact : top.matchup && Math.random() < 0.6 ? gamePool(top.b) : k === "good" ? [PIPS.good, ...libFor(top.b, ["up"])] : k === "bad" ? ["lockin", ...libFor(top.b, ["down"])] : gamePool(top.b).length ? gamePool(top.b) : libFor(top.b, ["hype"]);
+        const P = pickClip(pool) || pickClip(libFor(top.b, ["hype", "vibe"]));
+        react(top.b, k, P, e.tag);
+      } else react(top.b, top.kind);
       return;
     }
     // quiet stretch: pop a clip that fits how one of the live bets is going
