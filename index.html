@@ -1423,7 +1423,7 @@ body.tv .chart { height: 240px; }
 
   // ---------- sound: slot-machine payout for wins, the loss clip for losses ----------
   // Browsers only allow sound after a tap or click on the page, so the chip shows "Tap for sound" until then.
-  const SND = { on: true, ctx: null, loss: null, lossP: null };
+  const SND = { on: true, ctx: null, bufs: {}, loading: {} };
   try { SND.on = localStorage.getItem("sb-sound") !== "off"; } catch (e) {}
   function audio() {
     if (!SND.ctx) { const C = window.AudioContext || window.webkitAudioContext; if (!C) return null; SND.ctx = new C(); SND.ctx.onstatechange = sndChip; }
@@ -1435,17 +1435,22 @@ body.tv .chart { height: 240px; }
     b.classList.toggle("wake", SND.on && !live);
     b.setAttribute("aria-pressed", String(SND.on));
   }
-  function loadLoss() {
-    const c = audio(); if (!c || SND.lossP) return SND.lossP;
-    SND.lossP = fetch("loss.mp3").then((r) => r.arrayBuffer()).then((a) => new Promise((ok, bad) => c.decodeAudioData(a, ok, bad)))
-      .then((buf) => (SND.loss = buf)).catch(() => { SND.lossP = null; });
-    return SND.lossP;
+  function loadBuf(name) {
+    const c = audio(); if (!c) return Promise.resolve(null);
+    if (SND.bufs[name]) return Promise.resolve(SND.bufs[name]);
+    if (!SND.loading[name]) {
+      SND.loading[name] = fetch(name + ".mp3?v=2").then((r) => r.arrayBuffer()).then((a) => new Promise((ok, bad) => c.decodeAudioData(a, ok, bad)))
+        .then((buf) => (SND.bufs[name] = buf)).catch(() => { SND.loading[name] = null; return null; });
+    }
+    return SND.loading[name];
   }
+  function loadSounds() { loadBuf("win"); loadBuf("loss"); }
+  function playBuf(c, buf, vol) { const s = c.createBufferSource(), g = c.createGain(); g.gain.value = vol; s.buffer = buf; s.connect(g).connect(c.destination); s.start(); }
   function unlock() {
     const wasLive = !!SND.ctx && SND.ctx.state === "running";
     const c = audio();
     if (c && !wasLive) { SND.woke = Date.now(); if (c.state !== "running") c.resume().catch(() => {}); }
-    loadLoss(); sndChip();
+    loadSounds(); sndChip();
   }
   document.addEventListener("pointerdown", unlock, true);
   document.addEventListener("keydown", unlock, true);
@@ -1473,6 +1478,9 @@ body.tv .chart { height: 240px; }
   }
   function playWin() {
     const c = ready(); if (!c) return;
+    if (SND.bufs.win) { playBuf(c, SND.bufs.win, 0.9); return; }
+    loadBuf("win");
+    // the recording isn't loaded yet: play a built-in payout so the win isn't silent
     const lim = c.createDynamicsCompressor(); lim.threshold.value = -6; lim.ratio.value = 12; lim.connect(c.destination);
     const out = c.createGain(); out.gain.value = 0.55; out.connect(lim);
     const t = c.currentTime + 0.03;
@@ -1483,8 +1491,7 @@ body.tv .chart { height: 240px; }
   }
   function playLoss() {
     const c = ready(); if (!c) return;
-    const go = () => { if (!SND.loss) return; const s = c.createBufferSource(), g = c.createGain(); g.gain.value = 0.9; s.buffer = SND.loss; s.connect(g).connect(c.destination); s.start(); };
-    if (SND.loss) go(); else (loadLoss() || Promise.resolve()).then(go);
+    loadBuf("loss").then((buf) => buf && playBuf(c, buf, 0.9));
   }
   sndChip();
 
