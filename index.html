@@ -651,7 +651,7 @@ body.tv .chart { height: 240px; }
     <div class="field">
       <span class="lbl">Win sound</span>
       <div class="sndlist" id="sndList"></div>
-      <span class="hint">Tap Play to hear one, then pick it. Your pick plays on every device you're signed in on. Bets of 2u or more get the whale, 3u or more get the nuke.</span>
+      <span class="hint">Tap Play to hear one, then pick it. Your pick plays on every device you're signed in on. Bets of 1.5u or more get the whale, 3u or more get the nuke.</span>
       <div style="display:flex;gap:8px;flex-wrap:wrap">
         <button type="button" class="btn sm" id="coinTest">Preview Coin Alert</button>
         <button type="button" class="btn sm" id="lossTest">Preview loss sound</button>
@@ -1865,7 +1865,7 @@ body.tv .chart { height: 240px; }
   }
 
   // ---------- the whale: ocean rolls in, beluga surfaces squeaking ----------
-  const WHALE_UNITS = 2;
+  const WHALE_UNITS = 1.5;
   const isWhale = (b) => Number(b.units) >= WHALE_UNITS && !isNuke(b);
   let whaleDraw = null;
   function loadWhale() { loadVid("#whaleVid", "sounds/whale"); }
@@ -2068,8 +2068,8 @@ body.tv .chart { height: 240px; }
       return IMPACT + 5600;
     });
   }
-  $("#whaleTest").addEventListener("click", () => { closeSheets(); whaleAlert({ pick: "Florida −3.5", units: 2, odds: -110 }, "place"); });
-  $("#whaleWinTest").addEventListener("click", () => { closeSheets(); whaleSplash({ pick: "Florida −3.5", units: 2, odds: -110 }, 1.82); });
+  $("#whaleTest").addEventListener("click", () => { closeSheets(); whaleAlert({ pick: "Florida −3.5", units: 1.5, odds: -110 }, "place"); });
+  $("#whaleWinTest").addEventListener("click", () => { closeSheets(); whaleSplash({ pick: "Florida −3.5", units: 1.5, odds: -110 }, 1.36); });
 
   // the song plays from the top; the bomb drops on "...blow New Jersey UP" (4.96s in)
   const NJ_DROP = 5.0;
