@@ -90,7 +90,7 @@ button.chip:hover { color: var(--ink); border-color: var(--ink-3); }
   .hero { grid-column: 1 / -1; }
 }
 @media (min-width: 1200px) {
-  .grid { grid-template-columns: minmax(0, 0.95fr) minmax(0, 1.1fr) minmax(0, 1fr); }
+  .grid { grid-template-columns: minmax(0, 0.85fr) minmax(0, 1.5fr) minmax(0, 0.95fr); }
   .hero { grid-column: auto; position: sticky; top: calc(env(safe-area-inset-top, 0px) + 18px); }
 }
 
@@ -123,24 +123,24 @@ button.chip:hover { color: var(--ink); border-color: var(--ink-3); }
 .dot.none { background: transparent; border: 1px dashed var(--line); }
 
 /* Bets */
-.list { display: flex; flex-direction: column; gap: 10px; }
-.bet { display: grid; grid-template-columns: auto minmax(0, 1fr) auto; gap: 6px 12px; align-items: center; padding: 14px; border-radius: 12px; background: var(--panel-2); border: 1px solid transparent; position: relative; transition: border-color .2s, transform .2s; }
+.list { display: grid; grid-template-columns: repeat(auto-fill, minmax(min(100%, 340px), 1fr)); gap: 10px; align-items: start; }
+.bet { display: grid; grid-template-columns: auto minmax(0, 1fr) auto; gap: 5px 10px; align-items: center; padding: 11px 12px; border-radius: 12px; background: var(--panel-2); border: 1px solid transparent; position: relative; transition: border-color .2s, transform .2s; }
 .bet.click { cursor: pointer; }
 .bet.click:hover { border-color: var(--line); }
 .bet.expanded { border-color: var(--ink-3); }
-.book { width: 36px; height: 36px; border-radius: 9px; display: grid; place-items: center; font: 700 12px var(--f-mono); color: #0A0F17; letter-spacing: 0.02em; }
+.book { width: 30px; height: 30px; border-radius: 8px; display: grid; place-items: center; font: 700 11px var(--f-mono); color: #0A0F17; letter-spacing: 0.02em; align-self: start; margin-top: 2px; }
 .book.FD { background: var(--fd); } .book.DK { background: var(--dk); }
-.pick { font-weight: 600; font-size: 17px; overflow-wrap: anywhere; }
-.meta { font: 500 12px var(--f-mono); color: var(--ink-3); display: flex; gap: 8px; flex-wrap: wrap; align-items: center; }
+.pick { font-weight: 700; font-size: 20px; line-height: 1.2; overflow-wrap: anywhere; }
+.meta { font: 500 13px var(--f-mono); color: var(--ink-3); display: flex; gap: 8px; flex-wrap: wrap; align-items: center; margin-top: 2px; }
 .meta .tag { color: var(--gold); }
 .meta .smp { color: var(--gold); border: 1px solid rgba(255,194,75,.4); border-radius: 4px; padding: 0 4px; }
 .odds { text-align: right; }
-.odds b { display: block; font: 600 17px var(--f-mono); }
-.odds span { font: 500 12px var(--f-mono); color: var(--ink-2); white-space: nowrap; }
+.odds b { display: block; font: 700 20px var(--f-mono); }
+.odds span { font: 500 13px var(--f-mono); color: var(--ink-2); white-space: nowrap; }
 .sweat { position: absolute; top: 10px; right: 10px; width: 6px; height: 6px; border-radius: 50%; background: var(--gold); opacity: .85; animation: blink 1.8s ease-in-out infinite; }
 @keyframes blink { 50% { opacity: .2; } }
 .legs { grid-column: 2 / -1; margin: 4px 0 0; padding: 0; list-style: none; display: flex; flex-direction: column; gap: 3px; }
-.legs li { font-size: 13px; color: var(--ink-2); padding-left: 14px; position: relative; overflow-wrap: anywhere; }
+.legs li { font-size: 15px; color: var(--ink); padding-left: 14px; position: relative; overflow-wrap: anywhere; }
 .legs li::before { content: ""; position: absolute; left: 2px; top: 8px; width: 6px; height: 1px; background: var(--ink-3); }
 .actions { grid-column: 1 / -1; display: flex; gap: 8px; flex-wrap: wrap; margin-top: 8px; padding-top: 12px; border-top: 1px solid var(--line); align-items: center; }
 .actions .spacer { flex: 1; }
@@ -212,6 +212,17 @@ button.chip:hover { color: var(--ink); border-color: var(--ink-3); }
 .legrow .x { font-size: 18px; }
 .addleg { display: flex; gap: 6px; }
 .sheet .field .addleg input { flex: 1; width: auto; min-width: 0; background: var(--ground); border: 1px solid var(--line); border-radius: 10px; padding: 9px 12px; font-size: 15px; }
+/* scorebug with team logos */
+.bug { grid-column: 1 / -1; display: flex; align-items: center; gap: 6px 14px; flex-wrap: wrap; background: var(--ground); border-radius: 9px; padding: 7px 10px; font: 600 15px var(--f-mono); color: var(--ink-2); }
+.bug .tm { display: inline-flex; align-items: center; gap: 7px; }
+.bug .tm b { font: 700 19px var(--f-mono); color: var(--ink-2); }
+.bug .tm.me { color: var(--ink); }
+.bug .tm.me b { color: var(--ink); }
+.bug .tm.me img { filter: drop-shadow(0 0 6px rgba(255,194,75,.55)); }
+.bug .clk { margin-left: auto; font: 500 13px var(--f-mono); color: var(--ink-3); white-space: nowrap; }
+.bug .clk.on { color: var(--loss); }
+.lgo { width: 26px; height: 26px; object-fit: contain; flex: none; }
+.legs .lgo { width: 20px; height: 20px; transform: translateY(4px); }
 .score-line { grid-column: 2 / -1; display: flex; flex-wrap: wrap; gap: 6px 10px; align-items: center; font: 500 13px var(--f-mono); color: var(--ink); }
 .score-line .sc { background: var(--ground); border-radius: 6px; padding: 3px 8px; }
 .legs small { font: 500 11px var(--f-mono); color: var(--ink-3); margin-left: 4px; }
@@ -419,8 +430,11 @@ body.pulse-L::after { box-shadow: inset 0 0 160px rgba(255,97,112,.45); }
 /* TV mode: bigger, read-only, no chrome */
 body.tv { font-size: 17px; }
 body.tv .edit, body.tv .fab, body.tv .add-top { display: none !important; }
-body.tv .pick { font-size: 21px; }
-body.tv .odds b { font-size: 20px; }
+body.tv .app { padding-block: 14px 10px; }
+body.tv .pick { font-size: 23px; }
+body.tv .odds b { font-size: 22px; }
+body.tv .bug { font-size: 16px; }
+body.tv .legs li { font-size: 16px; }
 body.tv .bet.click { cursor: default; }
 body.tv .chart { height: 240px; }
 
@@ -765,7 +779,20 @@ body.tv .chart { height: 240px; }
     renderChart(settled);
     renderSplits(settled);
     renderRecent(settled);
+    fitTV();
   }
+  // TV mode: scale the board up to fill the screen, without dropping below the 3-column layout
+  function fitTV() {
+    const app = $(".app");
+    if (!document.body.classList.contains("tv")) { app.style.zoom = ""; return; }
+    app.style.zoom = "1";
+    const z = Math.max(1, Math.min(1.8, ((innerHeight - 6) / app.scrollHeight) * 0.98, innerWidth / 1240));
+    app.style.zoom = z.toFixed(3);
+  }
+  let fitT = 0;
+  const refit = () => { clearTimeout(fitT); fitT = setTimeout(fitTV, 120); };
+  window.addEventListener("resize", refit);
+  document.addEventListener("load", (e) => { if (e.target.tagName === "IMG") refit(); }, true); // team logos change the height once they arrive
 
   function renderChrome(all) {
     document.querySelectorAll("#range button").forEach((b) => b.setAttribute("aria-pressed", String(b.dataset.r === S.range)));
@@ -835,6 +862,18 @@ body.tv .chart { height: 240px; }
     if (fin) txt = "Final · " + (res === "W" ? "winner" : res === "L" ? "loser" : "push");
     return { m, res, fin, txt, g };
   }
+  const logo = (t, cls) => (t && t.lg ? `<img class="${cls || "lgo"}" src="${esc(t.lg)}" alt="" loading="lazy" referrerpolicy="no-referrer" onerror="this.remove()">` : "");
+  function scorebug(sel) {
+    const g = gameOf(sel); if (!g) return "";
+    const me = (side) => (sel.m !== "tot" && sel.s === side ? " me" : "");
+    const pre = g.st === "pre", sc = (t) => (pre || t.sc == null ? "" : `<b>${t.sc}</b>`);
+    const clk = pre ? startLabel(g.t) : g.st === "post" ? "Final" : g.d;
+    return `<div class="bug"><span class="tm${me("a")}">${logo(g.a)}${esc(g.a.ab)} ${sc(g.a)}</span><span class="tm${me("h")}">${logo(g.h)}${esc(g.h.ab)} ${sc(g.h)}</span><span class="clk${g.st === "in" ? " on" : ""}">${esc(clk)}</span></div>`;
+  }
+  function legLogo(sel) {
+    const g = gameOf(sel); if (!g) return "";
+    return sel.m === "tot" ? logo(g.h) : logo(sel.s === "a" ? g.a : g.h);
+  }
   const scoreTxt = (g) => `${g.a.ab} ${g.a.sc} – ${g.h.ab} ${g.h.sc} · ${g.st === "post" ? "Final" : g.d}`;
   function linkedGames(b) {
     const sels = b.kind === "parlay" ? (Array.isArray(b.legSel) ? b.legSel : []) : [b.sel];
@@ -862,7 +901,7 @@ body.tv .chart { height: 240px; }
       const manual = st[i] === "hit" || st[i] === "miss" ? st[i] : null;
       const ev = sels[i] ? evalSel(sels[i]) : null;
       const auto = ev && ev.fin ? (ev.res === "W" ? "hit" : ev.res === "L" ? "miss" : null) : null;
-      return { t, st: manual || auto, manual, ev };
+      return { t, st: manual || auto, manual, ev, sel: sels[i] || null };
     });
   }
   function startLabel(t) {
@@ -907,7 +946,7 @@ body.tv .chart { height: 240px; }
       const manual = ph === "live" && b.live && (!derived || (b.liveAt || 0) > (S.slateAt || 0)) ? b.live : "";
       const st = dead ? "dead" : manual || derived;
       const verdict = ev && ev.fin ? ev.res : legs.length && ph === "final" ? (dead ? "L" : allHit ? "W" : "") : "";
-      const legsHtml = legs.length ? `<ul class="legs">${legs.map((l, i) => `<li class="leg${l.st ? " " + l.st : ""}${can ? " tap" : ""}" data-leg="${i}"${can ? ' title="Tap to mark hit / missed"' : ""}><span class="mk">${l.st === "hit" ? "✓" : l.st === "miss" ? "✕" : ""}</span><span>${esc(l.t)}${l.ev ? `<small>${esc(l.ev.g.st === "post" ? "Final" : l.ev.txt.toLowerCase() + " · " + l.ev.g.d)}</small>` : ""}</span></li>`).join("")}</ul>` : "";
+      const legsHtml = legs.length ? `<ul class="legs">${legs.map((l, i) => `<li class="leg${l.st ? " " + l.st : ""}${can ? " tap" : ""}" data-leg="${i}"${can ? ' title="Tap to mark hit / missed"' : ""}><span class="mk">${l.st === "hit" ? "✓" : l.st === "miss" ? "✕" : ""}</span>${l.sel ? legLogo(l.sel) : ""}<span>${esc(l.t)}${l.ev ? `<small>${esc(l.ev.g.st === "post" ? "Final" : l.ev.txt.toLowerCase() + " · " + l.ev.g.d)}</small>` : ""}</span></li>`).join("")}</ul>` : "";
       const chips = [
         ph === "live" ? '<span class="live">LIVE</span>' : ph === "final" ? '<span class="final">FINAL</span>' : ph === "pre" ? `<span class="soon">${startLabel(startOf(b))}</span>` : "",
         dead ? '<span class="state dead">Dead</span>' : allHit ? '<span class="state alive">All legs hit</span>' : ev ? `<span class="state ${ev.fin ? (ev.res === "W" ? "alive" : ev.res === "L" ? "dead" : "sweating") : st}">${esc(ev.txt)}</span>` : st ? `<span class="state ${st}">${LIVE_LABEL[st]}</span>` : "",
@@ -945,7 +984,7 @@ body.tv .chart { height: 240px; }
         <div class="book ${b.book === "DK" ? "DK" : "FD"}" title="${BOOK[b.book] || ""}">${b.book === "DK" ? "DK" : "FD"}</div>
         <div style="min-width:0"><div class="pick">${esc(b.pick)}</div><div class="meta">${chips}</div></div>
         <div class="odds num"><b>${fOdds(b.odds)}</b><span>${fU(b.units)} → ${fU(towin, true)}</span>${legs.length ? `<span class="prog">${hits}/${legs.length} legs</span>` : ""}</div>
-        ${ev ? `<div class="score-line"><span class="sc">${esc(scoreTxt(ev.g))}</span></div>` : ""}
+        ${b.kind !== "parlay" && b.sel ? scorebug(b.sel) : ""}
         ${b.note ? `<div class="note-line">${esc(b.note)}</div>` : ""}${legsHtml}${actions}</article>`;
     }).join("");
     if (keep) {
@@ -1151,6 +1190,7 @@ body.tv .chart { height: 240px; }
     document.body.classList.toggle("tv", on);
     $("#tvBtn").textContent = on ? "Exit TV" : "TV mode";
     S.open = null; render();
+    setTimeout(fitTV, 400);
     if (on) {
       try { if (document.documentElement.requestFullscreen) await document.documentElement.requestFullscreen(); } catch (e) {}
       grabWake();
@@ -1396,7 +1436,7 @@ body.tv .chart { height: 240px; }
     $("#clock").textContent = now.toLocaleTimeString([], { hour: "numeric", minute: "2-digit" });
     const k = dayStart(now.getTime()).getTime();
     if (S.dayKey && k !== S.dayKey) render();
-    else if (S.ready) renderActive([...S.bets.values()].filter((b) => b.status === "open"));
+    else if (S.ready) { renderActive([...S.bets.values()].filter((b) => b.status === "open")); fitTV(); }
     S.dayKey = k;
   }
   tick(); setInterval(tick, 15000);
@@ -1423,7 +1463,7 @@ body.tv .chart { height: 240px; }
     const c = e.competitions[0], t = {};
     for (const x of c.competitors) t[x.homeAway] = x;
     const st = e.status.type;
-    const team = (k) => { const x = t[k], tm = x.team; return { ab: tm.abbreviation || "", nm: tm.shortDisplayName || tm.name || "", fn: tm.displayName || "", sc: /^\d+$/.test(String(x.score)) ? Number(x.score) : null }; };
+    const team = (k) => { const x = t[k], tm = x.team; return { ab: tm.abbreviation || "", nm: tm.shortDisplayName || tm.name || "", fn: tm.displayName || "", lg: tm.logo || "", sc: /^\d+$/.test(String(x.score)) ? Number(x.score) : null }; };
     const g = { id: String(e.id), sport, t: Date.parse(e.date), st: st.state || "pre", d: st.shortDetail || "", a: team("away"), h: team("home") };
     const o = (c.odds || [])[0];
     if (o) {
