@@ -1931,7 +1931,7 @@ body.tv .strip .chart { height: 96px; }
   // ---------- sheets ----------
   function openSheet(id) { $(id).hidden = false; }
   // keep every open screen current: when a new version is up, reload it (never mid-form or mid-animation)
-  const BUILD = "20261011145955";
+  const BUILD = "20261011150443";
   function checkBuild() {
     if (BUILD === "dev") return;
     fetch("version.json?t=" + Date.now(), { cache: "no-store" }).then((r) => (r.ok ? r.json() : null)).then((j) => {
@@ -2287,7 +2287,13 @@ body.tv .strip .chart { height: 96px; }
     $("#clock").textContent = now.toLocaleTimeString([], { hour: "numeric", minute: "2-digit" });
     const k = dayStart(now.getTime()).getTime();
     if (S.dayKey && k !== S.dayKey) render();
-    else if (S.ready) { renderActive([...S.bets.values()].filter((b) => b.status === "open")); fitTV(); }
+    else if (S.ready) {
+      // refresh the clocks on open bets: yours in the sweat, the crew's stay in Crew picks
+      const ev = [...S.bets.values()];
+      renderActive(ev.filter((b) => b.status === "open" && isMe(b)));
+      renderCrew(ev.filter((b) => !isMe(b)), rangeStart(S.range));
+      fitTV();
+    }
     S.dayKey = k;
   }
   tick(); setInterval(tick, 15000);
