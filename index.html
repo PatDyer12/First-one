@@ -876,6 +876,13 @@ body.tv .strip .chart { height: 96px; }
 .bki.sm { width: 15px; height: 15px; border-radius: 4px; margin-right: 6px; vertical-align: -2px; }
 /* whose bet: big, first thing in the form */
 #whoRadios label span { padding: 10px 16px; font-size: 16px; }
+#guestRadios { display: contents; }
+.guest-list { display: flex; flex-wrap: wrap; gap: 8px; }
+.guest-list:empty::before { content: "No guests saved yet"; color: var(--ink-3); font-size: 13px; }
+.gchip { display: inline-flex; align-items: center; gap: 7px; padding: 4px 4px 4px 4px; border-radius: 999px; border: 1px solid color-mix(in srgb, var(--c) 55%, transparent); background: rgba(255,255,255,.04); font: 700 14px var(--f-ui); }
+.gchip i { width: 22px; height: 22px; border-radius: 50%; display: grid; place-items: center; font: 800 12px var(--f-num); font-style: normal; color: #05070b; background: var(--c); }
+.gchip button { width: 24px; height: 24px; border-radius: 50%; border: 0; background: rgba(255,255,255,.06); color: var(--ink-3); font: 600 15px/1 var(--f-ui); cursor: pointer; }
+.gchip button:hover { color: var(--loss); background: rgba(255,97,112,.12); }
 .who-hint { display: block; margin-top: 8px; }
 
 /* play card: what just happened, before the clip */
@@ -1319,10 +1326,11 @@ body.tv.idle, body.tv.idle * { cursor: none !important; }
       <div class="radios" id="whoRadios">
         <label><input type="radio" name="who" value="me" checked><span>Mine</span></label>
         <label><input type="radio" name="who" value="julian"><span><i style="background:#36d6ff"></i>Julian</span></label>
-        <label><input type="radio" name="who" value="guest"><span><i style="background:#ff9f43"></i><b id="guestLbl">Guest</b></span></label>
+        <span id="guestRadios"></span>
+        <label><input type="radio" name="who" value="new"><span>+ New guest</span></label>
       </div>
       <span class="hint who-hint">Julian and guest bets get tracked on their own (record and units) and never touch your numbers.</span>
-      <div class="linein" id="guestWrap" hidden><label for="f-guest">Guest name</label><input type="text" id="f-guest" maxlength="20" autocomplete="off" placeholder="Guest"></div>
+      <div class="linein" id="guestWrap" hidden><label for="f-guest">Name</label><input type="text" id="f-guest" maxlength="20" autocomplete="off" placeholder="Their name"></div>
     </div>
     <div class="field">
       <span class="lbl">Book</span>
@@ -1489,6 +1497,12 @@ body.tv.idle, body.tv.idle * { cursor: none !important; }
       </div>
       <span class="hint" id="spStatus" aria-live="polite"></span>
       <span class="hint">Needs full Spotify Premium (Student counts, Mini and Lite don't). Connect it on the screen that's hooked up to the speakers, the TV. Use a playlist you made: Spotify only lets these apps read your own. Your Spotify app's redirect URI has to be <code id="spRedir"></code></span>
+    </div>
+    <div class="field">
+      <span class="lbl">Guest profiles</span>
+      <div class="guest-list" id="guestList"></div>
+      <div class="linein"><label for="f-newguest">Add</label><input type="text" class="wide" id="f-newguest" maxlength="20" autocomplete="off" placeholder="Their name"><button type="button" class="btn sm" id="guestAdd">Add guest</button></div>
+      <span class="hint">Saved to your account, so they're on every screen and show up when you log a bet. Removing someone keeps their bets and record.</span>
     </div>
     <div class="field">
       <span class="lbl">Your name on the board</span>
@@ -1710,6 +1724,19 @@ body.tv.idle, body.tv.idle * { cursor: none !important; }
   const isMe = (b) => !b || !b.who || b.who === "me";
   const whoName = (b) => (b.whoName || (b.who === "julian" ? "Julian" : S.guestName || "Guest"));
   const WHO_COL = { julian: "#36d6ff", guest: "#ff9f43" };
+  // guest profiles: the saved list (Settings), or until one's saved, everybody who's had a guest bet. Each gets a color
+  const guestKey = (n) => String(n || "").trim().toLowerCase();
+  function guestList() {
+    if (Array.isArray(S.guests)) return S.guests.slice();
+    const seen = new Map();
+    for (const n of [S.guestName, ...[...S.bets.values()].filter((b) => b.who === "guest").sort((a, b) => a.placedAt - b.placedAt).map((b) => b.whoName)]) if (guestKey(n) && n !== "Guest" && !seen.has(guestKey(n))) seen.set(guestKey(n), String(n).trim());
+    return [...seen.values()];
+  }
+  const GUEST_COLS = ["#ff9f43", "#ff5fa2", "#b18cff", "#3ddc97", "#ffd23f", "#ff6b6b", "#4dd0e1", "#f78fb3"];
+  function guestCol(name) {
+    const k = guestKey(name), i = guestList().map(guestKey).indexOf(k);
+    return GUEST_COLS[(i >= 0 ? i : [...k].reduce((a, c) => a + c.charCodeAt(0), 0)) % GUEST_COLS.length];
+  }
   function render() {
     const everyone = [...S.bets.values()], all = everyone.filter(isMe);
     const start = rangeStart(S.range);
@@ -2040,8 +2067,9 @@ body.tv.idle, body.tv.idle * { cursor: none !important; }
           <input id="co-${esc(b.id)}" inputmode="decimal" autocomplete="off" placeholder="${(b.units * S.unit).toFixed(2)}">
           <span class="spacer"></span><button type="button" class="btn sm" data-act="cancel">Cancel</button><button type="button" class="btn sm primary" data-act="co-save">Save</button></div>`;
       } else {
-        const wh = b.who === "julian" ? "julian" : b.who === "guest" ? "guest" : "me";
-        actions = `<div class="actions"><span class="lbl">Whose bet</span>${[["me", "Mine"], ["julian", "Julian"], ["guest", wh === "guest" ? b.whoName || "Guest" : S.guestName || "Guest"]].map(([k, l]) => `<button type="button" class="btn sm${wh === k ? " primary" : ""}" data-act="who-${k}">${esc(l)}</button>`).join("")}</div>
+        const wh = b.who === "julian" ? "julian" : b.who === "guest" ? "g:" + guestKey(whoName(b)) : "me";
+        const gs = guestList(); if (b.who === "guest" && !gs.some((n) => guestKey(n) === guestKey(whoName(b)))) gs.push(whoName(b));
+        actions = `<div class="actions"><span class="lbl">Whose bet</span>${[["me", "Mine"], ["julian", "Julian"], ...gs.map((n) => ["g:" + guestKey(n), n])].map(([k, l]) => `<button type="button" class="btn sm${wh === k ? " primary" : ""}" data-act="who-${esc(k)}">${esc(l)}</button>`).join("")}</div>
           <div class="actions"><span class="lbl">Note</span>
           <input class="notein" id="nt-${esc(b.id)}" autocomplete="off" maxlength="60" placeholder="Score or note, like Q3 · up 4" value="${esc(b.note || "")}" aria-label="Score or note">
           <button type="button" class="btn sm" data-act="note">Save note</button></div>
@@ -2117,7 +2145,7 @@ body.tv.idle, body.tv.idle * { cursor: none !important; }
     keys.forEach((k, i) => {
       const p = people.get(k), done = p.done.sort((a, b) => b.settledAt - a.settledAt);
       const w = done.filter((b) => outcome(b) === "W").length, l = done.filter((b) => outcome(b) === "L").length, pu = done.length - w - l;
-      const net = done.reduce((a, b) => a + netOf(b), 0), col = WHO_COL[p.who] || "#ff9f43", today = done.filter((b) => b.settledAt >= start), tNet = today.reduce((a, b) => a + netOf(b), 0);
+      const net = done.reduce((a, b) => a + netOf(b), 0), col = p.who === "guest" ? guestCol(p.name) : WHO_COL[p.who] || "#ff9f43", today = done.filter((b) => b.settledAt >= start), tNet = today.reduce((a, b) => a + netOf(b), 0);
       $("#crewh-" + i).innerHTML = `<span class="crew-av" style="--c:${col}">${esc(p.name.slice(0, 1).toUpperCase())}</span><b>${esc(p.name)}</b>
         <span class="crew-rec">${w}-${l}${pu ? "-" + pu : ""}</span><span class="crew-net ${net > 0.004 ? "w" : net < -0.004 ? "l" : ""}">${fU(net, true)} <small>${fUSD(net * S.unit, true)}</small></span>
         ${S.range !== "all" && today.length ? `<span class="crew-rng">${esc(RANGE_LABEL[S.range])} ${fU(tNet, true)}</span>` : ""}<span class="crew-open">${p.open.length ? p.open.length + " open" : ""}</span>`;
@@ -2140,7 +2168,7 @@ body.tv.idle, body.tv.idle * { cursor: none !important; }
   // a group ride is the same pick from two or more people; a head to head is somebody on the other side of yours
   const personKey = (b) => (isMe(b) ? "me" : (b.who || "guest") + ":" + whoName(b).toLowerCase());
   const personName = (b) => (isMe(b) ? S.hostName || "You" : whoName(b));
-  const personCol = (b) => (isMe(b) ? "#d4ff3a" : WHO_COL[b.who] || "#ff9f43");
+  const personCol = (b) => (isMe(b) ? "#d4ff3a" : b.who === "guest" ? guestCol(whoName(b)) : WHO_COL[b.who] || "#ff9f43");
   const normPick = (s) => String(s || "").toLowerCase().replace(/[−–—]/g, "-").replace(/[^a-z0-9.+\-/ ]/g, "").replace(/\s+/g, " ").trim();
   const selKey = (s) => (s && s.g != null ? [s.g, s.m, s.s, isTd(s.m) ? normNm(s.p && s.p.nm) : ""].join("|") : null);
   function rideKey(b) {
@@ -2526,7 +2554,7 @@ body.tv.idle, body.tv.idle * { cursor: none !important; }
     }
     const a = act.dataset.act;
     if (a === "won" || a === "lost" || a === "push") settle(id, a);
-    else if (a.startsWith("who-")) { const w = a.slice(4), d = w === "julian" ? { who: "julian", whoName: "Julian" } : w === "guest" ? { who: "guest", whoName: S.guestName || "Guest" } : { who: "me", whoName: "" }; S.open = null; patchBet(id, d).then((ok) => ok && toast(w === "me" ? "Moved to your bets" : `Moved to ${d.whoName}`)); }
+    else if (a.startsWith("who-")) { const w = a.slice(4), gn = w.startsWith("g:") ? guestList().find((n) => guestKey(n) === w.slice(2)) || (S.bets.get(id) || {}).whoName || w.slice(2) : "", d = w === "julian" ? { who: "julian", whoName: "Julian" } : w.startsWith("g:") ? { who: "guest", whoName: gn } : { who: "me", whoName: "" }; S.open = null; patchBet(id, d).then((ok) => ok && toast(w === "me" ? "Moved to your bets" : `Moved to ${d.whoName}`)); }
     else if (a === "note") { const i = document.getElementById("nt-" + id); patchBet(id, { note: i ? i.value.trim().slice(0, 60) : "" }).then((ok) => ok && toast("Note saved")); }
     else if (a === "co") { S.cashout = id; render(); const i = document.getElementById("co-" + id); if (i) i.focus(); }
     else if (a === "co-save") {
@@ -2626,7 +2654,7 @@ body.tv.idle, body.tv.idle * { cursor: none !important; }
   // ---------- sheets ----------
   function openSheet(id) { $(id).hidden = false; }
   // keep every open screen current: when a new version is up, reload it (never mid-form or mid-animation)
-  const BUILD = "20261011231831";
+  const BUILD = "20261011232910";
   function checkBuild() {
     if (BUILD === "dev") return;
     fetch("version.json?t=" + Date.now(), { cache: "no-store" }).then((r) => (r.ok ? r.json() : null)).then((j) => {
@@ -2882,18 +2910,37 @@ body.tv.idle, body.tv.idle * { cursor: none !important; }
     const w = (document.querySelector('input[name="who"]:checked') || {}).value || "me";
     if (w === "me") return {};
     if (w === "julian") return { who: "julian", whoName: "Julian" };
-    const name = ($("#f-guest").value.trim() || S.guestName || "Guest").slice(0, 20);
-    if (name !== S.guestName) { S.guestName = name; write((db) => db.doc("config/settings").set({ guestName: name }, { merge: true }), () => {}); }
+    if (w.startsWith("g:")) return { who: "guest", whoName: guestList().find((n) => guestKey(n) === w.slice(2)) || w.slice(2) };
+    const typed = $("#f-guest").value.trim().slice(0, 20) || "Guest", name = guestList().find((n) => guestKey(n) === guestKey(typed)) || typed;
+    addGuest(name);
     return { who: "guest", whoName: name };
   }
+  // the saved guests, saved to the account
+  function saveGuests(l) { S.guests = l; write((db) => db.doc("config/settings").set({ guests: l }, { merge: true }), () => {}); renderGuests(); render(); }
+  function addGuest(name) { const l = guestList(); if (name && name !== "Guest" && !l.some((n) => guestKey(n) === guestKey(name))) saveGuests([...l, name]); }
+  function renderGuests() {
+    const cur = (document.querySelector('input[name="who"]:checked') || {}).value;
+    $("#guestRadios").innerHTML = guestList().map((n) => `<label><input type="radio" name="who" value="g:${esc(guestKey(n))}"${cur === "g:" + guestKey(n) ? " checked" : ""}><span><i style="background:${guestCol(n)}"></i>${esc(n)}</span></label>`).join("");
+    $("#guestList").innerHTML = guestList().map((n) => `<span class="gchip" style="--c:${guestCol(n)}"><i>${esc(n.slice(0, 1).toUpperCase())}</i>${esc(n)}<button type="button" data-rmguest="${esc(guestKey(n))}" aria-label="Remove ${esc(n)}">×</button></span>`).join("");
+  }
   $("#whoRadios").addEventListener("change", () => {
-    const g = (document.querySelector('input[name="who"]:checked') || {}).value === "guest";
-    $("#guestWrap").hidden = !g; if (g && !$("#f-guest").value) $("#f-guest").value = S.guestName || "";
+    const nw = (document.querySelector('input[name="who"]:checked') || {}).value === "new";
+    $("#guestWrap").hidden = !nw; if (nw) setTimeout(() => $("#f-guest").focus(), 0);
   });
-  $("#f-guest").addEventListener("input", (e) => { $("#guestLbl").textContent = e.target.value.trim() || "Guest"; });
+  $("#guestAdd").addEventListener("click", () => {
+    const n = $("#f-newguest").value.trim().slice(0, 20); if (!n) return;
+    if (guestList().some((x) => guestKey(x) === guestKey(n))) { toast(n + " is already saved"); return; }
+    addGuest(n); $("#f-newguest").value = ""; toast(n + " saved as a guest");
+  });
+  $("#f-newguest").addEventListener("keydown", (e) => { if (e.key === "Enter") { e.preventDefault(); $("#guestAdd").click(); } });
+  $("#guestList").addEventListener("click", (e) => {
+    const x = e.target.closest("[data-rmguest]"); if (!x) return;
+    const n = guestList().find((g) => guestKey(g) === x.dataset.rmguest);
+    saveGuests(guestList().filter((g) => guestKey(g) !== x.dataset.rmguest)); toast(`Removed ${n || "that guest"}. Their bets stay.`);
+  });
   function openAdd() {
     const me = document.querySelector('input[name="who"][value="me"]'); if (me) me.checked = true;
-    $("#guestWrap").hidden = true; $("#f-guest").value = S.guestName || ""; $("#guestLbl").textContent = S.guestName || "Guest";
+    $("#guestWrap").hidden = true; $("#f-guest").value = ""; renderGuests();
     $("#addForm").reset(); S.sign = -1; S.day = 0; $("#f-odds").value = "110"; $("#f-units").value = "1"; $("#f-err").textContent = "";
     Object.assign(F, { sel: null, legs: [], q: "", openG: null, custom: false, oddsTouched: false, sport: focusLeague() });
     scanNote(""); slipBets = [];
@@ -2954,7 +3001,7 @@ body.tv.idle, body.tv.idle * { cursor: none !important; }
     write((db) => db.doc("config/settings").set({ oddsKey: k }, { merge: true }), () => {});
     toast(k ? "Odds key saved. Prices show up in the TD scorer picker." : "Odds key removed");
   });
-  function openSettings() { $("#f-oddskey").value = S.oddsKey || ""; $("#f-unit").value = trim(S.unit); $("#u-err").textContent = ""; resetClear(); openSheet("#setSheet"); }
+  function openSettings() { renderGuests(); $("#f-oddskey").value = S.oddsKey || ""; $("#f-unit").value = trim(S.unit); $("#u-err").textContent = ""; resetClear(); openSheet("#setSheet"); }
   $("#unitChip").addEventListener("click", openSettings);
   $("#sampleChip").addEventListener("click", openSettings);
   $("#setForm").addEventListener("submit", async (e) => {
@@ -7289,7 +7336,9 @@ body.tv.idle, body.tv.idle * { cursor: none !important; }
         const hn = s.exists ? s.data().hostName : null;
         if (hn != null && hn !== S.hostName) { S.hostName = hn; $("#f-host").value = hn; render(); }
         const gn = s.exists ? s.data().guestName : null;
-        if (gn && gn !== S.guestName) { S.guestName = gn; $("#guestLbl").textContent = gn; render(); }
+        if (gn && gn !== S.guestName) { S.guestName = gn; renderGuests(); render(); }
+        const gl = s.exists ? s.data().guests : null;
+        if (Array.isArray(gl) && JSON.stringify(gl) !== JSON.stringify(S.guests)) { S.guests = gl; renderGuests(); render(); }
         const ws = s.exists ? s.data().winSound : null;
         if (ws && WIN_SOUNDS.some((x) => x.k === ws) && ws !== S.winSound) { S.winSound = ws; renderSndList(); if (SND.ctx) loadBuf("sounds/" + ws); }
       }, onErr));
