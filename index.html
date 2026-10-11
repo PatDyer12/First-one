@@ -972,6 +972,8 @@ button.crew-chip.ask { border-color: var(--loss); box-shadow: 0 0 0 1px var(--lo
 .rider { display: inline-flex; align-items: center; gap: 7px; padding: 4px 11px 4px 4px; border-radius: 999px; background: rgba(255,255,255,.05); border: 1px solid color-mix(in srgb, var(--c) 55%, transparent); font: 700 15px var(--f-num); white-space: nowrap; }
 .rider i { width: 24px; height: 24px; border-radius: 50%; display: grid; place-items: center; font: 800 13px var(--f-num); font-style: normal; color: #05070b; background: var(--c); }
 .rider em { font-style: normal; color: var(--ink-3); font-weight: 600; }
+.rider em.pl { font-size: .72em; letter-spacing: .06em; text-transform: uppercase; color: var(--ink-2); padding: 1px 6px; border-radius: 6px; border: 1px solid var(--line-2); }
+.legs .lride { flex: none; align-self: center; font: 700 10px/1 var(--f-mono); letter-spacing: .08em; text-transform: uppercase; color: var(--accent); padding: 3px 6px; border-radius: 6px; border: 1px solid color-mix(in srgb, var(--accent) 45%, transparent); white-space: nowrap; }
 .vsb { font: 800 12px var(--f-num); letter-spacing: .1em; text-transform: uppercase; color: #fff; background: linear-gradient(90deg, #d0142f, #7a0e1c); border-radius: 5px; padding: 3px 8px; box-shadow: 0 0 12px rgba(208,20,47,.45); }
 .empty.slim { padding: 12px 16px; }
 #room { display: flex; flex-direction: column; gap: 8px; }
@@ -1469,7 +1471,7 @@ body.tv.idle, body.tv.idle * { cursor: none !important; }
         <label><input type="radio" name="slate" value="feature"><span>4 PM</span></label>
         <label><input type="radio" name="slate" value="prime"><span>Prime time</span></label>
       </div>
-      <span class="hint">Auto goes by how many games are on. 1 PM mode (5+ games): touchdown and turnover alerts on your games, and every touchdown for your side gets a music edit after its alert (a <span class="gnm">Goldie</span> edit, a hype song or DJ <span class="gnm">Goldie</span>); in between it's DJ <span class="gnm">Goldie</span> and music every couple of minutes, no other clips. 4 PM mode (2 to 4 games) and prime time (one game): the full show. Each screen keeps its own setting.</span>
+      <span class="hint">Auto goes by how many games are on. 1 PM mode (5+ games): touchdown and turnover alerts on your games, and every touchdown for your side gets a music edit after its alert (a <span class="gnm">Goldie</span> edit, a hype song or DJ <span class="gnm">Goldie</span>); in between it's DJ <span class="gnm">Goldie</span> and music every couple of minutes, no other clips. 4 PM mode (2 to 4 games) and prime time (one game): the full show, plus something every couple of minutes, taking turns: DJ <span class="gnm">Goldie</span> (off your Spotify playlist when it's connected), a football edit and one of his scenes. Each screen keeps its own setting.</span>
     </div>
     <div class="field">
       <span class="lbl">His name</span>
@@ -2017,7 +2019,8 @@ body.tv.idle, body.tv.idle * { cursor: none !important; }
     const manual = "";
     const st = dead ? "dead" : manual || derived;
     const verdict = ev && ev.fin ? ev.res : legs.length && ph === "final" ? (dead ? "L" : allHit ? "W" : "") : "";
-    const legsHtml = legs.length ? `<ul class="legs">${legs.map((l, i) => { const lc = l.st || (l.ev && !l.ev.fin ? (l.ev.res === "W" ? "lw" : l.ev.res === "L" ? "ll" : "le") : ""); return `<li class="leg${lc ? " " + lc : ""}${can ? " tap" : ""}" data-leg="${i}"${can ? ' title="Tap to mark hit / missed"' : ""}><span class="mk">${l.st === "hit" ? "✓" : l.st === "miss" ? "✕" : ""}</span>${l.sel ? legLogo(l.sel) : ""}<span class="lt">${esc(l.t)}${!l.st && l.sel ? ballTag(hasBall(l.sel)) : ""}</span>${legDetail(l)}</li>`; }).join("")}</ul>` : "";
+    const lr = S.room && S.room.legRide && S.room.legRide.get(b.id);
+    const legsHtml = legs.length ? `<ul class="legs">${legs.map((l, i) => { const lc = l.st || (l.ev && !l.ev.fin ? (l.ev.res === "W" ? "lw" : l.ev.res === "L" ? "ll" : "le") : ""); return `<li class="leg${lc ? " " + lc : ""}${can ? " tap" : ""}" data-leg="${i}"${can ? ' title="Tap to mark hit / missed"' : ""}><span class="mk">${l.st === "hit" ? "✓" : l.st === "miss" ? "✕" : ""}</span>${l.sel ? legLogo(l.sel) : ""}<span class="lt">${esc(l.t)}${!l.st && l.sel ? ballTag(hasBall(l.sel)) : ""}</span>${lr && lr.has(i) ? `<em class="lride">Ride · ${esc(lr.get(i).join(" + "))}</em>` : ""}${legDetail(l)}</li>`; }).join("")}</ul>` : "";
     const chips = [
       vsB,
       ph === "live" ? '<span class="live">LIVE</span>' : ph === "final" ? '<span class="final">FINAL</span>' : ph === "pre" ? `<span class="soon">${startLabel(startOf(b))}</span>` : "",
@@ -2055,7 +2058,7 @@ body.tv.idle, body.tv.idle * { cursor: none !important; }
       ${ph === "live" && !dead ? '<span class="sweat" aria-hidden="true"></span>' : ""}
       <div class="book ${bookKey(b)}" title="${BOOK[bookKey(b)]}"><img src="${BOOK_IMG[bookKey(b)]}" alt="${BOOK[bookKey(b)]}"></div>
       <div style="min-width:0"><div class="pick">${b.sel && b.sel.p && b.sel.p.hs ? `<img class="pkhs" src="${esc(b.sel.p.hs)}" alt="" loading="lazy">` : ""}${esc(b.pick)}${b.kind !== "parlay" ? ballTag(hasBall(b.sel)) : ""}</div><div class="meta">${chips}</div></div>
-      <div class="odds num"><b>${fOdds(b.odds)}</b><span>${ride ? ride.bets.length + " riding · " + fU(ride.bets.reduce((x, y) => x + y.units, 0)) : fU(b.units) + " → " + fU(towin, true)}</span>${legs.length ? `<span class="prog">${hits}/${legs.length} legs</span>` : ""}</div>
+      <div class="odds num"><b>${b.odds == null ? "LEG" : fOdds(b.odds)}</b><span>${ride ? rideLine(ride) : fU(b.units) + " → " + fU(towin, true)}</span>${legs.length ? `<span class="prog">${hits}/${legs.length} legs</span>` : ""}</div>
       ${ev && !ev.fin && ph === "live" ? meterHtml(b.sel, ev) : legs.length && ph !== "pre" ? legMeter(legs) : ""}
       ${b.kind !== "parlay" && b.sel ? scorebug(b.sel) : ""}
       ${ride ? ridersHtml(ride) : ""}
@@ -2150,22 +2153,45 @@ body.tv.idle, body.tv.idle * { cursor: none !important; }
   // which side of which game a single bet is on: a team (spread or moneyline) or the total
   const sideKey = (b) => (b.kind === "parlay" || !b.sel || b.sel.g == null || isTd(b.sel.m) ? null : { g: String(b.sel.g), k: b.sel.m === "tot" ? "tot" : "team", s: b.sel.s });
   const against = (x, y) => { const p = sideKey(x), q = sideKey(y); return !!(p && q && p.g === q.g && p.k === q.k && p.s !== q.s); };
+  // a parlay leg's key: the same one a straight bet on that pick gets
+  const legKey = (b, i) => selKey((Array.isArray(b.legSel) ? b.legSel : [])[i]) || "T:" + normPick((b.legs || [])[i]);
   function roomGroups() {
     const open = [...S.bets.values()].filter((b) => b.status === "open"), by = new Map();
-    for (const b of open) { const k = rideKey(b); if (!by.has(k)) by.set(k, []); by.get(k).push(b); }
-    const rides = [], inRide = new Set();
+    const put = (k, b, leg) => { if (!by.has(k)) by.set(k, []); const l = by.get(k); if (!l.some((x) => x.b.id === b.id)) l.push({ b, leg }); };
+    for (const b of open) { put(rideKey(b), b, null); if (b.kind === "parlay") (b.legs || []).forEach((_, i) => put(legKey(b, i), b, i)); }
+    const people = (l) => new Set(l.map((x) => personKey(x.b))).size;
+    const order = (x, y) => Number(isMe(y.b)) - Number(isMe(x.b)) || x.b.placedAt - y.b.placedAt;
+    const rides = [], inRide = new Set(), legRide = new Map();
     for (const [k, list] of by) {
-      if (new Set(list.map(personKey)).size < 2) continue;
-      list.sort((x, y) => Number(isMe(y)) - Number(isMe(x)) || x.placedAt - y.placedAt);
-      rides.push({ k, bets: list, lead: list[0], mine: list.some(isMe) });
-      for (const b of list) inRide.add(b.id);
+      if (people(list) < 2) continue;
+      list.sort(order);
+      const whole = list.filter((x) => x.leg == null), legs = list.filter((x) => x.leg != null);
+      // the same whole parlay already rides together: its legs don't need rides of their own
+      if (!whole.length && legs.every((x) => rideKey(x.b) === rideKey(legs[0].b) && people(by.get(rideKey(x.b))) >= 2)) continue;
+      // the card up top: a straight bet on the pick (yours first), or the leg itself when it's only in parlays
+      const x0 = legs[0], sel = !whole.length && (Array.isArray(x0.b.legSel) ? x0.b.legSel : [])[x0.leg];
+      const lead = whole.length ? whole[0].b : { id: "leg:" + k, synth: true, pick: (x0.b.legs || [])[x0.leg], sel: sel || null, kind: "straight", odds: null, units: 0, book: x0.b.book, sport: (sel && sel.sp) || x0.b.sport, placedAt: x0.b.placedAt, status: "open" };
+      const legOf = new Map(legs.map((x) => [x.b.id, x.leg]));
+      rides.push({ k, bets: list.map((x) => x.b), lead, mine: list.some((x) => isMe(x.b)), legOf });
+      for (const x of whole) inRide.add(x.b.id);
+      // the parlay's own card says which leg rides with whom
+      for (const x of legs) {
+        const m = legRide.get(x.b.id) || new Map(), names = [...new Set(list.filter((y) => personKey(y.b) !== personKey(x.b)).map((y) => personName(y.b)))];
+        m.set(x.leg, names); legRide.set(x.b.id, m);
+      }
     }
     const rk = (r) => ({ live: 0, pre: 1, final: 2, none: 3 }[phase(r.lead)] ?? 3);
     rides.sort((x, y) => Number(y.mine) - Number(x.mine) || rk(x) - rk(y) || y.bets.length - x.bets.length);
     const vs = new Map(), add = (x, y) => { const l = vs.get(x.id) || []; if (!l.some((z) => personKey(z) === personKey(y))) l.push(y); vs.set(x.id, l); };
     const mine = open.filter(isMe);
     for (const c of open) if (!isMe(c)) for (const m of mine) if (against(m, c)) { add(m, c); add(c, m); }
-    return { rides, inRide, vs };
+    return { rides, inRide, vs, legRide };
+  }
+  // what's riding on a ride: straight bets' units (a parlay rides with its leg, not its stake)
+  const rideUnits = (r) => r.bets.reduce((a, x) => a + (r.legOf && r.legOf.has(x.id) ? 0 : x.units), 0);
+  function rideLine(r) {
+    const u = rideUnits(r), np = r.legOf ? r.legOf.size : 0;
+    return `${r.bets.length} riding` + (u > 0 ? " · " + fU(u) : "") + (np ? ` · ${np} parlay${np > 1 ? "s" : ""}` : "");
   }
   // everybody else riding the same pick as `b` (open, or settled in the last 3 hours)
   function rideMates(b) {
@@ -2175,17 +2201,18 @@ body.tv.idle, body.tv.idle * { cursor: none !important; }
   }
   const fadingMe = (b) => [...S.bets.values()].some((m) => isMe(m) && against(m, b) && (m.status === "open" || Date.now() - (m.settledAt || 0) < 3 * 3600e3));
   function ridersHtml(ride) {
-    return `<div class="riders">${ride.bets.map((x) => `<span class="rider${isMe(x) ? " me" : ""}" style="--c:${personCol(x)}"><i>${esc(personName(x).slice(0, 1).toUpperCase())}</i><b>${esc(personName(x))}</b><em>${fOdds(x.odds)} · ${fU(x.units)}</em></span>`).join("")}</div>`;
+    const pl = (x) => ride.legOf && ride.legOf.has(x.id);
+    return `<div class="riders">${ride.bets.map((x) => `<span class="rider${isMe(x) ? " me" : ""}" style="--c:${personCol(x)}"><i>${esc(personName(x).slice(0, 1).toUpperCase())}</i><b>${esc(personName(x))}</b>${pl(x) ? `<em class="pl">${(x.legs || []).length}-leg parlay</em>` : `<em>${fOdds(x.odds)} · ${fU(x.units)}</em>`}</span>`).join("")}</div>`;
   }
   function renderRides(room) {
     const panel = $("#ridesPanel"), box = $("#rides");
     panel.hidden = !room.rides.length;
     if (!room.rides.length) { box.innerHTML = ""; return; }
     $("#ride-count").textContent = room.rides.length;
-    const units = room.rides.reduce((a, r) => a + r.bets.reduce((x, y) => x + y.units, 0), 0), people = new Set(room.rides.flatMap((r) => r.bets.map(personName)));
+    const units = room.rides.reduce((a, r) => a + rideUnits(r), 0), people = new Set(room.rides.flatMap((r) => r.bets.map(personName)));
     $("#ride-sub").textContent = `${[...people].join(" · ")} · ${fU(units)} riding together`;
     const can = !document.body.classList.contains("tv") && S.canWrite;
-    box.innerHTML = room.rides.map((r) => cardHtml(r.lead, can && isMe(r.lead), r)).join("");
+    box.innerHTML = room.rides.map((r) => cardHtml(r.lead, can && !r.lead.synth && isMe(r.lead), r)).join("");
   }
   // standings: who's best today. Three straight wins (or up 3u+) is on fire, three straight losses (or down 3u+) is ice cold
   let roomPrev = null;
@@ -2425,7 +2452,8 @@ body.tv.idle, body.tv.idle * { cursor: none !important; }
   let slipT = 0;
   function slipIn(b) {
     const el = $("#slip"), room = roomGroups(), ride = room.rides.find((r) => r.bets.some((x) => x.id === b.id)), vs = room.vs.get(b.id);
-    const others = ride ? [...new Set(ride.bets.filter((x) => personKey(x) !== personKey(b)).map(personName))] : [];
+    const viaLeg = (x) => !!(ride && ride.legOf && ride.legOf.has(x.id));
+    const others = ride ? [...new Set(ride.bets.filter((x) => personKey(x) !== personKey(b)).map((x) => personName(x) + (viaLeg(x) && !viaLeg(b) ? "'s parlay" : "")))] : [];
     el.style.setProperty("--c", personCol(b));
     $("#slAv").textContent = personName(b).slice(0, 1).toUpperCase();
     $("#slWho").textContent = isMe(b) ? personName(b) + " · locked in" : personName(b) + " just bet";
@@ -2433,7 +2461,7 @@ body.tv.idle, body.tv.idle * { cursor: none !important; }
     $("#slPick").textContent = b.pick;
     $("#slOdds").textContent = fOdds(b.odds);
     $("#slAmt").textContent = `${fU(b.units)} (${fUSD(b.units * S.unit)}) to win ${fU(b.units * ppu(b.odds))}`;
-    $("#slSub").textContent = ride ? "Riding with " + others.join(" + ") : vs ? (isMe(b) ? "Against " : "Fading ") + vs.map(personName).join(" + ") : b.kind === "parlay" ? (b.legs || []).length + "-leg parlay" : b.sport || "";
+    $("#slSub").textContent = ride ? (viaLeg(b) ? "A leg rides with " : "Riding with ") + others.join(" + ") : vs ? (isMe(b) ? "Against " : "Fading ") + vs.map(personName).join(" + ") : b.kind === "parlay" ? (b.legs || []).length + "-leg parlay" : b.sport || "";
     el.className = "slip" + (ride ? " ride" : vs ? " vs" : ""); el.hidden = false; void el.offsetWidth; el.classList.add("on");
     snSound("whoosh", 0.55, 0); snSound("slam", 0.7, 700);
     clearTimeout(slipT); slipT = setTimeout(() => { el.classList.add("out"); setTimeout(() => { el.hidden = true; el.className = "slip"; }, 500); }, 4600);
@@ -2598,7 +2626,7 @@ body.tv.idle, body.tv.idle * { cursor: none !important; }
   // ---------- sheets ----------
   function openSheet(id) { $(id).hidden = false; }
   // keep every open screen current: when a new version is up, reload it (never mid-form or mid-animation)
-  const BUILD = "20261011195020";
+  const BUILD = "20261011210312";
   function checkBuild() {
     if (BUILD === "dev") return;
     fetch("version.json?t=" + Date.now(), { cache: "no-store" }).then((r) => (r.ok ? r.json() : null)).then((j) => {
@@ -3922,15 +3950,15 @@ body.tv.idle, body.tv.idle * { cursor: none !important; }
       const pre = g && (g.st === "pre" || g.a.sc == null), side = b.sel && b.sel.m !== "tot" && !isTd(b.sel.m) ? b.sel.s : null;
       const tm = (x) => `${lg(g[x])}<span class="${side === x ? "me" : ""}">${esc(g[x].ab)}${pre ? "" : " " + g[x].sc}</span>`;
       const sc = !g ? "" : `${tm("a")}<i>·</i>${tm("h")}<i>·</i><em>${esc(pre ? startLabel(g.t) : g.st === "post" ? "Final" : g.d)}</em>`;
-      const riders = ride ? ride.bets : [b];
+      const riders = ride ? ride.bets : [b], pl = (x) => !!(ride && ride.legOf && ride.legOf.has(x.id)), cash = riders.filter((x) => !pl(x));
       const who = riders.map((x) => `<s style="--c:${personCol(x)}">${esc(personName(x).slice(0, 1).toUpperCase())}</s>`).join("");
-      const units = riders.reduce((a, x) => a + x.units, 0), toWin = riders.reduce((a, x) => a + x.units * ppu(x.odds), 0);
+      const units = cash.reduce((a, x) => a + x.units, 0), toWin = cash.reduce((a, x) => a + x.units * ppu(x.odds), 0);
       const meter = ev && !ev.fin && ph === "live" ? meterHtml(b.sel, ev) : legs.length && ph !== "pre" ? legMeter(legs) : "";
       const legRows = legs.length ? `<ul class="jl">${legs.map((l) => { const d = legShort(l); return `<li class="${l.st || d.cls}"><i>${l.st === "hit" ? "✓" : l.st === "miss" ? "✕" : ""}</i><span>${esc(l.t)}</span>${d.txt ? `<em>${esc(d.txt)}</em>` : ""}</li>`; }).join("")}</ul>` : "";
       const on = b.id === statusBet || (ride && ride.bets.some((x) => x.id === statusBet));
       return `<div class="jb-bet${on ? " on" : ""}${ride ? " ride" : isMe(b) ? "" : " cw"}" style="--c:${personCol(b)}">
-        <div class="r"><b>${esc(b.pick)}</b><span class="od">${fOdds(b.odds)}</span></div>
-        <div class="m"><span class="jb-who">${who}</span><span class="nm">${esc(riders.map(personName).join(" + "))}</span><span>${fU(units)} → ${fU(toWin, true)}</span></div>
+        <div class="r"><b>${esc(b.pick)}</b><span class="od">${b.odds == null ? "LEG" : fOdds(b.odds)}</span></div>
+        <div class="m"><span class="jb-who">${who}</span><span class="nm">${esc(riders.map((x) => personName(x) + (pl(x) ? " (parlay)" : "")).join(" + "))}</span>${cash.length ? `<span>${fU(units)} → ${fU(toWin, true)}</span>` : ""}</div>
         ${sc ? `<div class="sc">${sc}</div>` : ""}<div class="st ${cls}">${ph === "live" ? '<i class="dot"></i>' : ""}${esc(st)}</div>${meter}${legRows}</div>`;
     };
     const html = [...room.rides.map((r) => row(r.lead, r)), ...mine.map((b) => row(b)), ...crew.map((b) => row(b))];
@@ -4208,6 +4236,8 @@ body.tv.idle, body.tv.idle * { cursor: none !important; }
     return null;
   }
   const isMatchup = (c, g) => !!(g && c.teams && c.teams.includes(g.a.ab) && c.teams.includes(g.h.ab));
+  // a clip for this sport: its own, the general ones, and on NFL bets the college football edits that aren't about one school
+  const forSport = (c, sp) => !c.sport || c.sport === sp || (sp === "NFL" && c.sport === "CFB" && !c.fan && !c.teams);
   // the team you're riding on this bet; null on a total (then nobody's fan clips play)
   function myTeam(b) {
     const g = gameFor(b); if (!g) return null;
@@ -4222,7 +4252,7 @@ body.tv.idle, body.tv.idle * { cursor: none !important; }
     return c.fan !== (g.a.ab === me ? g.h.ab : g.a.ab);
   }
   // your team's own clips first, then the matchup's, then the general folders
-  const rapFor = (b) => { const g = gameFor(b), sp = (g || {}).sport || sportOf(b); return CLIPS.filter((c) => { const m = c.mood.split(" "); return (m.includes("win") || m.includes("rap") || (c.sport && c.sport === sp && m.includes("hype"))) && fits(c, b) && (!c.sport || c.sport === sp); }); };
+  const rapFor = (b) => { const g = gameFor(b), sp = (g || {}).sport || sportOf(b); return CLIPS.filter((c) => { const m = c.mood.split(" "); return (m.includes("win") || m.includes("rap") || (c.sport && forSport(c, sp) && m.includes("hype"))) && fits(c, b) && forSport(c, sp); }); };
   function poolFor(b, k) {
     const me = myTeam(b);
     if (k === "fill") {
@@ -4234,7 +4264,7 @@ body.tv.idle, body.tv.idle * { cursor: none !important; }
     if (k === "comeback") {
       // down but within two scores: the fight-back speeches, your team's hype, then general hype
       const g = gameFor(b), sp = (g || {}).sport || sportOf(b);
-      const cb = CLIPS.filter((c) => c.mood.split(" ").includes("comeback") && fits(c, b) && (!c.sport || c.sport === sp) && (!c.teams || isMatchup(c, g)));
+      const cb = CLIPS.filter((c) => c.mood.split(" ").includes("comeback") && fits(c, b) && forSport(c, sp) && (!c.teams || isMatchup(c, g)));
       if (okPool(cb) && Math.random() < 0.6) return cb;
       k = "hype";
     }
@@ -4250,7 +4280,7 @@ body.tv.idle, body.tv.idle * { cursor: none !important; }
   const isMusic = (c) => !!(c.song || c.music);
   function libFor(b, moods) {
     const sp = (gameFor(b) || {}).sport || sportOf(b);
-    return CLIPS.filter((c) => (!c.sport || c.sport === sp) && fits(c, b) && moods.some((m) => c.mood.split(" ").includes(m)));
+    return CLIPS.filter((c) => forSport(c, sp) && fits(c, b) && moods.some((m) => c.mood.split(" ").includes(m)));
   }
 
   // this bet's game has its own clips (Georgia–Bama): play those when stuff happens
@@ -4624,8 +4654,9 @@ body.tv.idle, body.tv.idle * { cursor: none !important; }
   const DJ_EVERY = 150e3;      // busy slate: music after 2½ minutes of quiet (DJ Goldie mostly, other songs mixed in)
   const BUSY_GAP = 15e3;       // busy slate: alerts can come 15 seconds apart (lots of games)
   // songs that fit a bet's sport (no anthems), and the 1 PM touchdown edit: a Goldie edit, a hype song or DJ Goldie, in turn
-  const musicFor = (b) => { const sp = (gameFor(b) || {}).sport || sportOf(b); return CLIPS.filter((c) => (c.song || c.music || c.dj) && !/anthem/i.test(c.artist || "") && (!c.sport || c.sport === sp) && fits(c, b)); };
-  let busyPops = 0, tdPops = 0, lastSong = "";
+  const musicFor = (b) => { const sp = (gameFor(b) || {}).sport || sportOf(b); return CLIPS.filter((c) => (c.song || c.music || c.dj) && !/anthem/i.test(c.artist || "") && forSport(c, sp) && fits(c, b)); };
+  let busyPops = 0, tdPops = 0, lastSong = "", showPops = 0, showTd = 0;
+  const SHOW_EVERY = 2 * 60e3; // 4 PM / prime: a DJ break, a clip or one of his scenes after 2 minutes without anything
   const newSong = (l) => { const f = l.filter((c) => !c.song || c.song !== lastSong); return f.length ? f : l; };
   function tdHype(b, why) {
     if (!clipsOn()) return;
@@ -4717,7 +4748,7 @@ body.tv.idle, body.tv.idle * { cursor: none !important; }
       else if (top.kind === "ev") {
         const e = top.e, k = gk(top);
         // a clip filed under this exact moment wins; otherwise the matchup's own clips on a score, else winning / losing / hype
-        const exact = CLIPS.filter((c) => c.mood.split(" ").includes(e.ev) && (!c.sport || c.sport === top.g.sport) && (!c.teams || isMatchup(c, top.g)));
+        const exact = CLIPS.filter((c) => c.mood.split(" ").includes(e.ev) && forSport(c, top.g.sport) && (!c.teams || isMatchup(c, top.g)));
         const exactMine = exact.filter((c) => fits(c, top.b));
         const pool = exactMine.length ? exactMine : poolFor(top.b, k === "mid" ? "hype" : k);
         const P = pickClip(pool) || pickClip(libFor(top.b, ["hype", "vibe"]));
@@ -4726,6 +4757,7 @@ body.tv.idle, body.tv.idle * { cursor: none !important; }
           showPlayCard(top.g, e, tdb, (why) => { if (mine) tdHype(tdb, why); });
           return;
         }
+        if (CARD_EVS.has(e.ev) && top.g && e.ev === "td" && top.h > 0 && showTd++ % 2 === 0) { const tdb = top.b; showPlayCard(top.g, e, tdb, (why) => tdHype(tdb, why)); return; }
         if (CARD_EVS.has(e.ev) && top.g) {
           if (P && P.base) { clipBuf(P.base); const pv = document.createElement("video"); pv.muted = true; pv.preload = "auto"; pv.src = vidSrc(P.base); }
           const pre = preAudio(top.b, P);
@@ -4748,14 +4780,25 @@ body.tv.idle, body.tv.idle * { cursor: none !important; }
       react(b, "mid", P, P.dj ? "DJ " + gName() : "Music");
       return;
     }
+    // 4 PM and prime time: something every 2 minutes, taking turns: DJ {name} (off your Spotify playlist when the TV's
+    // connected), a clip for how your bets are going (football edits, rap, comebacks), one of his scenes
+    const mine = [...S.bets.values()].filter((b) => b.status === "open" && isMe(b));
+    if (!mine.length || now - lastAny < SHOW_EVERY) return;
     let live = [];
-    for (const b of S.bets.values()) { if (b.status !== "open" || !isMe(b)) continue; const spot = liveSpot(b); if (spot && spot.state !== "L") live.push({ b, ...spot }); }
+    for (const b of mine) { const spot = liveSpot(b); if (spot && spot.state !== "L") live.push({ b, ...spot }); }
     const winning = live.filter((x) => x.state === "W");
     if (winning.length) live = winning;
-    let out = 0; for (const b of S.bets.values()) if (b.status === "open" && isMe(b)) out++;
-    if (!live.length || now - lastAny < (out <= 2 ? POP_FEW : winning.length ? POP_WIN : POP_EVERY)) return;
+    const turn = showPops++ % 3;
+    if (turn === 0 || !live.length) {
+      const b = (live[0] && live[0].b) || mine.find((x) => phase(x) === "live") || mine[0], P = pickClip(newSong(CLIPS.filter((c) => c.dj)));
+      if (!P) return;
+      lastAny = now; lastKind = "pop";
+      react(b, "mid", P, "DJ " + gName());
+      return;
+    }
     const pick = live.sort((x, y) => (lastFeat.get(x.b.id) || 0) - (lastFeat.get(y.b.id) || 0))[0];
-    const P = pickClip(poolFor(pick.b, pick.state === "W" ? "rap" : pick.state === "C" ? "comeback" : "fill"));
+    const scenes = CLIPS.filter((c) => c.base.startsWith("sounds/aura/") && fits(c, pick.b));
+    const P = turn === 2 && scenes.length ? pickClip(newSong(scenes)) : pickClip(poolFor(pick.b, pick.state === "W" ? "rap" : pick.state === "C" ? "comeback" : "fill"));
     if (!P) return;
     lastAny = now; lastKind = "pop"; lastFeat.set(pick.b.id, now);
     react(pick.b, pick.state === "W" ? "good" : "mid", P, pick.state === "W" ? "Cashing" : pick.state === "C" ? "Comeback" : null);
