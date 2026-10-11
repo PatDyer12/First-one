@@ -1827,7 +1827,7 @@ body.tv .strip .chart { height: 96px; }
   // ---------- sheets ----------
   function openSheet(id) { $(id).hidden = false; }
   // keep every open screen current: when a new version is up, reload it (never mid-form or mid-animation)
-  const BUILD = "20261011032245";
+  const BUILD = "20261011033555";
   function checkBuild() {
     if (BUILD === "dev") return;
     fetch("version.json?t=" + Date.now(), { cache: "no-store" }).then((r) => (r.ok ? r.json() : null)).then((j) => {
@@ -2901,6 +2901,7 @@ body.tv .strip .chart { height: 96px; }
   // sport limits a clip to one sport; teams ties "game" clips to that matchup
   const clip = (path, label, mood, sec, o) => Object.assign({ base: "sounds/" + path, label, mood, ms: sec * 1000, lib: true }, o || {});
   // fan: only plays when the team you're on is that team (any game). teams: only in that matchup
+  const cfbTeam = (ab) => ({ sport: "CFB", fan: ab });
   const CFB = { sport: "CFB" }, MLB = { sport: "MLB" }, UGA_ALA = { sport: "CFB", teams: ["UGA", "ALA"] };
   const UGA = { sport: "CFB", fan: "UGA" }, ALA = { sport: "CFB", fan: "ALA" }, UGA_VS_ALA = { sport: "CFB", fan: "UGA", teams: ["UGA", "ALA"] }, ALA_VS_UGA = { sport: "CFB", fan: "ALA", teams: ["UGA", "ALA"] };
   const CLIPS = [
@@ -2972,6 +2973,32 @@ body.tv .strip .chart { height: 96px; }
     clip("clips/g09", "Vikings pregame huddle", "hype vibe", 30.4),
     clip("win/win22", "Ant Edwards, part 2", "up win", 30.4),
     clip("win/win23", "Future, part 2", "up win", 30.4),
+    clip("cfb/cfb21", "GameDay: lighting it up", "hype vibe", 30.5, CFB),
+    clip("cfb/cfb22", "GameDay energy, part 2", "hype vibe", 31.0, CFB),
+    clip("cfb/cfb23", "Tunnel walkouts", "hype up", 33.5, CFB),
+    clip("cfb/cfb24", "Tunnel walkouts, part 2", "hype up", 33.5, CFB),
+    clip("cfb/cfb25", "Close your eyes", "up hype", 13.0, CFB),
+    clip("cfb/cfb26", "Bama rap edit", "hype up", 26.0, ALA),
+    clip("cfb/cfb27", "Bama rap edit, part 2", "hype up", 26.0, ALA),
+    clip("cfb/cfb28", "Being a winner is a curse", "hype comeback", 27.0, CFB),
+    clip("cfb/cfb29", "Being a winner, part 2", "hype up", 27.3, CFB),
+    clip("cfb/cfb30", "I know what you are, Empire", "hype up", 16.0, cfbTeam("OU")),
+    clip("cfb/cfb31", "You ain't heard about us?", "up hype", 17.0, CFB),
+    clip("cfb/cfb32", "Not a body within 10 yards", "up hype", 28.0, cfbTeam("FLA")),
+    clip("cfb/cfb33", "Gators, part 2", "up hype", 13.1, cfbTeam("FLA")),
+    clip("cfb/cfb34", "Surrounded by snipers", "up hype", 15.5, CFB),
+    clip("cfb/cfb35", "Memorial Stadium nights", "vibe hype", 18.0, CFB),
+    clip("cfb/cfb36", "Give me my theme music!", "hype up", 22.2, CFB),
+    clip("cfb/cfb37", "110,000 fans", "hype comeback", 23.0, CFB),
+    clip("cfb/cfb38", "Paint our masterpiece", "hype up", 18.8, CFB),
+    clip("cfb/cfb39", "Dabo: don't quit", "hype comeback", 31.0, cfbTeam("CLEM")),
+    clip("cfb/cfb40", "Dabo: don't quit, part 2", "hype comeback", 30.5, cfbTeam("CLEM")),
+    clip("cfb/cfb41", "Ole Miss takeover", "up hype", 30.0, cfbTeam("MISS")),
+    clip("cfb/cfb42", "Ole Miss takeover, part 2", "up hype", 30.5, cfbTeam("MISS")),
+    clip("cfb/cfb43", "Under the lights", "hype vibe", 26.0, CFB),
+    clip("cfb/cfb44", "We Bama, that's what we do", "hype", 29.6, ALA),
+    clip("cfb/cfb45", "Dread it, run from it", "hype", 31.4, ALA),
+    clip("cfb/cfb46", "We Bama, part 3", "hype", 31.0, ALA),
     clip("goldie/g1", "Goldie: sent it", "up win", 6.35),
     clip("goldie/g2", "Goldie: main character", "vibe", 5.95),
     clip("goldie/g3", "Goldie: next level", "up win", 9.95),
@@ -3317,7 +3344,7 @@ body.tv .strip .chart { height: 96px; }
   }
   setInterval(autoReact, 60e3); // pop-ups keep coming even if the scores haven't changed
   // Settings: the clip library, with a Play button on each
-  const LIB_GROUPS = [["Winning · on repeat while you're winning", (c) => c.mood.split(" ").includes("win")], ["Comeback · when you're down but within two scores", (c) => c.mood.split(" ").includes("comeback")], ["Georgia · only on your Georgia bets", (c) => c.fan === "UGA"], ["Alabama · only on your Bama bets", (c) => c.fan === "ALA"], ["Georgia–Bama game", (c) => c.teams && !c.fan],
+  const LIB_GROUPS = [["Winning · on repeat while you're winning", (c) => c.mood.split(" ").includes("win")], ["Comeback · when you're down but within two scores", (c) => c.mood.split(" ").includes("comeback")], ["Georgia · any college bet unless you're fading Georgia", (c) => c.fan === "UGA"], ["Alabama · Bama bets and games without Georgia", (c) => c.fan === "ALA"], ["Other teams · their games and yours, never on a Georgia game", (c) => c.fan && c.fan !== "UGA" && c.fan !== "ALA"],
     ["College football only", (c) => c.sport === "CFB" && !c.teams && !c.fan], ["MLB only", (c) => c.sport === "MLB"],
     ["Losing bet · every sport", (c) => !c.sport && c.mood.includes("down")], ["Fillers · close games, every 3 min", (c) => c.mood.split(" ").includes("vibe") && !c.sport]];
   $("#clipLib").innerHTML = LIB_GROUPS.map(([name, f]) => `<h4>${esc(name)}</h4>` + CLIPS.map((c, i) => (f(c) ? `<div class="sndrow"><label>${esc(c.label)}${c.sport && !c.teams && !c.fan ? `<span class="mood">${c.mood.includes("down") ? "Losing" : "Winning"}</span>` : ""}</label><button type="button" class="btn sm" data-i="${i}">Play</button></div>` : "")).join("")).join("");
