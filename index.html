@@ -1080,8 +1080,14 @@ body.tv .strip .chart { height: 96px; }
         <button type="button" class="btn sm" id="snTest200">Sniper +200</button>
         <button type="button" class="btn sm" id="snTest300">Sniper +300</button>
         <button type="button" class="btn sm" id="snTest400">Sniper +400</button>
-        <button type="button" class="btn sm" id="inTestMoney">$100+ intro</button>
-        <button type="button" class="btn sm" id="inTestParlay">Parlay intro</button>
+      </div>
+    </div>
+    <div class="field">
+      <span class="lbl">Goldie intros</span>
+      <span class="hint">Every win gets one. Regular hits shuffle through all of these. $100+ wins get the blockbuster, parlays get their own, and +150 or longer gets the sniper. Tap any to watch it.</span>
+      <div style="display:flex;gap:8px;flex-wrap:wrap">
+        <button type="button" class="btn sm" id="inTestMoney">$100+ blockbuster</button>
+        <button type="button" class="btn sm" id="inTestParlay">Parlay</button>
         <span class="inq" id="inQuick"></span>
       </div>
     </div>
@@ -1726,7 +1732,7 @@ body.tv .strip .chart { height: 96px; }
       if (isNuke(b)) nukeHit(b.pick, n); else if (isWhale(b)) whaleSplash(b, n); else if (!big && !par && !snipe) quickWin(b, n);
       return;
     }
-    if (o === "L") playLoss();
+    if (o === "L") { playLoss(); if (clipsOn()) setTimeout(() => { if (!clipBusy()) react(b, "bad", pickClip(libFor(b, ["down"])), "Final"); }, 2600); }
     const word = b.status === "cashout" ? "CASHED" : o === "W" ? "WINNER" : o === "L" ? "LOSS" : "PUSH";
     flash(o, word, b.pick, `${b.book === "DK" ? "DraftKings" : "FanDuel"} · ${fOdds(b.odds)} · ${fU(n, true)} (${fUSD(n * S.unit, true)})`);
   }
@@ -1821,7 +1827,7 @@ body.tv .strip .chart { height: 96px; }
   // ---------- sheets ----------
   function openSheet(id) { $(id).hidden = false; }
   // keep every open screen current: when a new version is up, reload it (never mid-form or mid-animation)
-  const BUILD = "20261011031407";
+  const BUILD = "20261011032245";
   function checkBuild() {
     if (BUILD === "dev") return;
     fetch("version.json?t=" + Date.now(), { cache: "no-store" }).then((r) => (r.ok ? r.json() : null)).then((j) => {
@@ -2956,6 +2962,21 @@ body.tv .strip .chart { height: 96px; }
     clip("mlb/mlb04", "Red October crowd", "up hype vibe", 13.75, MLB),
     clip("mlb/mlb05", "Three-peat rolls on", "up hype vibe", 30, MLB),
     clip("mlb/mlb06", "Next opponent: Ohtani", "up hype vibe", 15.25, MLB),
+    clip("mlb/mlb07", "Three-peat, part 2", "up hype vibe", 8.6, MLB),
+    clip("cfb/cfb16", "365 days, part 2", "hype up", 31.2, UGA),
+    clip("cfb/cfb19", "Dawgs going crazy, part 2", "hype up", 14.6, UGA),
+    clip("cfb/cfb17", "I don't lose, part 2", "down comeback", 32),
+    clip("cfb/cfb18", "Brick by brick, part 2", "down comeback", 30.2),
+    clip("cfb/cfb20", "You owe them something, part 2", "down hype comeback", 12.8),
+    clip("clips/l08", "Streamer losses, part 2", "down", 30),
+    clip("clips/g09", "Vikings pregame huddle", "hype vibe", 30.4),
+    clip("win/win22", "Ant Edwards, part 2", "up win", 30.4),
+    clip("win/win23", "Future, part 2", "up win", 30.4),
+    clip("goldie/g1", "Goldie: sent it", "up win", 6.35),
+    clip("goldie/g2", "Goldie: main character", "vibe", 5.95),
+    clip("goldie/g3", "Goldie: next level", "up win", 9.95),
+    clip("goldie/g4", "Goldie: golden hour", "vibe", 8.75),
+    clip("goldie/g5", "Goldie: what is going on", "down", 8.35),
   ];
   // library clips are big once decoded, so only the last couple stay in memory
   const clipBufs = new Map();
@@ -3060,7 +3081,17 @@ body.tv .strip .chart { height: 96px; }
     const s = selsOf(b).find((x) => String(x.g) === g.id);
     return s && s.m !== "tot" && g[s.s] ? g[s.s].ab : null;
   }
-  const fits = (c, b) => !c.fan || c.fan === myTeam(b);
+  // team clips: yours play anywhere you're not betting against your team; another team's play on
+  // its own side, or on games that don't involve Georgia (never Bama edits on a Georgia game)
+  const HOME = "UGA";
+  function fits(c, b) {
+    if (!c.fan) return true;
+    const me = myTeam(b), g = gameFor(b), inGame = (t) => !!g && (g.a.ab === t || g.h.ab === t);
+    if (me === c.fan) return true;
+    if (me && inGame(c.fan)) return false;
+    if (c.fan !== HOME && inGame(HOME)) return false;
+    return true;
+  }
   // your team's own clips first, then the matchup's, then the general folders
   const rapFor = (b) => { const g = gameFor(b), sp = (g || {}).sport || sportOf(b); return CLIPS.filter((c) => (c.mood.split(" ").includes("win") || c.mood.split(" ").includes("rap")) && fits(c, b) && (!c.sport || c.sport === sp) && (!c.teams || isMatchup(c, g))); };
   function poolFor(b, k) {
@@ -3080,7 +3111,7 @@ body.tv .strip .chart { height: 96px; }
     }
     if (k === "rap") { const r = rapFor(b); if (okPool(r) && Math.random() < 0.75) return r; k = "good"; }
     if (k === "good") { const r = rapFor(b); if (okPool(r) && Math.random() < 0.4) return r; }
-    const fan = me && k !== "bad" ? CLIPS.filter((c) => c.fan === me && (!c.teams || isMatchup(c, gameFor(b)))) : [];
+    const fan = me && k !== "bad" ? CLIPS.filter((c) => c.fan === me && (!c.sport || c.sport === sportOf(b) || c.sport === (gameFor(b) || {}).sport)) : [];
     const match = k === "bad" ? [] : gamePool(b).filter((c) => k !== "good" || c.mood.split(" ").includes("up"));
     const base = k === "good" ? libFor(b, ["up"]) : k === "bad" ? ["lockin", ...libFor(b, ["down"])] : libFor(b, ["hype", "vibe"]);
     if (okPool(fan) && Math.random() < 0.6) return fan;
@@ -3089,7 +3120,7 @@ body.tv .strip .chart { height: 96px; }
   }
   function libFor(b, moods) {
     const sp = (gameFor(b) || {}).sport || sportOf(b);
-    return CLIPS.filter((c) => (!c.sport || c.sport === sp) && !c.teams && fits(c, b) && moods.some((m) => c.mood.split(" ").includes(m)));
+    return CLIPS.filter((c) => (!c.sport || c.sport === sp) && (!c.teams || (c.fan && c.fan === myTeam(b))) && fits(c, b) && moods.some((m) => c.mood.split(" ").includes(m)));
   }
 
   // this bet's game has its own clips (Georgia–Bama): play those when stuff happens
