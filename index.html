@@ -847,11 +847,21 @@ body.tv .strip .chart { height: 96px; }
 .in video { position: absolute; width: 2px; height: 2px; opacity: 0; pointer-events: none; }
 .inq { display: contents; }
 
+/* sportsbook logos */
+.book.FD, .book.DK { background: #fff; overflow: hidden; padding: 0; }
+.book img { width: 100%; height: 100%; display: block; }
+.bki { width: 18px; height: 18px; border-radius: 5px; vertical-align: -3px; margin-right: 7px; flex: none; box-shadow: 0 0 0 1px rgba(255,255,255,.08); }
+.bki.sm { width: 15px; height: 15px; border-radius: 4px; margin-right: 6px; vertical-align: -2px; }
+/* whose bet: big, first thing in the form */
+#whoRadios label span { padding: 10px 16px; font-size: 16px; }
+.who-hint { display: block; margin-top: 8px; }
+
 /* crew picks */
 .crew-p + .crew-p { margin-top: 18px; padding-top: 16px; border-top: 1px solid var(--line); }
 .crew-h { display: flex; align-items: center; gap: 12px; margin-bottom: 12px; flex-wrap: wrap; }
 .crew-av { width: 34px; height: 34px; border-radius: 50%; display: grid; place-items: center; font: 800 18px var(--f-num); color: #05070b; background: var(--c); box-shadow: 0 0 16px color-mix(in srgb, var(--c) 50%, transparent); }
 .crew-h b { font: 800 26px/1 var(--f-num); letter-spacing: .01em; }
+.crew-rng { font: 700 14px var(--f-num); color: var(--ink-2); letter-spacing: .04em; text-transform: uppercase; }
 .crew-rec { font: 800 22px var(--f-num); color: var(--ink-2); }
 .crew-net { font: 800 22px var(--f-num); color: var(--ink-2); } .crew-net small { font-size: 16px; color: var(--ink-3); margin-left: 4px; }
 .crew-net.w { color: var(--win); } .crew-net.l { color: var(--loss); }
@@ -963,13 +973,14 @@ body.tv .strip .chart { height: 96px; }
         <label><input type="radio" name="who" value="julian"><span><i style="background:#36d6ff"></i>Julian</span></label>
         <label><input type="radio" name="who" value="guest"><span><i style="background:#ff9f43"></i><b id="guestLbl">Guest</b></span></label>
       </div>
+      <span class="hint who-hint">Julian and guest bets get tracked on their own (record and units) and never touch your numbers.</span>
       <div class="linein" id="guestWrap" hidden><label for="f-guest">Guest name</label><input type="text" id="f-guest" maxlength="20" autocomplete="off" placeholder="Guest"></div>
     </div>
     <div class="field">
       <span class="lbl">Book</span>
       <div class="radios">
-        <label><input type="radio" name="book" id="bk-fd" value="FD" checked><span><i style="background:var(--fd)"></i>FanDuel</span></label>
-        <label><input type="radio" name="book" id="bk-dk" value="DK"><span><i style="background:var(--dk)"></i>DraftKings</span></label>
+        <label><input type="radio" name="book" id="bk-fd" value="FD" checked><span><img class="bki" src="img/fd.png?v=1" alt="">FanDuel</span></label>
+        <label><input type="radio" name="book" id="bk-dk" value="DK"><span><img class="bki" src="img/dk.png?v=1" alt="">DraftKings</span></label>
       </div>
     </div>
     <div class="field">
@@ -1265,6 +1276,9 @@ body.tv .strip .chart { height: 96px; }
   };
   const esc = (s) => String(s == null ? "" : s).replace(/[&<>"']/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]));
   const BOOK = { FD: "FanDuel", DK: "DraftKings" };
+  const BOOK_IMG = { FD: "img/fd.png?v=1", DK: "img/dk.png?v=1" };
+  const bookKey = (b) => (b.book === "DK" ? "DK" : "FD");
+  const bookLogo = (b, cls) => `<img class="bki${cls ? " " + cls : ""}" src="${BOOK_IMG[bookKey(b)]}" alt="${BOOK[bookKey(b)]}">`;
 
   function animateNum(el, to, fmt) {
     const from = typeof el._v === "number" ? el._v : 0;
@@ -1513,7 +1527,9 @@ body.tv .strip .chart { height: 96px; }
             <input id="co-${esc(b.id)}" inputmode="decimal" autocomplete="off" placeholder="${(b.units * S.unit).toFixed(2)}">
             <span class="spacer"></span><button type="button" class="btn sm" data-act="cancel">Cancel</button><button type="button" class="btn sm primary" data-act="co-save">Save</button></div>`;
         } else {
-          actions = `<div class="actions"><span class="lbl">Note</span>
+          const wh = b.who === "julian" ? "julian" : b.who === "guest" ? "guest" : "me";
+          actions = `<div class="actions"><span class="lbl">Whose bet</span>${[["me", "Mine"], ["julian", "Julian"], ["guest", wh === "guest" ? b.whoName || "Guest" : S.guestName || "Guest"]].map(([k, l]) => `<button type="button" class="btn sm${wh === k ? " primary" : ""}" data-act="who-${k}">${esc(l)}</button>`).join("")}</div>
+            <div class="actions"><span class="lbl">Note</span>
             <input class="notein" id="nt-${esc(b.id)}" autocomplete="off" maxlength="60" placeholder="Score or note, like Q3 · up 4" value="${esc(b.note || "")}" aria-label="Score or note">
             <button type="button" class="btn sm" data-act="note">Save note</button></div>
             <div class="actions"><span class="lbl${verdict ? " hot" : ""}">${verdict === "W" ? "Final says it won. Confirm on your slip, then settle." : verdict === "L" ? (dead ? "A leg missed. Settle it as lost?" : "Final says it lost. Settle it?") : verdict === "P" ? "Final landed on the number. Looks like a push." : dead ? "A leg missed. Settle it as lost?" : allHit ? "Every leg hit. Settle it as won?" : "Settle"}</span>
@@ -1527,7 +1543,7 @@ body.tv .strip .chart { height: 96px; }
       const pp = S.pops.get(b.id), pop = pp && Date.now() < pp.until ? " pop-" + pp.kind : "";
       return `<article class="bet${can ? " click" : ""}${exp ? " expanded" : ""}${st ? " st-" + st : ""}${pop}" data-id="${esc(b.id)}" ${can ? 'tabindex="0" role="button" aria-expanded="' + exp + '"' : ""}>
         ${ph === "live" && !dead ? '<span class="sweat" aria-hidden="true"></span>' : ""}
-        <div class="book ${b.book === "DK" ? "DK" : "FD"}" title="${BOOK[b.book] || ""}">${b.book === "DK" ? "DK" : "FD"}</div>
+        <div class="book ${bookKey(b)}" title="${BOOK[bookKey(b)]}"><img src="${BOOK_IMG[bookKey(b)]}" alt="${BOOK[bookKey(b)]}"></div>
         <div style="min-width:0"><div class="pick">${esc(b.pick)}${b.kind !== "parlay" ? ballTag(hasBall(b.sel)) : ""}</div><div class="meta">${chips}</div></div>
         <div class="odds num"><b>${fOdds(b.odds)}</b><span>${fU(b.units)} → ${fU(towin, true)}</span>${legs.length ? `<span class="prog">${hits}/${legs.length} legs</span>` : ""}</div>
         ${ev && !ev.fin && ph === "live" ? meterHtml(b.sel, ev) : legs.length && ph !== "pre" ? legMeter(legs) : ""}
@@ -1555,7 +1571,6 @@ body.tv .strip .chart { height: 96px; }
     const panel = $("#crewPanel"), wrap = $("#crew");
     const people = new Map();
     for (const b of bets) {
-      if (b.status !== "open" && !(b.settledAt && b.settledAt >= start)) continue;
       const k = (b.who || "guest") + ":" + whoName(b).toLowerCase();
       if (!people.has(k)) people.set(k, { name: whoName(b), who: b.who || "guest", open: [], done: [] });
       (b.status === "open" ? people.get(k).open : people.get(k).done).push(b);
@@ -1572,10 +1587,10 @@ body.tv .strip .chart { height: 96px; }
     keys.forEach((k, i) => {
       const p = people.get(k), done = p.done.sort((a, b) => b.settledAt - a.settledAt);
       const w = done.filter((b) => outcome(b) === "W").length, l = done.filter((b) => outcome(b) === "L").length, pu = done.length - w - l;
-      const net = done.reduce((a, b) => a + netOf(b), 0), col = WHO_COL[p.who] || "#ff9f43";
+      const net = done.reduce((a, b) => a + netOf(b), 0), col = WHO_COL[p.who] || "#ff9f43", today = done.filter((b) => b.settledAt >= start), tNet = today.reduce((a, b) => a + netOf(b), 0);
       $("#crewh-" + i).innerHTML = `<span class="crew-av" style="--c:${col}">${esc(p.name.slice(0, 1).toUpperCase())}</span><b>${esc(p.name)}</b>
         <span class="crew-rec">${w}-${l}${pu ? "-" + pu : ""}</span><span class="crew-net ${net > 0.004 ? "w" : net < -0.004 ? "l" : ""}">${fU(net, true)} <small>${fUSD(net * S.unit, true)}</small></span>
-        <span class="crew-open">${p.open.length ? p.open.length + " open" : ""}</span>`;
+        ${S.range !== "all" && today.length ? `<span class="crew-rng">${esc(RANGE_LABEL[S.range])} ${fU(tNet, true)}</span>` : ""}<span class="crew-open">${p.open.length ? p.open.length + " open" : ""}</span>`;
       renderActive(p.open, "#crewl-" + i);
       $("#crewd-" + i).innerHTML = done.slice(0, 8).map((b) => { const o = outcome(b); return `<span class="crew-chip ${o}"><i>${o}</i>${esc(b.pick)}<em>${fU(netOf(b), true)}</em></span>`; }).join("");
     });
@@ -1623,8 +1638,8 @@ body.tv .strip .chart { height: 96px; }
 
   function renderSplits(settled) {
     const groups = [
-      { nm: "FanDuel", c: "var(--fd)", f: (b) => b.book !== "DK" },
-      { nm: "DraftKings", c: "var(--dk)", f: (b) => b.book === "DK" },
+      { nm: "FanDuel", c: "var(--fd)", img: BOOK_IMG.FD, f: (b) => b.book !== "DK" },
+      { nm: "DraftKings", c: "var(--dk)", img: BOOK_IMG.DK, f: (b) => b.book === "DK" },
       { nm: "Straights", c: "var(--ink-2)", f: (b) => b.kind !== "parlay" },
       { nm: "Parlays", c: "var(--gold)", f: (b) => b.kind === "parlay" },
     ].map((g) => ({ ...g, s: stats(settled.filter(g.f)) }));
@@ -1634,7 +1649,7 @@ body.tv .strip .chart { height: 96px; }
       const w = (Math.abs(g.s.net) / max) * 50;
       const left = g.s.net >= 0 ? 50 : 50 - w;
       const bg = g.s.net > 0.004 ? "var(--win)" : g.s.net < -0.004 ? "var(--loss)" : "var(--push)";
-      return `<div class="split"><span class="nm"><i style="background:${g.c}"></i>${g.nm}</span>
+      return `<div class="split"><span class="nm">${g.img ? `<img class="bki" src="${g.img}" alt="">` : `<i style="background:${g.c}"></i>`}${g.nm}</span>
         <span class="rec num">${g.s.w}-${g.s.l}${g.s.p ? "-" + g.s.p : ""}</span>
         <span class="bar"><i style="left:${left}%;width:${w}%;background:${bg}"></i></span>
         <span class="val num ${cls(g.s.net)}">${fU(g.s.net, true)}</span></div>`;
@@ -1649,7 +1664,7 @@ body.tv .strip .chart { height: 96px; }
       const o = outcome(b), n = netOf(b);
       const label = b.status === "cashout" ? "CO" : o;
       return `<div class="row"><span class="res ${o}">${label}</span>
-        <div style="min-width:0"><div class="t">${esc(b.pick)}</div><div class="m">${b.book === "DK" ? "DK" : "FD"} · ${fOdds(b.odds)} · ${fU(b.units)} · ${when(b.settledAt)}${b.sample ? " · sample" : ""}</div></div>
+        <div style="min-width:0"><div class="t">${esc(b.pick)}</div><div class="m">${bookLogo(b, "sm")}${fOdds(b.odds)} · ${fU(b.units)} · ${when(b.settledAt)}${b.sample ? " · sample" : ""}</div></div>
         <div class="r num"><span class="${cls(n)}">${fU(n, true)}</span>${S.canWrite ? `<button type="button" class="edit" data-reopen="${esc(b.id)}">undo</button>` : ""}</div></div>`;
     }).join("");
   }
@@ -1756,6 +1771,7 @@ body.tv .strip .chart { height: 96px; }
     }
     const a = act.dataset.act;
     if (a === "won" || a === "lost" || a === "push") settle(id, a);
+    else if (a.startsWith("who-")) { const w = a.slice(4), d = w === "julian" ? { who: "julian", whoName: "Julian" } : w === "guest" ? { who: "guest", whoName: S.guestName || "Guest" } : { who: "me", whoName: "" }; S.open = null; patchBet(id, d).then((ok) => ok && toast(w === "me" ? "Moved to your bets" : `Moved to ${d.whoName}`)); }
     else if (a === "note") { const i = document.getElementById("nt-" + id); patchBet(id, { note: i ? i.value.trim().slice(0, 60) : "" }).then((ok) => ok && toast("Note saved")); }
     else if (a === "co") { S.cashout = id; render(); const i = document.getElementById("co-" + id); if (i) i.focus(); }
     else if (a === "co-save") {
@@ -2997,13 +3013,19 @@ body.tv .strip .chart { height: 96px; }
   // don't play the same clip twice in a row: pick from whichever ones have gone longest unplayed
   const played = new Map();
   try { for (const [k, t] of JSON.parse(localStorage.getItem("sb-played") || "[]")) played.set(k, t); } catch (e) {}
+  const clipKey = (p) => (p === "lockin" ? p : p.base);
+  // anything played in the last 12 minutes (across refreshes) sits out while there's something fresher
+  const isFresh = (p) => Date.now() - (played.get(clipKey(p)) || 0) > 12 * 60e3;
+  const okPool = (l) => l.length > 0 && l.some(isFresh);
   function pickClip(pool) {
     if (!pool.length) return null;
     const own = pool.filter((p) => p !== "lockin" && p.sport && !p.teams);
-    if (own.length && Math.random() < 0.6) pool = own; // the sport's own folder gets first dibs
-    const key = (p) => (p === "lockin" ? p : p.base);
-    const sorted = pool.slice().sort((x, y) => (played.get(key(x)) || 0) - (played.get(key(y)) || 0));
-    const p = sorted[Math.floor(Math.random() * Math.max(1, Math.ceil(sorted.length / 2)))];
+    if (okPool(own) && Math.random() < 0.5) pool = own; // the sport's own folder gets first dibs
+    const key = clipKey;
+    // shuffle first so never-played clips come out in a random order, then the longest-unplayed first
+    const sorted = pool.map((p) => [p, Math.random()]).sort((x, y) => (played.get(key(x[0])) || 0) - (played.get(key(y[0])) || 0) || x[1] - y[1]).map((x) => x[0]);
+    const fresh = sorted.filter(isFresh), from = fresh.length ? fresh : sorted;
+    const p = from[Math.floor(Math.random() * Math.max(1, Math.ceil(from.length * 0.6)))];
     played.set(key(p), Date.now());
     try { localStorage.setItem("sb-played", JSON.stringify([...played])); } catch (e) {}
     return p;
@@ -3030,23 +3052,23 @@ body.tv .strip .chart { height: 96px; }
     if (k === "fill") {
       // close game: mostly fillers, some of your team's hype
       const fill = [PIPS.good, ...libFor(b, ["vibe"])];
-      if (Math.random() < 0.65) return fill;
+      if (okPool(fill) && Math.random() < 0.65) return fill;
       k = "hype";
     }
     if (k === "comeback") {
       // down but within two scores: the fight-back speeches, your team's hype, then general hype
       const g = gameFor(b), sp = (g || {}).sport || sportOf(b);
       const cb = CLIPS.filter((c) => c.mood.split(" ").includes("comeback") && fits(c, b) && (!c.sport || c.sport === sp) && (!c.teams || isMatchup(c, g)));
-      if (cb.length && Math.random() < 0.6) return cb;
+      if (okPool(cb) && Math.random() < 0.6) return cb;
       k = "hype";
     }
-    if (k === "rap") { const r = rapFor(b); if (r.length && Math.random() < 0.75) return r; k = "good"; }
-    if (k === "good") { const r = rapFor(b); if (r.length && Math.random() < 0.4) return r; }
+    if (k === "rap") { const r = rapFor(b); if (okPool(r) && Math.random() < 0.75) return r; k = "good"; }
+    if (k === "good") { const r = rapFor(b); if (okPool(r) && Math.random() < 0.4) return r; }
     const fan = me && k !== "bad" ? CLIPS.filter((c) => c.fan === me && (!c.teams || isMatchup(c, gameFor(b)))) : [];
     const match = k === "bad" ? [] : gamePool(b).filter((c) => k !== "good" || c.mood.split(" ").includes("up"));
     const base = k === "good" ? libFor(b, ["up"]) : k === "bad" ? ["lockin", ...libFor(b, ["down"])] : libFor(b, ["hype", "vibe"]);
-    if (fan.length && Math.random() < 0.75) return fan;
-    if (match.length && Math.random() < 0.6) return match;
+    if (okPool(fan) && Math.random() < 0.6) return fan;
+    if (okPool(match) && Math.random() < 0.5) return match;
     return base.length ? base : fan.length ? fan : match;
   }
   function libFor(b, moods) {
@@ -4110,7 +4132,7 @@ body.tv .strip .chart { height: 96px; }
 
   // ---------- Intros: cinematic win montages cut to the beat (big wins, parlays, and a couple of quick ones) ----------
   // you, standing: walk, power (fists at the hips), flex (both arms up), bird, fist (one fist up); cape optional
-  function inHero(ctx, x, y, u, pose, t, opt) { goldie(ctx, x, y, u * 0.95, pose, t, opt); }
+  function inHero(ctx, x, y, u, pose, t, opt) { return goldie(ctx, x, y, u * 0.95, pose, t, opt); }
 
   // flames: soft glowing wall (drawn small, scaled up) with crisp tongues on top
   let inFireCv = null;
@@ -4172,6 +4194,41 @@ body.tv .strip .chart { height: 96px; }
     ctx.restore();
   }
 
+  // Goldie talks: a comic bubble off his head, and the line out loud when sound is on
+  const G_LINES = ["Fuck you", "Eat a bag of dicks", "Squid"];
+  let gLineBag = [];
+  const inLine = () => { if (!gLineBag.length) gLineBag = G_LINES.slice().sort(() => Math.random() - 0.5); return gLineBag.pop(); };
+  function inVoice(txt) {
+    try {
+      if (!SND.on || !window.speechSynthesis) return;
+      const u = new SpeechSynthesisUtterance(txt), vs = speechSynthesis.getVoices();
+      u.voice = vs.find((v) => /^en/i.test(v.lang) && /david|guy|daniel|fred|alex|male|google uk english male/i.test(v.name)) || vs.find((v) => /^en/i.test(v.lang)) || null;
+      u.pitch = 0.45; u.rate = 0.92; u.volume = 1; speechSynthesis.cancel(); speechSynthesis.speak(u);
+    } catch (e) {}
+  }
+  // k = seconds since he said it; side "l" puts the bubble to the left of his head instead of above
+  function inSay(ctx, hx, hy, txt, k, H, W, side) {
+    if (k < 0) return;
+    const s = k < 0.14 ? 0.5 + (k / 0.14) * 0.6 : 1.1 - Math.min(0.1, (k - 0.14) * 0.8), wob = Math.sin(k * 9) * 0.015;
+    ctx.save(); ctx.font = `900 ${Math.round(H * 0.052)}px "Big Shoulders Display", "Barlow Condensed", Impact, sans-serif`;
+    const t = txt.toUpperCase() + (txt === "Squid" ? "" : "!"), tw = ctx.measureText(t).width, w = tw + H * 0.08, h = H * 0.095;
+    let cx = side === "l" ? hx - H * 0.16 - w / 2 : hx - w * 0.3, cy = side === "l" ? hy - H * 0.06 : hy - H * 0.27;
+    cx = Math.max(w / 2 + 12, Math.min(W - w / 2 - 12, cx)); cy = Math.max(h / 2 + H * 0.1, cy);
+    const tx = (hx - cx) * 0.62, ty = (hy - cy) * 0.62;
+    ctx.translate(cx, cy); ctx.rotate(-0.05 + wob); ctx.scale(s, s);
+    ctx.lineJoin = "round"; ctx.lineWidth = H * 0.007; ctx.strokeStyle = "#000"; ctx.fillStyle = "#fff";
+    ctx.beginPath(); ctx.moveTo(-h * 0.22, h * 0.3); ctx.lineTo(tx, ty); ctx.lineTo(h * 0.22, h * 0.3); ctx.closePath(); ctx.fill(); ctx.stroke();
+    rr(ctx, -w / 2, -h / 2, w, h, h * 0.45); ctx.fill(); ctx.stroke();
+    ctx.beginPath(); ctx.moveTo(-h * 0.2, h * 0.3); ctx.lineTo(tx * 0.25, ty * 0.25 + h * 0.1); ctx.lineTo(h * 0.2, h * 0.3); ctx.closePath(); ctx.fill();
+    ctx.fillStyle = "#0b0b0b"; ctx.textAlign = "center"; ctx.textBaseline = "middle"; ctx.fillText(t, 0, h * 0.04);
+    ctx.restore();
+  }
+  // once per shot: pick the line in enter (s.line), say it out loud the first frame it shows
+  function inTalk(ctx, s, head, k, at, H, W, side) {
+    if (!s.line) s.line = inLine();
+    if (k >= at && !s.said) { s.said = true; inVoice(s.line); }
+    inSay(ctx, head[0], head[1], s.line, k - at, H, W, side);
+  }
   // the runner: plays a list of shots, cuts land on the beat, titles in the DOM
   function inRun(spec) {
     const ov = $("#intro"), cv = $("#inCv"), ctx = cv.getContext("2d"), dpr = Math.min(2, devicePixelRatio || 1);
@@ -4351,8 +4408,9 @@ body.tv .strip .chart { height: 96px; }
       if (landed && k - land < 0.05) for (let i = 0; i < 50; i++) s.dust.push({ x: W * 0.67 + (Math.random() - 0.5) * 60, y: ground, vx: (Math.random() - 0.5) * 14, vy: -Math.random() * 4, r: 6 + Math.random() * 14, l: 0.8 });
       for (const d of s.dust) { d.x += d.vx; d.y += d.vy; d.vx *= 0.95; d.r *= 1.02; d.l *= 0.96; ctx.fillStyle = `rgba(200,170,190,${d.l * 0.4})`; ctx.beginPath(); ctx.arc(d.x, d.y, d.r, 0, TAU); ctx.fill(); }
       if (landed) { ctx.strokeStyle = "rgba(255,200,150,.6)"; ctx.lineWidth = 3; for (let i = 0; i < 7; i++) { const a = Math.PI + (i / 6) * Math.PI; ctx.beginPath(); ctx.moveTo(W * 0.67, ground); ctx.lineTo(W * 0.67 + Math.cos(a) * H * 0.12, ground + 6 + Math.abs(Math.sin(a)) * 10); ctx.stroke(); } }
-      inHero(ctx, landed ? W * 0.67 : x, landed ? ground : y, H * 0.62, landed ? "fist" : "fist", t, { cape: true, glow: "rgba(255,140,80,.5)" });
+      const hr = inHero(ctx, landed ? W * 0.67 : x, landed ? ground : y, H * 0.62, landed ? "fist" : "fist", t, { cape: true, glow: "rgba(255,140,80,.5)" });
       ctx.restore();
+      if (landed) inTalk(ctx, s, hr.head, k - land, 1.1, H, W);
       if (landed && !s.titled) { s.titled = true; inTitle("Hero hit", "W", b.pick, `${usd(b, n)} · ${fU(n, true)}`, "hero"); }
     } }];
     return inRun({ len: L, cls: "herov", shots, sounds: [["../intro/hero", 0.95, 0], ["whoosh", 0.8, land - 0.45], ["slam", 0.9, land]] });
@@ -4588,6 +4646,7 @@ body.tv .strip .chart { height: 96px; }
         inSpot(ctx, x, 0, fl, H * 0.28, 1);
         inCash(ctx, W, H, s.rain, t, 0.3);
         ctx.save(); ctx.translate(x, 0); ctx.scale(-1, 1); const r = goldie(ctx, 0, fl, H * 0.6, "gun", t, { shades: true, glow: "rgba(255,210,90,.6)" }); ctx.restore();
+        inTalk(ctx, s, [x, r.head[1]], k, 1, H, W);
         const mx = x - r.muzzle[0], my = r.muzzle[1];
         for (let i = 0; i < 2; i++) inSpray(s.P, mx, my, -Math.PI - GUN_ANG, 0.6, inRnd(12, 24) * sc, sc);
         inParts(ctx, s.P, t, 0.3 * sc, W, H);
@@ -4663,8 +4722,9 @@ body.tv .strip .chart { height: 96px; }
         const sc = H / 900, g = ctx.createRadialGradient(W * 0.7, H * 0.5, 0, W * 0.7, H * 0.5, W * 0.8); g.addColorStop(0, "#6b4a08"); g.addColorStop(1, "#0b0702"); ctx.fillStyle = g; ctx.fillRect(0, 0, W, H);
         inRays(ctx, W * 0.72, H * 0.5, Math.max(W, H), t, "rgba(255,210,90,.12)");
         for (let i = 0; i < 3; i++) s.P.push({ x: inRnd(0, W), y: -30, vx: inRnd(-2, 2) * sc, vy: inRnd(2, 8) * sc, r: 0, vr: 0, f: Math.random() * 6, s: sc * inRnd(0.9, 1.6), coin: true });
-        goldie(ctx, W * 0.72, H * 0.93, H * 0.66, "dance", t, { shades: true, glow: "rgba(255,210,90,.8)" });
+        const r = goldie(ctx, W * 0.72, H * 0.93, H * 0.66, "dance", t, { shades: true, glow: "rgba(255,210,90,.8)" });
         inParts(ctx, s.P, t, 0.4 * sc, W, H);
+        inTalk(ctx, s, r.head, k, 1, H, W);
       } },
     ];
     const snd = [["../intro/slots", 0.95, 0], ["whoosh", 0.5, 0.1], ["slam", 0.5, stops[0]], ["slam", 0.5, stops[1]], ["slam", 0.9, jp], ["shatter", 0.5, jp]];
@@ -4719,8 +4779,9 @@ body.tv .strip .chart { height: 96px; }
       } },
       { at: c3, d: L - c3, bars: false, enter: (s) => { s.P = []; inSlam("Cash dance", b, n, "gold side"); }, draw: (ctx, W, H, k, t, s) => {
         const fl = H * 0.68; inClub(ctx, W, H, t, [320, 45, 190], fl, 0.9); inFloor(ctx, W, H, fl, beat(k + c3)); inDisco(ctx, W * 0.5, H * 0.13, H * 0.065, t);
-        goldie(ctx, W * 0.72, H * 0.93, H * 0.62, "dance", t, { shades: true, glow: "rgba(255,210,90,.8)" });
+        const r = goldie(ctx, W * 0.72, H * 0.93, H * 0.62, "dance", t, { shades: true, glow: "rgba(255,210,90,.8)" });
         inConfetti(ctx, s.P, W, H, 0.7, H / 900, t);
+        inTalk(ctx, s, r.head, k, 1, H, W);
       } },
     ];
     return inRun({ len: L, cls: "dancev", shots, sounds: [["../intro/dance", 0.95, 0], ["slam", 0.7, c3]] });
@@ -4774,7 +4835,7 @@ body.tv .strip .chart { height: 96px; }
       inParts(ctx, s.P, t, 0.45 * sc, W, H);
       inFlash(ctx, W, H, k - hit, 0.14);
       if (k >= hit + 0.25 && !s.titled) { s.titled = true; inSlam("Paid", b, n, "lock", ""); }
-      if (k > hit + 0.5) { const p = inE((k - hit - 0.5) / 0.5); goldie(ctx, W * 0.87, H * (1.32 - p * 0.36), H * 0.62, "wave", t, { shades: true, glow: "rgba(255,210,90,.5)" }); }
+      if (k > hit + 0.5) { const p = inE((k - hit - 0.5) / 0.5), r = goldie(ctx, W * 0.87, H * (1.32 - p * 0.36), H * 0.62, "wave", t, { shades: true, glow: "rgba(255,210,90,.5)" }); inTalk(ctx, s, r.head, k, hit + 1.3, H, W, "l"); }
     } }];
     return inRun({ len: L, cls: "stampv", shots, sounds: [["../intro/stamp", 0.95, 0], ["whoosh", 0.5, 1.2], ["slam", 1, hit], ["bolt", 0.5, hit]] });
   }
@@ -4820,11 +4881,12 @@ body.tv .strip .chart { height: 96px; }
         if (slapping) { const bi = Math.floor((k + c2 - F) / B); if (s.last !== bi) { s.last = bi; s.pw.push([k, bi % 2 ? -1 : 1]); } for (const [k0, sd] of s.pw) inPow(ctx, r.butt[0] + sd * H * 0.32, r.butt[1] - H * 0.08, "SLAP!", k - k0, H * 0.07, sd > 0 ? "#ff6a3d" : "#ffd23a", sd * 0.15); }
         inFlash(ctx, W, H, k - 0.35, 0.1, 0.6);
       } },
-      { at: c3, d: L - c3, bars: false, enter: () => inTitle("Dear sportsbook", usd(b, n), "Kiss my gold", `${b.pick} · ${fOdds(Number(b.odds))}`, "gold side"), draw: (ctx, W, H, k, t) => {
+      { at: c3, d: L - c3, bars: false, enter: () => inTitle("Dear sportsbook", usd(b, n), "Kiss my gold", `${b.pick} · ${fOdds(Number(b.odds))}`, "gold side"), draw: (ctx, W, H, k, t, s) => {
         const fl = H * 0.86, ph = sl(k + c3); inBook(ctx, W, H, t, fl);
         const g = ctx.createLinearGradient(0, 0, W * 0.6, 0); g.addColorStop(0, "rgba(0,0,0,.7)"); g.addColorStop(1, "rgba(0,0,0,0)"); ctx.fillStyle = g; ctx.fillRect(0, 0, W, H);
         const r = goldieBack(ctx, W * 0.74, fl + H * 0.04, H * 0.66, t, { look: 1, mood: "wink", down: 1, arms: "slap", slap: ph, jig: ph * 2, glow: "rgba(255,210,90,.5)" });
         inStar(ctx, r.butt[0] - H * 0.05, r.butt[1] - H * 0.04, H * 0.12 * (0.6 + 0.4 * Math.sin(t * 6)), 0.9);
+        if (!s.line) s.line = "Eat a bag of dicks"; inTalk(ctx, s, r.head, k, 0.9, H, W);
       } },
     ];
     return inRun({ len: L, cls: "moonv", shots, sounds: [["../intro/moon", 0.95, 0], ["whoosh", 0.6, c2 - 0.1], ["bolt", 0.5, c2 + 0.35], ["slam", 0.7, c3]] });
@@ -4852,8 +4914,9 @@ body.tv .strip .chart { height: 96px; }
       { at: c2, d: L - c2, bars: false, enter: (s) => { s.rain = []; inSlam("Shake it", b, n, "gold side"); }, draw: (ctx, W, H, k, t, s) => {
         const fl = H * 0.88, x = W * 0.73, p = ph(k + c2); inClub(ctx, W, H, t, HUES, fl, 1); inSpot(ctx, x, 0, fl, H * 0.26, 0.9);
         const top = inStack(ctx, x, fl, H * 0.36);
-        goldieBack(ctx, x, top, H * 0.46, t, { squat: 1, arms: "knees", jig: p * 2, look: 1, mood: "hype", glow: "rgba(255,210,90,.6)" });
+        const r = goldieBack(ctx, x, top, H * 0.46, t, { squat: 1, arms: "knees", jig: p * 2, look: 1, mood: "hype", glow: "rgba(255,210,90,.6)" });
         inCash(ctx, W, H, s.rain, t, 0.45);
+        inTalk(ctx, s, r.head, k, 1, H, W);
       } },
     ];
     return inRun({ len: L, cls: "twerkv", shots, sounds: [["../intro/twerk", 0.95, 0], ["slam", 0.6, c1], ["slam", 0.8, c2]] });
@@ -4930,7 +4993,8 @@ body.tv .strip .chart { height: 96px; }
         inCity(ctx, W, H, "#1b0f1e", sc);
         const cx = W * 0.72 + Math.sin(t * 0.8) * 20 * sc, cy = H * 0.12 + k * 25 * sc, hh = inCanopy(ctx, cx, cy, H * 0.62, 1, t) || 0, gy = H * 0.84 + k * 25 * sc, u = H * 0.36;
         ctx.strokeStyle = "rgba(40,30,20,.6)"; ctx.lineWidth = 1.5 * sc; for (const fx of [-0.45, -0.25, 0.25, 0.45]) { ctx.beginPath(); ctx.moveTo(cx + fx * H * 0.62, cy + hh * 0.25); ctx.lineTo(cx + Math.sign(fx) * u * 0.15, gy - u * 0.95); ctx.stroke(); }
-        goldie(ctx, cx, gy, u, "up", t, { shades: true, glow: "rgba(255,200,120,.6)" });
+        const r = goldie(ctx, cx, gy, u, "up", t, { shades: true, glow: "rgba(255,200,120,.6)" });
+        inTalk(ctx, s, r.head, k, 1, H, W, "l");
         if (Math.random() < 0.3) s.P.push({ x: inRnd(0, W), y: -30, vx: inRnd(-1, 1) * sc, vy: inRnd(1, 3) * sc, r: Math.random() * 6, vr: inRnd(-0.1, 0.1), f: Math.random() * 6, s: sc, coin: false });
         inParts(ctx, s.P, t, 0.05 * sc, W, H);
       } },
@@ -4991,6 +5055,7 @@ body.tv .strip .chart { height: 96px; }
         const by = k < 0.25 ? r.hand[1] + (gy - r.hand[1]) * (k / 0.25) * (k / 0.25) : gy - Math.abs(Math.sin((k - 0.25) * 6)) * Math.exp(-(k - 0.25) * 2.5) * H * 0.3;
         inFootball(ctx, x + W * 0.1 * Math.min(1, k), by - H * 0.02, H * 0.04, k * 9);
         inPow(ctx, x - W * 0.12, gy - H * 0.05, "SPIKE", k - 0.25, H * 0.06, "#ffd23a");
+        inTalk(ctx, s, r.head, k, 1.1, H, W);
       } },
     ];
     return inRun({ len: L, cls: "tdv", shots, sounds: [["../intro/td", 0.95, 0], ["whoosh", 0.6, 0.2], ["slam", 0.8, catchAt], ["whoosh", 0.6, c2], ["slam", 0.9, c3]] });
@@ -5039,6 +5104,7 @@ body.tv .strip .chart { height: 96px; }
         const top = H * 0.8; ctx.fillStyle = "#170c10"; ctx.beginPath(); ctx.moveTo(W * 0.35, H); ctx.quadraticCurveTo(W * 0.55, top - H * 0.02, W * 0.72, top); ctx.quadraticCurveTo(W * 0.9, top + H * 0.02, W * 1.05, H); ctx.fill();
         const u = H * 0.5, r = goldie(ctx, W * 0.72, top + 4 * sc, u, "fist", t, { helmet: "army", pole: true, glow: "rgba(255,200,120,.8)" });
         inFlag(ctx, W * 0.72 + u * 0.23, top - u * 1.55, u * 0.55, u * 0.34, t);
+        inTalk(ctx, s, r.head, k, 1, H, W, "l");
         for (let i = 0; i < 5; i++) { const x = ((i * W * 0.3 + t * 30) % (W * 1.4)) - W * 0.2, y = H * (0.84 + i * 0.03), sm = ctx.createRadialGradient(x, y, 0, x, y, 160 * sc); sm.addColorStop(0, "rgba(70,40,40,.3)"); sm.addColorStop(1, "rgba(70,40,40,0)"); ctx.fillStyle = sm; ctx.fillRect(x - 160 * sc, y - 160 * sc, 320 * sc, 320 * sc); }
       } },
     ];
