@@ -770,7 +770,7 @@ body.tv .chart { height: 240px; }
     <div class="field">
       <span class="lbl">Reaction clips</span>
       <label class="togrow"><input type="checkbox" id="clipsOn"> Pop clips up on this screen</label>
-      <span class="hint">Only the good stuff, and only for your side. Your team's touchdowns, field goals, turnovers, red-zone trips, home runs and goals get a clip, with your team's own clips first. While you're winning, hype rap plays every 2½ minutes. When it's close, hype plays about every 6 minutes. When you're down but within two scores, comeback clips play. When you're getting blown out, it stays quiet. Overs and unders are judged on pace. Tap the screen to close a clip. Turn this off on your phone and leave it on for the monitor.</span>
+      <span class="hint">Only the good stuff, and only for your side. Your team's touchdowns, field goals, turnovers, red-zone trips, home runs and goals get a clip, with your team's own clips first. While you're winning, your winning clips play every 2½ minutes. When it's close, hype plays about every 6 minutes. When you're down but within two scores, comeback clips play. When you're getting blown out, it stays quiet. Overs and unders are judged on pace. Tap the screen to close a clip. Turn this off on your phone and leave it on for the monitor.</span>
       <label class="togrow delayrow">TV delay <input type="range" id="tvDelay" min="0" max="120" step="5"> <b id="tvDelayVal"></b></label>
       <span class="hint">ESPN's scores run ahead of your TV. The board holds scores, clips and win/loss animations back by this much so nothing spoils a play. If clips still beat the TV, turn it up. If they come late, turn it down. Each screen keeps its own setting.</span>
       <div class="cliplib" id="clipLib"></div>
@@ -2373,7 +2373,7 @@ body.tv .chart { height: 240px; }
     clip("cfb/cfb02", "Saban's effort barometer", "hype up", 14.6, ALA),
     clip("cfb/cfb06", "Nick Saban is the Hulk", "hype up", 30, ALA),
     clip("cfb/cfb04", "Bama vs. Georgia", "hype up", 11.5, ALA_VS_UGA),
-    clip("clips/g06", "Pregame huddle speeches", "hype up", 30, UGA_ALA),
+    clip("clips/g06", "Pregame huddle speeches", "hype", 30, UGA_ALA),
     clip("clips/l01", "It's not your fault", "down", 30.85),
     clip("clips/l02", "Baseball heartbreak", "down", 28.35),
     clip("clips/l03", "Meltdown", "down", 11.25),
@@ -2384,22 +2384,30 @@ body.tv .chart { height: 240px; }
     clip("cfb/cfb05", "I don't lose", "down comeback", 28),
     clip("cfb/cfb07", "Brick by brick", "down comeback", 25.8),
     clip("cfb/cfb14", "You owe them something", "down hype comeback", 33.4),
-    clip("clips/w02", "Car ride laughs", "up", 22.45),
-    clip("clips/w03", "Tiger: Pure.", "up", 30),
-    clip("clips/w04", "Migos carpool", "up vibe rap", 30),
-    clip("clips/w05", "Melo's Knicks intro", "up", 30),
-    clip("clips/w06", "KD: kiss it", "up rap", 26.35),
-    clip("clips/w07", "Locker room karaoke", "up vibe", 27.95),
-    clip("cfb/cfb08", "Sark had me rollin", "up", 5.7),
-    clip("clips/w09", "Bryce Underwood", "up", 17.85),
-    clip("cfb/cfb09", "You light my fire", "up vibe", 27.9),
-    clip("cfb/cfb10", "Locker room singalong", "up vibe", 26.9),
-    clip("cfb/cfb11", "Nah nah honey I'm good", "up vibe", 29.9),
-    clip("cfb/cfb12", "Backyard singalong", "up vibe", 25.9),
-    clip("clips/w14", "Drake Maye singing", "up", 17.7),
-    clip("clips/w15", "July 4, 1776", "up vibe rap", 15.05),
-    clip("clips/w16", "Chuck E. Cheese party", "up vibe rap", 29.85),
-    clip("cfb/cfb15", "After the touchdown", "up", 15, CFB),
+    clip("clips/w02", "Car ride laughs", "up win", 22.45),
+    clip("clips/w03", "Tiger: Pure.", "up win", 30),
+    clip("clips/w04", "Migos carpool", "up win", 30),
+    clip("clips/w05", "Melo's Knicks intro", "up win", 30),
+    clip("clips/w06", "KD: kiss it", "up win", 26.35),
+    clip("clips/w07", "Locker room karaoke", "up win", 27.95),
+    clip("cfb/cfb08", "Sark had me rollin", "extra", 5.7),
+    clip("clips/w09", "Bryce Underwood", "extra", 17.85),
+    clip("cfb/cfb09", "You light my fire", "vibe", 27.9),
+    clip("cfb/cfb10", "Locker room singalong", "vibe", 26.9),
+    clip("cfb/cfb11", "Nah nah honey I'm good", "vibe", 29.9),
+    clip("cfb/cfb12", "Backyard singalong", "vibe", 25.9),
+    clip("clips/w14", "Drake Maye singing", "extra", 17.7),
+    clip("clips/w15", "July 4, 1776", "up win", 15.05),
+    clip("clips/w16", "Chuck E. Cheese party", "up win", 29.85),
+    clip("win/win09", "Ant Edwards takeover", "up win", 30),
+    clip("win/win10", "Paging Dr.", "up win", 29.75),
+    clip("win/win11", "God disguised as MJ", "up win", 36.5),
+    clip("win/win12", "Meet me in the lobby", "up win", 25.95),
+    clip("win/win13", "Tyson: In the Air Tonight", "up win", 31.75),
+    clip("win/win14", "How he make his money", "up win", 17.05),
+    clip("win/win15", "Money", "up win", 10.25),
+    clip("win/win16", "Tastes like promotion", "up win", 18.15),
+    clip("cfb/cfb15", "After the touchdown", "extra", 15, CFB),
     clip("mlb/mlb01", "Superior firepower", "up hype vibe", 23.15, MLB),
     clip("mlb/mlb02", "Back to me", "up hype vibe", 25.45, MLB),
     clip("mlb/mlb03", "105 up and in", "up hype vibe", 16.75, MLB),
@@ -2506,7 +2514,7 @@ body.tv .chart { height: 240px; }
   }
   const fits = (c, b) => !c.fan || c.fan === myTeam(b);
   // your team's own clips first, then the matchup's, then the general folders
-  const rapFor = (b) => { const g = gameFor(b), sp = (g || {}).sport || sportOf(b); return CLIPS.filter((c) => c.mood.split(" ").includes("rap") && fits(c, b) && (!c.sport || c.sport === sp) && (!c.teams || isMatchup(c, g))); };
+  const rapFor = (b) => { const g = gameFor(b), sp = (g || {}).sport || sportOf(b); return CLIPS.filter((c) => (c.mood.split(" ").includes("win") || c.mood.split(" ").includes("rap")) && fits(c, b) && (!c.sport || c.sport === sp) && (!c.teams || isMatchup(c, g))); };
   function poolFor(b, k) {
     const me = myTeam(b);
     if (k === "comeback") {
@@ -2519,8 +2527,8 @@ body.tv .chart { height: 240px; }
     if (k === "rap") { const r = rapFor(b); if (r.length && Math.random() < 0.75) return r; k = "good"; }
     if (k === "good") { const r = rapFor(b); if (r.length && Math.random() < 0.4) return r; }
     const fan = me && k !== "bad" ? CLIPS.filter((c) => c.fan === me && (!c.teams || isMatchup(c, gameFor(b)))) : [];
-    const match = k !== "bad" ? gamePool(b) : [];
-    const base = k === "good" ? [PIPS.good, ...libFor(b, ["up"])] : k === "bad" ? ["lockin", ...libFor(b, ["down"])] : libFor(b, ["hype", "vibe"]);
+    const match = k === "bad" ? [] : gamePool(b).filter((c) => k !== "good" || c.mood.split(" ").includes("up"));
+    const base = k === "good" ? libFor(b, ["up"]) : k === "bad" ? ["lockin", ...libFor(b, ["down"])] : libFor(b, ["hype", "vibe"]);
     if (fan.length && Math.random() < 0.75) return fan;
     if (match.length && Math.random() < 0.6) return match;
     return base.length ? base : fan.length ? fan : match;
@@ -2723,9 +2731,9 @@ body.tv .chart { height: 240px; }
   }
   setInterval(autoReact, 60e3); // pop-ups keep coming even if the scores haven't changed
   // Settings: the clip library, with a Play button on each
-  const LIB_GROUPS = [["Hype rap · on repeat while you're winning", (c) => c.mood.split(" ").includes("rap")], ["Comeback · when you're down but within two scores", (c) => c.mood.split(" ").includes("comeback")], ["Georgia · only on your Georgia bets", (c) => c.fan === "UGA"], ["Alabama · only on your Bama bets", (c) => c.fan === "ALA"], ["Georgia–Bama game", (c) => c.teams && !c.fan],
+  const LIB_GROUPS = [["Winning · on repeat while you're winning", (c) => c.mood.split(" ").includes("win")], ["Comeback · when you're down but within two scores", (c) => c.mood.split(" ").includes("comeback")], ["Georgia · only on your Georgia bets", (c) => c.fan === "UGA"], ["Alabama · only on your Bama bets", (c) => c.fan === "ALA"], ["Georgia–Bama game", (c) => c.teams && !c.fan],
     ["College football only", (c) => c.sport === "CFB" && !c.teams && !c.fan], ["MLB only", (c) => c.sport === "MLB"],
-    ["Winning bet · every sport", (c) => !c.sport && c.mood.includes("up")], ["Losing bet · every sport", (c) => !c.sport && c.mood.includes("down")]];
+    ["Losing bet · every sport", (c) => !c.sport && c.mood.includes("down")], ["Not in the rotation", (c) => c.mood === "extra" || (c.mood === "vibe" && !c.sport)]];
   $("#clipLib").innerHTML = LIB_GROUPS.map(([name, f]) => `<h4>${esc(name)}</h4>` + CLIPS.map((c, i) => (f(c) ? `<div class="sndrow"><label>${esc(c.label)}${c.sport && !c.teams && !c.fan ? `<span class="mood">${c.mood.includes("down") ? "Losing" : "Winning"}</span>` : ""}</label><button type="button" class="btn sm" data-i="${i}">Play</button></div>` : "")).join("")).join("");
   $("#clipLib").addEventListener("click", (e) => {
     const btn = e.target.closest("button[data-i]"); if (!btn) return;
