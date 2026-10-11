@@ -1451,7 +1451,7 @@ body.tv.idle, body.tv.idle * { cursor: none !important; }
         <label><input type="radio" name="slate" value="feature"><span>4 PM</span></label>
         <label><input type="radio" name="slate" value="prime"><span>Prime time</span></label>
       </div>
-      <span class="hint">Auto goes by how many games are on. 1 PM mode (5+ games): touchdown and turnover alerts on your games, DJ Goldie music now and then, no other clips. 4 PM mode (2 to 4 games) and prime time (one game): the full show. Each screen keeps its own setting.</span>
+      <span class="hint">Auto goes by how many games are on. 1 PM mode (5+ games): touchdown and turnover alerts on your games, and every touchdown for your side gets a music edit after its alert (a Goldie edit, a hype song or DJ Goldie); in between it's DJ Goldie and music every couple of minutes, no other clips. 4 PM mode (2 to 4 games) and prime time (one game): the full show. Each screen keeps its own setting.</span>
     </div>
     <div class="field">
       <span class="lbl">Your name on the board</span>
@@ -2516,7 +2516,7 @@ body.tv.idle, body.tv.idle * { cursor: none !important; }
   // ---------- sheets ----------
   function openSheet(id) { $(id).hidden = false; }
   // keep every open screen current: when a new version is up, reload it (never mid-form or mid-animation)
-  const BUILD = "20261011175325";
+  const BUILD = "20261011175937";
   function checkBuild() {
     if (BUILD === "dev") return;
     fetch("version.json?t=" + Date.now(), { cache: "no-store" }).then((r) => (r.ok ? r.json() : null)).then((j) => {
@@ -3881,6 +3881,7 @@ body.tv.idle, body.tv.idle * { cursor: none !important; }
       $("#jbLbl").textContent = P.label;
       // songs get a now-playing card (song and artist), slid in a beat after the clip starts
       const np = $("#jbNp"); np.classList.remove("on"); clearTimeout(npT);
+      if (P.song) lastSong = P.song;
       if (P.song) { $("#npSong").textContent = P.song; $("#npArtist").textContent = P.artist || ""; np.hidden = false; npT = setTimeout(() => np.classList.add("on"), 700); } else np.hidden = true;
       $("#jbTag").textContent = why || MOOD_TAG[mood] || "Live";
       jbBug(b);
@@ -4292,8 +4293,20 @@ body.tv.idle, body.tv.idle * { cursor: none !important; }
   // 4 PM (2 to 4 games) and prime time (one game) get the full show. Auto goes by how many games are on; each screen can pin one
   const MODE_LABEL = { busy: "1 PM mode", feature: "4 PM mode", prime: "Prime time" };
   const BUSY_EVS = new Set(["td", "turnover", "safety", "goal", "hr"]);
-  const DJ_EVERY = 6 * 60e3;   // busy slate: a DJ Goldie break when nothing's happened for 6 minutes
+  const DJ_EVERY = 150e3;      // busy slate: music after 2½ minutes of quiet (DJ Goldie mostly, other songs mixed in)
   const BUSY_GAP = 15e3;       // busy slate: alerts can come 15 seconds apart (lots of games)
+  // songs that fit a bet's sport (no anthems), and the 1 PM touchdown edit: a Goldie edit, a hype song or DJ Goldie, in turn
+  const musicFor = (b) => { const sp = (gameFor(b) || {}).sport || sportOf(b); return CLIPS.filter((c) => (c.song || c.music || c.dj) && !/anthem/i.test(c.artist || "") && (!c.sport || c.sport === sp) && fits(c, b)); };
+  let busyPops = 0, tdPops = 0, lastSong = "";
+  const newSong = (l) => { const f = l.filter((c) => !c.song || c.song !== lastSong); return f.length ? f : l; };
+  function tdHype(b, why) {
+    if (!clipsOn()) return;
+    const edits = CLIPS.filter((c) => c.base.startsWith("sounds/aura/") && fits(c, b));
+    const songs = musicFor(b).filter((c) => !c.dj && /win|hype/.test(c.mood) && !c.base.startsWith("sounds/aura/"));
+    const k = tdPops++ % 3, pool = k === 0 ? edits : k === 1 && songs.length ? songs : CLIPS.filter((c) => c.dj);
+    const P = pickClip(newSong(pool)) || pickClip(newSong(edits));
+    if (P) react(b, "good", P, why);
+  }
   function slatePin() { try { return localStorage.getItem("sb-slate") || "auto"; } catch (e) { return "auto"; } }
   function slateGames() {
     const lg = focusLeague(), now = Date.now(), seen = new Set(); let n = 0;
@@ -4369,7 +4382,7 @@ body.tv.idle, body.tv.idle * { cursor: none !important; }
       const big = top.kind === "first" || (top.kind === "ev" && top.e.big) || top.kind === "good" || top.kind === "bad";
       const gap = busy ? BUSY_GAP : big ? BIG_GAP : TRIGGER_GAP;
       // a real play cuts off a filler pop-up that's playing; otherwise wait out the gap
-      const ok = on && (top.kind === "first" || (big && lastKind === "pop" && !fxBusy) || (now - lastAny >= gap && !clipBusy()));
+      const ok = on && (busy ? !cardBusy && !fxBusy && now - lastAny >= gap : top.kind === "first" || (big && lastKind === "pop" && !fxBusy) || (now - lastAny >= gap && !clipBusy()));
       if (!ok) { render(); return; } // too soon: glow only, no clip
       lastAny = now; lastKind = "play";
       if (top.kind === "kick") react(top.b, "mid", null, { MLB: "First pitch", NBA: "Tip-off", CBB: "Tip-off", NHL: "Puck drop" }[(gameFor(top.b) || {}).sport || sportOf(top.b)] || "Kickoff");
@@ -4380,7 +4393,11 @@ body.tv.idle, body.tv.idle * { cursor: none !important; }
         const exactMine = exact.filter((c) => fits(c, top.b));
         const pool = exactMine.length ? exactMine : poolFor(top.b, k === "mid" ? "hype" : k);
         const P = pickClip(pool) || pickClip(libFor(top.b, ["hype", "vibe"]));
-        if (CARD_EVS.has(e.ev) && top.g && busy) { showPlayCard(top.g, e, top.b, () => {}); return; } // the alert only; any music keeps going under it
+        if (CARD_EVS.has(e.ev) && top.g && busy) { // the alert; a touchdown for your side gets a music edit after it, anything else keeps the music going
+          const tdb = top.b, mine = e.ev === "td" && top.h > 0;
+          showPlayCard(top.g, e, tdb, (why) => { if (mine) tdHype(tdb, why); });
+          return;
+        }
         if (CARD_EVS.has(e.ev) && top.g) {
           if (P && P.base) { clipBuf(P.base); const pv = document.createElement("video"); pv.muted = true; pv.preload = "auto"; pv.src = vidSrc(P.base); }
           const pre = preAudio(top.b, P);
@@ -4396,10 +4413,11 @@ body.tv.idle, body.tv.idle * { cursor: none !important; }
       // busy slate: DJ Goldie, now and then, over whichever of your bets is live
       if (now - lastAny < DJ_EVERY) return;
       const mine = [...S.bets.values()].filter((b) => b.status === "open" && isMe(b)), b = mine.find((x) => phase(x) === "live") || mine[0];
-      const P = pickClip(CLIPS.filter((c) => c.dj));
-      if (!b || !P) return;
+      if (!b) return;
+      const other = musicFor(b).filter((c) => !c.dj), P = pickClip(newSong(busyPops++ % 3 === 2 && other.length ? other : CLIPS.filter((c) => c.dj)));
+      if (!P) return;
       lastAny = now; lastKind = "pop";
-      react(b, "mid", P, "DJ Goldie");
+      react(b, "mid", P, P.dj ? "DJ Goldie" : "Music");
       return;
     }
     let live = [];
