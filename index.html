@@ -802,7 +802,7 @@ body.tv .chart { height: 240px; }
     <div class="field">
       <span class="lbl">Win sound</span>
       <div class="sndlist" id="sndList"></div>
-      <span class="hint">Tap Play to hear one, then pick it. Your pick plays on every device you're signed in on. Bets of 1.5u or more get the whale, 3u or more get the nuke. Odds of +180 or longer get the sniper, with bigger versions at +200, +300 and +400.</span>
+      <span class="hint">Tap Play to hear one, then pick it. Your pick plays on every device you're signed in on. Bets of 1.5u or more get the whale, 3u or more get the nuke. Odds of +150 or longer get the sniper, with bigger versions at +200, +300 and +400 (a whale or nuke still wins out).</span>
       <div style="display:flex;gap:8px;flex-wrap:wrap">
         <button type="button" class="btn sm" id="coinTest">Preview Coin Alert</button>
         <button type="button" class="btn sm" id="lossTest">Preview loss sound</button>
@@ -814,7 +814,7 @@ body.tv .chart { height: 240px; }
         <button type="button" class="btn sm" id="nukeWarnTest">Preview nuke warning</button>
         <button type="button" class="btn sm" id="nukeHitTest">Preview nuke hit</button>
         <button type="button" class="btn sm" id="snTestPlace">Preview sniper set up</button>
-        <button type="button" class="btn sm" id="snTest180">Sniper +180</button>
+        <button type="button" class="btn sm" id="snTest180">Sniper +150</button>
         <button type="button" class="btn sm" id="snTest200">Sniper +200</button>
         <button type="button" class="btn sm" id="snTest300">Sniper +300</button>
         <button type="button" class="btn sm" id="snTest400">Sniper +400</button>
@@ -1380,8 +1380,8 @@ body.tv .chart { height: 240px; }
   function celebrate(b) {
     const o = outcome(b), n = netOf(b);
     if (o === "W") {
-      if (isSniper(b)) { sniperHit(b, n); if (isNuke(b)) nukeHit(b.pick, n); else if (isWhale(b)) whaleSplash(b, n); return; } // long shot: the sniper, then the size effect if it's big too
-      if (isNuke(b)) nukeHit(b.pick, n); else if (isWhale(b)) whaleSplash(b, n); else coinAlert(b.pick, n); return;
+      // size beats odds: a nuke or whale plays its own effect even on a long shot
+      if (isNuke(b)) nukeHit(b.pick, n); else if (isWhale(b)) whaleSplash(b, n); else if (isSniper(b)) sniperHit(b, n); else coinAlert(b.pick, n); return;
     }
     if (o === "L") playLoss();
     const word = b.status === "cashout" ? "CASHED" : o === "W" ? "WINNER" : o === "L" ? "LOSS" : "PUSH";
@@ -2926,8 +2926,8 @@ body.tv .chart { height: 240px; }
   document.addEventListener("visibilitychange", loadTicker);
 
   // ---------- Sniper: long shots, +180 and up ----------
-  // the longer the odds, the longer the shot: +180 sniper, +200 long shot, +300 long range + the drive-off, +400 impossible (gold)
-  const SNIPER_ODDS = 180;
+  // the longer the odds, the longer the shot: +150 sniper, +200 long shot, +300 long range + the drive-off, +400 impossible (gold)
+  const SNIPER_ODDS = 150;
   const isSniper = (b) => Number(b.odds) >= SNIPER_ODDS;
   function snTier(odds) {
     const o = Number(odds);
@@ -3451,7 +3451,7 @@ body.tv .chart { height: 240px; }
   }
   function sniperHit(b, n) { fx(() => snRun(b, n, false)); }
   function sniperPlace(b) { fx(() => snRun(b, 0, true)); }
-  for (const [id, odds] of [["snTest180", 185], ["snTest200", 240], ["snTest300", 350], ["snTest400", 450]])
+  for (const [id, odds] of [["snTest180", 165], ["snTest200", 240], ["snTest300", 350], ["snTest400", 450]])
     $("#" + id).addEventListener("click", () => { closeSheets(); sniperHit({ pick: "Kentucky ML", units: 1, odds }, odds / 100); });
   $("#snTestPlace").addEventListener("click", () => { closeSheets(); sniperPlace({ pick: "Kentucky ML", units: 1, odds: 350 }); });
 
