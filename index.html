@@ -556,6 +556,17 @@ body.has-ticker .jumbo { bottom: clamp(40px, 4.6vh, 58px); }
 .jb-bug .bt > span { font: 700 .8em var(--f-mono); color: #5b6474; }
 .jb-bug .bt .st { color: #fff; background: #5b6474; padding: .15em .5em; border-radius: 4px; text-transform: uppercase; letter-spacing: .05em; }
 .jb-bug .bt .st.w { background: #14915f; } .jb-bug .bt .st.l { background: #c8102e; } .jb-bug .bt .st.e { background: #b07a00; }
+.jb-np { position: absolute; right: 2.2%; top: 3.5%; display: flex; align-items: center; gap: .8em; max-width: 46%; padding: .7em 1.1em .7em .7em; border-radius: 14px; background: rgba(8,10,16,.72); border: 1px solid rgba(255,255,255,.14); box-shadow: 0 14px 40px rgba(0,0,0,.55); backdrop-filter: blur(14px); -webkit-backdrop-filter: blur(14px); font-size: clamp(12px, 1.9vh, 22px); transform: translateX(120%); opacity: 0; transition: transform .6s cubic-bezier(.2,.9,.3,1.15), opacity .4s; }
+.jb-np.on { transform: none; opacity: 1; }
+.np-art { flex: none; width: 3.1em; height: 3.1em; border-radius: 9px; display: flex; align-items: flex-end; justify-content: center; gap: .18em; padding: .55em .5em; background: linear-gradient(135deg, #9B8CFF, #ff5fa2 55%, #ffc24b); box-shadow: inset 0 0 0 1px rgba(255,255,255,.25); }
+.np-art i { width: .32em; border-radius: 2px; background: #fff; height: 30%; animation: npEq 1s ease-in-out infinite; }
+.np-art i:nth-child(2) { animation-delay: -.35s; } .np-art i:nth-child(3) { animation-delay: -.7s; } .np-art i:nth-child(4) { animation-delay: -.15s; } .np-art i:nth-child(5) { animation-delay: -.55s; }
+@keyframes npEq { 0%, 100% { height: 22%; } 50% { height: 92%; } }
+.np-txt { display: flex; flex-direction: column; gap: .18em; min-width: 0; }
+.np-txt span { font: 700 .62em/1 var(--f-mono); letter-spacing: .16em; text-transform: uppercase; color: #b9b0ff; white-space: nowrap; }
+@media (max-width: 780px) { .jb-np { left: 3%; right: 3%; top: 2.5%; max-width: none; font-size: 15px; } }
+.np-txt b { font: 800 1.05em/1.15 var(--f-body); color: #fff; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.np-txt em { font: 600 .85em/1.15 var(--f-body); font-style: normal; color: rgba(255,255,255,.7); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
 .jb-prog { height: 6px; border-radius: 3px; background: rgba(255,255,255,.08); overflow: hidden; }
 .jb-prog i { display: block; height: 100%; width: 0; background: rgb(var(--mc)); }
 .jb-side { display: flex; flex-direction: column; gap: 1.1vh; padding: 2vh 1.4vw; background: rgba(10,14,21,.85); border-left: 1px solid var(--line); overflow: hidden; min-height: 0; }
@@ -1160,7 +1171,7 @@ body.tv .strip .chart { height: 96px; }
     <div class="field">
       <span class="lbl">Reaction clips</span>
       <label class="togrow"><input type="checkbox" id="clipsOn"> Pop clips up on this screen</label>
-      <span class="hint">Only the good stuff, and only for your side. Your team's touchdowns, field goals, turnovers, red-zone trips, home runs and goals get a clip, with your team's own clips first. While you're winning, your winning clips play every 2½ minutes. When it's close, a filler or some hype plays every 3 minutes. With only 1 or 2 bets out, there's more dead air, so a clip comes every 2 minutes. When you're down but within two scores, comeback clips play. When you're getting blown out, it stays quiet. Overs and unders are judged on pace, and stay quiet whenever they're off pace. Tap the screen to close a clip. Turn this off on your phone and leave it on for the monitor.</span>
+      <span class="hint">Only the good stuff, and only for your side. Your team's touchdowns, field goals, turnovers, red-zone trips, home runs and goals get a clip, with your team's own clips first. While you're winning, your winning clips play every 2½ minutes. When it's close, a music break or some hype plays every 3 minutes. Music breaks are songs only, with a card showing the song and artist. With only 1 or 2 bets out, there's more dead air, so a clip comes every 2 minutes. When you're down but within two scores, comeback clips play. When you're getting blown out, it stays quiet. Overs and unders are judged on pace, and stay quiet whenever they're off pace. Tap the screen to close a clip. Turn this off on your phone and leave it on for the monitor.</span>
       <div style="display:flex;gap:8px;flex-wrap:wrap"><button type="button" class="btn sm primary" id="trialBtn">Run a trial</button><button type="button" class="btn sm" id="pcTest">Preview a touchdown alert</button></div>
       <span class="hint">The trial replays the latest finished NFL game play by play with a pretend bet on the winner: play alerts and clips when your side scores, quiet when they don't, then the win. Nothing gets saved and it doesn't touch your numbers.</span>
       <label class="togrow delayrow">TV delay <input type="range" id="tvDelay" min="0" max="120" step="5"> <b id="tvDelayVal"></b></label>
@@ -1261,7 +1272,7 @@ body.tv .strip .chart { height: 96px; }
 <div class="jumbo" id="jumbo" hidden title="Tap to close">
   <div class="jb-head"><span class="jb-logo">SWEAT<b>ZONE</b></span><span class="jb-tag" id="jbTag">Live</span><b id="jbLbl"></b><span class="jb-x" aria-hidden="true">×</span></div>
   <div class="jb-main">
-    <div class="jb-screen"><video id="jbBg" muted playsinline preload="none" aria-hidden="true"></video><video id="pipVid" muted playsinline preload="none"></video><div class="jb-bug" id="jbBug" hidden></div></div>
+    <div class="jb-screen"><video id="jbBg" muted playsinline preload="none" aria-hidden="true"></video><video id="pipVid" muted playsinline preload="none"></video><div class="jb-bug" id="jbBug" hidden></div><div class="jb-np" id="jbNp" hidden><div class="np-art" aria-hidden="true"><i></i><i></i><i></i><i></i><i></i></div><div class="np-txt"><span>Now playing</span><b id="npSong"></b><em id="npArtist"></em></div></div></div>
     <div class="jb-prog"><i id="jbProg"></i></div>
   </div>
   <aside class="jb-side"><h3><i class="dot"></i>Active bets</h3><div id="jbBets"></div></aside>
@@ -1920,7 +1931,7 @@ body.tv .strip .chart { height: 96px; }
   // ---------- sheets ----------
   function openSheet(id) { $(id).hidden = false; }
   // keep every open screen current: when a new version is up, reload it (never mid-form or mid-animation)
-  const BUILD = "20261011123958";
+  const BUILD = "20261011143219";
   function checkBuild() {
     if (BUILD === "dev") return;
     fetch("version.json?t=" + Date.now(), { cache: "no-store" }).then((r) => (r.ok ? r.json() : null)).then((j) => {
@@ -3090,19 +3101,19 @@ body.tv .strip .chart { height: 96px; }
   const CFB = { sport: "CFB" }, MLB = { sport: "MLB" }, UGA_ALA = { sport: "CFB", teams: ["UGA", "ALA"] };
   const UGA = { sport: "CFB", fan: "UGA" }, ALA = { sport: "CFB", fan: "ALA" }, UGA_VS_ALA = { sport: "CFB", fan: "UGA", teams: ["UGA", "ALA"] }, ALA_VS_UGA = { sport: "CFB", fan: "ALA", teams: ["UGA", "ALA"] };
   const CLIPS = [
-    clip("uga/uga01", "Between the hedges", "hype up vibe", 13.95, UGA),
-    clip("uga/uga02", "They call him George", "hype up vibe", 30, UGA),
-    clip("uga/uga03", "Dawgs highlight reel", "hype up rap vibe", 25.75, UGA),
-    clip("clips/g08", "How 'bout them Dawgs", "hype up rap vibe", 30.05, UGA),
-    clip("uga/uga04", "Heavyweights in Tuscaloosa", "hype up rap vibe", 30, UGA_VS_ALA),
-    clip("uga/uga05", "Don't think about nothing", "hype up comeback vibe", 16.25, UGA_VS_ALA),
-    clip("cfb/cfb03", "365 days", "hype up vibe", 26.8, UGA_VS_ALA),
-    clip("cfb/cfb13", "McAfee: going crazy tonight", "hype up vibe", 22, UGA_VS_ALA),
-    clip("cfb/cfb01", "Saban: Play Nintendo?", "hype up vibe", 12, ALA),
-    clip("cfb/cfb02", "Saban's effort barometer", "hype up vibe", 14.6, ALA),
-    clip("cfb/cfb06", "Nick Saban is the Hulk", "hype up vibe", 30, ALA),
-    clip("cfb/cfb04", "Bama vs. Georgia", "hype up vibe", 11.5, ALA_VS_UGA),
-    clip("clips/g06", "Pregame huddle speeches", "hype vibe", 30),
+    clip("uga/uga01", "Between the hedges", "hype up", 13.95, UGA),
+    clip("uga/uga02", "They call him George", "hype up", 30, UGA),
+    clip("uga/uga03", "Dawgs highlight reel", "hype up rap", 25.75, UGA),
+    clip("clips/g08", "How 'bout them Dawgs", "hype up rap", 30.05, UGA),
+    clip("uga/uga04", "Heavyweights in Tuscaloosa", "hype up rap", 30, UGA_VS_ALA),
+    clip("uga/uga05", "Don't think about nothing", "hype up comeback", 16.25, UGA_VS_ALA),
+    clip("cfb/cfb03", "365 days", "hype up", 26.8, UGA_VS_ALA),
+    clip("cfb/cfb13", "McAfee: going crazy tonight", "hype up", 22, UGA_VS_ALA),
+    clip("cfb/cfb01", "Saban: Play Nintendo?", "hype up", 12, ALA),
+    clip("cfb/cfb02", "Saban's effort barometer", "hype up", 14.6, ALA),
+    clip("cfb/cfb06", "Nick Saban is the Hulk", "hype up", 30, ALA),
+    clip("cfb/cfb04", "Bama vs. Georgia", "hype up", 11.5, ALA_VS_UGA),
+    clip("clips/g06", "Pregame huddle speeches", "hype", 30),
     clip("clips/l01", "It's not your fault", "down", 30.85),
     clip("clips/l02", "Baseball heartbreak", "down", 28.35),
     clip("clips/l03", "Meltdown", "down", 11.25),
@@ -3114,85 +3125,85 @@ body.tv .strip .chart { height: 96px; }
     clip("cfb/cfb07", "Brick by brick", "down comeback", 25.8),
     clip("cfb/cfb14", "You owe them something", "down hype comeback", 33.4),
     clip("aura/sky", "Goldie: sent it", "up win", 17.0),
-    clip("aura/whip", "Goldie: new whip", "up win", 20.6),
+    clip("aura/whip", "Goldie: new whip", "up win vibe", 20.6, { song: "I'm Dat N****", artist: "Future" }),
     clip("aura/war", "Goldie: went to war", "up win", 19.4),
     clip("aura/strap", "Goldie: strapped", "up win", 17.3),
-    clip("aura/smoke", "Goldie: really high", "up win vibe", 16.9),
+    clip("aura/smoke", "Goldie: really high", "up win", 16.9),
     clip("aura/aura", "Goldie: aura maxed", "up win", 15.6),
-    clip("aura/rain", "Goldie: made it rain", "up win", 18.3),
+    clip("aura/rain", "Goldie: made it rain", "up win vibe", 18.3, { song: "All There", artist: "Jeezy ft. Bankroll Fresh" }),
     clip("aura/take", "Goldie: pulled up", "up win", 20.0),
-    clip("aura/bike", "Goldie: wheelie", "up win", 18.0),
+    clip("aura/bike", "Goldie: wheelie", "up win vibe", 18.0, { song: "All There", artist: "Jeezy ft. Bankroll Fresh" }),
     clip("clips/w02", "Car ride laughs", "up win", 22.45),
     clip("clips/w03", "Tiger: Pure.", "up win", 30),
-    clip("clips/w04", "Migos carpool", "up win", 30),
+    clip("clips/w04", "Migos carpool", "up win vibe", 30, { song: "Walk It Talk It", artist: "Migos ft. Drake" }),
     clip("clips/w05", "Melo's Knicks intro", "up win", 30),
     clip("clips/w06", "KD: kiss it", "up win", 26.35),
-    clip("clips/w07", "Locker room karaoke", "up win", 27.95),
-    clip("cfb/cfb08", "Sark had me rollin", "vibe", 5.7),
-    clip("clips/w09", "Bryce Underwood", "vibe", 17.85),
-    clip("cfb/cfb09", "You light my fire", "vibe", 27.9),
-    clip("cfb/cfb10", "Locker room singalong", "vibe", 26.9),
-    clip("cfb/cfb11", "Nah nah honey I'm good", "vibe", 29.9),
-    clip("cfb/cfb12", "Backyard singalong", "vibe", 25.9),
-    clip("clips/w14", "Drake Maye singing", "vibe", 17.7),
+    clip("clips/w07", "Locker room karaoke", "up win vibe", 27.95, { song: "You Are Not Alone", artist: "Michael Jackson" }),
+    clip("cfb/cfb08", "Sark had me rollin", "up", 5.7),
+    clip("clips/w09", "Bryce Underwood", "vibe", 17.85, { song: "O Canada", artist: "National anthem" }),
+    clip("cfb/cfb09", "You light my fire", "up", 27.9),
+    clip("cfb/cfb10", "Locker room singalong", "vibe", 26.9, { song: "Meet in the Middle", artist: "Diamond Rio" }),
+    clip("cfb/cfb11", "Nah nah honey I'm good", "vibe", 29.9, { song: "Honey, I'm Good.", artist: "Andy Grammer" }),
+    clip("cfb/cfb12", "Backyard singalong", "vibe", 25.9, { song: "Poison", artist: "Bell Biv DeVoe" }),
+    clip("clips/w14", "Drake Maye singing", "vibe", 17.7, { song: "Love in the Dark", artist: "Adele" }),
     clip("clips/w15", "July 4, 1776", "up win", 15.05),
-    clip("clips/w16", "Chuck E. Cheese party", "up win", 29.85),
-    clip("win/win09", "Ant Edwards takeover", "up win", 30),
+    clip("clips/w16", "Chuck E. Cheese party", "up win vibe", 29.85, { song: "Back to Back", artist: "Drake" }),
+    clip("win/win09", "Ant Edwards takeover", "up win vibe", 30, { song: "All There", artist: "Jeezy ft. Bankroll Fresh" }),
     clip("win/win10", "Paging Dr.", "up win", 29.75),
     clip("win/win11", "God disguised as MJ", "up win", 36.5),
     clip("win/win12", "Meet me in the lobby", "up win", 25.95),
-    clip("win/win13", "Tyson: In the Air Tonight", "up win", 31.75),
+    clip("win/win13", "Tyson: In the Air Tonight", "up win vibe", 31.75, { song: "In the Air Tonight", artist: "Phil Collins" }),
     clip("win/win14", "How he make his money", "up win", 17.05),
     clip("win/win15", "Money", "up win", 10.25),
     clip("win/win16", "Tastes like promotion", "up win", 18.15),
-    clip("win/win17", "Future: I'm dat n****", "up win", 30),
+    clip("win/win17", "Future: I'm dat n****", "up win vibe", 30, { song: "I'm Dat N****", artist: "Future" }),
     clip("win/win18", "Travis Scott", "up win", 25.4),
     clip("win/win19", "Crowd singalong", "up win", 24.55),
     clip("win/win20", "Lil Durk", "up win", 15.65),
     clip("win/win21", "Quavo: Hold them bands down", "up win", 26.35),
-    clip("cfb/cfb15", "After the touchdown", "vibe hype up", 15, CFB),
-    clip("mlb/mlb01", "Superior firepower", "up hype vibe", 23.15, MLB),
-    clip("mlb/mlb02", "Back to me", "up hype vibe", 25.45, MLB),
-    clip("mlb/mlb03", "105 up and in", "up hype vibe", 16.75, MLB),
-    clip("mlb/mlb04", "Red October crowd", "up hype vibe", 13.75, MLB),
-    clip("mlb/mlb05", "Three-peat rolls on", "up hype vibe", 30, MLB),
-    clip("mlb/mlb06", "Next opponent: Ohtani", "up hype vibe", 15.25, MLB),
-    clip("mlb/mlb07", "Three-peat, part 2", "up hype vibe", 8.6, MLB),
-    clip("cfb/cfb16", "365 days, part 2", "hype up vibe", 31.2, UGA),
-    clip("cfb/cfb19", "Dawgs going crazy, part 2", "hype up vibe", 14.6, UGA),
+    clip("cfb/cfb15", "After the touchdown", "hype up", 15, CFB),
+    clip("mlb/mlb01", "Superior firepower", "up hype", 23.15, MLB),
+    clip("mlb/mlb02", "Back to me", "up hype", 25.45, MLB),
+    clip("mlb/mlb03", "105 up and in", "up hype", 16.75, MLB),
+    clip("mlb/mlb04", "Red October crowd", "up hype", 13.75, MLB),
+    clip("mlb/mlb05", "Three-peat rolls on", "up hype", 30, MLB),
+    clip("mlb/mlb06", "Next opponent: Ohtani", "up hype", 15.25, MLB),
+    clip("mlb/mlb07", "Three-peat, part 2", "up hype", 8.6, MLB),
+    clip("cfb/cfb16", "365 days, part 2", "hype up", 31.2, UGA),
+    clip("cfb/cfb19", "Dawgs going crazy, part 2", "hype up", 14.6, UGA),
     clip("cfb/cfb17", "I don't lose, part 2", "down comeback", 32),
     clip("cfb/cfb18", "Brick by brick, part 2", "down comeback", 30.2),
     clip("cfb/cfb20", "You owe them something, part 2", "down hype comeback", 12.8),
     clip("clips/l08", "Streamer losses, part 2", "down", 30),
-    clip("clips/g09", "Vikings pregame huddle", "hype vibe", 30.4),
-    clip("win/win22", "Ant Edwards, part 2", "up win", 30.4),
-    clip("win/win23", "Future, part 2", "up win", 30.4),
-    clip("cfb/cfb21", "GameDay: lighting it up", "hype vibe up", 30.5, CFB),
-    clip("cfb/cfb22", "GameDay energy, part 2", "hype vibe up", 31.0, CFB),
-    clip("cfb/cfb23", "Tunnel walkouts", "hype up vibe", 33.5, CFB),
-    clip("cfb/cfb24", "Tunnel walkouts, part 2", "hype up vibe", 33.5, CFB),
-    clip("cfb/cfb25", "Close your eyes", "up hype vibe", 13.0, CFB),
-    clip("cfb/cfb26", "Bama rap edit", "hype up vibe", 26.0, ALA),
-    clip("cfb/cfb27", "Bama rap edit, part 2", "hype up vibe", 26.0, ALA),
-    clip("cfb/cfb28", "Being a winner is a curse", "hype comeback up vibe", 27.0, CFB),
-    clip("cfb/cfb29", "Being a winner, part 2", "hype up vibe", 27.3, CFB),
-    clip("cfb/cfb30", "I know what you are, Empire", "hype up vibe", 16.0, cfbTeam("OU")),
-    clip("cfb/cfb31", "You ain't heard about us?", "up hype vibe", 17.0, CFB),
-    clip("cfb/cfb32", "Not a body within 10 yards", "up hype vibe", 28.0, cfbTeam("FLA")),
-    clip("cfb/cfb33", "Gators, part 2", "up hype vibe", 13.1, cfbTeam("FLA")),
-    clip("cfb/cfb34", "Surrounded by snipers", "up hype vibe", 15.5, CFB),
-    clip("cfb/cfb35", "Memorial Stadium nights", "vibe hype up", 18.0, CFB),
-    clip("cfb/cfb36", "Give me my theme music!", "hype up vibe", 22.2, CFB),
-    clip("cfb/cfb37", "110,000 fans", "hype comeback up vibe", 23.0, CFB),
-    clip("cfb/cfb38", "Paint our masterpiece", "hype up vibe", 18.8, CFB),
-    clip("cfb/cfb39", "Dabo: don't quit", "hype comeback up vibe", 31.0, cfbTeam("CLEM")),
-    clip("cfb/cfb40", "Dabo: don't quit, part 2", "hype comeback up vibe", 30.5, cfbTeam("CLEM")),
-    clip("cfb/cfb41", "Ole Miss takeover", "up hype vibe", 30.0, cfbTeam("MISS")),
-    clip("cfb/cfb42", "Ole Miss takeover, part 2", "up hype vibe", 30.5, cfbTeam("MISS")),
-    clip("cfb/cfb43", "Under the lights", "hype vibe up", 26.0, CFB),
-    clip("cfb/cfb44", "We Bama, that's what we do", "hype up vibe", 29.6, ALA),
-    clip("cfb/cfb45", "Dread it, run from it", "hype up vibe", 31.4, ALA),
-    clip("cfb/cfb46", "We Bama, part 3", "hype up vibe", 31.0, ALA),
+    clip("clips/g09", "Vikings pregame huddle", "hype", 30.4),
+    clip("win/win22", "Ant Edwards, part 2", "up win vibe", 30.4, { song: "All There", artist: "Jeezy ft. Bankroll Fresh" }),
+    clip("win/win23", "Future, part 2", "up win vibe", 30.4, { song: "I'm Dat N****", artist: "Future" }),
+    clip("cfb/cfb21", "GameDay: lighting it up", "hype up", 30.5, CFB),
+    clip("cfb/cfb22", "GameDay energy, part 2", "hype up", 31.0, CFB),
+    clip("cfb/cfb23", "Tunnel walkouts", "hype up", 33.5, CFB),
+    clip("cfb/cfb24", "Tunnel walkouts, part 2", "hype up vibe", 33.5, { ...CFB, song: "Seven Nation Army", artist: "The White Stripes" }),
+    clip("cfb/cfb25", "Close your eyes", "up hype", 13.0, CFB),
+    clip("cfb/cfb26", "Bama rap edit", "hype up", 26.0, ALA),
+    clip("cfb/cfb27", "Bama rap edit, part 2", "hype up", 26.0, ALA),
+    clip("cfb/cfb28", "Being a winner is a curse", "hype comeback up", 27.0, CFB),
+    clip("cfb/cfb29", "Being a winner, part 2", "hype up", 27.3, CFB),
+    clip("cfb/cfb30", "I know what you are, Empire", "hype up", 16.0, cfbTeam("OU")),
+    clip("cfb/cfb31", "You ain't heard about us?", "up hype", 17.0, CFB),
+    clip("cfb/cfb32", "Not a body within 10 yards", "up hype", 28.0, cfbTeam("FLA")),
+    clip("cfb/cfb33", "Gators, part 2", "up hype", 13.1, cfbTeam("FLA")),
+    clip("cfb/cfb34", "Surrounded by snipers", "up hype", 15.5, CFB),
+    clip("cfb/cfb35", "Memorial Stadium nights", "hype up", 18.0, CFB),
+    clip("cfb/cfb36", "Give me my theme music!", "hype up", 22.2, CFB),
+    clip("cfb/cfb37", "110,000 fans", "hype comeback up", 23.0, CFB),
+    clip("cfb/cfb38", "Paint our masterpiece", "hype up", 18.8, CFB),
+    clip("cfb/cfb39", "Dabo: don't quit", "hype comeback up", 31.0, cfbTeam("CLEM")),
+    clip("cfb/cfb40", "Dabo: don't quit, part 2", "hype comeback up", 30.5, cfbTeam("CLEM")),
+    clip("cfb/cfb41", "Ole Miss takeover", "up hype", 30.0, cfbTeam("MISS")),
+    clip("cfb/cfb42", "Ole Miss takeover, part 2", "up hype", 30.5, cfbTeam("MISS")),
+    clip("cfb/cfb43", "Under the lights", "hype up", 26.0, CFB),
+    clip("cfb/cfb44", "We Bama, that's what we do", "hype up", 29.6, ALA),
+    clip("cfb/cfb45", "Dread it, run from it", "hype up", 31.4, ALA),
+    clip("cfb/cfb46", "We Bama, part 3", "hype up", 31.0, ALA),
   ];
   // library clips are big once decoded, so only the last couple stay in memory
   const clipBufs = new Map();
@@ -3233,6 +3244,7 @@ body.tv .strip .chart { height: 96px; }
     el.hidden = false;
   }
   // start sound and video together once both are loaded
+  let npT = 0;
   function showPip(b, P, mood, why, pre) {
     const jb = $("#jumbo"), v = $("#pipVid"), bg = $("#jbBg"), c = ready(), go = ++pipGo, betId = b.id;
     const src = vidSrc(P.base);
@@ -3242,6 +3254,9 @@ body.tv .strip .chart { height: 96px; }
       if (go !== pipGo || statusBet !== betId) return;
       clearTimeout(hideT);
       $("#jbLbl").textContent = P.label;
+      // songs get a now-playing card (song and artist), slid in a beat after the clip starts
+      const np = $("#jbNp"); np.classList.remove("on"); clearTimeout(npT);
+      if (P.song) { $("#npSong").textContent = P.song; $("#npArtist").textContent = P.artist || ""; np.hidden = false; npT = setTimeout(() => np.classList.add("on"), 700); } else np.hidden = true;
       $("#jbTag").textContent = why || MOOD_TAG[mood] || "Live";
       jbBug(b);
       jb.className = "jumbo m-" + mood; jb.hidden = false;
@@ -3311,9 +3326,9 @@ body.tv .strip .chart { height: 96px; }
   function poolFor(b, k) {
     const me = myTeam(b);
     if (k === "fill") {
-      // close game: mostly fillers, some of your team's hype
-      const fill = [PIPS.good, ...libFor(b, ["vibe"]), ...libFor(b, ["hype"]).filter((c) => c.sport)];
-      if (okPool(fill) && Math.random() < 0.65) return fill;
+      // dead air: vibes are music only (songs get the now-playing card), plus your sport's hype edits that ride a song
+      const fill = [...libFor(b, ["vibe"]).filter(isMusic), ...libFor(b, ["hype"]).filter((c) => c.sport && isMusic(c))];
+      if (okPool(fill) && Math.random() < 0.75) return [...new Set(fill)];
       k = "hype";
     }
     if (k === "comeback") {
@@ -3327,11 +3342,12 @@ body.tv .strip .chart { height: 96px; }
     if (k === "good") { const r = rapFor(b); if (okPool(r) && Math.random() < 0.4) return r; }
     const fan = me && k !== "bad" ? CLIPS.filter((c) => c.fan === me && (!c.sport || c.sport === sportOf(b) || c.sport === (gameFor(b) || {}).sport)) : [];
     const match = k === "bad" ? [] : gamePool(b).filter((c) => k !== "good" || c.mood.split(" ").includes("up"));
-    const base = k === "good" ? libFor(b, ["up", "hype"]) : k === "bad" ? ["lockin", ...libFor(b, ["down"])] : libFor(b, ["hype", "vibe"]);
+    const base = k === "good" ? libFor(b, ["up", "hype"]) : k === "bad" ? ["lockin", ...libFor(b, ["down"])] : [...new Set([...libFor(b, ["hype"]), ...libFor(b, ["vibe"]).filter(isMusic)])];
     if (okPool(fan) && Math.random() < 0.6) return fan;
     if (okPool(match) && Math.random() < 0.5) return match;
     return base.length ? base : fan.length ? fan : match;
   }
+  const isMusic = (c) => !!(c.song || c.music);
   function libFor(b, moods) {
     const sp = (gameFor(b) || {}).sport || sportOf(b);
     return CLIPS.filter((c) => (!c.sport || c.sport === sp) && fits(c, b) && moods.some((m) => c.mood.split(" ").includes(m)));
