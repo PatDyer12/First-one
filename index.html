@@ -250,6 +250,10 @@ button.chip:hover { color: var(--ink); border-color: var(--ink-3); }
 .row .r { text-align: right; font: 600 14px var(--f-mono); }
 .row .r button { display: block; margin-left: auto; margin-top: 2px; background: none; border: 0; padding: 0; color: var(--ink-3); font: 500 11px var(--f-mono); text-decoration: underline; text-underline-offset: 2px; }
 .row .r button:hover { color: var(--ink); }
+.row .r .rb { display: flex; justify-content: flex-end; gap: 10px; } .row .r .rb button { margin: 2px 0 0; }
+.row .r .rb button.del { color: var(--loss); opacity: .8; } .row .r .rb button.del:hover { opacity: 1; }
+.row-ask { grid-column: 1 / -1; display: flex; align-items: center; gap: 8px; flex-wrap: wrap; padding: 8px 10px; border-radius: 9px; border: 1px solid rgba(255,97,112,.4); background: rgba(255,97,112,.08); font: 600 13px var(--f-ui); color: var(--ink-2); }
+.row-ask > span { flex: 1 1 100%; min-width: 0; }
 
 /* FAB */
 .fab { position: fixed; right: 16px; bottom: calc(16px + env(safe-area-inset-bottom, 0px)); z-index: 20; padding: 15px 22px; border-radius: 999px; font-size: 16px; box-shadow: 0 10px 30px rgba(0,0,0,.45); }
@@ -871,6 +875,7 @@ body.tv .strip .chart { height: 96px; }
 .who-hint { display: block; margin-top: 8px; }
 
 /* play card: what just happened, before the clip */
+.pc.top { z-index: 110; }
 .pc { position: fixed; inset: 0; z-index: 94; display: grid; place-items: center; pointer-events: none; overflow: hidden; --tc: #1b2433; }
 .pc.out { opacity: 0; transition: opacity .35s; }
 .pc-bg { position: absolute; inset: 0; background: radial-gradient(120% 95% at 18% 28%, var(--tc) 0%, color-mix(in srgb, var(--tc) 55%, #000) 48%, #04060a 100%); animation: pcIn .3s ease-out both; }
@@ -948,6 +953,11 @@ body.tv .strip .chart { height: 96px; }
 .crew-chip i { font-style: normal; width: 22px; height: 22px; border-radius: 6px; display: grid; place-items: center; font: 800 12px var(--f-num); color: #05070b; background: var(--push); }
 .crew-chip.W i { background: var(--win); } .crew-chip.L i { background: var(--loss); }
 .crew-chip em { font-style: normal; color: var(--ink-3); } .crew-chip.W em { color: var(--win); } .crew-chip.L em { color: var(--loss); }
+button.crew-chip { color: inherit; cursor: pointer; text-align: left; }
+button.crew-chip:hover { border-color: var(--line-2); background: rgba(255,255,255,.07); }
+button.crew-chip.ask { border-color: var(--loss); box-shadow: 0 0 0 1px var(--loss) inset; }
+.chip-ask { flex-basis: 100%; display: flex; align-items: center; gap: 8px; flex-wrap: wrap; padding: 10px 12px; border-radius: 10px; border: 1px solid rgba(255,97,112,.4); background: rgba(255,97,112,.08); font: 600 14px var(--f-ui); color: var(--ink-2); }
+.chip-ask > span { flex: 1 1 100%; min-width: 0; } .chip-ask b { color: var(--ink); } .chip-ask .btn:first-of-type, .row-ask .btn:first-of-type { margin-left: auto; }
 @media (max-width: 1099px) { .crewp { order: 2; } .lines { order: 3; } .settledp { order: 4; } .splitsp { order: 5; } }
 
 /* ===================== the room: group rides, head to heads, standings ===================== */
@@ -1135,6 +1145,10 @@ body.tv .jumbo { inset: var(--sy, 0px) var(--sx, 0px); }
 body.tv.has-ticker .jumbo { bottom: calc(var(--sy, 0px) + clamp(40px, 4.6vh, 58px)); }
 body.tv .flash { top: calc(18px + var(--sy, 0px)); }
 body.tv .whotag { top: calc(2.6vh + var(--sy, 0px)); }
+/* over the big screen: the top left of the picture, clear of the header and the now-playing card */
+.whotag.jb { left: 3.4vw; top: 11.5vh; transform: translateY(-30%); opacity: 0; transition: transform .45s cubic-bezier(.2,.9,.3,1.3), opacity .35s; }
+.whotag.jb.on { transform: none; opacity: 1; }
+body.tv .whotag.jb { left: calc(3.4vw + var(--sx, 0px)); top: calc(11.5vh + var(--sy, 0px)); }
 .safeframe { position: fixed; inset: var(--sy, 0px) var(--sx, 0px); z-index: 400; border: 3px dashed var(--accent); border-radius: 4px; pointer-events: none; box-shadow: 0 0 0 100vmax rgba(0,0,0,.45); }
 .safeframe .c { position: absolute; width: 46px; height: 46px; border: 0 solid var(--accent); }
 .safeframe .tl { left: 6px; top: 6px; border-width: 8px 0 0 8px; } .safeframe .tr { right: 6px; top: 6px; border-width: 8px 8px 0 0; }
@@ -2071,6 +2085,7 @@ body.tv.idle, body.tv.idle * { cursor: none !important; }
       wrap.dataset.keys = keys.join("|");
       wrap.innerHTML = keys.map((k, i) => `<div class="crew-p" data-k="${esc(k)}"><div class="crew-h" id="crewh-${i}"></div><div class="list" id="crewl-${i}"></div><div class="crew-done" id="crewd-${i}"></div></div>`).join("");
     }
+    const canDel = S.canWrite && !document.body.classList.contains("tv");
     keys.forEach((k, i) => {
       const p = people.get(k), done = p.done.sort((a, b) => b.settledAt - a.settledAt);
       const w = done.filter((b) => outcome(b) === "W").length, l = done.filter((b) => outcome(b) === "L").length, pu = done.length - w - l;
@@ -2079,8 +2094,19 @@ body.tv.idle, body.tv.idle * { cursor: none !important; }
         <span class="crew-rec">${w}-${l}${pu ? "-" + pu : ""}</span><span class="crew-net ${net > 0.004 ? "w" : net < -0.004 ? "l" : ""}">${fU(net, true)} <small>${fUSD(net * S.unit, true)}</small></span>
         ${S.range !== "all" && today.length ? `<span class="crew-rng">${esc(RANGE_LABEL[S.range])} ${fU(tNet, true)}</span>` : ""}<span class="crew-open">${p.open.length ? p.open.length + " open" : ""}</span>`;
       renderActive(p.open, "#crewl-" + i);
-      $("#crewd-" + i).innerHTML = done.slice(0, 8).map((b) => { const o = outcome(b); return `<span class="crew-chip ${o}"><i>${o}</i>${esc(b.pick)}<em>${fU(netOf(b), true)}</em></span>`; }).join("");
+      const shown = done.slice(0, 8), ask = canDel ? shown.find((b) => b.id === S.chipAsk) : null;
+      $("#crewd-" + i).innerHTML = shown.map((b) => {
+        const o = outcome(b), body = `<i>${o}</i>${esc(b.pick)}<em>${fU(netOf(b), true)}</em>`;
+        return canDel ? `<button type="button" class="crew-chip ${o}${ask === b ? " ask" : ""}" data-chip="${esc(b.id)}" title="Tap to delete" aria-label="${esc(p.name + ": " + b.pick + ", tap to delete")}">${body}</button>` : `<span class="crew-chip ${o}">${body}</span>`;
+      }).join("") + (ask ? delAskHtml(ask) : "");
     });
+  }
+  // the confirm under a crew result: what it is, what it paid, then Keep / Delete
+  function delAskHtml(b) {
+    const o = outcome(b), res = b.status === "cashout" ? "cashed out" : o === "W" ? "won" : o === "L" ? "lost" : "pushed";
+    const legs = b.kind === "parlay" && Array.isArray(b.legs) && b.legs.length ? ` (${b.legs.map(esc).join(" + ")})` : "";
+    return `<div class="chip-ask"><span>Delete ${esc(whoName(b))}'s <b>${esc(b.pick)}</b>${legs} · ${fOdds(b.odds)} · ${fU(b.units)}, ${res} ${fU(netOf(b), true)}? It comes off the board and the standings for good.</span>
+      <button type="button" class="btn sm" data-ask="no">Keep</button><button type="button" class="btn sm loss" data-ask="yes">Delete</button></div>`;
   }
   // ---------- the room: everybody's bets on one screen ----------
   // a group ride is the same pick from two or more people; a head to head is somebody on the other side of yours
@@ -2256,7 +2282,8 @@ body.tv.idle, body.tv.idle * { cursor: none !important; }
       const label = b.status === "cashout" ? "CO" : o;
       return `<div class="row"><span class="res ${o}">${label}</span>
         <div style="min-width:0"><div class="t">${esc(b.pick)}</div><div class="m">${bookLogo(b, "sm")}${fOdds(b.odds)} · ${fU(b.units)} · ${when(b.settledAt)}${b.sample ? " · sample" : ""}</div></div>
-        <div class="r num"><span class="${cls(n)}">${fU(n, true)}</span>${S.canWrite ? `<button type="button" class="edit" data-reopen="${esc(b.id)}">undo</button>` : ""}</div></div>`;
+        <div class="r num"><span class="${cls(n)}">${fU(n, true)}</span>${S.canWrite ? `<span class="rb edit"><button type="button" data-reopen="${esc(b.id)}">undo</button><button type="button" class="del" data-delask="${esc(b.id)}">delete</button></span>` : ""}</div>
+        ${S.canWrite && S.recentAsk === b.id ? `<div class="row-ask edit"><span>Delete this bet? It comes off your record for good.</span><button type="button" class="btn sm" data-delno>Keep</button><button type="button" class="btn sm loss" data-delyes="${esc(b.id)}">Delete</button></div>` : ""}</div>`;
     }).join("");
   }
 
@@ -2313,8 +2340,9 @@ body.tv.idle, body.tv.idle * { cursor: none !important; }
       const dup = Date.now() - (rideFx.get(k) || 0) < 120e3, fade = fadingMe(b);
       if (o === "W" && !fade && !withMe && !dup && clipsOn()) {
         rideFx.set(k, Date.now());
-        const names = [personName(b), ...mates];
-        winFx(b, n, { name: names.length > 1 ? names.join(" + ") : names[0], sub: names.length > 1 ? "group ride hit" : "hit", col: personCol(b) });
+        const names = [personName(b), ...mates], td = b.kind !== "parlay" && b.sel && isTd(b.sel.m);
+        const tag = { name: names.length > 1 ? names.join(" + ") : names[0], sub: td ? "TD scorer cashed" : names.length > 1 ? "group ride hit" : "hit", col: personCol(b) };
+        if (td && !isMoney(b, n)) edShow(b, n, tag); else winFx(b, n, tag);
         return;
       }
       if (o === "W" && !fade && !withMe && !dup) playWin();
@@ -2340,14 +2368,26 @@ body.tv.idle, body.tv.idle * { cursor: none !important; }
     else if (isWhale(b)) { whaleSplash(b, n); if (tag && !(big || par || snipe)) whoTag(tag, 8000); }
     else if (!big && !par && !snipe) quickWin(b, n, tag);
   }
+  // one of the Goldie scenes, full screen with its song, whoever's name riding on top. Shuffled, never the same one twice running
+  let edBag = [], edLast = -1;
+  function edShow(b, n, tag) {
+    if (!edBag.length) { edBag = EDITS.map((_, i) => i).sort(() => Math.random() - 0.5); if (edBag[edBag.length - 1] === edLast) edBag.unshift(edBag.pop()); }
+    const c = EDITS[(edLast = edBag.pop())]; edPre(c);
+    fx(afterCard(() => { const ms = introEdit(c, b, n); if (tag) whoTag(tag, ms); return ms; }));
+    if (isNuke(b)) nukeHit(b.pick, n); else if (isWhale(b)) whaleSplash(b, n);
+  }
   // whose bet is on screen: a name pill riding over any animation
-  let whoT = 0;
-  function whoTag(tag, ms) {
-    const el = $("#whoTag");
+  let whoT = 0, whoJb = false;
+  function whoTag(tag, ms, jb) {
+    const el = $("#whoTag"); whoJb = !!jb; el.classList.toggle("jb", whoJb);
     el.style.setProperty("--c", tag.col || "#ff9f43");
     $("#wtAv").textContent = String(tag.name || "?").slice(0, 1).toUpperCase(); $("#wtName").textContent = tag.name; $("#wtSub").textContent = tag.sub || "";
     el.hidden = false; el.classList.remove("on"); void el.offsetWidth; el.classList.add("on");
-    clearTimeout(whoT); whoT = setTimeout(() => { el.classList.remove("on"); setTimeout(() => { if (!el.classList.contains("on")) el.hidden = true; }, 600); }, Math.max(2500, (ms || 5000) - 300));
+    clearTimeout(whoT); whoT = setTimeout(whoOff, Math.max(2500, (ms || 5000) - 300));
+  }
+  function whoOff() {
+    const el = $("#whoTag"); clearTimeout(whoT); whoJb = false;
+    el.classList.remove("on"); setTimeout(() => { if (!el.classList.contains("on")) el.hidden = true; }, 600);
   }
   function announce(b) {
     const tag = isMe(b) ? null : { name: personName(b), sub: "just bet", col: personCol(b) };
@@ -2390,10 +2430,11 @@ body.tv.idle, body.tv.idle * { cursor: none !important; }
   }
   function legFx(b, legs, i) {
     const l = legs[i], hits = legs.filter((x) => x.st === "hit").length;
+    if (!isMe(b) && l.st === "hit" && tdCard.delete(b.id)) return;
     if (!isMe(b)) { flash(l.st === "hit" ? "W" : "L", `${personName(b).toUpperCase()} · LEG ${l.st === "hit" ? "✓" : "✕"}`, l.t, `${b.pick} · ${hits}/${legs.length} legs`, false); return; }
     if (l.st === "miss") { flash("L", "LEG ✕", l.t, `${b.pick} · parlay's dead`); return; }
     if (!clipsOn()) { flash("W", "LEG ✓", l.t, hits === legs.length ? `${b.pick} · every leg hit, cash it` : `${b.pick} · ${hits}/${legs.length} legs in`, false); return; }
-    fx(() => legCard(b, legs, i));
+    fx(afterCard(() => legCard(b, legs, i)));
   }
   function legCard(b, legs, i) {
     const ov = $("#legCard"), hits = legs.filter((x) => x.st === "hit").length, left = legs.length - hits;
@@ -2451,8 +2492,24 @@ body.tv.idle, body.tv.idle * { cursor: none !important; }
   };
   for (const sel of ["#active", "#crew", "#rides"]) { $(sel).addEventListener("click", onCardClick); $(sel).addEventListener("keydown", onCardKey); }
   $("#recent").addEventListener("click", (e) => {
+    if (!S.canWrite) return;
+    const ask = e.target.closest("[data-delask]"), yes = e.target.closest("[data-delyes]");
+    if (ask) { S.recentAsk = S.recentAsk === ask.dataset.delask ? null : ask.dataset.delask; render(); return; }
+    if (e.target.closest("[data-delno]")) { S.recentAsk = null; render(); return; }
+    if (yes) { S.recentAsk = null; delBet(yes.dataset.delyes).then((ok) => { if (ok) toast("Bet deleted"); render(); }); return; }
     const btn = e.target.closest("[data-reopen]"); if (!btn) return;
+    S.recentAsk = null;
     patchBet(btn.dataset.reopen, { status: "open", settledAt: null, net: null, noAuto: true }).then((ok) => ok && toast("Moved back to open"));
+  });
+  // a crew result: tap it, then Delete. Gone from every screen, their record and the standings
+  $("#crew").addEventListener("click", (e) => {
+    if (document.body.classList.contains("tv") || !S.canWrite) return;
+    const chip = e.target.closest("[data-chip]");
+    if (chip) { S.chipAsk = S.chipAsk === chip.dataset.chip ? null : chip.dataset.chip; render(); return; }
+    const a = e.target.closest("[data-ask]"); if (!a) return;
+    const id = S.chipAsk, b = id && S.bets.get(id); S.chipAsk = null;
+    if (a.dataset.ask !== "yes" || !b) { render(); return; }
+    delBet(id).then((ok) => { if (ok) toast(`Deleted ${whoName(b)}'s bet`); render(); });
   });
 
   // ---------- header ----------
@@ -2516,7 +2573,7 @@ body.tv.idle, body.tv.idle * { cursor: none !important; }
   // ---------- sheets ----------
   function openSheet(id) { $(id).hidden = false; }
   // keep every open screen current: when a new version is up, reload it (never mid-form or mid-animation)
-  const BUILD = "20261011175937";
+  const BUILD = "20261011182432";
   function checkBuild() {
     if (BUILD === "dev") return;
     fetch("version.json?t=" + Date.now(), { cache: "no-store" }).then((r) => (r.ok ? r.json() : null)).then((j) => {
@@ -3196,6 +3253,8 @@ body.tv.idle, body.tv.idle * { cursor: none !important; }
   // ---------- big-bet effects queue: one full-screen effect at a time ----------
   const fxQ = []; let fxBusy = false;
   function fx(run) { fxQ.push(run); if (!fxBusy) fxNext(); }
+  // a full-screen effect that holds its place in line until the play card on screen is done
+  const afterCard = (run) => { const w = () => (cardBusy ? (fxQ.unshift(w), 250) : run()); return w; };
   function fxNext() {
     const run = fxQ.shift();
     if (!run) { fxBusy = false; return; }
@@ -3676,6 +3735,7 @@ body.tv.idle, body.tv.idle * { cursor: none !important; }
     pipGo++;
     try { if (statusSrc) statusSrc.stop(); } catch (e) {}
     statusSrc = null; statusBet = null; $("#lockStop").hidden = true;
+    if (whoJb) whoOff();
     const jb = $("#jumbo"), v = $("#pipVid"), bg = $("#jbBg"); clearTimeout(pipT); clearTimeout(hideT); clearInterval(jbTick); clearInterval(djT);
     if (!jb.hidden) { jb.classList.add("out"); hideT = setTimeout(() => { jb.hidden = true; jb.classList.remove("out"); try { v.pause(); bg.pause(); } catch (e) {} }, 400); }
   }
@@ -4156,7 +4216,7 @@ body.tv.idle, body.tv.idle * { cursor: none !important; }
     let label = who;
     if (!over && e.side && ["td", "fg", "safety", "hr", "run", "goal"].includes(e.ev)) scoringPlay(g, e.side).then((sp) => { if (sp && !ov.hidden && cardBusy) label = pcFill(g, e, b, sp) || label; });
     setTimeout(() => ov.classList.add("out"), ms - 350);
-    setTimeout(() => { ov.hidden = true; ov.classList.remove("out"); cardBusy = false; then(label ? `${e.tag} · ${label}` : e.tag); }, ms);
+    setTimeout(() => { ov.hidden = true; ov.classList.remove("out", "top"); cardBusy = false; then(label ? `${e.tag} · ${label}` : e.tag); }, ms);
   }
   $("#pcTest").addEventListener("click", () => {
     closeSheets();
@@ -4185,23 +4245,81 @@ body.tv.idle, body.tv.idle * { cursor: none !important; }
       } catch (e) {}
     }
   }
-  // your player just scored (or the first TD went to someone else): the play card with his face, then the bet settles and the win runs
+  // a touchdown scorer just hit: the play card with his face, then the bet settles and the win runs. Yours come first. Julian's
+  // and the guest's get the same card with their name on it once yours is done, then a straight bet cashes into a Goldie scene
+  // with its song and a parlay leg gets one on the big screen
+  const tdHold = new Set(), tdCard = new Set(), crewTdQ = []; let crewTdT = 0;
+  function tdHit(sel, before, now) {
+    const me = normNm(sel.p && sel.p.nm), had = before.filter((p) => p.who === me).length, has = now.filter((p) => p.who === me);
+    return sel.m === "td" ? (has.length > had ? has[has.length - 1] : null) : !before.length && now.length && now[0].who === me ? now[0] : null;
+  }
+  const tdPeople = (sel, hit) => { const p = sel.p || {}; return [{ nm: p.nm || hit.name, hs: p.hs || "", j: p.j || "", pos: p.pos || "", sh: p.nm }]; };
+  const tdType = (sel, hit, b) => (sel.m === "ftd" ? "First TD · " : "") + hit.type + (b.kind === "parlay" ? " · parlay leg" : "");
   function tdCheck(g, before, now) {
-    if (!before) return; // first look: no fireworks for touchdowns that already happened
+    if (!before || !clipsOn()) return; // first look: no fireworks for touchdowns that already happened
+    let mine = null; const crew = [];
     for (const b of S.bets.values()) {
-      if (b.status !== "open" || !isMe(b)) continue;
+      if (b.status !== "open") continue;
       for (const sel of selsOf(b)) {
         if (!isTd(sel.m) || gameOf(sel) !== g) continue;
-        const me = normNm(sel.p && sel.p.nm), had = before.filter((p) => p.who === me).length, has = now.filter((p) => p.who === me);
-        const hit = sel.m === "td" ? has.length > had && has[has.length - 1] : !before.length && now.length && now[0].who === me ? now[0] : null;
-        if (!hit || !clipsOn()) continue;
-        stopStatus();
-        const p = sel.p || {};
-        showPlayCard(g, { ev: "td", side: sel.s, tag: "Touchdown " + g[sel.s].ab }, b, () => autoSettle(), 4500,
-          { text: hit.text, type: (sel.m === "ftd" ? "First TD · " : "") + hit.type + (b.kind === "parlay" ? " · parlay leg" : ""), people: [{ nm: p.nm || hit.name, hs: p.hs || "", j: p.j || "", pos: p.pos || "", sh: p.nm }] });
-        return;
+        const hit = tdHit(sel, before, now); if (!hit) continue;
+        if (isMe(b)) { if (!mine) mine = { b, sel, hit }; } else crew.push({ b, sel, hit, nm: normNm(sel.p && sel.p.nm) });
+        break;
       }
     }
+    if (mine) {
+      stopStatus();
+      if (fxBusy) { $("#playCard").classList.add("top"); whoOff(); }
+      showPlayCard(g, { ev: "td", side: mine.sel.s, tag: "Touchdown " + g[mine.sel.s].ab }, mine.b, () => autoSettle(), 4500,
+        { text: mine.hit.text, type: tdType(mine.sel, mine.hit, mine.b), people: tdPeople(mine.sel, mine.hit) });
+    }
+    // the crew on the same player as yours ride your card; anybody else's scorer gets a card of their own after
+    const same = mine ? normNm(mine.sel.p && mine.sel.p.nm) : null, groups = new Map();
+    for (const x of crew) { if (x.nm === same) continue; if (!groups.has(x.nm)) groups.set(x.nm, []); groups.get(x.nm).push(x); }
+    for (const grp of groups.values()) {
+      for (const x of grp) { tdHold.add(x.b.id); if (x.b.kind === "parlay") tdCard.add(x.b.id); }
+      crewTdQ.push({ g, grp, at: Date.now() });
+    }
+    if (groups.size) crewTdNext();
+  }
+  // their card waits for anything of yours on screen (a card, a full-screen win, your touchdown music) and never cuts it off
+  const mineBusy = () => cardBusy || fxBusy || (!!statusSrc && lastKind === "play");
+  function crewTdNext() {
+    clearTimeout(crewTdT);
+    const job = crewTdQ[0]; if (!job) return;
+    const late = Date.now() - job.at > 45e3;
+    if (mineBusy() && !late) { crewTdT = setTimeout(crewTdNext, 1000); return; }
+    crewTdQ.shift();
+    const grp = job.grp.filter((x) => { const b = S.bets.get(x.b.id); return b && b.status === "open"; }); // another screen may have settled it already
+    const release = () => { for (const x of job.grp) { tdHold.delete(x.b.id); tdCard.delete(x.b.id); } };
+    if (!grp.length || late || !clipsOn()) { release(); autoSettle(); crewTdT = setTimeout(crewTdNext, 300); return; }
+    const g = job.g, lead = grp[0], names = [...new Set(grp.map((x) => personName(x.b)))], who = names.join(" + ");
+    const player = (lead.sel.p && lead.sel.p.nm) || lead.hit.name, straight = grp.some((x) => x.b.kind !== "parlay");
+    const tag = { name: who, sub: straight ? "TD scorer hit" : "TD scorer leg hit", col: personCol(lead.b) };
+    stopStatus();
+    whoTag(tag, 4500);
+    showPlayCard(g, { ev: "td", side: lead.sel.s, tag: "Touchdown " + g[lead.sel.s].ab }, { ...lead.b, pick: who + " · " + lead.b.pick }, () => {
+      release();
+      // a parlay that's still alive gets a Goldie clip with music; a straight bet (or a parlay this cashed) gets its win show when it settles
+      const cashes = straight || grp.some((x) => { const b = S.bets.get(x.b.id); return b && legsOf(b).every((l) => l.st === "hit"); });
+      const live = grp.map((x) => S.bets.get(x.b.id)).find((b) => b && b.status === "open" && b.kind === "parlay");
+      autoSettle();
+      if (!cashes && live) crewLegShow(live, who, player);
+      crewTdT = setTimeout(crewTdNext, 600);
+    }, 4500, { text: lead.hit.text, type: tdType(lead.sel, lead.hit, lead.b), people: tdPeople(lead.sel, lead.hit) });
+  }
+  // their parlay leg landed: one of the Goldie scenes on the big screen with its song, their name on it
+  function crewLegShow(b, who, player) {
+    const t0 = Date.now();
+    const go = () => {
+      const cur = S.bets.get(b.id); if (!cur || cur.status !== "open" || !clipsOn()) return;
+      if (fxBusy || cardBusy) { if (Date.now() - t0 < 30e3) setTimeout(go, 1000); return; }
+      const P = pickClip(newSong(CLIPS.filter((c) => c.base.startsWith("sounds/aura/") && fits(c, cur)))); if (!P) return;
+      lastAny = Date.now(); lastKind = "pop"; // anything of yours can still cut in
+      react({ ...cur, pick: who + " · " + cur.pick }, "good", P, `${who} · ${player} scored`);
+      whoTag({ name: who, sub: "TD scorer leg hit", col: personCol(cur) }, P.ms, true);
+    };
+    go();
   }
   setInterval(loadTdPlays, 30e3);
 
@@ -6584,7 +6702,7 @@ body.tv.idle, body.tv.idle * { cursor: none !important; }
   function autoSettle() {
     if (!S.db || !S.canWrite || !S.ready) return;
     for (const b of S.bets.values()) {
-      if (b.status !== "open" || b.noAuto || b.trial || settling.has(b.id)) continue;
+      if (b.status !== "open" || b.noAuto || b.trial || settling.has(b.id) || tdHold.has(b.id)) continue;
       if (cardBusy && b.sel && isTd(b.sel.m)) continue; // let his touchdown card play first
       let status = null;
       if (b.kind === "parlay") {
