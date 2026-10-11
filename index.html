@@ -7,7 +7,7 @@
 <title>Sweat Board</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Archivo:wght@400;500;600;700&family=Azeret+Mono:wght@400;500;600&family=Big+Shoulders+Display:wght@700;800;900&family=Barlow+Condensed:wght@500;600;700;800&display=swap">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Archivo:wght@400;500;600;700&family=Azeret+Mono:wght@400;500;600&family=Big+Shoulders+Display:wght@700;800;900&family=Barlow+Condensed:wght@500;600;700;800&family=Inter:wght@400;500;600;700;800&display=swap">
 <style>
 html,body{margin:0}img{max-width:100%}
 /* Layout: arena scoreboard at night. Wide screens = three columns (score | the sweat | trend); phones stack with a floating + Bet. Single dark look on purpose: it lives on a monitor in a dim room. */
@@ -82,25 +82,6 @@ button.chip:hover { color: var(--ink); border-color: var(--ink-3); }
 .btn.push { background: rgba(148,163,184,.12); border-color: rgba(148,163,184,.35); color: var(--push); }
 .btn.danger { color: var(--loss); }
 .btn.sm { padding: 7px 11px; font-size: 13px; }
-
-/* Grid */
-.grid { display: grid; gap: 18px; grid-template-columns: minmax(0, 1fr); align-items: start; }
-.col { display: flex; flex-direction: column; gap: 18px; min-width: 0; }
-/* below the 3-column layout the left column melts into the grid: record, open bets, the rest, then live lines */
-@media (max-width: 1199px) {
-  .lcol { display: contents; }
-  .hero { order: 0; } .grid > section.panel { order: 1; } .grid > .col:not(.lcol) { order: 2; } .lines { order: 3; }
-}
-@media (min-width: 780px) {
-  .grid { grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); }
-  .lines { grid-column: 1 / -1; }
-  .hero { grid-column: 1 / -1; }
-}
-@media (min-width: 1200px) {
-  .grid { grid-template-columns: minmax(0, 0.85fr) minmax(0, 1.5fr) minmax(0, 0.95fr); }
-  .hero { grid-column: auto; }
-  .lines { grid-column: auto; }
-}
 
 .panel { background: var(--panel); border: 1px solid var(--line); border-radius: 16px; padding: 18px; min-width: 0; }
 .ph { display: flex; justify-content: space-between; align-items: baseline; gap: 10px; margin-bottom: 14px; flex-wrap: wrap; }
@@ -676,6 +657,165 @@ body.tv .chart { height: 240px; }
 @media (prefers-reduced-motion: reduce) {
   *, *::before, *::after { animation: none !important; transition: none !important; }
 }
+/* ===================== v2: clean, modern, built for the side monitor ===================== */
+:root {
+  --ground: #050608;
+  --panel: #0c0e13;
+  --panel-2: #12151c;
+  --line: #1c2029;
+  --line-2: #262b36;
+  --ink: #f4f6fa;
+  --ink-2: #a3aab8;
+  --ink-3: #5e6676;
+  --accent: #d4ff3a;
+  --accent-ink: #0b0f02;
+  --gold: #ffb52e;
+  --win: #2ee89a;
+  --loss: #ff4d6a;
+  --push: #8b93a1;
+  --fd: #3d8bff;
+  --dk: #a982ff;
+  --f-ui: "Inter", "Archivo", system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+  --f-body: var(--f-ui);
+  --r: 18px;
+}
+html, body { background: var(--ground); }
+body { font-family: var(--f-ui); letter-spacing: -0.005em; }
+body::before { background: radial-gradient(900px 520px at 8% -8%, rgba(212,255,58,.07), transparent 70%), radial-gradient(900px 600px at 100% 110%, rgba(120,90,255,.09), transparent 70%), radial-gradient(1200px 700px at 12% -10%, var(--mood), transparent 70%); }
+.num { font-variant-numeric: tabular-nums; }
+:focus-visible { outline-color: var(--accent); }
+
+/* header */
+.app { gap: 16px; padding-block: 16px 110px; }
+.top { gap: 10px 12px; }
+.brand { align-items: center; gap: 14px; }
+.brand h1 { font: italic 800 34px/1 var(--f-num); letter-spacing: 0.01em; display: flex; align-items: center; gap: 10px; }
+.brand h1::before { content: ""; width: 14px; height: 14px; background: var(--accent); transform: rotate(45deg); border-radius: 3px; box-shadow: 0 0 18px rgba(212,255,58,.6); }
+.brand h1 span { color: var(--accent); }
+.clock { font: 600 15px var(--f-num); letter-spacing: .04em; color: var(--ink-2); }
+.status { font: 700 11px var(--f-ui); letter-spacing: .12em; }
+.seg { background: var(--panel); border-color: var(--line); border-radius: 12px; padding: 4px; }
+.seg button { font: 600 13px var(--f-ui); border-radius: 9px; padding: 7px 13px; color: var(--ink-3); }
+.seg button[aria-pressed="true"] { background: var(--ink); color: var(--ground); box-shadow: none; }
+.chip { font: 600 12px var(--f-ui); background: var(--panel); border-color: var(--line); border-radius: 10px; padding: 7px 11px; }
+.btn { border-radius: 11px; font-family: var(--f-ui); border-color: var(--line-2); background: var(--panel-2); }
+.btn.primary { background: var(--accent); border-color: var(--accent); color: var(--accent-ink); font-weight: 800; box-shadow: 0 6px 24px rgba(212,255,58,.25); }
+
+/* panels */
+.panel { background: linear-gradient(180deg, rgba(20,23,31,.9), rgba(12,14,19,.92)); border: 1px solid var(--line); border-radius: var(--r); padding: 20px; box-shadow: inset 0 1px 0 rgba(255,255,255,.04), 0 18px 40px rgba(0,0,0,.35); }
+.ph { margin-bottom: 14px; align-items: center; }
+.ph h2 { display: flex; align-items: center; gap: 10px; font: 700 12px var(--f-ui); letter-spacing: .16em; color: var(--ink-2); }
+.ph h2::before { content: ""; width: 3px; height: 14px; border-radius: 2px; background: var(--accent); }
+.ph .sub { font: 600 13px var(--f-num); letter-spacing: .03em; color: var(--ink-3); }
+.empty { border: 1px dashed var(--line-2); border-radius: 14px; background: rgba(255,255,255,.015); }
+
+/* layout: stat strip on top, the sweat big on the left, lines / trend / splits on the right */
+.grid { display: grid; gap: 16px; grid-template-columns: minmax(0, 1fr); align-items: start; }
+.col { display: flex; flex-direction: column; gap: 16px; min-width: 0; }
+.strip { grid-column: 1 / -1; }
+@media (max-width: 1099px) {
+  .mainc, .side { display: contents; }
+  .strip { order: 0; } .sweatp { order: 1; } .lines { order: 2; } .settledp { order: 3; } .trendp { order: 4; } .splitsp { order: 5; }
+}
+@media (min-width: 1100px) {
+  .grid { grid-template-columns: minmax(0, 1.75fr) minmax(400px, 1fr); }
+}
+
+/* stat strip */
+.hero.strip { display: grid; grid-template-columns: minmax(0, 1fr); gap: 14px; padding: 18px 22px; background: linear-gradient(120deg, rgba(212,255,58,.06), rgba(20,23,31,.9) 38%, rgba(12,14,19,.92)); position: static; }
+.strip .label { font: 700 12px var(--f-ui); letter-spacing: .16em; color: var(--ink-2); justify-content: flex-start; gap: 14px; }
+.strip .label .num { color: var(--ink-3); }
+.plrow { display: flex; align-items: baseline; gap: 16px; flex-wrap: wrap; }
+.strip .big { font: 800 clamp(64px, 7vw, 120px)/0.86 var(--f-num); letter-spacing: -0.01em; margin: 6px 0 0; }
+.strip .big[data-sign="pos"] { text-shadow: 0 0 50px rgba(46,232,154,.35); }
+.strip .big[data-sign="neg"] { text-shadow: 0 0 50px rgba(255,77,106,.3); }
+.strip .usd { font: 700 28px var(--f-num); color: var(--ink-2); }
+.slabel, .strip .kpi small, .strip .form small { display: block; font: 700 11px var(--f-ui); letter-spacing: .14em; text-transform: uppercase; color: var(--ink-3); }
+.strip .board { display: flex; gap: 18px; margin-top: 6px; }
+.strip .cell { background: none; border: 0; padding: 0; display: flex; flex-direction: column; align-items: flex-start; gap: 2px; }
+.strip .cell b { font: 800 46px/0.9 var(--f-num); }
+.strip .cell small { font: 700 10px var(--f-ui); letter-spacing: .14em; text-transform: uppercase; color: var(--ink-3); }
+.strip .kpis { display: grid; grid-template-columns: repeat(3, auto); gap: 22px; margin: 0; }
+.strip .kpi { padding: 0; }
+.strip .kpi span { display: block; margin-top: 6px; font: 800 34px/0.95 var(--f-num); }
+.strip .form { margin: 0; padding: 0; border: 0; }
+.strip .dots { gap: 5px; margin-top: 8px; max-width: none; grid-template-columns: repeat(10, 22px); }
+.strip .dot { height: 22px; border-radius: 6px; font: 800 12px var(--f-num); }
+.strip .dot.none { border-color: var(--line-2); }
+@media (min-width: 900px) {
+  .hero.strip { grid-template-columns: minmax(280px, 1.3fr) auto auto auto; align-items: center; gap: 0; }
+  .strip > * { padding: 0 28px; }
+  .strip > *:first-child { padding-left: 0; }
+  .strip > * + * { border-left: 1px solid var(--line); min-height: 86px; display: flex; flex-direction: column; justify-content: center; }
+}
+
+/* bet cards */
+.list { grid-template-columns: repeat(auto-fill, minmax(min(100%, 400px), 1fr)); gap: 14px; }
+.bet { background: linear-gradient(180deg, #161a23, #11141b); border: 1px solid var(--line-2); border-radius: 16px; padding: 16px 18px 16px 18px; gap: 6px 14px; box-shadow: inset 0 1px 0 rgba(255,255,255,.05), 0 10px 26px rgba(0,0,0,.3); overflow: hidden; }
+.bet::after { content: ""; position: absolute; left: 0; top: 0; bottom: 0; width: 4px; background: var(--rail, transparent); box-shadow: 0 0 18px var(--rail, transparent); }
+.bet.st-cooking, .bet.st-sweating, .bet.st-trouble, .bet.st-dead { box-shadow: inset 0 1px 0 rgba(255,255,255,.05), 0 10px 26px rgba(0,0,0,.3); }
+.bet.st-cooking { --rail: var(--win); } .bet.st-sweating { --rail: var(--gold); } .bet.st-trouble { --rail: var(--loss); } .bet.st-dead { --rail: var(--loss); background: linear-gradient(180deg, #1d1418, #131014); }
+.book { width: 38px; height: 38px; border-radius: 11px; font: 800 15px var(--f-num); box-shadow: inset 0 -2px 0 rgba(0,0,0,.2); }
+.pick { font: 700 30px/1.05 var(--f-num); letter-spacing: 0; }
+.meta { font: 600 16px var(--f-num); gap: 10px; margin-top: 6px; }
+.live { font-weight: 700; letter-spacing: .1em; }
+.state { font: 800 15px var(--f-num); letter-spacing: .05em; border-radius: 6px; padding: 3px 9px; }
+.odds b { font: 800 34px/1 var(--f-num); }
+.odds span { font: 600 17px var(--f-num); }
+.sweat { top: 12px; right: 12px; background: var(--accent); }
+.bug { background: rgba(255,255,255,.03); border: 1px solid var(--line); border-radius: 12px; padding: 9px 13px; margin-top: 4px; }
+.bug .tm.me img { filter: drop-shadow(0 0 6px rgba(212,255,58,.6)); }
+.legs { gap: 6px; margin-top: 6px; }
+.legs li { font: 600 21px/1.15 var(--f-num); }
+.legs small { font: 600 16px var(--f-num); }
+.note-line { font: 600 15px var(--f-num); }
+/* sweat meter: how far past (or short of) your number, centered on the number */
+.meter { grid-column: 1 / -1; position: relative; height: 10px; border-radius: 6px; background: rgba(255,255,255,.06); margin-top: 8px; overflow: hidden; }
+.meter::before { content: ""; position: absolute; left: 50%; top: -2px; bottom: -2px; width: 2px; margin-left: -1px; background: rgba(255,255,255,.35); z-index: 1; }
+.meter i { position: absolute; top: 0; bottom: 0; left: var(--l); width: var(--w); border-radius: 6px; background: var(--mc); box-shadow: 0 0 14px var(--mc); transition: left .8s cubic-bezier(.2,.9,.3,1), width .8s cubic-bezier(.2,.9,.3,1); }
+.meter.w { --mc: var(--win); } .meter.l { --mc: var(--loss); } .meter.e { --mc: var(--gold); }
+.lmeter { grid-column: 1 / -1; display: flex; gap: 5px; margin-top: 8px; }
+.lmeter span { flex: 1; height: 10px; border-radius: 5px; background: rgba(255,255,255,.07); }
+.lmeter span.hit { background: var(--win); box-shadow: 0 0 10px rgba(46,232,154,.5); }
+.lmeter span.miss { background: var(--loss); }
+.lmeter span.lw { background: rgba(46,232,154,.45); } .lmeter span.ll { background: rgba(255,77,106,.45); } .lmeter span.le { background: rgba(255,181,46,.45); }
+body.tv .pick { font-size: 34px; } body.tv .odds b { font-size: 38px; } body.tv .legs li { font-size: 23px; } body.tv .bug { font-size: 21px; }
+
+/* live lines, splits, settled, chart in the new palette */
+.lc { background: #0a0c11; border-color: transparent; }
+.lc.mine { border-color: var(--accent); background: rgba(212,255,58,.08); box-shadow: 0 0 16px rgba(212,255,58,.12); }
+.ln-h u.live { background: rgba(255,77,106,.15); }
+.lines .ln { border-top-color: var(--line); }
+.chart { height: 210px; }
+body.tv .chart { height: 210px; }
+.split { padding: 9px 0; }
+.ticker { background: #07080b; }
+.tk-lbl { background: var(--accent); color: var(--accent-ink); }
+.tk-g.mine { background: rgba(212,255,58,.08); border-color: rgba(212,255,58,.5); }
+.fab { background: var(--accent) !important; color: var(--accent-ink) !important; }
+
+/* the running P/L line lives in the strip */
+.strip .trend { min-width: 0; }
+.strip .trend .slabel span { color: var(--ink-3); margin-left: 6px; letter-spacing: .06em; text-transform: none; font-weight: 600; }
+.strip .chart { height: 104px; margin-top: 6px; }
+.strip .chart .empty { padding: 10px; font-size: 13px; border-radius: 10px; }
+.strip .chart .empty b { font-size: 13px; margin: 0; }
+@media (min-width: 900px) { .hero.strip { grid-template-columns: auto minmax(220px, 1fr) auto auto auto; } }
+@media (min-width: 900px) and (max-width: 1399px) { .hero.strip { grid-template-columns: auto minmax(200px, 1fr) auto auto; } .strip .form { display: none; } }
+@media (max-width: 1099px) { .strip { order: 0; } .sweatp { order: 1; } .lines { order: 2; } .settledp { order: 3; } .splitsp { order: 4; } }
+body.tv .settledp:has(#recent .empty) { display: none; }
+body.tv .strip .chart { height: 96px; }
+
+/* settled list, splits and the chart in the new type */
+.chart text { font: 600 13px var(--f-num); fill: var(--ink-3); }
+.split .nm { font: 600 15px var(--f-ui); }
+.split .rec { font: 700 18px var(--f-num); color: var(--ink-2); }
+.split .val { font: 800 20px var(--f-num); }
+.row { padding: 11px 0; }
+.row .t { font: 700 20px var(--f-num); letter-spacing: .005em; }
+.row .m { font: 600 14px var(--f-num); letter-spacing: .03em; }
+.row .r { font: 800 22px var(--f-num); }
+.row .r button { font: 600 13px var(--f-num); }
 </style>
 </head>
 <body>
@@ -704,15 +844,22 @@ body.tv .chart { height: 240px; }
   <div class="banner" id="offline" hidden>Can't reach your bet database right now. Check your connection and reload.</div>
 
   <main class="grid">
-    <div class="col lcol">
-    <section class="panel hero" aria-label="Results">
-      <div class="label"><span id="h-label">Today</span><span class="num" id="h-day"></span></div>
-      <div class="big num" id="h-net" data-sign="zero">0u</div>
-      <div class="usd num" id="h-usd">$0.00</div>
-      <div class="board">
-        <div class="cell w"><b class="num" id="h-w">0</b><small>WON</small></div>
-        <div class="cell l"><b class="num" id="h-l">0</b><small>LOST</small></div>
-        <div class="cell p"><b class="num" id="h-p">0</b><small>PUSH</small></div>
+    <section class="panel hero strip" aria-label="Results">
+      <div class="pl">
+        <div class="label"><span id="h-label">Today</span><span class="num" id="h-day"></span></div>
+        <div class="plrow"><div class="big num" id="h-net" data-sign="zero">0u</div><div class="usd num" id="h-usd">$0.00</div></div>
+      </div>
+      <div class="trend" aria-label="Profit trend">
+        <span class="slabel">Running P/L <span id="c-sub"></span></span>
+        <div class="chart" id="chart"></div>
+      </div>
+      <div class="rec">
+        <span class="slabel">Record</span>
+        <div class="board">
+          <div class="cell w"><b class="num" id="h-w">0</b><small>Won</small></div>
+          <div class="cell l"><b class="num" id="h-l">0</b><small>Lost</small></div>
+          <div class="cell p"><b class="num" id="h-p">0</b><small>Push</small></div>
+        </div>
       </div>
       <div class="kpis">
         <div class="kpi"><small>Hit rate</small><span class="num" id="h-hit">–</span></div>
@@ -724,29 +871,26 @@ body.tv .chart { height: 240px; }
         <div class="dots" id="h-dots"></div>
       </div>
     </section>
-    <section class="panel lines" aria-label="Live lines">
-      <div class="ph"><h2>Live lines</h2><span class="sub" id="ln-sub"></span></div>
-      <div id="lines"><div class="empty"><b>No games to price</b>Live lines show up here for every game you have a bet on.</div></div>
-    </section>
-    </div>
 
-    <section class="panel" aria-label="Active bets">
-      <div class="ph"><h2>The sweat · <span id="a-count">0</span> open</h2><span class="sub num" id="a-sum"></span></div>
-      <div class="list" id="active"><div class="empty"><b>Loading your bets…</b></div></div>
-    </section>
-
-    <div class="col">
-      <section class="panel" aria-label="Profit trend">
-        <div class="ph"><h2>Running P/L</h2><span class="sub" id="c-sub"></span></div>
-        <div class="chart" id="chart"></div>
+    <div class="col mainc">
+      <section class="panel sweatp" aria-label="Active bets">
+        <div class="ph"><h2>The sweat · <span id="a-count">0</span> open</h2><span class="sub num" id="a-sum"></span></div>
+        <div class="list" id="active"><div class="empty"><b>Loading your bets…</b></div></div>
       </section>
-      <section class="panel" aria-label="Splits">
-        <div class="ph"><h2>Splits</h2><span class="sub" id="s-sub"></span></div>
-        <div class="splits" id="splits"></div>
-      </section>
-      <section class="panel" aria-label="Settled bets">
+      <section class="panel settledp" aria-label="Settled bets">
         <div class="ph"><h2>Settled</h2><span class="sub" id="r-sub"></span></div>
         <div id="recent"></div>
+      </section>
+    </div>
+
+    <div class="col side">
+      <section class="panel lines" aria-label="Live lines">
+        <div class="ph"><h2>Live lines</h2><span class="sub" id="ln-sub"></span></div>
+        <div id="lines"><div class="empty"><b>No games to price</b>Live lines show up here for every game you have a bet on.</div></div>
+      </section>
+      <section class="panel splitsp" aria-label="Splits">
+        <div class="ph"><h2>Splits</h2><span class="sub" id="s-sub"></span></div>
+        <div class="splits" id="splits"></div>
       </section>
     </div>
   </main>
@@ -1306,6 +1450,7 @@ body.tv .chart { height: 240px; }
         <div class="book ${b.book === "DK" ? "DK" : "FD"}" title="${BOOK[b.book] || ""}">${b.book === "DK" ? "DK" : "FD"}</div>
         <div style="min-width:0"><div class="pick">${esc(b.pick)}${b.kind !== "parlay" ? ballTag(hasBall(b.sel)) : ""}</div><div class="meta">${chips}</div></div>
         <div class="odds num"><b>${fOdds(b.odds)}</b><span>${fU(b.units)} → ${fU(towin, true)}</span>${legs.length ? `<span class="prog">${hits}/${legs.length} legs</span>` : ""}</div>
+        ${ev && !ev.fin && ph === "live" ? meterHtml(b.sel, ev) : legs.length && ph !== "pre" ? legMeter(legs) : ""}
         ${b.kind !== "parlay" && b.sel ? scorebug(b.sel) : ""}
         ${b.note ? `<div class="note-line">${esc(b.note)}</div>` : ""}${legsHtml}${actions}</article>`;
     }).join("");
@@ -1315,6 +1460,16 @@ body.tv .chart { height: 240px; }
     }
   }
 
+  // sweat meter: the bar is centered on your number; it fills toward green the more you're covering, red the more you need
+  const METER = { CFB: 14, NFL: 14, NBA: 12, CBB: 12, MLB: 4, NHL: 3 };
+  function meterHtml(sel, ev) {
+    const span = METER[(ev.g && ev.g.sport) || sel.sp] || 10, k = Math.max(-1, Math.min(1, ev.m / span));
+    const w = Math.max(2, Math.abs(k) * 50), l = k >= 0 ? 50 : 50 - w, cls = ev.m > 0 ? "w" : ev.m < 0 ? "l" : "e";
+    return `<div class="meter ${cls}" aria-hidden="true"><i style="--l:${l.toFixed(1)}%;--w:${w.toFixed(1)}%"></i></div>`;
+  }
+  function legMeter(legs) {
+    return `<div class="lmeter" aria-hidden="true">${legs.map((l) => `<span class="${l.st || (l.ev && !l.ev.fin ? (l.ev.res === "W" ? "lw" : l.ev.res === "L" ? "ll" : "le") : "")}"></span>`).join("")}</div>`;
+  }
   function niceStep(x) {
     const p = Math.pow(10, Math.floor(Math.log10(x))), m = x / p;
     return (m <= 1 ? 1 : m <= 2 ? 2 : m <= 5 ? 5 : 10) * p;
