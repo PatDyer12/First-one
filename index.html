@@ -2423,7 +2423,7 @@ body.tv.idle, body.tv.idle * { cursor: none !important; }
   // one of the Goldie scenes, full screen with its song, whoever's name riding on top. Shuffled, never the same one twice running
   let edBag = [], edLast = -1;
   function edShow(b, n, tag) {
-    if (!edBag.length) { edBag = EDITS.map((_, i) => i).sort(() => Math.random() - 0.5); if (edBag[edBag.length - 1] === edLast) edBag.unshift(edBag.pop()); }
+    if (!edBag.length) { edBag = shuffled(EDITS.map((_, i) => i)); if (edBag[edBag.length - 1] === edLast) edBag.unshift(edBag.pop()); }
     const c = EDITS[(edLast = edBag.pop())]; edPre(c);
     fx(afterCard(() => { const ms = introEdit(c, b, n); if (tag) whoTag(tag, ms); return ms; }));
     if (isNuke(b)) nukeHit(b.pick, n); else if (isWhale(b)) whaleSplash(b, n);
@@ -2626,7 +2626,7 @@ body.tv.idle, body.tv.idle * { cursor: none !important; }
   // ---------- sheets ----------
   function openSheet(id) { $(id).hidden = false; }
   // keep every open screen current: when a new version is up, reload it (never mid-form or mid-animation)
-  const BUILD = "20261011225539";
+  const BUILD = "20261011231831";
   function checkBuild() {
     if (BUILD === "dev") return;
     fetch("version.json?t=" + Date.now(), { cache: "no-store" }).then((r) => (r.ok ? r.json() : null)).then((j) => {
@@ -3937,6 +3937,17 @@ body.tv.idle, body.tv.idle * { cursor: none !important; }
     clip("nfl/nfl13", "Notre Dame: in the club", "hype up", 29.7, cfbTeam("ND")),
     clip("nfl/nfl14", "Brady: not Montana, not Elway", "hype up win", 27.8, NFL),
     clip("nfl/nfl15", "Smith-Njigba: show them", "hype up td", 22.2, nflTeam("SEA")),
+    clip("nfl/nfl16", "Nostalgic vines: OBJ", "hype up win", 14.0, NFL),
+    clip("nfl/nfl17", "OBJ was the Vine JuJu", "up win", 12.4, NFL),
+    clip("nfl/nfl18", "T.O. touchdown dance", "hype up td", 22.1, NFL),
+    clip("nfl/nfl19", "Beat drop: This could be us", "hype up td", 17.6, NFL),
+    clip("nfl/nfl20", "Beat drop vines, part 2", "hype up td", 15.8, NFL),
+    clip("nfl/nfl21", "Beat drop vines, part 3", "hype up td", 23.9, NFL),
+    clip("nfl/nfl22", "2015 Vine celebrations", "up win td", 21.0, NFL),
+    clip("nfl/nfl23", "Cam dab", "up win td", 9.9, NFL),
+    clip("nfl/nfl24", "TD celebrations", "up win td", 20.6, NFL),
+    clip("nfl/nfl25", "TD celebrations, part 2", "up win td", 20.1, NFL),
+    clip("nfl/nfl26", "TD celebrations, part 3", "up win td", 18.6, NFL),
   ];
   // library clips are big once decoded, so only the last couple stay in memory
   const clipBufs = new Map();
@@ -4155,8 +4166,17 @@ body.tv.idle, body.tv.idle * { cursor: none !important; }
   }
   // shuffled, every song once before any repeats, never the same one twice running
   function spPick() {
-    if (!SP.bag.length) { SP.bag = SP.list.map((_, i) => i).sort(() => Math.random() - 0.5); if (SP.list.length > 1 && SP.list[SP.bag[SP.bag.length - 1]].uri === SP.last) SP.bag.unshift(SP.bag.pop()); }
-    const t = SP.list[SP.bag.pop()]; SP.last = t.uri; return t;
+    if (!SP.bag.length) {
+      // what's left of the shuffle from before the board last reloaded, if it's the same playlist
+      let saved = null; try { saved = JSON.parse(spGet("bag") || "null"); } catch (e) {}
+      const at = new Map(SP.list.map((t, i) => [t.uri, i]));
+      if (saved && saved.pid === SP.playlist && Array.isArray(saved.left)) SP.bag = saved.left.map((u) => at.get(u)).filter((i) => i != null);
+      if (saved && saved.pid === SP.playlist && saved.last) SP.last = saved.last;
+    }
+    if (!SP.bag.length) { SP.bag = shuffled(SP.list.map((_, i) => i)); if (SP.list.length > 1 && SP.list[SP.bag[SP.bag.length - 1]].uri === SP.last) SP.bag.unshift(SP.bag.pop()); }
+    const t = SP.list[SP.bag.pop()]; SP.last = t.uri;
+    spSet("bag", JSON.stringify({ pid: SP.playlist, left: SP.bag.map((i) => SP.list[i].uri), last: t.uri }));
+    return t;
   }
   // where a song gets going: about a fifth of the way in (25 to 55 seconds), leaving a full break after it
   const spHook = (dur) => Math.max(0, Math.min(Math.max(25e3, Math.min(55e3, dur * 0.2)), dur - SP_BREAK - 5e3));
@@ -4226,12 +4246,18 @@ body.tv.idle, body.tv.idle * { cursor: none !important; }
       const me = statusSrc; me.onended = () => { if (statusSrc === me) { statusSrc = null; statusBet = null; $("#lockStop").hidden = true; } };
     });
   }
+  // a fair shuffle (every order equally likely)
+  function shuffled(a) { a = a.slice(); for (let i = a.length - 1; i > 0; i--) { const j = Math.floor(Math.random() * (i + 1)); [a[i], a[j]] = [a[j], a[i]]; } return a; }
   // don't play the same clip twice in a row: pick from whichever ones have gone longest unplayed
   const played = new Map();
   try { for (const [k, t] of JSON.parse(localStorage.getItem("sb-played") || "[]")) played.set(k, t); } catch (e) {}
   const clipKey = (p) => (p === "lockin" ? p : p.base);
-  // anything played in the last 12 minutes (across refreshes) sits out while there's something fresher
-  const isFresh = (p) => Date.now() - (played.get(clipKey(p)) || 0) > 12 * 60e3;
+  // several clips ride the same song: the song counts too, so a different clip with the song you just heard waits its turn
+  const songKey = (p) => (p && p !== "lockin" && p.song ? "song:" + p.song.toLowerCase() : null);
+  const lastPlayed = (p) => Math.max(played.get(clipKey(p)) || 0, (songKey(p) && played.get(songKey(p))) || 0);
+  // anything played in the last 12 minutes, or with a song heard in the last 45 (across refreshes), sits out while
+  // there's something fresher
+  const isFresh = (p) => Date.now() - (played.get(clipKey(p)) || 0) > 12 * 60e3 && (!songKey(p) || Date.now() - (played.get(songKey(p)) || 0) > 45 * 60e3);
   const okPool = (l) => l.length > 0 && l.some(isFresh);
   function pickClip(pool) {
     if (!pool.length) return null;
@@ -4239,10 +4265,11 @@ body.tv.idle, body.tv.idle * { cursor: none !important; }
     if (okPool(own) && Math.random() < 0.5) pool = own; // the sport's own folder gets first dibs
     const key = clipKey;
     // shuffle first so never-played clips come out in a random order, then the longest-unplayed first
-    const sorted = pool.map((p) => [p, Math.random()]).sort((x, y) => (played.get(key(x[0])) || 0) - (played.get(key(y[0])) || 0) || x[1] - y[1]).map((x) => x[0]);
-    const fresh = sorted.filter(isFresh), from = fresh.length ? fresh : sorted;
-    const p = from[Math.floor(Math.random() * Math.max(1, Math.ceil(from.length * 0.6)))];
-    played.set(key(p), Date.now());
+    const sorted = pool.map((p) => [p, Math.random()]).sort((x, y) => lastPlayed(x[0]) - lastPlayed(y[0]) || x[1] - y[1]).map((x) => x[0]);
+    // something fresh: a random one of the fresher ones. Everything's been on lately: the one that's gone longest
+    const fresh = sorted.filter(isFresh);
+    const p = fresh.length ? fresh[Math.floor(Math.random() * Math.max(1, Math.ceil(fresh.length * 0.6)))] : sorted[0];
+    played.set(key(p), Date.now()); if (songKey(p)) played.set(songKey(p), Date.now());
     try { localStorage.setItem("sb-played", JSON.stringify([...played])); } catch (e) {}
     return p;
   }
