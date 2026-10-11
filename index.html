@@ -1920,7 +1920,7 @@ body.tv .strip .chart { height: 96px; }
   // ---------- sheets ----------
   function openSheet(id) { $(id).hidden = false; }
   // keep every open screen current: when a new version is up, reload it (never mid-form or mid-animation)
-  const BUILD = "20261011045306";
+  const BUILD = "20261011045855";
   function checkBuild() {
     if (BUILD === "dev") return;
     fetch("version.json?t=" + Date.now(), { cache: "no-store" }).then((r) => (r.ok ? r.json() : null)).then((j) => {
@@ -2075,7 +2075,7 @@ body.tv .strip .chart { height: 96px; }
     const p = F.legs.reduce((a, x) => a * dec(x.o), 1);
     setOdds(Math.round(p >= 2 ? (p - 1) * 100 : -100 / (p - 1)));
   }
-  function legText(x) { const g = S.games.get(x.g); return g ? mkLabel(g, x.m, x.s, x.l) : x.text; }
+  function legText(x) { const g = S.games.get(x.g); return g ? mkLabel(g, x.m, x.s, x.l, x.p) : x.text; }
   function renderPicker() {
     const parlay = kindNow() === "parlay";
     $("#gameField").hidden = !parlay && (F.custom || !!F.sel);
@@ -2092,7 +2092,7 @@ body.tv .strip .chart { height: 96px; }
     }
     $("#legCount").textContent = F.legs.length ? "· " + F.legs.length + " picked" : "· tap markets below or add your own";
     $("#legList").innerHTML = F.legs.map((x, i) => `<div class="legrow"><span class="lt">${esc(legText(x))}</span>
-      ${x.g && x.m !== "ml" ? `<input data-ll="${i}" inputmode="decimal" autocomplete="off" value="${x.l == null ? "" : x.l}" aria-label="Line for leg ${i + 1}">` : "<span></span>"}
+      ${x.g && x.m !== "ml" && !isTd(x.m) ? `<input data-ll="${i}" inputmode="decimal" autocomplete="off" value="${x.l == null ? "" : x.l}" aria-label="Line for leg ${i + 1}">` : "<span></span>"}
       <span class="lo">${x.o ? fOdds(x.o) : ""}</span><button type="button" class="x" data-rm="${i}" aria-label="Remove leg">×</button></div>`).join("");
     renderGames();
   }
@@ -2217,9 +2217,9 @@ body.tv .strip .chart { height: 96px; }
       } else { err.textContent = "Tap a game, then the side you bet."; return; }
     } else {
       if (F.legs.length < 2) { err.textContent = "A parlay needs at least two legs."; return; }
-      if (F.legs.some((x) => x.g && x.m !== "ml" && x.l == null)) { err.textContent = "One of your legs is missing its line."; return; }
+      if (F.legs.some((x) => x.g && x.m !== "ml" && !isTd(x.m) && x.l == null)) { err.textContent = "One of your legs is missing its line."; return; }
       data.legs = F.legs.map(legText);
-      data.legSel = F.legs.map((x) => { const g = x.g && S.games.get(x.g); return x.g ? { g: x.g, m: x.m, s: x.s, l: x.l, sp: x.sport, t: g ? g.t : null } : null; });
+      data.legSel = F.legs.map((x) => { const g = x.g && S.games.get(x.g); if (!x.g) return null; const o = { g: x.g, m: x.m, s: x.s, l: x.l, sp: x.sport, t: g ? g.t : null }; if (x.p) o.p = x.p; return o; });
       F.legs.forEach((x) => { const g = x.g && S.games.get(x.g); if (g) starts.push(g.t); });
       const sp = [...new Set(F.legs.map((x) => x.sport).filter(Boolean))];
       data.sport = sp.length === 1 ? sp[0] : sp.length ? "Mixed" : "";
@@ -3506,9 +3506,12 @@ body.tv .strip .chart { height: 96px; }
   async function loadTdPlays() {
     const want = new Map();
     for (const b of S.bets.values()) {
-      if (b.status !== "open" || !b.sel || !isTd(b.sel.m)) continue;
-      const g = gameOf(b.sel); if (!g || g.st === "pre") continue;
-      const d = TDP.get(g.id); if (d && d.final) continue; want.set(g.id, g);
+      if (b.status !== "open") continue;
+      for (const sel of selsOf(b)) {
+        if (!isTd(sel.m)) continue;
+        const g = gameOf(sel); if (!g || g.st === "pre") continue;
+        const d = TDP.get(g.id); if (d && d.final) continue; want.set(g.id, g);
+      }
     }
     for (const g of want.values()) {
       try {
@@ -3524,15 +3527,18 @@ body.tv .strip .chart { height: 96px; }
   function tdCheck(g, before, now) {
     if (!before) return; // first look: no fireworks for touchdowns that already happened
     for (const b of S.bets.values()) {
-      if (b.status !== "open" || !isMe(b) || !b.sel || !isTd(b.sel.m) || gameOf(b.sel) !== g) continue;
-      const me = normNm(b.sel.p && b.sel.p.nm), had = before.filter((p) => p.who === me).length, has = now.filter((p) => p.who === me);
-      const hit = b.sel.m === "td" ? has.length > had && has[has.length - 1] : !before.length && now.length && now[0].who === me ? now[0] : null;
-      if (!hit || !clipsOn()) continue;
-      stopStatus();
-      const p = b.sel.p || {};
-      showPlayCard(g, { ev: "td", side: b.sel.s, tag: "Touchdown " + g[b.sel.s].ab }, b, () => autoSettle(), 4500,
-        { text: hit.text, type: (b.sel.m === "ftd" ? "First TD · " : "") + hit.type, people: [{ nm: p.nm || hit.name, hs: p.hs || "", j: p.j || "", pos: p.pos || "", sh: p.nm }] });
-      return;
+      if (b.status !== "open" || !isMe(b)) continue;
+      for (const sel of selsOf(b)) {
+        if (!isTd(sel.m) || gameOf(sel) !== g) continue;
+        const me = normNm(sel.p && sel.p.nm), had = before.filter((p) => p.who === me).length, has = now.filter((p) => p.who === me);
+        const hit = sel.m === "td" ? has.length > had && has[has.length - 1] : !before.length && now.length && now[0].who === me ? now[0] : null;
+        if (!hit || !clipsOn()) continue;
+        stopStatus();
+        const p = sel.p || {};
+        showPlayCard(g, { ev: "td", side: sel.s, tag: "Touchdown " + g[sel.s].ab }, b, () => autoSettle(), 4500,
+          { text: hit.text, type: (sel.m === "ftd" ? "First TD · " : "") + hit.type + (b.kind === "parlay" ? " · parlay leg" : ""), people: [{ nm: p.nm || hit.name, hs: p.hs || "", j: p.j || "", pos: p.pos || "", sh: p.nm }] });
+        return;
+      }
     }
   }
   setInterval(loadTdPlays, 30e3);
@@ -5816,8 +5822,8 @@ body.tv .strip .chart { height: 96px; }
 
   // ---------- scan a bet slip (Gemini via Firebase AI Logic) ----------
   const SLIP_MODELS = ["gemini-3.5-flash-lite", "gemini-3.8-flash"];
-  const SLIP_PROMPT = "You read screenshots of sportsbook bet slips (usually FanDuel or DraftKings) and extract each bet on them.\nRules:\n- One entry per bet. A parlay is ONE bet with several legs; a straight bet has exactly one leg.\n- odds: the American odds of the whole bet as an integer (e.g. -110, 250). For a parlay, the parlay's total odds.\n- stake: the dollar amount wagered. to_win: the dollar payout profit shown, if any.\n- For each leg: pick = the selection as written (team or player and line); team = the team or player name only;\n  market = \"ml\" (moneyline/to win), \"spread\" (point spread, run line, puck line, alt spread), \"total\" (over/under game total) or \"prop\" (anything else);\n  side = \"over\" or \"under\" for totals, else null; line = the signed number for spreads (e.g. -6.5) or the total number (e.g. 48.5), else null;\n  away and home = the two teams of the game if shown (an \"A @ B\" matchup means A is away, B is home), else null;\n  sport = NFL, CFB, NBA, CBB, MLB, NHL or OTHER, judged from the teams and market.\n- book = \"FD\" for FanDuel, \"DK\" for DraftKings, null if you can't tell.\n- Use null for anything not visible. Never invent numbers.";
-  const SLIP_SCHEMA = {"type": "OBJECT", "properties": {"bets": {"type": "ARRAY", "items": {"type": "OBJECT", "properties": {"book": {"type": "STRING", "enum": ["FD", "DK"], "nullable": true}, "kind": {"type": "STRING", "enum": ["straight", "parlay"]}, "odds": {"type": "INTEGER", "nullable": true}, "stake": {"type": "NUMBER", "nullable": true}, "to_win": {"type": "NUMBER", "nullable": true}, "legs": {"type": "ARRAY", "items": {"type": "OBJECT", "properties": {"pick": {"type": "STRING"}, "team": {"type": "STRING", "nullable": true}, "market": {"type": "STRING", "enum": ["ml", "spread", "total", "prop"]}, "side": {"type": "STRING", "enum": ["over", "under"], "nullable": true}, "line": {"type": "NUMBER", "nullable": true}, "odds": {"type": "INTEGER", "nullable": true}, "away": {"type": "STRING", "nullable": true}, "home": {"type": "STRING", "nullable": true}, "sport": {"type": "STRING", "enum": ["NFL", "CFB", "NBA", "CBB", "MLB", "NHL", "OTHER"]}}, "required": ["pick", "market", "sport"]}}}, "required": ["kind", "legs"]}}}, "required": ["bets"]};
+  const SLIP_PROMPT = "You read screenshots of sportsbook bet slips (usually FanDuel or DraftKings) and extract each bet on them.\nRules:\n- One entry per bet. A parlay is ONE bet with several legs; a straight bet has exactly one leg.\n- odds: the American odds of the whole bet as an integer (e.g. -110, 250). For a parlay, the parlay's total odds.\n- stake: the dollar amount wagered. to_win: the dollar payout profit shown, if any.\n- For each leg: pick = the selection as written (team or player and line); team = the team or player name only;\n  market = \"ml\" (moneyline/to win), \"spread\" (point spread, run line, puck line, alt spread), \"total\" (over/under game total), \"anytime_td\" (anytime touchdown scorer, \"to score a TD\"), \"first_td\" (first touchdown scorer of the game) or \"prop\" (anything else);\n  player = for touchdown scorer bets, the player's full name exactly as written (e.g. \"Bucky Irving\"), else null; for those bets team = the player's team if shown;\n  side = \"over\" or \"under\" for totals, else null; line = the signed number for spreads (e.g. -6.5) or the total number (e.g. 48.5), else null;\n  away and home = the two teams of the game if shown (an \"A @ B\" matchup means A is away, B is home), else null;\n  sport = NFL, CFB, NBA, CBB, MLB, NHL or OTHER, judged from the teams and market.\n- book = \"FD\" for FanDuel, \"DK\" for DraftKings, null if you can't tell.\n- Use null for anything not visible. Never invent numbers.";
+  const SLIP_SCHEMA = {"type": "OBJECT", "properties": {"bets": {"type": "ARRAY", "items": {"type": "OBJECT", "properties": {"book": {"type": "STRING", "enum": ["FD", "DK"], "nullable": true}, "kind": {"type": "STRING", "enum": ["straight", "parlay"]}, "odds": {"type": "INTEGER", "nullable": true}, "stake": {"type": "NUMBER", "nullable": true}, "to_win": {"type": "NUMBER", "nullable": true}, "legs": {"type": "ARRAY", "items": {"type": "OBJECT", "properties": {"pick": {"type": "STRING"}, "team": {"type": "STRING", "nullable": true}, "market": {"type": "STRING", "enum": ["ml", "spread", "total", "anytime_td", "first_td", "prop"]}, "player": {"type": "STRING", "nullable": true}, "side": {"type": "STRING", "enum": ["over", "under"], "nullable": true}, "line": {"type": "NUMBER", "nullable": true}, "odds": {"type": "INTEGER", "nullable": true}, "away": {"type": "STRING", "nullable": true}, "home": {"type": "STRING", "nullable": true}, "sport": {"type": "STRING", "enum": ["NFL", "CFB", "NBA", "CBB", "MLB", "NHL", "OTHER"]}}, "required": ["pick", "market", "sport"]}}}, "required": ["kind", "legs"]}}}, "required": ["bets"]};
   async function shrink(file) {
     const url = URL.createObjectURL(file);
     try {
@@ -5862,7 +5868,8 @@ body.tv .strip .chart { height: 96px; }
   }
   // find the ESPN game (and side) a slip leg is about
   function matchLeg(leg) {
-    if (!leg || leg.market === "prop") return null;
+    if (leg && leg._td) return leg._td;
+    if (!leg || leg.market === "prop" || leg.market === "anytime_td" || leg.market === "first_td") return null;
     let best = null;
     for (const g of S.games.values()) {
       if (leg.sport && leg.sport !== "OTHER" && g.sport !== leg.sport) continue;
@@ -5882,6 +5889,31 @@ body.tv .strip .chart { height: 96px; }
     const side = best.ta >= best.th ? "a" : "h";
     return { g: g.id, m: leg.market === "spread" ? "sp" : "ml", s: side, l: leg.market === "spread" ? leg.line : null, o: leg.odds, sport: g.sport };
   }
+  // TD scorer legs: find the game (from the matchup, or by finding him on the football rosters) and the player
+  const sameName = (a, b) => {
+    if (normNm(a) && normNm(a) === normNm(b)) return true;
+    const w = (x) => String(x || "").toLowerCase().replace(/\b(jr|sr|ii|iii|iv)\b\.?/g, "").replace(/[^a-z\s.]/g, "").split(/[\s.]+/).filter(Boolean);
+    const x = w(a), y = w(b); return x.length > 1 && y.length > 1 && x[x.length - 1] === y[y.length - 1] && x[0][0] === y[0][0];
+  };
+  async function resolveTdLegs(bets) {
+    for (const pb of bets) for (const leg of pb.legs || []) {
+      if (!leg || (leg.market !== "anytime_td" && leg.market !== "first_td")) continue;
+      const m = leg.market === "first_td" ? "ftd" : "td", who = leg.player || String(leg.pick || "").replace(/\b(anytime|first|td|touchdown|scorer|to score|a)\b/gi, "").trim();
+      const base = matchLeg({ ...leg, market: "ml", team: leg.team || leg.away || leg.home });
+      const fb = (g) => g.sport === "NFL" || g.sport === "CFB";
+      let games = base ? [S.games.get(base.g)] : pickable().filter((g) => fb(g) && (leg.sport === "NFL" || leg.sport === "CFB" ? g.sport === leg.sport : true));
+      if (!base && games.length > 40) games = games.filter((g) => g.sport === "NFL");   // a college Saturday is too many rosters to search
+      let found = null;
+      for (const g of games) {
+        if (!g) continue;
+        const rs = await Promise.all(["a", "h"].map((sd) => loadRoster(g.sport, g[sd].id)));
+        ["a", "h"].forEach((sd, i) => { if (found) return; const pl = (Array.isArray(rs[i]) ? rs[i] : []).find((x) => sameName(x.nm, who)); if (pl) found = { g: g.id, m, s: sd, l: null, o: leg.odds, sport: g.sport, p: pl }; });
+        if (found) break;
+      }
+      if (!found && base && who) found = { g: base.g, m, s: base.s, l: null, o: leg.odds, sport: base.sport, p: { nm: who, hs: "", j: "", pos: "" } };
+      if (found) leg._td = found;
+    }
+  }
   const unitsFor = (stake) => (stake > 0 ? Math.round((stake / S.unit) * 100) / 100 : null);
   // build a ready-to-save bet from one parsed slip bet (used by "Add all")
   function betFromSlip(pb, fallbackBook) {
@@ -5892,11 +5924,11 @@ body.tv .strip .chart { height: 96px; }
     const ms = legs.map(matchLeg), starts = [];
     if (data.kind === "straight") {
       const m = ms[0], g = m && S.games.get(m.g);
-      if (g && !(m.m !== "ml" && m.l == null)) { data.pick = mkLabel(g, m.m, m.s, m.l); data.sport = g.sport; data.sel = { g: g.id, m: m.m, s: m.s, l: m.l, sp: g.sport, t: g.t }; starts.push(g.t); }
+      if (g && !(m.m !== "ml" && !isTd(m.m) && m.l == null)) { data.pick = mkLabel(g, m.m, m.s, m.l, m.p); data.sport = g.sport; data.sel = { g: g.id, m: m.m, s: m.s, l: m.l, sp: g.sport, t: g.t }; if (m.p) data.sel.p = m.p; starts.push(g.t); }
       else { data.pick = legs[0].pick.slice(0, 80); data.sport = legs[0].sport !== "OTHER" ? legs[0].sport : ""; }
     } else {
-      data.legs = legs.map((l, i) => { const m = ms[i], g = m && S.games.get(m.g); return g && !(m.m !== "ml" && m.l == null) ? mkLabel(g, m.m, m.s, m.l) : l.pick.slice(0, 80); });
-      data.legSel = ms.map((m) => { const g = m && S.games.get(m.g); if (!g || (m.m !== "ml" && m.l == null)) return null; starts.push(g.t); return { g: g.id, m: m.m, s: m.s, l: m.l, sp: g.sport, t: g.t }; });
+      data.legs = legs.map((l, i) => { const m = ms[i], g = m && S.games.get(m.g); return g && !(m.m !== "ml" && !isTd(m.m) && m.l == null) ? mkLabel(g, m.m, m.s, m.l, m.p) : l.pick.slice(0, 80); });
+      data.legSel = ms.map((m) => { const g = m && S.games.get(m.g); if (!g || (m.m !== "ml" && !isTd(m.m) && m.l == null)) return null; starts.push(g.t); const o = { g: g.id, m: m.m, s: m.s, l: m.l, sp: g.sport, t: g.t }; if (m.p) o.p = m.p; return o; });
       const sp = [...new Set(legs.map((l) => l.sport).filter((s) => s && s !== "OTHER"))];
       data.sport = sp.length === 1 ? sp[0] : sp.length ? "Mixed" : "";
       data.pick = data.legs.length + "-leg parlay";
@@ -5912,10 +5944,10 @@ body.tv .strip .chart { height: 96px; }
     document.querySelector(`input[name="kind"][value="${parlay ? "parlay" : "straight"}"]`).checked = true;
     Object.assign(F, { sel: null, legs: [], custom: false, openG: null, oddsTouched: true });
     if (parlay) {
-      F.legs = legs.map((l) => { const m = matchLeg(l); return m ? { g: m.g, m: m.m, s: m.s, l: m.l, o: m.o, sport: m.sport } : { text: l.pick.slice(0, 80) }; });
+      F.legs = legs.map((l) => { const m = matchLeg(l); return m ? { g: m.g, m: m.m, s: m.s, l: m.l, o: m.o, sport: m.sport, p: m.p } : { text: l.pick.slice(0, 80) }; });
     } else if (legs[0]) {
       const m = matchLeg(legs[0]);
-      if (m) { F.sel = { g: m.g, m: m.m, s: m.s, l: m.l }; $("#f-line").value = m.l == null ? "" : String(m.l); }
+      if (m) { F.sel = { g: m.g, m: m.m, s: m.s, l: m.l, p: m.p }; $("#f-line").value = m.l == null ? "" : String(m.l); }
       else { F.custom = true; $("#f-pick").value = legs[0].pick.slice(0, 80); const sp = document.querySelector(`input[name="sport"][value="${legs[0].sport}"]`); if (sp) sp.checked = true; }
     }
     setOdds(pb.odds && Math.abs(pb.odds) >= 100 ? pb.odds : null);
@@ -5933,6 +5965,7 @@ body.tv .strip .chart { height: 96px; }
       const [b64] = await Promise.all([shrink(f), loadPickerGames()]);
       const bets = (await readSlip(b64)).filter((b) => b && Array.isArray(b.legs) && b.legs.length);
       if (!bets.length) { scanNote("Couldn't find a bet on that image. Try a screenshot of the slip or the bet in My Bets."); return; }
+      if (bets.some((b) => b.legs.some((l) => l && (l.market === "anytime_td" || l.market === "first_td")))) { $("#scanLbl").textContent = "Finding the players…"; await resolveTdLegs(bets); }
       slipBets = bets;
       fillFromSlip(bets[0]);
       const missing = [];
