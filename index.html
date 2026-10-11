@@ -1425,8 +1425,8 @@ body.tv.idle, body.tv.idle * { cursor: none !important; }
       </div>
     </div>
     <div class="field">
-      <span class="lbl">Goldie intros</span>
-      <span class="hint">Every win gets one, and a loss gets Goldie wiping out (or one of your loss clips). Regular hits mostly get the Goldie scenes made from his pictures (skydive, whip, wheelie, war, strapped, smoke, aura, make it rain, takeover), mixed in with the cartoon ones. $100+ wins get the blockbuster, parlays get their own, and +150 or longer gets the sniper. Tap any to watch it.</span>
+      <span class="lbl"><span class="gnm">Goldie</span> intros</span>
+      <span class="hint">Every win gets one, and a loss gets <span class="gnm">Goldie</span> wiping out (or one of your loss clips). Regular hits mostly get the <span class="gnm">Goldie</span> scenes made from his pictures (skydive, whip, wheelie, war, strapped, smoke, aura, make it rain, takeover), mixed in with the cartoon ones. $100+ wins get the blockbuster, parlays get their own, and +150 or longer gets the sniper. Tap any to watch it.</span>
       <div style="display:flex;gap:8px;flex-wrap:wrap">
         <button type="button" class="btn sm" id="inTestMoney">$100+ blockbuster</button>
         <button type="button" class="btn sm" id="inTestParlay">Parlay</button>
@@ -1465,7 +1465,12 @@ body.tv.idle, body.tv.idle * { cursor: none !important; }
         <label><input type="radio" name="slate" value="feature"><span>4 PM</span></label>
         <label><input type="radio" name="slate" value="prime"><span>Prime time</span></label>
       </div>
-      <span class="hint">Auto goes by how many games are on. 1 PM mode (5+ games): touchdown and turnover alerts on your games, and every touchdown for your side gets a music edit after its alert (a Goldie edit, a hype song or DJ Goldie); in between it's DJ Goldie and music every couple of minutes, no other clips. 4 PM mode (2 to 4 games) and prime time (one game): the full show. Each screen keeps its own setting.</span>
+      <span class="hint">Auto goes by how many games are on. 1 PM mode (5+ games): touchdown and turnover alerts on your games, and every touchdown for your side gets a music edit after its alert (a <span class="gnm">Goldie</span> edit, a hype song or DJ <span class="gnm">Goldie</span>); in between it's DJ <span class="gnm">Goldie</span> and music every couple of minutes, no other clips. 4 PM mode (2 to 4 games) and prime time (one game): the full show. Each screen keeps its own setting.</span>
+    </div>
+    <div class="field">
+      <span class="lbl">His name</span>
+      <div class="linein"><label for="f-char">Name</label><input type="text" id="f-char" maxlength="16" autocomplete="off" placeholder="Goldie"><button type="button" class="btn sm" id="charSave">Save</button></div>
+      <span class="hint">What the gold guy goes by on screen: the DJ breaks, his scenes and the intros list. Saved to your account, so every screen gets it.</span>
     </div>
     <div class="field">
       <span class="lbl">Your name on the board</span>
@@ -1678,6 +1683,10 @@ body.tv.idle, body.tv.idle * { cursor: none !important; }
     el._raf = requestAnimationFrame(step);
   }
 
+  // his name on screen: set in Settings, Goldie until then. Labels written with "Goldie" in them take whatever it is
+  const gName = () => S.charName || "Goldie";
+  const gLbl = (x) => String(x || "").replace(/\bGoldie\b/g, gName());
+  function showGName() { document.querySelectorAll(".gnm").forEach((el) => (el.textContent = gName())); renderLib(); }
   // ---------- render ----------
   // bets you log for other people (Julian, a guest) live in their own section and never count toward yours
   const isMe = (b) => !b || !b.who || b.who === "me";
@@ -2573,7 +2582,7 @@ body.tv.idle, body.tv.idle * { cursor: none !important; }
   // ---------- sheets ----------
   function openSheet(id) { $(id).hidden = false; }
   // keep every open screen current: when a new version is up, reload it (never mid-form or mid-animation)
-  const BUILD = "20261011182432";
+  const BUILD = "20261011190324";
   function checkBuild() {
     if (BUILD === "dev") return;
     fetch("version.json?t=" + Date.now(), { cache: "no-store" }).then((r) => (r.ok ? r.json() : null)).then((j) => {
@@ -3938,7 +3947,7 @@ body.tv.idle, body.tv.idle * { cursor: none !important; }
     Promise.all([sound, vidReady(v)]).then(([buf]) => {
       if (go !== pipGo || statusBet !== betId) return;
       clearTimeout(hideT);
-      $("#jbLbl").textContent = P.label;
+      $("#jbLbl").textContent = gLbl(P.label);
       // songs get a now-playing card (song and artist), slid in a beat after the clip starts
       const np = $("#jbNp"); np.classList.remove("on"); clearTimeout(npT);
       if (P.song) lastSong = P.song;
@@ -4535,7 +4544,7 @@ body.tv.idle, body.tv.idle * { cursor: none !important; }
       const other = musicFor(b).filter((c) => !c.dj), P = pickClip(newSong(busyPops++ % 3 === 2 && other.length ? other : CLIPS.filter((c) => c.dj)));
       if (!P) return;
       lastAny = now; lastKind = "pop";
-      react(b, "mid", P, P.dj ? "DJ Goldie" : "Music");
+      react(b, "mid", P, P.dj ? "DJ " + gName() : "Music");
       return;
     }
     let live = [];
@@ -4555,7 +4564,8 @@ body.tv.idle, body.tv.idle * { cursor: none !important; }
   const LIB_GROUPS = [["Winning · on repeat while you're winning", (c) => c.mood.split(" ").includes("win")], ["Comeback · when you're down but within two scores", (c) => c.mood.split(" ").includes("comeback")], 
     ["College football · every college bet, never the team you're betting against", (c) => c.sport === "CFB"], ["MLB only", (c) => c.sport === "MLB"],
     ["Losing bet · every sport", (c) => !c.sport && c.mood.includes("down")], ["Fillers · close games, every 3 min", (c) => c.mood.split(" ").includes("vibe")]];
-  $("#clipLib").innerHTML = LIB_GROUPS.map(([name, f]) => `<h4>${esc(name)}</h4>` + CLIPS.map((c, i) => (f(c) ? `<div class="sndrow"><label>${esc(c.label)}${c.fan ? `<span class="mood">${esc(c.fan)}</span>` : ""}${c.sport && !c.teams && !c.fan ? `<span class="mood">${c.mood.includes("down") ? "Losing" : "Winning"}</span>` : ""}</label><button type="button" class="btn sm" data-i="${i}">Play</button></div>` : "")).join("")).join("");
+  function renderLib() { $("#clipLib").innerHTML = LIB_GROUPS.map(([name, f]) => `<h4>${esc(name)}</h4>` + CLIPS.map((c, i) => (f(c) ? `<div class="sndrow"><label>${esc(gLbl(c.label))}${c.fan ? `<span class="mood">${esc(c.fan)}</span>` : ""}${c.sport && !c.teams && !c.fan ? `<span class="mood">${c.mood.includes("down") ? "Losing" : "Winning"}</span>` : ""}</label><button type="button" class="btn sm" data-i="${i}">Play</button></div>` : "")).join("")).join(""); }
+  renderLib();
   $("#clipLib").addEventListener("click", (e) => {
     const btn = e.target.closest("button[data-i]"); if (!btn) return;
     const P = CLIPS[Number(btn.dataset.i)], m = P.mood.split(" ")[0];
@@ -4756,6 +4766,11 @@ body.tv.idle, body.tv.idle * { cursor: none !important; }
   const showSlate = () => { const r = document.querySelector(`input[name="slate"][value="${slatePin()}"]`); if (r) r.checked = true; };
   showSlate();
   $("#slateRadios").addEventListener("change", (e) => { try { localStorage.setItem("sb-slate", e.target.value); } catch (err) {} showMode(); });
+  $("#f-char").value = S.charName || "";
+  $("#charSave").addEventListener("click", () => {
+    const v = $("#f-char").value.trim().slice(0, 16); $("#f-char").value = v; S.charName = v; showGName();
+    write((db) => db.doc("config/settings").set({ charName: v }, { merge: true }), () => {}).then((ok) => ok && toast(v ? `He's ${v} now, on every screen` : "He's Goldie again"));
+  });
   $("#f-host").value = S.hostName || "";
   $("#hostSave").addEventListener("click", () => {
     const v = $("#f-host").value.trim().slice(0, 16); S.hostName = v; render();
@@ -6959,6 +6974,8 @@ body.tv.idle, body.tv.idle * { cursor: none !important; }
         if (ok && ok !== S.oddsKey) { S.oddsKey = ok; PROPS.clear(); OA_EVENTS.clear(); }
         const fc = s.exists ? s.data().focus : null;
         if (fc && ["auto", "CFB", "NFL"].includes(fc)) setFocus(fc);
+        const cn = s.exists ? s.data().charName : null;
+        if (cn != null && cn !== S.charName) { S.charName = cn; $("#f-char").value = cn; showGName(); }
         const hn = s.exists ? s.data().hostName : null;
         if (hn != null && hn !== S.hostName) { S.hostName = hn; $("#f-host").value = hn; render(); }
         const gn = s.exists ? s.data().guestName : null;
