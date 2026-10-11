@@ -257,7 +257,7 @@ button.chip:hover { color: var(--ink); border-color: var(--ink-3); }
 @media (max-width: 779px) { .top .add-top { display: none; } .brand h1 { font-size: 26px; } }
 
 /* Sheets */
-.scrim { position: fixed; inset: 0; z-index: 40; background: rgba(3,6,10,.72); display: grid; place-items: center; padding: 16px; backdrop-filter: blur(4px); }
+.scrim { position: fixed; inset: 0; z-index: 60; background: rgba(3,6,10,.72); display: grid; place-items: center; padding: 16px; backdrop-filter: blur(4px); }
 .sheet { width: 100%; max-width: 520px; max-height: calc(100% - 8px); overflow-y: auto; background: var(--panel); border: 1px solid var(--line); border-radius: 18px; padding: 20px; display: flex; flex-direction: column; gap: 16px; }
 @media (max-width: 560px) {
   .scrim { place-items: end center; padding: 0; }
@@ -1820,6 +1820,22 @@ body.tv .strip .chart { height: 96px; }
 
   // ---------- sheets ----------
   function openSheet(id) { $(id).hidden = false; }
+  // keep every open screen current: when a new version is up, reload it (never mid-form or mid-animation)
+  const BUILD = "20261011031407";
+  function checkBuild() {
+    if (BUILD === "dev") return;
+    fetch("version.json?t=" + Date.now(), { cache: "no-store" }).then((r) => (r.ok ? r.json() : null)).then((j) => {
+      if (!j || !j.v || j.v === BUILD) return;
+      if (fxBusy || !$("#addSheet").hidden || !$("#setSheet").hidden || !$("#jumbo").hidden) { setTimeout(checkBuild, 20000); return; }
+      // one try per version every 5 minutes, so a slow CDN can't cause a reload loop
+      let tried = ""; try { tried = sessionStorage.getItem("sb-upd") || ""; } catch (e) {}
+      const [tv, tt] = tried.split("|"); if (tv === j.v && Date.now() - Number(tt) < 5 * 60e3) return;
+      try { sessionStorage.setItem("sb-upd", j.v + "|" + Date.now()); } catch (e) {}
+      location.replace(location.pathname + "?v=" + encodeURIComponent(j.v));
+    }).catch(() => {});
+  }
+  setInterval(checkBuild, 90000); setTimeout(checkBuild, 4000);
+  document.addEventListener("visibilitychange", () => { if (!document.hidden) checkBuild(); });
   function closeSheets() { $("#addSheet").hidden = true; $("#setSheet").hidden = true; }
   document.querySelectorAll(".scrim").forEach((s) => s.addEventListener("click", (e) => { if (e.target === s || e.target.closest("[data-close]")) closeSheets(); }));
   document.addEventListener("keydown", (e) => { if (e.key === "Escape") closeSheets(); });
