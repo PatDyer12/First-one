@@ -1127,6 +1127,22 @@ body.tv .side .crewp .crew-p + .crew-p { margin-top: 10px; padding-top: 10px; }
 body.tv .side .crewp .crew-done { gap: 5px; margin-top: 6px; } body.tv .side .crewp .crew-chip { font-size: 12px; padding: 2px 7px 2px 2px; } body.tv .side .crewp .crew-chip i { width: 17px; height: 17px; font-size: 10px; }
 body.tv .side .crewp .crew-chip:nth-child(n+5) { display: none; }
 body.tv .side .crewp .list { columns: 214px; }
+
+/* fit to the TV: the edge margin, the frame you line up with, pinned standings, a hidden pointer */
+body.tv { padding: var(--sy, 0px) var(--sx, 0px) 0; }
+body.tv .ticker { left: var(--sx, 0px); right: var(--sx, 0px); bottom: var(--sy, 0px); }
+body.tv .jumbo { inset: var(--sy, 0px) var(--sx, 0px); }
+body.tv.has-ticker .jumbo { bottom: calc(var(--sy, 0px) + clamp(40px, 4.6vh, 58px)); }
+body.tv .flash { top: calc(18px + var(--sy, 0px)); }
+body.tv .whotag { top: calc(2.6vh + var(--sy, 0px)); }
+.safeframe { position: fixed; inset: var(--sy, 0px) var(--sx, 0px); z-index: 400; border: 3px dashed var(--accent); border-radius: 4px; pointer-events: none; box-shadow: 0 0 0 100vmax rgba(0,0,0,.45); }
+.safeframe .c { position: absolute; width: 46px; height: 46px; border: 0 solid var(--accent); }
+.safeframe .tl { left: 6px; top: 6px; border-width: 8px 0 0 8px; } .safeframe .tr { right: 6px; top: 6px; border-width: 8px 8px 0 0; }
+.safeframe .bl { left: 6px; bottom: 6px; border-width: 0 0 8px 8px; } .safeframe .br { right: 6px; bottom: 6px; border-width: 0 8px 8px 0; }
+.safeframe span { position: absolute; left: 50%; top: 50%; transform: translate(-50%, -50%); display: grid; gap: 8px; text-align: center; font: 900 clamp(26px, 3.4vw, 48px)/1.05 var(--f-num); color: var(--accent); background: rgba(5,6,8,.92); border: 1px solid var(--line-2); border-radius: 16px; padding: 20px 28px; white-space: nowrap; }
+.safeframe small { font: 700 clamp(14px, 1.5vw, 20px) var(--f-num); color: var(--ink-2); white-space: normal; }
+body.tv .side .roomp { position: sticky; top: 0; z-index: 3; background: linear-gradient(180deg, #151922, #0d1016); }
+body.tv.idle, body.tv.idle * { cursor: none !important; }
 </style>
 </head>
 <body>
@@ -1361,6 +1377,8 @@ body.tv .side .crewp .list { columns: 214px; }
       <span class="hint">Only the good stuff, and only for your side. Your team's touchdowns, field goals, turnovers, red-zone trips, home runs and goals get a clip, with your team's own clips first. While you're winning, your winning clips play every 2½ minutes. When it's close, a music break or some hype plays every 3 minutes. Music breaks are songs only, with a card showing the song and artist. With only 1 or 2 bets out, there's more dead air, so a clip comes every 2 minutes. When you're down but within two scores, comeback clips play. When you're getting blown out, it stays quiet. Overs and unders are judged on pace, and stay quiet whenever they're off pace. Tap the screen to close a clip. Turn this off on your phone and leave it on for the monitor.</span>
       <div style="display:flex;gap:8px;flex-wrap:wrap"><button type="button" class="btn sm primary" id="trialBtn">Run a trial</button><button type="button" class="btn sm" id="pcTest">Preview a touchdown alert</button></div>
       <span class="hint">The trial replays the latest finished NFL game play by play with a pretend bet on the winner: play alerts and clips when your side scores, quiet when they don't, then the win. Nothing gets saved and it doesn't touch your numbers.</span>
+      <label class="togrow delayrow">TV edges <input type="range" id="tvSafe" min="0" max="10" step="0.5"> <b id="tvSafeVal"></b></label>
+      <span class="hint">If the TV cuts off the edges of the board (the logo, Exit TV, the ticker), slide this up in TV mode until all four corners show, or press − and + on the keyboard. Best fix is the TV's own Screen Fit picture size or Underscan in the Mac's Display settings; this is the backup. Each screen keeps its own setting.</span>
       <label class="togrow delayrow">TV delay <input type="range" id="tvDelay" min="0" max="120" step="5"> <b id="tvDelayVal"></b></label>
       <span class="hint">ESPN's scores run ahead of your TV. The board holds scores, clips and win/loss animations back by this much so nothing spoils a play. If clips still beat the TV, turn it up. If they come late, turn it down. Each screen keeps its own setting.</span>
       <div class="cliplib" id="clipLib"></div>
@@ -1504,6 +1522,7 @@ body.tv .side .crewp .list { columns: 214px; }
 
 <div class="slip" id="slip" hidden aria-live="polite"><div class="sl-card"><div class="sl-who"><i id="slAv"></i><span id="slWho"></span></div><div class="sl-pick" id="slPick"></div><div class="sl-row"><b id="slOdds"></b><span id="slAmt"></span></div><div class="sl-sub" id="slSub"></div><div class="sl-stamp" id="slStamp"></div></div></div>
 <div class="legcard" id="legCard" hidden aria-live="polite"><div class="lc-box"><div class="lc-kick" id="lcKick"></div><div class="lc-title"><span class="ck">✓</span>Leg hit</div><div class="lc-leg" id="lcLeg"></div><div class="lc-prog" id="lcProg"></div><ul class="lc-list" id="lcList"></ul><div class="lc-foot" id="lcFoot"></div></div></div>
+<div class="safeframe" id="safeFrame" hidden aria-hidden="true"><i class="c tl"></i><i class="c tr"></i><i class="c bl"></i><i class="c br"></i><span id="safeLbl"></span></div>
 <div class="whotag" id="whoTag" hidden aria-live="polite"><i id="wtAv"></i><b id="wtName"></b><em id="wtSub"></em></div>
 <div class="flash" id="flash" aria-live="polite"><div class="word" id="fl-word"></div><div class="what"><b id="fl-pick"></b><span id="fl-detail"></span></div></div>
 <div class="toast" id="toast" hidden role="status"></div>
@@ -1629,20 +1648,26 @@ body.tv .side .crewp .list { columns: 214px; }
   // and the side column scroll inside; bet cards step down in size (bigger first, more columns as bets pile up) so as many
   // as possible fit, the crew's always a step smaller than yours. Whatever still doesn't fit scrolls slowly up and down
   const TV_W = 1500;
+  // TVs that crop the picture (overscan) cut off the board's edges; this pulls everything in from all four sides (percent)
+  function tvSafe() { try { const v = parseFloat(localStorage.getItem("sb-safe")); return isFinite(v) ? Math.max(0, Math.min(10, v)) : 0; } catch (e) { return 0; } }
   function fitTV() {
     const app = $(".app");
     if (!document.body.classList.contains("tv")) { app.style.zoom = ""; app.style.height = ""; return; }
-    const z = Math.max(0.7, Math.min(2.4, innerWidth / TV_W));
+    const sp = tvSafe() / 100, sx = Math.round(innerWidth * sp), sy = Math.round(innerHeight * sp);
+    document.body.style.setProperty("--sx", sx + "px"); document.body.style.setProperty("--sy", sy + "px");
+    const z = Math.max(0.6, Math.min(2.4, (innerWidth - 2 * sx) / TV_W));
     app.style.zoom = z.toFixed(4);
     const tk = $("#ticker"), tkh = tk && !tk.hidden ? tk.offsetHeight : 0;
-    app.style.height = Math.floor((innerHeight - tkh) / z) + "px";
+    app.style.height = Math.floor((innerHeight - 2 * sy - tkh) / z) + "px";
     densify();
   }
   let dens = 0;
   function densify() {
     const sc = $(".mainc"); if (!sc) return;
     const crewN = document.querySelectorAll("#crew .bet").length, crewL = crewN <= 2 ? 1 : crewN <= 6 ? 2 : 3;
-    const set = (L) => { document.body.dataset.dens = L; $("#rides").dataset.d = L; $("#active").dataset.d = L; for (const el of document.querySelectorAll("#crew .list")) el.dataset.d = crewL; };
+    const COLW = [400, 330, 262, 214], GAP = [12, 10, 8, 7];
+    const cols = (el, L) => { const n = el.querySelectorAll(":scope > .bet").length, max = Math.max(1, Math.floor((el.clientWidth + GAP[L]) / (COLW[L] + GAP[L]))); el.style.columnCount = n ? String(Math.min(n, max)) : ""; };
+    const set = (L) => { document.body.dataset.dens = L; $("#rides").dataset.d = L; $("#active").dataset.d = L; cols($("#active"), L); for (const el of document.querySelectorAll("#crew .list")) { el.dataset.d = crewL; cols(el, crewL); } };
     const fits = (k) => sc.scrollHeight <= sc.clientHeight * k + 2;
     let L = 0;
     for (; L < 3; L++) { set(L); if (fits(1)) break; }
@@ -2367,15 +2392,35 @@ body.tv .side .crewp .list { columns: 214px; }
   document.addEventListener("visibilitychange", () => { if (document.visibilityState === "visible" && document.body.classList.contains("tv")) grabWake(); });
   // on the TV your bets keep the big left side; the crew's picks sit on the right under the standings
   function placeCrew(tv) {
-    const crew = $("#crewPanel");
-    if (tv) $(".side").insertBefore(crew, $(".lines"));
-    else $(".mainc").insertBefore(crew, $(".settledp"));
+    const crew = $("#crewPanel"), done = $(".settledp");
+    if (tv) { $(".side").insertBefore(crew, $(".lines")); $(".side").appendChild(done); }
+    else { $(".mainc").appendChild(done); $(".mainc").insertBefore(crew, done); }
   }
+  // line the board up with the TV: a dashed frame at the edges while you adjust (Settings slider, or - and + on the keyboard)
+  let safeT = 0;
+  function setSafe(v, show) {
+    v = Math.max(0, Math.min(10, Math.round(v * 2) / 2));
+    try { localStorage.setItem("sb-safe", String(v)); } catch (e) {}
+    $("#tvSafe").value = v; $("#tvSafeVal").textContent = v + "%";
+    fitTV();
+    if (!show || !document.body.classList.contains("tv")) return;
+    const f = $("#safeFrame"); $("#safeLbl").innerHTML = `TV edges ${v}%<small>Press − or + until you can see all four corners of this frame</small>`;
+    f.hidden = false; clearTimeout(safeT); safeT = setTimeout(() => (f.hidden = true), 4000);
+  }
+  document.addEventListener("keydown", (e) => {
+    if (!document.body.classList.contains("tv") || e.metaKey || e.ctrlKey || e.altKey || /INPUT|TEXTAREA|SELECT/.test((e.target && e.target.tagName) || "")) return;
+    if (e.key === "-" || e.key === "_") { setSafe(tvSafe() + 0.5, true); e.preventDefault(); }
+    else if (e.key === "=" || e.key === "+") { setSafe(tvSafe() - 0.5, true); e.preventDefault(); }
+  });
+  // the pointer hides when it sits still on the TV
+  let idleT = 0;
+  const unIdle = () => { document.body.classList.remove("idle"); clearTimeout(idleT); idleT = setTimeout(() => document.body.classList.add("idle"), 3000); };
+  document.addEventListener("mousemove", unIdle, { passive: true }); unIdle();
 
   // ---------- sheets ----------
   function openSheet(id) { $(id).hidden = false; }
   // keep every open screen current: when a new version is up, reload it (never mid-form or mid-animation)
-  const BUILD = "20261011173225";
+  const BUILD = "20261011173942";
   function checkBuild() {
     if (BUILD === "dev") return;
     fetch("version.json?t=" + Date.now(), { cache: "no-store" }).then((r) => (r.ok ? r.json() : null)).then((j) => {
@@ -4273,6 +4318,8 @@ body.tv .side .crewp .list { columns: 214px; }
     const P = CLIPS[Number(btn.dataset.i)], m = P.mood.split(" ")[0];
     closeSheets(); react(anyOpen(), m === "up" ? "good" : m === "down" ? "bad" : "mid", P);
   });
+  $("#tvSafe").value = tvSafe(); $("#tvSafeVal").textContent = tvSafe() + "%";
+  $("#tvSafe").addEventListener("input", (e) => setSafe(parseFloat(e.target.value) || 0, true));
   const showDelay = () => { $("#tvDelay").value = tvDelay(); $("#tvDelayVal").textContent = tvDelay() + "s"; };
   showDelay();
   $("#tvDelay").addEventListener("input", (e) => { try { localStorage.setItem("sb-delay", e.target.value); } catch (err) {} showDelay(); });
