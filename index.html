@@ -2598,7 +2598,7 @@ body.tv.idle, body.tv.idle * { cursor: none !important; }
   // ---------- sheets ----------
   function openSheet(id) { $(id).hidden = false; }
   // keep every open screen current: when a new version is up, reload it (never mid-form or mid-animation)
-  const BUILD = "20261011192658";
+  const BUILD = "20261011195020";
   function checkBuild() {
     if (BUILD === "dev") return;
     fetch("version.json?t=" + Date.now(), { cache: "no-store" }).then((r) => (r.ok ? r.json() : null)).then((j) => {
@@ -3408,7 +3408,7 @@ body.tv.idle, body.tv.idle * { cursor: none !important; }
       if (m2) { m2.clearRect(0, 0, w, h); m2.drawImage(cv, 0, 0); }
     };
   }
-  const vidSrc = (base) => (document.createElement("video").canPlayType('video/mp4; codecs="avc1.42E01E"') ? base + ".mp4" : base + ".webm") + "?v=1";
+  const vidSrc = (base) => (document.createElement("video").canPlayType('video/mp4; codecs="avc1.42E01E"') ? base + ".mp4" : base + ".webm") + (base === "sounds/aura/dj" ? "?v=2" : "?v=1"); // v=2: the DJ loop with Sweat Zone signs
   function loadVid(id, base) { const v = $(id); if (!v.getAttribute("src")) { v.preload = "auto"; v.src = vidSrc(base); v.load(); } }
   // play a cut-out video into its canvas; `then` runs once it's rolling (or right away if it can't)
   function playCut(v, draw, onShow, then) {
