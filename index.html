@@ -770,7 +770,7 @@ body.tv .chart { height: 240px; }
     <div class="field">
       <span class="lbl">Reaction clips</span>
       <label class="togrow"><input type="checkbox" id="clipsOn"> Pop clips up on this screen</label>
-      <span class="hint">While a bet is live, a clip takes over the screen on touchdowns, field goals, turnovers, red-zone trips, home runs, goals, big runs, crunch time and halftime (good or bad for you), and about every 6 minutes if nothing's happened: a winning clip when you're cashing, a losing one when you're not, hype when it's close. Kickoffs and big swings set one off too, and Georgia–Bama plays its own clips on every score. Tap the screen to close one. Turn this off on your phone and leave it on for the monitor.</span>
+      <span class="hint">Only the good stuff, and only for your side. Your team's touchdowns, field goals, turnovers, red-zone trips, home runs and goals get a clip, with your team's own clips first. While you're winning, hype rap plays every 2½ minutes. When it's close, hype plays about every 6 minutes. When you're losing, it stays quiet. Overs and unders are judged on pace. Tap the screen to close a clip. Turn this off on your phone and leave it on for the monitor.</span>
       <label class="togrow delayrow">TV delay <input type="range" id="tvDelay" min="0" max="120" step="5"> <b id="tvDelayVal"></b></label>
       <span class="hint">ESPN's scores run ahead of your TV. The board holds scores, clips and win/loss animations back by this much so nothing spoils a play. If clips still beat the TV, turn it up. If they come late, turn it down. Each screen keeps its own setting.</span>
       <div class="cliplib" id="clipLib"></div>
@@ -1039,6 +1039,17 @@ body.tv .chart { height: 240px; }
   const fLine = (l) => (l > 0 ? "+" + trimL(l) : l < 0 ? "−" + trimL(-l) : "PK");
   const gameOf = (sel) => (sel && sel.g != null ? S.games.get(String(sel.g)) : null);
   // live grade of one pick from the latest scores: m > 0 means it's winning
+  // share of the game played, 0..1, from the period and clock
+  function gameDone(g) {
+    if (g.st === "post") return 1;
+    if (g.st !== "in") return 0;
+    const pd = g.pd || 1, c = Number(g.clk) || 0;
+    if (/halftime/i.test(g.d)) return 0.5;
+    const per = { CFB: [4, 900], NFL: [4, 900], NBA: [4, 720], CBB: [2, 1200], NHL: [3, 1200] }[g.sport];
+    if (per) return pd > per[0] ? 0.99 : Math.min(0.99, ((pd - 1) * per[1] + (per[1] - Math.min(c, per[1]))) / (per[0] * per[1]));
+    if (g.sport === "MLB") { const half = /^top/i.test(g.d) ? 0.25 : /^mid/i.test(g.d) ? 0.5 : /^bot/i.test(g.d) ? 0.75 : /^end/i.test(g.d) ? 1 : 0.5; return Math.min(0.99, (pd - 1 + half) / 9); }
+    return 0;
+  }
   function evalSel(sel) {
     const g = gameOf(sel);
     if (!g || g.st === "pre" || g.a.sc == null || g.h.sc == null) return null;
@@ -1047,12 +1058,16 @@ body.tv .chart { height: 240px; }
     if (sel.m === "ml") m = diff;
     else if (sel.m === "sp") { if (sel.l == null) return null; m = diff + sel.l; }
     else { if (sel.l == null) return null; m = sel.s === "o" ? a + h - sel.l : sel.l - (a + h); }
-    const res = m > 0 ? "W" : m < 0 ? "L" : "P", fin = g.st === "post", k = trimL(Math.abs(m));
+    const fin = g.st === "post", k = trimL(Math.abs(m));
+    // a total mid-game is graded against pace: points so far vs the line's share for the time played
+    let pace = null;
+    if (sel.m === "tot" && !fin) { const f = gameDone(g); if (f > 0 && f < 1) { const par = sel.l * f; pace = sel.s === "o" ? a + h - par : par - (a + h); if (m <= 0 || sel.s === "u") m = sel.s === "o" ? pace : Math.min(pace, m); } }
+    const res = m > 0 ? "W" : m < 0 ? "L" : "P";
     let txt;
     if (sel.m === "ml") txt = m > 0 ? "Up " + k : m < 0 ? "Down " + k : "Tied";
     else if (sel.m === "sp") txt = m > 0 ? "Covering by " + k : m < 0 ? "Needs " + k : "On the number";
-    else if (sel.s === "o") txt = m > 0 ? "Over by " + k : m < 0 ? "Needs " + k + " more" : "On the number";
-    else txt = m > 0 ? k + " to spare" : m < 0 ? "Over by " + k : "On the number";
+    else if (sel.s === "o") txt = (a + h > sel.l ? "Over by " + trimL(a + h - sel.l) : a + h < sel.l ? "Needs " + trimL(sel.l - a - h) + " more" : "On the number") + (pace != null && a + h <= sel.l ? (pace >= 0 ? " · on pace" : " · off pace") : "");
+    else txt = (a + h < sel.l ? trimL(sel.l - a - h) + " to spare" : a + h > sel.l ? "Over by " + trimL(a + h - sel.l) : "On the number") + (pace != null && a + h < sel.l ? (pace >= 0 ? " · on pace" : " · off pace") : "");
     if (fin) txt = "Final · " + (res === "W" ? "winner" : res === "L" ? "loser" : "push");
     return { m, res, fin, txt, g };
   }
@@ -2348,9 +2363,9 @@ body.tv .chart { height: 240px; }
   const CLIPS = [
     clip("uga/uga01", "Between the hedges", "hype up", 13.95, UGA),
     clip("uga/uga02", "They call him George", "hype up", 30, UGA),
-    clip("uga/uga03", "Dawgs highlight reel", "hype up", 25.75, UGA),
-    clip("clips/g08", "How 'bout them Dawgs", "hype up", 30.05, UGA),
-    clip("uga/uga04", "Heavyweights in Tuscaloosa", "hype up", 30, UGA_VS_ALA),
+    clip("uga/uga03", "Dawgs highlight reel", "hype up rap", 25.75, UGA),
+    clip("clips/g08", "How 'bout them Dawgs", "hype up rap", 30.05, UGA),
+    clip("uga/uga04", "Heavyweights in Tuscaloosa", "hype up rap", 30, UGA_VS_ALA),
     clip("uga/uga05", "Don't think about nothing", "hype up", 16.25, UGA_VS_ALA),
     clip("cfb/cfb03", "365 days", "hype up", 26.8, UGA_VS_ALA),
     clip("cfb/cfb13", "McAfee: going crazy tonight", "hype up", 22, UGA_VS_ALA),
@@ -2371,9 +2386,9 @@ body.tv .chart { height: 240px; }
     clip("cfb/cfb14", "You owe them something", "down hype", 33.4, CFB),
     clip("clips/w02", "Car ride laughs", "up", 22.45),
     clip("clips/w03", "Tiger: Pure.", "up", 30),
-    clip("clips/w04", "Migos carpool", "up vibe", 30),
+    clip("clips/w04", "Migos carpool", "up vibe rap", 30),
     clip("clips/w05", "Melo's Knicks intro", "up", 30),
-    clip("clips/w06", "KD: kiss it", "up", 26.35),
+    clip("clips/w06", "KD: kiss it", "up rap", 26.35),
     clip("clips/w07", "Locker room karaoke", "up vibe", 27.95),
     clip("cfb/cfb08", "Sark had me rollin", "up", 5.7),
     clip("clips/w09", "Bryce Underwood", "up", 17.85),
@@ -2382,8 +2397,8 @@ body.tv .chart { height: 240px; }
     clip("cfb/cfb11", "Nah nah honey I'm good", "up vibe", 29.9),
     clip("cfb/cfb12", "Backyard singalong", "up vibe", 25.9),
     clip("clips/w14", "Drake Maye singing", "up", 17.7),
-    clip("clips/w15", "July 4, 1776", "up vibe", 15.05),
-    clip("clips/w16", "Chuck E. Cheese party", "up vibe", 29.85),
+    clip("clips/w15", "July 4, 1776", "up vibe rap", 15.05),
+    clip("clips/w16", "Chuck E. Cheese party", "up vibe rap", 29.85),
     clip("cfb/cfb15", "After the touchdown", "up", 15, CFB),
     clip("mlb/mlb01", "Superior firepower", "up hype vibe", 23.15, MLB),
     clip("mlb/mlb02", "Back to me", "up hype vibe", 25.45, MLB),
@@ -2491,8 +2506,11 @@ body.tv .chart { height: 240px; }
   }
   const fits = (c, b) => !c.fan || c.fan === myTeam(b);
   // your team's own clips first, then the matchup's, then the general folders
+  const rapFor = (b) => { const g = gameFor(b), sp = (g || {}).sport || sportOf(b); return CLIPS.filter((c) => c.mood.split(" ").includes("rap") && fits(c, b) && (!c.sport || c.sport === sp) && (!c.teams || isMatchup(c, g))); };
   function poolFor(b, k) {
     const me = myTeam(b);
+    if (k === "rap") { const r = rapFor(b); if (r.length && Math.random() < 0.75) return r; k = "good"; }
+    if (k === "good") { const r = rapFor(b); if (r.length && Math.random() < 0.4) return r; }
     const fan = me && k !== "bad" ? CLIPS.filter((c) => c.fan === me && (!c.teams || isMatchup(c, gameFor(b)))) : [];
     const match = k !== "bad" ? gamePool(b) : [];
     const base = k === "good" ? [PIPS.good, ...libFor(b, ["up"])] : k === "bad" ? ["lockin", ...libFor(b, ["down"])] : libFor(b, ["hype", "vibe"]);
@@ -2537,6 +2555,7 @@ body.tv .chart { height: 240px; }
   const BIG_GAP = 60e3;           // touchdowns, home runs, goals, turnovers, swings: a minute apart
   const TRIGGER_GAP = 2 * 60e3;   // red zone, field goals, runs, crunch time, halftime, kickoffs: 2 min apart
   const POP_EVERY = 6 * 60e3;     // nothing for 6 min while a game's live: pop one anyway
+  const POP_WIN = 150e3;          // while you're winning: hype rap every 2½ min
   const lastRes = new Map(), lastReact = new Map(), legHits = new Map(), gameSt = new Map(), gameSc = new Map(), lastM = new Map(), lastFeat = new Map();
   let lastAny = Date.now() - POP_EVERY + 2 * 60e3; // first pop-up no sooner than 2 min after the board opens
   function clipsOn() { try { return localStorage.getItem("sb-clips") !== "off"; } catch (e) { return true; } }
@@ -2556,8 +2575,10 @@ body.tv .chart { height: 240px; }
       if (!legs.some((l) => l.sel && !l.st && (gameOf(l.sel) || {}).st === "in")) return null;
       return { state: legs.some((l) => l.st === "hit") ? "W" : "E" };
     }
-    const g = gameOf(b.sel);
-    return g && g.st === "in" ? { state: lastRes.get(b.id) || "E" } : null;
+    const g = gameOf(b.sel), ev = evalSel(b.sel);
+    if (!g || g.st !== "in" || !ev) return null;
+    // pop-ups go by where it stands right now: behind at all is losing (quiet), ahead and past the bar is winning
+    return { state: ev.m < 0 ? "L" : ev.m > 0 && lastRes.get(b.id) === "W" ? "W" : "E" };
   }
   // ---------- game situations: what just happened in a game you're on, and whether it helps you ----------
   const FB = { CFB: 1, NFL: 1 }, HOOPS = { NBA: 1, CBB: 1 };
@@ -2629,7 +2650,8 @@ body.tv .chart { height: 240px; }
           for (const { b: rb, s: rs } of riders) {
             const h = helps(rs, e);
             // on a side or moneyline, only your team's plays get a clip; on a total every score counts
-            if (e.side && (h < 0 ? rs.m !== "tot" : h === 0)) continue;
+            if (e.side && h <= 0) continue; // losing stays quiet: nothing for plays that hurt you (a TD on your under too)
+            if (!e.side && lastRes.get(rb.id) === "L") continue;
             swings.push({ b: rb, kind: "ev", e, h, g, pri: (EV_RANK[e.ev] || 2) + (h < 0 ? 0.5 : 0), matchup: scored && gamePool(rb).length > 0 });
           }
         }
@@ -2646,7 +2668,7 @@ body.tv .chart { height: 240px; }
       lastRes.set(b.id, cur);
       if (!prev || prev === cur || cur === "E") continue; // first look at this game, or no real swing
       if (now - (lastReact.get(b.id) || 0) < BET_COOLDOWN) continue;
-      if (cur === "L" && b.sel.m !== "tot") { glow(b.id, "bad"); lastReact.set(b.id, now); continue; } // the other team's doing: glow, no clip
+      if (cur === "L") { glow(b.id, "bad"); lastReact.set(b.id, now); continue; } // losing stays quiet: the card glows, no clip
       swings.push({ b, kind: cur === "W" ? "good" : "bad", pri: cur === "W" ? 5 : 5.5 });
     }
     const on = clipsOn();
@@ -2674,19 +2696,21 @@ body.tv .chart { height: 240px; }
       return;
     }
     // quiet stretch: pop a clip that fits how one of the live bets is going
-    if (!on || now - lastAny < POP_EVERY || clipBusy()) return;
-    const live = [];
-    for (const b of S.bets.values()) { if (b.status !== "open") continue; const spot = liveSpot(b); if (spot) live.push({ b, ...spot }); }
-    if (!live.length) return;
+    if (!on || clipBusy()) return;
+    let live = [];
+    for (const b of S.bets.values()) { if (b.status !== "open") continue; const spot = liveSpot(b); if (spot && spot.state !== "L") live.push({ b, ...spot }); }
+    const winning = live.filter((x) => x.state === "W");
+    if (winning.length) live = winning;
+    if (!live.length || now - lastAny < (winning.length ? POP_WIN : POP_EVERY)) return;
     const pick = live.sort((x, y) => (lastFeat.get(x.b.id) || 0) - (lastFeat.get(y.b.id) || 0))[0];
-    const P = pickClip(poolFor(pick.b, pick.state === "W" ? "good" : pick.state === "L" ? "bad" : "hype"));
+    const P = pickClip(poolFor(pick.b, pick.state === "W" ? "rap" : "hype"));
     if (!P) return;
     lastAny = now; lastFeat.set(pick.b.id, now);
-    react(pick.b, pick.state === "W" ? "good" : pick.state === "L" ? "bad" : "mid", P);
+    react(pick.b, pick.state === "W" ? "good" : "mid", P, pick.state === "W" ? "Cashing" : null);
   }
   setInterval(autoReact, 60e3); // pop-ups keep coming even if the scores haven't changed
   // Settings: the clip library, with a Play button on each
-  const LIB_GROUPS = [["Georgia · only on your Georgia bets", (c) => c.fan === "UGA"], ["Alabama · only on your Bama bets", (c) => c.fan === "ALA"], ["Georgia–Bama game", (c) => c.teams && !c.fan],
+  const LIB_GROUPS = [["Hype rap · on repeat while you're winning", (c) => c.mood.split(" ").includes("rap")], ["Georgia · only on your Georgia bets", (c) => c.fan === "UGA"], ["Alabama · only on your Bama bets", (c) => c.fan === "ALA"], ["Georgia–Bama game", (c) => c.teams && !c.fan],
     ["College football only", (c) => c.sport === "CFB" && !c.teams && !c.fan], ["MLB only", (c) => c.sport === "MLB"],
     ["Winning bet · every sport", (c) => !c.sport && c.mood.includes("up")], ["Losing bet · every sport", (c) => !c.sport && c.mood.includes("down")]];
   $("#clipLib").innerHTML = LIB_GROUPS.map(([name, f]) => `<h4>${esc(name)}</h4>` + CLIPS.map((c, i) => (f(c) ? `<div class="sndrow"><label>${esc(c.label)}${c.sport && !c.teams && !c.fan ? `<span class="mood">${c.mood.includes("down") ? "Losing" : "Winning"}</span>` : ""}</label><button type="button" class="btn sm" data-i="${i}">Play</button></div>` : "")).join("")).join("");
