@@ -2626,7 +2626,7 @@ body.tv.idle, body.tv.idle * { cursor: none !important; }
   // ---------- sheets ----------
   function openSheet(id) { $(id).hidden = false; }
   // keep every open screen current: when a new version is up, reload it (never mid-form or mid-animation)
-  const BUILD = "20261011210312";
+  const BUILD = "20261011211824";
   function checkBuild() {
     if (BUILD === "dev") return;
     fetch("version.json?t=" + Date.now(), { cache: "no-store" }).then((r) => (r.ok ? r.json() : null)).then((j) => {
@@ -3805,6 +3805,7 @@ body.tv.idle, body.tv.idle * { cursor: none !important; }
   const clip = (path, label, mood, sec, o) => Object.assign({ base: "sounds/" + path, label, mood, ms: sec * 1000, lib: true }, o || {});
   // fan: only plays when the team you're on is that team (any game). teams: only in that matchup
   const cfbTeam = (ab) => ({ sport: "CFB", fan: ab });
+  const NFL = { sport: "NFL" }, nflTeam = (t) => ({ sport: "NFL", fan: t });
   const CFB = { sport: "CFB" }, MLB = { sport: "MLB" }, UGA_ALA = { sport: "CFB", teams: ["UGA", "ALA"] };
   const UGA = { sport: "CFB", fan: "UGA" }, ALA = { sport: "CFB", fan: "ALA" }, UGA_VS_ALA = { sport: "CFB", fan: "UGA", teams: ["UGA", "ALA"] }, ALA_VS_UGA = { sport: "CFB", fan: "ALA", teams: ["UGA", "ALA"] };
   const CLIPS = [
@@ -3920,6 +3921,15 @@ body.tv.idle, body.tv.idle * { cursor: none !important; }
     clip("cfb/cfb44", "We Bama, that's what we do", "hype up", 29.6, ALA),
     clip("cfb/cfb45", "Dread it, run from it", "hype up", 31.4, ALA),
     clip("cfb/cfb46", "We Bama, part 3", "hype up", 31.0, ALA),
+    // NFL edits: highlight reels also play right after a touchdown for you; team reels never when you're against that team
+    clip("nfl/nfl01", "Olave highlight reel", "hype up td", 16.6, nflTeam("NO")),
+    clip("nfl/nfl02", "Panthers x Stitch", "hype up", 16.6, nflTeam("CAR")),
+    clip("nfl/nfl03", "Big hits montage", "hype up", 16.0),
+    clip("nfl/nfl04", "Project X: the party", "up win vibe", 28.2, { song: "I Love It", artist: "Icona Pop ft. Charli XCX" }),
+    clip("nfl/nfl05", "Big catches", "hype up td", 11.25, NFL),
+    clip("nfl/nfl06", "Brady: lock in", "hype comeback up", 12.3, NFL),
+    clip("nfl/nfl07", "Beast Mode: run through 'em", "hype comeback up", 29.1, NFL),
+    clip("nfl/nfl08", "Kirk: You like that!", "up win comeback", 60.6, NFL),
   ];
   // library clips are big once decoded, so only the last couple stay in memory
   const clipBufs = new Map();
@@ -4805,7 +4815,7 @@ body.tv.idle, body.tv.idle * { cursor: none !important; }
   }
   setInterval(autoReact, 30e3); // pop-ups keep coming even if the scores haven't changed
   // Settings: the clip library, with a Play button on each
-  const LIB_GROUPS = [["Winning · on repeat while you're winning", (c) => c.mood.split(" ").includes("win")], ["Comeback · when you're down but within two scores", (c) => c.mood.split(" ").includes("comeback")], 
+  const LIB_GROUPS = [["NFL · every NFL bet, never a team you're betting against", (c) => c.sport === "NFL"], ["Winning · on repeat while you're winning", (c) => c.mood.split(" ").includes("win")], ["Comeback · when you're down but within two scores", (c) => c.mood.split(" ").includes("comeback")], 
     ["College football · every college bet, never the team you're betting against", (c) => c.sport === "CFB"], ["MLB only", (c) => c.sport === "MLB"],
     ["Losing bet · every sport", (c) => !c.sport && c.mood.includes("down")], ["Fillers · close games, every 3 min", (c) => c.mood.split(" ").includes("vibe")]];
   function renderLib() { $("#clipLib").innerHTML = LIB_GROUPS.map(([name, f]) => `<h4>${esc(name)}</h4>` + CLIPS.map((c, i) => (f(c) ? `<div class="sndrow"><label>${esc(gLbl(c.label))}${c.fan ? `<span class="mood">${esc(c.fan)}</span>` : ""}${c.sport && !c.teams && !c.fan ? `<span class="mood">${c.mood.includes("down") ? "Losing" : "Winning"}</span>` : ""}</label><button type="button" class="btn sm" data-i="${i}">Play</button></div>` : "")).join("")).join(""); }
