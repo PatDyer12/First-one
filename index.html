@@ -906,6 +906,20 @@ body.tv .strip .chart { height: 96px; }
 .trialbar span { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
 .trialbar[hidden] { display: none; }
 
+/* TD scorer picker */
+.tdmk { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; padding: 0 12px 10px; }
+.tdp { padding: 0 12px 12px; display: grid; gap: 8px; }
+.tdlist { display: grid; gap: 6px; max-height: 340px; overflow-y: auto; padding-right: 4px; }
+.tdl-h { font: 700 12px var(--f-ui); letter-spacing: .12em; text-transform: uppercase; color: var(--ink-2); margin: 6px 0 0; }
+.tdpl { display: flex; align-items: center; gap: 10px; padding: 6px 10px; border-radius: 10px; background: rgba(255,255,255,.04); border: 1px solid var(--line); text-align: left; color: inherit; font: inherit; cursor: pointer; }
+.tdpl:hover { border-color: var(--accent); }
+.tdpl img, .tdpl .ph { width: 34px; height: 34px; border-radius: 50%; object-fit: cover; object-position: top; background: rgba(255,255,255,.08); flex: none; }
+.tdpl b { font: 700 17px var(--f-num); } .tdpl small { margin-left: auto; color: var(--ink-2); font: 600 13px var(--f-num); letter-spacing: .04em; }
+.tdodds { font: 800 17px var(--f-num); font-style: normal; color: var(--accent); margin-left: 10px; min-width: 52px; text-align: right; }
+.tdodds i { font: 700 10px var(--f-ui); color: var(--ink-2); margin-left: 4px; font-style: normal; }
+.tdnote { font: 600 13px var(--f-ui); color: var(--ink-2); background: rgba(255,255,255,.04); border: 1px dashed var(--line); border-radius: 10px; padding: 8px 10px; }
+.pkhs { width: 1.25em; height: 1.25em; border-radius: 50%; object-fit: cover; object-position: top; vertical-align: -.25em; margin-right: .35em; background: rgba(255,255,255,.08); }
+
 /* crew picks */
 .crew-p + .crew-p { margin-top: 18px; padding-top: 16px; border-top: 1px solid var(--line); }
 .crew-h { display: flex; align-items: center; gap: 12px; margin-bottom: 12px; flex-wrap: wrap; }
@@ -1162,6 +1176,11 @@ body.tv .strip .chart { height: 96px; }
       </div>
       <span class="hint">What the ticker follows (every score, spreads and totals before kickoff, upset watch, injury news) and which league the bet form opens to. Auto runs college Tuesday through Saturday and the NFL on Sunday, Monday and Thursday. Applies to every screen.</span>
       <label class="togrow"><input type="checkbox" id="tickerOn"> Show the ticker on this screen</label>
+    </div>
+    <div class="field">
+      <span class="lbl">Player prop odds</span>
+      <div class="linein"><label for="f-oddskey">Odds API key</label><input type="text" id="f-oddskey" autocomplete="off" spellcheck="false" placeholder="Paste your key"><button type="button" class="btn sm" id="oddsKeySave">Save</button></div>
+      <span class="hint" id="oddsKeyHint">Shows FanDuel and DraftKings anytime and first TD scorer prices right in the bet form and fills them in when you pick a player. Get a free key at the-odds-api.com (500 requests a month; each game you open costs 2). Saved to your account, so every screen gets it.</span>
     </div>
     <div class="field">
       <span class="lbl">Your data</span>
@@ -1457,9 +1476,23 @@ body.tv .strip .chart { height: 96px; }
     if (g.sport === "MLB") { const half = /^top/i.test(g.d) ? 0.25 : /^mid/i.test(g.d) ? 0.5 : /^bot/i.test(g.d) ? 0.75 : /^end/i.test(g.d) ? 1 : 0.5; return Math.min(0.99, (pd - 1 + half) / 9); }
     return 0;
   }
+  // TD scorer bets: graded off the game's scoring plays (who's named first in a touchdown call is the scorer)
+  const TDP = new Map();
+  const normNm = (x) => String(x || "").toLowerCase().replace(/\b(jr|sr|ii|iii|iv)\b\.?/g, "").replace(/[^a-z]/g, "");
+  const scorerOf = (text) => { const m = String(text || "").match(/^(.+?)\s+\d+\s+(?:Yd|yd|Yds|yds|Yard|yard)/); return m ? m[1].trim() : ""; };
+  function evalTd(sel, g) {
+    const d = TDP.get(g.id), tds = d ? d.plays : [], me = normNm(sel.p && sel.p.nm), fin = g.st === "post" && !!(d && d.final);
+    if (sel.m === "td") {
+      if (tds.some((p) => p.who === me)) return { m: 1, res: "W", fin: true, txt: "Scored a TD", g };
+      return { m: fin ? -1 : 0, res: fin ? "L" : "P", fin, txt: fin ? "Final · no TD" : tds.length ? `Needs a TD · ${tds.length} scored so far` : "Needs a TD", g };
+    }
+    if (tds.length) { const won = tds[0].who === me; return { m: won ? 1 : -1, res: won ? "W" : "L", fin: true, txt: won ? "Scored the first TD" : `First TD: ${tds[0].name}`, g }; }
+    return { m: fin ? -1 : 0, res: fin ? "L" : "P", fin, txt: fin ? "Final · no TD" : "Waiting on the first TD", g };
+  }
   function evalSel(sel) {
     const g = gameOf(sel);
     if (!g || g.st === "pre" || g.a.sc == null || g.h.sc == null) return null;
+    if (isTd(sel.m)) return evalTd(sel, g);
     const a = g.a.sc, h = g.h.sc, diff = sel.s === "a" ? a - h : h - a;
     let m;
     if (sel.m === "ml") m = diff;
@@ -1610,7 +1643,7 @@ body.tv .strip .chart { height: 96px; }
       return `<article class="bet${can ? " click" : ""}${exp ? " expanded" : ""}${st ? " st-" + st : ""}${pop}" data-id="${esc(b.id)}" ${can ? 'tabindex="0" role="button" aria-expanded="' + exp + '"' : ""}>
         ${ph === "live" && !dead ? '<span class="sweat" aria-hidden="true"></span>' : ""}
         <div class="book ${bookKey(b)}" title="${BOOK[bookKey(b)]}"><img src="${BOOK_IMG[bookKey(b)]}" alt="${BOOK[bookKey(b)]}"></div>
-        <div style="min-width:0"><div class="pick">${esc(b.pick)}${b.kind !== "parlay" ? ballTag(hasBall(b.sel)) : ""}</div><div class="meta">${chips}</div></div>
+        <div style="min-width:0"><div class="pick">${b.sel && b.sel.p && b.sel.p.hs ? `<img class="pkhs" src="${esc(b.sel.p.hs)}" alt="" loading="lazy">` : ""}${esc(b.pick)}${b.kind !== "parlay" ? ballTag(hasBall(b.sel)) : ""}</div><div class="meta">${chips}</div></div>
         <div class="odds num"><b>${fOdds(b.odds)}</b><span>${fU(b.units)} → ${fU(towin, true)}</span>${legs.length ? `<span class="prog">${hits}/${legs.length} legs</span>` : ""}</div>
         ${ev && !ev.fin && ph === "live" ? meterHtml(b.sel, ev) : legs.length && ph !== "pre" ? legMeter(legs) : ""}
         ${b.kind !== "parlay" && b.sel ? scorebug(b.sel) : ""}
@@ -1887,7 +1920,7 @@ body.tv .strip .chart { height: 96px; }
   // ---------- sheets ----------
   function openSheet(id) { $(id).hidden = false; }
   // keep every open screen current: when a new version is up, reload it (never mid-form or mid-animation)
-  const BUILD = "20261011044432";
+  const BUILD = "20261011045306";
   function checkBuild() {
     if (BUILD === "dev") return;
     fetch("version.json?t=" + Date.now(), { cache: "no-store" }).then((r) => (r.ok ? r.json() : null)).then((j) => {
@@ -1912,7 +1945,9 @@ body.tv .strip .chart { height: 96px; }
   // ----- game picker -----
   const F = { sel: null, legs: [], sport: "All", q: "", openG: null, custom: false, oddsTouched: false };
   const kindNow = () => document.querySelector('input[name="kind"]:checked').value;
-  function mkLabel(g, m, s, l) {
+  const isTd = (m) => m === "td" || m === "ftd";
+  function mkLabel(g, m, s, l, p) {
+    if (isTd(m)) return (p ? p.nm : "Player") + (m === "ftd" ? " first TD" : " anytime TD");
     if (m === "ml") return (s === "a" ? g.a : g.h).nm + " ML";
     if (m === "sp") return (s === "a" ? g.a : g.h).nm + " " + (l == null ? "spread" : fLine(l));
     return (s === "o" ? "Over " : "Under ") + (l == null ? "" : trimL(l) + " ") + "· " + g.a.ab + "/" + g.h.ab;
@@ -1953,11 +1988,82 @@ body.tv .strip .chart { height: 96px; }
       if (open) {
         const btn = (m, s) => { const p = mkPrefill(g, m, s); return `<button type="button" class="mkt${isOn(g, m, s) ? " on" : ""}" data-pick="${esc(g.id)}|${m}|${s}"><span>${esc(mkLabel(g, m, s, p.l))}</span><b>${p.o ? fOdds(p.o) : "—"}</b></button>`; };
         mk = `<div class="mkts">${btn("ml", "a")}${btn("ml", "h")}${btn("sp", "a")}${btn("sp", "h")}${btn("tot", "o")}${btn("tot", "u")}</div>`;
+        if ((g.sport === "CFB" || g.sport === "NFL") && kindNow() === "straight")
+          mk += `<div class="tdmk">${[["td", "Anytime TD scorer"], ["ftd", "First TD scorer"]].map(([m, l]) => `<button type="button" class="mkt${F.tdG === g.id && F.tdM === m ? " on" : ""}" data-td="${esc(g.id)}|${m}"><span>${l}</span><b>${F.tdG === g.id && F.tdM === m ? "▾" : "›"}</b></button>`).join("")}</div>${F.tdG === g.id ? tdPanel(g) : ""}`;
       }
       return `<div class="g${open ? " open" : ""}"><button type="button" class="g-head" data-gopen="${esc(g.id)}" aria-expanded="${open}">
         <span class="g-when">${gWhen(g)}</span><span class="g-teams">${esc(g.a.nm)} <i>@</i> ${esc(g.h.nm)}</span>
         <span class="g-meta">${g.st === "in" ? `${g.a.sc}-${g.h.sc} · ${esc(g.d)}` : g.sport}</span></button>${mk}</div>`;
     }).join("");
+  }
+  // TD scorer picker: both teams' skill players from ESPN rosters, with headshots
+  const ROSTER = new Map(), TD_POS = ["RB", "WR", "TE", "QB", "FB"];
+  function loadRoster(sport, tid) {
+    const k = sport + "|" + tid; if (ROSTER.has(k)) return ROSTER.get(k);
+    const pr = fetch(`https://site.api.espn.com/apis/site/v2/sports/${ESPN[sport]}/teams/${tid}/roster`).then((r) => r.json()).then((j) => {
+      const items = []; for (const grp of j.athletes || []) for (const a of grp.items || (grp.displayName ? [grp] : [])) {
+        const pos = (a.position && a.position.abbreviation) || ""; if (!TD_POS.includes(pos)) continue;
+        items.push({ id: String(a.id), nm: a.displayName || a.fullName || "", j: a.jersey || "", pos, hs: (a.headshot && a.headshot.href) || "", tm: String(tid) });
+      }
+      items.sort((x, y) => TD_POS.indexOf(x.pos) - TD_POS.indexOf(y.pos) || Number(x.j || 99) - Number(y.j || 99));
+      ROSTER.set(k, items); if (!$("#addSheet").hidden) renderGames(); return items;
+    }).catch(() => { ROSTER.delete(k); return []; });
+    ROSTER.set(k, pr); return pr;
+  }
+  // TD scorer prices from The Odds API (FanDuel and DraftKings), 10-minute cache per game
+  S.oddsKey = S.oddsKey || "";
+  const PROPS = new Map(), OA_EVENTS = new Map(), OA = "https://api.the-odds-api.com/v4/sports/";
+  const oaSport = (sp) => (sp === "NFL" ? "americanfootball_nfl" : "americanfootball_ncaaf");
+  const oaName = (x) => String(x || "").toLowerCase().replace(/[^a-z]/g, "");
+  async function loadProps(g) {
+    if (!S.oddsKey) return null;
+    const have = PROPS.get(g.id); if (have && (have.then || Date.now() - have.at < 10 * 60e3)) return have;
+    const pr = (async () => {
+      try {
+        const sk = oaSport(g.sport); let evs = OA_EVENTS.get(sk);
+        if (!evs || Date.now() - evs.at > 30 * 60e3) { const r = await fetch(`${OA}${sk}/events?apiKey=${encodeURIComponent(S.oddsKey)}`); if (!r.ok) throw new Error(r.status === 401 ? "key" : "quota"); evs = { at: Date.now(), list: await r.json() }; OA_EVENTS.set(sk, evs); }
+        const want = [oaName(g.a.fn || g.a.nm), oaName(g.h.fn || g.h.nm)];
+        const ev = evs.list.find((e) => Math.abs(Date.parse(e.commence_time) - g.t) < 4 * 36e5 && [oaName(e.away_team), oaName(e.home_team)].every((n, i) => n === want[i] || n.includes(want[i]) || want[i].includes(n)));
+        if (!ev) { const v = { at: Date.now(), map: new Map(), none: true }; PROPS.set(g.id, v); return v; }
+        const r = await fetch(`${OA}${sk}/events/${ev.id}/odds?apiKey=${encodeURIComponent(S.oddsKey)}&regions=us&markets=player_anytime_td,player_1st_td&oddsFormat=american&bookmakers=fanduel,draftkings`);
+        if (!r.ok) throw new Error(r.status === 401 ? "key" : "quota");
+        const j = await r.json(), map = new Map();
+        for (const bk of j.bookmakers || []) {
+          const book = bk.key === "draftkings" ? "DK" : bk.key === "fanduel" ? "FD" : null; if (!book) continue;
+          for (const mk of bk.markets || []) {
+            const m = mk.key === "player_anytime_td" ? "td" : mk.key === "player_1st_td" ? "ftd" : null; if (!m) continue;
+            for (const o of mk.outcomes || []) { if (o.name && /^no$/i.test(o.name)) continue; const nm = normNm(o.description || o.name); if (!map.has(nm)) map.set(nm, {}); const e = map.get(nm); (e[m] = e[m] || {})[book] = o.price; }
+          }
+        }
+        const v = { at: Date.now(), map }; PROPS.set(g.id, v); return v;
+      } catch (e) { const v = { at: Date.now(), map: new Map(), err: String(e.message || e) }; PROPS.set(g.id, v); return v; }
+    })();
+    PROPS.set(g.id, pr);
+    pr.then(() => { if (!$("#addSheet").hidden && F.tdG === g.id) renderGames(); });
+    return pr;
+  }
+  const curBook = () => (document.querySelector('input[name="book"]:checked') || {}).value || "FD";
+  function propOdds(g, p, m) {
+    const v = PROPS.get(g.id); if (!v || v.then || !v.map) return null;
+    const e = v.map.get(normNm(p.nm)); if (!e || !e[m]) return null;
+    const b = curBook(); return e[m][b] != null ? { o: e[m][b], book: b } : { o: e[m][b === "FD" ? "DK" : "FD"], book: b === "FD" ? "DK" : "FD" };
+  }
+  const rosterOf = (g, side) => { const r = ROSTER.get(g.sport + "|" + g[side].id); return Array.isArray(r) ? r : null; };
+  function tdList(g) {
+    const q = (F.tdQ || "").trim().toLowerCase();
+    return ["a", "h"].map((side) => {
+      const r = rosterOf(g, side); if (!r) return `<div class="tdl-h">${esc(g[side].nm)}</div><div class="gnone">Loading players…</div>`;
+      const list = r.filter((p) => !q || p.nm.toLowerCase().includes(q) || p.j === q).map((p) => ({ p, od: propOdds(g, p, F.tdM) }));
+      if (list.some((x) => x.od)) list.sort((x, y) => (x.od ? dec(x.od.o) : 999) - (y.od ? dec(y.od.o) : 999));
+      return `<div class="tdl-h">${esc(g[side].nm)}</div>` + (list.length ? list.slice(0, 40).map(({ p, od }) => `<button type="button" class="tdpl" data-tdp="${esc(g.id)}|${side}|${esc(p.id)}">${p.hs ? `<img src="${esc(p.hs)}" alt="" loading="lazy">` : '<span class="ph"></span>'}<b>${esc(p.nm)}</b><small>${esc([p.j ? "#" + p.j : "", p.pos].filter(Boolean).join(" · "))}</small>${od ? `<em class="tdodds" title="${od.book === "DK" ? "DraftKings" : "FanDuel"}">${fOdds(od.o)}${od.book !== curBook() ? `<i>${od.book}</i>` : ""}</em>` : ""}</button>`).join("") : '<div class="gnone">No match</div>');
+    }).join("");
+  }
+  function tdPanel(g) {
+    for (const side of ["a", "h"]) if (!rosterOf(g, side)) loadRoster(g.sport, g[side].id);
+    loadProps(g);
+    const v = PROPS.get(g.id);
+    const note = !S.oddsKey ? "Add your free odds key in Settings to see FanDuel and DraftKings prices here." : v && v.then ? "Getting prices…" : v && v.err === "key" ? "That odds key didn't work. Check it in Settings." : v && v.err ? "Couldn't get prices right now (out of requests?). Type the odds from your slip." : v && v.none ? "No player prop prices posted for this game yet." : "";
+    return `<div class="tdp">${note ? `<div class="tdnote">${esc(note)}</div>` : ""}<input type="text" data-tdq autocomplete="off" placeholder="Search a player or number" value="${esc(F.tdQ || "")}" aria-label="Search a player"><div class="tdlist">${tdList(g)}</div></div>`;
   }
   const dec = (o) => (o > 0 ? 1 + o / 100 : 1 + 100 / Math.abs(o));
   function setOdds(o) {
@@ -1980,9 +2086,9 @@ body.tv .strip .chart { height: 96px; }
     $("#timeField").hidden = parlay ? F.legs.some((x) => x.g) : !F.custom;
     if (F.sel) {
       const g = S.games.get(F.sel.g);
-      $("#selText").textContent = g ? mkLabel(g, F.sel.m, F.sel.s, F.sel.l) : "";
+      $("#selText").textContent = g ? mkLabel(g, F.sel.m, F.sel.s, F.sel.l, F.sel.p) : "";
       $("#selGame").textContent = g ? `${g.sport} · ${g.a.nm} @ ${g.h.nm} · ${g.st === "in" ? "live now" : startLabel(g.t)}` : "";
-      $("#lineWrap").hidden = F.sel.m === "ml";
+      $("#lineWrap").hidden = F.sel.m === "ml" || isTd(F.sel.m);
     }
     $("#legCount").textContent = F.legs.length ? "· " + F.legs.length + " picked" : "· tap markets below or add your own";
     $("#legList").innerHTML = F.legs.map((x, i) => `<div class="legrow"><span class="lt">${esc(legText(x))}</span>
@@ -1993,6 +2099,16 @@ body.tv .strip .chart { height: 96px; }
   $("#g-list").addEventListener("click", (e) => {
     const head = e.target.closest("[data-gopen]");
     if (head) { F.openG = F.openG === head.dataset.gopen ? null : head.dataset.gopen; renderGames(); return; }
+    const tdb = e.target.closest("[data-td]");
+    if (tdb) { const [gid, m] = tdb.dataset.td.split("|"); if (F.tdG === gid && F.tdM === m) F.tdG = null; else { F.tdG = gid; F.tdM = m; F.tdQ = ""; } renderGames(); return; }
+    const tp = e.target.closest("[data-tdp]");
+    if (tp) {
+      const [gid, side, pid] = tp.dataset.tdp.split("|"), g = S.games.get(gid), pl = g && (rosterOf(g, side) || []).find((x) => x.id === pid); if (!pl) return;
+      F.sel = { g: gid, m: F.tdM, s: side, l: null, p: pl }; F.custom = false; F.tdG = null;
+      const od = propOdds(g, pl, F.tdM); if (od) { setOdds(od.o); const r = document.querySelector(`input[name="book"][value="${od.book}"]`); if (r) r.checked = true; } else { $("#f-odds").value = ""; S.sign = 1; }
+      F.oddsTouched = false;
+      renderPicker(); updatePreview(); $("#f-odds").focus(); return;
+    }
     const pk = e.target.closest("[data-pick]"); if (!pk) return;
     const [gid, m, s] = pk.dataset.pick.split("|"), g = S.games.get(gid); if (!g) return;
     const p = mkPrefill(g, m, s);
@@ -2008,6 +2124,8 @@ body.tv .strip .chart { height: 96px; }
     renderPicker(); updatePreview();
   });
   $("#g-q").addEventListener("input", (e) => { F.q = e.target.value; renderGames(); });
+  document.querySelectorAll('input[name="book"]').forEach((r) => r.addEventListener("change", () => { if (F.tdG) renderGames(); else if (F.sel && isTd(F.sel.m)) { const g = S.games.get(F.sel.g), od = g && propOdds(g, F.sel.p, F.sel.m); if (od && od.book === curBook()) { setOdds(od.o); updatePreview(); } } }));
+  $("#g-list").addEventListener("input", (e) => { if (!e.target.matches("[data-tdq]")) return; F.tdQ = e.target.value; const g = S.games.get(F.tdG), box = e.target.parentElement.querySelector(".tdlist"); if (g && box) box.innerHTML = tdList(g); });
   $("#g-sports").addEventListener("change", (e) => { if (e.target.name === "gsport") { F.sport = e.target.value; renderGames(); } });
   $("#customToggle").addEventListener("click", () => { F.custom = true; F.sel = null; renderPicker(); updatePreview(); $("#f-pick").focus(); });
   $("#selClear").addEventListener("click", () => { F.sel = null; renderPicker(); updatePreview(); });
@@ -2088,9 +2206,10 @@ body.tv .strip .chart { height: 96px; }
       if (F.sel) {
         const g = S.games.get(F.sel.g);
         if (!g) { err.textContent = "That game dropped off the list. Pick it again or type it in."; return; }
-        if (F.sel.m !== "ml" && F.sel.l == null) { err.textContent = "Add the line from your slip, like −3.5 or 47.5."; return; }
-        data.pick = mkLabel(g, F.sel.m, F.sel.s, F.sel.l); data.sport = g.sport;
+        if (F.sel.m !== "ml" && !isTd(F.sel.m) && F.sel.l == null) { err.textContent = "Add the line from your slip, like −3.5 or 47.5."; return; }
+        data.pick = mkLabel(g, F.sel.m, F.sel.s, F.sel.l, F.sel.p); data.sport = g.sport;
         data.sel = { g: g.id, m: F.sel.m, s: F.sel.s, l: F.sel.l, sp: g.sport, t: g.t }; starts.push(g.t);
+        if (isTd(F.sel.m)) data.sel.p = F.sel.p;
       } else if (F.custom) {
         data.pick = $("#f-pick").value.trim().slice(0, 80);
         if (!data.pick) { err.textContent = "Add the pick, like “Judge 1+ HR”."; return; }
@@ -2124,7 +2243,12 @@ body.tv .strip .chart { height: 96px; }
     if (ok) { closeSheets(); if (!S.db) announce({ id, ...data }); }
   });
 
-  function openSettings() { $("#f-unit").value = trim(S.unit); $("#u-err").textContent = ""; resetClear(); openSheet("#setSheet"); }
+  $("#oddsKeySave").addEventListener("click", () => {
+    const k = $("#f-oddskey").value.trim(); S.oddsKey = k; PROPS.clear(); OA_EVENTS.clear();
+    write((db) => db.doc("config/settings").set({ oddsKey: k }, { merge: true }), () => {});
+    toast(k ? "Odds key saved. Prices show up in the TD scorer picker." : "Odds key removed");
+  });
+  function openSettings() { $("#f-oddskey").value = S.oddsKey || ""; $("#f-unit").value = trim(S.unit); $("#u-err").textContent = ""; resetClear(); openSheet("#setSheet"); }
   $("#unitChip").addEventListener("click", openSettings);
   $("#sampleChip").addEventListener("click", openSettings);
   $("#setForm").addEventListener("submit", async (e) => {
@@ -3319,7 +3443,7 @@ body.tv .strip .chart { height: 96px; }
     }
     return r;
   }
-  const helps = (s, e) => (!e.side ? 0 : s.m === "tot" ? (e.noTot ? 0 : s.s === "o" ? 1 : -1) : e.side === s.s ? 1 : -1);
+  const helps = (s, e) => (!e.side || isTd(s.m) ? 0 : s.m === "tot" ? (e.noTot ? 0 : s.s === "o" ? 1 : -1) : e.side === s.s ? 1 : -1);
   const EV_RANK = { td: 6, hr: 6, goal: 6, safety: 6, turnover: 6, run: 4, fg: 4, redzone: 3, crunch: 3, half: 2 };
   // ---------- play card: what happened, who did it and how, big, then the clip ----------
   const PC_TYPE = { td: "Touchdown", fg: "Field goal", safety: "Safety", turnover: "Turnover", redzone: "Red zone", hr: "Home run", run: "Run scores", goal: "Goal" };
@@ -3345,11 +3469,11 @@ body.tv .strip .chart { height: 96px; }
     const tid = side ? String(g[side].id) : null, low = (text || "").replace(/\([^)]*\)/g, "").toLowerCase();
     return (ath || []).filter((a) => a.nm && (!low || low.includes(a.nm.split(" ").slice(-1)[0].toLowerCase())) && (!tid || !a.tm || String(a.tm) === tid || /intercept|fumble/i.test(text))).slice(0, 2);
   }
-  function pcFill(g, e, b, sp) {
+  function pcFill(g, e, b, sp, ov) {
     const lp = (g.sit || {}).lp || {}, side = e.side, tm = side ? g[side] : null;
-    const text = e.ev === "redzone" ? [(g.sit || {}).dd, lp.text].filter(Boolean).join(" · ") : (sp && sp.text) || lp.text || "";
-    const kind = (sp && sp.type) || (e.ev === "redzone" ? "" : lp.type) || "";
-    const people = e.ev === "redzone" ? [] : pcPeople(lp.ath, text, side, g);
+    const text = ov ? ov.text : e.ev === "redzone" ? [(g.sit || {}).dd, lp.text].filter(Boolean).join(" · ") : (sp && sp.text) || lp.text || "";
+    const kind = ov ? ov.type : (sp && sp.type) || (e.ev === "redzone" ? "" : lp.type) || "";
+    const people = ov ? ov.people : e.ev === "redzone" ? [] : pcPeople(lp.ath, text, side, g);
     const ev = b && b.sel ? evalSel(b.sel) : null;
     $("#playCard").style.setProperty("--tc", (tm && (tm.col && tm.col !== "#ffffff" ? tm.col : tm.alt)) || "#1b2433");
     const lead = g.a.sc > g.h.sc ? "a" : g.h.sc > g.a.sc ? "h" : "";
@@ -3362,13 +3486,13 @@ body.tv .strip .chart { height: 96px; }
     return people[0] ? people[0].sh || people[0].nm : "";
   }
   // show the card, then run `then` with a label for the clip ("Touchdown UGA · C. Young")
-  function showPlayCard(g, e, b, then, ms) {
+  function showPlayCard(g, e, b, then, ms, over) {
     const ov = $("#playCard"); cardBusy = true; ms = ms || 4000;
-    const who = pcFill(g, e, b, null);
+    const who = pcFill(g, e, b, null, over);
     ov.classList.remove("out"); ov.hidden = false; for (const el of ov.querySelectorAll("*")) { el.style.animation = "none"; void el.offsetWidth; el.style.animation = ""; }
     snSound("slam", 0.85, 0); snSound("whoosh", 0.5, 0);
     let label = who;
-    if (e.side && ["td", "fg", "safety", "hr", "run", "goal"].includes(e.ev)) scoringPlay(g, e.side).then((sp) => { if (sp && !ov.hidden && cardBusy) label = pcFill(g, e, b, sp) || label; });
+    if (!over && e.side && ["td", "fg", "safety", "hr", "run", "goal"].includes(e.ev)) scoringPlay(g, e.side).then((sp) => { if (sp && !ov.hidden && cardBusy) label = pcFill(g, e, b, sp) || label; });
     setTimeout(() => ov.classList.add("out"), ms - 350);
     setTimeout(() => { ov.hidden = true; ov.classList.remove("out"); cardBusy = false; then(label ? `${e.tag} · ${label}` : e.tag); }, ms);
   }
@@ -3378,6 +3502,41 @@ body.tv .strip .chart { height: 96px; }
       sit: { lp: { type: "Passing Touchdown", text: "Gunner Stockton 31 Yd pass to Colbie Young (Peyton Woodring Kick)", ath: [{ nm: "Colbie Young", sh: "C. Young", hs: "", j: "8", pos: "WR", tm: "61" }, { nm: "Gunner Stockton", sh: "G. Stockton", hs: "", j: "14", pos: "QB", tm: "61" }] } } };
     showPlayCard(g, { ev: "td", side: "a", tag: "Touchdown UGA" }, anyOpen(), () => {});
   });
+  // ---------- TD scorer tracking ----------
+  async function loadTdPlays() {
+    const want = new Map();
+    for (const b of S.bets.values()) {
+      if (b.status !== "open" || !b.sel || !isTd(b.sel.m)) continue;
+      const g = gameOf(b.sel); if (!g || g.st === "pre") continue;
+      const d = TDP.get(g.id); if (d && d.final) continue; want.set(g.id, g);
+    }
+    for (const g of want.values()) {
+      try {
+        const j = await fetch(`https://site.api.espn.com/apis/site/v2/sports/${ESPN[g.sport]}/summary?event=${g.eid || g.id}`).then((r) => r.json());
+        const plays = (j.scoringPlays || []).filter((p) => /touchdown/i.test((p.type && p.type.text) || "")).map((p) => { const nm = scorerOf(p.text); return { who: normNm(nm), name: nm, text: p.text || "", type: (p.type && p.type.text) || "", team: p.team && String(p.team.id) }; });
+        const c = j.header && j.header.competitions && j.header.competitions[0], final = !!(c && c.status && c.status.type && c.status.type.completed);
+        const apply = () => { const prev = TDP.get(g.id); TDP.set(g.id, { plays, final, at: Date.now() }); tdCheck(g, prev ? prev.plays : null, plays); render(); if (!cardBusy) autoSettle(); };
+        if (final || g.id.startsWith("trial-")) apply(); else setTimeout(apply, tvDelay() * 1000);
+      } catch (e) {}
+    }
+  }
+  // your player just scored (or the first TD went to someone else): the play card with his face, then the bet settles and the win runs
+  function tdCheck(g, before, now) {
+    if (!before) return; // first look: no fireworks for touchdowns that already happened
+    for (const b of S.bets.values()) {
+      if (b.status !== "open" || !isMe(b) || !b.sel || !isTd(b.sel.m) || gameOf(b.sel) !== g) continue;
+      const me = normNm(b.sel.p && b.sel.p.nm), had = before.filter((p) => p.who === me).length, has = now.filter((p) => p.who === me);
+      const hit = b.sel.m === "td" ? has.length > had && has[has.length - 1] : !before.length && now.length && now[0].who === me ? now[0] : null;
+      if (!hit || !clipsOn()) continue;
+      stopStatus();
+      const p = b.sel.p || {};
+      showPlayCard(g, { ev: "td", side: b.sel.s, tag: "Touchdown " + g[b.sel.s].ab }, b, () => autoSettle(), 4500,
+        { text: hit.text, type: (b.sel.m === "ftd" ? "First TD · " : "") + hit.type, people: [{ nm: p.nm || hit.name, hs: p.hs || "", j: p.j || "", pos: p.pos || "", sh: p.nm }] });
+      return;
+    }
+  }
+  setInterval(loadTdPlays, 30e3);
+
   // ---------- Trial: replay the latest finished NFL game, play by play, through the live pipeline ----------
   // a temporary bet on the winner (never saved), real scoring plays and turnovers fed in as the scoreboard would, then the win
   let trial = null;
@@ -5638,6 +5797,7 @@ body.tv .strip .chart { height: 96px; }
     if (!S.db || !S.canWrite || !S.ready) return;
     for (const b of S.bets.values()) {
       if (b.status !== "open" || b.noAuto || b.trial || settling.has(b.id)) continue;
+      if (cardBusy && b.sel && isTd(b.sel.m)) continue; // let his touchdown card play first
       let status = null;
       if (b.kind === "parlay") {
         const legs = legsOf(b);
@@ -5863,6 +6023,8 @@ body.tv .strip .chart { height: 96px; }
       unsub.push(db.doc("config/settings").onSnapshot((s) => {
         const v = s.exists ? Number(s.data().unitSize) : NaN;
         if (v > 0 && v !== S.unit) { S.unit = v; render(); }
+        const ok = s.exists ? s.data().oddsKey : null;
+        if (ok && ok !== S.oddsKey) { S.oddsKey = ok; PROPS.clear(); OA_EVENTS.clear(); }
         const fc = s.exists ? s.data().focus : null;
         if (fc && ["auto", "CFB", "NFL"].includes(fc)) setFocus(fc);
         const gn = s.exists ? s.data().guestName : null;
