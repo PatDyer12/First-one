@@ -1148,7 +1148,7 @@ body.tv .strip .chart { height: 96px; }
     </div>
     <div class="field">
       <span class="lbl">Goldie intros</span>
-      <span class="hint">Every win gets one, and a loss gets Goldie wiping out (or one of your loss clips). Regular hits shuffle through all of these. $100+ wins get the blockbuster, parlays get their own, and +150 or longer gets the sniper. Tap any to watch it.</span>
+      <span class="hint">Every win gets one, and a loss gets Goldie wiping out (or one of your loss clips). Regular hits mostly get the Goldie scenes made from his pictures (skydive, whip, wheelie, war, strapped, smoke, aura, make it rain, takeover), mixed in with the cartoon ones. $100+ wins get the blockbuster, parlays get their own, and +150 or longer gets the sniper. Tap any to watch it.</span>
       <div style="display:flex;gap:8px;flex-wrap:wrap">
         <button type="button" class="btn sm" id="inTestMoney">$100+ blockbuster</button>
         <button type="button" class="btn sm" id="inTestParlay">Parlay</button>
@@ -1920,7 +1920,7 @@ body.tv .strip .chart { height: 96px; }
   // ---------- sheets ----------
   function openSheet(id) { $(id).hidden = false; }
   // keep every open screen current: when a new version is up, reload it (never mid-form or mid-animation)
-  const BUILD = "20261011050605";
+  const BUILD = "20261011123958";
   function checkBuild() {
     if (BUILD === "dev") return;
     fetch("version.json?t=" + Date.now(), { cache: "no-store" }).then((r) => (r.ok ? r.json() : null)).then((j) => {
@@ -3113,6 +3113,15 @@ body.tv .strip .chart { height: 96px; }
     clip("cfb/cfb05", "I don't lose", "down comeback", 28),
     clip("cfb/cfb07", "Brick by brick", "down comeback", 25.8),
     clip("cfb/cfb14", "You owe them something", "down hype comeback", 33.4),
+    clip("aura/sky", "Goldie: sent it", "up win", 17.0),
+    clip("aura/whip", "Goldie: new whip", "up win", 20.6),
+    clip("aura/war", "Goldie: went to war", "up win", 19.4),
+    clip("aura/strap", "Goldie: strapped", "up win", 17.3),
+    clip("aura/smoke", "Goldie: really high", "up win vibe", 16.9),
+    clip("aura/aura", "Goldie: aura maxed", "up win", 15.6),
+    clip("aura/rain", "Goldie: made it rain", "up win", 18.3),
+    clip("aura/take", "Goldie: pulled up", "up win", 20.0),
+    clip("aura/bike", "Goldie: wheelie", "up win", 18.0),
     clip("clips/w02", "Car ride laughs", "up win", 22.45),
     clip("clips/w03", "Tiger: Pure.", "up win", 30),
     clip("clips/w04", "Migos carpool", "up win", 30),
@@ -3184,11 +3193,6 @@ body.tv .strip .chart { height: 96px; }
     clip("cfb/cfb44", "We Bama, that's what we do", "hype up vibe", 29.6, ALA),
     clip("cfb/cfb45", "Dread it, run from it", "hype up vibe", 31.4, ALA),
     clip("cfb/cfb46", "We Bama, part 3", "hype up vibe", 31.0, ALA),
-    clip("goldie/g1", "Goldie: sent it", "up win", 6.35),
-    clip("goldie/g2", "Goldie: main character", "vibe", 5.95),
-    clip("goldie/g3", "Goldie: next level", "up win", 9.95),
-    clip("goldie/g4", "Goldie: golden hour", "vibe", 8.75),
-    clip("goldie/g5", "Goldie: what is going on", "down", 8.35),
   ];
   // library clips are big once decoded, so only the last couple stay in memory
   const clipBufs = new Map();
@@ -5009,82 +5013,53 @@ body.tv .strip .chart { height: 96px; }
     ctx.fillStyle = col; let x = -10, i = 0;
     while (x < W + 10) { const w = (40 + ((i * 53) % 60)) * sc, h = (60 + ((i * 97) % 170)) * sc; ctx.fillRect(x, y - h, w - 4 * sc, h); if (i % 4 === 1) ctx.fillRect(x + w * 0.4, y - h - 30 * sc, 4 * sc, 30 * sc); x += w; i++; }
   }
-  // ---- footage: the Goldie clips, played big over a blurred fill, a slam on the drop ----
-  const GCLIPS = [
-    { name: "Sent it", vid: "g1", aud: "g1", hit: 3.95, len: 6.6, cls: "ice", fx: "snow", freeze: true },
-    { name: "Main character", vid: "g2", aud: "g2", hit: 3.27, len: 6.2, cls: "pix", fx: "pix" },
-    { name: "Next level", vid: "g3", aud: "g3", hit: 4.41, len: 8.9, cls: "ice side", fx: "ice", cx: 0.7 },
-    { name: "Golden hour", vid: "g4", aud: "g4", hit: 4.53, len: 8.2, cls: "gold", fx: "leak" },
-    { name: "Came up", vid: "g5r", aud: "g5", hit: 6.62, len: 8.6, cls: "gold", fx: "bubbles" },
+  // ---- Goldie scenes: rendered from his pictures. The video is the picture, the music plays through WebAudio,
+  // the pick rides a lower third, and your payout slams in on the scene's drop ----
+  const EDITS = [
+    { name: "Sent it", id: "sky", len: 17.0, hit: 14.6, cls: "lock", l3: [4.3, 8.4] },
+    { name: "New whip", id: "whip", len: 20.6, hit: 17.2, cls: "lock" },
+    { name: "Went to war", id: "war", len: 19.4, hit: 16.7, cls: "lock" },
+    { name: "Strapped", id: "strap", len: 17.3, hit: 15.6, cls: "lock" },
+    { name: "Really high", id: "smoke", len: 16.9, hit: 13.0, cls: "green lock" },
+    { name: "Aura maxed", id: "aura", len: 15.6, hit: 13.9, cls: "lock" },
+    { name: "Made it rain", id: "rain", len: 18.3, hit: 15.1, cls: "lock" },
+    { name: "Pulled up", id: "take", len: 20.0, hit: 16.7, cls: "lock" },
+    { name: "Wheelie", id: "bike", len: 18.0, hit: 15.3, cls: "lock" },
   ];
-  let inVidBg = null;
-  function inVidDraw(ctx, W, H, v, cxf, zoom) {
-    if (v.readyState < 2 || !v.videoWidth) return null;
-    const vw = v.videoWidth, vh = v.videoHeight, bw = 40, bh = Math.max(8, Math.round((bw * H) / W));
-    if (!inVidBg) inVidBg = document.createElement("canvas");
-    if (inVidBg.width !== bw || inVidBg.height !== bh) { inVidBg.width = bw; inVidBg.height = bh; }
-    const bx = inVidBg.getContext("2d"), cs = Math.max(bw / vw, bh / vh); bx.drawImage(v, (bw - vw * cs) / 2, (bh - vh * cs) / 2, vw * cs, vh * cs);
-    ctx.save(); ctx.imageSmoothingEnabled = true; ctx.drawImage(inVidBg, -W * 0.06, -H * 0.06, W * 1.12, H * 1.12); ctx.fillStyle = "rgba(0,0,0,.5)"; ctx.fillRect(0, 0, W, H); ctx.restore();
-    const s = Math.min(H / vh, W / vw) * zoom, dw = vw * s, dh = vh * s;
-    const cx = Math.max(Math.min(W * cxf, W - dw / 2), dw / 2), x = cx - dw / 2, y = (H - dh) / 2;
-    ctx.drawImage(v, x, y, dw, dh);
-    for (const [x0, dir] of [[x, 1], [x + dw, -1]]) { const e = dw * 0.07, g = ctx.createLinearGradient(x0, 0, x0 + dir * e, 0); g.addColorStop(0, "rgba(0,0,0,.55)"); g.addColorStop(1, "rgba(0,0,0,0)"); ctx.fillStyle = g; ctx.fillRect(dir > 0 ? x0 : x0 - e, y, e, dh); }
-    return [x, y, dw, dh];
+  const edSrc = (c) => vidSrc("sounds/aura/" + c.id), edAud = (c) => "../aura/" + c.id;
+  const edPreV = {};
+  function edPre(c) { loadBuf("sounds/sniper/" + edAud(c)); if (!edPreV[c.id]) { const v = document.createElement("video"); v.muted = true; v.preload = "auto"; v.src = edSrc(c); v.load(); edPreV[c.id] = v; } }
+  let edBg = null;
+  // wide screens: fill it. Tall screens: a blurred wash with the letterboxed picture full width
+  function edDraw(ctx, W, H, v) {
+    if (v.readyState < 2 || !v.videoWidth) return;
+    const vw = v.videoWidth, vh = v.videoHeight;
+    if (W / H >= 1.3) { const s = Math.max(W / vw, H / vh); ctx.drawImage(v, (W - vw * s) / 2, (H - vh * s) / 2, vw * s, vh * s); return; }
+    const bar = Math.round(vh * 0.128), ch = vh - bar * 2, bw = 40, bh = Math.max(8, Math.round((bw * H) / W));
+    if (!edBg) edBg = document.createElement("canvas");
+    if (edBg.width !== bw || edBg.height !== bh) { edBg.width = bw; edBg.height = bh; }
+    const bx = edBg.getContext("2d"), cs = Math.max(bw / vw, bh / ch); bx.drawImage(v, 0, bar, vw, ch, (bw - vw * cs) / 2, (bh - ch * cs) / 2, vw * cs, ch * cs);
+    ctx.save(); ctx.imageSmoothingEnabled = true; ctx.drawImage(edBg, -W * 0.08, -H * 0.08, W * 1.16, H * 1.16); ctx.fillStyle = "rgba(0,0,0,.45)"; ctx.fillRect(0, 0, W, H); ctx.restore();
+    const dw = W * 1.08, dh = (dw * ch) / vw;
+    ctx.drawImage(v, 0, bar, vw, ch, (W - dw) / 2, (H - dh) / 2, dw, dh);
   }
-  // particles laid over the footage
-  function inClipFx(ctx, W, H, kind, s, t) {
-    const P = s.p, sc = H / 900;
-    ctx.save();
-    if (kind === "snow") {
-      if (P.length < 160) for (let i = 0; i < 4; i++) P.push({ x: inRnd(0, W * 1.3), y: -20, vx: -inRnd(6, 16) * sc, vy: inRnd(4, 10) * sc, l: inRnd(4, 16) });
-      ctx.strokeStyle = "rgba(255,255,255,.75)"; ctx.lineCap = "round";
-      for (const p of P) { p.x += p.vx; p.y += p.vy; ctx.lineWidth = (1 + p.l / 8) * sc; ctx.beginPath(); ctx.moveTo(p.x, p.y); ctx.lineTo(p.x - p.vx * p.l * 0.2, p.y - p.vy * p.l * 0.2); ctx.stroke(); }
-    } else if (kind === "pix") {
-      if (Math.random() < 0.6) P.push({ x: inRnd(0, W), y: H + 10, vy: -inRnd(1.5, 4) * sc, sz: inRnd(6, 16) * sc, c: ["#7cff4f", "#ffe14d", "#ffffff", "#4fd1ff"][Math.floor(Math.random() * 4)], f: Math.random() * 6 });
-      for (const p of P) { p.y += p.vy; ctx.globalAlpha = 0.45 + 0.45 * Math.sin(t * 9 + p.f); ctx.fillStyle = p.c; ctx.fillRect(Math.round(p.x / 4) * 4, Math.round(p.y / 4) * 4, p.sz, p.sz); }
-    } else if (kind === "ice") {
-      if (Math.random() < 0.35) P.push({ x: inRnd(W * 0.4, W), y: inRnd(H * 0.1, H * 0.9), l: 0, r: inRnd(14, 40) * sc });
-      for (const p of P) { p.l += 0.03; inStar(ctx, p.x, p.y, p.r * Math.sin(Math.min(1, p.l) * Math.PI), 0.9, "#e6f6ff"); }
-    } else if (kind === "leak") {
-      ctx.globalCompositeOperation = "lighter";
-      for (const [i, c] of [[0, "255,140,40"], [1, "255,60,140"], [2, "255,210,90"]]) { const x = W * (((t * 0.07 + i * 0.37) % 1.4) - 0.2), y = H * (0.3 + 0.3 * Math.sin(t * 0.5 + i)), g = ctx.createRadialGradient(x, y, 0, x, y, W * 0.35); g.addColorStop(0, `rgba(${c},.28)`); g.addColorStop(1, `rgba(${c},0)`); ctx.fillStyle = g; ctx.fillRect(0, 0, W, H); }
-    } else if (kind === "bubbles") {
-      if (Math.random() < 0.5) P.push({ x: inRnd(0, W), y: H + 20, vy: -inRnd(2, 6) * sc, r: inRnd(3, 14) * sc, f: Math.random() * 6 });
-      ctx.strokeStyle = "rgba(220,250,255,.55)"; ctx.lineWidth = 1.5 * sc;
-      for (const p of P) { p.y += p.vy; const x = p.x + Math.sin(t * 3 + p.f) * 8 * sc; ctx.beginPath(); ctx.arc(x, p.y, p.r, 0, TAU); ctx.stroke(); ctx.fillStyle = "rgba(255,255,255,.5)"; ctx.beginPath(); ctx.arc(x - p.r * 0.35, p.y - p.r * 0.35, p.r * 0.25, 0, TAU); ctx.fill(); }
-    }
-    ctx.restore();
-    for (let i = P.length - 1; i >= 0; i--) { const p = P[i]; if (p.y > H + 40 || p.y < -60 || p.x < -300 || (p.l !== undefined && kind === "ice" && p.l > 1)) P.splice(i, 1); }
-  }
-  const inClipSrc = (c) => vidSrc("sounds/goldie/" + c.vid), inClipAud = (c) => "../goldie/" + c.aud;
-  const inPreV = {};
-  function inPreClip(c) { loadBuf("sounds/sniper/" + inClipAud(c)); if (!inPreV[c.vid]) { const v = document.createElement("video"); v.muted = true; v.preload = "auto"; v.src = inClipSrc(c); v.load(); inPreV[c.vid] = v; } }
-  function introClip(c, b, n) {
-    const v = $("#inVid"); v.pause(); v.src = inClipSrc(c); v.currentTime = 0; v.load();
-    let started = false, snd = null;
+  function introEdit(c, b, n) {
+    const v = $("#inVid"); v.pause(); v.src = edSrc(c); v.currentTime = 0; v.load();
+    let started = false;
     const start = () => { if (started) return; started = true; v.play().catch(() => {}); };
-    snd = snSound(inClipAud(c), 0.95, 0, start); const fallback = setTimeout(start, 1400);
-    const shots = [{ at: 0, d: c.len, bars: true, enter: (s) => { inHide(); s.p = []; }, draw: (ctx, W, H, k, t, s) => {
-      const ct = started ? v.currentTime : 0;
-      if (!s.hit && ((started && ct >= c.hit) || k >= c.hit + 1.4)) { s.hit = k; if (c.freeze) v.pause(); inSlam(c.name, b, n, c.cls); snSound("slam", 0.75, 0); }
-      const since = s.hit ? k - s.hit : -1;
-      const zoom = 1.02 + Math.min(ct, c.len) * 0.01 + (since >= 0 ? inE(since / 0.45) * 0.03 + since * 0.01 : 0);
+    const snd = snSound(edAud(c), 0.95, 0, start), fallback = setTimeout(start, 1500);
+    const shots = [{ at: 0, d: c.len, bars: false, enter: () => inHide(), draw: (ctx, W, H, k, t, s) => {
       ctx.fillStyle = "#000"; ctx.fillRect(0, 0, W, H);
-      if (since >= 0) inShake(ctx, since, 0.35, 18);
-      const r = inVidDraw(ctx, W, H, v, c.cx || 0.5, zoom);
-      if (r && since >= 0 && since < 0.3) { ctx.save(); ctx.globalCompositeOperation = "lighter"; ctx.globalAlpha = 0.35 * (1 - since / 0.3); ctx.drawImage(v, r[0] - 14, r[1], r[2], r[3]); ctx.drawImage(v, r[0] + 14, r[1], r[2], r[3]); ctx.restore(); }
-      if (since >= 0) {
-        if (c.freeze) { ctx.save(); ctx.globalCompositeOperation = "color"; ctx.globalAlpha = Math.min(0.6, since * 2.5); ctx.fillStyle = c.cls.startsWith("ice") ? "#5fb4ff" : "#d4a12a"; ctx.fillRect(0, 0, W, H); ctx.restore(); }
-        if (c.cls.includes("side")) { const g = ctx.createLinearGradient(0, 0, W * 0.6, 0); g.addColorStop(0, `rgba(0,0,0,${Math.min(0.75, since * 3)})`); g.addColorStop(1, "rgba(0,0,0,0)"); ctx.fillStyle = g; ctx.fillRect(0, 0, W, H); }
-        else { ctx.fillStyle = `rgba(0,0,0,${Math.min(0.5, since * 2)})`; ctx.fillRect(0, 0, W, H); }
-      }
-      inClipFx(ctx, W, H, c.fx, s, t);
-      if (!s.hit) inL3(ctx, W, H, k - 0.3, "Cashed", b.pick, c.hit - 0.75);
-      inFlash(ctx, W, H, since, 0.14, 0.9);
+      edDraw(ctx, W, H, v);
+      const ct = started ? v.currentTime : 0;
+      if (!s.hit && ((started && ct >= c.hit) || k >= c.hit + 1.5)) { s.hit = k; inSlam(c.name, b, n, c.cls); snSound("slam", 0.7, 0); }
+      const [l0, l1] = c.l3 || [0.5, 6];
+      if (!s.hit && k >= l0) inL3(ctx, W, H, k - l0, "Cashed", b.pick, Math.min(l1, c.hit - 1) - l0);
     } }];
-    setTimeout(() => snd.stop(1), (c.len - 1) * 1000);
+    setTimeout(() => snd.stop(1), (c.len - 0.9) * 1000);
     return inRun({ len: c.len, cls: "clipv", shots, sounds: [], done: () => { clearTimeout(fallback); snd.stop(0.2); v.pause(); v.removeAttribute("src"); v.load(); } });
   }
+
   // ---- make it rain: spotlight on, money gun, cash everywhere ----
   function introGun(b, n) {
     const [B, F] = MUS.gun, c1 = F + B * 4, c2 = F + B * 8, L = 8.4, HUES = [45, 300, 190];
@@ -5580,7 +5555,7 @@ body.tv .strip .chart { height: 96px; }
   // regular wins: a shuffled bag of every intro, no repeats until the bag is empty
   const footballBet = (b) => { const sp = String(sportOf(b) || "").toLowerCase(); return !sp || /football|nfl|cfb/.test(sp); };
   const QUICK = [
-    ...GCLIPS.map((c) => ({ name: c.name, run: (b, n) => introClip(c, b, n), pre: () => inPreClip(c) })),
+    ...EDITS.map((c) => ({ name: c.name, run: (b, n) => introEdit(c, b, n), pre: () => edPre(c), w: 2 })),
     { name: "Make it rain", run: introGun, mus: "gun" },
     { name: "Jackpot", run: introSlots, mus: "slots" },
     { name: "Cash dance", run: introDance, mus: "dance" },
@@ -5594,7 +5569,13 @@ body.tv .strip .chart { height: 96px; }
     { name: "Hero landing", run: introHero, mus: "hero" },
   ];
   let quickBag = [], quickLast = -1;
-  function quickFill() { quickBag = QUICK.map((_, i) => i).sort(() => Math.random() - 0.5); if (quickBag[quickBag.length - 1] === quickLast) quickBag.unshift(quickBag.pop()); }
+  function quickFill() {
+    const bag = QUICK.flatMap((q, i) => Array(q.w || 1).fill(i)).sort(() => Math.random() - 0.5);
+    // never the same one twice in a row, including across refills
+    for (let i = bag.length - 2; i >= 0; i--) if (bag[i] === bag[i + 1]) { const j = bag.findIndex((x, m) => m !== i && x !== bag[i] && (m === 0 || bag[m - 1] !== bag[i]) && (m === bag.length - 1 || bag[m + 1] !== bag[i])); if (j >= 0) [bag[i], bag[j]] = [bag[j], bag[i]]; }
+    if (bag[bag.length - 1] === quickLast) bag.unshift(bag.pop());
+    quickBag = bag;
+  }
   function quickPre() { if (!quickBag.length) quickFill(); const q = QUICK[quickBag[quickBag.length - 1]]; if (q.pre) q.pre(); else loadBuf("sounds/sniper/../intro/" + q.mus); }
   function quickWin(b, n) {
     if (!quickBag.length) quickFill();
