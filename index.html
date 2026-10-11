@@ -2626,7 +2626,7 @@ body.tv.idle, body.tv.idle * { cursor: none !important; }
   // ---------- sheets ----------
   function openSheet(id) { $(id).hidden = false; }
   // keep every open screen current: when a new version is up, reload it (never mid-form or mid-animation)
-  const BUILD = "20261011211824";
+  const BUILD = "20261011212957";
   function checkBuild() {
     if (BUILD === "dev") return;
     fetch("version.json?t=" + Date.now(), { cache: "no-store" }).then((r) => (r.ok ? r.json() : null)).then((j) => {
@@ -3930,6 +3930,13 @@ body.tv.idle, body.tv.idle * { cursor: none !important; }
     clip("nfl/nfl06", "Brady: lock in", "hype comeback up", 12.3, NFL),
     clip("nfl/nfl07", "Beast Mode: run through 'em", "hype comeback up", 29.1, NFL),
     clip("nfl/nfl08", "Kirk: You like that!", "up win comeback", 60.6, NFL),
+    clip("nfl/nfl09", "Randy Moss: straight cash", "hype up win", 59.3, NFL),
+    clip("nfl/nfl10", "Gruden mic'd up", "hype comeback", 49.5, NFL),
+    clip("nfl/nfl11", "Bears walk off the Packers", "hype up td", 20.3, nflTeam("CHI")),
+    clip("nfl/nfl12", "Patriots: it's us first", "hype up", 61.3, nflTeam("NE")),
+    clip("nfl/nfl13", "Notre Dame: in the club", "hype up", 29.7, cfbTeam("ND")),
+    clip("nfl/nfl14", "Brady: not Montana, not Elway", "hype up win", 27.8, NFL),
+    clip("nfl/nfl15", "Smith-Njigba: show them", "hype up td", 22.2, nflTeam("SEA")),
   ];
   // library clips are big once decoded, so only the last couple stay in memory
   const clipBufs = new Map();
@@ -4010,6 +4017,7 @@ body.tv.idle, body.tv.idle * { cursor: none !important; }
       // songs get a now-playing card (song and artist), slid in a beat after the clip starts; a Spotify song brings its cover
       const np = $("#jbNp"); np.classList.remove("on"); clearTimeout(npT); spArt(sp && sp.art);
       if (P.song && !sp) lastSong = P.song;
+      if (P.dj) lastDj = Date.now();
       const song = sp ? sp.name : P.song, artist = sp ? sp.artist : P.artist;
       if (song) { $("#npSong").textContent = song; $("#npArtist").textContent = artist || ""; np.hidden = false; npT = setTimeout(() => np.classList.add("on"), 700); } else np.hidden = true;
       $("#jbTag").textContent = why || MOOD_TAG[mood] || "Live";
@@ -4667,6 +4675,18 @@ body.tv.idle, body.tv.idle * { cursor: none !important; }
   const musicFor = (b) => { const sp = (gameFor(b) || {}).sport || sportOf(b); return CLIPS.filter((c) => (c.song || c.music || c.dj) && !/anthem/i.test(c.artist || "") && forSport(c, sp) && fits(c, b)); };
   let busyPops = 0, tdPops = 0, lastSong = "", showPops = 0, showTd = 0;
   const SHOW_EVERY = 2 * 60e3; // 4 PM / prime: a DJ break, a clip or one of his scenes after 2 minutes without anything
+  // the DJ gets his turn every 4 minutes however busy the games are: plays keep coming on a full slate, so waiting for a
+  // quiet 2 minutes meant he hardly ever came on. A big play (a touchdown, a turnover) still comes first and cuts him off
+  const DJ_DUE = 4 * 60e3;
+  let lastDj = Date.now() - 3 * 60e3; // first one about a minute after the board opens
+  function djBreak(now) {
+    const mine = [...S.bets.values()].filter((b) => b.status === "open" && isMe(b)), b = mine.find((x) => phase(x) === "live") || mine[0];
+    const P = b && pickClip(newSong(CLIPS.filter((c) => c.dj)));
+    if (!P) return false;
+    lastAny = now; lastKind = "pop"; lastDj = now;
+    react(b, "mid", P, "DJ " + gName());
+    return true;
+  }
   const newSong = (l) => { const f = l.filter((c) => !c.song || c.song !== lastSong); return f.length ? f : l; };
   function tdHype(b, why) {
     if (!clipsOn()) return;
@@ -4749,6 +4769,7 @@ body.tv.idle, body.tv.idle * { cursor: none !important; }
       // one clip at a time, the biggest moment wins
       const top = swings.reduce((x, s) => (s.pri > x.pri ? s : x));
       const big = top.kind === "first" || (top.kind === "ev" && top.e.big) || top.kind === "good" || top.kind === "bad";
+      if (on && !busy && !big && !trial && now - lastDj >= DJ_DUE && now - lastAny >= 20e3 && !clipBusy() && djBreak(now)) return;
       const gap = busy ? BUSY_GAP : big ? BIG_GAP : TRIGGER_GAP;
       // a real play cuts off a filler pop-up that's playing; otherwise wait out the gap
       const ok = on && (busy ? !cardBusy && !fxBusy && now - lastAny >= gap : top.kind === "first" || (big && lastKind === "pop" && !fxBusy) || (now - lastAny >= gap && !clipBusy()));
@@ -4781,10 +4802,11 @@ body.tv.idle, body.tv.idle * { cursor: none !important; }
     if (!on || clipBusy() || trial) return;
     if (busy) {
       // busy slate: DJ Goldie, now and then, over whichever of your bets is live
-      if (now - lastAny < DJ_EVERY) return;
+      const due = now - lastDj >= DJ_DUE && now - lastAny >= 20e3;
+      if (now - lastAny < DJ_EVERY && !due) return;
       const mine = [...S.bets.values()].filter((b) => b.status === "open" && isMe(b)), b = mine.find((x) => phase(x) === "live") || mine[0];
       if (!b) return;
-      const other = musicFor(b).filter((c) => !c.dj), P = pickClip(newSong(busyPops++ % 3 === 2 && other.length ? other : CLIPS.filter((c) => c.dj)));
+      const other = musicFor(b).filter((c) => !c.dj), P = pickClip(newSong(!due && busyPops++ % 3 === 2 && other.length ? other : CLIPS.filter((c) => c.dj)));
       if (!P) return;
       lastAny = now; lastKind = "pop";
       react(b, "mid", P, P.dj ? "DJ " + gName() : "Music");
@@ -4793,12 +4815,13 @@ body.tv.idle, body.tv.idle * { cursor: none !important; }
     // 4 PM and prime time: something every 2 minutes, taking turns: DJ {name} (off your Spotify playlist when the TV's
     // connected), a clip for how your bets are going (football edits, rap, comebacks), one of his scenes
     const mine = [...S.bets.values()].filter((b) => b.status === "open" && isMe(b));
-    if (!mine.length || now - lastAny < SHOW_EVERY) return;
+    const djDue = now - lastDj >= DJ_DUE && now - lastAny >= 20e3;
+    if (!mine.length || (now - lastAny < SHOW_EVERY && !djDue)) return;
     let live = [];
     for (const b of mine) { const spot = liveSpot(b); if (spot && spot.state !== "L") live.push({ b, ...spot }); }
     const winning = live.filter((x) => x.state === "W");
     if (winning.length) live = winning;
-    const turn = showPops++ % 3;
+    const turn = djDue ? 0 : showPops++ % 3;
     if (turn === 0 || !live.length) {
       const b = (live[0] && live[0].b) || mine.find((x) => phase(x) === "live") || mine[0], P = pickClip(newSong(CLIPS.filter((c) => c.dj)));
       if (!P) return;
