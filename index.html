@@ -841,6 +841,9 @@ body.tv .strip .chart { height: 96px; }
 .in-sub { font: 800 clamp(20px, 3.6vh, 46px)/1 var(--f-num); color: var(--win); text-shadow: 0 0 22px rgba(46,232,154,.5); }
 .in-title.t-lock { justify-content: flex-end; padding-bottom: 11vh; gap: .6vh; }
 .in-title.t-lock .in-big { font-size: clamp(56px, 12vh, 150px); }
+.in-title.t-loss .in-big { background-image: linear-gradient(180deg, #ffe1e1 0%, #ff8a8a 42%, #e0182f 55%, #5a0010 100%); filter: drop-shadow(0 0 26px rgba(255,40,60,.5)) drop-shadow(0 8px 0 rgba(0,0,0,.6)); }
+.in-title.t-loss .in-kick { color: #ff5a6a; text-shadow: 0 0 20px rgba(255,60,80,.6); }
+.in-title.t-loss .in-sub { color: #ff6b7a; text-shadow: none; }
 .in-title.t-hero, .in-title.t-side { align-items: flex-start; text-align: left; padding-left: 7vw; width: 58vw; }
 .in-title.t-ice .in-big { background-image: linear-gradient(105deg, transparent 38%, rgba(255,255,255,.95) 48%, transparent 58%), linear-gradient(180deg, #ffffff 0%, #d8f1ff 42%, #4aa8ff 55%, #0a2f66 100%); filter: drop-shadow(0 0 30px rgba(90,180,255,.6)) drop-shadow(0 8px 0 rgba(0,0,0,.6)); }
 .in-title.t-pix .in-big { background-image: linear-gradient(105deg, transparent 38%, rgba(255,255,255,.95) 48%, transparent 58%), linear-gradient(180deg, #f6ffd8 0%, #c6ff6a 42%, #4caf1e 55%, #1d4d06 100%); filter: drop-shadow(8px 8px 0 #000); }
@@ -1084,11 +1087,13 @@ body.tv .strip .chart { height: 96px; }
     </div>
     <div class="field">
       <span class="lbl">Goldie intros</span>
-      <span class="hint">Every win gets one. Regular hits shuffle through all of these. $100+ wins get the blockbuster, parlays get their own, and +150 or longer gets the sniper. Tap any to watch it.</span>
+      <span class="hint">Every win gets one, and a loss gets Goldie wiping out (or one of your loss clips). Regular hits shuffle through all of these. $100+ wins get the blockbuster, parlays get their own, and +150 or longer gets the sniper. Tap any to watch it.</span>
       <div style="display:flex;gap:8px;flex-wrap:wrap">
         <button type="button" class="btn sm" id="inTestMoney">$100+ blockbuster</button>
         <button type="button" class="btn sm" id="inTestParlay">Parlay</button>
         <span class="inq" id="inQuick"></span>
+        <button type="button" class="btn sm" id="inLossCliff">Loss: off a cliff</button>
+        <button type="button" class="btn sm" id="inLossTrain">Loss: train</button>
       </div>
     </div>
     <div class="field">
@@ -1100,9 +1105,14 @@ body.tv .strip .chart { height: 96px; }
       <div class="cliplib" id="clipLib"></div>
     </div>
     <div class="field">
-      <span class="lbl">Ticker</span>
-      <label class="togrow"><input type="checkbox" id="tickerOn"> Show the college football ticker on this screen</label>
-      <span class="hint">Runs along the bottom on game days: every FBS score (yours first), touchdowns and field goals as they happen, upset watch when a ranked team is in trouble, crunch time, and injury news.</span>
+      <span class="lbl">Main sport</span>
+      <div class="radios" id="focusRadios">
+        <label><input type="radio" name="focus" value="auto"><span>Auto</span></label>
+        <label><input type="radio" name="focus" value="CFB"><span>College football</span></label>
+        <label><input type="radio" name="focus" value="NFL"><span>NFL</span></label>
+      </div>
+      <span class="hint">What the ticker follows (every score, spreads and totals before kickoff, upset watch, injury news) and which league the bet form opens to. Auto runs college Tuesday through Saturday and the NFL on Sunday, Monday and Thursday. Applies to every screen.</span>
+      <label class="togrow"><input type="checkbox" id="tickerOn"> Show the ticker on this screen</label>
     </div>
     <div class="field">
       <span class="lbl">Your data</span>
@@ -1178,7 +1188,7 @@ body.tv .strip .chart { height: 96px; }
   <div class="in-cap" id="inCap"></div>
   <div class="in-title" id="inTitle"><div class="in-kick" id="inKick"></div><div class="in-big" id="inBig"></div><div class="in-mid" id="inMid"></div><div class="in-sub" id="inSub"></div></div>
 </div>
-<div class="ticker" id="ticker" hidden><div class="tk-lbl"><i class="dot"></i>CFB</div><div class="tk-track"><div class="tk-run" id="tkRun"></div></div></div>
+<div class="ticker" id="ticker" hidden><div class="tk-lbl"><i class="dot"></i><span id="tkLbl">CFB</span></div><div class="tk-track"><div class="tk-run" id="tkRun"></div></div></div>
 <div class="jumbo" id="jumbo" hidden title="Tap to close">
   <div class="jb-head"><span class="jb-logo">SWEAT<b>ZONE</b></span><span class="jb-tag" id="jbTag">Live</span><b id="jbLbl"></b><span class="jb-x" aria-hidden="true">×</span></div>
   <div class="jb-main">
@@ -1732,7 +1742,7 @@ body.tv .strip .chart { height: 96px; }
       if (isNuke(b)) nukeHit(b.pick, n); else if (isWhale(b)) whaleSplash(b, n); else if (!big && !par && !snipe) quickWin(b, n);
       return;
     }
-    if (o === "L") { playLoss(); if (clipsOn()) setTimeout(() => { if (!clipBusy()) react(b, "bad", pickClip(libFor(b, ["down"])), "Final"); }, 2600); }
+    if (o === "L") { playLoss(); lossReact(b, n); }
     const word = b.status === "cashout" ? "CASHED" : o === "W" ? "WINNER" : o === "L" ? "LOSS" : "PUSH";
     flash(o, word, b.pick, `${b.book === "DK" ? "DraftKings" : "FanDuel"} · ${fOdds(b.odds)} · ${fU(n, true)} (${fUSD(n * S.unit, true)})`);
   }
@@ -1827,7 +1837,7 @@ body.tv .strip .chart { height: 96px; }
   // ---------- sheets ----------
   function openSheet(id) { $(id).hidden = false; }
   // keep every open screen current: when a new version is up, reload it (never mid-form or mid-animation)
-  const BUILD = "20261011033555";
+  const BUILD = "20261011040428";
   function checkBuild() {
     if (BUILD === "dev") return;
     fetch("version.json?t=" + Date.now(), { cache: "no-store" }).then((r) => (r.ok ? r.json() : null)).then((j) => {
@@ -2011,7 +2021,7 @@ body.tv .strip .chart { height: 96px; }
     const me = document.querySelector('input[name="who"][value="me"]'); if (me) me.checked = true;
     $("#guestWrap").hidden = true; $("#f-guest").value = S.guestName || ""; $("#guestLbl").textContent = S.guestName || "Guest";
     $("#addForm").reset(); S.sign = -1; S.day = 0; $("#f-odds").value = "110"; $("#f-units").value = "1"; $("#f-err").textContent = "";
-    Object.assign(F, { sel: null, legs: [], q: "", openG: null, custom: false, oddsTouched: false });
+    Object.assign(F, { sel: null, legs: [], q: "", openG: null, custom: false, oddsTouched: false, sport: focusLeague() });
     scanNote(""); slipBets = [];
     renderPicker(); updatePreview(); openSheet("#addSheet"); loadPickerGames();
   }
@@ -2905,18 +2915,18 @@ body.tv .strip .chart { height: 96px; }
   const CFB = { sport: "CFB" }, MLB = { sport: "MLB" }, UGA_ALA = { sport: "CFB", teams: ["UGA", "ALA"] };
   const UGA = { sport: "CFB", fan: "UGA" }, ALA = { sport: "CFB", fan: "ALA" }, UGA_VS_ALA = { sport: "CFB", fan: "UGA", teams: ["UGA", "ALA"] }, ALA_VS_UGA = { sport: "CFB", fan: "ALA", teams: ["UGA", "ALA"] };
   const CLIPS = [
-    clip("uga/uga01", "Between the hedges", "hype up", 13.95, UGA),
-    clip("uga/uga02", "They call him George", "hype up", 30, UGA),
-    clip("uga/uga03", "Dawgs highlight reel", "hype up rap", 25.75, UGA),
-    clip("clips/g08", "How 'bout them Dawgs", "hype up rap", 30.05, UGA),
-    clip("uga/uga04", "Heavyweights in Tuscaloosa", "hype up rap", 30, UGA_VS_ALA),
-    clip("uga/uga05", "Don't think about nothing", "hype up comeback", 16.25, UGA_VS_ALA),
-    clip("cfb/cfb03", "365 days", "hype up", 26.8, UGA_VS_ALA),
-    clip("cfb/cfb13", "McAfee: going crazy tonight", "hype up", 22, UGA_VS_ALA),
-    clip("cfb/cfb01", "Saban: Play Nintendo?", "hype", 12, ALA),
-    clip("cfb/cfb02", "Saban's effort barometer", "hype up", 14.6, ALA),
-    clip("cfb/cfb06", "Nick Saban is the Hulk", "hype up", 30, ALA),
-    clip("cfb/cfb04", "Bama vs. Georgia", "hype up", 11.5, ALA_VS_UGA),
+    clip("uga/uga01", "Between the hedges", "hype up vibe", 13.95, UGA),
+    clip("uga/uga02", "They call him George", "hype up vibe", 30, UGA),
+    clip("uga/uga03", "Dawgs highlight reel", "hype up rap vibe", 25.75, UGA),
+    clip("clips/g08", "How 'bout them Dawgs", "hype up rap vibe", 30.05, UGA),
+    clip("uga/uga04", "Heavyweights in Tuscaloosa", "hype up rap vibe", 30, UGA_VS_ALA),
+    clip("uga/uga05", "Don't think about nothing", "hype up comeback vibe", 16.25, UGA_VS_ALA),
+    clip("cfb/cfb03", "365 days", "hype up vibe", 26.8, UGA_VS_ALA),
+    clip("cfb/cfb13", "McAfee: going crazy tonight", "hype up vibe", 22, UGA_VS_ALA),
+    clip("cfb/cfb01", "Saban: Play Nintendo?", "hype up vibe", 12, ALA),
+    clip("cfb/cfb02", "Saban's effort barometer", "hype up vibe", 14.6, ALA),
+    clip("cfb/cfb06", "Nick Saban is the Hulk", "hype up vibe", 30, ALA),
+    clip("cfb/cfb04", "Bama vs. Georgia", "hype up vibe", 11.5, ALA_VS_UGA),
     clip("clips/g06", "Pregame huddle speeches", "hype vibe", 30),
     clip("clips/l01", "It's not your fault", "down", 30.85),
     clip("clips/l02", "Baseball heartbreak", "down", 28.35),
@@ -2956,7 +2966,7 @@ body.tv .strip .chart { height: 96px; }
     clip("win/win19", "Crowd singalong", "up win", 24.55),
     clip("win/win20", "Lil Durk", "up win", 15.65),
     clip("win/win21", "Quavo: Hold them bands down", "up win", 26.35),
-    clip("cfb/cfb15", "After the touchdown", "vibe", 15, CFB),
+    clip("cfb/cfb15", "After the touchdown", "vibe hype up", 15, CFB),
     clip("mlb/mlb01", "Superior firepower", "up hype vibe", 23.15, MLB),
     clip("mlb/mlb02", "Back to me", "up hype vibe", 25.45, MLB),
     clip("mlb/mlb03", "105 up and in", "up hype vibe", 16.75, MLB),
@@ -2964,8 +2974,8 @@ body.tv .strip .chart { height: 96px; }
     clip("mlb/mlb05", "Three-peat rolls on", "up hype vibe", 30, MLB),
     clip("mlb/mlb06", "Next opponent: Ohtani", "up hype vibe", 15.25, MLB),
     clip("mlb/mlb07", "Three-peat, part 2", "up hype vibe", 8.6, MLB),
-    clip("cfb/cfb16", "365 days, part 2", "hype up", 31.2, UGA),
-    clip("cfb/cfb19", "Dawgs going crazy, part 2", "hype up", 14.6, UGA),
+    clip("cfb/cfb16", "365 days, part 2", "hype up vibe", 31.2, UGA),
+    clip("cfb/cfb19", "Dawgs going crazy, part 2", "hype up vibe", 14.6, UGA),
     clip("cfb/cfb17", "I don't lose, part 2", "down comeback", 32),
     clip("cfb/cfb18", "Brick by brick, part 2", "down comeback", 30.2),
     clip("cfb/cfb20", "You owe them something, part 2", "down hype comeback", 12.8),
@@ -2973,32 +2983,32 @@ body.tv .strip .chart { height: 96px; }
     clip("clips/g09", "Vikings pregame huddle", "hype vibe", 30.4),
     clip("win/win22", "Ant Edwards, part 2", "up win", 30.4),
     clip("win/win23", "Future, part 2", "up win", 30.4),
-    clip("cfb/cfb21", "GameDay: lighting it up", "hype vibe", 30.5, CFB),
-    clip("cfb/cfb22", "GameDay energy, part 2", "hype vibe", 31.0, CFB),
-    clip("cfb/cfb23", "Tunnel walkouts", "hype up", 33.5, CFB),
-    clip("cfb/cfb24", "Tunnel walkouts, part 2", "hype up", 33.5, CFB),
-    clip("cfb/cfb25", "Close your eyes", "up hype", 13.0, CFB),
-    clip("cfb/cfb26", "Bama rap edit", "hype up", 26.0, ALA),
-    clip("cfb/cfb27", "Bama rap edit, part 2", "hype up", 26.0, ALA),
-    clip("cfb/cfb28", "Being a winner is a curse", "hype comeback", 27.0, CFB),
-    clip("cfb/cfb29", "Being a winner, part 2", "hype up", 27.3, CFB),
-    clip("cfb/cfb30", "I know what you are, Empire", "hype up", 16.0, cfbTeam("OU")),
-    clip("cfb/cfb31", "You ain't heard about us?", "up hype", 17.0, CFB),
-    clip("cfb/cfb32", "Not a body within 10 yards", "up hype", 28.0, cfbTeam("FLA")),
-    clip("cfb/cfb33", "Gators, part 2", "up hype", 13.1, cfbTeam("FLA")),
-    clip("cfb/cfb34", "Surrounded by snipers", "up hype", 15.5, CFB),
-    clip("cfb/cfb35", "Memorial Stadium nights", "vibe hype", 18.0, CFB),
-    clip("cfb/cfb36", "Give me my theme music!", "hype up", 22.2, CFB),
-    clip("cfb/cfb37", "110,000 fans", "hype comeback", 23.0, CFB),
-    clip("cfb/cfb38", "Paint our masterpiece", "hype up", 18.8, CFB),
-    clip("cfb/cfb39", "Dabo: don't quit", "hype comeback", 31.0, cfbTeam("CLEM")),
-    clip("cfb/cfb40", "Dabo: don't quit, part 2", "hype comeback", 30.5, cfbTeam("CLEM")),
-    clip("cfb/cfb41", "Ole Miss takeover", "up hype", 30.0, cfbTeam("MISS")),
-    clip("cfb/cfb42", "Ole Miss takeover, part 2", "up hype", 30.5, cfbTeam("MISS")),
-    clip("cfb/cfb43", "Under the lights", "hype vibe", 26.0, CFB),
-    clip("cfb/cfb44", "We Bama, that's what we do", "hype", 29.6, ALA),
-    clip("cfb/cfb45", "Dread it, run from it", "hype", 31.4, ALA),
-    clip("cfb/cfb46", "We Bama, part 3", "hype", 31.0, ALA),
+    clip("cfb/cfb21", "GameDay: lighting it up", "hype vibe up", 30.5, CFB),
+    clip("cfb/cfb22", "GameDay energy, part 2", "hype vibe up", 31.0, CFB),
+    clip("cfb/cfb23", "Tunnel walkouts", "hype up vibe", 33.5, CFB),
+    clip("cfb/cfb24", "Tunnel walkouts, part 2", "hype up vibe", 33.5, CFB),
+    clip("cfb/cfb25", "Close your eyes", "up hype vibe", 13.0, CFB),
+    clip("cfb/cfb26", "Bama rap edit", "hype up vibe", 26.0, ALA),
+    clip("cfb/cfb27", "Bama rap edit, part 2", "hype up vibe", 26.0, ALA),
+    clip("cfb/cfb28", "Being a winner is a curse", "hype comeback up vibe", 27.0, CFB),
+    clip("cfb/cfb29", "Being a winner, part 2", "hype up vibe", 27.3, CFB),
+    clip("cfb/cfb30", "I know what you are, Empire", "hype up vibe", 16.0, cfbTeam("OU")),
+    clip("cfb/cfb31", "You ain't heard about us?", "up hype vibe", 17.0, CFB),
+    clip("cfb/cfb32", "Not a body within 10 yards", "up hype vibe", 28.0, cfbTeam("FLA")),
+    clip("cfb/cfb33", "Gators, part 2", "up hype vibe", 13.1, cfbTeam("FLA")),
+    clip("cfb/cfb34", "Surrounded by snipers", "up hype vibe", 15.5, CFB),
+    clip("cfb/cfb35", "Memorial Stadium nights", "vibe hype up", 18.0, CFB),
+    clip("cfb/cfb36", "Give me my theme music!", "hype up vibe", 22.2, CFB),
+    clip("cfb/cfb37", "110,000 fans", "hype comeback up vibe", 23.0, CFB),
+    clip("cfb/cfb38", "Paint our masterpiece", "hype up vibe", 18.8, CFB),
+    clip("cfb/cfb39", "Dabo: don't quit", "hype comeback up vibe", 31.0, cfbTeam("CLEM")),
+    clip("cfb/cfb40", "Dabo: don't quit, part 2", "hype comeback up vibe", 30.5, cfbTeam("CLEM")),
+    clip("cfb/cfb41", "Ole Miss takeover", "up hype vibe", 30.0, cfbTeam("MISS")),
+    clip("cfb/cfb42", "Ole Miss takeover, part 2", "up hype vibe", 30.5, cfbTeam("MISS")),
+    clip("cfb/cfb43", "Under the lights", "hype vibe up", 26.0, CFB),
+    clip("cfb/cfb44", "We Bama, that's what we do", "hype up vibe", 29.6, ALA),
+    clip("cfb/cfb45", "Dread it, run from it", "hype up vibe", 31.4, ALA),
+    clip("cfb/cfb46", "We Bama, part 3", "hype up vibe", 31.0, ALA),
     clip("goldie/g1", "Goldie: sent it", "up win", 6.35),
     clip("goldie/g2", "Goldie: main character", "vibe", 5.95),
     clip("goldie/g3", "Goldie: next level", "up win", 9.95),
@@ -3108,24 +3118,20 @@ body.tv .strip .chart { height: 96px; }
     const s = selsOf(b).find((x) => String(x.g) === g.id);
     return s && s.m !== "tot" && g[s.s] ? g[s.s].ab : null;
   }
-  // team clips: yours play anywhere you're not betting against your team; another team's play on
-  // its own side, or on games that don't involve Georgia (never Bama edits on a Georgia game)
-  const HOME = "UGA";
+  // team edits are all general college football clips; the only one that never shows is the team you're betting against
   function fits(c, b) {
     if (!c.fan) return true;
-    const me = myTeam(b), g = gameFor(b), inGame = (t) => !!g && (g.a.ab === t || g.h.ab === t);
-    if (me === c.fan) return true;
-    if (me && inGame(c.fan)) return false;
-    if (c.fan !== HOME && inGame(HOME)) return false;
-    return true;
+    const me = myTeam(b), g = gameFor(b);
+    if (!me || !g || me === c.fan) return true;
+    return c.fan !== (g.a.ab === me ? g.h.ab : g.a.ab);
   }
   // your team's own clips first, then the matchup's, then the general folders
-  const rapFor = (b) => { const g = gameFor(b), sp = (g || {}).sport || sportOf(b); return CLIPS.filter((c) => (c.mood.split(" ").includes("win") || c.mood.split(" ").includes("rap")) && fits(c, b) && (!c.sport || c.sport === sp) && (!c.teams || isMatchup(c, g))); };
+  const rapFor = (b) => { const g = gameFor(b), sp = (g || {}).sport || sportOf(b); return CLIPS.filter((c) => { const m = c.mood.split(" "); return (m.includes("win") || m.includes("rap") || (c.sport && c.sport === sp && m.includes("hype"))) && fits(c, b) && (!c.sport || c.sport === sp); }); };
   function poolFor(b, k) {
     const me = myTeam(b);
     if (k === "fill") {
       // close game: mostly fillers, some of your team's hype
-      const fill = [PIPS.good, ...libFor(b, ["vibe"])];
+      const fill = [PIPS.good, ...libFor(b, ["vibe"]), ...libFor(b, ["hype"]).filter((c) => c.sport)];
       if (okPool(fill) && Math.random() < 0.65) return fill;
       k = "hype";
     }
@@ -3140,14 +3146,14 @@ body.tv .strip .chart { height: 96px; }
     if (k === "good") { const r = rapFor(b); if (okPool(r) && Math.random() < 0.4) return r; }
     const fan = me && k !== "bad" ? CLIPS.filter((c) => c.fan === me && (!c.sport || c.sport === sportOf(b) || c.sport === (gameFor(b) || {}).sport)) : [];
     const match = k === "bad" ? [] : gamePool(b).filter((c) => k !== "good" || c.mood.split(" ").includes("up"));
-    const base = k === "good" ? libFor(b, ["up"]) : k === "bad" ? ["lockin", ...libFor(b, ["down"])] : libFor(b, ["hype", "vibe"]);
+    const base = k === "good" ? libFor(b, ["up", "hype"]) : k === "bad" ? ["lockin", ...libFor(b, ["down"])] : libFor(b, ["hype", "vibe"]);
     if (okPool(fan) && Math.random() < 0.6) return fan;
     if (okPool(match) && Math.random() < 0.5) return match;
     return base.length ? base : fan.length ? fan : match;
   }
   function libFor(b, moods) {
     const sp = (gameFor(b) || {}).sport || sportOf(b);
-    return CLIPS.filter((c) => (!c.sport || c.sport === sp) && (!c.teams || (c.fan && c.fan === myTeam(b))) && fits(c, b) && moods.some((m) => c.mood.split(" ").includes(m)));
+    return CLIPS.filter((c) => (!c.sport || c.sport === sp) && fits(c, b) && moods.some((m) => c.mood.split(" ").includes(m)));
   }
 
   // this bet's game has its own clips (Georgia–Bama): play those when stuff happens
@@ -3344,10 +3350,10 @@ body.tv .strip .chart { height: 96px; }
   }
   setInterval(autoReact, 60e3); // pop-ups keep coming even if the scores haven't changed
   // Settings: the clip library, with a Play button on each
-  const LIB_GROUPS = [["Winning · on repeat while you're winning", (c) => c.mood.split(" ").includes("win")], ["Comeback · when you're down but within two scores", (c) => c.mood.split(" ").includes("comeback")], ["Georgia · any college bet unless you're fading Georgia", (c) => c.fan === "UGA"], ["Alabama · Bama bets and games without Georgia", (c) => c.fan === "ALA"], ["Other teams · their games and yours, never on a Georgia game", (c) => c.fan && c.fan !== "UGA" && c.fan !== "ALA"],
-    ["College football only", (c) => c.sport === "CFB" && !c.teams && !c.fan], ["MLB only", (c) => c.sport === "MLB"],
-    ["Losing bet · every sport", (c) => !c.sport && c.mood.includes("down")], ["Fillers · close games, every 3 min", (c) => c.mood.split(" ").includes("vibe") && !c.sport]];
-  $("#clipLib").innerHTML = LIB_GROUPS.map(([name, f]) => `<h4>${esc(name)}</h4>` + CLIPS.map((c, i) => (f(c) ? `<div class="sndrow"><label>${esc(c.label)}${c.sport && !c.teams && !c.fan ? `<span class="mood">${c.mood.includes("down") ? "Losing" : "Winning"}</span>` : ""}</label><button type="button" class="btn sm" data-i="${i}">Play</button></div>` : "")).join("")).join("");
+  const LIB_GROUPS = [["Winning · on repeat while you're winning", (c) => c.mood.split(" ").includes("win")], ["Comeback · when you're down but within two scores", (c) => c.mood.split(" ").includes("comeback")], 
+    ["College football · every college bet, never the team you're betting against", (c) => c.sport === "CFB"], ["MLB only", (c) => c.sport === "MLB"],
+    ["Losing bet · every sport", (c) => !c.sport && c.mood.includes("down")], ["Fillers · close games, every 3 min", (c) => c.mood.split(" ").includes("vibe")]];
+  $("#clipLib").innerHTML = LIB_GROUPS.map(([name, f]) => `<h4>${esc(name)}</h4>` + CLIPS.map((c, i) => (f(c) ? `<div class="sndrow"><label>${esc(c.label)}${c.fan ? `<span class="mood">${esc(c.fan)}</span>` : ""}${c.sport && !c.teams && !c.fan ? `<span class="mood">${c.mood.includes("down") ? "Losing" : "Winning"}</span>` : ""}</label><button type="button" class="btn sm" data-i="${i}">Play</button></div>` : "")).join("")).join("");
   $("#clipLib").addEventListener("click", (e) => {
     const btn = e.target.closest("button[data-i]"); if (!btn) return;
     const P = CLIPS[Number(btn.dataset.i)], m = P.mood.split(" ")[0];
@@ -3360,14 +3366,22 @@ body.tv .strip .chart { height: 96px; }
   $("#clipsOn").addEventListener("change", (e) => { try { localStorage.setItem("sb-clips", e.target.checked ? "on" : "off"); } catch (err) {} if (!e.target.checked) stopStatus(); });
 
   // ---------- Bottom ticker: every college football game today, scores as they happen, upset watch, injury news ----------
-  const TK = { games: [], alerts: [], news: [], prev: new Map(), newsAt: 0, html: "", pending: null };
+  const TK = { games: [], alerts: [], news: [], prev: new Map(), newsAt: 0, html: "", pending: null, lg: "" };
+  // main sport: CFB, NFL, or auto (NFL on Sunday, Monday and Thursday, college the rest of the week)
+  S.focus = S.focus || "auto";
+  const etDow = () => ({ Sun: 0, Mon: 1, Tue: 2, Wed: 3, Thu: 4, Fri: 5, Sat: 6 })[new Intl.DateTimeFormat("en-US", { timeZone: "America/New_York", weekday: "short" }).format(new Date())];
+  const focusLeague = () => (S.focus === "CFB" || S.focus === "NFL" ? S.focus : [0, 1, 4].includes(etDow()) ? "NFL" : "CFB");
+  function showFocus() { const r = document.querySelector(`input[name="focus"][value="${S.focus}"]`); if (r) r.checked = true; }
+  function setFocus(v) { if (v === S.focus) return; S.focus = v; showFocus(); loadTicker(); }
   function tickerOn() { try { return localStorage.getItem("sb-ticker") !== "off"; } catch (e) { return true; } }
   const SCORE_WORD = { 1: "Extra point", 2: "Safety / 2-pt", 3: "Field goal", 6: "Touchdown", 7: "Touchdown", 8: "Touchdown + 2" };
   async function loadTicker() {
     if (!tickerOn() || document.visibilityState !== "visible") return;
     try {
-      const r = await fetch(`https://site.api.espn.com/apis/site/v2/sports/football/college-football/scoreboard?dates=${etDate(Date.now())}&limit=300&groups=80`);
-      if (!r.ok) return;
+      const lg = focusLeague();
+      if (lg !== TK.lg) { Object.assign(TK, { games: [], alerts: [], news: [], prev: new Map(), newsAt: 0, html: "", pending: null, lg }); $("#tkLbl").textContent = lg; $("#tkRun").innerHTML = ""; }
+      const r = await fetch(`https://site.api.espn.com/apis/site/v2/sports/${ESPN[lg]}/scoreboard?limit=300${lg === "CFB" ? `&groups=80&dates=${etDate(Date.now())}` : ""}`);
+      if (!r.ok || lg !== TK.lg) return;
       const j = await r.json(), d = TK.games.length ? tvDelay() * 1000 : 0;
       if (d) setTimeout(() => tickerApply(j), d); else tickerApply(j);
     } catch (e) {}
@@ -3381,8 +3395,9 @@ body.tv .strip .chart { height: 96px; }
         if (!t.home || !t.away) continue;
         const team = (x) => ({ id: x.team.id, ab: x.team.abbreviation || x.team.shortDisplayName, rank: (x.curatedRank && x.curatedRank.current) || 99, sc: Number(x.score) || 0 });
         const st = e.status.type, sit = c.situation || {}, lp = sit.lastPlay || null;
+        const od = (c.odds || [])[0] || null, det = od && od.details ? String(od.details) : "", fm = det.match(/^([A-Z0-9&]{2,5})\s+-?([\d.]+)/);
         const g = { id: String(e.id), st: st.state, d: st.shortDetail || "", period: e.status.period || 0, a: team(t.away), h: team(t.home), t: Date.parse(e.date), rz: !!sit.isRedZone, pos: sit.possession || null, lp,
-          hp: lp && lp.probability ? lp.probability.homeWinPercentage : null };
+          hp: lp && lp.probability ? lp.probability.homeWinPercentage : null, line: det && det !== "EVEN" ? det : det === "EVEN" ? "Pick'em" : "", ou: od && od.overUnder ? od.overUnder : null, favAb: fm ? fm[1] : null, spr: fm ? Number(fm[2]) : 0 };
         games.push(g);
         // a score since the last look: say who and what
         const was = TK.prev.get(g.id);
@@ -3401,7 +3416,7 @@ body.tv .strip .chart { height: 96px; }
   }
   async function loadNews() {
     try {
-      const r = await fetch("https://site.api.espn.com/apis/site/v2/sports/football/college-football/news?limit=50");
+      const r = await fetch(`https://site.api.espn.com/apis/site/v2/sports/${ESPN[TK.lg || focusLeague()]}/news?limit=50`);
       const j = await r.json(), now = Date.now();
       TK.news = (j.articles || []).filter((a) => /injur|ruled out|carted|questionable|doubtful|out for|exits|leaves|left the game|concussion|won't return|will not return|sidelined/i.test(a.headline || "") && now - Date.parse(a.published) < 10 * 3600e3)
         .slice(0, 6).map((a) => a.headline);
@@ -3412,7 +3427,8 @@ body.tv .strip .chart { height: 96px; }
   const mineIds = () => { const s = new Set(); for (const b of S.bets.values()) if (b.status === "open" && isMe(b)) for (const x of selsOf(b)) s.add(String(x.g)); return s; };
   function renderTicker() {
     const el = $("#ticker"), now = Date.now(), mine = mineIds();
-    const today = TK.games.filter((g) => g.st === "in" || (g.st === "post" && now - g.t < 9 * 3600e3) || (g.st === "pre" && g.t - now < 4 * 3600e3));
+    const ahead = TK.lg === "NFL" ? 5 * 86400e3 : 4 * 3600e3; // the NFL ticker shows the week's slate with lines
+    const today = TK.games.filter((g) => g.st === "in" || (g.st === "post" && now - g.t < 9 * 3600e3) || (g.st === "pre" && g.t - now < ahead));
     const show = tickerOn() && today.length > 0;
     if (el.hidden === show) { el.hidden = !show; document.body.classList.toggle("has-ticker", show); refit(); }
     if (!show) return;
@@ -3423,8 +3439,9 @@ body.tv .strip .chart { height: 96px; }
       items.push(`<span class="tk-a sc"><u>${esc(x.word)}</u>${tkTeam(s)}${x.txt ? ` <small>${esc(x.txt.length > 90 ? x.txt.slice(0, 88) + "…" : x.txt)}</small>` : ""} <span class="tk-g">${tkTeam(g.a)} ${g.a.sc} ${tkTeam(g.h)} ${g.h.sc}</span></span>`);
     }
     for (const g of today) {
-      const fav = g.a.rank < g.h.rank ? "a" : g.h.rank < g.a.rank ? "h" : null;
-      if (!fav || g[fav].rank > 25) continue;
+      let fav = g.a.rank < g.h.rank ? "a" : g.h.rank < g.a.rank ? "h" : null;
+      if (TK.lg === "NFL" || !fav || g[fav].rank > 25) fav = g.favAb && g.spr >= 3 ? (g.a.ab === g.favAb ? "a" : g.h.ab === g.favAb ? "h" : null) : null;
+      if (!fav) continue;
       const dog = fav === "a" ? "h" : "a", lead = g[dog].sc - g[fav].sc;
       const favP = g.hp == null ? null : fav === "h" ? g.hp : 1 - g.hp;
       if (g.st === "in" && (lead > 0 || (favP != null && favP < 0.4)))
@@ -3439,7 +3456,7 @@ body.tv .strip .chart { height: 96px; }
     const ord = (g) => (mine.has(g.id) ? 0 : 3) + ({ in: 0, post: 1, pre: 2 }[g.st] ?? 2);
     for (const g of today.slice().sort((x, y) => ord(x) - ord(y) || x.t - y.t)) {
       const wonA = g.st === "post" && g.a.sc > g.h.sc, wonH = g.st === "post" && g.h.sc > g.a.sc;
-      const when = g.st === "pre" ? tm(g.t) : g.st === "post" ? "Final" : g.d;
+      const when = g.st === "pre" ? (g.t - now > 20 * 3600e3 ? new Date(g.t).toLocaleDateString("en-US", { weekday: "short" }) + " " : "") + tm(g.t) + (g.line ? ` · ${g.line}${g.ou ? ` · O/U ${g.ou}` : ""}` : "") : g.st === "post" ? "Final" : g.d;
       const pos = (x) => (g.st === "in" && g.pos === x.id ? '<span class="ball"></span>' : "");
       items.push(`<span class="tk-g${mine.has(g.id) ? " mine" : ""}${g.st === "in" ? " live" : ""}">${pos(g.a)}${tkTeam(g.a, wonA)} ${g.st === "pre" ? "" : g.a.sc} ${pos(g.h)}${tkTeam(g.h, wonH)} ${g.st === "pre" ? "" : g.h.sc} <em>${esc(when)}</em>${g.rz ? '<span class="rz">Red zone</span>' : ""}</span>`);
     }
@@ -3458,6 +3475,8 @@ body.tv .strip .chart { height: 96px; }
   $("#tkRun").addEventListener("animationiteration", () => { if (TK.pending) applyTicker(); });
   $("#tickerOn").checked = tickerOn();
   $("#tickerOn").addEventListener("change", (e) => { try { localStorage.setItem("sb-ticker", e.target.checked ? "on" : "off"); } catch (err) {} if (e.target.checked) loadTicker(); else renderTicker(); });
+  showFocus();
+  $("#focusRadios").addEventListener("change", (e) => { const v = e.target.value; setFocus(v); write((db) => db.doc("config/settings").set({ focus: v }, { merge: true }), () => {}); });
   loadTicker(); setInterval(loadTicker, 45e3);
   document.addEventListener("visibilitychange", loadTicker);
 
@@ -5216,6 +5235,144 @@ body.tv .strip .chart { height: 96px; }
   $("#inTestParlay").addEventListener("click", () => { closeSheets(); fx(() => introParlay(sample(596, "4-leg parlay", ["Georgia ML", "LSU +7.5", "Over 48.5 USC/PSU", "Texas −7.5"]), 2.98)); });
   $("#inQuick").innerHTML = QUICK.map((q, i) => `<button type="button" class="btn sm" data-q="${i}">${esc(q.name)}</button>`).join("") + `<button type="button" class="btn sm" data-q="r">Random hit</button>`;
   $("#inQuick").addEventListener("click", (e) => { const bt = e.target.closest("[data-q]"); if (!bt) return; closeSheets(); const s = sample(-110, "Georgia +2.5"); if (bt.dataset.q === "r") quickWin(s, 0.91); else { const q = QUICK[+bt.dataset.q]; if (q.pre) q.pre(); fx(() => q.run(s, 0.91)); } });
+  // ---------- losses: Goldie wipes out, cartoon style ----------
+  // little synth effects: slide whistle down, train horn, thud, the train going by, sad trombone
+  let sfxNoise = null;
+  function sfx(kind) {
+    const c = ready(); if (!c) return;
+    const t = c.currentTime, out = c.createGain(); out.gain.value = 0.55; out.connect(c.destination);
+    const env = (g, a, peak, hold, rel) => { g.gain.setValueAtTime(0.0001, t + a); g.gain.exponentialRampToValueAtTime(peak, t + a + 0.04); g.gain.setValueAtTime(peak, t + a + hold); g.gain.exponentialRampToValueAtTime(0.0001, t + a + hold + rel); };
+    if (!sfxNoise) { sfxNoise = c.createBuffer(1, c.sampleRate * 2, c.sampleRate); const d = sfxNoise.getChannelData(0); for (let i = 0; i < d.length; i++) d[i] = Math.random() * 2 - 1; }
+    if (kind === "whistle") { const o = c.createOscillator(), g = c.createGain(); o.type = "sine"; o.frequency.setValueAtTime(1600, t); o.frequency.exponentialRampToValueAtTime(240, t + 1.25); env(g, 0, 0.3, 1.15, 0.12); o.connect(g).connect(out); o.start(t); o.stop(t + 1.4); }
+    if (kind === "horn") for (const f of [277, 330, 415]) { const o = c.createOscillator(), lp = c.createBiquadFilter(), g = c.createGain(); o.type = "sawtooth"; o.frequency.value = f; lp.type = "lowpass"; lp.frequency.value = 1300; env(g, 0, 0.11, 1.0, 0.25); o.connect(lp).connect(g).connect(out); o.start(t); o.stop(t + 1.35); }
+    if (kind === "thud") { const o = c.createOscillator(), g = c.createGain(); o.type = "sine"; o.frequency.setValueAtTime(110, t); o.frequency.exponentialRampToValueAtTime(38, t + 0.3); env(g, 0, 0.9, 0.05, 0.3); o.connect(g).connect(out); o.start(t); o.stop(t + 0.45); }
+    if (kind === "rush") { const s = c.createBufferSource(), bp = c.createBiquadFilter(), g = c.createGain(); s.buffer = sfxNoise; bp.type = "bandpass"; bp.Q.value = 0.8; bp.frequency.setValueAtTime(300, t); bp.frequency.exponentialRampToValueAtTime(2200, t + 0.5); bp.frequency.exponentialRampToValueAtTime(250, t + 1.3); env(g, 0, 0.8, 0.9, 0.4); s.connect(bp).connect(g).connect(out); s.start(t); s.stop(t + 1.5); }
+    if (kind === "trombone") {
+      [[293.7, 0, 0.42], [277.2, 0.45, 0.42], [261.6, 0.9, 0.42], [246.9, 1.35, 1.4]].forEach(([f, at, d], i) => {
+        const o = c.createOscillator(), lp = c.createBiquadFilter(), g = c.createGain(); o.type = "sawtooth"; o.frequency.setValueAtTime(f, t + at);
+        if (i === 3) { const l = c.createOscillator(), lg = c.createGain(); l.frequency.value = 6; lg.gain.value = 7; l.connect(lg).connect(o.frequency); l.start(t + at + 0.2); l.stop(t + at + d); }
+        lp.type = "lowpass"; lp.frequency.value = 900; env(g, at, 0.2, d - 0.1, 0.12); o.connect(lp).connect(g).connect(out); o.start(t + at); o.stop(t + at + d + 0.2);
+      });
+    }
+  }
+  const lossTitle = (b, n, side) => inTitle("Took an L", fUSD(n * S.unit, true), b.pick, `${fOdds(Number(b.odds))} · ${fU(n, true)}`, side ? "loss side" : "loss");
+  const later = (fn, s) => setTimeout(fn, s * 1000);
+  // a cartoon desert: sky, mesas, the cliff on the left
+  function inDesert(ctx, W, H, edge, top, t) {
+    const g = ctx.createLinearGradient(0, 0, 0, H); g.addColorStop(0, "#7cc4f2"); g.addColorStop(0.6, "#f7d9a0"); g.addColorStop(1, "#e8a35f"); ctx.fillStyle = g; ctx.fillRect(0, 0, W, H);
+    const hz = Math.min(H * 0.72, top + H * 0.06);
+    ctx.fillStyle = "#e6a370"; for (const [x, w, h] of [[0.5, 0.14, 0.12], [0.68, 0.1, 0.2], [0.84, 0.2, 0.1]]) ctx.fillRect(W * x, hz - H * h, W * w, H * 2);
+    const dp = ctx.createLinearGradient(0, hz, 0, H); dp.addColorStop(0, "rgba(120,50,20,0)"); dp.addColorStop(1, "rgba(60,20,8,.85)"); ctx.fillStyle = dp; ctx.fillRect(0, hz, W, H - hz);
+    // the cliff: flat top, then a straight drop
+    ctx.fillStyle = "#a4552a"; ctx.beginPath(); ctx.moveTo(-10, top); ctx.lineTo(edge, top); ctx.lineTo(edge - W * 0.01, top + H * 0.08); ctx.lineTo(edge + W * 0.01, top + H * 0.2); ctx.lineTo(edge - W * 0.02, H + 10); ctx.lineTo(-10, H + 10); ctx.fill();
+    ctx.fillStyle = "#c97a44"; ctx.fillRect(-10, top, edge + 10, H * 0.025);
+    ctx.strokeStyle = "rgba(90,40,15,.4)"; ctx.lineWidth = 3; for (let i = 1; i < 6; i++) { ctx.beginPath(); ctx.moveTo(0, top + i * H * 0.06); ctx.lineTo(edge - W * 0.02, top + i * H * 0.06 + 8); ctx.stroke(); }
+  }
+  function introCliff(b, n) {
+    const L = 7.6, c1 = 2.3, c2 = 4.0, c3 = 5.0;
+    later(() => sfx("whistle"), c2); later(() => sfx("thud"), c3 + 0.7); later(() => sfx("trombone"), c3 + 1.1);
+    const shots = [
+      { at: 0, d: c1, bars: true, enter: (s) => { inHide(); }, draw: (ctx, W, H, k, t) => {
+        const top = H * 0.66, edge = W * 0.56; inDesert(ctx, W, H, edge, top, t);
+        const bx = W * 0.3 + k * W * 0.32, by = top - H * 0.32 - Math.sin(k * 4) * H * 0.05; inBill(ctx, bx, by, Math.sin(k * 5) * 0.6, Math.cos(k * 7), H / 500);
+        const x = W * 0.06 + k * W * 0.3; goldie(ctx, x, top + H * 0.005, H * 0.42, "run", t, { mood: "hype" });
+        inL3(ctx, W, H, k - 0.2, "Final", b.pick, c1 - 0.5);
+      } },
+      { at: c1, d: c2 - c1, bars: true, draw: (ctx, W, H, k, t) => {
+        // past the edge, still running on air, then he notices
+        const top = H * 0.9, edge = W * 0.22; inDesert(ctx, W, H, edge, top, t);
+        const stop = k > 0.55, x = W * 0.5, y = top - H * 0.005, u = H * 0.5;
+        const r = goldie(ctx, x, y, u, stop ? "fist" : "run", stop ? 0 : t * 1.8, { mood: stop ? "hype" : "chill" });
+        if (stop) {
+          // the little sign
+          const hx = r.hand[0], hy = r.hand[1]; ctx.strokeStyle = "#6b4423"; ctx.lineWidth = u * 0.015; ctx.beginPath(); ctx.moveTo(hx, hy + u * 0.02); ctx.lineTo(hx, hy - u * 0.2); ctx.stroke();
+          ctx.fillStyle = "#f4e2b8"; ctx.strokeStyle = "#6b4423"; ctx.lineWidth = 3; rr(ctx, hx - u * 0.17, hy - u * 0.36, u * 0.34, u * 0.17, 6); ctx.fill(); ctx.stroke();
+          ctx.fillStyle = "#3a2410"; ctx.font = `900 ${Math.round(u * 0.09)}px "Big Shoulders Display", "Barlow Condensed", Impact, sans-serif`; ctx.textAlign = "center"; ctx.textBaseline = "middle"; ctx.fillText("UH OH", hx, hy - u * 0.27);
+          for (let i = 0; i < 3; i++) { ctx.strokeStyle = "rgba(60,30,10,.6)"; ctx.lineWidth = 3; ctx.beginPath(); ctx.arc(r.head[0] - u * 0.22, r.head[1] - u * 0.05 + i * u * 0.05, u * 0.03, -1, 1); ctx.stroke(); }
+        }
+      } },
+      { at: c2, d: c3 - c2, bars: true, draw: (ctx, W, H, k, t) => {
+        // gone: straight down, a streak behind him
+        const top = H * 0.9, edge = W * 0.22; inDesert(ctx, W, H, edge, top, t);
+        const y = top - H * 0.005 + Math.pow(k / (c3 - c2), 2.2) * H * 1.6, x = W * 0.5, u = H * 0.5;
+        ctx.strokeStyle = "rgba(255,255,255,.7)"; ctx.lineWidth = 3; for (let i = -2; i <= 2; i++) { ctx.beginPath(); ctx.moveTo(x + i * u * 0.08, y - u * 1.3); ctx.lineTo(x + i * u * 0.08, Math.max(0, y - u * 2.6)); ctx.stroke(); }
+        goldie(ctx, x, y, u, "up", t, { mood: "hype" });
+      } },
+      { at: c3, d: L - c3, bars: false, enter: (s) => { s.p = []; }, draw: (ctx, W, H, k, t, s) => {
+        // looking straight down the canyon: a tiny poof at the bottom
+        const g = ctx.createRadialGradient(W / 2, H * 0.6, 0, W / 2, H * 0.6, W * 0.6); g.addColorStop(0, "#c46a35"); g.addColorStop(0.5, "#8a3f1c"); g.addColorStop(1, "#3a1608"); ctx.fillStyle = g; ctx.fillRect(0, 0, W, H);
+        ctx.strokeStyle = "rgba(40,15,5,.35)"; ctx.lineWidth = 4; for (let i = 0; i < 14; i++) { const a = (i / 14) * TAU; ctx.beginPath(); ctx.moveTo(W / 2 + Math.cos(a) * W * 0.08, H * 0.6 + Math.sin(a) * H * 0.08); ctx.lineTo(W / 2 + Math.cos(a) * W, H * 0.6 + Math.sin(a) * W); ctx.stroke(); }
+        if (k > 0.7 && !s.puffed) { s.puffed = true; for (let i = 0; i < 26; i++) { const a = Math.random() * TAU; s.p.push({ x: W / 2, y: H * 0.6, vx: Math.cos(a) * inRnd(0.5, 2.2), vy: Math.sin(a) * inRnd(0.3, 1.2) - 0.4, r: inRnd(5, 12), l: 1 }); } lossTitle(b, n); }
+        for (const p of s.p) { p.x += p.vx; p.y += p.vy; p.r *= 1.012; p.l *= 0.985; ctx.fillStyle = `rgba(240,210,170,${p.l * 0.8})`; ctx.beginPath(); ctx.arc(p.x, p.y, p.r, 0, TAU); ctx.fill(); }
+        if (k <= 0.7) { const sz = H * 0.025 * (1 - k / 0.7) + 2; ctx.fillStyle = "#f4cb47"; ctx.beginPath(); ctx.arc(W / 2, H * 0.6 - (1 - k / 0.7) * H * 0.4, sz, 0, TAU); ctx.fill(); }
+        inPow(ctx, W / 2 + H * 0.12, H * 0.6 - H * 0.08, "poof", k - 0.7, H * 0.045, "#f4e2b8", 0.1);
+      } },
+    ];
+    return inRun({ len: L, cls: "lossv", shots, sounds: [["whoosh", 0.4, 0.2]] });
+  }
+  function inTracks(ctx, W, H, y, sc, off) {
+    ctx.fillStyle = "#5a4a3a"; ctx.fillRect(0, y, W, H - y);
+    ctx.fillStyle = "#3b2a1d"; for (let i = -1; i < 30; i++) { const x = ((i * 70 * sc - off) % (W + 70 * sc) + W + 70 * sc) % (W + 70 * sc) - 70 * sc; ctx.fillRect(x, y + 6 * sc, 24 * sc, 30 * sc); }
+    ctx.fillStyle = "#9aa0a8"; ctx.fillRect(0, y + 8 * sc, W, 6 * sc); ctx.fillRect(0, y + 26 * sc, W, 6 * sc);
+  }
+  function introTrain(b, n) {
+    const L = 7.8, c1 = 2.4, c2 = 3.1, c3 = 4.5;
+    later(() => sfx("horn"), 1.2); later(() => sfx("horn"), c2 - 0.3); later(() => sfx("rush"), c2); later(() => sfx("trombone"), c3 + 0.8);
+    const shots = [
+      { at: 0, d: c1, bars: true, enter: () => inHide(), draw: (ctx, W, H, k, t) => {
+        const sc = H / 900, y = H * 0.74;
+        const g = ctx.createLinearGradient(0, 0, 0, y); g.addColorStop(0, "#1b2340"); g.addColorStop(1, "#c8704a"); ctx.fillStyle = g; ctx.fillRect(0, 0, W, H);
+        inCity(ctx, W, y, "#22161e", sc * 0.8);
+        inTracks(ctx, W, H, y, sc, 0);
+        const glow = Math.max(0, (k - 0.9) / (c1 - 0.9)), gl = ctx.createRadialGradient(0, y - H * 0.08, 0, 0, y - H * 0.08, W * (0.2 + glow * 0.8)); gl.addColorStop(0, `rgba(255,250,210,${0.2 + glow * 0.7})`); gl.addColorStop(1, "rgba(255,240,180,0)"); ctx.fillStyle = gl; ctx.fillRect(0, 0, W, H);
+        const r = goldie(ctx, W * 0.55, y + 4 * sc, H * 0.5, k < 1.4 ? "power" : "up", t, { mood: k < 1.4 ? "chill" : "hype", shades: k < 1.4 });
+        if (k > 1.4) inPow(ctx, r.head[0] + H * 0.14, r.head[1] - H * 0.12, "!!", k - 1.4, H * 0.06, "#ff4a3d", 0.1);
+        inL3(ctx, W, H, k - 0.2, "Final", b.pick, 1.2);
+      } },
+      { at: c1, d: c2 - c1, bars: true, draw: (ctx, W, H, k, t) => {
+        // close on his face, the headlight swallowing the frame
+        ctx.fillStyle = "#1a1220"; ctx.fillRect(0, 0, W, H);
+        const gl = ctx.createRadialGradient(W * 0.1, H * 0.5, 0, W * 0.1, H * 0.5, W * (0.6 + k)); gl.addColorStop(0, "rgba(255,255,230,1)"); gl.addColorStop(1, "rgba(255,240,180,0)"); ctx.fillStyle = gl; ctx.fillRect(0, 0, W, H);
+        ctx.save(); inShake(ctx, 0, 1, 10); ctx.translate(W * 0.55, H * 0.55); goldHead(ctx, H * 0.9, t, "hype"); ctx.restore();
+      } },
+      { at: c2, d: c3 - c2, bars: true, draw: (ctx, W, H, k, t) => {
+        // the train blows through
+        const sc = H / 900, y = H * 0.74; ctx.save(); inShake(ctx, 0, 1, 22 * sc);
+        const g = ctx.createLinearGradient(0, 0, 0, y); g.addColorStop(0, "#1b2340"); g.addColorStop(1, "#c8704a"); ctx.fillStyle = g; ctx.fillRect(-30, -30, W + 60, H + 60);
+        inTracks(ctx, W, H, y, sc, k * 4000 * sc);
+        const tx = -W * 0.4 + k * W * 3.2;
+        ctx.fillStyle = "#2b2f3a"; ctx.fillRect(tx - W * 3, y - H * 0.42, W * 3, H * 0.42);
+        ctx.fillStyle = "#b8202a"; ctx.fillRect(tx - W * 3, y - H * 0.16, W * 3, H * 0.05);
+        ctx.fillStyle = "#ffe9a8"; for (let i = 0; i < 30; i++) ctx.fillRect(tx - W * 3 + i * W * 0.1 + 10, y - H * 0.36, W * 0.06, H * 0.08);
+        ctx.fillStyle = "#3a404d"; ctx.beginPath(); ctx.moveTo(tx, y - H * 0.42); ctx.lineTo(tx + W * 0.08, y - H * 0.2); ctx.lineTo(tx + W * 0.08, y); ctx.lineTo(tx, y); ctx.fill();
+        ctx.strokeStyle = "rgba(255,255,255,.35)"; ctx.lineWidth = 3; for (let i = 0; i < 18; i++) { const yy = H * 0.15 + ((i * 53) % 100) / 100 * H * 0.6; ctx.beginPath(); ctx.moveTo(0, yy); ctx.lineTo(W, yy); ctx.stroke(); }
+        ctx.restore();
+        inFlash(ctx, W, H, k, 0.12, 0.8);
+      } },
+      { at: c3, d: L - c3, bars: false, enter: (s) => { s.line = "Fuck you"; }, draw: (ctx, W, H, k, t, s) => {
+        // flat as a pancake on the tracks, peeling up like paper
+        const sc = H / 900, y = H * 0.74;
+        const g = ctx.createLinearGradient(0, 0, 0, y); g.addColorStop(0, "#1b2340"); g.addColorStop(1, "#c8704a"); ctx.fillStyle = g; ctx.fillRect(0, 0, W, H);
+        inCity(ctx, W, y, "#22161e", sc * 0.8); inTracks(ctx, W, H, y, sc, 0);
+        if (k > 0.3 && !s.titled) { s.titled = true; lossTitle(b, n, true); }
+        const peel = Math.max(0, Math.sin(Math.min(1, k / 2.2) * Math.PI)) * 0.5, x = W * 0.72;
+        ctx.save(); ctx.translate(x - H * 0.18, y + 14 * sc); ctx.rotate(-peel * 0.5); ctx.translate(H * 0.18, 0); ctx.scale(1.5, 0.11 + peel * 0.08); goldie(ctx, 0, 0, H * 0.5, "spread", 0, { spread: true, mood: "hype" }); ctx.restore();
+        for (let i = 0; i < 4; i++) { const a = t * 3 + (i / 4) * TAU; inStar(ctx, x + Math.cos(a) * H * 0.1, y - H * 0.08 + Math.sin(a) * H * 0.03, H * 0.035, 0.9, "#ffe27a"); }
+        inTalk(ctx, s, [x, y - H * 0.04], k, 1.6, H, W);
+      } },
+    ];
+    return inRun({ len: L, cls: "lossv", shots, sounds: [] });
+  }
+  // a final loss: Goldie wipes out, or one of your loss clips, shuffled
+  let lossBag = [];
+  function lossReact(b, n) {
+    if (!lossBag.length) lossBag = ["cliff", "train", "clip", "cliff", "train"].sort(() => Math.random() - 0.5);
+    const k = lossBag.pop();
+    if (k === "clip") { if (clipsOn()) setTimeout(() => { if (!clipBusy()) react(b, "bad", pickClip(libFor(b, ["down"])), "Final"); }, 2600); return; }
+    fx(() => (k === "cliff" ? introCliff : introTrain)(b, n));
+  }
+  $("#inLossCliff").addEventListener("click", () => { closeSheets(); fx(() => introCliff(sample(-110, "Georgia −3.5"), -1)); });
+  $("#inLossTrain").addEventListener("click", () => { closeSheets(); fx(() => introTrain(sample(-110, "Georgia −3.5"), -1)); });
 
   // ---------- Coin Alert: full-screen win celebration ----------
   function coinAlert(pick, n) {
@@ -5510,6 +5667,8 @@ body.tv .strip .chart { height: 96px; }
       unsub.push(db.doc("config/settings").onSnapshot((s) => {
         const v = s.exists ? Number(s.data().unitSize) : NaN;
         if (v > 0 && v !== S.unit) { S.unit = v; render(); }
+        const fc = s.exists ? s.data().focus : null;
+        if (fc && ["auto", "CFB", "NFL"].includes(fc)) setFocus(fc);
         const gn = s.exists ? s.data().guestName : null;
         if (gn && gn !== S.guestName) { S.guestName = gn; $("#guestLbl").textContent = gn; render(); }
         const ws = s.exists ? s.data().winSound : null;
