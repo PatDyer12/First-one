@@ -900,6 +900,12 @@ body.tv .strip .chart { height: 96px; }
   .pc-bet { font-size: 16px; }
 }
 
+/* trial banner */
+.trialbar { position: fixed; bottom: 74px; left: 50%; transform: translateX(-50%); z-index: 99; display: flex; align-items: center; gap: 12px; padding: 8px 10px 8px 14px; border-radius: 12px; background: rgba(5,7,11,.92); border: 1px solid var(--accent); box-shadow: 0 10px 30px rgba(0,0,0,.5); font: 700 15px var(--f-num); color: #fff; max-width: calc(100vw - 24px); }
+.trialbar b { color: #05070b; background: var(--accent); padding: 3px 8px; border-radius: 6px; letter-spacing: .1em; }
+.trialbar span { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.trialbar[hidden] { display: none; }
+
 /* crew picks */
 .crew-p + .crew-p { margin-top: 18px; padding-top: 16px; border-top: 1px solid var(--line); }
 .crew-h { display: flex; align-items: center; gap: 12px; margin-bottom: 12px; flex-wrap: wrap; }
@@ -1141,7 +1147,8 @@ body.tv .strip .chart { height: 96px; }
       <span class="lbl">Reaction clips</span>
       <label class="togrow"><input type="checkbox" id="clipsOn"> Pop clips up on this screen</label>
       <span class="hint">Only the good stuff, and only for your side. Your team's touchdowns, field goals, turnovers, red-zone trips, home runs and goals get a clip, with your team's own clips first. While you're winning, your winning clips play every 2½ minutes. When it's close, a filler or some hype plays every 3 minutes. With only 1 or 2 bets out, there's more dead air, so a clip comes every 2 minutes. When you're down but within two scores, comeback clips play. When you're getting blown out, it stays quiet. Overs and unders are judged on pace, and stay quiet whenever they're off pace. Tap the screen to close a clip. Turn this off on your phone and leave it on for the monitor.</span>
-      <div style="display:flex;gap:8px;flex-wrap:wrap"><button type="button" class="btn sm" id="pcTest">Preview a touchdown alert</button></div>
+      <div style="display:flex;gap:8px;flex-wrap:wrap"><button type="button" class="btn sm primary" id="trialBtn">Run a trial</button><button type="button" class="btn sm" id="pcTest">Preview a touchdown alert</button></div>
+      <span class="hint">The trial replays the latest finished NFL game play by play with a pretend bet on the winner: play alerts and clips when your side scores, quiet when they don't, then the win. Nothing gets saved and it doesn't touch your numbers.</span>
       <label class="togrow delayrow">TV delay <input type="range" id="tvDelay" min="0" max="120" step="5"> <b id="tvDelayVal"></b></label>
       <span class="hint">ESPN's scores run ahead of your TV. The board holds scores, clips and win/loss animations back by this much so nothing spoils a play. If clips still beat the TV, turn it up. If they come late, turn it down. Each screen keeps its own setting.</span>
       <div class="cliplib" id="clipLib"></div>
@@ -1815,7 +1822,7 @@ body.tv .strip .chart { height: 96px; }
   const onCardClick = (e) => {
     if (document.body.classList.contains("tv") || !S.canWrite) return;
     const card = e.target.closest(".bet"); if (!card) return;
-    const id = card.dataset.id;
+    const id = card.dataset.id; if (id === "trial") return;
     const leg = e.target.closest("[data-leg]");
     if (leg) {
       const b = S.bets.get(id); if (!b) return;
@@ -1880,7 +1887,7 @@ body.tv .strip .chart { height: 96px; }
   // ---------- sheets ----------
   function openSheet(id) { $(id).hidden = false; }
   // keep every open screen current: when a new version is up, reload it (never mid-form or mid-animation)
-  const BUILD = "20261011043205";
+  const BUILD = "20261011044432";
   function checkBuild() {
     if (BUILD === "dev") return;
     fetch("version.json?t=" + Date.now(), { cache: "no-store" }).then((r) => (r.ok ? r.json() : null)).then((j) => {
@@ -3322,7 +3329,7 @@ body.tv .strip .chart { height: 96px; }
   async function scoringPlay(g, side) {
     try {
       const ctl = new AbortController(), to = setTimeout(() => ctl.abort(), 1800);
-      const r = await fetch(`https://site.api.espn.com/apis/site/v2/sports/${ESPN[g.sport]}/summary?event=${g.id}`, { signal: ctl.signal }); clearTimeout(to);
+      const r = await fetch(`https://site.api.espn.com/apis/site/v2/sports/${ESPN[g.sport]}/summary?event=${g.eid || g.id}`, { signal: ctl.signal }); clearTimeout(to);
       if (!r.ok) return null;
       const j = await r.json(); let list = j.scoringPlays || [];
       if (!list.length && Array.isArray(j.plays)) list = j.plays.filter((p) => p.scoringPlay);
@@ -3335,7 +3342,7 @@ body.tv .strip .chart { height: 96px; }
   const pcInitials = (nm) => nm.split(" ").map((w) => w[0] || "").join("").slice(0, 2).toUpperCase();
   function pcPeople(ath, text, side, g) {
     // only the players actually named in the play (the last play can be the kickoff after the score)
-    const tid = side ? String(g[side].id) : null, low = (text || "").toLowerCase();
+    const tid = side ? String(g[side].id) : null, low = (text || "").replace(/\([^)]*\)/g, "").toLowerCase();
     return (ath || []).filter((a) => a.nm && (!low || low.includes(a.nm.split(" ").slice(-1)[0].toLowerCase())) && (!tid || !a.tm || String(a.tm) === tid || /intercept|fumble/i.test(text))).slice(0, 2);
   }
   function pcFill(g, e, b, sp) {
@@ -3371,6 +3378,89 @@ body.tv .strip .chart { height: 96px; }
       sit: { lp: { type: "Passing Touchdown", text: "Gunner Stockton 31 Yd pass to Colbie Young (Peyton Woodring Kick)", ath: [{ nm: "Colbie Young", sh: "C. Young", hs: "", j: "8", pos: "WR", tm: "61" }, { nm: "Gunner Stockton", sh: "G. Stockton", hs: "", j: "14", pos: "QB", tm: "61" }] } } };
     showPlayCard(g, { ev: "td", side: "a", tag: "Touchdown UGA" }, anyOpen(), () => {});
   });
+  // ---------- Trial: replay the latest finished NFL game, play by play, through the live pipeline ----------
+  // a temporary bet on the winner (never saved), real scoring plays and turnovers fed in as the scoreboard would, then the win
+  let trial = null;
+  const clockSec = (s) => { const [m, x] = String(s || "0:00").split(":").map(Number); return (m || 0) * 60 + (x || 0); };
+  const ordQ = (p) => (p > 4 ? "OT" : ["1st", "2nd", "3rd", "4th"][p - 1]);
+  const wait = (ms) => new Promise((ok) => setTimeout(ok, ms));
+  function trialBanner(txt) {
+    let el = $("#trialBar");
+    if (!el) { el = document.createElement("div"); el.id = "trialBar"; el.className = "trialbar"; document.body.appendChild(el); el.addEventListener("click", (e) => { if (e.target.closest("[data-stop]")) stopTrial(); }); }
+    el.hidden = !txt; el.innerHTML = txt ? `<b>TRIAL</b><span>${esc(txt)}</span><button type="button" class="btn sm" data-stop>Stop</button>` : "";
+  }
+  function stopTrial() {
+    if (!trial) return;
+    trial.stop = true; S.bets.delete("trial"); S.games.delete(trial.gid); trialBanner(""); stopStatus(); trial = null; render();
+  }
+  async function runTrial() {
+    if (trial) return;
+    trial = { stop: false }; trialBanner("Finding the latest NFL game…");
+    const api = "https://site.api.espn.com/apis/site/v2/sports/football/nfl";
+    let ev = null;
+    for (let d = 0; d < 8 && !ev; d++) {
+      const j = await fetch(`${api}/scoreboard?dates=${etDate(Date.now() - d * 86400e3)}`).then((r) => r.json()).catch(() => null);
+      const fin = ((j && j.events) || []).filter((e) => e.status && e.status.type.state === "post").sort((x, y) => Date.parse(y.date) - Date.parse(x.date));
+      if (fin.length) ev = fin[0];
+    }
+    const sum = ev && (await fetch(`${api}/summary?event=${ev.id}`).then((r) => r.json()).catch(() => null));
+    if (!ev || !sum || !Array.isArray(sum.scoringPlays) || trial.stop) { trialBanner(""); trial = null; toast("Couldn't load a game to replay. Try again in a minute."); return; }
+    const base = parseGame(ev, "NFL"), gid = "trial-" + ev.id; trial.gid = gid;
+    // players by name, with headshots, from the box score
+    const POS = { passing: "QB", kicking: "K", punting: "P" }, people = new Map();
+    for (const t of (sum.boxscore && sum.boxscore.players) || []) for (const cat of t.statistics || []) for (const x of cat.athletes || []) {
+      const a = x.athlete || {}; if (!a.displayName || people.has(a.displayName)) continue;
+      people.set(a.displayName, { nm: a.displayName, sh: a.shortName || "", hs: (a.headshot && a.headshot.href) || "", j: a.jersey || "", pos: POS[cat.name] || "", tm: t.team && t.team.id });
+    }
+    const at = (text, nm) => { const w = nm.split(" "), last = w.slice(1).join(" "), i = text.indexOf(nm); if (i >= 0 || !last) return i; const j = text.indexOf(w[0][0] + "." + last); return j >= 0 ? j : text.indexOf(w[0][0] + ". " + last); };
+    const named = (text) => { text = text.replace(/\([^)]*\)/g, ""); return [...people.values()].map((a) => [a, at(text, a.nm)]).filter(([, i]) => i >= 0).sort((x, y) => x[1] - y[1]).map(([a]) => a).slice(0, 3); };
+    const idOf = (ab) => (base.a.ab === ab ? base.a.id : base.h.ab === ab ? base.h.id : null);
+    // the timeline: every score, plus turnovers from the drive log
+    const steps = sum.scoringPlays.map((p) => ({ pd: p.period.number, clk: clockSec(p.clock.displayValue), cd: p.clock.displayValue, tm: p.team && p.team.id, type: p.type.text, text: p.text, a: p.awayScore, h: p.homeScore }));
+    let sa = 0, sh = 0;
+    for (const d of (sum.drives && sum.drives.previous) || []) for (const p of d.plays || []) {
+      if (p.scoringPlay) { sa = p.awayScore; sh = p.homeScore; }
+      if (!p.isTurnover || p.scoringPlay) continue;
+      const off = d.team && d.team.id, gain = String(off) === String(base.a.id) ? base.h.id : base.a.id;
+      steps.push({ pd: p.period.number, clk: clockSec(p.clock.displayValue), cd: p.clock.displayValue, tm: gain, off, type: (p.type && p.type.text) || "Turnover", text: p.text || "", a: p.awayScore ?? sa, h: p.homeScore ?? sh, to: true });
+    }
+    steps.sort((x, y) => x.pd - y.pd || y.clk - x.clk);
+    const fa = Number(ev.competitions[0].competitors.find((c) => c.homeAway === "away").score), fh = Number(ev.competitions[0].competitors.find((c) => c.homeAway === "home").score);
+    const side = fa >= fh ? "a" : "h", win = base[side];
+    const g = Object.assign({}, base, { id: gid, eid: ev.id, st: "in", d: "15:00 - 1st", pd: 1, clk: 900, a: { ...base.a, sc: 0 }, h: { ...base.h, sc: 0 }, sit: { rz: false, pos: null, dd: "", lp: null } });
+    S.games.set(gid, g);
+    const odds = (base.ml && base.ml[side]) || -150;
+    const bet = { id: "trial", trial: true, book: "FD", kind: "straight", pick: `${win.nm} ML`, odds, units: 1, status: "open", placedAt: Date.now(), sport: "NFL", legs: [], sel: { g: gid, m: "ml", s: side, sp: "NFL", t: base.t } };
+    S.bets.set("trial", bet); render(); autoReact();   // first look: the game is on, nothing has happened yet
+    const label = `${base.a.ab} @ ${base.h.ab} · ${new Date(base.t).toLocaleDateString("en-US", { weekday: "long", timeZone: "America/New_York" })} · your bet: ${bet.pick}`;
+    for (let i = 0; i < steps.length && !trial.stop; i++) {
+      const st = steps[i];
+      trialBanner(`${label} · play ${i + 1} of ${steps.length}`);
+      // the offense has the ball first (so a turnover reads as the ball changing hands), then the play lands
+      g.sit = { ...g.sit, pos: st.to ? st.off : st.tm }; autoReact();
+      await wait(400);
+      Object.assign(g, { pd: st.pd, clk: st.clk, d: `${st.cd} - ${ordQ(st.pd)}` });
+      g.a = { ...g.a, sc: st.a }; g.h = { ...g.h, sc: st.h };
+      g.sit = { rz: false, pos: st.tm, dd: "", lp: { id: "trial" + i, type: st.type, text: st.text, team: st.tm, ath: named(st.text) } };
+      statusBet = null; lastAny = 0; render(); autoReact();
+      for (let k = 0; k < 6 && !cardBusy && !statusBet && $("#jumbo").hidden; k++) await wait(250);
+      if (!cardBusy && !statusBet && $("#jumbo").hidden) { await wait(2500); continue; } // their score: no clip, the board just updates
+      while (cardBusy && !trial.stop) await wait(250);
+      for (let k = 0; k < 40 && $("#jumbo").hidden && statusBet && !trial.stop; k++) await wait(250);   // the clip loading
+      for (let k = 0; k < 44 && !$("#jumbo").hidden && !trial.stop; k++) await wait(250);   // ~11 s of it
+      if (trial && !trial.stop) stopStatus();
+      await wait(1200);
+    }
+    if (!trial || trial.stop) return;
+    // final whistle: settle the trial bet (in memory only) and run the win
+    Object.assign(g, { st: "post", d: "Final" }); g.a = { ...g.a, sc: fa }; g.h = { ...g.h, sc: fh }; render();
+    trialBanner(`${label} · final ${base.a.ab} ${fa}, ${base.h.ab} ${fh}`);
+    await wait(1500);
+    S.bets.delete("trial"); S.games.delete(gid); render();
+    celebrate({ ...bet, status: "won", settledAt: Date.now() });
+    setTimeout(() => { trialBanner(""); trial = null; }, 2000);
+  }
+  $("#trialBtn").addEventListener("click", () => { closeSheets(); runTrial(); });
   function autoReact() {
     if (!S.ready) return;
     const now = Date.now(), swings = [], seenG = new Set();
@@ -3441,7 +3531,7 @@ body.tv .strip .chart { height: 96px; }
       return;
     }
     // quiet stretch: pop a clip that fits how one of the live bets is going
-    if (!on || clipBusy()) return;
+    if (!on || clipBusy() || trial) return;
     let live = [];
     for (const b of S.bets.values()) { if (b.status !== "open" || !isMe(b)) continue; const spot = liveSpot(b); if (spot && spot.state !== "L") live.push({ b, ...spot }); }
     const winning = live.filter((x) => x.state === "W");
@@ -5547,7 +5637,7 @@ body.tv .strip .chart { height: 96px; }
   function autoSettle() {
     if (!S.db || !S.canWrite || !S.ready) return;
     for (const b of S.bets.values()) {
-      if (b.status !== "open" || b.noAuto || settling.has(b.id)) continue;
+      if (b.status !== "open" || b.noAuto || b.trial || settling.has(b.id)) continue;
       let status = null;
       if (b.kind === "parlay") {
         const legs = legsOf(b);
