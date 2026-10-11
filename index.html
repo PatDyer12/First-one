@@ -191,6 +191,9 @@ button.chip:hover { color: var(--ink); border-color: var(--ink-3); }
 .selcard span { grid-column: 1; font: 500 12px var(--f-mono); color: var(--ink-3); }
 .selcard .x { grid-column: 2; grid-row: 1 / span 2; }
 .linein { display: flex; align-items: center; gap: 10px; }
+.sheet .field .linein input.wide { flex: 1; width: auto; min-width: 0; }
+.hint code { font: 600 12px var(--f-mono); color: var(--ink); background: rgba(255,255,255,.07); padding: 1px 6px; border-radius: 5px; user-select: all; overflow-wrap: anywhere; }
+#spStatus { color: var(--ink-2); } #spStatus.err { color: var(--loss); }
 .linein label { font: 600 11px var(--f-body); letter-spacing: 0.12em; text-transform: uppercase; color: var(--ink-3); }
 .sheet .field .linein input { width: 110px; flex: none; background: var(--ground); border: 1px solid var(--line); border-radius: 10px; padding: 9px 12px; font-size: 16px; }
 .leglist { display: flex; flex-direction: column; gap: 6px; }
@@ -563,6 +566,7 @@ body.has-ticker .jumbo { bottom: clamp(40px, 4.6vh, 58px); }
 .jb-np { position: absolute; right: 2.2%; top: 3.5%; display: flex; align-items: center; gap: .8em; max-width: 46%; padding: .7em 1.1em .7em .7em; border-radius: 14px; background: rgba(8,10,16,.72); border: 1px solid rgba(255,255,255,.14); box-shadow: 0 14px 40px rgba(0,0,0,.55); backdrop-filter: blur(14px); -webkit-backdrop-filter: blur(14px); font-size: clamp(12px, 1.9vh, 22px); transform: translateX(120%); opacity: 0; transition: transform .6s cubic-bezier(.2,.9,.3,1.15), opacity .4s; }
 .jb-np.on { transform: none; opacity: 1; }
 .np-art { flex: none; width: 3.1em; height: 3.1em; border-radius: 9px; display: flex; align-items: flex-end; justify-content: center; gap: .18em; padding: .55em .5em; background: linear-gradient(135deg, #9B8CFF, #ff5fa2 55%, #ffc24b); box-shadow: inset 0 0 0 1px rgba(255,255,255,.25); }
+.np-art { position: relative; overflow: hidden; } .np-art img { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; }
 .np-art i { width: .32em; border-radius: 2px; background: #fff; height: 30%; animation: npEq 1s ease-in-out infinite; }
 .np-art i:nth-child(2) { animation-delay: -.35s; } .np-art i:nth-child(3) { animation-delay: -.7s; } .np-art i:nth-child(4) { animation-delay: -.15s; } .np-art i:nth-child(5) { animation-delay: -.55s; }
 @keyframes npEq { 0%, 100% { height: 22%; } 50% { height: 92%; } }
@@ -1472,6 +1476,18 @@ body.tv.idle, body.tv.idle * { cursor: none !important; }
       <div class="linein"><label for="f-char">Name</label><input type="text" id="f-char" maxlength="16" autocomplete="off" placeholder="Goldie"><button type="button" class="btn sm" id="charSave">Save</button></div>
       <span class="hint">What the gold guy goes by on screen: the DJ breaks, his scenes and the intros list. Saved to your account, so every screen gets it.</span>
     </div>
+    <div class="field" id="spField">
+      <span class="lbl">Spotify for the DJ breaks</span>
+      <div class="linein"><label for="f-spclient">Client ID</label><input type="text" class="wide" id="f-spclient" autocomplete="off" spellcheck="false" placeholder="From your Spotify app's settings"><button type="button" class="btn sm" id="spClientSave">Save</button></div>
+      <div class="linein"><label for="f-splist">Playlist</label><input type="text" class="wide" id="f-splist" autocomplete="off" spellcheck="false" placeholder="Paste a playlist link"><button type="button" class="btn sm" id="spListSave">Save</button></div>
+      <div style="display:flex;gap:8px;flex-wrap:wrap;align-items:center">
+        <button type="button" class="btn sm primary" id="spConnect">Connect Spotify on this screen</button>
+        <button type="button" class="btn sm" id="spTest" hidden>Play a DJ break</button>
+        <button type="button" class="btn sm ghost" id="spOff" hidden>Disconnect</button>
+      </div>
+      <span class="hint" id="spStatus" aria-live="polite"></span>
+      <span class="hint">Needs full Spotify Premium (Student counts, Mini and Lite don't). Connect it on the screen that's hooked up to the speakers, the TV. Use a playlist you made: Spotify only lets these apps read your own. Your Spotify app's redirect URI has to be <code id="spRedir"></code></span>
+    </div>
     <div class="field">
       <span class="lbl">Your name on the board</span>
       <div class="linein"><label for="f-host">Name</label><input type="text" id="f-host" maxlength="16" autocomplete="off" placeholder="You"><button type="button" class="btn sm" id="hostSave">Save</button></div>
@@ -1561,7 +1577,7 @@ body.tv.idle, body.tv.idle * { cursor: none !important; }
 <div class="jumbo" id="jumbo" hidden title="Tap to close">
   <div class="jb-head"><span class="jb-logo">SWEAT<b>ZONE</b></span><span class="jb-tag" id="jbTag">Live</span><b id="jbLbl"></b><span class="jb-x" aria-hidden="true">×</span></div>
   <div class="jb-main">
-    <div class="jb-screen"><video id="jbBg" muted playsinline preload="none" aria-hidden="true"></video><video id="pipVid" muted playsinline preload="none"></video><div class="jb-bug" id="jbBug" hidden></div><div class="jb-np" id="jbNp" hidden><div class="np-art" aria-hidden="true"><i></i><i></i><i></i><i></i><i></i></div><div class="np-txt"><span>Now playing</span><b id="npSong"></b><em id="npArtist"></em></div></div></div>
+    <div class="jb-screen"><video id="jbBg" muted playsinline preload="none" aria-hidden="true"></video><video id="pipVid" muted playsinline preload="none"></video><div class="jb-bug" id="jbBug" hidden></div><div class="jb-np" id="jbNp" hidden><div class="np-art" aria-hidden="true"><i></i><i></i><i></i><i></i><i></i><img id="npImg" alt="" hidden></div><div class="np-txt"><span>Now playing</span><b id="npSong"></b><em id="npArtist"></em></div></div></div>
     <div class="jb-prog"><i id="jbProg"></i></div>
   </div>
   <aside class="jb-side"><h3><i class="dot"></i>Active bets</h3><div id="jbBets"></div></aside>
@@ -2443,7 +2459,7 @@ body.tv.idle, body.tv.idle * { cursor: none !important; }
     if (!isMe(b)) { flash(l.st === "hit" ? "W" : "L", `${personName(b).toUpperCase()} · LEG ${l.st === "hit" ? "✓" : "✕"}`, l.t, `${b.pick} · ${hits}/${legs.length} legs`, false); return; }
     if (l.st === "miss") { flash("L", "LEG ✕", l.t, `${b.pick} · parlay's dead`); return; }
     if (!clipsOn()) { flash("W", "LEG ✓", l.t, hits === legs.length ? `${b.pick} · every leg hit, cash it` : `${b.pick} · ${hits}/${legs.length} legs in`, false); return; }
-    fx(afterCard(() => legCard(b, legs, i)));
+    const run = afterCard(() => legCard(b, legs, i)); run.keep = true; fx(run);
   }
   function legCard(b, legs, i) {
     const ov = $("#legCard"), hits = legs.filter((x) => x.st === "hit").length, left = legs.length - hits;
@@ -2582,7 +2598,7 @@ body.tv.idle, body.tv.idle * { cursor: none !important; }
   // ---------- sheets ----------
   function openSheet(id) { $(id).hidden = false; }
   // keep every open screen current: when a new version is up, reload it (never mid-form or mid-animation)
-  const BUILD = "20261011190324";
+  const BUILD = "20261011192658";
   function checkBuild() {
     if (BUILD === "dev") return;
     fetch("version.json?t=" + Date.now(), { cache: "no-store" }).then((r) => (r.ok ? r.json() : null)).then((j) => {
@@ -3205,6 +3221,7 @@ body.tv.idle, body.tv.idle * { cursor: none !important; }
     const c = audio();
     if (c && !wasLive) { SND.woke = Date.now(); if (c.state !== "running") c.resume().catch(() => {}); }
     loadSounds(); sndChip();
+    try { if (SP.player) SP.player.activateElement(); } catch (e) {}
   }
   document.addEventListener("pointerdown", unlock, true);
   document.addEventListener("keydown", unlock, true);
@@ -3268,6 +3285,7 @@ body.tv.idle, body.tv.idle * { cursor: none !important; }
     const run = fxQ.shift();
     if (!run) { fxBusy = false; return; }
     fxBusy = true;
+    if (!run.keep && !cardBusy && statusSrc) stopStatus(); // a full-screen moment cuts off the music on the big screen (a leg card plays over it)
     setTimeout(fxNext, run());
   }
   const NUKE_UNITS = 3;
@@ -3943,31 +3961,214 @@ body.tv.idle, body.tv.idle * { cursor: none !important; }
     const src = vidSrc(vbase);
     if (v.dataset.base !== vbase) { v.dataset.base = vbase; v.src = src; v.load(); bg.src = src; bg.load(); }
     for (const x of [v, bg]) { x.loop = dj; x.defaultPlaybackRate = rate; x.playbackRate = rate; }
-    const sound = pre || !c ? null : P.lib ? clipBuf(P.base) : loadBuf(P.base);
+    const own = () => (pre || !c ? null : P.lib ? clipBuf(P.base) : loadBuf(P.base));
+    // a DJ break plays off your Spotify playlist when this screen's connected to it (the built-in song when Spotify can't)
+    const sound = dj && !pre && spUsable() ? spPlay().then((t) => t || own()) : own();
     Promise.all([sound, vidReady(v)]).then(([buf]) => {
-      if (go !== pipGo || statusBet !== betId) return;
+      const sp = buf && buf.sp ? buf : null, ms = sp ? sp.ms : P.ms, r = sp ? 1 : rate;
+      if (go !== pipGo || statusBet !== betId) { if (sp && SP.seq === sp.seq) spStop(); return; }
       clearTimeout(hideT);
-      $("#jbLbl").textContent = gLbl(P.label);
-      // songs get a now-playing card (song and artist), slid in a beat after the clip starts
-      const np = $("#jbNp"); np.classList.remove("on"); clearTimeout(npT);
-      if (P.song) lastSong = P.song;
-      if (P.song) { $("#npSong").textContent = P.song; $("#npArtist").textContent = P.artist || ""; np.hidden = false; npT = setTimeout(() => np.classList.add("on"), 700); } else np.hidden = true;
+      $("#jbLbl").textContent = sp ? sp.name : gLbl(P.label);
+      // songs get a now-playing card (song and artist), slid in a beat after the clip starts; a Spotify song brings its cover
+      const np = $("#jbNp"); np.classList.remove("on"); clearTimeout(npT); spArt(sp && sp.art);
+      if (P.song && !sp) lastSong = P.song;
+      const song = sp ? sp.name : P.song, artist = sp ? sp.artist : P.artist;
+      if (song) { $("#npSong").textContent = song; $("#npArtist").textContent = artist || ""; np.hidden = false; npT = setTimeout(() => np.classList.add("on"), 700); } else np.hidden = true;
       $("#jbTag").textContent = why || MOOD_TAG[mood] || "Live";
       jbBug(b);
       jb.className = "jumbo m-" + mood; jb.hidden = false;
       // picking up mid-clip: the video joins the sound where it is
       const off = pre ? Math.max(0, Math.min(P.ms - 800, performance.now() - pre.at)) : 0;
-      const vt = dj ? djPos(P, off / 1000 + 0.08) : off / 1000;
-      for (const x of [v, bg]) { try { x.playbackRate = rate; x.currentTime = vt; x.play().catch(() => {}); } catch (e) {} }
-      const bar = $("#jbProg"); bar.style.transition = "none"; bar.style.width = (100 * off) / P.ms + "%"; void bar.offsetWidth; bar.style.transition = `width ${P.ms - off}ms linear`; bar.style.width = "100%";
-      if (buf) statusSrc = playBuf(c, buf, 0.95);
-      // keep Goldie on the beat: the song clock is the audio context; nudge the loop back if it drifts
+      const vt = sp ? 0 : dj ? djPos(P, off / 1000 + 0.08) : off / 1000;
+      for (const x of [v, bg]) { try { x.playbackRate = r; x.currentTime = vt; x.play().catch(() => {}); } catch (e) {} }
+      const bar = $("#jbProg"); bar.style.transition = "none"; bar.style.width = (100 * off) / ms + "%"; void bar.offsetWidth; bar.style.transition = `width ${ms - off}ms linear`; bar.style.width = "100%";
+      if (sp) statusSrc = { stop: () => { if (SP.seq === sp.seq) spStop(); } };
+      else if (buf) statusSrc = playBuf(c, buf, 0.95);
+      // keep Goldie on the beat: the song clock is the audio context; nudge the loop back if it drifts (a Spotify song has no tempo to go by)
       clearInterval(djT);
-      if (dj && c) { const t0 = c.currentTime - off / 1000; djT = setInterval(() => { if (go !== pipGo) { clearInterval(djT); return; } const want = djPos(P, c.currentTime - t0), d = Math.abs(want - v.currentTime); if (Math.min(d, DJ_LOOP - d) > 0.12) { try { v.currentTime = want; bg.currentTime = want; } catch (e) {} } }, 1500); }
+      if (dj && c && !sp) { const t0 = c.currentTime - off / 1000; djT = setInterval(() => { if (go !== pipGo) { clearInterval(djT); return; } const want = djPos(P, c.currentTime - t0), d = Math.abs(want - v.currentTime); if (Math.min(d, DJ_LOOP - d) > 0.12) { try { v.currentTime = want; bg.currentTime = want; } catch (e) {} } }, 1500); }
       jumboBets(); clearInterval(jbTick); jbTick = setInterval(() => { jumboBets(); jbBug(b); }, 5000);
-      pipT = setTimeout(() => { if (statusBet === betId) stopStatus(); }, P.ms - off);
+      pipT = setTimeout(() => { if (statusBet === betId) stopStatus(); }, ms - off);
     });
   }
+  // ---------- Spotify: DJ breaks off your own playlist ----------
+  // This screen turns into a Spotify speaker (Spotify's Web Playback SDK, full Premium only). Your Spotify app's Client ID and the
+  // playlist are saved to the account; signing in to Spotify happens per screen (connect just the TV). A DJ break plays the next
+  // song in a shuffle of the playlist from about where it gets going, faded in, Goldie DJing over it, and anything else that comes
+  // up cuts it off. Spotify doesn't give apps a song's tempo, so he dances at his own speed. If Spotify can't play, the break
+  // falls back to the built-in songs
+  const SP_REDIRECT = location.origin + location.pathname.replace(/index\.html$/, "");
+  const SP_SCOPES = "streaming user-read-email user-read-private user-modify-playback-state user-read-playback-state playlist-read-private playlist-read-collaborative";
+  const SP_BREAK = 60e3, SP_VOL = 0.9;
+  const SP = { client: "", playlist: "", tok: null, player: null, dev: null, err: "", list: [], bag: [], last: "", name: "", loading: false, on: false, seq: 0, vol: SP_VOL, fade: 0, bootT: 0 };
+  const spGet = (k) => { try { return localStorage.getItem("sb-sp-" + k); } catch (e) { return null; } };
+  const spSet = (k, v) => { try { if (v == null) localStorage.removeItem("sb-sp-" + k); else localStorage.setItem("sb-sp-" + k, v); } catch (e) {} };
+  try { SP.tok = JSON.parse(spGet("tok") || "null"); } catch (e) {}
+  const spPid = (x) => { const t = String(x || "").trim(), m = t.match(/playlist[/:]([A-Za-z0-9]{22})/) || t.match(/^([A-Za-z0-9]{22})$/); return m ? m[1] : ""; };
+  const spUsable = () => !!(SP.player && SP.dev && SP.list.length && ready());
+  const b64u = (a) => btoa(String.fromCharCode(...new Uint8Array(a))).replace(/\+/g, "-").replace(/\//g, "_").replace(/=+$/, "");
+  // sign in with Spotify (PKCE: no secret on the page); Spotify sends you back here with a code
+  async function spConnect() {
+    const id = $("#f-spclient").value.trim();
+    if (id && id !== SP.client) spSaveClient(id);
+    if (!SP.client) { toast("Paste the Client ID from your Spotify app first."); return; }
+    const ver = b64u(crypto.getRandomValues(new Uint8Array(48))), st = b64u(crypto.getRandomValues(new Uint8Array(12)));
+    const ch = b64u(await crypto.subtle.digest("SHA-256", new TextEncoder().encode(ver)));
+    spSet("ver", ver); spSet("state", st); spSet("client", SP.client);
+    location.assign("https://accounts.spotify.com/authorize?" + new URLSearchParams({ response_type: "code", client_id: SP.client, scope: SP_SCOPES, redirect_uri: SP_REDIRECT, code_challenge_method: "S256", code_challenge: ch, state: st }));
+  }
+  const spTokReq = (body) => fetch("https://accounts.spotify.com/api/token", { method: "POST", headers: { "Content-Type": "application/x-www-form-urlencoded" }, body: new URLSearchParams(body) })
+    .then((r) => r.json().catch(() => ({})).then((j) => { if (!r.ok || !j.access_token) { const e = new Error(j.error_description || j.error || "HTTP " + r.status); e.code = j.error; throw e; } return j; }));
+  function spKeep(j, client) {
+    SP.tok = { a: j.access_token, r: j.refresh_token || (SP.tok && SP.tok.r), exp: Date.now() + (j.expires_in || 3600) * 1000 - 120e3, c: client || (SP.tok && SP.tok.c) };
+    spSet("tok", JSON.stringify(SP.tok));
+  }
+  let spTokP = null;
+  function spToken() {
+    if (!SP.tok) return Promise.resolve(null);
+    if (Date.now() < SP.tok.exp) return Promise.resolve(SP.tok.a);
+    if (!spTokP) spTokP = spTokReq({ grant_type: "refresh_token", refresh_token: SP.tok.r, client_id: SP.tok.c })
+      .then((j) => { spKeep(j); return SP.tok.a; })
+      .catch((e) => { if (e.code === "invalid_grant" || e.code === "invalid_client") spForget("Spotify signed this screen out. Hit Connect again."); return null; })
+      .finally(() => { spTokP = null; });
+    return spTokP;
+  }
+  async function spCallback() {
+    const q = new URLSearchParams(location.search), code = q.get("code"), err = q.get("error"), st = q.get("state");
+    if ((!code && !err) || !st || st !== spGet("state")) return;
+    history.replaceState(null, "", SP_REDIRECT + location.hash);
+    const ver = spGet("ver"), client = spGet("client"); spSet("ver", null); spSet("state", null);
+    if (err) { SP.err = err === "access_denied" ? "Spotify connect was cancelled." : "Spotify said: " + err; spShow(); return; }
+    try { spKeep(await spTokReq({ grant_type: "authorization_code", code, redirect_uri: SP_REDIRECT, client_id: client, code_verifier: ver }), client); SP.err = ""; toast("Spotify's connected on this screen"); spBoot(); }
+    catch (e) { SP.err = `Spotify didn't finish connecting (${e.message}). Check the Client ID, and that the redirect URI in your Spotify app matches the one below.`; spShow(); }
+  }
+  function spForget(msg) {
+    clearTimeout(SP.bootT); clearInterval(SP.fade);
+    try { if (SP.player) SP.player.disconnect(); } catch (e) {}
+    SP.tok = null; SP.player = null; SP.dev = null; SP.on = false; SP.err = msg || ""; spSet("tok", null); spShow();
+  }
+  async function spApi(path, method, body) {
+    const t = await spToken(); if (!t) throw new Error("Spotify isn't connected on this screen");
+    const r = await fetch("https://api.spotify.com/v1" + path, { method: method || "GET", headers: { Authorization: "Bearer " + t, ...(body ? { "Content-Type": "application/json" } : {}) }, body: body ? JSON.stringify(body) : undefined });
+    if (r.status === 401 && SP.tok) SP.tok.exp = 0; // refresh on the next call
+    if (r.status === 202 || r.status === 204) return null;
+    const j = await r.json().catch(() => null);
+    if (!r.ok) { const e = new Error((j && j.error && j.error.message) || "HTTP " + r.status); e.status = r.status; throw e; }
+    return j;
+  }
+  // the player: Spotify's SDK, loaded only once this screen is connected
+  function spBoot() {
+    if (!SP.tok || SP.player) { spShow(); return; }
+    const make = () => {
+      if (SP.player || !SP.tok) return;
+      const p = new window.Spotify.Player({ name: "Sweat Board", getOAuthToken: (cb) => { spToken().then((t) => t && cb(t)); }, volume: SP_VOL });
+      const say = (m) => { SP.err = m; spShow(); };
+      p.addListener("ready", ({ device_id }) => { SP.dev = device_id; SP.err = ""; clearTimeout(SP.bootT); spShow(); if (!SP.list.length) spLoad(); });
+      p.addListener("not_ready", () => { SP.dev = null; spShow(); });
+      p.addListener("initialization_error", ({ message }) => say(`This browser can't play Spotify (${message}).`));
+      p.addListener("authentication_error", () => say("Spotify's sign-in didn't take. Hit Reconnect."));
+      p.addListener("account_error", () => say("Spotify needs full Premium on the account you connected (Mini and Lite don't work)."));
+      p.addListener("playback_error", ({ message }) => say(`Spotify couldn't play that one (${message}).`));
+      p.addListener("autoplay_failed", () => say("The browser stopped Spotify from starting. Click anywhere on the board once."));
+      SP.player = p; p.connect();
+      clearTimeout(SP.bootT); SP.bootT = setTimeout(() => { if (!SP.dev && SP.player === p) say("Spotify's player didn't start on this screen, so the DJ breaks are using the built-in songs. Try Reconnect."); }, 25e3);
+      spShow();
+    };
+    if (window.Spotify && window.Spotify.Player) { make(); return; }
+    window.onSpotifyWebPlaybackSDKReady = make;
+    if (!document.getElementById("spSdk")) {
+      const sc = document.createElement("script"); sc.id = "spSdk"; sc.src = "https://sdk.scdn.co/spotify-player.js"; sc.async = true;
+      sc.onerror = () => { SP.err = "Couldn't load Spotify's player. Check the connection."; spShow(); };
+      document.head.appendChild(sc);
+    }
+    spShow();
+  }
+  // the playlist's songs (Spotify lets these apps read only playlists you made or collaborate on)
+  async function spLoad() {
+    if (!SP.playlist || !SP.tok || SP.loading) { spShow(); return; }
+    const pid = SP.playlist; SP.loading = true; spShow();
+    try {
+      const pl = await spApi(`/playlists/${pid}?fields=name`).catch(() => null), list = [];
+      for (let off = 0, n = 0; n < 10; n++, off += 50) {
+        const j = await spApi(`/playlists/${pid}/items?limit=50&offset=${off}`);
+        for (const x of (j && j.items) || []) {
+          const t = x && (x.item || x.track);
+          if (!t || x.is_local || t.type !== "track" || !t.uri || !(t.duration_ms > 75e3)) continue;
+          const im = ((t.album && t.album.images) || []).slice().sort((a, b) => (a.width || 0) - (b.width || 0)).find((i) => (i.width || 300) >= 120);
+          list.push({ uri: t.uri, name: t.name || "", artist: (t.artists || []).map((a) => a.name).join(", "), dur: t.duration_ms, art: im ? im.url : "" });
+        }
+        if (!j || !j.next) break;
+      }
+      if (SP.playlist === pid) { SP.list = list; SP.bag = []; SP.name = (pl && pl.name) || ""; SP.err = list.length ? "" : "That playlist doesn't have any songs Spotify will play here."; }
+    } catch (e) {
+      if (SP.playlist === pid) { SP.list = []; SP.err = e.status === 403 || e.status === 404 ? "Spotify only lets this app read playlists you made. Paste a link to one of yours (you can copy songs into a new playlist)." : `Couldn't load the playlist (${e.message}).`; }
+    }
+    SP.loading = false;
+    if (SP.playlist !== pid) { spLoad(); return; }
+    spShow();
+  }
+  // shuffled, every song once before any repeats, never the same one twice running
+  function spPick() {
+    if (!SP.bag.length) { SP.bag = SP.list.map((_, i) => i).sort(() => Math.random() - 0.5); if (SP.list.length > 1 && SP.list[SP.bag[SP.bag.length - 1]].uri === SP.last) SP.bag.unshift(SP.bag.pop()); }
+    const t = SP.list[SP.bag.pop()]; SP.last = t.uri; return t;
+  }
+  // where a song gets going: about a fifth of the way in (25 to 55 seconds), leaving a full break after it
+  const spHook = (dur) => Math.max(0, Math.min(Math.max(25e3, Math.min(55e3, dur * 0.2)), dur - SP_BREAK - 5e3));
+  function spFade(to, ms, then) {
+    const p = SP.player; clearInterval(SP.fade); if (!p) return;
+    const from = SP.vol, n = Math.max(1, Math.round(ms / 100)); let i = 0;
+    SP.fade = setInterval(() => { i++; SP.vol = from + (to - from) * Math.min(1, i / n); p.setVolume(Math.max(0, Math.min(1, SP.vol))).catch(() => {}); if (i >= n) { clearInterval(SP.fade); if (then) then(); } }, 100);
+  }
+  // a DJ break: the next song, from its hook, faded in. Resolves to what's playing, or null (the built-in songs take it)
+  async function spPlay() {
+    if (!spUsable()) return null;
+    const p = SP.player, me = ++SP.seq; clearInterval(SP.fade);
+    try { p.activateElement(); } catch (e) {}
+    for (let k = 0; k < 3; k++) {
+      const t = spPick(), at = spHook(t.dur);
+      try {
+        SP.vol = 0.02; await p.setVolume(0.02).catch(() => {});
+        await spApi(`/me/player/play?device_id=${encodeURIComponent(SP.dev)}`, "PUT", { uris: [t.uri], position_ms: Math.round(at) });
+        if (me !== SP.seq) return null;
+        SP.on = true; if (SP.err) { SP.err = ""; spShow(); } spFade(SP_VOL, 1500);
+        return { sp: true, seq: me, name: t.name, artist: t.artist, art: t.art, ms: Math.max(15e3, Math.min(SP_BREAK, t.dur - at - 2e3)) };
+      } catch (e) {
+        if (e.status === 404 && k === 0) { await spApi("/me/player", "PUT", { device_ids: [SP.dev], play: false }).catch(() => {}); continue; } // wake the player up, then try again
+        if ((e.status === 400 || e.status === 403) && k < 2) continue; // that song won't play here: the next one
+        SP.err = `Spotify wouldn't start (${e.message}), so that break used the built-in songs.`; spShow(); return null;
+      }
+    }
+    return null;
+  }
+  function spStop() {
+    if (!SP.on || !SP.player) return;
+    SP.on = false; const p = SP.player;
+    spFade(0.02, 1000, () => { if (!SP.on) p.pause().catch(() => {}); });
+  }
+  function spArt(url) { const i = $("#npImg"); if (url) { i.src = url; i.hidden = false; } else { i.hidden = true; i.removeAttribute("src"); } }
+  function spShow() {
+    const st = $("#spStatus"); if (!st) return;
+    const con = !!SP.tok;
+    $("#spConnect").textContent = con ? "Reconnect" : "Connect Spotify on this screen";
+    $("#spOff").hidden = !con; $("#spTest").hidden = !(con && SP.dev && SP.list.length);
+    st.textContent = SP.err || (!con ? "Not connected on this screen." : !SP.player ? "Starting Spotify…" : !SP.dev ? "Waiting on Spotify's player…" : !SP.playlist ? "Connected. Paste a playlist link and hit Save."
+      : SP.loading ? "Loading the playlist…" : SP.list.length ? `Connected. DJ breaks on this screen play ${SP.list.length} songs from ${SP.name || "your playlist"}.` : "Connected.");
+    st.classList.toggle("err", !!SP.err);
+  }
+  function spSaveClient(v) { SP.client = v; return write((db) => db.doc("config/settings").set({ spClient: v }, { merge: true }), () => {}); }
+  $("#spRedir").textContent = SP_REDIRECT;
+  $("#spClientSave").addEventListener("click", () => { const v = $("#f-spclient").value.trim(); $("#f-spclient").value = v; spSaveClient(v).then((ok) => ok && toast(v ? "Client ID saved. Now hit Connect on the TV." : "Client ID removed")); });
+  $("#spListSave").addEventListener("click", () => {
+    const raw = $("#f-splist").value.trim(), id = spPid(raw);
+    if (raw && !id) { toast("That doesn't look like a Spotify playlist link."); return; }
+    SP.playlist = id; SP.list = []; SP.err = ""; $("#f-splist").value = id ? "https://open.spotify.com/playlist/" + id : "";
+    write((db) => db.doc("config/settings").set({ spPlaylist: id }, { merge: true }), () => {}).then((ok) => ok && toast(id ? "Playlist saved" : "Playlist removed"));
+    spLoad();
+  });
+  $("#spConnect").addEventListener("click", () => { spConnect().catch((e) => toast("Couldn't start the Spotify sign-in: " + e.message)); });
+  $("#spOff").addEventListener("click", () => { if (statusSrc && SP.on) stopStatus(); spForget(""); toast("Spotify's off on this screen"); });
+  $("#spTest").addEventListener("click", () => { closeSheets(); const P = pickClip(CLIPS.filter((c) => c.dj)); if (P) react(anyOpen(), "mid", P, "DJ " + gName()); });
+  spCallback(); if (SP.tok) spBoot(); spShow();
   function lockIn(b) {
     const ov = $("#lockIn"); ov.hidden = false; ov.style.animation = "none"; void ov.offsetWidth; ov.style.animation = "";
     ov.firstElementChild.style.animation = "none"; void ov.offsetWidth; ov.firstElementChild.style.animation = "";
@@ -6974,6 +7175,10 @@ body.tv.idle, body.tv.idle * { cursor: none !important; }
         if (ok && ok !== S.oddsKey) { S.oddsKey = ok; PROPS.clear(); OA_EVENTS.clear(); }
         const fc = s.exists ? s.data().focus : null;
         if (fc && ["auto", "CFB", "NFL"].includes(fc)) setFocus(fc);
+        const spc = s.exists ? s.data().spClient : null;
+        if (spc != null && spc !== SP.client) { SP.client = spc; $("#f-spclient").value = spc; }
+        const spl = s.exists ? s.data().spPlaylist : null;
+        if (spl != null && spl !== SP.playlist) { SP.playlist = spl; SP.list = []; $("#f-splist").value = spl ? "https://open.spotify.com/playlist/" + spl : ""; spLoad(); }
         const cn = s.exists ? s.data().charName : null;
         if (cn != null && cn !== S.charName) { S.charName = cn; $("#f-char").value = cn; showGName(); }
         const hn = s.exists ? s.data().hostName : null;
