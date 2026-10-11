@@ -2626,7 +2626,7 @@ body.tv.idle, body.tv.idle * { cursor: none !important; }
   // ---------- sheets ----------
   function openSheet(id) { $(id).hidden = false; }
   // keep every open screen current: when a new version is up, reload it (never mid-form or mid-animation)
-  const BUILD = "20261011212957";
+  const BUILD = "20261011225539";
   function checkBuild() {
     if (BUILD === "dev") return;
     fetch("version.json?t=" + Date.now(), { cache: "no-store" }).then((r) => (r.ok ? r.json() : null)).then((j) => {
@@ -3827,7 +3827,7 @@ body.tv.idle, body.tv.idle * { cursor: none !important; }
     clip("clips/l03", "Meltdown", "down", 11.25),
     clip("clips/l04", "Brutal loss", "down", 16.55),
     clip("clips/l05", "Brewers pain", "down", 24.85),
-    clip("clips/l06", "Vols heartbreak", "down", 18.85),
+    clip("clips/l06", "Vols heartbreak", "down", 18.85, { college: true }),
     clip("clips/l07", "Streamer losses", "down", 30),
     clip("cfb/cfb05", "I don't lose", "down comeback", 28),
     clip("cfb/cfb07", "Brick by brick", "down comeback", 25.8),
@@ -3848,7 +3848,7 @@ body.tv.idle, body.tv.idle * { cursor: none !important; }
     clip("clips/w06", "KD: kiss it", "up win", 26.35),
     clip("clips/w07", "Locker room karaoke", "up win vibe", 27.95, { song: "You Are Not Alone", artist: "Michael Jackson" }),
     clip("cfb/cfb08", "Sark had me rollin", "up", 5.7),
-    clip("clips/w09", "Bryce Underwood", "vibe", 17.85, { song: "O Canada", artist: "National anthem" }),
+    clip("clips/w09", "Bryce Underwood", "vibe", 17.85, { song: "O Canada", artist: "National anthem", college: true }),
     clip("cfb/cfb09", "You light my fire", "up", 27.9),
     clip("cfb/cfb10", "Locker room singalong", "vibe", 26.9, { song: "Meet in the Middle", artist: "Diamond Rio" }),
     clip("cfb/cfb11", "Nah nah honey I'm good", "vibe", 29.9, { song: "Honey, I'm Good.", artist: "Andy Grammer" }),
@@ -4254,8 +4254,10 @@ body.tv.idle, body.tv.idle * { cursor: none !important; }
     return null;
   }
   const isMatchup = (c, g) => !!(g && c.teams && c.teams.includes(g.a.ab) && c.teams.includes(g.h.ab));
-  // a clip for this sport: its own, the general ones, and on NFL bets the college football edits that aren't about one school
-  const forSport = (c, sp) => !c.sport || c.sport === sp || (sp === "NFL" && c.sport === "CFB" && !c.fan && !c.teams);
+  // a clip for this sport: its own and the general ones. NFL bets never get a college edit (the college folders, anything
+  // tagged college), just the NFL edits, the general fillers and the DJ
+  const isCollege = (c) => c.sport === "CFB" || c.college || /^sounds\/(cfb|uga)\//.test(c.base);
+  const forSport = (c, sp) => (sp === "NFL" ? c.sport === "NFL" || (!c.sport && !isCollege(c)) : !c.sport || c.sport === sp);
   // the team you're riding on this bet; null on a total (then nobody's fan clips play)
   function myTeam(b) {
     const g = gameFor(b); if (!g) return null;
