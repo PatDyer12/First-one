@@ -85,13 +85,20 @@ button.chip:hover { color: var(--ink); border-color: var(--ink-3); }
 /* Grid */
 .grid { display: grid; gap: 18px; grid-template-columns: minmax(0, 1fr); align-items: start; }
 .col { display: flex; flex-direction: column; gap: 18px; min-width: 0; }
+/* below the 3-column layout the left column melts into the grid: record, open bets, the rest, then live lines */
+@media (max-width: 1199px) {
+  .lcol { display: contents; }
+  .hero { order: 0; } .grid > section.panel { order: 1; } .grid > .col:not(.lcol) { order: 2; } .lines { order: 3; }
+}
 @media (min-width: 780px) {
   .grid { grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); }
+  .lines { grid-column: 1 / -1; }
   .hero { grid-column: 1 / -1; }
 }
 @media (min-width: 1200px) {
   .grid { grid-template-columns: minmax(0, 0.85fr) minmax(0, 1.5fr) minmax(0, 0.95fr); }
-  .hero { grid-column: auto; position: sticky; top: calc(env(safe-area-inset-top, 0px) + 18px); }
+  .hero { grid-column: auto; }
+  .lines { grid-column: auto; }
 }
 
 .panel { background: var(--panel); border: 1px solid var(--line); border-radius: 16px; padding: 18px; min-width: 0; }
@@ -435,6 +442,30 @@ body.settle .panel, body.settle #h-net, body.settle #h-usd, body.settle .cell b,
 .pip.out { transform: translateX(130%); opacity: 0; transition: transform .5s ease-in, opacity .5s; }
 @keyframes pipIn { from { transform: translateX(130%) rotate(6deg); } to { transform: none; } }
 @media (max-width: 780px) { .pip { width: 40vw; right: 12px; bottom: 90px; } .pip.sq, .pip.kobe { width: 50vw; } .pip.wide { width: 66vw; } }
+/* live lines */
+.lines .ln { padding: 12px 0; border-top: 1px solid var(--line); }
+.lines .ln:first-child { padding-top: 0; border-top: 0; }
+.ln-h { display: flex; align-items: center; gap: 6px; font: 700 13px var(--f-mono); color: var(--ink); min-width: 0; }
+.ln-h img { width: 18px; height: 18px; object-fit: contain; }
+.ln-h span { color: var(--ink-2); margin-left: 2px; }
+.ln-h i { font-style: normal; color: var(--ink-3); margin: 0 2px; }
+.ln-h em { font-style: normal; font-weight: 500; font-size: 11px; color: var(--ink-3); margin-left: auto; white-space: nowrap; }
+.ln-h u { text-decoration: none; font: 700 9px var(--f-mono); letter-spacing: .1em; text-transform: uppercase; padding: 2px 6px; border-radius: 5px; background: var(--panel-2); color: var(--ink-3); }
+.ln-h u.live { background: rgba(255,97,112,.15); color: var(--loss); }
+.ln-grid { display: grid; grid-template-columns: auto 1fr 1.35fr 1.45fr; gap: 4px 6px; margin-top: 8px; align-items: center; }
+.ln-grid .hd { font: 600 9px var(--f-mono); letter-spacing: .14em; text-transform: uppercase; color: var(--ink-3); text-align: center; }
+.ln-grid .tm { font: 700 11px var(--f-mono); color: var(--ink-2); padding-right: 2px; }
+.lc { position: relative; display: flex; align-items: baseline; justify-content: center; gap: 4px; padding: 5px 4px; border-radius: 7px; background: var(--ground); border: 1px solid transparent; font: 700 13px var(--f-mono); color: var(--ink); white-space: nowrap; }
+.lc small { font: 500 10px var(--f-mono); color: var(--ink-3); }
+.lc.mine { border-color: var(--gold); background: rgba(255,194,75,.1); }
+.lc i { font-style: normal; font-size: 9px; }
+.lc.up i { color: var(--win); } .lc.dn i { color: var(--loss); }
+.lc.up, .lc.dn { animation: lnFlash 1.6s ease-out; }
+@keyframes lnFlash { from { background: rgba(255,194,75,.35); } }
+.ln-you { margin-top: 6px; font: 600 11.5px var(--f-mono); color: var(--ink-2); }
+.ln-you.good { color: var(--win); } .ln-you.bad { color: var(--loss); }
+.ln-you em { font-style: normal; font: 700 9px var(--f-mono); letter-spacing: .1em; text-transform: uppercase; color: var(--ink-3); border: 1px solid var(--line); border-radius: 4px; padding: 0 4px; margin-right: 6px; }
+.ln-none { margin-top: 8px; font: 500 12px var(--f-mono); color: var(--ink-3); }
 /* sniper: long shots */
 .sn { position: fixed; inset: 0; z-index: 95; background: #000; overflow: hidden; --sc: 255,60,60; }
 .sn.gold { --sc: 255,211,74; }
@@ -664,6 +695,7 @@ body.tv .chart { height: 240px; }
   <div class="banner" id="offline" hidden>Can't reach your bet database right now. Check your connection and reload.</div>
 
   <main class="grid">
+    <div class="col lcol">
     <section class="panel hero" aria-label="Results">
       <div class="label"><span id="h-label">Today</span><span class="num" id="h-day"></span></div>
       <div class="big num" id="h-net" data-sign="zero">0u</div>
@@ -683,6 +715,11 @@ body.tv .chart { height: 240px; }
         <div class="dots" id="h-dots"></div>
       </div>
     </section>
+    <section class="panel lines" aria-label="Live lines">
+      <div class="ph"><h2>Live lines</h2><span class="sub" id="ln-sub"></span></div>
+      <div id="lines"><div class="empty"><b>No games to price</b>Live lines show up here for every game you have a bet on.</div></div>
+    </section>
+    </div>
 
     <section class="panel" aria-label="Active bets">
       <div class="ph"><h2>The sweat · <span id="a-count">0</span> open</h2><span class="sub num" id="a-sum"></span></div>
@@ -1765,7 +1802,7 @@ body.tv .chart { height: 240px; }
     const ok = got.filter(Boolean); if (!ok.length) return;
     const finish = () => {
       S.slateAt = Date.now();
-      render();
+      render(); renderLines();
       autoReact();
       autoSettle();
       if (!$("#addSheet").hidden) renderGames();
@@ -1794,7 +1831,100 @@ body.tv .chart { height: 240px; }
     }
     return [...keys];
   }
-  async function pollLive() { if (document.visibilityState === "visible") { const k = liveKeys(); if (k.length) await loadBoards(k); } }
+  async function pollLive() { if (document.visibilityState === "visible") { const k = liveKeys(); if (k.length) await loadBoards(k); loadLines(); } }
+  // ---------- Live lines: DraftKings moneyline / spread / total for every game you're on ----------
+  const LINES = new Map(), LCHG = new Map(); // gameId -> latest lines; "gameId:cell" -> { dir, at } when a number moves
+  const lineSels = (b) => (b.kind === "parlay" ? (Array.isArray(b.legSel) ? b.legSel : []) : [b.sel]).filter((s) => s && s.g != null);
+  function lineGames() {
+    const m = new Map();
+    for (const b of S.bets.values()) {
+      if (b.status !== "open") continue;
+      const legs = b.kind === "parlay" ? legsOf(b) : null;
+      if (legs && legs.some((l) => l.st === "miss")) continue;
+      lineSels(b).forEach((s) => {
+        if (legs && legs.find((l) => l.sel === s && l.st)) return;
+        const g = gameOf(s), sp = s.sp || b.sport, id = String(s.g);
+        if ((g && g.st === "post") || !ESPN[sp]) return;
+        if (!m.has(id)) m.set(id, { sp, picks: [] });
+        m.get(id).picks.push({ b, s, leg: !!legs });
+      });
+    }
+    return m;
+  }
+  const lnum = (v) => { if (v == null || v === "") return null; const n = Number(String(v).replace("−", "-")); return Number.isFinite(n) ? n : null; };
+  function parseLine(it) {
+    const A = it.awayTeamOdds || {}, Hm = it.homeTeamOdds || {}, hl = lnum(it.spread);
+    const pt = (o, fb) => lnum(o.current && o.current.pointSpread && o.current.pointSpread.american) ?? fb;
+    return {
+      ml: { a: lnum(A.moneyLine), h: lnum(Hm.moneyLine) },
+      sp: { a: { l: pt(A, hl == null ? null : -hl), o: lnum(A.spreadOdds) }, h: { l: pt(Hm, hl), o: lnum(Hm.spreadOdds) } },
+      tot: { l: lnum(it.overUnder), o: lnum(it.overOdds), u: lnum(it.underOdds) },
+    };
+  }
+  async function loadLines() {
+    if (!S.ready || document.visibilityState !== "visible") return;
+    const games = lineGames();
+    if (!games.size) { renderLines(); return; }
+    const got = await Promise.all([...games].map(async ([id, gm]) => {
+      try {
+        const [sport, league] = ESPN[gm.sp].split("/");
+        const r = await fetch(`https://sports.core.api.espn.com/v2/sports/${sport}/leagues/${league}/events/${id}/competitions/${id}/odds`);
+        if (!r.ok) return null;
+        const items = (await r.json()).items || [];
+        const isLive = (x) => /live/i.test((x.provider && x.provider.name) || "");
+        const live = items.find(isLive), pre = items.find((x) => !isLive(x));
+        // a live market only exists once the game's going, so take it whenever it's there
+        const it = live || pre;
+        return it ? [id, { ...parseLine(it), live: it === live, book: ((it.provider && it.provider.name) || "").replace(/\s*-\s*live odds/i, "") }] : null;
+      } catch (e) { return null; }
+    }));
+    const apply = () => {
+      const now = Date.now();
+      for (const x of got) {
+        if (!x) continue;
+        const [id, L] = x, old = LINES.get(id);
+        if (old) for (const [k, a, b] of [["ml.a", old.ml.a, L.ml.a], ["ml.h", old.ml.h, L.ml.h], ["sp.a", old.sp.a.l, L.sp.a.l], ["sp.h", old.sp.h.l, L.sp.h.l], ["tot.o", old.tot.l, L.tot.l], ["tot.u", old.tot.l, L.tot.l]])
+          if (a != null && b != null && a !== b) LCHG.set(id + ":" + k, { dir: b > a ? 1 : -1, at: now });
+        LINES.set(id, { ...L, at: now });
+      }
+      renderLines();
+    };
+    const d = LINES.size ? tvDelay() * 1000 : 0; // same TV delay as the scores, after the first look
+    if (d) setTimeout(apply, d); else apply();
+  }
+  const impl = (o) => (o > 0 ? 100 / (o + 100) : -o / (-o + 100));
+  const fLn = (x) => (x == null ? "–" : x > 0 ? "+" + trimL(x) : x < 0 ? "−" + trimL(-x) : "PK");
+  const fOd = (o) => (o == null ? "" : fOdds(o));
+  function renderLines() {
+    const el = $("#lines"); if (!el) return;
+    const games = lineGames(), now = Date.now();
+    $("#ln-sub").textContent = [...LINES.values()].some((x) => x.live) ? "live · every 30s" : games.size ? "every 30s" : "";
+    if (!games.size) { el.innerHTML = '<div class="empty"><b>No games to price</b>Live lines show up here for every game you have a bet on.</div>'; return; }
+    el.innerHTML = [...games].map(([id, gm]) => {
+      const g = S.games.get(id), L = LINES.get(id);
+      const tm = (x) => (x ? `${x.lg ? `<img src="${esc(x.lg)}" alt="">` : ""}<b>${esc(x.ab)}</b>${g.st !== "pre" && x.sc != null ? `<span>${x.sc}</span>` : ""}` : "");
+      const head = g ? `<div class="ln-h">${tm(g.a)}<i>@</i>${tm(g.h)}<em>${esc(g.st === "pre" ? startLabel(g.t) : g.d)}</em>${L ? `<u class="${L.live ? "live" : ""}">${L.live ? "Live" : "Pregame"}</u>` : ""}</div>` : "";
+      if (!L) return `<div class="ln">${head}<div class="ln-none">Waiting on lines…</div></div>`;
+      const mine = new Set(gm.picks.map(({ s }) => (s.m === "tot" ? "tot." + s.s : s.m + "." + s.s)));
+      const cell = (key, main, odds) => {
+        const c = LCHG.get(id + ":" + key), mv = c && now - c.at < 120e3 ? (c.dir > 0 ? " up" : " dn") : "";
+        return `<span class="lc${mine.has(key) ? " mine" : ""}${mv}">${main}${odds ? `<small>${odds}</small>` : ""}${mv ? `<i>${c.dir > 0 ? "▲" : "▼"}</i>` : ""}</span>`;
+      };
+      const row = (x, side) => `<span class="tm">${g ? esc(g[x].ab) : x.toUpperCase()}</span>${cell("ml." + x, L.ml[x] == null ? "–" : fOd(L.ml[x]))}${cell("sp." + x, fLn(L.sp[x].l), fOd(L.sp[x].o))}${cell("tot." + side, `${side.toUpperCase()} ${L.tot.l == null ? "–" : trimL(L.tot.l)}`, fOd(side === "o" ? L.tot.o : L.tot.u))}`;
+      // where your number sits against the live one
+      const you = gm.picks.map(({ b, s, leg }) => {
+        const team = g ? g[s.s === "a" ? "a" : "h"].ab : "";
+        let txt = "", cls = "";
+        if (s.m === "tot" && s.l != null && L.tot.l != null) { const d = s.s === "o" ? L.tot.l - s.l : s.l - L.tot.l; txt = `${s.s === "o" ? "Over" : "Under"} ${trimL(s.l)} → live ${trimL(L.tot.l)}`; cls = d > 0 ? "good" : d < 0 ? "bad" : ""; if (d) txt += ` · ${trimL(Math.abs(d))} ${d > 0 ? "your way" : "against you"}`; }
+        else if (s.m === "sp" && s.l != null && L.sp[s.s] && L.sp[s.s].l != null) { const d = s.l - L.sp[s.s].l; txt = `${team} ${fLn(s.l)} → live ${fLn(L.sp[s.s].l)}`; cls = d > 0 ? "good" : d < 0 ? "bad" : ""; if (d) txt += ` · ${trimL(Math.abs(d))} ${d > 0 ? "better" : "worse"}`; }
+        else if (s.m === "ml" && L.ml[s.s] != null) { if (!leg && b.odds) { const d = impl(L.ml[s.s]) - impl(Number(b.odds)); txt = `${team} ML ${fOdds(Number(b.odds))} → live ${fOdds(L.ml[s.s])}`; cls = d > 0.005 ? "good" : d < -0.005 ? "bad" : ""; } else txt = `${team} ML → live ${fOdds(L.ml[s.s])}`; }
+        return txt ? `<div class="ln-you ${cls}">${leg ? "<em>leg</em>" : ""}${esc(txt)}</div>` : "";
+      }).join("");
+      return `<div class="ln">${head}<div class="ln-grid"><span></span><span class="hd">ML</span><span class="hd">Spread</span><span class="hd">Total</span>${row("a", "o")}${row("h", "u")}</div>${you}</div>`;
+    }).join("");
+  }
+  setInterval(() => { if (LCHG.size) renderLines(); }, 30e3); // let the move arrows age out
+
   setInterval(pollLive, 30000);
   document.addEventListener("visibilitychange", pollLive);
   // the bet form needs today's and tomorrow's games for every sport
@@ -3744,7 +3874,7 @@ body.tv .chart { height: 240px; }
           else if (!prev && d.status === "open") announce(d);
         }
         const wasReady = S.ready;
-        S.ready = true; render(); autoReact(); autoSettle();
+        S.ready = true; render(); autoReact(); autoSettle(); if (!LINES.size) loadLines(); else renderLines();
         if (!wasReady) { const k = liveKeys(); if (k.length) loadBoards(k); }
       }, onErr));
       unsub.push(db.doc("config/settings").onSnapshot((s) => {
