@@ -1141,7 +1141,57 @@ body.tv .whotag { top: calc(2.6vh + var(--sy, 0px)); }
 .safeframe .bl { left: 6px; bottom: 6px; border-width: 0 0 8px 8px; } .safeframe .br { right: 6px; bottom: 6px; border-width: 0 8px 8px 0; }
 .safeframe span { position: absolute; left: 50%; top: 50%; transform: translate(-50%, -50%); display: grid; gap: 8px; text-align: center; font: 900 clamp(26px, 3.4vw, 48px)/1.05 var(--f-num); color: var(--accent); background: rgba(5,6,8,.92); border: 1px solid var(--line-2); border-radius: 16px; padding: 20px 28px; white-space: nowrap; }
 .safeframe small { font: 700 clamp(14px, 1.5vw, 20px) var(--f-num); color: var(--ink-2); white-space: normal; }
-body.tv .side .roomp { position: sticky; top: 0; z-index: 3; background: linear-gradient(180deg, #151922, #0d1016); }
+body.tv .side { overflow: hidden; }
+body.tv .side .roomp { flex: none; }
+body.tv .sidescroll { flex: 1 1 auto; min-height: 0; overflow: hidden; display: flex; flex-direction: column; gap: 12px; position: relative; }
+body.tv .sidescroll > .panel { flex: none; }
+body.tv .col { position: relative; }
+.loopclone { display: flex; flex-direction: column; flex: none; }
+.sidescroll:empty { display: none; }
+.loopclone .bet { animation: none !important; }
+.jb-side > #jbBets { flex: 1 1 auto; min-height: 0; overflow: hidden; position: relative; }
+/* parlay legs: the game and where each leg stands */
+.legs li.leg { flex-wrap: wrap; align-items: center; row-gap: 2px; column-gap: 8px; border-radius: 8px; padding: 2px 6px 2px 2px; }
+.legs li.leg .lt { min-width: 0; }
+.legs .ld { margin-left: auto; display: inline-flex; align-items: center; gap: 8px; font: 600 .76em var(--f-num); color: var(--ink-2); white-space: nowrap; text-decoration: none; }
+.legs .ld b { color: var(--ink); font-weight: 800; }
+.legs .ld em { font-style: normal; color: var(--ink-3); }
+.legs .ld-st { font-weight: 800; letter-spacing: .04em; text-transform: uppercase; padding: 1px 7px; border-radius: 5px; background: rgba(255,255,255,.06); color: var(--ink-2); }
+.legs .ld-st.w { color: var(--win); background: rgba(46,232,154,.13); } .legs .ld-st.l { color: var(--loss); background: rgba(255,77,106,.13); } .legs .ld-st.e { color: var(--gold); background: rgba(255,181,46,.13); }
+.legs li.lw { background: linear-gradient(90deg, rgba(46,232,154,.1), transparent 75%); } .legs li.ll { background: linear-gradient(90deg, rgba(255,77,106,.1), transparent 75%); }
+.legs li.hit { background: linear-gradient(90deg, rgba(46,232,154,.14), transparent 75%); } .legs li.miss .ld { text-decoration: none; }
+/* TV: readable sizes */
+body.tv .legs .ld { font-size: 17px; }
+body.tv .list[data-d="1"] .bet { padding: 12px 14px; gap: 5px 12px; }
+body.tv .list[data-d="1"] .pick { font-size: 27px; }
+body.tv .list[data-d="1"] .odds b { font-size: 29px; }
+body.tv .list[data-d="1"] .odds span { font-size: 16px; }
+body.tv .list[data-d="1"] .meta { font-size: 15px; }
+body.tv .list[data-d="1"] .state, body.tv .list[data-d="1"] .ride-tag, body.tv .list[data-d="1"] .vsb { font-size: 13px; }
+body.tv .list[data-d="1"] .legs li { font-size: 19px; }
+body.tv .list[data-d="1"] .legs .ld { font-size: 15px; }
+body.tv .list[data-d="1"] .legs .mk { width: 19px; height: 19px; font-size: 11px; }
+body.tv .list[data-d="1"] .bug { font-size: 17px; padding: 6px 11px; }
+body.tv .list[data-d="1"] .bug .tm b { font-size: 22px; } body.tv .list[data-d="1"] .bug .clk { font-size: 16px; } body.tv .list[data-d="1"] .bug .lgo { width: 24px; height: 24px; }
+body.tv .list[data-d="1"] .rider { font-size: 14px; }
+/* jumbo rail: each bet in full */
+.jb-bet .r .od { font: 800 2.1vh var(--f-num); color: #fff; flex: none; }
+.jb-bet .m { display: flex; align-items: center; gap: .55em; margin-top: .5vh; font: 700 1.65vh var(--f-num); color: var(--ink-3); white-space: nowrap; overflow: hidden; }
+.jb-bet .m .nm { color: var(--ink-2); text-transform: uppercase; letter-spacing: .05em; overflow: hidden; text-overflow: ellipsis; min-width: 0; }
+.jb-bet .m .jb-who s { width: 1.45em; height: 1.45em; }
+.jb-bet .sc span.me { color: #fff; font-weight: 800; }
+.jb-bet .sc { flex-wrap: wrap; row-gap: .2vh; white-space: normal; }
+.jb-bet .sc > span, .jb-bet .sc > em { white-space: nowrap; }
+.jb-bet .st { letter-spacing: .03em; line-height: 1.15; }
+.jb-bet .meter, .jb-bet .lmeter { margin-top: .8vh; }
+.jb-bet .jl { list-style: none; margin: .9vh 0 0; padding: 0; display: grid; gap: .55vh; }
+.jb-bet .jl li { display: grid; grid-template-columns: 1.4em minmax(0, 1fr); column-gap: .5em; align-items: center; font: 700 1.8vh/1.15 var(--f-num); color: var(--ink-2); }
+.jb-bet .jl li i { grid-row: span 2; align-self: start; width: 1.25em; height: 1.25em; border-radius: 50%; border: 2px solid var(--line-2); display: grid; place-items: center; font: 900 .72em var(--f-num); font-style: normal; }
+.jb-bet .jl li em { grid-column: 2; font: 700 1.5vh var(--f-num); font-style: normal; color: var(--ink-3); }
+.jb-bet .jl li.hit { color: #fff; } .jb-bet .jl li.hit i { background: var(--win); border-color: var(--win); color: #04130c; } .jb-bet .jl li.hit em { color: var(--win); }
+.jb-bet .jl li.miss { color: var(--loss); } .jb-bet .jl li.miss span { text-decoration: line-through; } .jb-bet .jl li.miss i { background: var(--loss); border-color: var(--loss); color: #fff; }
+.jb-bet .jl li.lw em { color: var(--win); } .jb-bet .jl li.ll em { color: var(--loss); } .jb-bet .jl li.le em { color: var(--gold); }
+.jb-bet .jl li.lw i { border-color: var(--win); } .jb-bet .jl li.ll i { border-color: var(--loss); } .jb-bet .jl li.le i { border-color: var(--gold); }
 body.tv.idle, body.tv.idle * { cursor: none !important; }
 </style>
 </head>
@@ -1652,53 +1702,71 @@ body.tv.idle, body.tv.idle * { cursor: none !important; }
   function tvSafe() { try { const v = parseFloat(localStorage.getItem("sb-safe")); return isFinite(v) ? Math.max(0, Math.min(10, v)) : 0; } catch (e) { return 0; } }
   function fitTV() {
     const app = $(".app");
-    if (!document.body.classList.contains("tv")) { app.style.zoom = ""; app.style.height = ""; return; }
+    if (!document.body.classList.contains("tv")) { app.style.zoom = ""; app.style.height = ""; loopDrop(true); return; }
     const sp = tvSafe() / 100, sx = Math.round(innerWidth * sp), sy = Math.round(innerHeight * sp);
     document.body.style.setProperty("--sx", sx + "px"); document.body.style.setProperty("--sy", sy + "px");
     const z = Math.max(0.6, Math.min(2.4, (innerWidth - 2 * sx) / TV_W));
     app.style.zoom = z.toFixed(4);
     const tk = $("#ticker"), tkh = tk && !tk.hidden ? tk.offsetHeight : 0;
     app.style.height = Math.floor((innerHeight - 2 * sy - tkh) / z) + "px";
+    loopDrop();
     densify();
+    for (const st of ASC) if (st.el.id !== "jbBets") loopSync(st);
   }
   let dens = 0;
   function densify() {
     const sc = $(".mainc"); if (!sc) return;
-    const crewN = document.querySelectorAll("#crew .bet").length, crewL = crewN <= 2 ? 1 : crewN <= 6 ? 2 : 3;
-    const COLW = [400, 330, 262, 214], GAP = [12, 10, 8, 7];
+    const COLW = [400, 330, 262, 214], GAP = [12, 10, 8, 7], crewL = 1;
     const cols = (el, L) => { const n = el.querySelectorAll(":scope > .bet").length, max = Math.max(1, Math.floor((el.clientWidth + GAP[L]) / (COLW[L] + GAP[L]))); el.style.columnCount = n ? String(Math.min(n, max)) : ""; };
-    const set = (L) => { document.body.dataset.dens = L; $("#rides").dataset.d = L; $("#active").dataset.d = L; cols($("#active"), L); for (const el of document.querySelectorAll("#crew .list")) { el.dataset.d = crewL; cols(el, crewL); } };
-    const fits = (k) => sc.scrollHeight <= sc.clientHeight * k + 2;
-    let L = 0;
-    for (; L < 3; L++) { set(L); if (fits(1)) break; }
-    if (L < dens) { set(L); if (!fits(0.93)) L = Math.min(dens, L + 1); } // don't flip back up for a few pixels
+    const set = (L) => { document.body.dataset.dens = L; $("#rides").dataset.d = L; $("#active").dataset.d = L; cols($("#active"), L); for (const el of $("#crewPanel").querySelectorAll(".list")) { el.dataset.d = crewL; cols(el, crewL); } };
+    // the big cards if everything fits; otherwise the readable size, and the column rolls to show the rest
+    set(0);
+    let L = sc.scrollHeight <= sc.clientHeight + 2 ? 0 : 1;
+    if (L === 0 && dens === 1 && sc.scrollHeight > sc.clientHeight * 0.93) L = 1; // don't flip back up for a few pixels
     set(L); dens = L;
   }
-  // a column that doesn't fit scrolls itself: slowly down, a beat at the bottom, back up, a longer beat at the top
+  // a column that doesn't fit rolls upward forever, like a crawl: its content is followed by a copy of itself, and when the
+  // copy reaches the top the column jumps back to the original, so it never stops and never goes back down
   const ASC = [];
-  function autoScroll(el) {
-    if (!el) return;
-    const st = { el, dir: 1, pos: 0, wait: performance.now() + 6000, user: 0, last: performance.now() };
+  function autoScroll(el, speed) {
+    if (!el || ASC.some((s) => s.el === el)) return;
+    const st = { el, pos: 0, user: 0, last: performance.now(), hold: performance.now() + 4000, clone: null, period: 0, speed: speed || 30 };
     const poke = () => { st.user = performance.now(); st.pos = el.scrollTop; };
     for (const ev of ["wheel", "touchstart", "keydown"]) el.addEventListener(ev, poke, { passive: true });
     ASC.push(st);
+    return st;
   }
+  function loopDrop(all) { for (const st of ASC) { if (st.el.id === "jbBets" && !all) continue; if (st.clone) { st.clone.remove(); st.clone = null; } st.period = 0; } }
+  function loopSync(st) {
+    if (!st) return;
+    const el = st.el;
+    if (st.clone) { st.clone.remove(); st.clone = null; }
+    st.period = 0;
+    if (!document.body.classList.contains("tv") || !el.isConnected || el.offsetParent === null) return;
+    const kids = [...el.children].filter((k) => !k.hidden && getComputedStyle(k).display !== "none");
+    if (!kids.length || el.scrollHeight <= el.clientHeight + 2) { st.pos = 0; el.scrollTop = 0; return; }
+    const c = document.createElement("div");
+    c.className = "loopclone"; c.setAttribute("aria-hidden", "true"); c.style.gap = getComputedStyle(el).rowGap;
+    for (const k of [...el.children]) c.appendChild(k.cloneNode(true));
+    el.appendChild(c); st.clone = c;
+    st.period = c.offsetTop - kids[0].offsetTop;
+    if (st.period > 0) st.pos %= st.period;
+  }
+  const loopSyncEl = (el) => loopSync(ASC.find((s) => s.el === el));
   function ascTick(now) {
     const on = document.body.classList.contains("tv");
     for (const st of ASC) {
       const el = st.el, dt = Math.min(0.1, (now - st.last) / 1000); st.last = now;
-      if (!on || !el.isConnected) continue;
-      const max = el.scrollHeight - el.clientHeight;
-      if (max <= 2) { if (el.scrollTop) el.scrollTop = 0; st.pos = 0; st.dir = 1; st.wait = now + 6000; continue; }
-      if (now - st.user < 15000 || now < st.wait) continue;
-      st.pos = Math.max(0, Math.min(max, st.pos + st.dir * (st.dir > 0 ? 26 : 70) * dt));
-      if (st.dir > 0 && st.pos >= max) { st.dir = -1; st.wait = now + 5000; }
-      else if (st.dir < 0 && st.pos <= 0) { st.dir = 1; st.wait = now + 9000; }
+      if (!on || !el.isConnected || el.offsetParent === null) continue;
+      if (!st.period) { if (el.scrollTop) el.scrollTop = 0; continue; }
+      if (now - st.user < 15000 || now < st.hold) continue;
+      st.pos += st.speed * dt;
+      if (st.pos >= st.period) st.pos -= st.period;
       el.scrollTop = st.pos;
     }
     requestAnimationFrame(ascTick);
   }
-  autoScroll($(".mainc")); autoScroll($(".side")); autoScroll($(".jb-side"));
+  autoScroll($(".mainc"), 30); autoScroll($("#jbBets"), 34);
   requestAnimationFrame(ascTick);
   let fitT = 0;
   const refit = () => { clearTimeout(fitT); fitT = setTimeout(fitTV, 120); };
@@ -1910,7 +1978,7 @@ body.tv.idle, body.tv.idle * { cursor: none !important; }
     const manual = "";
     const st = dead ? "dead" : manual || derived;
     const verdict = ev && ev.fin ? ev.res : legs.length && ph === "final" ? (dead ? "L" : allHit ? "W" : "") : "";
-    const legsHtml = legs.length ? `<ul class="legs">${legs.map((l, i) => `<li class="leg${l.st ? " " + l.st : ""}${can ? " tap" : ""}" data-leg="${i}"${can ? ' title="Tap to mark hit / missed"' : ""}><span class="mk">${l.st === "hit" ? "✓" : l.st === "miss" ? "✕" : ""}</span>${l.sel ? legLogo(l.sel) : ""}<span>${esc(l.t)}${!l.st && l.sel ? ballTag(hasBall(l.sel)) : ""}${l.ev ? `<small>${esc(l.ev.g.st === "post" ? "Final" : l.ev.txt.toLowerCase() + " · " + l.ev.g.d)}</small>` : ""}</span></li>`).join("")}</ul>` : "";
+    const legsHtml = legs.length ? `<ul class="legs">${legs.map((l, i) => { const lc = l.st || (l.ev && !l.ev.fin ? (l.ev.res === "W" ? "lw" : l.ev.res === "L" ? "ll" : "le") : ""); return `<li class="leg${lc ? " " + lc : ""}${can ? " tap" : ""}" data-leg="${i}"${can ? ' title="Tap to mark hit / missed"' : ""}><span class="mk">${l.st === "hit" ? "✓" : l.st === "miss" ? "✕" : ""}</span>${l.sel ? legLogo(l.sel) : ""}<span class="lt">${esc(l.t)}${!l.st && l.sel ? ballTag(hasBall(l.sel)) : ""}</span>${legDetail(l)}</li>`; }).join("")}</ul>` : "";
     const chips = [
       vsB,
       ph === "live" ? '<span class="live">LIVE</span>' : ph === "final" ? '<span class="final">FINAL</span>' : ph === "pre" ? `<span class="soon">${startLabel(startOf(b))}</span>` : "",
@@ -1960,6 +2028,27 @@ body.tv.idle, body.tv.idle * { cursor: none !important; }
     const span = METER[(ev.g && ev.g.sport) || sel.sp] || 10, k = Math.max(-1, Math.min(1, ev.m / span));
     const w = Math.max(2, Math.abs(k) * 50), l = k >= 0 ? 50 : 50 - w, cls = ev.m > 0 ? "w" : ev.m < 0 ? "l" : "e";
     return `<div class="meter ${cls}" aria-hidden="true"><i style="--l:${l.toFixed(1)}%;--w:${w.toFixed(1)}%"></i></div>`;
+  }
+  // one parlay leg's game and where it stands: "WSH 24–13 NYG · Final · HIT", "PIT 7–10 IND · 2nd 4:12 · DOWN 3"
+  function legDetail(l) {
+    const s = l.sel, g = s ? gameOf(s) : null;
+    if (!g) return "";
+    if (g.st === "pre") return `<span class="ld"><em>${esc(startLabel(g.t))}</em></span>`;
+    const ev = l.ev, td = isTd(s.m), mine = s.m === "tot" || td ? null : s.s, opp = mine === "a" ? "h" : "a";
+    const sc = td ? "" : mine ? `<b>${esc(g[mine].ab)} ${g[mine].sc}</b>–${g[opp].sc} ${esc(g[opp].ab)}` : `${esc(g.a.ab)} ${g.a.sc}–${g.h.sc} ${esc(g.h.ab)} · <b>${g.a.sc + g.h.sc}</b>/${s.l}`;
+    const cls = l.st === "hit" ? "w" : l.st === "miss" ? "l" : ev ? (ev.res === "W" ? "w" : ev.res === "L" ? "l" : "e") : "";
+    const how = l.st === "hit" ? "Hit" : l.st === "miss" ? "Missed" : ev ? ev.txt.replace(/^Final · /, "") : "";
+    return `<span class="ld">${sc ? `<span class="ld-sc">${sc}</span>` : ""}<em>${esc(g.st === "post" ? "Final" : g.d)}</em>${how ? `<span class="ld-st ${cls}">${esc(how)}</span>` : ""}</span>`;
+  }
+  // the same, in a few words, for the jumbo rail
+  function legShort(l) {
+    const s = l.sel, g = s ? gameOf(s) : null;
+    if (!g) return { txt: "", cls: "" };
+    if (g.st === "pre") return { txt: startLabel(g.t), cls: "" };
+    const ev = l.ev, td = isTd(s.m), mine = s.m === "tot" || td ? null : s.s, opp = mine === "a" ? "h" : "a";
+    const sc = td ? "" : mine ? `${g[mine].ab} ${g[mine].sc}–${g[opp].sc}` : `${g.a.sc + g.h.sc}/${s.l}`;
+    const how = l.st ? (l.st === "hit" ? "Hit" : "Missed") : ev ? ev.txt.replace(/^Final · /, "") : "";
+    return { txt: [sc, g.st === "post" ? "Final" : g.d, how].filter(Boolean).join(" · "), cls: !l.st && ev ? (ev.res === "W" ? "lw" : ev.res === "L" ? "ll" : "le") : "" };
   }
   function legMeter(legs) {
     return `<div class="lmeter" aria-hidden="true">${legs.map((l) => `<span class="${l.st || (l.ev && !l.ev.fin ? (l.ev.res === "W" ? "lw" : l.ev.res === "L" ? "ll" : "le") : "")}"></span>`).join("")}</div>`;
@@ -2392,9 +2481,16 @@ body.tv.idle, body.tv.idle * { cursor: none !important; }
   document.addEventListener("visibilitychange", () => { if (document.visibilityState === "visible" && document.body.classList.contains("tv")) grabWake(); });
   // on the TV your bets keep the big left side; the crew's picks sit on the right under the standings
   function placeCrew(tv) {
-    const crew = $("#crewPanel"), done = $(".settledp");
-    if (tv) { $(".side").insertBefore(crew, $(".lines")); $(".side").appendChild(done); }
-    else { $(".mainc").appendChild(done); $(".mainc").insertBefore(crew, done); }
+    const side = $(".side"), crew = $("#crewPanel"), done = $(".settledp");
+    let wrap = $("#sideScroll");
+    if (tv) {
+      if (!wrap) { wrap = document.createElement("div"); wrap.id = "sideScroll"; wrap.className = "sidescroll"; side.appendChild(wrap); autoScroll(wrap, 30); }
+      wrap.append(crew, $(".lines"), $(".splitsp"), done);
+    } else {
+      const st = ASC.find((s) => s.el === wrap); if (st && st.clone) { st.clone.remove(); st.clone = null; }
+      side.append($(".lines"), $(".splitsp"));
+      $(".mainc").appendChild(done); $(".mainc").insertBefore(crew, done);
+    }
   }
   // line the board up with the TV: a dashed frame at the edges while you adjust (Settings slider, or - and + on the keyboard)
   let safeT = 0;
@@ -2420,7 +2516,7 @@ body.tv.idle, body.tv.idle * { cursor: none !important; }
   // ---------- sheets ----------
   function openSheet(id) { $(id).hidden = false; }
   // keep every open screen current: when a new version is up, reload it (never mid-form or mid-animation)
-  const BUILD = "20261011173942";
+  const BUILD = "20261011175325";
   function checkBuild() {
     if (BUILD === "dev") return;
     fetch("version.json?t=" + Date.now(), { cache: "no-store" }).then((r) => (r.ok ? r.json() : null)).then((j) => {
@@ -3733,15 +3829,26 @@ body.tv.idle, body.tv.idle * { cursor: none !important; }
     const mine = open.filter(isMe).sort((x, y) => rank(x) - rank(y)), crew = open.filter((b) => !isMe(b)).sort((x, y) => rank(x) - rank(y));
     const row = (b, ride) => {
       const ph = phase(b), legs = legsOf(b), ev = b.kind !== "parlay" && b.sel ? evalSel(b.sel) : null, g = b.sel ? gameOf(b.sel) : null;
-      const cls = ev ? (ev.res === "W" ? "w" : ev.res === "L" ? "l" : "e") : legs.some((l) => l.st === "miss") ? "l" : "";
-      const st = legs.length ? (legs.some((l) => l.st === "miss") ? "Dead" : `${legs.filter((l) => l.st === "hit").length}/${legs.length} legs`) : ev ? ev.txt : ph === "pre" ? startLabel(startOf(b)) : "";
-      const pre = g && (g.st === "pre" || g.a.sc == null), sc = !g ? "" : `${lg(g.a)}${esc(g.a.ab)}${pre ? "" : " " + g.a.sc}<i>·</i>${lg(g.h)}${esc(g.h.ab)}${pre ? "" : " " + g.h.sc}${pre ? "" : `<i>·</i>${esc(g.d)}`}`;
-      const who = ride ? `<span class="jb-who">${ride.bets.map((x) => `<s style="--c:${personCol(x)}">${esc(personName(x).slice(0, 1).toUpperCase())}</s>`).join("")}</span>` : isMe(b) ? `<span>${fU(b.units)}</span>` : `<span class="jb-nm" style="--c:${personCol(b)}">${esc(personName(b))}</span>`;
+      const dead = legs.some((l) => l.st === "miss"), hits = legs.filter((l) => l.st === "hit").length;
+      const cls = ev ? (ev.res === "W" ? "w" : ev.res === "L" ? "l" : "e") : dead ? "l" : legs.length && hits === legs.length ? "w" : "";
+      const st = legs.length ? (dead ? "Dead · a leg missed" : hits === legs.length ? "Every leg hit" : `${hits} of ${legs.length} legs in`) : ev ? ev.txt : ph === "pre" ? startLabel(startOf(b)) : ph === "live" ? "Live" : "";
+      const pre = g && (g.st === "pre" || g.a.sc == null), side = b.sel && b.sel.m !== "tot" && !isTd(b.sel.m) ? b.sel.s : null;
+      const tm = (x) => `${lg(g[x])}<span class="${side === x ? "me" : ""}">${esc(g[x].ab)}${pre ? "" : " " + g[x].sc}</span>`;
+      const sc = !g ? "" : `${tm("a")}<i>·</i>${tm("h")}<i>·</i><em>${esc(pre ? startLabel(g.t) : g.st === "post" ? "Final" : g.d)}</em>`;
+      const riders = ride ? ride.bets : [b];
+      const who = riders.map((x) => `<s style="--c:${personCol(x)}">${esc(personName(x).slice(0, 1).toUpperCase())}</s>`).join("");
+      const units = riders.reduce((a, x) => a + x.units, 0), toWin = riders.reduce((a, x) => a + x.units * ppu(x.odds), 0);
+      const meter = ev && !ev.fin && ph === "live" ? meterHtml(b.sel, ev) : legs.length && ph !== "pre" ? legMeter(legs) : "";
+      const legRows = legs.length ? `<ul class="jl">${legs.map((l) => { const d = legShort(l); return `<li class="${l.st || d.cls}"><i>${l.st === "hit" ? "✓" : l.st === "miss" ? "✕" : ""}</i><span>${esc(l.t)}</span>${d.txt ? `<em>${esc(d.txt)}</em>` : ""}</li>`; }).join("")}</ul>` : "";
       const on = b.id === statusBet || (ride && ride.bets.some((x) => x.id === statusBet));
-      return `<div class="jb-bet${on ? " on" : ""}${ride ? " ride" : isMe(b) ? "" : " cw"}" style="--c:${personCol(b)}"><div class="r"><b>${esc(b.pick)}</b>${who}</div>${sc ? `<div class="sc">${sc}</div>` : ""}<div class="st ${cls}">${ph === "live" ? '<i class="dot"></i>' : ""}${esc(st)}</div></div>`;
+      return `<div class="jb-bet${on ? " on" : ""}${ride ? " ride" : isMe(b) ? "" : " cw"}" style="--c:${personCol(b)}">
+        <div class="r"><b>${esc(b.pick)}</b><span class="od">${fOdds(b.odds)}</span></div>
+        <div class="m"><span class="jb-who">${who}</span><span class="nm">${esc(riders.map(personName).join(" + "))}</span><span>${fU(units)} → ${fU(toWin, true)}</span></div>
+        ${sc ? `<div class="sc">${sc}</div>` : ""}<div class="st ${cls}">${ph === "live" ? '<i class="dot"></i>' : ""}${esc(st)}</div>${meter}${legRows}</div>`;
     };
     const html = [...room.rides.map((r) => row(r.lead, r)), ...mine.map((b) => row(b)), ...crew.map((b) => row(b))];
     $("#jbBets").innerHTML = html.length ? html.join("") : '<div class="jb-none">No open bets</div>';
+    loopSyncEl($("#jbBets"));
   }
   const lg = (x) => (x.lg ? `<img src="${esc(x.lg)}" alt="">` : "");
   // lower third, like the RedZone score bug: the game, then your bet and how it's doing
