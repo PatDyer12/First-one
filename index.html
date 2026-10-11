@@ -460,11 +460,13 @@ body.settle .panel, body.settle #h-net, body.settle #h-usd, body.settle .cell b,
 .sn-pick { font: 800 clamp(22px, 4.4vh, 56px)/1.1 var(--f-body); color: #fff; max-width: 90vw; }
 .sn-amt { font: 800 clamp(22px, 4.6vh, 60px)/1 var(--f-mono); color: var(--win); text-shadow: 0 0 24px rgba(61,220,151,.6); }
 .sn-sub { font: 700 2vh/1 var(--f-mono); letter-spacing: .3em; text-transform: uppercase; color: rgba(255,255,255,.6); }
-.sn-drive { position: absolute; inset: 0; background: #000; opacity: 0; transition: opacity .5s; display: flex; align-items: center; justify-content: center; }
+.sn-drive { position: absolute; inset: 0; opacity: 0; transition: opacity .5s; pointer-events: none; }
 .sn.drive .sn-drive { opacity: 1; }
-.sn-drive video { height: 100%; max-width: 100%; object-fit: contain; }
-.sn-drive-txt { position: absolute; left: 0; right: 0; bottom: 7vh; text-align: center; font: 800 clamp(22px, 5vh, 64px)/1 var(--f-display); text-transform: uppercase; letter-spacing: .04em; color: #fff; text-shadow: 0 4px 24px rgba(0,0,0,.9); }
+.sn.drive .sn-card, .sn.drive .sn-top { opacity: 0; transition: opacity .3s; }
+.sn-drive-txt { position: absolute; left: 0; right: 0; top: 9vh; text-align: center; font: 800 clamp(22px, 5vh, 64px)/1 var(--f-display); text-transform: uppercase; letter-spacing: .04em; color: #fff; text-shadow: 0 4px 24px rgba(0,0,0,.9); }
 .sn-drive-txt b { color: rgb(var(--sc)); }
+.sn-drive-txt .gone { margin-top: 2vh; font-size: 1.8em; opacity: 0; transform: scale(1.6); transition: opacity .4s, transform .5s cubic-bezier(.2,1.6,.4,1); }
+.sn.gone .sn-drive-txt .gone { opacity: 1; transform: none; }
 /* bottom ticker */
 .ticker { position: fixed; left: 0; right: 0; bottom: 0; z-index: 50; height: clamp(40px, 4.6vh, 58px); display: flex; align-items: stretch; background: #070a10; border-top: 1px solid var(--line); box-shadow: 0 -10px 30px rgba(0,0,0,.5); font-size: clamp(15px, 2vh, 22px); }
 body.has-ticker .app { padding-bottom: calc(clamp(40px, 4.6vh, 58px) + 14px); }
@@ -879,7 +881,7 @@ body.tv .chart { height: 240px; }
   <div class="sn-top" id="snTop"></div>
   <div class="sn-hud l" id="snHudL"></div><div class="sn-hud r" id="snHudR"></div>
   <div class="sn-card"><div class="sn-tier" id="snTier"></div><div class="sn-odds" id="snOdds"></div><div class="sn-pick" id="snPick"></div><div class="sn-amt" id="snAmt"></div><div class="sn-sub" id="snSub"></div></div>
-  <div class="sn-drive"><video id="snDrive" muted playsinline preload="none"></video><div class="sn-drive-txt" id="snDriveTxt"></div></div>
+  <div class="sn-drive"><div class="sn-drive-txt" id="snDriveTxt"></div></div>
 </div>
 <div class="ticker" id="ticker" hidden><div class="tk-lbl"><i class="dot"></i>CFB</div><div class="tk-track"><div class="tk-run" id="tkRun"></div></div></div>
 <div class="jumbo" id="jumbo" hidden title="Tap to close">
@@ -2906,6 +2908,95 @@ body.tv .chart { height: 240px; }
   loadTicker(); setInterval(loadTicker, 45e3);
   document.addEventListener("visibilitychange", loadTicker);
 
+  // ---------- the drive-off: you, a convertible, a launch ----------
+  const meImg = new Image(); let meReady = false;
+  meImg.onload = () => (meReady = true);
+  function loadMe() { if (!meImg.src) meImg.src = (document.createElement("canvas").toDataURL("image/webp").startsWith("data:image/webp") ? "sounds/sniper/me.webp" : "sounds/sniper/me.png") + "?v=1"; }
+  const SN_CITY = Array.from({ length: 46 }, (_, i) => {
+    const r = (k) => (((i + 1) * 9301 * (k + 3) + 49297) % 233280) / 233280;
+    return { x: i / 46, w: 0.018 + r(1) * 0.03, h: 0.08 + r(2) * 0.28, lit: r(3), far: i % 2 };
+  });
+  // the car, side view facing right, drawn in units of its own length from the rear bottom
+  function snCar(ctx, X, Y, L, spin, gold, glowCol, squat) {
+    const p = (x, y) => [X + x * L, Y + y * L - (x < 0.5 ? squat : -squat * 0.4) * L * 0.02];
+    ctx.save();
+    // underglow
+    ctx.fillStyle = glowCol; ctx.shadowColor = glowCol; ctx.shadowBlur = L * 0.08; ctx.globalAlpha = 0.75;
+    ctx.beginPath(); ctx.ellipse(X + L * 0.5, Y - L * 0.005, L * 0.46, L * 0.018, 0, 0, Math.PI * 2); ctx.fill();
+    ctx.restore();
+    // you, in the cockpit (the door covers your lap)
+    if (meReady) { const h = L * 0.32, w = h * (meImg.width / meImg.height), [mx, my] = p(0.44, -0.06); ctx.drawImage(meImg, mx - w / 2, my - h, w, h); }
+    // body
+    const pts = [[0.02, -0.045], [0, -0.12], [0.05, -0.185], [0.15, -0.2], [0.3, -0.188], [0.33, -0.14], [0.56, -0.14], [0.6, -0.165], [0.85, -0.118], [0.99, -0.078], [1, -0.04], [0.97, -0.03], [0.03, -0.03]];
+    const body = ctx.createLinearGradient(0, Y - L * 0.2, 0, Y);
+    body.addColorStop(0, gold ? "#ffe9a3" : "#ff4d5e"); body.addColorStop(0.35, gold ? "#d9a520" : "#c4122f"); body.addColorStop(1, gold ? "#6b4a0c" : "#4a0610");
+    ctx.fillStyle = body; ctx.beginPath(); pts.forEach(([x, y], i) => { const [a, b] = p(x, y); i ? ctx.lineTo(a, b) : ctx.moveTo(a, b); }); ctx.closePath(); ctx.fill();
+    // shoulder highlight, door line, side intake
+    ctx.strokeStyle = "rgba(255,255,255,.55)"; ctx.lineWidth = Math.max(1.5, L * 0.004);
+    ctx.beginPath(); ctx.moveTo(...p(0.06, -0.15)); ctx.quadraticCurveTo(...p(0.5, -0.115), ...p(0.95, -0.075)); ctx.stroke();
+    ctx.strokeStyle = "rgba(0,0,0,.45)"; ctx.beginPath(); ctx.moveTo(...p(0.36, -0.138)); ctx.lineTo(...p(0.38, -0.04)); ctx.moveTo(...p(0.58, -0.15)); ctx.lineTo(...p(0.6, -0.045)); ctx.stroke();
+    ctx.fillStyle = "rgba(0,0,0,.55)"; ctx.beginPath(); ctx.moveTo(...p(0.27, -0.11)); ctx.lineTo(...p(0.34, -0.1)); ctx.lineTo(...p(0.33, -0.07)); ctx.lineTo(...p(0.26, -0.075)); ctx.fill();
+    // swept windshield
+    ctx.fillStyle = "rgba(160,210,255,.28)"; ctx.strokeStyle = "rgba(20,20,25,.9)"; ctx.lineWidth = Math.max(2, L * 0.006);
+    ctx.beginPath(); ctx.moveTo(...p(0.585, -0.162)); ctx.lineTo(...p(0.625, -0.158)); ctx.lineTo(...p(0.545, -0.25)); ctx.lineTo(...p(0.525, -0.25)); ctx.closePath(); ctx.fill(); ctx.stroke();
+    // lights: head beam forward, tail glow back
+    const [hx, hy] = p(0.97, -0.085);
+    const beam = ctx.createLinearGradient(hx, hy, hx + L * 0.7, hy);
+    beam.addColorStop(0, "rgba(255,250,220,.55)"); beam.addColorStop(1, "rgba(255,250,220,0)");
+    ctx.fillStyle = beam; ctx.beginPath(); ctx.moveTo(hx, hy - L * 0.01); ctx.lineTo(hx + L * 0.7, hy - L * 0.08); ctx.lineTo(hx + L * 0.7, hy + L * 0.09); ctx.lineTo(hx, hy + L * 0.012); ctx.fill();
+    ctx.fillStyle = "#fffbe6"; ctx.shadowColor = "#fff"; ctx.shadowBlur = L * 0.03; ctx.beginPath(); ctx.ellipse(hx, hy, L * 0.018, L * 0.008, -0.2, 0, Math.PI * 2); ctx.fill();
+    ctx.fillStyle = "#ff1a2e"; ctx.shadowColor = "#ff1a2e"; ctx.shadowBlur = L * 0.04; const [tx, ty] = p(0.005, -0.125); ctx.fillRect(tx - L * 0.004, ty, L * 0.012, L * 0.03);
+    ctx.shadowBlur = 0;
+    // wheels
+    for (const wx of [0.2, 0.8]) {
+      const [cx, cy] = p(wx, -0.075), r = L * 0.078;
+      ctx.fillStyle = "#050507"; ctx.beginPath(); ctx.arc(cx, cy - r * 0.08, r * 1.12, Math.PI, Math.PI * 2); ctx.fill();
+      ctx.fillStyle = "#111"; ctx.beginPath(); ctx.arc(cx, cy, r, 0, Math.PI * 2); ctx.fill();
+      const rim = ctx.createRadialGradient(cx - r * 0.2, cy - r * 0.2, r * 0.05, cx, cy, r * 0.68);
+      rim.addColorStop(0, gold ? "#fff3c4" : "#f2f4f7"); rim.addColorStop(1, gold ? "#a07810" : "#6b7280");
+      ctx.fillStyle = rim; ctx.beginPath(); ctx.arc(cx, cy, r * 0.66, 0, Math.PI * 2); ctx.fill();
+      ctx.strokeStyle = "#1a1a1f"; ctx.lineWidth = r * 0.12;
+      for (let i = 0; i < 5; i++) { const a = spin + i * 1.2566; ctx.beginPath(); ctx.moveTo(cx + Math.cos(a) * r * 0.15, cy + Math.sin(a) * r * 0.15); ctx.lineTo(cx + Math.cos(a) * r * 0.6, cy + Math.sin(a) * r * 0.6); ctx.stroke(); }
+      ctx.fillStyle = "#c4122f"; ctx.beginPath(); ctx.arc(cx, cy, r * 0.1, 0, Math.PI * 2); ctx.fill();
+    }
+  }
+  const DRIVE_LEN = 9.2;
+  function snDrive(ctx, W, H, k, gold, puffs) {
+    const ground = H * 0.78, L = Math.min(W * 0.5, H * 1.05);
+    // night city
+    const sky = ctx.createLinearGradient(0, 0, 0, ground);
+    sky.addColorStop(0, "#05060f"); sky.addColorStop(0.6, gold ? "#2d1d08" : "#1d0d33"); sky.addColorStop(1, gold ? "#a8700f" : "#8a2a4a");
+    ctx.fillStyle = sky; ctx.fillRect(0, 0, W, ground);
+    for (const pass of [1, 0]) for (const bd of SN_CITY) {
+      if (bd.far !== pass) continue;
+      const bx = bd.x * W * 1.05 - W * 0.02, bw = bd.w * W, bh = bd.h * H * (pass ? 1.25 : 0.9);
+      ctx.fillStyle = pass ? "#0e0c1c" : "#07060d"; ctx.fillRect(bx, ground - bh, bw, bh);
+      ctx.fillStyle = gold ? "rgba(255,210,120,.55)" : "rgba(255,200,140,.45)";
+      for (let wy = ground - bh + 8; wy < ground - 10; wy += 14) for (let wx = bx + 5; wx < bx + bw - 6; wx += 10) if (((wx * 7 + wy * 3) | 0) % 5 < bd.lit * 3) ctx.fillRect(wx, wy, 4, 6);
+    }
+    // street: asphalt, curb, lane dashes, lamp posts
+    ctx.fillStyle = "#121218"; ctx.fillRect(0, ground, W, H - ground);
+    ctx.fillStyle = "#26262e"; ctx.fillRect(0, ground, W, H * 0.012);
+    ctx.fillStyle = "rgba(255,220,120,.7)"; for (let x = 20; x < W; x += W * 0.12) ctx.fillRect(x, ground + (H - ground) * 0.55, W * 0.06, H * 0.008);
+    for (let x = W * 0.08; x < W; x += W * 0.28) {
+      ctx.fillStyle = "#1c1c22"; ctx.fillRect(x, ground - H * 0.42, W * 0.005, H * 0.42);
+      const g = ctx.createRadialGradient(x, ground - H * 0.42, 2, x, ground - H * 0.42, H * 0.3);
+      g.addColorStop(0, "rgba(255,230,170,.55)"); g.addColorStop(1, "rgba(255,230,170,0)"); ctx.fillStyle = g; ctx.fillRect(x - H * 0.3, ground - H * 0.72, H * 0.6, H * 0.6);
+    }
+    // the car: rolls in, sits and revs, then launches
+    let x, spin, squat = 0, shakeY = 0;
+    const cx0 = W / 2 - L / 2;
+    if (k < 1.6) { const e = 1 - Math.pow(1 - k / 1.6, 3); x = -L * 1.1 + (cx0 + L * 1.1) * e; spin = x / (L * 0.078); }
+    else if (k < 4.2) { x = cx0; spin = cx0 / (L * 0.078); const rv = (k > 1.9 && k < 2.6) || (k > 3.7); shakeY = rv ? Math.sin(k * 90) * L * 0.004 : Math.sin(k * 30) * L * 0.0015; squat = rv ? 0.6 : 0; }
+    else { const u = k - 4.2; x = cx0 + 0.5 * W * 3.2 * u * u + W * 0.05 * u; spin = x / (L * 0.078); squat = Math.max(0, 1 - u * 1.5); }
+    // tire smoke at the launch
+    if (k > 3.9 && k < 4.9 && x < W) puffs.push({ x: x + L * 0.18, y: ground - L * 0.02, vx: -2 - Math.random() * 5, vy: -0.5 - Math.random(), r: L * 0.025, a: 0.38 });
+    else if (k > 1.9 && k < 4.2 && Math.random() < 0.3) puffs.push({ x: x + L * 0.01, y: ground - L * 0.06, vx: -1.5, vy: -0.4, r: L * 0.012, a: 0.4 });
+    if (x < W + 20) snCar(ctx, x, ground + shakeY, L, spin, gold, gold ? "#ffd34a" : "#ff2a55", squat);
+    for (const s of puffs) { s.x += s.vx; s.y += s.vy; s.r *= 1.015; s.a *= 0.955; ctx.fillStyle = `rgba(200,200,210,${s.a})`; ctx.beginPath(); ctx.arc(s.x, s.y, s.r, 0, Math.PI * 2); ctx.fill(); }
+    if (k > 4.6) { ctx.strokeStyle = "rgba(0,0,0,.55)"; ctx.lineWidth = L * 0.02; ctx.beginPath(); ctx.moveTo(cx0 + L * 0.2, ground - 2); ctx.lineTo(Math.min(W, cx0 + L * 0.2 + (k - 4.2) * W), ground - 2); ctx.stroke(); }
+    if (k > 4.2 && k < 5.4) { ctx.strokeStyle = "rgba(255,255,255,.25)"; ctx.lineWidth = 2; for (let i = 0; i < 18; i++) { const yy = H * 0.2 + ((i * 97) % 100) / 100 * H * 0.6; const xx = ((i * 211 + k * 4000) % (W + 400)) - 200; ctx.beginPath(); ctx.moveTo(W - xx, yy); ctx.lineTo(W - xx - 160, yy); ctx.stroke(); } }
+  }
   // ---------- Sniper: long shots, +180 and up ----------
   // the longer the odds, the longer the shot: +180 sniper, +200 long shot, +300 long range + the drive-off, +400 impossible
   const SNIPER_ODDS = 180;
@@ -3010,7 +3101,7 @@ body.tv .chart { height: 240px; }
     $("#snTier").textContent = T.name; $("#snOdds").textContent = fOdds(b.odds); $("#snPick").textContent = b.pick;
     $("#snAmt").textContent = `${pay}  ·  ${units}`; $("#snSub").textContent = `${T.sub} · ${T.range.toLocaleString()} m`;
     const T_SHOT = 3.3, CAM0 = T_SHOT + 0.45, T_HIT = T.cam ? T_SHOT + (gold ? 2.9 : 2.5) : T_SHOT + 0.85;
-    const DRIVE = T.drive ? T_HIT + 7.5 : null, END = place ? 5.2 : DRIVE ? DRIVE + 12.4 : T_HIT + 10.5;
+    const DRIVE = T.drive ? T_HIT + 7.5 : null, END = place ? 5.2 : DRIVE ? DRIVE + DRIVE_LEN : T_HIT + 10.5;
     const sounds = [];
     sounds.push(snSound("bolt", 0.9, 350)); heartbeat(place ? 5 : 3, 0.85);
     if (!place) {
@@ -3018,8 +3109,8 @@ body.tv .chart { height: 240px; }
       if (T.cam) sounds.push(snSound("whoosh", 0.8, CAM0 * 1000), snSound("whoosh", 0.55, (CAM0 + 0.9) * 1000));
       sounds.push(snSound("shatter", 0.95, T_HIT * 1000), snSound("slam", 0.8, (T_HIT + 0.05) * 1000), snSound(T.rap, 0.9, (T_HIT - 0.05) * 1000));
     }
-    const drv = $("#snDrive");
-    if (DRIVE) { drv.src = vidSrc("sounds/sniper/drive"); drv.load(); }
+    if (DRIVE) { loadMe(); sounds.push(snSound("rev", 1, (DRIVE + 1.9) * 1000), snSound("rev", 0.9, (DRIVE + 3.6) * 1000), snSound("launch", 1, (DRIVE + 4.15) * 1000)); }
+    const puffs = [];
     const shards = [], casings = [], rings = [], streaks = [];
     let raf = 0, t0 = performance.now(), lastRing = 0, hitAt = null, shake = 0;
     const ease = (x) => x < 0 ? 0 : x > 1 ? 1 : x * x * (3 - 2 * x);
@@ -3034,6 +3125,13 @@ body.tv .chart { height: 240px; }
       ay -= kick * R * 0.55; shake = Math.max(shake * 0.9, kick * 18);
       const shk = () => (Math.random() - 0.5) * shake;
       ctx.save(); ctx.translate(shk(), shk());
+      const inDrive = DRIVE && t >= DRIVE;
+      if (inDrive) {
+        snDrive(ctx, W, H, t - DRIVE, gold, puffs);
+        if (!ov.classList.contains("drive")) { ov.classList.add("drive"); $("#snDriveTxt").innerHTML = `<b>${esc(fOdds(b.odds))}</b> cashed · ${esc(pay)}<div class="gone">I'm gone.</div>`; }
+        ov.classList.toggle("gone", t - DRIVE > 5);
+        ctx.restore(); if (t < END) raf = requestAnimationFrame(tick); return;
+      }
       const inCam = !place && T.cam && t >= CAM0 && t < T_HIT;
       const after = !place && t >= T_HIT;
       if (inCam) {
@@ -3085,10 +3183,6 @@ body.tv .chart { height: 240px; }
           if (!ov.classList.contains("card")) ov.classList.add("card");
           $("#snTop").textContent = "Confirmed hit";
         }
-        if (DRIVE && t >= DRIVE && !ov.classList.contains("drive")) {
-          ov.classList.add("drive"); $("#snDriveTxt").innerHTML = `<b>${esc(fOdds(b.odds))}</b> cashed · ${esc(pay)}`;
-          try { drv.currentTime = 0; drv.play().catch(() => {}); } catch (e) {}
-        }
       } else {
         // looking down the scope
         snWorld(ctx, W, H, -ax / zScope * 0.0 + ax / zScope, -10 + ay / zScope, zScope, gold, false, t);
@@ -3102,7 +3196,7 @@ body.tv .chart { height: 240px; }
     raf = requestAnimationFrame(tick);
     setTimeout(() => ov.classList.add("out"), (END - 0.6) * 1000);
     setTimeout(() => sounds.forEach((s) => s.stop(1.2)), (END - 1.2) * 1000);
-    setTimeout(() => { cancelAnimationFrame(raf); ov.hidden = true; ov.className = "sn"; try { drv.pause(); } catch (e) {} }, END * 1000);
+    setTimeout(() => { cancelAnimationFrame(raf); ov.hidden = true; ov.className = "sn"; }, END * 1000);
     return END * 1000 + 200;
   }
   function sniperHit(b, n) { fx(() => snRun(b, n, false)); }
