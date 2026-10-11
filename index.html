@@ -859,6 +859,47 @@ body.tv .strip .chart { height: 96px; }
 #whoRadios label span { padding: 10px 16px; font-size: 16px; }
 .who-hint { display: block; margin-top: 8px; }
 
+/* play card: what just happened, before the clip */
+.pc { position: fixed; inset: 0; z-index: 94; display: grid; place-items: center; pointer-events: none; overflow: hidden; --tc: #1b2433; }
+.pc.out { opacity: 0; transition: opacity .35s; }
+.pc-bg { position: absolute; inset: 0; background: radial-gradient(120% 95% at 18% 28%, var(--tc) 0%, color-mix(in srgb, var(--tc) 55%, #000) 48%, #04060a 100%); animation: pcIn .3s ease-out both; }
+.pc-bg::after { content: ""; position: absolute; inset: -30%; background: repeating-linear-gradient(115deg, rgba(255,255,255,.07) 0 26px, transparent 26px 70px); animation: pcStripes 6s linear infinite; }
+.pc-bg::before { content: ""; position: absolute; inset: 0; background: linear-gradient(105deg, transparent 35%, rgba(255,255,255,.22) 48%, transparent 60%); background-size: 250% 100%; animation: snShine 1.6s .2s ease-in-out both; z-index: 1; }
+@keyframes pcIn { from { opacity: 0; transform: scale(1.08); } to { opacity: 1; transform: none; } }
+@keyframes pcStripes { to { transform: translateX(140px); } }
+@keyframes pcPop { 0% { opacity: 0; transform: translateY(4vh) scale(.92); } 100% { opacity: 1; transform: none; } }
+.pc-in { position: relative; z-index: 2; width: min(92vw, 1500px); display: grid; grid-template-columns: auto 1fr; column-gap: 3.5vw; row-gap: 2.4vh; align-items: center; }
+.pc-logo { width: 25vh; height: 25vh; object-fit: contain; filter: drop-shadow(0 12px 30px rgba(0,0,0,.55)); animation: snSlam .55s cubic-bezier(.2,1.6,.4,1) both; }
+.pc-kick { font: 800 clamp(14px, 2.8vh, 34px) var(--f-ui); letter-spacing: .32em; text-transform: uppercase; color: rgba(255,255,255,.88); animation: pcPop .4s .05s both; }
+.pc-type { font: 900 clamp(70px, 16vh, 220px)/.86 var(--f-num); text-transform: uppercase; color: #fff; letter-spacing: -.005em; text-shadow: 0 7px 0 rgba(0,0,0,.35), 0 0 46px rgba(255,255,255,.35); animation: snSlam .5s .12s cubic-bezier(.2,1.6,.4,1) both; }
+.pc-who { grid-column: 1 / -1; display: flex; align-items: center; gap: 2.4vw; flex-wrap: wrap; animation: pcPop .45s .35s both; }
+.pc-p { display: flex; align-items: center; gap: 1.4vw; }
+.pc-head { width: 15vh; height: 15vh; border-radius: 50%; object-fit: cover; object-position: top; background: rgba(0,0,0,.25); border: 4px solid rgba(255,255,255,.9); box-shadow: 0 10px 30px rgba(0,0,0,.45); display: grid; place-items: center; font: 900 6vh var(--f-num); color: #fff; }
+.pc-name { font: 900 clamp(30px, 6.6vh, 90px)/1 var(--f-num); color: #fff; text-shadow: 0 4px 18px rgba(0,0,0,.5); }
+.pc-meta { font: 700 clamp(14px, 2.8vh, 34px) var(--f-num); color: rgba(255,255,255,.78); letter-spacing: .06em; text-transform: uppercase; margin-top: .6vh; }
+.pc-text { grid-column: 1 / -1; font: 700 clamp(18px, 3.6vh, 46px)/1.25 var(--f-ui); color: #fff; background: rgba(0,0,0,.38); padding: 1.6vh 2vw; border-radius: 14px; border-left: 7px solid #fff; animation: pcPop .45s .5s both; }
+.pc-text:empty { display: none; }
+.pc-foot { grid-column: 1 / -1; display: flex; align-items: center; gap: 2.4vw; flex-wrap: wrap; animation: pcPop .45s .65s both; }
+.pc-score { display: flex; align-items: center; gap: 1.2vw; font: 900 clamp(28px, 6vh, 80px)/1 var(--f-num); color: #fff; background: rgba(0,0,0,.45); padding: 1.2vh 2vw; border-radius: 14px; }
+.pc-score img { width: 6.5vh; height: 6.5vh; object-fit: contain; }
+.pc-score em { font: 700 clamp(14px, 2.6vh, 32px) var(--f-num); color: rgba(255,255,255,.7); font-style: normal; margin-left: .6vw; }
+.pc-score .lead { color: #fff; text-shadow: 0 0 18px rgba(255,255,255,.6); } .pc-score .trail { opacity: .7; }
+.pc-bet { font: 800 clamp(16px, 3vh, 38px)/1.1 var(--f-num); color: #05070b; background: var(--accent); padding: 1.2vh 1.6vw; border-radius: 12px; }
+.pc-bet.bad { background: #ff5a6a; color: #fff; }
+.pc-in > * { min-width: 0; }
+@media (max-width: 760px) {
+  .pc-in { grid-template-columns: 1fr; row-gap: 1.8vh; width: calc(100vw - 32px); }
+  .pc-logo { width: 13vh; height: 13vh; }
+  .pc-kick { letter-spacing: .16em; font-size: 13px; }
+  .pc-type { font-size: min(15vw, 12vh); }
+  .pc-head { width: 9vh; height: 9vh; font-size: 3.6vh; border-width: 3px; }
+  .pc-name { font-size: min(8vw, 5vh); }
+  .pc-meta { font-size: 13px; }
+  .pc-text { font-size: 16px; padding: 12px 14px; }
+  .pc-score { font-size: min(7vw, 4.4vh); padding: 10px 12px; } .pc-score img { width: 4.4vh; height: 4.4vh; }
+  .pc-bet { font-size: 16px; }
+}
+
 /* crew picks */
 .crew-p + .crew-p { margin-top: 18px; padding-top: 16px; border-top: 1px solid var(--line); }
 .crew-h { display: flex; align-items: center; gap: 12px; margin-bottom: 12px; flex-wrap: wrap; }
@@ -1100,6 +1141,7 @@ body.tv .strip .chart { height: 96px; }
       <span class="lbl">Reaction clips</span>
       <label class="togrow"><input type="checkbox" id="clipsOn"> Pop clips up on this screen</label>
       <span class="hint">Only the good stuff, and only for your side. Your team's touchdowns, field goals, turnovers, red-zone trips, home runs and goals get a clip, with your team's own clips first. While you're winning, your winning clips play every 2½ minutes. When it's close, a filler or some hype plays every 3 minutes. With only 1 or 2 bets out, there's more dead air, so a clip comes every 2 minutes. When you're down but within two scores, comeback clips play. When you're getting blown out, it stays quiet. Overs and unders are judged on pace, and stay quiet whenever they're off pace. Tap the screen to close a clip. Turn this off on your phone and leave it on for the monitor.</span>
+      <div style="display:flex;gap:8px;flex-wrap:wrap"><button type="button" class="btn sm" id="pcTest">Preview a touchdown alert</button></div>
       <label class="togrow delayrow">TV delay <input type="range" id="tvDelay" min="0" max="120" step="5"> <b id="tvDelayVal"></b></label>
       <span class="hint">ESPN's scores run ahead of your TV. The board holds scores, clips and win/loss animations back by this much so nothing spoils a play. If clips still beat the TV, turn it up. If they come late, turn it down. Each screen keeps its own setting.</span>
       <div class="cliplib" id="clipLib"></div>
@@ -1189,6 +1231,7 @@ body.tv .strip .chart { height: 96px; }
   <div class="in-title" id="inTitle"><div class="in-kick" id="inKick"></div><div class="in-big" id="inBig"></div><div class="in-mid" id="inMid"></div><div class="in-sub" id="inSub"></div></div>
 </div>
 <div class="ticker" id="ticker" hidden><div class="tk-lbl"><i class="dot"></i><span id="tkLbl">CFB</span></div><div class="tk-track"><div class="tk-run" id="tkRun"></div></div></div>
+<div class="pc" id="playCard" hidden aria-live="assertive"><div class="pc-bg"></div><div class="pc-in" id="pcIn"></div></div>
 <div class="jumbo" id="jumbo" hidden title="Tap to close">
   <div class="jb-head"><span class="jb-logo">SWEAT<b>ZONE</b></span><span class="jb-tag" id="jbTag">Live</span><b id="jbLbl"></b><span class="jb-x" aria-hidden="true">×</span></div>
   <div class="jb-main">
@@ -1837,7 +1880,7 @@ body.tv .strip .chart { height: 96px; }
   // ---------- sheets ----------
   function openSheet(id) { $(id).hidden = false; }
   // keep every open screen current: when a new version is up, reload it (never mid-form or mid-animation)
-  const BUILD = "20261011040716";
+  const BUILD = "20261011043205";
   function checkBuild() {
     if (BUILD === "dev") return;
     fetch("version.json?t=" + Date.now(), { cache: "no-store" }).then((r) => (r.ok ? r.json() : null)).then((j) => {
@@ -2129,10 +2172,11 @@ body.tv .strip .chart { height: 96px; }
     const c = e.competitions[0], t = {};
     for (const x of c.competitors) t[x.homeAway] = x;
     const st = e.status.type;
-    const team = (k) => { const x = t[k], tm = x.team; return { id: tm.id, ab: tm.abbreviation || "", nm: tm.shortDisplayName || tm.name || "", fn: tm.displayName || "", lg: tm.logo || "", sc: /^\d+$/.test(String(x.score)) ? Number(x.score) : null }; };
+    const team = (k) => { const x = t[k], tm = x.team; return { id: tm.id, ab: tm.abbreviation || "", nm: tm.shortDisplayName || tm.name || "", fn: tm.displayName || "", lg: tm.logo || "", col: tm.color ? "#" + tm.color : "", alt: tm.alternateColor ? "#" + tm.alternateColor : "", sc: /^\d+$/.test(String(x.score)) ? Number(x.score) : null }; };
     const g = { id: String(e.id), sport, t: Date.parse(e.date), st: st.state || "pre", d: st.shortDetail || "", a: team("away"), h: team("home"), pd: e.status.period || 0, clk: e.status.clock };
     const si = c.situation, lp = si && si.lastPlay;
-    if (si) g.sit = { rz: !!si.isRedZone, pos: si.possession || null, lp: lp ? { id: String(lp.id), type: (lp.type && lp.type.text) || "", text: lp.text || "", team: lp.team && lp.team.id } : null };
+    if (si) g.sit = { rz: !!si.isRedZone, pos: si.possession || null, dd: si.downDistanceText || si.shortDownDistanceText || "", lp: lp ? { id: String(lp.id), type: (lp.type && lp.type.text) || "", text: lp.text || "", team: lp.team && lp.team.id,
+      ath: (lp.athletesInvolved || []).slice(0, 3).map((a) => ({ nm: a.displayName || a.fullName || "", sh: a.shortName || "", hs: a.headshot || "", j: a.jersey || "", pos: a.position || "", tm: a.team && a.team.id })) } : null };
     const o = (c.odds || [])[0];
     if (o) {
       const ml = o.moneyline || {}, sp = o.pointSpread || {}, tot = o.total || {};
@@ -3194,7 +3238,7 @@ body.tv .strip .chart { height: 96px; }
   let lastKind = "";
   let lastAny = Date.now() - POP_EVERY + 2 * 60e3; // first pop-up no sooner than 2 min after the board opens
   function clipsOn() { try { return localStorage.getItem("sb-clips") !== "off"; } catch (e) { return true; } }
-  const clipBusy = () => fxBusy || !!statusSrc || !$("#jumbo").hidden;
+  const clipBusy = () => fxBusy || cardBusy || !!statusSrc || !$("#jumbo").hidden;
   function swingState(b, ev, prev) {
     const bar = BARS[(b.sel && b.sel.sp) || b.sport] || 3;
     if (ev.m >= bar) return "W";
@@ -3270,6 +3314,63 @@ body.tv .strip .chart { height: 96px; }
   }
   const helps = (s, e) => (!e.side ? 0 : s.m === "tot" ? (e.noTot ? 0 : s.s === "o" ? 1 : -1) : e.side === s.s ? 1 : -1);
   const EV_RANK = { td: 6, hr: 6, goal: 6, safety: 6, turnover: 6, run: 4, fg: 4, redzone: 3, crunch: 3, half: 2 };
+  // ---------- play card: what happened, who did it and how, big, then the clip ----------
+  const PC_TYPE = { td: "Touchdown", fg: "Field goal", safety: "Safety", turnover: "Turnover", redzone: "Red zone", hr: "Home run", run: "Run scores", goal: "Goal" };
+  const CARD_EVS = new Set(Object.keys(PC_TYPE));
+  let cardBusy = false;
+  // the scoring play itself from the game summary (the scoreboard's last play is often already the extra point)
+  async function scoringPlay(g, side) {
+    try {
+      const ctl = new AbortController(), to = setTimeout(() => ctl.abort(), 1800);
+      const r = await fetch(`https://site.api.espn.com/apis/site/v2/sports/${ESPN[g.sport]}/summary?event=${g.id}`, { signal: ctl.signal }); clearTimeout(to);
+      if (!r.ok) return null;
+      const j = await r.json(); let list = j.scoringPlays || [];
+      if (!list.length && Array.isArray(j.plays)) list = j.plays.filter((p) => p.scoringPlay);
+      const tid = String(g[side].id), key = side === "a" ? "awayScore" : "homeScore", sc = g[side].sc;
+      const mine = list.filter((p) => p.team && String(p.team.id) === tid);
+      const hit = mine.filter((p) => p[key] == null || p[key] <= sc + 2).pop() || mine.pop();
+      return hit ? { type: (hit.type && hit.type.text) || "", text: hit.text || "" } : null;
+    } catch (e) { return null; }
+  }
+  const pcInitials = (nm) => nm.split(" ").map((w) => w[0] || "").join("").slice(0, 2).toUpperCase();
+  function pcPeople(ath, text, side, g) {
+    // only the players actually named in the play (the last play can be the kickoff after the score)
+    const tid = side ? String(g[side].id) : null, low = (text || "").toLowerCase();
+    return (ath || []).filter((a) => a.nm && (!low || low.includes(a.nm.split(" ").slice(-1)[0].toLowerCase())) && (!tid || !a.tm || String(a.tm) === tid || /intercept|fumble/i.test(text))).slice(0, 2);
+  }
+  function pcFill(g, e, b, sp) {
+    const lp = (g.sit || {}).lp || {}, side = e.side, tm = side ? g[side] : null;
+    const text = e.ev === "redzone" ? [(g.sit || {}).dd, lp.text].filter(Boolean).join(" · ") : (sp && sp.text) || lp.text || "";
+    const kind = (sp && sp.type) || (e.ev === "redzone" ? "" : lp.type) || "";
+    const people = e.ev === "redzone" ? [] : pcPeople(lp.ath, text, side, g);
+    const ev = b && b.sel ? evalSel(b.sel) : null;
+    $("#playCard").style.setProperty("--tc", (tm && (tm.col && tm.col !== "#ffffff" ? tm.col : tm.alt)) || "#1b2433");
+    const lead = g.a.sc > g.h.sc ? "a" : g.h.sc > g.a.sc ? "h" : "";
+    $("#pcIn").innerHTML = `${tm && tm.lg ? `<img class="pc-logo" src="${esc(tm.lg)}" alt="">` : "<span></span>"}
+      <div><div class="pc-kick">${esc([tm ? tm.nm || tm.ab : "", kind && !new RegExp("^" + PC_TYPE[e.ev] + "$", "i").test(kind) ? kind : "", g.d].filter(Boolean).join(" · "))}</div><div class="pc-type">${esc(PC_TYPE[e.ev] || e.tag)}</div></div>
+      ${people.length ? `<div class="pc-who">${people.map((a) => `<div class="pc-p">${a.hs ? `<img class="pc-head" src="${esc(a.hs)}" alt="">` : `<span class="pc-head">${esc(a.j ? "#" + a.j : pcInitials(a.nm))}</span>`}<div><div class="pc-name">${esc(a.nm)}</div><div class="pc-meta">${esc([a.j ? "#" + a.j : "", a.pos].filter(Boolean).join(" · "))}</div></div></div>`).join("")}</div>` : ""}
+      <div class="pc-text">${esc(text.length > 160 ? text.slice(0, 158) + "…" : text)}</div>
+      <div class="pc-foot"><div class="pc-score">${["a", "h"].map((x) => `${g[x].lg ? `<img src="${esc(g[x].lg)}" alt="">` : ""}<span class="${lead === x ? "lead" : lead ? "trail" : ""}">${esc(g[x].ab)} ${g[x].sc ?? ""}</span>`).join('<span class="trail">·</span>')}<em>${esc(g.d || "")}</em></div>
+      ${b ? `<div class="pc-bet${ev && ev.m < 0 ? " bad" : ""}">${esc(b.pick)}${ev && ev.txt ? " · " + esc(ev.txt) : ""}</div>` : ""}</div>`;
+    return people[0] ? people[0].sh || people[0].nm : "";
+  }
+  // show the card, then run `then` with a label for the clip ("Touchdown UGA · C. Young")
+  function showPlayCard(g, e, b, then, ms) {
+    const ov = $("#playCard"); cardBusy = true; ms = ms || 4000;
+    const who = pcFill(g, e, b, null);
+    ov.classList.remove("out"); ov.hidden = false; for (const el of ov.querySelectorAll("*")) { el.style.animation = "none"; void el.offsetWidth; el.style.animation = ""; }
+    snSound("slam", 0.85, 0); snSound("whoosh", 0.5, 0);
+    let label = who;
+    if (e.side && ["td", "fg", "safety", "hr", "run", "goal"].includes(e.ev)) scoringPlay(g, e.side).then((sp) => { if (sp && !ov.hidden && cardBusy) label = pcFill(g, e, b, sp) || label; });
+    setTimeout(() => ov.classList.add("out"), ms - 350);
+    setTimeout(() => { ov.hidden = true; ov.classList.remove("out"); cardBusy = false; then(label ? `${e.tag} · ${label}` : e.tag); }, ms);
+  }
+  $("#pcTest").addEventListener("click", () => {
+    closeSheets();
+    const g = { id: "0", sport: "CFB", d: "3rd 4:12", a: { id: "61", ab: "UGA", nm: "Georgia", sc: 24, col: "#ba0c2f", lg: "https://a.espncdn.com/i/teamlogos/ncaa/500/61.png" }, h: { id: "333", ab: "ALA", nm: "Alabama", sc: 17, col: "#9e1b32", lg: "https://a.espncdn.com/i/teamlogos/ncaa/500/333.png" },
+      sit: { lp: { type: "Passing Touchdown", text: "Gunner Stockton 31 Yd pass to Colbie Young (Peyton Woodring Kick)", ath: [{ nm: "Colbie Young", sh: "C. Young", hs: "", j: "8", pos: "WR", tm: "61" }, { nm: "Gunner Stockton", sh: "G. Stockton", hs: "", j: "14", pos: "QB", tm: "61" }] } } };
+    showPlayCard(g, { ev: "td", side: "a", tag: "Touchdown UGA" }, anyOpen(), () => {});
+  });
   function autoReact() {
     if (!S.ready) return;
     const now = Date.now(), swings = [], seenG = new Set();
@@ -3332,7 +3433,10 @@ body.tv .strip .chart { height: 96px; }
         const exactMine = exact.filter((c) => fits(c, top.b));
         const pool = exactMine.length ? exactMine : poolFor(top.b, k === "mid" ? "hype" : k);
         const P = pickClip(pool) || pickClip(libFor(top.b, ["hype", "vibe"]));
-        react(top.b, k, P, e.tag);
+        if (CARD_EVS.has(e.ev) && top.g) {
+          if (P && P.base) { clipBuf(P.base); const pv = document.createElement("video"); pv.muted = true; pv.preload = "auto"; pv.src = vidSrc(P.base); }
+          showPlayCard(top.g, e, top.b, (why) => react(top.b, k, P, why));
+        } else react(top.b, k, P, e.tag);
       } else react(top.b, top.kind);
       return;
     }
