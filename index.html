@@ -1931,7 +1931,7 @@ body.tv .strip .chart { height: 96px; }
   // ---------- sheets ----------
   function openSheet(id) { $(id).hidden = false; }
   // keep every open screen current: when a new version is up, reload it (never mid-form or mid-animation)
-  const BUILD = "20261011143219";
+  const BUILD = "20261011145955";
   function checkBuild() {
     if (BUILD === "dev") return;
     fetch("version.json?t=" + Date.now(), { cache: "no-store" }).then((r) => (r.ok ? r.json() : null)).then((j) => {
@@ -3146,6 +3146,15 @@ body.tv .strip .chart { height: 96px; }
     clip("cfb/cfb11", "Nah nah honey I'm good", "vibe", 29.9, { song: "Honey, I'm Good.", artist: "Andy Grammer" }),
     clip("cfb/cfb12", "Backyard singalong", "vibe", 25.9, { song: "Poison", artist: "Bell Biv DeVoe" }),
     clip("clips/w14", "Drake Maye singing", "vibe", 17.7, { song: "Love in the Dark", artist: "Adele" }),
+    clip("music/mus04", "Bad and Boujee", "vibe", 35, { song: "Bad and Boujee", artist: "Migos ft. Lil Uzi Vert" }),
+    clip("music/mus05", "Don't Tell 'Em", "vibe", 34, { song: "Don't Tell 'Em", artist: "Jeremih ft. YG" }),
+    clip("music/mus06", "Clout", "vibe", 35, { song: "Clout", artist: "Offset ft. Cardi B" }),
+    clip("music/mus07", "Alright", "vibe", 35, { song: "Alright", artist: "Kendrick Lamar" }),
+    clip("music/mus08", "Crazy Story", "vibe", 35, { song: "Crazy Story", artist: "King Von" }),
+    clip("music/mus09", "Sum 2 Prove", "vibe", 35, { song: "Sum 2 Prove", artist: "Lil Baby" }),
+    clip("music/mus01", "My word is like gold", "vibe", 36, { music: true }),
+    clip("music/mus02", "Flow state", "vibe", 36, { music: true }),
+    clip("music/mus03", "From the hood to the big league", "vibe", 30, { music: true }),
     clip("clips/w15", "July 4, 1776", "up win", 15.05),
     clip("clips/w16", "Chuck E. Cheese party", "up win vibe", 29.85, { song: "Back to Back", artist: "Drake" }),
     clip("win/win09", "Ant Edwards takeover", "up win vibe", 30, { song: "All There", artist: "Jeezy ft. Bankroll Fresh" }),
