@@ -1920,7 +1920,7 @@ body.tv .strip .chart { height: 96px; }
   // ---------- sheets ----------
   function openSheet(id) { $(id).hidden = false; }
   // keep every open screen current: when a new version is up, reload it (never mid-form or mid-animation)
-  const BUILD = "20261011045855";
+  const BUILD = "20261011050605";
   function checkBuild() {
     if (BUILD === "dev") return;
     fetch("version.json?t=" + Date.now(), { cache: "no-store" }).then((r) => (r.ok ? r.json() : null)).then((j) => {
@@ -3229,11 +3229,11 @@ body.tv .strip .chart { height: 96px; }
     el.hidden = false;
   }
   // start sound and video together once both are loaded
-  function showPip(b, P, mood, why) {
+  function showPip(b, P, mood, why, pre) {
     const jb = $("#jumbo"), v = $("#pipVid"), bg = $("#jbBg"), c = ready(), go = ++pipGo, betId = b.id;
     const src = vidSrc(P.base);
     if (v.dataset.base !== P.base) { v.dataset.base = P.base; v.src = src; v.load(); bg.src = src; bg.load(); }
-    const sound = !c ? null : P.lib ? clipBuf(P.base) : loadBuf(P.base);
+    const sound = pre || !c ? null : P.lib ? clipBuf(P.base) : loadBuf(P.base);
     Promise.all([sound, vidReady(v)]).then(([buf]) => {
       if (go !== pipGo || statusBet !== betId) return;
       clearTimeout(hideT);
@@ -3241,11 +3241,13 @@ body.tv .strip .chart { height: 96px; }
       $("#jbTag").textContent = why || MOOD_TAG[mood] || "Live";
       jbBug(b);
       jb.className = "jumbo m-" + mood; jb.hidden = false;
-      for (const x of [v, bg]) { try { x.currentTime = 0; x.play().catch(() => {}); } catch (e) {} }
-      const bar = $("#jbProg"); bar.style.transition = "none"; bar.style.width = "0%"; void bar.offsetWidth; bar.style.transition = `width ${P.ms}ms linear`; bar.style.width = "100%";
+      // picking up mid-clip: the video joins the sound where it is
+      const off = pre ? Math.max(0, Math.min(P.ms - 800, performance.now() - pre.at)) : 0;
+      for (const x of [v, bg]) { try { x.currentTime = off / 1000; x.play().catch(() => {}); } catch (e) {} }
+      const bar = $("#jbProg"); bar.style.transition = "none"; bar.style.width = (100 * off) / P.ms + "%"; void bar.offsetWidth; bar.style.transition = `width ${P.ms - off}ms linear`; bar.style.width = "100%";
       if (buf) statusSrc = playBuf(c, buf, 0.95);
       jumboBets(); clearInterval(jbTick); jbTick = setInterval(() => { jumboBets(); jbBug(b); }, 5000);
-      pipT = setTimeout(() => { if (statusBet === betId) stopStatus(); }, P.ms);
+      pipT = setTimeout(() => { if (statusBet === betId) stopStatus(); }, P.ms - off);
     });
   }
   function lockIn(b) {
@@ -3340,6 +3342,16 @@ body.tv .strip .chart { height: 96px; }
     clearTimeout(popT); popT = setTimeout(() => { const t = Date.now(); for (const [k, v] of S.pops) if (v.until <= t) S.pops.delete(k); render(); }, 3250);
   }
   // play a reaction for one bet. `P` picks the clip; otherwise it comes from the library by how the bet's going
+  const moodOf = (kind, P) => (kind === "good" || kind === "first" ? "up" : kind === "bad" ? "down" : P.mood.includes("game") || P.mood.includes("hype") ? "hype" : P.mood.includes("vibe") ? "vibe" : P.mood.split(" ")[0]);
+  // the play card starts the clip's sound under it; when the card leaves, the video comes in at that same moment
+  function preAudio(b, P) {
+    const c = ready(); if (!c || !P || P === "lockin" || !P.base) return null;
+    stopStatus(); statusBet = b.id;
+    const pre = { at: 0, src: null, dead: false };
+    (P.lib ? clipBuf(P.base) : loadBuf(P.base)).then((buf) => { if (!buf || pre.dead || statusBet !== b.id) return; pre.at = performance.now(); pre.src = statusSrc = playBuf(c, buf, 0.95); });
+    return pre;
+  }
+  function reactPre(b, kind, P, why, pre) { glow(b.id, kind); render(); statusBet = b.id; showPip(b, P, moodOf(kind, P), why, pre); }
   function react(b, kind, P, why) {
     glow(b.id, kind);
     render();
@@ -3690,7 +3702,8 @@ body.tv .strip .chart { height: 96px; }
         const P = pickClip(pool) || pickClip(libFor(top.b, ["hype", "vibe"]));
         if (CARD_EVS.has(e.ev) && top.g) {
           if (P && P.base) { clipBuf(P.base); const pv = document.createElement("video"); pv.muted = true; pv.preload = "auto"; pv.src = vidSrc(P.base); }
-          showPlayCard(top.g, e, top.b, (why) => react(top.b, k, P, why));
+          const pre = preAudio(top.b, P);
+          showPlayCard(top.g, e, top.b, (why) => { if (pre && pre.src && statusSrc === pre.src) reactPre(top.b, k, P, why, pre); else { if (pre) pre.dead = true; react(top.b, k, P, why); } });
         } else react(top.b, k, P, e.tag);
       } else react(top.b, top.kind);
       return;
