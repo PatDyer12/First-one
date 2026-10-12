@@ -1777,6 +1777,14 @@ body:not(.tv) [data-ids]:active { transform: scale(.99); }
 .rb-scp .s { font: 800 14px/1 var(--f-num); letter-spacing: .04em; color: #fff; white-space: nowrap; }
 body.tv.prime .rb-fld .fld { height: 84px; }
 body.tv.prime .rb-fld .ddx { font-size: 20px; }
+/* players of the quarter / half / game */
+.bc-type.aw { font-size: clamp(56px, 12.5vh, 170px); }
+.bc-type.aw small { display: block; margin: 0 0 1.2vh .4vh; font: 800 3vh/1 var(--f-num); letter-spacing: .26em; color: rgba(255,255,255,.7); animation: bcFade .5s .45s both; }
+.aw-st { display: flex; align-self: flex-start; gap: 1px; margin-top: 1.4vh; background: rgba(255,255,255,.1); box-shadow: inset 0 .4vh 0 var(--ta); }
+.aw-st > div { display: grid; gap: .9vh; min-width: 15vh; padding: 2vh 2.6vh 1.8vh; background: #0b0e14; animation: bcSlideR .6s calc(1s + var(--i) * .1s) var(--ez) both; }
+.aw-st b { font: 900 8.5vh/.9 var(--f-display); color: #fff; font-variant-numeric: tabular-nums; }
+.aw-st span { font: 700 1.9vh/1 var(--f-num); letter-spacing: .2em; text-transform: uppercase; color: rgba(255,255,255,.55); }
+@media (max-width: 860px) { .bc-type.aw { font-size: min(13vw, 8vh); } .bc-type.aw small { font-size: 1.6vh; } .aw-st > div { min-width: 0; padding: 1.2vh 1.6vh; } .aw-st b { font-size: 5vh; } .aw-st span { font-size: 1.2vh; } }
 /* sharper prime time: the game in a wide column that sizes itself to the card, no repeated kickoff times */
 .rb-games.primeg { column-width: auto; column-count: auto; display: grid; grid-template-columns: minmax(0, 1.6fr) minmax(300px, 1fr); gap: 14px; align-items: start; }
 .rb-games.primeg.solo { grid-template-columns: minmax(0, 1fr); }
@@ -2986,11 +2994,12 @@ body.tv.prime .rb-fld .ddx { font-size: 20px; }
   function heroPlays(g) {
     const c = SUMM.get(g.id), t = Date.now();
     if (g.st === "pre" || !ESPN[g.sport] || (c && (c.busy || t - c.at < (g.st === "post" ? 600e3 : 45e3)))) return c ? c.plays : null;
-    SUMM.set(g.id, { plays: c ? c.plays : null, at: t, busy: true });
+    SUMM.set(g.id, { ...(c || {}), plays: c ? c.plays : null, at: t, busy: true });
     fetch(`https://site.api.espn.com/apis/site/v2/sports/${ESPN[g.sport]}/summary?event=${g.eid || g.id}`).then((r) => r.json()).then((j) => {
       const plays = (j.scoringPlays || []).map((p) => ({ q: p.period && p.period.number, clk: (p.clock && p.clock.displayValue) || "", tm: p.team && String(p.team.id), type: (p.type && p.type.text) || "", text: p.text || "", a: p.awayScore, h: p.homeScore }));
-      setTimeout(() => { SUMM.set(g.id, { plays, at: Date.now(), busy: false }); renderRB(); }, g.st === "post" ? 0 : tvDelay() * 1000);
-    }).catch(() => SUMM.set(g.id, { plays: c ? c.plays : null, at: Date.now(), busy: false }));
+      const dg = digest(j, g);
+      setTimeout(() => { const v = { plays, ...dg, at: Date.now(), busy: false }; SUMM.set(g.id, v); renderRB(); awardWatch(g, v); }, g.st === "post" ? 0 : tvDelay() * 1000);
+    }).catch(() => SUMM.set(g.id, { ...(c || {}), plays: c ? c.plays : null, at: Date.now(), busy: false }));
     return c ? c.plays : null;
   }
   function scoringHtml(g) {
@@ -3595,7 +3604,7 @@ body.tv.prime .rb-fld .ddx { font-size: 20px; }
   // ---------- sheets ----------
   function openSheet(id) { $(id).hidden = false; }
   // keep every open screen current: when a new version is up, reload it (never mid-form or mid-animation)
-  const BUILD = "20261012201355";
+  const BUILD = "20261012202617";
   function checkBuild() {
     if (BUILD === "dev") return;
     fetch("version.json?t=" + Date.now(), { cache: "no-store" }).then((r) => (r.ok ? r.json() : null)).then((j) => {
@@ -5064,10 +5073,11 @@ body.tv.prime .rb-fld .ddx { font-size: 20px; }
     const jb = $("#jumbo"), v = $("#pipVid"), bg = $("#jbBg"), c = ready(), go = ++pipGo, betId = b.id, team = pipTeam;
     pipTeam = null;
     const dj = !!(P.dj && P.bpm), vbase = dj ? DJ_BASE : P.base, rate = dj ? djRate(P.bpm) : 1;
-    const src = vidSrc(vbase);
+    const src = P.ext || vidSrc(vbase);
+    v.muted = true; v.onerror = P.ext ? () => { if (go === pipGo) stopStatus(); } : null;
     if (v.dataset.base !== vbase) { v.dataset.base = vbase; v.src = src; v.load(); bg.src = src; bg.load(); }
     for (const x of [v, bg]) { x.loop = dj; x.defaultPlaybackRate = rate; x.playbackRate = rate; }
-    const own = () => (pre || !c ? null : P.lib ? clipBuf(P.base) : loadBuf(P.base));
+    const own = () => (pre || !c || P.ext ? null : P.lib ? clipBuf(P.base) : loadBuf(P.base));
     // a DJ break plays off your Spotify playlist when this screen's connected to it (the built-in song when Spotify can't)
     const sound = dj && !pre && spUsable() ? spPlay().then((t) => t || own()) : own();
     Promise.all([sound, vidReady(v)]).then(([buf]) => {
@@ -5088,7 +5098,7 @@ body.tv.prime .rb-fld .ddx { font-size: 20px; }
       if (team) {
         const c1 = hexRgb(team.t.col) || [40, 44, 60], c2 = hexRgb(team.t.alt) || c1;
         for (const [k, val] of [["--jt1", `rgb(${c1})`], ["--jt2", `rgb(${c2})`], ["--jtA", `rgba(${c2},.45)`], ["--jtInk", lum(c1) > 0.45 ? "#0b0f17" : "#fff"]]) jb.style.setProperty(k, val);
-        $("#jbTeamLg").src = team.t.lg || ""; $("#jbTeamNm").textContent = team.t.nm || team.t.ab; $("#jbTeamEv").textContent = team.word;
+        $("#jbTeamLg").src = team.t.lg || ""; $("#jbTeamNm").textContent = team.pl || team.t.nm || team.t.ab; $("#jbTeamEv").textContent = team.word;
         jt.hidden = false; jt.style.animation = "none"; void jt.offsetWidth; jt.style.animation = "";
       } else jt.hidden = true;
       // picking up mid-clip: the video joins the sound where it is
@@ -5096,7 +5106,8 @@ body.tv.prime .rb-fld .ddx { font-size: 20px; }
       const vt = sp ? 0 : dj ? djPos(P, off / 1000 + 0.08) : off / 1000;
       for (const x of [v, bg]) { try { x.playbackRate = r; x.currentTime = vt; x.play().catch(() => {}); } catch (e) {} }
       const bar = $("#jbProg"); bar.style.transition = "none"; bar.style.width = (100 * off) / ms + "%"; void bar.offsetWidth; bar.style.transition = `width ${ms - off}ms linear`; bar.style.width = "100%";
-      if (sp) statusSrc = { stop: () => { if (SP.seq === sp.seq) spStop(); } };
+      if (P.ext) { if (c) { v.muted = false; v.volume = 1; } statusSrc = { stop: () => { try { v.muted = true; } catch (e) {} } }; }
+      else if (sp) statusSrc = { stop: () => { if (SP.seq === sp.seq) spStop(); } };
       else if (buf) statusSrc = playBuf(c, buf, 0.95);
       // keep Goldie on the beat: the song clock is the audio context; nudge the loop back if it drifts (a Spotify song has no tempo to go by)
       clearInterval(djT);
@@ -5852,6 +5863,179 @@ body.tv.prime .rb-fld .ddx { font-size: 20px; }
     const P = pickClip(newSong(pool)) || pickClip(newSong(edits));
     if (P) react(b, "good", P, why);
   }
+  // ---------- prime time: ESPN's own highlights, and the players of the quarter, the half and the game ----------
+  // Stats come from ESPN's play-by-play ("M.Stafford pass deep right to P.Nacua for 34 yards (T.Johnson)"), names and
+  // headshots from the box score. Everything here runs off the game summary the hero card already pulls, behind the TV delay.
+  const PNM = "[A-Z][A-Za-z]{0,2}\\.\\s?(?:St\\.\\s?|Van\\s|De\\s|Le\\s)?[A-Z][A-Za-z'\\-]+(?:\\s(?:Jr|Sr|II|III|IV)\\.?)?";
+  const RX = { start: new RegExp(`^(${PNM})\\s`), pass: new RegExp(`^(${PNM}) pass\\b.*?\\bto (${PNM})`), sackBy: /sacked\b[^(]*\(([^)]*)\)/, int: new RegExp(`INTERCEPTED by (${PNM})`),
+    ff: new RegExp(`(?:Forced by |FUMBLES \\()(${PNM})`), fr: new RegExp(`RECOVERED by [A-Z]{2,3}-(${PNM})`), one: new RegExp(`^${PNM}$`) };
+  const plNames = (s) => String(s || "").split(/;\s*/).map((x) => x.replace(/\[.*?\]/g, "").trim()).filter((x) => RX.one.test(x));
+  const nkey = (s) => String(s || "").toLowerCase().replace(/[^a-z.]/g, "");
+  function digest(j, g) {
+    const dr = j.drives || {}, raw = [...(dr.previous || []), ...(dr.current ? [dr.current] : [])].flatMap((d) => d.plays || []), seen = new Set(), pbp = [];
+    for (const p of raw) {
+      if (seen.has(p.id)) continue; seen.add(p.id);
+      pbp.push({ type: (p.type && p.type.text) || "", text: p.text || "", yd: typeof p.statYardage === "number" ? p.statYardage : 0, per: (p.period && p.period.number) || 0, off: p.start && p.start.team ? String(p.start.team.id) : "", wc: Date.parse(p.wallclock || "") || 0 });
+    }
+    const ath = new Map();
+    for (const t of (j.boxscore && j.boxscore.players) || []) {
+      const tid = String(t.team && t.team.id);
+      for (const cat of t.statistics || []) for (const a of cat.athletes || []) {
+        const x = a.athlete || {}, f = x.firstName || "", l = x.lastName || "", v = { nm: x.displayName || (f + " " + l).trim(), hs: (x.headshot && x.headshot.href) || "", j: x.jersey || "", tm: tid };
+        for (const k of [f.slice(0, 1) + "." + l, f.slice(0, 2) + "." + l, f.slice(0, 3) + "." + l]) if (!ath.has(nkey(k) + "|" + tid)) ath.set(nkey(k) + "|" + tid, v);
+      }
+    }
+    const vids = (j.videos || []).map((v) => { const s = (v.links && v.links.source) || {}; return { id: String(v.id), hl: v.headline || "", ms: (v.duration || 0) * 1000, src: (s.HD && s.HD.href) || s.href || "", at: Date.parse(v.originalPublishDate || v.lastModified || "") || 0 }; })
+      .filter((v) => v.src && /\.mp4(\?|$)/.test(v.src) && v.ms > 3000 && v.ms <= 150e3).sort((x, y) => x.at - y.at);
+    const ends = new Map();
+    for (const p of pbp) { const m = /^End (Period|of Half|of Game)/i.exec(p.type); if (m) ends.set(/half/i.test(p.type) ? "h1" : /game/i.test(p.type) ? "game" : "q" + p.per, p.wc); }
+    return { pbp, ath, vids, ends };
+  }
+  // what one play puts on each player's line
+  function credits(p, g) {
+    const type = p.type, raw = p.text, t = raw.replace(/^(\([^)]*\)\s*)+/, ""), yd = p.yd, out = [];
+    if (!p.off || /no play/i.test(raw) || /^(penalty|timeout|official timeout|end |two-minute|kickoff|punt|field goal|extra point|blocked)/i.test(type)) return out;
+    const def = p.off === String(g.a.id) ? String(g.h.id) : String(g.a.id);
+    const O = (nm, k, v) => nm && out.push({ nm, tm: p.off, side: "o", k, v }), D = (nm, k, v) => nm && out.push({ nm, tm: def, side: "d", k, v });
+    const td = /touchdown/i.test(type), tail = (raw.match(/\(([^()]*)\)\.?\s*$/) || [])[1] || "", tk = plNames(tail);
+    let m;
+    if (/sack/i.test(type)) { if ((m = t.match(RX.start))) O(m[1], "sacked", 1); const by = plNames((raw.match(RX.sackBy) || [])[1]); by.forEach((n) => D(n, "sack", 1 / by.length)); }
+    else if (/interception/i.test(type)) { if ((m = t.match(RX.start))) O(m[1], "int", 1); if ((m = raw.match(RX.int))) { D(m[1], "pick", 1); if (td) D(m[1], "dtd", 1); } }
+    else if (/pass/i.test(type) && (m = t.match(RX.pass))) {
+      if (/incomplet/i.test(type + " " + raw)) { O(m[1], "att", 1); tk.forEach((n) => D(n, "pd", 1)); }
+      else { O(m[1], "pyd", yd); O(m[1], "comp", 1); O(m[2], "ryd", yd); O(m[2], "rec", 1); if (td) { O(m[1], "ptd", 1); O(m[2], "rtd", 1); } if (!td) tk.forEach((n) => D(n, "tkl", 1 / tk.length)); }
+    } else if (/rush/i.test(type) && (m = t.match(RX.start))) { O(m[1], "ruyd", yd); O(m[1], "car", 1); if (td) O(m[1], "rutd", 1); if (!td) tk.forEach((n) => D(n, yd < 0 ? "tfl" : "tkl", 1 / tk.length)); }
+    if ((m = raw.match(RX.ff))) D(m[1], "ff", 1);
+    if (/fumble recovery \(opponent\)|opp fumble recovery|fumble return touchdown/i.test(type) && (m = raw.match(RX.fr))) { D(m[1], "fr", 1); if (td) D(m[1], "dtd", 1); }
+    return out;
+  }
+  const OFF_PTS = (s) => (s.pyd || 0) * 0.04 + (s.ptd || 0) * 4 - (s.int || 0) * 2 + (s.ruyd || 0) * 0.1 + (s.rutd || 0) * 6 + (s.ryd || 0) * 0.1 + (s.rec || 0) * 0.5 + (s.rtd || 0) * 6;
+  const DEF_PTS = (s) => (s.sack || 0) * 3 + (s.pick || 0) * 5 + (s.ff || 0) * 3 + (s.fr || 0) * 2 + (s.pd || 0) + (s.tfl || 0) * 1.5 + (s.tkl || 0) * 0.6 + (s.dtd || 0) * 6;
+  const SEG = { q1: { per: [1], word: "1st quarter" }, h1: { per: [1, 2], word: "First half" }, q3: { per: [3], word: "3rd quarter" }, game: { per: [1, 2, 3, 4, 5, 6], word: "Game" } };
+  function segAwards(g, sum, seg) {
+    const per = SEG[seg].per, by = new Map();
+    for (const p of sum.pbp) {
+      if (!per.includes(p.per)) continue;
+      for (const c of credits(p, g)) { const k = nkey(c.nm) + "|" + c.tm; if (!by.has(k)) by.set(k, { k, nm: c.nm, tm: c.tm, s: {} }); const s = by.get(k).s; s[c.k] = (s[c.k] || 0) + c.v; }
+    }
+    const all = [...by.values()], top = (f) => all.map((x) => ({ ...x, pts: f(x.s) })).sort((x, y) => y.pts - x.pts)[0];
+    const o = top(OFF_PTS), d = top(DEF_PTS), out = [];
+    if (o && o.pts >= 4) out.push({ ...o, side: "o" });
+    if (d && d.pts >= 2) out.push({ ...d, side: "d" });
+    return out.map((x) => ({ ...x, who: sum.ath.get(x.k) || { nm: x.nm, hs: "", j: "", tm: x.tm } }));
+  }
+  // the three numbers that tell his story
+  function awTiles(x) {
+    const s = x.s, r = (v) => Math.round(v), t = [];
+    if (x.side === "o") {
+      const pass = (s.pyd || 0) * 0.04 + (s.ptd || 0) * 4, rush = (s.ruyd || 0) * 0.1 + (s.rutd || 0) * 6, rec = (s.ryd || 0) * 0.1 + (s.rtd || 0) * 6 + (s.rec || 0) * 0.5;
+      if (pass >= rush && pass >= rec) t.push([r(s.pyd || 0), "Pass yds"], [s.ptd || 0, "Pass TD"], [`${s.comp || 0}/${(s.comp || 0) + (s.att || 0)}`, "Comp"]);
+      else if (rush >= rec) t.push([r(s.ruyd || 0), "Rush yds"], [s.car || 0, "Carries"], [(s.rutd || 0) + (s.rtd || 0), "TD"]);
+      else t.push([r(s.ryd || 0), "Rec yds"], [s.rec || 0, "Catches"], [(s.rtd || 0) + (s.rutd || 0), "TD"]);
+    } else {
+      for (const [k, l] of [["sack", "Sacks"], ["pick", "INT"], ["ff", "Forced fum"], ["fr", "Fum rec"], ["tfl", "TFL"], ["pd", "Pass def"], ["tkl", "Tackles"]]) if (s[k]) t.push([Number.isInteger(s[k]) ? s[k] : s[k].toFixed(1), l]);
+    }
+    return t.slice(0, 3);
+  }
+  // the card: same broadcast frame as the scoring play, his headshot cut out, the numbers counting up
+  function showBcCard(g, tm, html, ms, then) {
+    const ov = $("#playCard"), box = $("#pcIn"), C = bcCols(tm); cardBusy = true;
+    ov.style.setProperty("--tc", C.tc); ov.style.setProperty("--ta", C.ta); ov.style.setProperty("--tk", C.tk);
+    const wm = $("#pcWm"); if (tm && tm.lg) { wm.src = tm.lg; wm.hidden = false; } else { wm.removeAttribute("src"); wm.hidden = true; }
+    box.dataset.g = ""; box.innerHTML = html;
+    ov.classList.remove("out"); ov.hidden = false; for (const el of ov.querySelectorAll("*")) { el.style.animation = "none"; void el.offsetWidth; el.style.animation = ""; }
+    snSound("bc_sting", 0.9, 0);
+    setTimeout(() => { for (const el of box.querySelectorAll("[data-n]")) countUp(el, Number(el.dataset.n)); }, 1100);
+    setTimeout(() => { ov.classList.add("out"); snSound("bc_out", 0.5, 0); }, ms - 650);
+    setTimeout(() => { ov.hidden = true; ov.classList.remove("out", "top"); cardBusy = false; if (then) then(); }, ms);
+  }
+  function countUp(el, n) {
+    const t0 = performance.now(), d = 900;
+    const f = (t) => { const k = Math.min(1, (t - t0) / d), e = 1 - Math.pow(1 - k, 3); el.textContent = Math.round(n * e); if (k < 1) requestAnimationFrame(f); };
+    requestAnimationFrame(f);
+  }
+  const bugHtml = (g, side) => `<div class="bc-bug"><div class="lbl">${esc(side ? g[side].ab : "Live")}</div>${["a", "h"].map((x) => { const t = g[x]; return `<div class="bc-t${x === side ? " sc" : ""}" style="--c:${bcCols(t).tc}">${t.lg ? `<img src="${esc(t.lg)}" alt="" referrerpolicy="no-referrer">` : ""}<b>${esc(t.ab)}</b><span class="n"><i>${esc(t.sc ?? "")}</i></span></div>`; }).join("")}<div class="bc-clk">${esc(g.st === "post" ? "Final" : g.d || "")}</div></div>`;
+  function awardHtml(g, seg, x) {
+    const side = String(g.a.id) === x.tm ? "a" : "h", tm = g[side], nm = bcName(x.who.nm), tiles = awTiles(x);
+    return `<div class="bc-top"><span class="net"><i></i>Sweat Zone</span><span class="sp">${esc(seg === "game" ? "Player of the game" : SEG[seg].word)}</span></div>
+      <div class="bc-art${x.who.hs ? " hs" : ""}">${x.who.j ? `<div class="bc-num">${esc(x.who.j)}</div>` : ""}<div class="bc-glow"></div>
+        ${tm.lg ? `<img class="bc-lg" src="${esc(tm.lg)}" alt="" referrerpolicy="no-referrer">` : ""}
+        ${x.who.hs ? `<div class="bc-cut"><img src="${esc(x.who.hs)}" alt="" referrerpolicy="no-referrer" onerror="this.closest('.bc-art').classList.remove('hs');this.parentNode.remove()"></div>` : ""}</div>
+      <div class="bc-txt">
+        <div class="bc-tag"><b>${esc(tm.nm || tm.ab)}</b><span>${x.side === "o" ? "Offense" : "Defense"}</span></div>
+        <div class="bc-type aw"><small>Player of the</small><span class="bc-rv"><span>${esc(SEG[seg].word)}</span></span></div>
+        <div class="bc-nm${nm.l.length > 11 ? " long" : ""}">${nm.f ? `<div class="m"><span class="f">${esc(nm.f)}</span></div>` : ""}<div class="m"><span class="l">${esc(nm.l)}</span></div></div>
+        ${tiles.length ? `<div class="aw-st">${tiles.map(([v, l], i) => `<div style="--i:${i}"><b${typeof v === "number" ? ` data-n="${v}"` : ""}>${typeof v === "number" ? 0 : esc(v)}</b><span>${esc(l)}</span></div>`).join("")}</div>` : ""}
+      </div>${bugHtml(g, side)}`;
+  }
+  // ESPN highlight videos: played on the big screen with their own sound
+  const hlSeen = new Set((() => { try { return JSON.parse(localStorage.getItem("sb-hl") || "[]"); } catch (e) { return []; } })());
+  const awSeen = new Set((() => { try { return JSON.parse(localStorage.getItem("sb-aw") || "[]"); } catch (e) { return []; } })());
+  const keep = (k, set) => { try { localStorage.setItem(k, JSON.stringify([...set].slice(-300))); } catch (e) {} };
+  const HLQ = [], AWQ = [], hlOpen = Date.now();
+  function anyBacker(g) { return backer(g, "a") || backer(g, "h") || [...S.bets.values()].find((b) => b.status === "open") || null; }
+  function hlTeam(g, v) { const h = v.hl.toLowerCase(); return [g.a, g.h].find((t) => [t.nm, t.ab, t.fn].some((n) => n && h.includes(String(n).toLowerCase()))) || null; }
+  function playHL(g, v, why, who) {
+    const b = anyBacker(g); if (!b || !v) return false;
+    hlSeen.add(v.id); keep("sb-hl", hlSeen);
+    const t = who ? (String(g.a.id) === who.tm ? g.a : g.h) : hlTeam(g, v); if (t) pipTeam = { t, word: why || "Highlight", pl: who ? who.nm : "" };
+    lastAny = Date.now(); lastKind = "pop";
+    react(b, "mid", { base: "espn/" + v.id, ext: v.src, label: v.hl, mood: "hype", ms: v.ms + 300, hl: true }, why || "ESPN highlight");
+    return true;
+  }
+  // a fresh highlight for the dead air: the queue first (halftime and the final run a reel), then anything new from the last 40 minutes
+  function nextHL() {
+    while (HLQ.length) { const j = HLQ.shift(); if (!hlSeen.has(j.v.id)) return j; }
+    for (const [gid, sum] of SUMM) {
+      const g = S.games.get(gid); if (!g || !sum || !sum.vids) continue;
+      const v = sum.vids.find((x) => !hlSeen.has(x.id) && x.at > Math.min(hlOpen, Date.now()) - 40 * 60e3); if (v) return { g, v, why: "ESPN highlight" };
+    }
+    return null;
+  }
+  function hlTurn() {
+    if (!clipsOn() || clipBusy()) return false;
+    const j = nextHL(); return j ? playHL(j.g, j.v, j.why) : false;
+  }
+  // the end of a quarter, the half or the game: offense and defense cards, then his ESPN clip (and a reel at the half and the final)
+  const awLooked = new Set();
+  function awardWatch(g, sum) {
+    if (!sum || !sum.ends) return;
+    const first = !awLooked.has(g.id); awLooked.add(g.id);
+    for (const seg of ["q1", "h1", "q3", "game"]) {
+      if (!sum.ends.has(seg)) continue;
+      const k = g.id + ":" + seg; if (awSeen.has(k)) continue;
+      awSeen.add(k); keep("sb-aw", awSeen);
+      const wc = sum.ends.get(seg);
+      if (first && !(wc && Date.now() - wc < 12 * 60e3)) continue; // opened mid-game: no replays of awards from an hour ago
+      AWQ.push({ g, seg });
+    }
+    awRun();
+  }
+  let awT = 0;
+  function awRun() {
+    clearTimeout(awT);
+    const job = AWQ[0]; if (!job) return;
+    if (!clipsOn()) { AWQ.length = 0; return; }
+    if (cardBusy || fxBusy) { awT = setTimeout(awRun, 2000); return; }
+    AWQ.shift();
+    const sum = SUMM.get(job.g.id), list = sum ? segAwards(job.g, sum, job.seg) : [];
+    if (!list.length) { awT = setTimeout(awRun, 500); return; }
+    stopStatus(); lastAny = Date.now(); lastKind = "play";
+    const step = (i) => {
+      if (i >= list.length) {
+        // his clip if ESPN has one, then (half and final) the reel of the rest
+        const vids = (sum.vids || []).filter((v) => !hlSeen.has(v.id)), last = (x) => bcName(x.who.nm).l.toLowerCase();
+        const mine = list.map((x) => ({ x, v: vids.find((v) => v.hl.toLowerCase().includes(last(x))) })).find((m) => m.v), his = mine && mine.v;
+        if (job.seg === "h1" || job.seg === "game") for (const v of vids.filter((v) => v !== his).slice(-5)) HLQ.push({ g: job.g, v, why: job.seg === "h1" ? "First half highlights" : "Game highlights" });
+        if (his) playHL(job.g, his, (mine.x.side === "o" ? "Player of the " : "Defensive player of the ") + SEG[job.seg].word.toLowerCase(), { nm: mine.x.who.nm, tm: mine.x.tm });
+        awT = setTimeout(awRun, 1000);
+        return;
+      }
+      const x = list[i], side = String(job.g.a.id) === x.tm ? "a" : "h";
+      showBcCard(job.g, job.g[side], awardHtml(job.g, job.seg, x), 6200, () => step(i + 1));
+    };
+    step(0);
+  }
   // ---------- player edits: his touchdown or his big play brings up his own edit ----------
   const PL_NAMES = { donald: "Aaron Donald", stafford: "Matthew Stafford", davante: "Davante Adams", puka: "Puka Nacua", kyren: "Kyren Williams" };
   // play-by-play writes "M.Stafford", scoring plays write "Matthew Stafford": either counts
@@ -5903,7 +6087,7 @@ body.tv.prime .rb-fld .ddx { font-size: 20px; }
       if (!pool.length || !b || clipBusy() || now - lastAny < 15e3) continue;
       const P = pickClip(pool); if (!P) continue;
       lastAny = now; lastKind = "play"; fired = true;
-      if (hit.mood === "good") pipTeam = { t, word: hit.word || "Big play" };
+      if (hit.mood === "good") pipTeam = { t, word: hit.why, pl: PL_NAMES[hit.pl] };
       react(b, hit.mood, P, hit.why);
     }
     return fired;
@@ -5912,9 +6096,9 @@ body.tv.prime .rb-fld .ddx { font-size: 20px; }
     if (!clipsOn() || !g || !e.side) return;
     const t = g[e.side], own = CLIPS.filter((c) => c.fan === t.ab && (!c.sport || c.sport === g.sport) && c.pl !== "simpson");
     const scenes = CLIPS.filter((c) => c.base.startsWith("sounds/aura/") && !c.dj && forSport(c, g.sport));
-    const P = (own.length && pickClip(scorerPool(own, g) || own)) || pickClip(newSong(scenes));
+    const sp = own.length ? scorerPool(own, g) : null, P = (own.length && pickClip(sp || own)) || pickClip(newSong(scenes));
     if (!P) return;
-    pipTeam = { t, word: PC_TYPE[e.ev] || "Score" };
+    pipTeam = { t, word: PC_TYPE[e.ev] || "Score", pl: sp && sp.includes(P) && PL_NAMES[P.pl] ? PL_NAMES[P.pl] : "" };
     react(b, "good", P, why);
   }
   function slatePin() { try { return localStorage.getItem("sb-slate") || "auto"; } catch (e) { return "auto"; } }
@@ -5943,6 +6127,7 @@ body.tv.prime .rb-fld .ddx { font-size: 20px; }
     const now = Date.now(), swings = [], seenG = new Set(), mode = slateMode(), busy = mode === "busy";
     showMode();
     if (playWatch()) { render(); return; }
+    if (HLQ.length && hlTurn()) { render(); return; }
     for (const b of S.bets.values()) {
       if (b.status !== "open") { lastRes.delete(b.id); legHits.delete(b.id); lastM.delete(b.id); continue; }
       for (const s of selsOf(b)) {
@@ -6045,6 +6230,7 @@ body.tv.prime .rb-fld .ddx { font-size: 20px; }
     for (const b of mine) { const spot = liveSpot(b); if (spot && spot.state !== "L") live.push({ b, ...spot }); }
     const winning = live.filter((x) => x.state === "W");
     if (winning.length) live = winning;
+    if (prime && hlTurn()) return;
     const turn = djDue ? 0 : prime ? PRIME_TURNS[showPops++ % PRIME_TURNS.length] : showPops++ % 3;
     if (turn === 0 || (!live.length && !(prime && turn === 2))) {
       const b = (live[0] && live[0].b) || mine.find((x) => phase(x) === "live") || mine[0], P = pickClip(newSong(CLIPS.filter((c) => c.dj)));
@@ -6062,7 +6248,14 @@ body.tv.prime .rb-fld .ddx { font-size: 20px; }
     lastAny = now; lastKind = "pop"; lastFeat.set(pick.b.id, now);
     react(pick.b, pick.state === "W" ? "good" : "mid", P, pick.state === "W" ? "Cashing" : pick.state === "C" ? "Comeback" : null);
   }
-  setInterval(autoReact, 30e3); // pop-ups keep coming even if the scores haven't changed
+  setInterval(autoReact, 30e3);
+  setInterval(() => {
+    for (const id of awLooked) {
+      const g = S.games.get(id), c = SUMM.get(id);
+      if (!g || g.st !== "post" || awSeen.has(id + ":game") || !c || c.busy || Date.now() - c.at < 40e3 || Date.now() - (c.fin || (c.fin = Date.now())) > 25 * 60e3) continue;
+      SUMM.set(id, { ...c, at: 0 }); heroPlays(g);
+    }
+  }, 30e3); // pop-ups keep coming even if the scores haven't changed
   // Settings: the clip library, with a Play button on each
   const LIB_GROUPS = [["NFL · every NFL bet, never a team you're betting against", (c) => c.sport === "NFL"], ["Winning · on repeat while you're winning", (c) => c.mood.split(" ").includes("win")], ["Comeback · when you're down but within two scores", (c) => c.mood.split(" ").includes("comeback")], 
     ["College football · every college bet, never the team you're betting against", (c) => c.sport === "CFB"], ["MLB only", (c) => c.sport === "MLB"],
