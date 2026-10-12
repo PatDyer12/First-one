@@ -1787,6 +1787,7 @@ body.tv.prime .rb-fld .ddx { font-size: 20px; }
 .aw-st b { font: 900 8.5vh/.9 var(--f-display); color: #fff; font-variant-numeric: tabular-nums; }
 .aw-st span { font: 700 1.9vh/1 var(--f-num); letter-spacing: .2em; text-transform: uppercase; color: rgba(255,255,255,.55); }
 @media (max-width: 860px) { .bc-type.aw { font-size: min(13vw, 8vh); } .bc-type.aw small { font-size: 1.6vh; } .aw-st > div { min-width: 0; padding: 1.2vh 1.6vh; } .aw-st b { font-size: 5vh; } .aw-st span { font-size: 1.2vh; } }
+.mkt b .pmc { margin-left: 6px; font: 600 .78em var(--f-num); font-style: normal; color: #7d9bff; }
 /* sharper prime time: the game in a wide column that sizes itself to the card, no repeated kickoff times */
 .rb-games.primeg { column-width: auto; column-count: auto; display: grid; grid-template-columns: minmax(0, 1.6fr) minmax(300px, 1fr); gap: 14px; align-items: start; }
 .rb-games.primeg.solo { grid-template-columns: minmax(0, 1fr); }
@@ -1937,6 +1938,7 @@ body.tv.prime .rb-fld .ddx { font-size: 20px; }
       <div class="radios">
         <label><input type="radio" name="book" id="bk-fd" value="FD" checked><span><img class="bki" src="img/fd.png?v=1" alt="">FanDuel</span></label>
         <label><input type="radio" name="book" id="bk-dk" value="DK"><span><img class="bki" src="img/dk.png?v=1" alt="">DraftKings</span></label>
+        <label><input type="radio" name="book" id="bk-pm" value="PM"><span><img class="bki" src="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 36 36'%3E%3Crect width='36' height='36' rx='8' fill='%232e5cff'/%3E%3Cpath d='M10 9h10.5a6.5 6.5 0 0 1 0 13H15v5h-5z M15 13.5v4h5a2 2 0 0 0 0-4z' fill='white' fill-rule='evenodd'/%3E%3C/svg%3E" alt="">Polymarket</span></label>
       </div>
     </div>
     <div class="field">
@@ -2297,9 +2299,9 @@ body.tv.prime .rb-fld .ddx { font-size: 20px; }
     return new Date(t).toLocaleDateString([], { weekday: "short", month: "short", day: "numeric" });
   };
   const esc = (s) => String(s == null ? "" : s).replace(/[&<>"']/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]));
-  const BOOK = { FD: "FanDuel", DK: "DraftKings" };
-  const BOOK_IMG = { FD: "img/fd.png?v=1", DK: "img/dk.png?v=1" };
-  const bookKey = (b) => (b.book === "DK" ? "DK" : "FD");
+  const BOOK = { FD: "FanDuel", DK: "DraftKings", PM: "Polymarket" };
+  const BOOK_IMG = { FD: "img/fd.png?v=1", DK: "img/dk.png?v=1", PM: "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 36 36'%3E%3Crect width='36' height='36' rx='8' fill='%232e5cff'/%3E%3Cpath d='M10 9h10.5a6.5 6.5 0 0 1 0 13H15v5h-5z M15 13.5v4h5a2 2 0 0 0 0-4z' fill='white' fill-rule='evenodd'/%3E%3C/svg%3E" };
+  const bookKey = (b) => (b.book === "DK" ? "DK" : b.book === "PM" ? "PM" : "FD");
   const bookLogo = (b, cls) => `<img class="bki${cls ? " " + cls : ""}" src="${BOOK_IMG[bookKey(b)]}" alt="${BOOK[bookKey(b)]}">`;
 
   function animateNum(el, to, fmt) {
@@ -3263,8 +3265,9 @@ body.tv.prime .rb-fld .ddx { font-size: 20px; }
 
   function renderSplits(settled) {
     const groups = [
-      { nm: "FanDuel", c: "var(--fd)", img: BOOK_IMG.FD, f: (b) => b.book !== "DK" },
+      { nm: "FanDuel", c: "var(--fd)", img: BOOK_IMG.FD, f: (b) => b.book !== "DK" && b.book !== "PM" },
       { nm: "DraftKings", c: "var(--dk)", img: BOOK_IMG.DK, f: (b) => b.book === "DK" },
+      ...(settled.some((b) => b.book === "PM") ? [{ nm: "Polymarket", c: "#2e5cff", img: BOOK_IMG.PM, f: (b) => b.book === "PM" }] : []),
       { nm: "Straights", c: "var(--ink-2)", f: (b) => b.kind !== "parlay" },
       { nm: "Parlays", c: "var(--gold)", f: (b) => b.kind === "parlay" },
     ].map((g) => ({ ...g, s: stats(settled.filter(g.f)) }));
@@ -3365,7 +3368,7 @@ body.tv.prime .rb-fld .ddx { font-size: 20px; }
     }
     if (o === "L") { playLoss(); lossReact(b, n); }
     const word = b.status === "cashout" ? "CASHED" : o === "W" ? "WINNER" : o === "L" ? "LOSS" : "PUSH";
-    flash(o, word, b.pick, `${b.book === "DK" ? "DraftKings" : "FanDuel"} · ${fOdds(b.odds)} · ${fU(n, true)} (${fUSD(n * S.unit, true)})`);
+    flash(o, word, b.pick, `${BOOK[bookKey(b)]} · ${fOdds(b.odds)} · ${fU(n, true)} (${fUSD(n * S.unit, true)})`);
   }
   // $100+ gets the blockbuster, parlays get theirs, long-shot straights get the sniper; whale or nuke sized bets get that right after
   function winFx(b, n, tag) {
@@ -3606,7 +3609,7 @@ body.tv.prime .rb-fld .ddx { font-size: 20px; }
   // ---------- sheets ----------
   function openSheet(id) { $(id).hidden = false; }
   // keep every open screen current: when a new version is up, reload it (never mid-form or mid-animation)
-  const BUILD = "20261012210618";
+  const BUILD = "20261012211029";
   function checkBuild() {
     if (BUILD === "dev") return;
     fetch("version.json?t=" + Date.now(), { cache: "no-store" }).then((r) => (r.ok ? r.json() : null)).then((j) => {
@@ -3638,7 +3641,49 @@ body.tv.prime .rb-fld .ddx { font-size: 20px; }
     if (m === "sp") return (s === "a" ? g.a : g.h).nm + " " + (l == null ? "spread" : fLine(l));
     return (s === "o" ? "Over " : "Under ") + (l == null ? "" : trimL(l) + " ") + "· " + g.a.ab + "/" + g.h.ab;
   }
+  // ---------- Polymarket: the game's market prices when Polymarket is the book (the bet form only) ----------
+  const PMK = new Map(), PM_TAG = { NFL: "nfl", CFB: "cfb", NBA: "nba", MLB: "mlb", NHL: "nhl", CBB: "cbb" };
+  const pmAm = (p) => { p = Math.min(0.99, Math.max(0.01, p)); return p >= 0.5 ? -Math.round((100 * p) / (1 - p)) : Math.round((100 * (1 - p)) / p); };
+  const pmNm = (x) => String(x || "").toLowerCase().replace(/[^a-z0-9]/g, "");
+  function pmLoad(g) {
+    const c = PMK.get(g.id); if (c && (c.then || Date.now() - c.at < 60e3)) return c;
+    const tag = PM_TAG[g.sport]; if (!tag) return null;
+    const iso = (t) => new Date(t).toISOString();
+    const pr = fetch(`https://gamma-api.polymarket.com/events?tag_slug=${tag}&closed=false&limit=100&end_date_min=${iso(g.t - 3 * 36e5)}&end_date_max=${iso(g.t + 3 * 36e5)}`).then((r) => r.json()).then((list) => {
+      const side = (o) => { const n = pmNm(o); return [g.a.nm, g.a.fn, g.a.ab].some((x) => x && pmNm(x) === n) ? "a" : [g.h.nm, g.h.fn, g.h.ab].some((x) => x && pmNm(x) === n) ? "h" : null; };
+      const ev = (list || []).find((e) => (e.markets || []).some((m) => m.sportsMarketType === "moneyline" && JSON.parse(m.outcomes || "[]").every((o) => side(o))));
+      const v = { at: Date.now(), ml: null, sp: [], tot: [], url: ev ? "https://polymarket.com/event/" + ev.slug : "" };
+      for (const m of (ev && ev.markets) || []) {
+        if (m.closed || m.active === false) continue;
+        const outs = JSON.parse(m.outcomes || "[]"), px = JSON.parse(m.outcomePrices || "[]").map(Number);
+        // what it costs to buy each side: the ask for the first outcome, one minus the bid for the second
+        const p0 = typeof m.bestAsk === "number" && m.bestAsk > 0 ? m.bestAsk : px[0], p1 = typeof m.bestBid === "number" && m.bestBid > 0 ? 1 - m.bestBid : px[1];
+        if (!(p0 > 0 && p1 > 0)) continue;
+        if (m.sportsMarketType === "moneyline") { const s0 = side(outs[0]), s1 = side(outs[1]); if (s0 && s1) v.ml = { [s0]: p0, [s1]: p1 }; }
+        else if (m.sportsMarketType === "spreads" && typeof m.line === "number") { const s0 = side(outs[0]), s1 = side(outs[1]); if (s0 && s1) v.sp.push({ [s0]: { l: m.line, p: p0 }, [s1]: { l: -m.line, p: p1 } }); }
+        else if (m.sportsMarketType === "totals" && typeof m.line === "number") v.tot.push({ l: m.line, o: /over/i.test(outs[0]) ? p0 : p1, u: /over/i.test(outs[0]) ? p1 : p0 });
+      }
+      PMK.set(g.id, v); if (!$("#addSheet").hidden) { renderGames(); pmNote(); } return v;
+    }).catch(() => { PMK.set(g.id, { at: Date.now(), ml: null, sp: [], tot: [], err: true }); return null; });
+    PMK.set(g.id, pr); return pr;
+  }
+  // the Polymarket line nearest the sportsbook number (or the closest to a coin flip when ESPN has none)
+  function pmPrefill(g, m, s) {
+    const v = PMK.get(g.id); if (!v || v.then) return null;
+    const near = (arr, want, pick) => arr.length ? arr.reduce((x, y) => (Math.abs(pick(y) - want) < Math.abs(pick(x) - want) ? y : x)) : null;
+    if (m === "ml") return v.ml && v.ml[s] ? { l: null, o: pmAm(v.ml[s]), c: v.ml[s] } : null;
+    if (m === "sp") { const e = near(v.sp.filter((x) => x[s]), g.sp && g.sp[s] && g.sp[s].l != null ? g.sp[s].l : 0, (x) => (g.sp && g.sp[s] && g.sp[s].l != null ? x[s].l : Math.abs(x[s].p - 0.5) * 40)); return e ? { l: e[s].l, o: pmAm(e[s].p), c: e[s].p } : null; }
+    const e = near(v.tot, g.tot && g.tot.l != null ? g.tot.l : 0, (x) => (g.tot && g.tot.l != null ? x.l : Math.abs(x.o - 0.5) * 100));
+    return e ? { l: e.l, o: pmAm(e[s === "o" ? "o" : "u"]), c: e[s === "o" ? "o" : "u"] } : null;
+  }
+  function pmNote() {
+    const el = $("#g-fresh"); if (!el) return;
+    if (curBook() !== "PM") return;
+    const g = F.openG && S.games.get(F.openG), v = g && PMK.get(g.id);
+    el.textContent = !g ? "· open a game for Polymarket prices" : !v || v.then ? "· loading Polymarket…" : v.ml ? "· prices via Polymarket, live" : "· no Polymarket market for this game";
+  }
   function mkPrefill(g, m, s) {
+    if (curBook() === "PM") { const p = pmPrefill(g, m, s); if (p) return p; }
     if (m === "ml") return { l: null, o: g.ml ? g.ml[s] : null };
     if (m === "sp") return { l: g.sp && g.sp[s] ? g.sp[s].l : null, o: g.sp && g.sp[s] ? g.sp[s].o : null };
     return { l: g.tot ? g.tot.l : null, o: g.tot ? g.tot[s] : null };
@@ -3668,11 +3713,13 @@ body.tv.prime .rb-fld .ddx { font-size: 20px; }
       (!q || [g.a.nm, g.h.nm, g.a.ab, g.h.ab].some((x) => String(x).toLowerCase().includes(q)))).slice(0, 80);
     if (!S.games.size) { $("#g-list").innerHTML = '<div class="gnone">Loading games from ESPN…</div>'; return; }
     if (!list.length) { $("#g-list").innerHTML = '<div class="gnone">No upcoming games match. Try another sport or search.</div>'; return; }
+    setTimeout(pmNote, 0);
     $("#g-list").innerHTML = list.map((g) => {
       const open = F.openG === g.id;
       let mk = "";
       if (open) {
-        const btn = (m, s) => { const p = mkPrefill(g, m, s); return `<button type="button" class="mkt${isOn(g, m, s) ? " on" : ""}" data-pick="${esc(g.id)}|${m}|${s}"><span>${esc(mkLabel(g, m, s, p.l))}</span><b>${p.o ? fOdds(p.o) : "—"}</b></button>`; };
+        if (curBook() === "PM") pmLoad(g);
+        const btn = (m, s) => { const p = mkPrefill(g, m, s); return `<button type="button" class="mkt${isOn(g, m, s) ? " on" : ""}" data-pick="${esc(g.id)}|${m}|${s}"><span>${esc(mkLabel(g, m, s, p.l))}</span><b>${p.o ? fOdds(p.o) : "—"}${p.c ? `<i class="pmc">${Math.round(p.c * 100)}¢</i>` : ""}</b></button>`; };
         mk = `<div class="mkts">${btn("ml", "a")}${btn("ml", "h")}${btn("sp", "a")}${btn("sp", "h")}${btn("tot", "o")}${btn("tot", "u")}</div>`;
         if (g.sport === "CFB" || g.sport === "NFL")
           mk += `<div class="tdmk">${[["td", "Anytime TD scorer"], ["ftd", "First TD scorer"]].map(([m, l]) => `<button type="button" class="mkt${F.tdG === g.id && F.tdM === m ? " on" : ""}" data-td="${esc(g.id)}|${m}"><span>${l}</span><b>${F.tdG === g.id && F.tdM === m ? "▾" : "›"}</b></button>`).join("")}</div>${F.tdG === g.id ? tdPanel(g) : ""}`;
@@ -3816,7 +3863,10 @@ body.tv.prime .rb-fld .ddx { font-size: 20px; }
     renderPicker(); updatePreview();
   });
   $("#g-q").addEventListener("input", (e) => { F.q = e.target.value; renderGames(); });
-  document.querySelectorAll('input[name="book"]').forEach((r) => r.addEventListener("change", () => { if (F.tdG) renderGames(); else if (F.sel && isTd(F.sel.m)) { const g = S.games.get(F.sel.g), od = g && propOdds(g, F.sel.p, F.sel.m); if (od && od.book === curBook()) { setOdds(od.o); updatePreview(); } } }));
+  document.querySelectorAll('input[name="book"]').forEach((r) => r.addEventListener("change", () => {
+    if (!F.tdG) { renderGames(); if (curBook() !== "PM") $("#g-fresh").textContent = S.slateAt ? "· lines via ESPN, " + tm(S.slateAt) : ""; }
+    if (F.sel && !isTd(F.sel.m) && kindNow() === "straight") { const g = S.games.get(F.sel.g); if (g) { const p = mkPrefill(g, F.sel.m, F.sel.s); if (p.o) { if (F.sel.m !== "ml" && p.l != null) { F.sel.l = p.l; $("#f-line").value = String(p.l); } setOdds(p.o); renderPicker(); updatePreview(); } } }
+    if (F.tdG) renderGames(); else if (F.sel && isTd(F.sel.m)) { const g = S.games.get(F.sel.g), od = g && propOdds(g, F.sel.p, F.sel.m); if (od && od.book === curBook()) { setOdds(od.o); updatePreview(); } } }));
   $("#g-list").addEventListener("input", (e) => { if (!e.target.matches("[data-tdq]")) return; F.tdQ = e.target.value; const g = S.games.get(F.tdG), box = e.target.parentElement.querySelector(".tdlist"); if (g && box) box.innerHTML = tdList(g); });
   $("#g-sports").addEventListener("change", (e) => { if (e.target.name === "gsport") { F.sport = e.target.value; renderGames(); } });
   $("#customToggle").addEventListener("click", () => { F.custom = true; F.sel = null; renderPicker(); updatePreview(); $("#f-pick").focus(); });
