@@ -1220,6 +1220,193 @@ body.tv .list[data-d="1"] .rider { font-size: 14px; }
 .jb-bet .jl li.lw em { color: var(--win); } .jb-bet .jl li.ll em { color: var(--loss); } .jb-bet .jl li.le em { color: var(--gold); }
 .jb-bet .jl li.lw i { border-color: var(--win); } .jb-bet .jl li.ll i { border-color: var(--loss); } .jb-bet .jl li.le i { border-color: var(--gold); }
 body.tv.idle, body.tv.idle * { cursor: none !important; }
+/* ---------- the room board (TV): games with everybody's bets, the standings rail. Clean and readable from the couch ---------- */
+.rb, .rb-mark { display: none; }
+body.tv main.grid { display: none !important; }
+body.tv .rb { display: grid; flex: 1 1 auto; min-height: 0; grid-template-columns: minmax(0, 1fr) 390px; gap: 16px; position: relative; z-index: 1; font-family: Inter, var(--f-body); }
+.rb-main, .rb-rail { min-height: 0; overflow-x: hidden; overflow-y: auto; scrollbar-width: none; }
+.rb-main::-webkit-scrollbar, .rb-rail::-webkit-scrollbar { display: none; }
+.rb-main > .loopclone { margin-top: 14px; }
+.rb-games { column-width: 460px; column-gap: 14px; }
+.rb-games > * { break-inside: avoid; margin-bottom: 14px; }
+.rb-games.one { column-count: 1; }
+.rb-rail { display: flex; flex-direction: column; gap: 14px; overflow: hidden !important; }
+.rb-rail > #rbLb { flex: none; }
+.rb-rsc { flex: 1 1 auto; min-height: 0; overflow-y: auto; scrollbar-width: none; display: flex; flex-direction: column; gap: 14px; }
+.rb-rsc::-webkit-scrollbar { display: none; }
+.rb-empty { column-span: all; padding: 60px 30px; text-align: center; color: var(--ink-3); border: 1px dashed var(--line); border-radius: 18px; font-size: 18px; }
+.rb-empty b { display: block; color: var(--ink); font-size: 24px; margin-bottom: 6px; }
+
+/* a game */
+.rb-g { position: relative; background: #0f151f; border: 1px solid rgba(255,255,255,.07); border-radius: 18px; overflow: hidden; }
+.rb-g::before { content: ""; position: absolute; inset: 0 0 auto 0; height: 4px; background: linear-gradient(90deg, var(--ca) 0 50%, var(--ch) 50% 100%); }
+.rb-g.post { opacity: .72; }
+.rb-gh { display: grid; grid-template-columns: 1fr auto 1fr; align-items: center; gap: 10px; padding: 18px 18px 12px; }
+.rb-gh .tm { display: flex; align-items: center; gap: 10px; min-width: 0; }
+.rb-gh .tm.h { flex-direction: row-reverse; }
+.rb-gh .tl { width: 38px; height: 38px; object-fit: contain; flex: none; }
+.rb-gh .ab { font: 800 22px/1 Inter, sans-serif; letter-spacing: .02em; color: var(--ink-2); }
+.rb-gh .sc { font: 800 38px/1 Inter, sans-serif; letter-spacing: -.02em; color: var(--ink-2); margin: 0 4px; }
+.rb-gh .tm.lead .sc, .rb-gh .tm.lead .ab { color: #fff; }
+.rb-gh .ball { width: 22px; height: 13px; }
+.rb-gh .mid { display: flex; flex-direction: column; align-items: center; gap: 4px; text-align: center; }
+.rb-gh .clk { font: 700 15px/1 Inter, sans-serif; letter-spacing: .04em; color: var(--ink-2); text-transform: uppercase; white-space: nowrap; }
+.rb-gh .clk.on { color: #ff6b6b; }
+.rb-gh .clk.on::before { content: ""; display: inline-block; width: 8px; height: 8px; border-radius: 50%; background: #ff4d5e; margin-right: 7px; vertical-align: 2px; animation: ping 2s infinite; }
+.rb-gh .dd { font: 600 13px/1.2 Inter, sans-serif; color: var(--ink-3); white-space: nowrap; }
+.rb-gh .rz { font: 800 11px/1 Inter, sans-serif; letter-spacing: .1em; text-transform: uppercase; color: #fff; background: #d6303f; border-radius: 6px; padding: 4px 7px; }
+.rb-rows { display: flex; flex-direction: column; gap: 8px; padding: 0 12px 12px; }
+
+.rb-gs { display: grid; grid-template-columns: minmax(0, 1fr) auto; align-items: center; gap: 16px; padding: 16px 18px 12px; }
+.rb-gs .tms { display: flex; flex-direction: column; gap: 6px; }
+.rb-gs .tm { display: flex; align-items: center; gap: 10px; }
+.rb-gs .tl { width: 30px; height: 30px; object-fit: contain; flex: none; }
+.rb-gs .ab { font: 800 20px/1 Inter, sans-serif; color: var(--ink-2); letter-spacing: .02em; }
+.rb-gs .sc { margin-left: auto; font: 800 28px/1 Inter, sans-serif; color: var(--ink-2); min-width: 1.4em; text-align: right; }
+.rb-gs .tm.lead .ab, .rb-gs .tm.lead .sc { color: #fff; }
+.rb-gs .ball { width: 20px; height: 12px; }
+.rb-gs .mid { display: flex; flex-direction: column; align-items: flex-end; gap: 6px; text-align: right; min-width: 130px; padding-left: 16px; border-left: 1px solid rgba(255,255,255,.08); }
+.rb-gs .clk { font: 700 15px/1 Inter, sans-serif; letter-spacing: .04em; color: var(--ink-2); text-transform: uppercase; white-space: nowrap; }
+.rb-gs .clk.on { color: #ff6b6b; }
+.rb-gs .clk.on::before { content: ""; display: inline-block; width: 8px; height: 8px; border-radius: 50%; background: #ff4d5e; margin-right: 7px; vertical-align: 2px; animation: ping 2s infinite; }
+.rb-gs .dd { font: 600 13px/1.2 Inter, sans-serif; color: var(--ink-3); white-space: nowrap; }
+.rb-gs .rz { font: 800 11px/1 Inter, sans-serif; letter-spacing: .1em; text-transform: uppercase; color: #fff; background: #d6303f; border-radius: 6px; padding: 4px 7px; }
+/* one pick, everybody on it */
+.rb-pos { position: relative; display: grid; grid-template-columns: auto minmax(0, 1fr) auto; align-items: center; gap: 12px; padding: 11px 14px; border-radius: 13px; background: rgba(255,255,255,.035); border: 1px solid transparent; }
+.rb-pos .meter { grid-column: 1 / -1; margin: 2px 0 0; }
+.rb-avs { display: flex; }
+.rb-avs .rb-av + .rb-av { margin-left: -9px; }
+.rb-av { position: relative; width: 32px; height: 32px; border-radius: 50%; display: inline-grid; place-items: center; flex: none; background: var(--c); color: #06080c; font: 800 15px/1 Inter, sans-serif; box-shadow: 0 0 0 2px #0f151f; }
+.rb-av.big { width: 44px; height: 44px; font-size: 20px; }
+.rb-pk { min-width: 0; }
+.rb-pk > b { display: flex; align-items: center; gap: 8px; font: 700 20px/1.2 Inter, sans-serif; color: #fff; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.rb-pk .od { color: var(--ink-2); font-weight: 600; }
+.rb-hs { width: 28px; height: 28px; border-radius: 50%; object-fit: cover; background: #1b2433; flex: none; }
+.rb-wls { display: flex; flex-wrap: wrap; gap: 4px 12px; margin-top: 4px; }
+.rb-wl { font: 500 13px/1.2 Inter, sans-serif; color: var(--ink-3); white-space: nowrap; }
+.rb-wl b { color: var(--c); font-weight: 700; }
+.rb-st { font: 700 14px/1.2 Inter, sans-serif; color: var(--ink-2); text-align: right; white-space: nowrap; padding: 6px 10px; border-radius: 9px; background: rgba(255,255,255,.05); }
+.rb-pos.st-w, .rb-hs-side.ahead { background: rgba(61,220,151,.07); border-color: rgba(61,220,151,.22); }
+.rb-pos.st-l { background: rgba(255,97,112,.06); border-color: rgba(255,97,112,.2); }
+.st-w > .rb-st, .rb-st.st-w, .st-won > .rb-st, .rb-st.st-won { color: var(--win); background: rgba(61,220,151,.12); }
+.st-l > .rb-st, .rb-st.st-l, .st-lost > .rb-st, .rb-st.st-lost { color: var(--loss); background: rgba(255,97,112,.12); }
+.rb-pos.st-won { border-color: rgba(61,220,151,.4); }
+.rb-pos.st-lost { opacity: .6; }
+.rb-pos.st-pre > .rb-st { color: var(--ink-3); background: none; }
+.rb-pos[class*="pop-"], .rb-h2h[class*="pop-"] { animation: rbPop 1.2s ease-in-out 2; }
+@keyframes rbPop { 50% { box-shadow: 0 0 0 3px var(--gold), 0 0 30px rgba(255,194,75,.35); } }
+.rb-pos .hasball { margin-left: 4px; }
+
+/* head to head: a tug of war */
+.rb-h2h { padding: 10px 12px 12px; border-radius: 13px; background: linear-gradient(90deg, color-mix(in srgb, var(--lc) 10%, transparent), rgba(255,255,255,.02) 50%, color-mix(in srgb, var(--rc) 10%, transparent)); border: 1px solid rgba(255,255,255,.06); }
+.rb-h2h-top { display: grid; grid-template-columns: minmax(0, 1fr) auto minmax(0, 1fr); align-items: center; gap: 10px; }
+.rb-hs-side { display: grid; grid-template-columns: auto minmax(0, 1fr); grid-template-rows: auto auto; column-gap: 10px; align-items: center; padding: 6px 8px; border-radius: 11px; border: 1px solid transparent; }
+.rb-hs-side .rb-avs { grid-row: 1 / 3; }
+.rb-hs-side .rb-st { grid-column: 2; justify-self: start; margin-top: 6px; padding: 3px 8px; font-size: 13px; }
+.rb-hs-side.r { grid-template-columns: minmax(0, 1fr) auto; text-align: right; }
+.rb-hs-side.r .rb-avs { grid-column: 2; grid-row: 1 / 3; }
+.rb-hs-side.r .rb-pk, .rb-hs-side.r .rb-st { grid-column: 1; grid-row: auto; }
+.rb-hs-side.r .rb-pk > b { justify-content: flex-end; }
+.rb-hs-side.r .rb-wls { justify-content: flex-end; }
+.rb-hs-side.r .rb-st { justify-self: end; }
+.rb-vs { font: 900 13px/1 Inter, sans-serif; letter-spacing: .12em; color: var(--ink-3); }
+.rb-tug { position: relative; height: 10px; margin: 10px 8px 0; border-radius: 99px; background: rgba(255,255,255,.08); }
+.rb-tug::after { content: ""; position: absolute; left: 50%; top: -4px; bottom: -4px; width: 2px; background: rgba(255,255,255,.35); }
+.rb-tug i { position: absolute; top: 0; bottom: 0; border-radius: 99px; transition: width .8s ease; }
+.rb-tug .lfill { right: 50%; background: var(--lc); }
+.rb-tug .rfill { left: 50%; background: var(--rc); }
+.rb-tug b { position: absolute; top: 50%; width: 18px; height: 18px; margin: -9px 0 0 -9px; border-radius: 50%; background: #fff; box-shadow: 0 0 0 3px rgba(0,0,0,.4), 0 0 14px rgba(255,255,255,.6); transition: left .8s ease; }
+.rb-tug.pre b { background: var(--ink-3); box-shadow: none; }
+
+/* parlays and other bets */
+.rb-card::before { display: none; }
+.rb-ch { display: flex; align-items: baseline; justify-content: space-between; padding: 16px 18px 10px; }
+.rb-ch h3, .rb-sec h3 { margin: 0; font: 800 14px/1 Inter, sans-serif; letter-spacing: .14em; text-transform: uppercase; color: var(--ink-2); }
+.rb-ch span, .rb-sec h3 span { font: 600 13px/1 Inter, sans-serif; color: var(--ink-3); letter-spacing: .04em; text-transform: none; margin-left: 8px; }
+.rb-par { display: grid; grid-template-columns: auto minmax(0, 1fr) auto auto; align-items: center; gap: 12px; padding: 10px 14px; border-radius: 13px; background: rgba(255,255,255,.035); }
+.rb-par.dead { opacity: .5; }
+.rb-dots { display: flex; gap: 5px; }
+.rb-dots i { width: 14px; height: 14px; border-radius: 50%; background: rgba(255,255,255,.12); }
+.rb-dots i.h { background: var(--win); }
+.rb-dots i.m { background: var(--loss); }
+.rb-dots i.lw { box-shadow: inset 0 0 0 3px var(--win); background: none; }
+.rb-dots i.ll { box-shadow: inset 0 0 0 3px var(--loss); background: none; }
+.rb-dots i.le { box-shadow: inset 0 0 0 3px var(--ink-3); background: none; }
+
+/* the rail: leaderboard, awards, head to head, results */
+.rb-sec { background: #0f151f; border: 1px solid rgba(255,255,255,.07); border-radius: 18px; padding: 16px 14px 12px; display: flex; flex-direction: column; gap: 9px; }
+.rb-sec h3 { padding: 0 4px 4px; }
+.rb-lr { position: relative; display: grid; grid-template-columns: 22px 44px minmax(0, 1fr) auto; grid-template-areas: "rk av nm net" "rk av ln ln" ". . l5 op"; align-items: center; column-gap: 12px; row-gap: 3px; padding: 12px 12px 11px; border-radius: 14px; background: rgba(255,255,255,.035); border: 1px solid transparent; overflow: hidden; }
+.rb-lr .rk { grid-area: rk; font: 800 18px/1 Inter, sans-serif; color: var(--ink-3); }
+.rb-lr.lead .rk { color: var(--gold); }
+.rb-lr > .rb-av { grid-area: av; }
+.rb-lr .nm { grid-area: nm; display: flex; align-items: center; gap: 8px; min-width: 0; }
+.rb-lr .nm b { font: 800 20px/1.1 Inter, sans-serif; color: #fff; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.rb-lr .net { grid-area: net; text-align: right; font: 800 24px/1 Inter, sans-serif; }
+.rb-lr .net small { display: block; font: 600 12px/1.3 Inter, sans-serif; color: var(--ink-3); }
+.rb-lr .net.pos { color: var(--win); } .rb-lr .net.neg { color: var(--loss); } .rb-lr .net.zero { color: var(--ink-2); }
+.rb-lr .ln { grid-area: ln; font: 600 13px/1.3 Inter, sans-serif; color: var(--ink-2); }
+.rb-lr .l5 { grid-area: l5; display: flex; gap: 4px; margin-top: 3px; }
+.rb-lr .l5 i { width: 18px; height: 6px; border-radius: 3px; }
+.rb-lr .l5 i.w { background: var(--win); } .rb-lr .l5 i.l { background: var(--loss); }
+.rb-lr .l5 em { font: 500 12px Inter, sans-serif; color: var(--ink-3); font-style: normal; }
+.rb-lr .op { grid-area: op; font: 600 12px/1.3 Inter, sans-serif; color: var(--ink-3); text-align: right; white-space: nowrap; }
+.rb-av .crown { position: absolute; left: 50%; top: -16px; transform: translateX(-50%) rotate(-12deg); font-size: 18px; text-decoration: none; filter: drop-shadow(0 2px 3px rgba(0,0,0,.7)); }
+.rb-heat { font: 800 12px/1 Inter, sans-serif; letter-spacing: .04em; padding: 4px 7px; border-radius: 7px; white-space: nowrap; }
+.rb-heat.fire { color: #1a0900; background: linear-gradient(90deg, #ffb300, #ff5a1f); box-shadow: 0 0 14px rgba(255,110,30,.6); }
+.rb-heat.ice { color: #001a29; background: linear-gradient(90deg, #e8f8ff, #7cc8ff); box-shadow: 0 0 14px rgba(120,200,255,.6); }
+.rb-heat.warm { color: #ffb36b; background: rgba(255,140,40,.14); }
+.rb-heat.cool { color: #9fd6ff; background: rgba(120,190,255,.14); }
+/* on fire: the row smolders and the avatar burns; ice cold: frosted */
+.rb-lr.fire { border-color: rgba(255,120,30,.75); background: linear-gradient(100deg, rgba(255,80,20,.22), rgba(255,170,40,.06) 60%, rgba(255,255,255,.02)); animation: rmBurn 1.5s ease-in-out infinite alternate; }
+.rb-lr.fire > .rb-av::before { content: ""; position: absolute; inset: -6px; border-radius: 50%; background: conic-gradient(from 0deg, #ff3d00, #ffb300, #ff6d00, #ffd54f, #ff3d00); filter: blur(4px); animation: rmSpin 1.4s linear infinite; z-index: -1; }
+.rb-lr.fire::after { content: ""; position: absolute; inset: auto 0 0 0; height: 60%; background: radial-gradient(60% 100% at 20% 100%, rgba(255,120,20,.35), transparent 70%); animation: rbFlick .35s steps(2) infinite; pointer-events: none; }
+@keyframes rbFlick { 50% { opacity: .55; } }
+.rb-lr.ice { border-color: rgba(140,210,255,.7); background: linear-gradient(100deg, rgba(90,180,255,.2), rgba(200,240,255,.05) 60%, rgba(255,255,255,.02)); box-shadow: inset 0 0 18px rgba(160,220,255,.12); }
+.rb-lr.ice > .rb-av { background: linear-gradient(160deg, #eefaff, #7cc8ff); box-shadow: 0 0 0 2px #0f151f, 0 0 16px rgba(140,210,255,.9); }
+.rb-lr.ice::after { content: "❄ ❅ ❆ ❄ ❅"; position: absolute; left: 34%; top: -6px; font-size: 13px; letter-spacing: 12px; color: rgba(210,240,255,.5); animation: rmSnow 3.2s linear infinite; pointer-events: none; }
+.rb-lr.warm { border-color: rgba(255,140,40,.3); }
+.rb-lr.cool { border-color: rgba(120,190,255,.3); }
+.rb-lr.lead:not(.fire):not(.ice) { border-color: rgba(255,194,75,.45); }
+.rb-aw { display: grid; grid-template-columns: 30px minmax(0, 1fr) auto auto; align-items: center; gap: 10px; padding: 8px 10px; border-radius: 12px; background: rgba(255,255,255,.035); }
+.rb-aw .ic { font-size: 22px; text-align: center; }
+.rb-aw b { display: block; font: 800 15px/1.2 Inter, sans-serif; color: #fff; }
+.rb-aw small { display: block; font: 500 12px/1.3 Inter, sans-serif; color: var(--ink-3); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.rb-aw .rb-av { width: 26px; height: 26px; font-size: 12px; }
+.rb-aw .who { font: 700 13px Inter, sans-serif; color: var(--ink-2); }
+.rb-hh { display: grid; grid-template-columns: auto minmax(0, 1fr) auto minmax(0, 1fr) auto; align-items: center; gap: 8px; padding: 8px 10px; border-radius: 12px; background: rgba(255,255,255,.035); font: 700 15px Inter, sans-serif; }
+.rb-hh b:nth-of-type(2) { text-align: right; }
+.rb-hh .sc { font: 800 20px Inter, sans-serif; color: var(--ink-3); }
+.rb-hh .sc em { font-style: normal; } .rb-hh .sc em.w { color: var(--win); }
+.rb-hh .rb-av { width: 28px; height: 28px; font-size: 13px; }
+.rb-res { display: grid; grid-template-columns: auto minmax(0, 1fr) auto; align-items: center; gap: 10px; padding: 6px 8px; font: 600 14px Inter, sans-serif; }
+.rb-res .rb-av { width: 26px; height: 26px; font-size: 12px; }
+.rb-res .pk { color: var(--ink); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.rb-res .v { font-weight: 800; }
+.rb-res.w .v { color: var(--win); } .rb-res.l .v { color: var(--loss); } .rb-res.p .v { color: var(--ink-3); }
+
+/* prime time: one game, the room's team colors, the scoreboard big */
+body.tv.prime { --gold: var(--tc); }
+body.tv.prime::before { background: radial-gradient(1400px 900px at 0% 0%, var(--tcBase), transparent 62%), radial-gradient(1000px 700px at 100% 100%, var(--tcA), transparent 70%); }
+body.tv.prime .rb-mark { display: block; position: fixed; right: -60px; bottom: -80px; width: 620px; height: 620px; opacity: .07; pointer-events: none; z-index: 0; filter: grayscale(.2); }
+body.tv.prime .rb-mark img { width: 100%; height: 100%; object-fit: contain; }
+body.tv.prime .brand h1 span, body.tv.prime .modechip { color: var(--tc); }
+body.tv.prime .modechip { background: var(--tcA); border-color: var(--tc); }
+body.tv.prime .rb-g, body.tv.prime .rb-sec { background: rgba(10,14,22,.82); backdrop-filter: blur(6px); }
+body.tv.prime .rb-g.hero { border-color: color-mix(in srgb, var(--tc) 55%, transparent); box-shadow: 0 0 0 1px color-mix(in srgb, var(--tc) 25%, transparent), 0 20px 60px rgba(0,0,0,.4); }
+.rb-g.hero::before { height: 8px; }
+.rb-g.hero .rb-gh { padding: 30px 30px 22px; }
+.rb-g.hero .tl { width: 76px; height: 76px; }
+.rb-g.hero .ab { font-size: 34px; }
+.rb-g.hero .sc { font-size: 84px; margin: 0 14px; }
+.rb-g.hero .clk { font-size: 22px; }
+.rb-g.hero .dd { font-size: 17px; }
+.rb-g.hero .rb-rows { padding: 0 20px 20px; gap: 10px; }
+.rb-g.hero .rb-pk > b { font-size: 24px; }
+.rb-g.hero .rb-wl { font-size: 15px; }
+.rb-g.hero .rb-st { font-size: 17px; }
+.rb-g.hero .rb-av { width: 38px; height: 38px; font-size: 17px; }
+body.tv.prime .rb-pos.st-w, body.tv.prime .rb-hs-side.ahead { border-color: color-mix(in srgb, var(--win) 35%, transparent); }
 </style>
 </head>
 <body>
@@ -1311,7 +1498,9 @@ body.tv.idle, body.tv.idle * { cursor: none !important; }
       </section>
     </div>
   </main>
+  <main class="rb" id="rb" aria-label="The room"><div class="rb-main" id="rbMain"><div class="rb-games" id="rbGames"></div></div><aside class="rb-rail" id="rbRail"><div id="rbLb"></div><div class="rb-rsc" id="rbRsc"></div></aside></main>
 </div>
+<div class="rb-mark" id="rbMark" aria-hidden="true"></div>
 
 <button type="button" class="btn primary fab edit" id="addFab">+ Bet</button>
 
@@ -1752,6 +1941,7 @@ body.tv.idle, body.tv.idle * { cursor: none !important; }
     renderSplits(settled);
     renderRecent(settled);
     renderRoom();
+    renderRB();
     legWatch();
     fitTV();
   }
@@ -1834,7 +2024,7 @@ body.tv.idle, body.tv.idle * { cursor: none !important; }
     }
     requestAnimationFrame(ascTick);
   }
-  autoScroll($(".mainc"), 30); autoScroll($("#jbBets"), 34);
+  autoScroll($(".mainc"), 30); autoScroll($("#jbBets"), 34); autoScroll($("#rbMain"), 26); autoScroll($("#rbRsc"), 22);
   requestAnimationFrame(ascTick);
   let fitT = 0;
   const refit = () => { clearTimeout(fitT); fitT = setTimeout(fitTV, 120); };
@@ -2292,6 +2482,244 @@ body.tv.idle, body.tv.idle * { cursor: none !important; }
     }
     roomPrev = now;
   }
+  // ---------- the room board (TV): every game the room has money on with everybody's bets on it, and the standings ----------
+  const avHtml = (b, cls) => `<span class="rb-av${cls ? " " + cls : ""}" style="--c:${personCol(b)}" title="${esc(personName(b))}">${esc(personName(b).slice(0, 1).toUpperCase())}</span>`;
+  // what's on the board: open bets, plus straight bets settled in the last 90 minutes so a finished game shows how it went
+  function boardEntries() {
+    const t = Date.now(), out = [];
+    for (const b of S.bets.values()) {
+      const recent = b.status !== "open" && b.settledAt && t - b.settledAt < 90 * 60e3;
+      if (b.status !== "open" && !(recent && b.kind !== "parlay")) continue;
+      if (b.kind === "parlay") {
+        const sels = Array.isArray(b.legSel) ? b.legSel : [], legs = legsOf(b);
+        (b.legs || []).forEach((txt, i) => out.push({ b, leg: i, nLegs: (b.legs || []).length, sel: sels[i] || null, pick: txt, lst: legs[i] && legs[i].st }));
+      } else out.push({ b, leg: null, sel: b.sel || null, pick: b.pick });
+    }
+    return out;
+  }
+  // a game's bets grouped by pick: one row per pick with everybody on it; opposite sides pair up head to head
+  function gamePositions(entries) {
+    const by = new Map();
+    for (const e of entries) {
+      const k = selKey(e.sel) || "T:" + normPick(e.pick);
+      if (!by.has(k)) by.set(k, { k, sel: e.sel, pick: e.leg == null ? e.pick : null, entries: [] });
+      const p = by.get(k); p.entries.push(e); if (!p.pick && e.leg == null) p.pick = e.pick;
+    }
+    const pos = [...by.values()];
+    for (const p of pos) { if (!p.pick) p.pick = p.entries[0].pick; const g = gameOf(p.sel); if (g && p.sel.m) p.pick = mkLabel(g, p.sel.m, p.sel.s, p.sel.l, p.sel.p).replace(/\s*·\s*[A-Z0-9]+\/[A-Z0-9]+$/, ""); p.people = new Set(p.entries.map((e) => personKey(e.b))); p.units = p.entries.reduce((a, e) => a + (e.leg == null ? e.b.units : e.b.units * 0.5), 0); }
+    const side = (p) => (p.sel && p.sel.g != null && !isTd(p.sel.m) ? { k: p.sel.m === "tot" ? "tot" : "team", s: p.sel.s } : null);
+    const used = new Set(), rows = [];
+    pos.sort((x, y) => y.people.size - x.people.size || y.units - x.units);
+    for (const p of pos) {
+      if (used.has(p.k)) continue;
+      const sp = side(p);
+      const q = sp && pos.find((o) => !used.has(o.k) && o !== p && side(o) && side(o).k === sp.k && side(o).s !== sp.s && [...o.people].some((x) => !p.people.has(x)));
+      if (q) { used.add(p.k); used.add(q.k); const left = sp.s === "a" || sp.s === "o" ? p : q; rows.push({ h2h: [left, left === p ? q : p] }); }
+      else { used.add(p.k); rows.push({ p }); }
+    }
+    return rows;
+  }
+  // one person on a pick: their stake, or which leg of their parlay it is
+  function whoLine(p) {
+    return p.entries.map((e) => {
+      const nm = esc(personName(e.b));
+      if (e.leg != null) return `<span class="rb-wl" style="--c:${personCol(e.b)}"><b>${nm}</b> leg ${e.leg + 1}/${e.nLegs}</span>`;
+      return `<span class="rb-wl" style="--c:${personCol(e.b)}"><b>${nm}</b> ${fOdds(e.b.odds)} · ${fU(e.b.units)}${e.b.tail ? ` · ${e.b.tail.kind === "fade" ? "fading" : "tailing"} ${esc(e.b.tail.name)}` : ""}</span>`;
+    }).join("");
+  }
+  // where a pick stands: settled result, the live grade, or the kickoff time
+  function posState(p, g) {
+    const done = p.entries.filter((e) => e.leg == null && e.b.status !== "open");
+    if (done.length && done.length === p.entries.length) {
+      const o = outcome(done[0].b), n = done.reduce((a, e) => a + netOf(e.b), 0);
+      return { cls: o === "W" ? "won" : o === "L" ? "lost" : "push", txt: o === "W" ? `✓ Won ${fU(n, true)}` : o === "L" ? `✕ Lost ${fU(n, true)}` : "Push", m: o === "W" ? 1 : o === "L" ? -1 : 0 };
+    }
+    const legSt = p.entries.find((e) => e.lst) && p.entries.find((e) => e.lst).lst;
+    if (g.st === "pre") return { cls: "pre", txt: startLabel(g.t), m: 0 };
+    const ev = p.sel ? evalSel(p.sel) : null;
+    if (legSt === "hit" && (!ev || ev.fin || ev.res === "W")) return { cls: "won", txt: "✓ Leg hit", m: 1, ev };
+    if (legSt === "miss") return { cls: "lost", txt: "✕ Leg missed", m: -1, ev };
+    if (!ev) return { cls: "e", txt: g.st === "post" ? "Final" : "Live", m: 0 };
+    return { cls: ev.fin ? (ev.res === "W" ? "won" : ev.res === "L" ? "lost" : "push") : ev.res === "W" ? "w" : ev.res === "L" ? "l" : "e", txt: ev.txt, m: ev.m, ev };
+  }
+  const popCls = (p) => { const t = Date.now(); for (const e of p.entries) { const pp = S.pops.get(e.b.id); if (pp && t < pp.until) return " pop-" + pp.kind; } return ""; };
+  function posRow(p, g) {
+    const st = posState(p, g), hb = p.sel ? hasBall(p.sel) : null;
+    const meter = st.ev && !st.ev.fin && g.st === "in" && !isTd(p.sel.m) ? meterHtml(p.sel, st.ev) : "";
+    const avs = [...new Map(p.entries.map((e) => [personKey(e.b), e.b])).values()].map((b) => avHtml(b)).join("");
+    const hs = p.sel && p.sel.p && p.sel.p.hs ? `<img class="rb-hs" src="${esc(p.sel.p.hs)}" alt="" loading="lazy" referrerpolicy="no-referrer" onerror="this.remove()">` : "";
+    return `<div class="rb-pos st-${st.cls}${popCls(p)}">
+      <div class="rb-avs">${avs}</div>
+      <div class="rb-pk"><b>${hs}${esc(p.pick)}${ballTag(hb)}</b><div class="rb-wls">${whoLine(p)}</div></div>
+      <div class="rb-st">${esc(st.txt)}</div>${meter}</div>`;
+  }
+  // two people on opposite sides: a tug of war. The marker leans toward whoever's winning, by how much
+  function h2hRow(l, r, g) {
+    const sl = posState(l, g), sr = posState(r, g);
+    const span = METER[g.sport] || 10, k = Math.max(-1, Math.min(1, (sl.m || 0) / span));
+    const pre = g.st === "pre", x = 50 - k * 44;
+    const lead = pre || Math.abs(sl.m || 0) < 0.01 ? "" : sl.m > 0 ? "l" : "r";
+    const who = (p) => [...new Map(p.entries.map((e) => [personKey(e.b), e.b])).values()];
+    const side = (p, s, d) => `<div class="rb-hs-side ${d}${lead === d ? " ahead" : ""}"><div class="rb-avs">${who(p).map((b) => avHtml(b)).join("")}</div><div class="rb-pk"><b>${esc(p.pick)}</b><div class="rb-wls">${whoLine(p)}</div></div><div class="rb-st st-${s.cls}">${esc(pre ? "" : s.txt)}</div></div>`;
+    const lc = personCol(l.entries[0].b), rc = personCol(r.entries[0].b);
+    return `<div class="rb-h2h${popCls(l)}${popCls(r)}" style="--lc:${lc};--rc:${rc}">
+      <div class="rb-h2h-top">${side(l, sl, "l")}<span class="rb-vs">VS</span>${side(r, sr, "r")}</div>
+      <div class="rb-tug${pre ? " pre" : ""}"><i class="lfill" style="width:${lead === "l" ? (50 - x).toFixed(1) : 0}%"></i><i class="rfill" style="width:${lead === "r" ? (x - 50).toFixed(1) : 0}%"></i><b style="left:${x.toFixed(1)}%"></b></div></div>`;
+  }
+  function gameCard(G, hero) {
+    const g = G.g, rows = gamePositions(G.entries);
+    const live = g.st === "in", pos = (t) => (live && g.sit && g.sit.pos && String(t.id) === String(g.sit.pos) ? BALL : "");
+    const sc = (t) => (g.st === "pre" || t.sc == null ? "" : `<span class="sc num">${t.sc}</span>`);
+    const clk = g.st === "pre" ? startLabel(g.t) : g.st === "post" ? "Final" : g.d;
+    const dd = live && g.sit && g.sit.dd ? `<span class="dd">${esc(g.sit.dd)}</span>` : "";
+    const rz = live && g.sit && g.sit.rz ? '<span class="rz">Red zone</span>' : "";
+    const lead = g.st !== "pre" && g.a.sc != null && g.h.sc != null ? (g.a.sc > g.h.sc ? "a" : g.h.sc > g.a.sc ? "h" : "") : "";
+    const tm = (t, s) => `<div class="tm ${s}${lead === s ? " lead" : ""}">${logo(t, "tl")}<span class="ab">${esc(t.ab)}</span>${pos(t)}${sc(t)}</div>`;
+    const mid = `<div class="mid"><span class="clk${live ? " on" : ""}">${esc(clk)}</span>${dd}${rz}</div>`;
+    return `<article class="rb-g ${g.st}${hero ? " hero" : ""}" style="--ca:${esc(g.a.col || "#445")};--ch:${esc(g.h.col || "#445")}">
+      ${hero ? `<header class="rb-gh">${tm(g.a, "a")}${mid}${tm(g.h, "h")}</header>` : `<header class="rb-gs"><div class="tms">${tm(g.a, "a")}${tm(g.h, "h")}</div>${mid}</header>`}
+      <div class="rb-rows">${rows.map((r) => (r.h2h ? h2hRow(r.h2h[0], r.h2h[1], g) : posRow(r.p, g))).join("")}</div></article>`;
+  }
+  function parlayCard(list) {
+    if (!list.length) return "";
+    const row = (b) => {
+      const legs = legsOf(b), hit = legs.filter((l) => l.st === "hit").length, dead = legs.some((l) => l.st === "miss");
+      const dots = legs.map((l) => `<i class="${l.st === "hit" ? "h" : l.st === "miss" ? "m" : l.ev && !l.ev.fin ? (l.ev.res === "W" ? "lw" : l.ev.res === "L" ? "ll" : "le") : ""}" title="${esc(l.t)}"></i>`).join("");
+      return `<div class="rb-par${dead ? " dead" : ""}">${avHtml(b)}<div class="rb-pk"><b>${legs.length}-leg parlay <span class="od num">${fOdds(b.odds)}</span></b><div class="rb-wls"><span class="rb-wl" style="--c:${personCol(b)}"><b>${esc(personName(b))}</b> ${fU(b.units)} → ${fU(b.units * ppu(b.odds), true)}</span></div></div>
+        <div class="rb-dots">${dots}</div><div class="rb-st ${dead ? "st-lost" : hit === legs.length ? "st-won" : ""}">${dead ? "Dead" : `${hit}/${legs.length} hit`}</div></div>`;
+    };
+    return `<article class="rb-g rb-card"><header class="rb-ch"><h3>Parlays</h3><span>${list.length} open</span></header><div class="rb-rows">${list.map(row).join("")}</div></article>`;
+  }
+  function otherCard(entries) {
+    if (!entries.length) return "";
+    return `<article class="rb-g rb-card"><header class="rb-ch"><h3>Other bets</h3></header><div class="rb-rows">${entries.map((e) => `<div class="rb-pos st-${e.b.status === "open" ? "e" : outcome(e.b) === "W" ? "won" : "lost"}"><div class="rb-avs">${avHtml(e.b)}</div><div class="rb-pk"><b>${esc(e.pick)}</b><div class="rb-wls">${whoLine({ entries: [e] })}</div></div><div class="rb-st">${e.b.status === "open" ? (phase(e.b) === "pre" ? startLabel(startOf(e.b)) : "Open") : outcome(e.b) === "W" ? "✓ Won" : "✕ Lost"}</div></div>`).join("")}</div></article>`;
+  }
+  // prime time: the board takes on the colors of the team the room's riding (most money on it; a totals-only room gets the home team)
+  const hexRgb = (h) => { const m = /^#?([0-9a-f]{6})$/i.exec(String(h || "")); if (!m) return null; const n = parseInt(m[1], 16); return [(n >> 16) & 255, (n >> 8) & 255, n & 255]; };
+  const lum = (c) => { const f = (v) => { v /= 255; return v <= 0.03928 ? v / 12.92 : Math.pow((v + 0.055) / 1.055, 2.4); }; return 0.2126 * f(c[0]) + 0.7152 * f(c[1]) + 0.0722 * f(c[2]); };
+  const mixW = (c, k) => c.map((v) => Math.round(v + (255 - v) * k));
+  function teamTheme(G) {
+    const w = { a: 0, h: 0 };
+    for (const e of G.entries) if (e.sel && e.sel.m !== "tot" && (e.sel.s === "a" || e.sel.s === "h")) w[e.sel.s] += e.leg == null ? e.b.units : e.b.units * 0.5;
+    const t = w.a > w.h ? G.g.a : G.g.h;
+    const c1 = hexRgb(t.col) || [80, 90, 110], c2 = hexRgb(t.alt) || c1;
+    // the accent is whichever of the two colors reads on a dark screen; too dark gets lifted toward white
+    let acc = lum(c1) >= lum(c2) && lum(c1) > 0.06 ? c1 : lum(c2) > 0.06 ? c2 : c1;
+    if (lum(acc) < 0.12) acc = mixW(acc, 0.45);
+    const base = lum(c1) <= lum(c2) ? c1 : c2;
+    return { t, acc: `rgb(${acc.join(",")})`, accA: `rgba(${acc.join(",")},.22)`, base: `rgba(${base.join(",")},.55)`, c1: `rgb(${c1.join(",")})`, c2: `rgb(${c2.join(",")})` };
+  }
+  // ---------- standings ----------
+  function standings(range) {
+    const start = rangeStart(range), ppl = new Map();
+    const get = (b) => { const k = personKey(b); if (!ppl.has(k)) ppl.set(k, { k, b, name: personName(b), col: personCol(b), me: isMe(b), done: [], all: [], open: [] }); return ppl.get(k); };
+    for (const b of S.bets.values()) {
+      const p = get(b);
+      if (b.status === "open") p.open.push(b);
+      else if (b.settledAt) { p.all.push(b); if (b.settledAt >= start) p.done.push(b); }
+    }
+    const rows = [...ppl.values()].filter((p) => p.open.length || p.done.length || p.me);
+    for (const p of rows) {
+      p.done.sort((x, y) => x.settledAt - y.settledAt); p.all.sort((x, y) => x.settledAt - y.settledAt);
+      p.w = p.done.filter((x) => outcome(x) === "W").length; p.l = p.done.filter((x) => outcome(x) === "L").length; p.p = p.done.length - p.w - p.l;
+      p.net = p.done.reduce((a, x) => a + netOf(x), 0);
+      p.risk = p.done.reduce((a, x) => a + (outcome(x) === "P" ? 0 : x.units), 0);
+      p.roi = p.risk ? p.net / p.risk : null; p.hit = p.w + p.l ? p.w / (p.w + p.l) : null;
+      let st = 0, last = "";
+      for (let i = p.all.length - 1; i >= 0; i--) { const o = outcome(p.all[i]); if (o !== "W" && o !== "L") continue; if (!last) last = o; if (o !== last) break; st++; }
+      p.st = st; p.sd = last;
+      p.last5 = p.all.filter((x) => outcome(x) !== "P").slice(-5).map(outcome);
+      p.toWin = p.open.reduce((a, x) => a + x.units * ppu(x.odds), 0);
+      p.live = p.open.map((x) => (x.kind !== "parlay" && x.sel ? evalSel(x.sel) : null)).filter((ev) => ev && !ev.fin);
+      p.heat = (p.sd === "W" && p.st >= 3) || (p.net >= 3 && p.w >= 2) ? "fire" : (p.sd === "L" && p.st >= 3) || (p.net <= -3 && p.l >= 2) ? "ice" : p.sd === "W" && p.st === 2 ? "warm" : p.sd === "L" && p.st === 2 ? "cool" : "";
+    }
+    rows.sort((x, y) => y.net - x.net || y.w - x.w || x.l - y.l || Number(y.me) - Number(x.me));
+    return rows;
+  }
+  function awards(rows) {
+    const out = [], all = rows.flatMap((p) => p.done.map((b) => ({ p, b })));
+    const best = (l, f) => l.reduce((a, x) => (a == null || f(x) > f(a) ? x : a), null);
+    const hot = best(rows.filter((p) => p.sd === "W" && p.st >= 2), (p) => p.st); if (hot) out.push({ ic: "🔥", t: "Heater", p: hot, d: `${hot.st} straight wins` });
+    const cold = best(rows.filter((p) => p.sd === "L" && p.st >= 2), (p) => p.st); if (cold) out.push({ ic: "🧊", t: "Ice cold", p: cold, d: `${cold.st} straight losses` });
+    const big = best(all.filter((x) => outcome(x.b) === "W"), (x) => netOf(x.b)); if (big) out.push({ ic: "💰", t: "Biggest hit", p: big.p, d: `${big.b.pick} · ${fU(netOf(big.b), true)} (${fUSD(netOf(big.b) * S.unit, true)})` });
+    const long = best(all.filter((x) => outcome(x.b) === "W" && x.b.odds >= 200), (x) => x.b.odds); if (long) out.push({ ic: "🚀", t: "Longshot", p: long.p, d: `${long.b.pick} at ${fOdds(long.b.odds)}` });
+    const sharp = best(rows.filter((p) => p.w + p.l >= 3 && p.hit > 0.5), (p) => p.hit + p.w * 0.001); if (sharp) out.push({ ic: "🎯", t: "Sharpshooter", p: sharp, d: `${sharp.w}-${sharp.l} · ${Math.round(sharp.hit * 100)}% hit` });
+    const beat = best(all.filter((x) => x.b.kind === "parlay" && outcome(x.b) === "L" && Array.isArray(x.b.legStatus) && x.b.legStatus.filter((s) => s === "miss").length === 1 && x.b.legStatus.filter((s) => s === "hit").length >= 2), (x) => x.b.legStatus.length);
+    if (beat) out.push({ ic: "💔", t: "Bad beat", p: beat.p, d: `${beat.b.legStatus.length - 1}/${beat.b.legStatus.length} legs hit` });
+    else { const ouch = best(all.filter((x) => outcome(x.b) === "L" && x.b.units >= 1), (x) => x.b.units); if (ouch) out.push({ ic: "💔", t: "Bad beat", p: ouch.p, d: `${ouch.b.pick} · ${fU(netOf(ouch.b), true)}` }); }
+    const brick = best(rows.filter((p) => p.l >= 3), (p) => p.l - p.w * 0.5); if (brick && brick !== sharp) out.push({ ic: "🧱", t: "Bricklayer", p: brick, d: `${brick.l} losses` });
+    const tails = all.filter((x) => x.b.tail && outcome(x.b) === "W"), tk = best(rows.filter((p) => tails.some((x) => x.p === p)), (p) => tails.filter((x) => x.p === p).reduce((a, x) => a + netOf(x.b), 0));
+    if (tk) { const n = tails.filter((x) => x.p === tk).reduce((a, x) => a + netOf(x.b), 0); out.push({ ic: "🤝", t: "Best tail", p: tk, d: `${fU(n, true)} riding someone else's picks` }); }
+    return out;
+  }
+  // head to head: people on opposite sides of the same game, settled in the range
+  function h2hTally(range) {
+    const start = rangeStart(range), done = [...S.bets.values()].filter((b) => b.status !== "open" && b.settledAt >= start && sideKey(b));
+    const pairs = new Map();
+    for (let i = 0; i < done.length; i++) for (let j = i + 1; j < done.length; j++) {
+      const x = done[i], y = done[j];
+      if (personKey(x) === personKey(y) || !against(x, y)) continue;
+      const ox = outcome(x), oy = outcome(y); if (ox === oy) continue;
+      const [a, b] = personKey(x) < personKey(y) ? [x, y] : [y, x], k = personKey(a) + "|" + personKey(b);
+      if (!pairs.has(k)) pairs.set(k, { a, b, wa: 0, wb: 0 });
+      const pr = pairs.get(k); if (outcome(a) === "W") pr.wa++; else if (outcome(b) === "W") pr.wb++;
+    }
+    return [...pairs.values()].sort((x, y) => y.wa + y.wb - (x.wa + x.wb)).slice(0, 4);
+  }
+  const pct = (v) => (v == null ? "–" : Math.round(v * 100) + "%");
+  function rail() {
+    const rows = standings(S.range), lbl = RANGE_LABEL[S.range];
+    const lead = rows[0] && rows[0].net > 0.004 && (!rows[1] || rows[0].net - rows[1].net > 0.004) ? rows[0].k : null;
+    const heatTag = (p) => (p.heat === "fire" ? `<span class="rb-heat fire">🔥 W${p.st}</span>` : p.heat === "ice" ? `<span class="rb-heat ice">🧊 L${p.st}</span>` : p.st >= 2 ? `<span class="rb-heat ${p.sd === "W" ? "warm" : "cool"}">${p.sd}${p.st}</span>` : "");
+    const lb = rows.map((p, i) => {
+      const winning = p.live.filter((ev) => ev.res === "W").length;
+      return `<div class="rb-lr${p.heat ? " " + p.heat : ""}${p.k === lead ? " lead" : ""}" data-k="${esc(p.k)}" style="--c:${p.col}">
+        <span class="rk num">${i + 1}</span>
+        <span class="rb-av big" style="--c:${p.col}">${esc(p.name.slice(0, 1).toUpperCase())}${p.k === lead ? '<s class="crown">👑</s>' : ""}</span>
+        <div class="nm"><b>${esc(p.name)}</b>${heatTag(p)}</div>
+        <div class="net num ${cls(p.net)}">${fU(p.net, true)}<small>${fUSD(p.net * S.unit, true)}</small></div>
+        <div class="ln num">${p.w + p.l + p.p ? `${p.w}-${p.l}${p.p ? "-" + p.p : ""} · ${pct(p.hit)} hit · ROI ${p.roi == null ? "–" : (p.roi > 0 ? "+" : "") + Math.round(p.roi * 100) + "%"}` : "No results yet"}</div>
+        <div class="l5">${p.last5.map((o) => `<i class="${o === "W" ? "w" : "l"}"></i>`).join("")}</div>
+        <div class="op num">${p.open.length ? `${p.open.length} open${p.live.length ? ` · ${winning}/${p.live.length} winning` : ""} · to win ${fU(p.toWin)}` : "No open bets"}</div></div>`;
+    }).join("");
+    const aw = awards(rows);
+    const awHtml = aw.length ? `<section class="rb-sec"><h3>Awards <span>${esc(lbl)}</span></h3>${aw.map((a) => `<div class="rb-aw"><span class="ic">${a.ic}</span><div><b>${a.t}</b><small>${esc(a.d)}</small></div>${avHtml(a.p.b)}<span class="who">${esc(a.p.name)}</span></div>`).join("")}</section>` : "";
+    const hh = h2hTally(S.range);
+    const hhHtml = hh.length ? `<section class="rb-sec"><h3>Head to head <span>${esc(lbl)}</span></h3>${hh.map((x) => `<div class="rb-hh">${avHtml(x.a)}<b>${esc(personName(x.a))}</b><span class="num sc"><em class="${x.wa > x.wb ? "w" : ""}">${x.wa}</em> – <em class="${x.wb > x.wa ? "w" : ""}">${x.wb}</em></span><b>${esc(personName(x.b))}</b>${avHtml(x.b)}</div>`).join("")}</section>` : "";
+    const start = rangeStart(S.range);
+    const res = [...S.bets.values()].filter((b) => b.status !== "open" && b.settledAt >= start).sort((x, y) => y.settledAt - x.settledAt).slice(0, 6);
+    const resHtml = res.length ? `<section class="rb-sec"><h3>Results</h3>${res.map((b) => { const o = outcome(b); return `<div class="rb-res ${o === "W" ? "w" : o === "L" ? "l" : "p"}">${avHtml(b)}<span class="pk">${esc(b.kind === "parlay" ? (b.legs || []).length + "-leg parlay" : b.pick)}</span><span class="num v">${o === "W" ? "✓" : o === "L" ? "✕" : "–"} ${fU(netOf(b), true)}</span></div>`; }).join("")}</section>` : "";
+    return [`<section class="rb-sec lb"><h3>Leaderboard <span>${esc(lbl)}</span></h3>${lb}</section>`, awHtml + hhHtml + resHtml];
+  }
+  let rbPrime = null;
+  function renderRB() {
+    if (!document.body.classList.contains("tv") || !S.ready) return;
+    const games = new Map(), other = [], parlays = [];
+    for (const e of boardEntries()) {
+      const g = e.sel && e.sel.g != null ? S.games.get(String(e.sel.g)) : null;
+      if (e.leg != null && e.leg === 0 && e.b.status === "open") parlays.push(e.b);
+      if (!g) { if (e.leg == null) other.push(e); continue; }
+      if (!games.has(g.id)) games.set(g.id, { g, entries: [] });
+      games.get(g.id).entries.push(e);
+    }
+    const rank = (G) => ({ in: 0, pre: 1, post: 2 }[G.g.st] ?? 3);
+    const list = [...games.values()].sort((x, y) => rank(x) - rank(y) || (rank(x) === 1 ? x.g.t - y.g.t : new Set(y.entries.map((e) => personKey(e.b))).size - new Set(x.entries.map((e) => personKey(e.b))).size || y.entries.length - x.entries.length));
+    // prime time: one game, the room's team colors, a big scoreboard
+    const prime = slateMode() === "prime" && list.filter((G) => G.g.st !== "post").length === 1 ? list.find((G) => G.g.st !== "post") : null;
+    const body = document.body;
+    if (prime) {
+      const th = teamTheme(prime);
+      body.classList.add("prime");
+      for (const [k, v] of [["--tc", th.acc], ["--tcA", th.accA], ["--tcBase", th.base], ["--tc1", th.c1], ["--tc2", th.c2]]) body.style.setProperty(k, v);
+      $("#rbMark").innerHTML = th.t.lg ? `<img src="${esc(th.t.lg)}" alt="" referrerpolicy="no-referrer" onerror="this.remove()">` : "";
+      rbPrime = th.t.ab;
+    } else if (rbPrime) { body.classList.remove("prime"); $("#rbMark").innerHTML = ""; rbPrime = null; }
+    const html = list.map((G) => gameCard(G, G === prime)).join("") + parlayCard(parlays) + otherCard(other);
+    $("#rbGames").innerHTML = html || `<div class="rb-empty"><b>No bets on the board</b>Log a bet from your phone and it shows up here with everybody's.</div>`;
+    $("#rbGames").classList.toggle("one", list.length + (parlays.length ? 1 : 0) + (other.length ? 1 : 0) <= 1);
+    const [lbH, restH] = rail();
+    $("#rbLb").innerHTML = lbH; $("#rbRsc").innerHTML = restH;
+  }
   function niceStep(x) {
     const p = Math.pow(10, Math.floor(Math.log10(x))), m = x / p;
     return (m <= 1 ? 1 : m <= 2 ? 2 : m <= 5 ? 5 : 10) * p;
@@ -2655,7 +3083,7 @@ body.tv.idle, body.tv.idle * { cursor: none !important; }
   // ---------- sheets ----------
   function openSheet(id) { $(id).hidden = false; }
   // keep every open screen current: when a new version is up, reload it (never mid-form or mid-animation)
-  const BUILD = "20261012012000";
+  const BUILD = "20261012153946";
   function checkBuild() {
     if (BUILD === "dev") return;
     fetch("version.json?t=" + Date.now(), { cache: "no-store" }).then((r) => (r.ok ? r.json() : null)).then((j) => {
@@ -3036,6 +3464,7 @@ body.tv.idle, body.tv.idle * { cursor: none !important; }
       S.room = roomGroups();
       renderBets(ev.filter((b) => b.status === "open" && isMe(b)).sort((a, b) => b.placedAt - a.placedAt), ev, rangeStart(S.range));
       renderRoom();
+      renderRB();
       fitTV();
     }
     S.dayKey = k;
