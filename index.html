@@ -3713,7 +3713,7 @@ body.tv .rb-pl .pl-legs .t { font-size: 16px; }
   // ---------- sheets ----------
   function openSheet(id) { $(id).hidden = false; }
   // keep every open screen current: when a new version is up, reload it (never mid-form or mid-animation)
-  const BUILD = "20261012012000";
+  const BUILD = "20261012213549";
   function checkBuild() {
     if (BUILD === "dev") return;
     fetch("version.json?t=" + Date.now(), { cache: "no-store" }).then((r) => (r.ok ? r.json() : null)).then((j) => {
