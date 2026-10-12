@@ -3595,7 +3595,7 @@ body.tv.prime .rb-fld .ddx { font-size: 20px; }
   // ---------- sheets ----------
   function openSheet(id) { $(id).hidden = false; }
   // keep every open screen current: when a new version is up, reload it (never mid-form or mid-animation)
-  const BUILD = "20261012200235";
+  const BUILD = "20261012201355";
   function checkBuild() {
     if (BUILD === "dev") return;
     fetch("version.json?t=" + Date.now(), { cache: "no-store" }).then((r) => (r.ok ? r.json() : null)).then((j) => {
@@ -4052,7 +4052,7 @@ body.tv.prime .rb-fld .ddx { font-size: 20px; }
     const si = c.situation, lp = si && si.lastPlay;
     if (si) g.sit = { rz: !!si.isRedZone, pos: si.possession || null, dd: si.downDistanceText || si.shortDownDistanceText || "", yl: typeof si.yardLine === "number" ? si.yardLine : null, dn: si.down || null, ds: si.distance ?? null,
       to: { a: si.awayTimeouts ?? null, h: si.homeTimeouts ?? null }, wp: lp && lp.probability && typeof lp.probability.homeWinPercentage === "number" ? lp.probability.homeWinPercentage : null,
-      dr: lp && lp.drive ? { t: lp.drive.description || "", s: lp.drive.start && typeof lp.drive.start.yardLine === "number" ? lp.drive.start.yardLine : null } : null, lp: lp ? { id: String(lp.id), type: (lp.type && lp.type.text) || "", text: lp.text || "", team: lp.team && lp.team.id,
+      dr: lp && lp.drive ? { t: lp.drive.description || "", s: lp.drive.start && typeof lp.drive.start.yardLine === "number" ? lp.drive.start.yardLine : null } : null, lp: lp ? { id: String(lp.id), type: (lp.type && lp.type.text) || "", text: lp.text || "", team: lp.team && lp.team.id, st: lp.start && lp.start.team ? lp.start.team.id : null, yd: typeof lp.statYardage === "number" ? lp.statYardage : null,
       ath: (lp.athletesInvolved || []).slice(0, 3).map((a) => ({ nm: a.displayName || a.fullName || "", sh: a.shortName || "", hs: a.headshot || "", j: a.jersey || "", pos: a.position || "", tm: a.team && a.team.id })) } : null };
     const o = (c.odds || [])[0];
     if (o) {
@@ -4960,6 +4960,7 @@ body.tv.prime .rb-fld .ddx { font-size: 20px; }
     clip("cfb/cfb44", "We Bama, that's what we do", "hype up", 29.6, ALA),
     clip("cfb/cfb45", "Dread it, run from it", "hype up", 31.4, ALA),
     clip("cfb/cfb46", "We Bama, part 3", "hype up", 31.0, ALA),
+    clip("cfb/cfb47", "Brady to Ty Simpson", "hype up", 13.2, { ...ALA, pl: "simpson" }),
     // NFL edits: highlight reels also play right after a touchdown for you; team reels never when you're against that team
     clip("nfl/nfl01", "Olave highlight reel", "hype up td", 16.6, nflTeam("NO")),
     clip("nfl/nfl02", "Panthers x Stitch", "hype up", 16.6, nflTeam("CAR")),
@@ -4987,6 +4988,36 @@ body.tv.prime .rb-fld .ddx { font-size: 20px; }
     clip("nfl/nfl24", "TD celebrations", "up win td", 20.6, NFL),
     clip("nfl/nfl25", "TD celebrations, part 2", "up win td", 20.1, NFL),
     clip("nfl/nfl26", "TD celebrations, part 3", "up win td", 18.6, NFL),
+    // Rams edits. pl: whose edit it is; his touchdowns and his big plays bring it up (Donald's ride the defense)
+    clip("nfl/nfl27", "Rams: lights out", "hype up td", 11.4, nflTeam("LAR")),
+    clip("nfl/nfl28", "Aaron Donald: 99", "hype up td", 35.1, { ...nflTeam("LAR"), pl: "donald" }),
+    clip("nfl/nfl29", "Stafford: the franchise", "hype up td", 30.3, { ...nflTeam("LAR"), pl: "stafford" }),
+    clip("nfl/nfl30", "Davante: they said", "hype up td", 32.1, { ...nflTeam("LAR"), pl: "davante" }),
+    clip("nfl/nfl31", "Stafford vs the Seahawks", "hype up td", 37.2, { ...nflTeam("LAR"), pl: "stafford" }),
+    clip("nfl/nfl32", "Rams: the tunnel", "hype up td", 25.1, { ...nflTeam("LAR"), songId: "lar06" }),
+    clip("nfl/nfl33", "Rams: the tunnel, part 2", "hype up td", 24.3, { ...nflTeam("LAR"), songId: "lar06" }),
+    clip("nfl/nfl34", "Rams: in your path", "hype up td", 39.3, nflTeam("LAR")),
+    clip("nfl/nfl35", "Davante vs the Giants", "hype up td", 29.3, { ...nflTeam("LAR"), pl: "davante", songId: "lar09" }),
+    clip("nfl/nfl36", "Davante vs the Giants, part 2", "hype up td", 31.0, { ...nflTeam("LAR"), pl: "davante", songId: "lar09" }),
+    clip("nfl/nfl37", "Aaron Donald: Thanos is back", "hype up td", 37.4, { ...nflTeam("LAR"), pl: "donald" }),
+    clip("nfl/nfl38", "Davante: Ramz Films", "hype up td", 18.6, { ...nflTeam("LAR"), pl: "davante" }),
+    clip("nfl/nfl39", "Stafford: dog", "hype up td", 23.6, { ...nflTeam("LAR"), pl: "stafford" }),
+    clip("nfl/nfl40", "Stafford: MVP", "hype up td", 22.1, { ...nflTeam("LAR"), pl: "stafford" }),
+    clip("nfl/nfl41", "Puka Nacua", "hype up td", 18.0, { ...nflTeam("LAR"), pl: "puka" }),
+    clip("nfl/nfl42", "Kyren Williams", "hype up td", 40.9, { ...nflTeam("LAR"), pl: "kyren" }),
+    clip("nfl/nfl43", "Davante: the Packers days", "hype up td", 14.5, { ...nflTeam("LAR"), pl: "davante" }),
+    clip("nfl/nfl44", "Stafford: the Georgia kid", "hype up td", 26.1, { ...nflTeam("LAR"), pl: "stafford", songId: "lar18" }),
+    clip("nfl/nfl45", "Stafford: the Georgia kid, part 2", "hype up td", 34.2, { ...nflTeam("LAR"), pl: "stafford", songId: "lar18" }),
+    clip("nfl/nfl46", "Stafford: they're laughing at you", "hype up td", 17.4, { ...nflTeam("LAR"), pl: "stafford" }),
+    clip("nfl/nfl47", "Davante: 17", "hype up td", 21.3, { ...nflTeam("LAR"), pl: "davante" }),
+    clip("nfl/nfl48", "Puka: 12", "hype up td", 36.0, { ...nflTeam("LAR"), pl: "puka", songId: "lar22" }),
+    clip("nfl/nfl49", "Puka: 12, part 2", "hype up td", 24.1, { ...nflTeam("LAR"), pl: "puka", songId: "lar22" }),
+    clip("nfl/nfl50", "Rams: Sunday night", "hype up td", 34.2, nflTeam("LAR")),
+    clip("nfl/nfl51", "Puka: scandalous", "hype up td", 17.5, { ...nflTeam("LAR"), pl: "puka" }),
+    clip("nfl/nfl52", "Stafford: the long road", "hype up td", 29.5, { ...nflTeam("LAR"), pl: "stafford", songId: "lar26" }),
+    clip("nfl/nfl53", "Stafford: the long road, part 2", "hype up td", 28.6, { ...nflTeam("LAR"), pl: "stafford", songId: "lar26" }),
+    clip("nfl/nfl54", "Stafford: MVP stuff", "hype up td", 21.7, { ...nflTeam("LAR"), pl: "stafford", songId: "lar28" }),
+    clip("nfl/nfl55", "Stafford: MVP stuff, part 2", "hype up td", 39.1, { ...nflTeam("LAR"), pl: "stafford", songId: "lar28" }),
   ];
   // library clips are big once decoded, so only the last couple stay in memory
   const clipBufs = new Map();
@@ -5560,12 +5591,14 @@ body.tv.prime .rb-fld .ddx { font-size: 20px; }
     if (sp && !card.hidden && box.dataset.g === String(g.id)) {
       const pl = box.querySelector(".bc-play span"); if (pl && text) pl.textContent = text;
       const tg = box.querySelector(".bc-tag span"); if (tg && kindLabel) tg.textContent = kindLabel;
+      if (PC_LAST && PC_LAST.g === String(g.id)) { PC_LAST.text = text || PC_LAST.text; PC_LAST.kind = kind || PC_LAST.kind; }
       return box.dataset.who || "";
     }
     const people = ov ? ov.people : e.ev === "redzone" ? [] : pcPeople(lp.ath, text, side, g);
     const C = bcCols(tm); card.style.setProperty("--tc", C.tc); card.style.setProperty("--ta", C.ta); card.style.setProperty("--tk", C.tk);
     const wm = $("#pcWm"); if (tm && tm.lg) { wm.src = tm.lg; wm.hidden = false; } else { wm.removeAttribute("src"); wm.hidden = true; }
     const li = pcLead(people, text, kind), lead = people[li], other = people.find((x, j) => j !== li);
+    PC_LAST = { g: String(g.id), text, kind, lead: lead ? lead.nm : "", other: other ? other.nm : "" };
     const nm = bcName(lead && lead.nm), bets = pcBets(g, b);
     const meta = lead ? [lead.j ? "#" + lead.j : "", lead.pos, tm ? tm.nm || tm.ab : ""].filter(Boolean) : [];
     const assist = other ? (other.pos === "QB" && /pass/i.test(kind + " " + text) ? "Pass from " : "With ") + other.nm : "";
@@ -5819,11 +5852,67 @@ body.tv.prime .rb-fld .ddx { font-size: 20px; }
     const P = pickClip(newSong(pool)) || pickClip(newSong(edits));
     if (P) react(b, "good", P, why);
   }
+  // ---------- player edits: his touchdown or his big play brings up his own edit ----------
+  const PL_NAMES = { donald: "Aaron Donald", stafford: "Matthew Stafford", davante: "Davante Adams", puka: "Puka Nacua", kyren: "Kyren Williams" };
+  // play-by-play writes "M.Stafford", scoring plays write "Matthew Stafford": either counts
+  const PL_RE = Object.fromEntries(Object.entries(PL_NAMES).map(([k, n]) => { const [f, l] = n.split(" "); return [k, new RegExp(`\\b(?:${f}\\s+|${f[0]}\\.\\s?)${l}\\b`, "i")]; }));
+  const plIn = (x) => Object.keys(PL_RE).find((k) => PL_RE[k].test(x || "")) || null;
+  const plClips = (fan, pl) => CLIPS.filter((c) => c.pl === pl && (pl === "simpson" || c.fan === fan));
+  let PC_LAST = null;
+  // a touchdown: the scorer's edit; a pick-six or scoop-and-score is the defense's (Donald); a catch by somebody without one is Stafford's throw
+  function scorerPool(own, g) {
+    const last = PC_LAST && PC_LAST.g === String(g.id) ? PC_LAST : null; if (!last) return null;
+    const by = (k) => { const l = own.filter((c) => c.pl === k); return l.length ? l : null; };
+    if (/interception|fumble|blocked|defensive/i.test(last.kind)) return by("donald");
+    const sc = plIn(last.lead) || plIn(scorerOf(last.text));
+    if (sc && by(sc)) return by(sc);
+    if (/pass/i.test(last.kind + " " + last.text) && (plIn(last.other) === "stafford" || PL_RE.stafford.test(last.text))) return by("stafford");
+    return null;
+  }
+  // someone in the room on this side of this game (a straight bet, a TD scorer, or a parlay leg)
+  function backer(g, side) {
+    for (const b of S.bets.values()) { if (b.status !== "open") continue; for (const x of selsOf(b)) if (x && String(x.g) === String(g.id) && x.s === side && x.m !== "tot") return b; }
+    return null;
+  }
+  // the plays that get an edit without a score: the defense takes it away (Donald), Stafford gives it away (Ty Simpson),
+  // Kyren breaks one (12+), Stafford goes deep (20+)
+  function bigPlay(g, lp) {
+    const type = lp.type || "", txt = lp.text || "", all = type + " " + txt, offId = String(lp.st || lp.team || "");
+    const off = offId === String(g.a.id) ? "a" : offId === String(g.h.id) ? "h" : null;
+    if (!off || /touchdown|no play|nullified|reversed|penalty/i.test(all)) return null; // touchdowns get their own moment; wiped-out plays get nothing
+    const def = off === "a" ? "h" : "a", ath = (lp.ath || []).map((a) => a.nm).join(" ");
+    const has = (k) => PL_RE[k].test(txt) || PL_RE[k].test(ath);
+    const yd = typeof lp.yd === "number" ? lp.yd : Number((txt.match(/for (-?\d+) yards?/i) || [])[1]);
+    const word = /interception/i.test(type) ? "Interception" : /sack/i.test(type) ? "Sack" : /fumble recovery \(opponent\)/i.test(type) ? "Fumble" : null;
+    if (word) return has("stafford") ? { side: off, pl: "simpson", mood: "bad", why: `${word} · get Ty Simpson in there` } : { side: def, pl: "donald", mood: "good", word, why: `${word} · ${g[def].nm || g[def].ab} D` };
+    if (/rush/i.test(type) && has("kyren") && yd >= 12) return { side: off, pl: "kyren", mood: "good", word: "Big run", why: `Kyren for ${yd}` };
+    if (/pass/i.test(type) && !/incomplet/i.test(all) && has("stafford") && yd >= 20) return { side: off, pl: "stafford", mood: "good", word: "Deep ball", why: `Stafford deep · ${yd} yds` };
+    return null;
+  }
+  const playSeen = new Map();
+  function playWatch() {
+    if (!S.ready || !clipsOn()) return false;
+    const now = Date.now(); let fired = false;
+    for (const g of S.games.values()) {
+      if (g.sport !== "NFL" || g.st !== "in" || !g.sit || !g.sit.lp || !g.sit.lp.id) continue;
+      const id = g.sit.lp.id, prev = playSeen.get(g.id); if (prev === id) continue;
+      playSeen.set(g.id, id);
+      if (prev === undefined || fired) continue; // first look: nothing from before we were watching
+      const hit = bigPlay(g, g.sit.lp); if (!hit) continue;
+      const t = g[hit.side], pool = plClips(t.ab, hit.pl), b = backer(g, hit.side);
+      if (!pool.length || !b || clipBusy() || now - lastAny < 15e3) continue;
+      const P = pickClip(pool); if (!P) continue;
+      lastAny = now; lastKind = "play"; fired = true;
+      if (hit.mood === "good") pipTeam = { t, word: hit.word || "Big play" };
+      react(b, hit.mood, P, hit.why);
+    }
+    return fired;
+  }
   function teamHype(b, g, e, why) {
     if (!clipsOn() || !g || !e.side) return;
-    const t = g[e.side], own = CLIPS.filter((c) => c.fan === t.ab && (!c.sport || c.sport === g.sport));
+    const t = g[e.side], own = CLIPS.filter((c) => c.fan === t.ab && (!c.sport || c.sport === g.sport) && c.pl !== "simpson");
     const scenes = CLIPS.filter((c) => c.base.startsWith("sounds/aura/") && !c.dj && forSport(c, g.sport));
-    const P = (own.length && pickClip(own)) || pickClip(newSong(scenes));
+    const P = (own.length && pickClip(scorerPool(own, g) || own)) || pickClip(newSong(scenes));
     if (!P) return;
     pipTeam = { t, word: PC_TYPE[e.ev] || "Score" };
     react(b, "good", P, why);
@@ -5853,6 +5942,7 @@ body.tv.prime .rb-fld .ddx { font-size: 20px; }
     if (!S.ready) return;
     const now = Date.now(), swings = [], seenG = new Set(), mode = slateMode(), busy = mode === "busy";
     showMode();
+    if (playWatch()) { render(); return; }
     for (const b of S.bets.values()) {
       if (b.status !== "open") { lastRes.delete(b.id); legHits.delete(b.id); lastM.delete(b.id); continue; }
       for (const s of selsOf(b)) {
@@ -5966,7 +6056,8 @@ body.tv.prime .rb-fld .ddx { font-size: 20px; }
     // nothing live (halftime, before kickoff): his scene rides on your bet anyway
     const pick = live.length ? live.sort((x, y) => (lastFeat.get(x.b.id) || 0) - (lastFeat.get(y.b.id) || 0))[0] : { b: mine.find((x) => phase(x) === "live") || mine[0], state: "" };
     const scenes = CLIPS.filter((c) => c.base.startsWith("sounds/aura/") && !c.dj && fits(c, pick.b) && forSport(c, (gameFor(pick.b) || {}).sport || sportOf(pick.b)));
-    const P = turn === 2 && scenes.length ? pickClip(newSong(scenes)) : pickClip(poolFor(pick.b, pick.state === "W" ? "rap" : pick.state === "C" ? "comeback" : "fill"));
+    const fanP = prime && pick.state !== "C" ? CLIPS.filter((c) => c.fan && c.sport === "NFL" && c.fan === myTeam(pick.b) && c.pl !== "simpson") : [];
+    const P = turn === 2 && scenes.length ? pickClip(newSong(scenes)) : fanP.length && Math.random() < 0.6 ? pickClip(newSong(fanP)) : pickClip(poolFor(pick.b, pick.state === "W" ? "rap" : pick.state === "C" ? "comeback" : "fill"));
     if (!P) return;
     lastAny = now; lastKind = "pop"; lastFeat.set(pick.b.id, now);
     react(pick.b, pick.state === "W" ? "good" : "mid", P, pick.state === "W" ? "Cashing" : pick.state === "C" ? "Comeback" : null);
