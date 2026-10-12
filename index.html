@@ -2655,7 +2655,7 @@ body.tv.idle, body.tv.idle * { cursor: none !important; }
   // ---------- sheets ----------
   function openSheet(id) { $(id).hidden = false; }
   // keep every open screen current: when a new version is up, reload it (never mid-form or mid-animation)
-  const BUILD = "20261012004528";
+  const BUILD = "20261012005624";
   function checkBuild() {
     if (BUILD === "dev") return;
     fetch("version.json?t=" + Date.now(), { cache: "no-store" }).then((r) => (r.ok ? r.json() : null)).then((j) => {
@@ -3892,6 +3892,7 @@ body.tv.idle, body.tv.idle * { cursor: none !important; }
     clip("aura/td", "Goldie: touchdown", "up win", 17.0, { football: true }),
     clip("aura/slots", "Goldie: jackpot", "up win vibe", 18.0, { song: "I'm Dat N****", artist: "Future" }),
     clip("aura/hero", "Goldie: hero landing", "up win", 17.0),
+    clip("aura/paid", "Goldie: paid", "up win", 17.0),
     clip("clips/w02", "Car ride laughs", "up win", 22.45),
     clip("clips/w03", "Tiger: Pure.", "up win", 30),
     clip("clips/w04", "Migos carpool", "up win vibe", 30, { song: "Walk It Talk It", artist: "Migos ft. Drake" }),
@@ -6310,6 +6311,7 @@ body.tv.idle, body.tv.idle * { cursor: none !important; }
     { name: "Touchdown", id: "td", len: 17.0, hit: 14.03, cls: "lock", fits: (b) => footballBet(b) },
     { name: "Jackpot", id: "slots", len: 18.0, hit: 14.37, cls: "lock" },
     { name: "Hero landing", id: "hero", len: 17.0, hit: 13.03, cls: "lock", l3: [0.5, 3.6] },
+    { name: "Paid", id: "paid", len: 17.0, hit: 12.82, cls: "lock", l3: [2.3, 4.0] },
   ];
   const edSrc = (c) => vidSrc("sounds/aura/" + c.id), edAud = (c) => "../aura/" + c.id;
   const edPreV = {};
@@ -6842,7 +6844,6 @@ body.tv.idle, body.tv.idle * { cursor: none !important; }
   const QUICK = [
     ...EDITS.map((c) => ({ name: c.name, run: (b, n) => introEdit(c, b, n), pre: () => edPre(c), w: 2, fits: c.fits })),
     { name: "Cash dance", run: introDance, mus: "dance" },
-    { name: "Paid", run: introStamp, mus: "stamp" },
     { name: "Dear sportsbook", run: introMoon, mus: "moon" },
     { name: "Shake it", run: introTwerk, mus: "twerk" },
     { name: "Lock it up", run: introLock, mus: "lock" },
