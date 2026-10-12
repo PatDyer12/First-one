@@ -2655,7 +2655,7 @@ body.tv.idle, body.tv.idle * { cursor: none !important; }
   // ---------- sheets ----------
   function openSheet(id) { $(id).hidden = false; }
   // keep every open screen current: when a new version is up, reload it (never mid-form or mid-animation)
-  const BUILD = "20261012005624";
+  const BUILD = "20261012012000";
   function checkBuild() {
     if (BUILD === "dev") return;
     fetch("version.json?t=" + Date.now(), { cache: "no-store" }).then((r) => (r.ok ? r.json() : null)).then((j) => {
@@ -3880,19 +3880,20 @@ body.tv.idle, body.tv.idle * { cursor: none !important; }
     clip("cfb/cfb05", "I don't lose", "down comeback", 28),
     clip("cfb/cfb07", "Brick by brick", "down comeback", 25.8),
     clip("cfb/cfb14", "You owe them something", "down hype comeback", 33.4),
-    clip("aura/sky", "Goldie: sent it", "up win", 17.0),
+    clip("aura/sky", "Goldie: sent it", "up win", 17.0, { songId: "p01" }),
     clip("aura/whip", "Goldie: new whip", "up win vibe", 20.6, { song: "I'm Dat N****", artist: "Future" }),
     clip("aura/war", "Goldie: went to war", "up win", 19.4),
     clip("aura/strap", "Goldie: strapped", "up win", 17.3),
     clip("aura/smoke", "Goldie: really high", "up win", 16.9),
     clip("aura/aura", "Goldie: aura maxed", "up win", 15.6),
     clip("aura/rain", "Goldie: made it rain", "up win vibe", 18.3, { song: "All There", artist: "Jeezy ft. Bankroll Fresh" }),
-    clip("aura/take", "Goldie: pulled up", "up win", 20.0),
+    clip("aura/take", "Goldie: pulled up", "up win", 20.0, { songId: "bp2" }),
     clip("aura/bike", "Goldie: wheelie", "up win vibe", 18.0, { song: "All There", artist: "Jeezy ft. Bankroll Fresh" }),
-    clip("aura/td", "Goldie: touchdown", "up win", 17.0, { football: true }),
+    clip("aura/td", "Goldie: touchdown", "up win", 17.0, { football: true, songId: "p01" }),
     clip("aura/slots", "Goldie: jackpot", "up win vibe", 18.0, { song: "I'm Dat N****", artist: "Future" }),
-    clip("aura/hero", "Goldie: hero landing", "up win", 17.0),
-    clip("aura/paid", "Goldie: paid", "up win", 17.0),
+    clip("aura/hero", "Goldie: hero landing", "up win", 17.0, { songId: "bp2" }),
+    clip("aura/paid", "Goldie: paid", "up win", 17.0, { songId: "p01" }),
+    clip("aura/lock", "Goldie: locked in", "up win", 17.0, { songId: "p01" }),
     clip("clips/w02", "Car ride laughs", "up win", 22.45),
     clip("clips/w03", "Tiger: Pure.", "up win", 30),
     clip("clips/w04", "Migos carpool", "up win vibe", 30, { song: "Walk It Talk It", artist: "Migos ft. Drake" }),
@@ -4305,7 +4306,7 @@ body.tv.idle, body.tv.idle * { cursor: none !important; }
   try { for (const [k, t] of JSON.parse(localStorage.getItem("sb-played") || "[]")) played.set(k, t); } catch (e) {}
   const clipKey = (p) => (p === "lockin" ? p : p.base);
   // several clips ride the same song: the song counts too, so a different clip with the song you just heard waits its turn
-  const songKey = (p) => (p && p !== "lockin" && p.song ? "song:" + p.song.toLowerCase() : null);
+  const songKey = (p) => (p && p !== "lockin" && (p.song || p.songId) ? "song:" + (p.song || p.songId).toLowerCase() : null);
   const lastPlayed = (p) => Math.max(played.get(clipKey(p)) || 0, (songKey(p) && played.get(songKey(p))) || 0);
   // anything played in the last 12 minutes, or with a song heard in the last 45 (across refreshes), sits out while
   // there's something fresher
@@ -6312,6 +6313,7 @@ body.tv.idle, body.tv.idle * { cursor: none !important; }
     { name: "Jackpot", id: "slots", len: 18.0, hit: 14.37, cls: "lock" },
     { name: "Hero landing", id: "hero", len: 17.0, hit: 13.03, cls: "lock", l3: [0.5, 3.6] },
     { name: "Paid", id: "paid", len: 17.0, hit: 12.82, cls: "lock", l3: [2.3, 4.0] },
+    { name: "Lock it up", id: "lock", len: 17.0, hit: 12.91, cls: "lock", l3: [0.5, 4.2] },
   ];
   const edSrc = (c) => vidSrc("sounds/aura/" + c.id), edAud = (c) => "../aura/" + c.id;
   const edPreV = {};
@@ -6339,9 +6341,10 @@ body.tv.idle, body.tv.idle * { cursor: none !important; }
       ctx.fillStyle = "#000"; ctx.fillRect(0, 0, W, H);
       edDraw(ctx, W, H, v);
       const ct = started ? v.currentTime : 0;
-      if (!s.hit && ((started && ct >= c.hit) || k >= c.hit + 1.5)) { s.hit = k; inSlam(c.name, b, n, c.cls); snSound("slam", 0.7, 0); }
+      if (!s.hit && ((started && ct >= c.hit) || k >= c.hit + 1.5)) { s.hit = k; if (c.loss) lossTitle(b, n, c.side); else { inSlam(c.name, b, n, c.cls); snSound("slam", 0.7, 0); } }
+      if (c.say && !s.said && ((started && ct >= c.say[0]) || k >= c.say[0] + 1.5)) { s.said = true; inVoice(c.say[1]); }
       const [l0, l1] = c.l3 || [0.5, 6];
-      if (!s.hit && k >= l0) inL3(ctx, W, H, k - l0, "Cashed", b.pick, Math.min(l1, c.hit - 1) - l0);
+      if (!s.hit && k >= l0) inL3(ctx, W, H, k - l0, c.loss ? "Final" : "Cashed", b.pick, Math.min(l1, c.hit - 1) - l0);
     } }];
     setTimeout(() => snd.stop(1), (c.len - 0.9) * 1000);
     return inRun({ len: c.len, cls: "clipv", shots, sounds: [], done: () => { clearTimeout(fallback); snd.stop(0.2); v.pause(); v.removeAttribute("src"); v.load(); } });
@@ -6846,7 +6849,6 @@ body.tv.idle, body.tv.idle * { cursor: none !important; }
     { name: "Cash dance", run: introDance, mus: "dance" },
     { name: "Dear sportsbook", run: introMoon, mus: "moon" },
     { name: "Shake it", run: introTwerk, mus: "twerk" },
-    { name: "Lock it up", run: introLock, mus: "lock" },
   ];
   let quickBag = [], quickLast = -1;
   function quickFill() {
@@ -6998,16 +7000,22 @@ body.tv.idle, body.tv.idle * { cursor: none !important; }
     ];
     return inRun({ len: L, cls: "lossv", shots, sounds: [] });
   }
+  // the wipeouts, rendered like his win scenes: sound effects instead of a song
+  const LOSS_EDITS = {
+    cliff: { name: "Cliff", id: "cliff", len: 9.0, hit: 6.5, loss: true, l3: [0.2, 2.2] },
+    train: { name: "Train", id: "train", len: 8.6, hit: 4.9, loss: true, side: true, l3: [0.2, 2.2], say: [6.0, "Fuck you"] },
+  };
+  const lossScene = (k, b, n) => { const c = LOSS_EDITS[k]; edPre(c); fx(() => introEdit(c, b, n)); };
   // a final loss: Goldie wipes out, or one of your loss clips, shuffled
   let lossBag = [];
   function lossReact(b, n) {
     if (!lossBag.length) lossBag = ["cliff", "train", "clip", "cliff", "train"].sort(() => Math.random() - 0.5);
     const k = lossBag.pop();
     if (k === "clip") { if (clipsOn()) setTimeout(() => { if (!clipBusy()) react(b, "bad", pickClip(libFor(b, ["down"])), "Final"); }, 2600); return; }
-    fx(() => (k === "cliff" ? introCliff : introTrain)(b, n));
+    lossScene(k, b, n);
   }
-  $("#inLossCliff").addEventListener("click", () => { closeSheets(); fx(() => introCliff(sample(-110, "Georgia −3.5"), -1)); });
-  $("#inLossTrain").addEventListener("click", () => { closeSheets(); fx(() => introTrain(sample(-110, "Georgia −3.5"), -1)); });
+  $("#inLossCliff").addEventListener("click", () => { closeSheets(); lossScene("cliff", sample(-110, "Georgia −3.5"), -1); });
+  $("#inLossTrain").addEventListener("click", () => { closeSheets(); lossScene("train", sample(-110, "Georgia −3.5"), -1); });
 
   // ---------- Coin Alert: full-screen win celebration ----------
   function coinAlert(pick, n) {
