@@ -1734,6 +1734,49 @@ body:not(.tv) [data-ids]:active { transform: scale(.99); }
 @media (prefers-reduced-motion: reduce) {
   .bc *, .bc *::before, .bc *::after { animation-duration: .01s !important; animation-delay: 0s !important; }
 }
+/* prime time: the drive on a field, timeouts, win probability; the lines before kickoff */
+.rb-fld { padding: 4px 18px 16px; display: grid; gap: 10px; }
+.rb-fld .fld { display: grid; grid-template-columns: 7% 1fr 7%; height: 74px; border-radius: 8px; overflow: hidden; background: #0f1a14; box-shadow: inset 0 0 0 1px rgba(255,255,255,.08); }
+.rb-fld .ez { display: grid; place-items: center; background: color-mix(in srgb, var(--c) 28%, #0b0e14); box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--c) 30%, transparent); }
+.rb-fld .ez span { font: 900 15px/1 var(--f-display); letter-spacing: .14em; color: rgba(255,255,255,.85); writing-mode: vertical-rl; transform: rotate(180deg); }
+.rb-fld .ez:last-child span { transform: none; }
+.rb-fld .pf { position: relative; background: repeating-linear-gradient(90deg, rgba(255,255,255,.035) 0 10%, transparent 10% 20%), linear-gradient(180deg, #13261b, #0f1d15); }
+.rb-fld .yd { position: absolute; inset: 0; background: repeating-linear-gradient(90deg, rgba(255,255,255,.16) 0 1px, transparent 1px 10%), repeating-linear-gradient(90deg, rgba(255,255,255,.07) 0 1px, transparent 1px 5%); }
+.rb-fld .yd span { position: absolute; bottom: 5px; transform: translateX(-50%); font: 700 11px/1 var(--f-num); letter-spacing: .04em; color: rgba(255,255,255,.32); }
+.rb-fld .drv { position: absolute; top: 34%; height: 32%; background: linear-gradient(90deg, color-mix(in srgb, var(--c) 10%, transparent), color-mix(in srgb, var(--c) 30%, transparent)); box-shadow: inset 0 1px 0 color-mix(in srgb, var(--c) 45%, transparent), inset 0 -1px 0 color-mix(in srgb, var(--c) 45%, transparent); border-radius: 2px; transition: left .8s cubic-bezier(.16,1,.3,1), width .8s cubic-bezier(.16,1,.3,1); }
+.rb-fld .rzn { position: absolute; top: 0; bottom: 0; width: 20%; background: linear-gradient(90deg, rgba(255,77,94,.16), rgba(255,77,94,.04)); }
+.rb-fld .rzn.r { right: 0; transform: scaleX(-1); } .rb-fld .rzn.l { left: 0; }
+.rb-fld .fd { position: absolute; top: 0; bottom: 0; width: 3px; margin-left: -1.5px; background: #ffd100; box-shadow: 0 0 8px rgba(255,209,0,.6); transition: left .8s cubic-bezier(.16,1,.3,1); }
+.rb-fld .los { position: absolute; top: 0; bottom: 0; width: 3px; margin-left: -1.5px; background: #4aa3ff; box-shadow: 0 0 8px rgba(74,163,255,.6); transition: left .8s cubic-bezier(.16,1,.3,1); }
+.rb-fld .los b { position: absolute; top: 50%; width: 18px; height: 11px; margin-top: -5.5px; border-radius: 50%; background: #8a4b22; box-shadow: inset 0 0 0 1.5px #5c2f12, 0 2px 6px rgba(0,0,0,.5); }
+.rb-fld .los b::after { content: ""; position: absolute; left: 4px; right: 4px; top: 50%; height: 1.5px; margin-top: -.75px; background: rgba(255,255,255,.85); }
+.rb-fld .los.ra b { left: 6px; } .rb-fld .los.la b { left: -21px; }
+.rb-fld .fi { display: flex; align-items: center; gap: 14px; font: 700 14px/1 var(--f-num); letter-spacing: .08em; text-transform: uppercase; color: var(--ink-2); }
+.rb-fld .ddx { color: #fff; font-size: 17px; }
+.rb-fld .drt { color: var(--ink-3, rgba(255,255,255,.5)); }
+.rb-fld .tos { display: inline-flex; gap: 4px; } .rb-fld .tos:last-child { margin-left: auto; }
+.rb-fld .tos i { width: 14px; height: 4px; border-radius: 2px; background: rgba(255,255,255,.14); } .rb-fld .tos i.on { background: #ffd100; }
+.rb-fld .wp { display: grid; grid-template-columns: auto 1fr auto; align-items: center; gap: 10px; font: 800 15px/1 var(--f-num); letter-spacing: .06em; color: var(--ink-2); }
+.rb-fld .wp b.up { color: #fff; }
+.rb-fld .wp .bar { display: flex; height: 6px; border-radius: 3px; overflow: hidden; background: rgba(255,255,255,.08); }
+.rb-fld .wp .bar i { height: 100%; transition: width .8s cubic-bezier(.16,1,.3,1); }
+.rb-fld .wp .bar i + i { box-shadow: inset 2px 0 0 #07090d; }
+.rb-fld .wp em { grid-column: 1 / -1; justify-self: center; margin-top: -4px; font: 700 10px/1 var(--f-num); font-style: normal; letter-spacing: .24em; text-transform: uppercase; color: var(--ink-3, rgba(255,255,255,.45)); }
+.rb-lines { display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 1px; margin: 0 18px 14px; border-radius: 8px; overflow: hidden; background: rgba(255,255,255,.07); }
+.rb-lines > div { display: grid; gap: 6px; padding: 10px 14px; background: #0b0e14; }
+.rb-lines span { font: 700 11px/1 var(--f-num); letter-spacing: .2em; text-transform: uppercase; color: var(--ink-3, rgba(255,255,255,.45)); }
+.rb-lines b { font: 800 19px/1 var(--f-num); letter-spacing: .02em; color: #fff; }
+.rb-scp { margin: 2px 18px 16px; display: grid; gap: 6px; }
+.rb-scp h4 { margin: 4px 0 2px; font: 700 12px/1 var(--f-num); letter-spacing: .24em; text-transform: uppercase; color: var(--ink-3, rgba(255,255,255,.45)); }
+.rb-scp .r { display: grid; grid-template-columns: 24px 84px minmax(0, 1fr) auto; align-items: center; gap: 12px; padding: 6px 12px; border-radius: 6px; background: rgba(255,255,255,.03); box-shadow: inset 3px 0 0 var(--c); }
+.rb-scp .r.new { background: rgba(255,255,255,.06); }
+.rb-scp img { width: 24px; height: 24px; object-fit: contain; }
+.rb-scp .q { font: 700 13px/1 var(--f-num); letter-spacing: .06em; color: var(--ink-3, rgba(255,255,255,.5)); }
+.rb-scp .tx { font: 500 14px/1.3 var(--f-ui); color: var(--ink-2); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.rb-scp .tx b { font: 800 14px/1 var(--f-num); letter-spacing: .06em; text-transform: uppercase; color: #fff; margin-right: 10px; }
+.rb-scp .s { font: 800 14px/1 var(--f-num); letter-spacing: .04em; color: #fff; white-space: nowrap; }
+body.tv.prime .rb-fld .fld { height: 84px; }
+body.tv.prime .rb-fld .ddx { font-size: 20px; }
 .tdpl.on { border-color: var(--gold) !important; background: rgba(255,194,75,.14) !important; }
 .tdpl.on b::after { content: " ✓"; color: var(--gold); }
 </style>
@@ -2900,6 +2943,61 @@ body:not(.tv) [data-ids]:active { transform: scale(.99); }
       <div class="rb-h2h-top">${side(l, sl, "l")}<span class="rb-vs">VS</span>${side(r, sr, "r")}</div>
       <div class="rb-tug${pre ? " pre" : ""}"><i class="lfill" style="width:${lead === "l" ? (50 - x).toFixed(1) : 0}%"></i><i class="rfill" style="width:${lead === "r" ? (x - 50).toFixed(1) : 0}%"></i><b style="left:${x.toFixed(1)}%"></b></div></div>`;
   }
+  // prime time, a football game on: the drive on a field (away team's end zone on the left, so the team on the left attacks right),
+  // the first-down line, timeouts and the live win probability. Before kickoff: the lines.
+  // the one of a team's two colors that reads on a dark screen (Bills red, Rams gold), so two blue teams still look different
+  function bright(t) {
+    const L = (h) => { const m = /^#?([0-9a-f]{6})$/i.exec(h || ""); if (!m) return -1; const n = parseInt(m[1], 16); return (0.299 * (n >> 16) + 0.587 * ((n >> 8) & 255) + 0.114 * (n & 255)) / 255; };
+    const ok = [t.col, t.alt].filter((c) => L(c) >= 0.14 && L(c) <= 0.9).sort((x, y) => L(y) - L(x));
+    return ok[0] || (L(t.col) > 0.9 ? "#c9ced8" : "#8a94a8");
+  }
+  // the hero game's scoring plays from the game summary, behind the same TV delay as everything else
+  const SUMM = new Map();
+  function heroPlays(g) {
+    const c = SUMM.get(g.id), t = Date.now();
+    if (g.st === "pre" || !ESPN[g.sport] || (c && (c.busy || t - c.at < (g.st === "post" ? 600e3 : 45e3)))) return c ? c.plays : null;
+    SUMM.set(g.id, { plays: c ? c.plays : null, at: t, busy: true });
+    fetch(`https://site.api.espn.com/apis/site/v2/sports/${ESPN[g.sport]}/summary?event=${g.eid || g.id}`).then((r) => r.json()).then((j) => {
+      const plays = (j.scoringPlays || []).map((p) => ({ q: p.period && p.period.number, clk: (p.clock && p.clock.displayValue) || "", tm: p.team && String(p.team.id), type: (p.type && p.type.text) || "", text: p.text || "", a: p.awayScore, h: p.homeScore }));
+      setTimeout(() => { SUMM.set(g.id, { plays, at: Date.now(), busy: false }); renderRB(); }, g.st === "post" ? 0 : tvDelay() * 1000);
+    }).catch(() => SUMM.set(g.id, { plays: c ? c.plays : null, at: Date.now(), busy: false }));
+    return c ? c.plays : null;
+  }
+  function scoringHtml(g) {
+    const plays = heroPlays(g); if (!plays || !plays.length) return "";
+    const tmOf = (id) => (String(g.a.id) === id ? g.a : String(g.h.id) === id ? g.h : null);
+    return `<div class="rb-scp"><h4>Scoring</h4>${plays.slice(-4).reverse().map((p, i) => { const t = tmOf(p.tm);
+      return `<div class="r${i === 0 ? " new" : ""}" style="--c:${esc(t ? bright(t) : "#8a94a8")}">${t && t.lg ? `<img src="${esc(t.lg)}" alt="" referrerpolicy="no-referrer">` : "<span></span>"}<span class="q num">Q${esc(p.q ?? "")} ${esc(p.clk)}</span><span class="tx"><b>${esc(p.type)}</b>${esc(p.text)}</span><span class="s num">${esc(g.a.ab)} ${p.a ?? ""} · ${esc(g.h.ab)} ${p.h ?? ""}</span></div>`; }).join("")}</div>`;
+  }
+  function fieldHtml(g) {
+    const sit = g.sit || {}, fb = g.sport === "NFL" || g.sport === "CFB";
+    const col = (t) => esc(bright(t));
+    if (g.st === "pre") {
+      const ln = [];
+      if (g.sp && g.sp.h && g.sp.h.l != null) ln.push(["Spread", `${g.h.ab} ${fLine(g.sp.h.l)}`]);
+      if (g.tot && g.tot.l != null) ln.push(["Total", `O/U ${g.tot.l}`]);
+      if (g.ml && g.ml.a != null && g.ml.h != null) ln.push(["Moneyline", `${g.a.ab} ${fOdds(g.ml.a)} · ${g.h.ab} ${fOdds(g.ml.h)}`]);
+      return ln.length ? `<div class="rb-lines">${ln.map(([k, v]) => `<div><span>${k}</span><b class="num">${esc(v)}</b></div>`).join("")}</div>` : "";
+    }
+    if (g.st !== "in" || !fb) return "";
+    const yl = sit.yl, hasBall = yl != null && sit.pos, awayBall = hasBall && String(sit.pos) === String(g.a.id);
+    const x = (v) => Math.max(0, Math.min(100, 100 - v)); // yard line from the home goal -> % across the field
+    let fld = "";
+    if (hasBall) {
+      const tgt = sit.ds != null ? Math.max(0, Math.min(100, awayBall ? yl - sit.ds : yl + sit.ds)) : null;
+      const ds = sit.dr && sit.dr.s != null ? sit.dr.s : null, tm = awayBall ? g.a : g.h;
+      const drive = ds != null ? `<i class="drv" style="left:${Math.min(x(ds), x(yl))}%;width:${Math.abs(x(ds) - x(yl))}%;--c:${col(tm)}"></i>` : "";
+      const rz = sit.rz ? `<i class="rzn ${awayBall ? "r" : "l"}"></i>` : "";
+      fld = `${rz}${drive}${tgt != null && tgt !== 0 && tgt !== 100 ? `<i class="fd" style="left:${x(tgt)}%"></i>` : ""}<i class="los${awayBall ? " ra" : " la"}" style="left:${x(yl)}%;--c:${col(tm)}"><b></b></i>`;
+    }
+    const nums = [10, 20, 30, 40, 50, 40, 30, 20, 10].map((n, i) => `<span style="left:${(i + 1) * 10}%">${n}</span>`).join("");
+    const tos = (k) => { const n = sit.to && sit.to[k]; return n == null ? "" : `<span class="tos" title="Timeouts">${[0, 1, 2].map((i) => `<i class="${i < n ? "on" : ""}"></i>`).join("")}</span>`; };
+    const wp = sit.wp != null ? Math.round(sit.wp * 100) : null;
+    const wpH = wp == null ? "" : `<div class="wp"><b class="${wp < 50 ? "up" : ""}">${esc(g.a.ab)} ${100 - wp}%</b><div class="bar"><i style="width:${100 - wp}%;background:${col(g.a)}"></i><i style="width:${wp}%;background:${col(g.h)}"></i></div><b class="${wp > 50 ? "up" : ""}">${wp}% ${esc(g.h.ab)}</b><em>Win probability</em></div>`;
+    return `<div class="rb-fld">
+      <div class="fld"><div class="ez" style="--c:${esc(g.a.col || "#445")}"><span>${esc(g.a.ab)}</span></div><div class="pf"><div class="yd">${nums}</div>${fld}</div><div class="ez" style="--c:${esc(g.h.col || "#445")}"><span>${esc(g.h.ab)}</span></div></div>
+      <div class="fi">${tos("a")}<span class="ddx">${esc(sit.dd || g.d || "")}</span>${sit.dr && sit.dr.t ? `<span class="drt">Drive · ${esc(sit.dr.t)}</span>` : ""}${tos("h")}</div>${wpH}</div>`;
+  }
   function gameCard(G, hero) {
     const g = G.g, rows = gamePositions(G.entries);
     const live = g.st === "in", pos = (t) => (live && g.sit && g.sit.pos && String(t.id) === String(g.sit.pos) ? BALL : "");
@@ -2911,8 +3009,8 @@ body:not(.tv) [data-ids]:active { transform: scale(.99); }
     const tm = (t, s) => `<div class="tm ${s}${lead === s ? " lead" : ""}">${logo(t, "tl")}<span class="ab">${esc(t.ab)}</span>${pos(t)}${sc(t)}</div>`;
     const mid = `<div class="mid"><span class="clk${live ? " on" : ""}">${esc(clk)}</span>${dd}${rz}</div>`;
     return `<article class="rb-g ${g.st}${hero ? " hero" : ""}" style="--ca:${esc(g.a.col || "#445")};--ch:${esc(g.h.col || "#445")}">
-      ${hero ? `<header class="rb-gh">${tm(g.a, "a")}${mid}${tm(g.h, "h")}</header>` : `<header class="rb-gs"><div class="tms">${tm(g.a, "a")}${tm(g.h, "h")}</div>${mid}</header>`}
-      <div class="rb-rows">${rows.map((r) => (r.h2h ? h2hRow(r.h2h[0], r.h2h[1], g) : posRow(r.p, g))).join("")}</div></article>`;
+      ${hero ? `<header class="rb-gh">${tm(g.a, "a")}${mid}${tm(g.h, "h")}</header>${fieldHtml(g)}` : `<header class="rb-gs"><div class="tms">${tm(g.a, "a")}${tm(g.h, "h")}</div>${mid}</header>`}
+      <div class="rb-rows">${rows.map((r) => (r.h2h ? h2hRow(r.h2h[0], r.h2h[1], g) : posRow(r.p, g))).join("")}</div>${hero ? scoringHtml(g) : ""}</article>`;
   }
   function parlayCard(list) {
     if (!list.length) return "";
@@ -3465,7 +3563,7 @@ body:not(.tv) [data-ids]:active { transform: scale(.99); }
   // ---------- sheets ----------
   function openSheet(id) { $(id).hidden = false; }
   // keep every open screen current: when a new version is up, reload it (never mid-form or mid-animation)
-  const BUILD = "20261012193134";
+  const BUILD = "20261012193902";
   function checkBuild() {
     if (BUILD === "dev") return;
     fetch("version.json?t=" + Date.now(), { cache: "no-store" }).then((r) => (r.ok ? r.json() : null)).then((j) => {
@@ -3920,7 +4018,9 @@ body:not(.tv) [data-ids]:active { transform: scale(.99); }
     const team = (k) => { const x = t[k], tm = x.team; return { id: tm.id, ab: tm.abbreviation || "", nm: tm.shortDisplayName || tm.name || "", fn: tm.displayName || "", lg: tm.logo || "", col: tm.color ? "#" + tm.color : "", alt: tm.alternateColor ? "#" + tm.alternateColor : "", sc: /^\d+$/.test(String(x.score)) ? Number(x.score) : null }; };
     const g = { id: String(e.id), sport, t: Date.parse(e.date), st: st.state || "pre", d: st.shortDetail || "", a: team("away"), h: team("home"), pd: e.status.period || 0, clk: e.status.clock };
     const si = c.situation, lp = si && si.lastPlay;
-    if (si) g.sit = { rz: !!si.isRedZone, pos: si.possession || null, dd: si.downDistanceText || si.shortDownDistanceText || "", lp: lp ? { id: String(lp.id), type: (lp.type && lp.type.text) || "", text: lp.text || "", team: lp.team && lp.team.id,
+    if (si) g.sit = { rz: !!si.isRedZone, pos: si.possession || null, dd: si.downDistanceText || si.shortDownDistanceText || "", yl: typeof si.yardLine === "number" ? si.yardLine : null, dn: si.down || null, ds: si.distance ?? null,
+      to: { a: si.awayTimeouts ?? null, h: si.homeTimeouts ?? null }, wp: lp && lp.probability && typeof lp.probability.homeWinPercentage === "number" ? lp.probability.homeWinPercentage : null,
+      dr: lp && lp.drive ? { t: lp.drive.description || "", s: lp.drive.start && typeof lp.drive.start.yardLine === "number" ? lp.drive.start.yardLine : null } : null, lp: lp ? { id: String(lp.id), type: (lp.type && lp.type.text) || "", text: lp.text || "", team: lp.team && lp.team.id,
       ath: (lp.athletesInvolved || []).slice(0, 3).map((a) => ({ nm: a.displayName || a.fullName || "", sh: a.shortName || "", hs: a.headshot || "", j: a.jersey || "", pos: a.position || "", tm: a.team && a.team.id })) } : null };
     const o = (c.odds || [])[0];
     if (o) {
