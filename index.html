@@ -1787,6 +1787,32 @@ body.tv.prime .rb-fld .ddx { font-size: 20px; }
 .aw-st b { font: 900 8.5vh/.9 var(--f-display); color: #fff; font-variant-numeric: tabular-nums; }
 .aw-st span { font: 700 1.9vh/1 var(--f-num); letter-spacing: .2em; text-transform: uppercase; color: rgba(255,255,255,.55); }
 @media (max-width: 860px) { .bc-type.aw { font-size: min(13vw, 8vh); } .bc-type.aw small { font-size: 1.6vh; } .aw-st > div { min-width: 0; padding: 1.2vh 1.6vh; } .aw-st b { font-size: 5vh; } .aw-st span { font-size: 1.2vh; } }
+/* parlays, whole: total odds and payout, then every leg with its odds and status */
+.rb-pl { padding: 12px 14px 10px; border-radius: 13px; background: rgba(255,255,255,.035); border: 1px solid transparent; }
+.rb-pl.won { border-color: rgba(61,220,151,.4); } .rb-pl.dead { opacity: .5; }
+.rb-pl .pl-h { display: grid; grid-template-columns: auto minmax(0, 1fr) auto; align-items: center; gap: 12px; }
+.rb-pl .pl-t { display: grid; gap: 3px; min-width: 0; }
+.rb-pl .pl-t > b { font: 700 19px/1.15 Inter, sans-serif; color: #fff; white-space: nowrap; }
+.rb-pl .pl-t > b .num { color: var(--gold, #ffc24b); font-weight: 800; margin-left: 4px; }
+.rb-pl .pl-legs { list-style: none; margin: 10px 0 0; padding: 0; display: grid; gap: 4px; }
+.rb-pl .pl-legs li { display: grid; grid-template-columns: 22px minmax(0, 1fr) auto; grid-template-areas: "i t o" ". s s"; align-items: center; column-gap: 10px; padding: 6px 8px; border-radius: 8px; background: rgba(0,0,0,.18); }
+.rb-pl .pl-legs i { grid-area: i; width: 22px; height: 22px; border-radius: 50%; display: grid; place-items: center; font: 800 11px/1 Inter, sans-serif; font-style: normal; color: var(--ink-3, rgba(255,255,255,.5)); box-shadow: inset 0 0 0 1.5px rgba(255,255,255,.18); }
+.rb-pl .pl-legs .t { grid-area: t; display: flex; align-items: center; gap: 7px; min-width: 0; font: 600 15px/1.25 Inter, sans-serif; color: #fff; }
+.rb-pl .pl-legs .t > span { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.rb-pl .pl-legs .t .rb-hs { width: 20px; height: 20px; flex: none; }
+.rb-pl .pl-legs .o { grid-area: o; font: 700 14px/1 Inter, sans-serif; font-style: normal; color: #fff; }
+.rb-pl .pl-legs .o.now { color: var(--ink-3, rgba(255,255,255,.45)); font-weight: 600; }
+.rb-pl .pl-legs .s { grid-area: s; margin-top: 2px; font: 600 12px/1.2 Inter, sans-serif; color: var(--ink-3, rgba(255,255,255,.5)); }
+.rb-pl .pl-legs li.pl-hit i { background: var(--win, #2ee89a); color: #04130c; box-shadow: none; }
+.rb-pl .pl-legs li.pl-hit .s { color: var(--win, #2ee89a); }
+.rb-pl .pl-legs li.pl-miss i { background: var(--loss, #ff5a6a); color: #fff; box-shadow: none; }
+.rb-pl .pl-legs li.pl-miss .t, .rb-pl .pl-legs li.pl-miss .s { color: var(--loss, #ff5a6a); }
+.rb-pl .pl-legs li.pl-miss .t > span { text-decoration: line-through; }
+.rb-pl .pl-legs li.pl-w .s { color: var(--win, #2ee89a); } .rb-pl .pl-legs li.pl-l .s { color: var(--loss, #ff5a6a); }
+.rb-inpar { display: flex; align-items: center; gap: 8px; padding: 8px 12px; border-radius: 10px; font: 600 13px/1 Inter, sans-serif; color: var(--ink-3, rgba(255,255,255,.55)); background: rgba(255,255,255,.025); }
+.rb-inpar .rb-av { width: 22px; height: 22px; font-size: 11px; }
+.rb-inpar .rb-av + .rb-av { margin-left: -12px; }
+body.tv .rb-pl .pl-legs .t { font-size: 16px; }
 .mkt b .pmc { margin-left: 6px; font: 600 .78em var(--f-num); font-style: normal; color: #7d9bff; }
 /* sharper prime time: the game in a wide column that sizes itself to the card, no repeated kickoff times */
 .rb-games.primeg { column-width: auto; column-count: auto; display: grid; grid-template-columns: minmax(0, 1.6fr) minmax(300px, 1fr); gap: 14px; align-items: start; }
@@ -3053,15 +3079,38 @@ body.tv.prime .rb-fld .ddx { font-size: 20px; }
     const mid = `<div class="mid"><span class="clk${live ? " on" : ""}">${esc(clk)}</span>${dd}${rz}</div>`;
     return `<article class="rb-g ${g.st}${hero ? " hero" : ""}" style="--ca:${esc(g.a.col || "#445")};--ch:${esc(g.h.col || "#445")}">
       ${hero ? `<header class="rb-gh">${tm(g.a, "a")}${mid}${tm(g.h, "h")}</header>${fieldHtml(g)}` : `<header class="rb-gs"><div class="tms">${tm(g.a, "a")}${tm(g.h, "h")}</div>${mid}</header>`}
-      <div class="rb-rows">${rows.map((r) => (r.h2h ? h2hRow(r.h2h[0], r.h2h[1], g) : posRow(r.p, g))).join("")}</div>${hero ? scoringHtml(g) : ""}</article>`;
+      <div class="rb-rows">${rows.map((r) => (r.h2h ? h2hRow(r.h2h[0], r.h2h[1], g) : posRow(r.p, g))).join("")}${inParlays(G)}</div>${hero ? scoringHtml(g) : ""}</article>`;
+  }
+  // the sportsbook number for a leg right now (a parlay logged before leg odds were saved)
+  function legNowOdds(sel, g) {
+    if (!sel || !g) return null;
+    if (isTd(sel.m)) { const od = sel.p && propOdds(g, sel.p, sel.m); return od ? od.o : null; }
+    if (sel.m === "ml") return g.ml ? g.ml[sel.s] : null;
+    if (sel.m === "sp") return g.sp && g.sp[sel.s] && g.sp[sel.s].l === sel.l ? g.sp[sel.s].o : null;
+    if (sel.m === "tot") return g.tot && g.tot.l === sel.l ? g.tot[sel.s] : null;
+    return null;
+  }
+  function inParlays(G) {
+    const legs = G.legs || []; if (!legs.length) return "";
+    const bs = [...new Map(legs.map((e) => [e.b.id, e.b])).values()], ppl = [...new Map(bs.map((b) => [personKey(b), b])).values()];
+    return `<div class="rb-inpar">${ppl.map((b) => avHtml(b, "sm")).join("")}<span>${G.entries.length ? "Also in" : "In"} ${bs.length} parlay${bs.length > 1 ? "s" : ""}</span></div>`;
   }
   function parlayCard(list) {
     if (!list.length) return "";
     const row = (b) => {
-      const legs = legsOf(b), hit = legs.filter((l) => l.st === "hit").length, dead = legs.some((l) => l.st === "miss");
-      const dots = legs.map((l) => `<i class="${l.st === "hit" ? "h" : l.st === "miss" ? "m" : l.ev && !l.ev.fin ? (l.ev.res === "W" ? "lw" : l.ev.res === "L" ? "ll" : "le") : ""}" title="${esc(l.t)}"></i>`).join("");
-      return `<div class="rb-par${dead ? " dead" : ""}${onAir([b.id])}"${tapAttrs([b.id], personName(b) + "'s parlay")}>${avHtml(b)}<div class="rb-pk"><b>${legs.length}-leg parlay <span class="od num">${fOdds(b.odds)}</span></b><div class="rb-wls"><span class="rb-wl" style="--c:${personCol(b)}"><b>${esc(personName(b))}</b> ${fU(b.units)} → ${fU(b.units * ppu(b.odds), true)}</span></div></div>
-        <div class="rb-dots">${dots}</div><div class="rb-st ${dead ? "st-lost" : hit === legs.length ? "st-won" : ""}">${dead ? "Dead" : `${hit}/${legs.length} hit`}</div></div>`;
+      const legs = legsOf(b), hit = legs.filter((l) => l.st === "hit").length, dead = legs.some((l) => l.st === "miss"), all = hit === legs.length;
+      const gs = [...new Set(legs.map((l) => l.sel && String(l.sel.g)))], g1 = gs.length === 1 && gs[0] ? gameOf(legs[0].sel) : null, pre1 = g1 && g1.st === "pre";
+      const lis = legs.map((l, i) => {
+        const sel = l.sel, g = sel ? gameOf(sel) : null, saved = sel && sel.o, od = saved || legNowOdds(sel, g);
+        const live = l.ev && !l.ev.fin && g && g.st === "in";
+        const [cls, txt] = l.st === "hit" ? ["hit", "Hit"] : l.st === "miss" ? ["miss", "Missed"] : live ? [l.ev.res === "W" ? "w" : l.ev.res === "L" ? "l" : "e", l.ev.txt] : g && g.st === "pre" ? ["pre", pre1 ? "" : startLabel(g.t)] : ["e", l.ev && l.ev.txt ? l.ev.txt : ""];
+        const hs = sel && sel.p && sel.p.hs ? `<img class="rb-hs" src="${esc(sel.p.hs)}" alt="" loading="lazy" referrerpolicy="no-referrer" onerror="this.remove()">` : "";
+        return `<li class="pl-${cls}"><i>${l.st === "hit" ? "✓" : l.st === "miss" ? "✕" : i + 1}</i><span class="t">${hs}<span>${esc(l.t)}</span></span><em class="o num${saved ? "" : " now"}"${saved ? "" : ' title="Current line"'}>${od ? fOdds(od) : ""}</em>${txt ? `<span class="s">${esc(txt)}</span>` : ""}</li>`;
+      }).join("");
+      return `<div class="rb-pl${dead ? " dead" : all ? " won" : ""}${onAir([b.id])}"${tapAttrs([b.id], personName(b) + "'s parlay")}>
+        <div class="pl-h">${avHtml(b)}<div class="pl-t"><b>${legs.length}-leg parlay <span class="num">${fOdds(b.odds)}</span></b><span class="rb-wl" style="--c:${personCol(b)}"><b>${esc(personName(b))}</b> ${fU(b.units)} to win ${fU(b.units * ppu(b.odds))}${pre1 ? ` · ${esc(startLabel(g1.t))}` : ""}</span></div>
+        <div class="rb-st ${dead ? "st-lost" : all ? "st-won" : ""}">${dead ? "Dead" : `${hit}/${legs.length}`}</div></div>
+        <ol class="pl-legs">${lis}</ol></div>`;
     };
     return `<article class="rb-g rb-card"><header class="rb-ch"><h3>Parlays</h3><span>${list.length} open</span></header><div class="rb-rows">${list.map(row).join("")}</div></article>`;
   }
@@ -3075,7 +3124,7 @@ body.tv.prime .rb-fld .ddx { font-size: 20px; }
   const mixW = (c, k) => c.map((v) => Math.round(v + (255 - v) * k));
   function teamTheme(G) {
     const w = { a: 0, h: 0 };
-    for (const e of G.entries) if (e.sel && e.sel.m !== "tot" && (e.sel.s === "a" || e.sel.s === "h")) w[e.sel.s] += e.leg == null ? e.b.units : e.b.units * 0.5;
+    for (const e of [...G.entries, ...(G.legs || [])]) if (e.sel && e.sel.m !== "tot" && (e.sel.s === "a" || e.sel.s === "h")) w[e.sel.s] += e.leg == null ? e.b.units : e.b.units * 0.5;
     const t = w.a > w.h ? G.g.a : G.g.h;
     const c1 = hexRgb(t.col) || [80, 90, 110], c2 = hexRgb(t.alt) || c1;
     // the accent is whichever of the two colors reads on a dark screen; too dark gets lifted toward white
@@ -3174,7 +3223,8 @@ body.tv.prime .rb-fld .ddx { font-size: 20px; }
       const g = e.sel && e.sel.g != null ? S.games.get(String(e.sel.g)) : null;
       if (e.leg != null && e.leg === 0 && e.b.status === "open") parlays.push(e.b);
       if (!g) { if (e.leg == null) other.push(e); continue; }
-      if (!games.has(g.id)) games.set(g.id, { g, entries: [] });
+      if (!games.has(g.id)) games.set(g.id, { g, entries: [], legs: [] });
+      if (e.leg != null) { if (e.b.status === "open") games.get(g.id).legs.push(e); continue; }
       games.get(g.id).entries.push(e);
     }
     const rank = (G) => ({ in: 0, pre: 1, post: 2 }[G.g.st] ?? 3);
@@ -3609,7 +3659,7 @@ body.tv.prime .rb-fld .ddx { font-size: 20px; }
   // ---------- sheets ----------
   function openSheet(id) { $(id).hidden = false; }
   // keep every open screen current: when a new version is up, reload it (never mid-form or mid-animation)
-  const BUILD = "20261012211330";
+  const BUILD = "20261012211809";
   function checkBuild() {
     if (BUILD === "dev") return;
     fetch("version.json?t=" + Date.now(), { cache: "no-store" }).then((r) => (r.ok ? r.json() : null)).then((j) => {
@@ -4016,7 +4066,7 @@ body.tv.prime .rb-fld .ddx { font-size: 20px; }
       if (F.legs.length < 2) { err.textContent = "A parlay needs at least two legs."; return; }
       if (F.legs.some((x) => x.g && x.m !== "ml" && !isTd(x.m) && x.l == null)) { err.textContent = "One of your legs is missing its line."; return; }
       data.legs = F.legs.map(legText);
-      data.legSel = F.legs.map((x) => { const g = x.g && S.games.get(x.g); if (!x.g) return null; const o = { g: x.g, m: x.m, s: x.s, l: x.l, sp: x.sport, t: g ? g.t : null }; if (x.p) o.p = x.p; return o; });
+      data.legSel = F.legs.map((x) => { const g = x.g && S.games.get(x.g); if (!x.g) return null; const o = { g: x.g, m: x.m, s: x.s, l: x.l, sp: x.sport, t: g ? g.t : null }; if (x.p) o.p = x.p; if (x.o) o.o = x.o; return o; });
       F.legs.forEach((x) => { const g = x.g && S.games.get(x.g); if (g) starts.push(g.t); });
       const sp = [...new Set(F.legs.map((x) => x.sport).filter(Boolean))];
       data.sport = sp.length === 1 ? sp[0] : sp.length ? "Mixed" : "";
@@ -8595,7 +8645,7 @@ body.tv.prime .rb-fld .ddx { font-size: 20px; }
       else { data.pick = legs[0].pick.slice(0, 80); data.sport = legs[0].sport !== "OTHER" ? legs[0].sport : ""; }
     } else {
       data.legs = legs.map((l, i) => { const m = ms[i], g = m && S.games.get(m.g); return g && !(m.m !== "ml" && !isTd(m.m) && m.l == null) ? mkLabel(g, m.m, m.s, m.l, m.p) : l.pick.slice(0, 80); });
-      data.legSel = ms.map((m) => { const g = m && S.games.get(m.g); if (!g || (m.m !== "ml" && !isTd(m.m) && m.l == null)) return null; starts.push(g.t); const o = { g: g.id, m: m.m, s: m.s, l: m.l, sp: g.sport, t: g.t }; if (m.p) o.p = m.p; return o; });
+      data.legSel = ms.map((m) => { const g = m && S.games.get(m.g); if (!g || (m.m !== "ml" && !isTd(m.m) && m.l == null)) return null; starts.push(g.t); const o = { g: g.id, m: m.m, s: m.s, l: m.l, sp: g.sport, t: g.t }; if (m.p) o.p = m.p; if (m.o) o.o = m.o; return o; });
       const sp = [...new Set(legs.map((l) => l.sport).filter((s) => s && s !== "OTHER"))];
       data.sport = sp.length === 1 ? sp[0] : sp.length ? "Mixed" : "";
       data.pick = data.legs.length + "-leg parlay";
