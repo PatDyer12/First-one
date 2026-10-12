@@ -1777,6 +1777,34 @@ body:not(.tv) [data-ids]:active { transform: scale(.99); }
 .rb-scp .s { font: 800 14px/1 var(--f-num); letter-spacing: .04em; color: #fff; white-space: nowrap; }
 body.tv.prime .rb-fld .fld { height: 84px; }
 body.tv.prime .rb-fld .ddx { font-size: 20px; }
+/* sharper prime time: the game in a wide column that sizes itself to the card, no repeated kickoff times */
+.rb-games.primeg { column-width: auto; column-count: auto; display: grid; grid-template-columns: minmax(0, 1.6fr) minmax(300px, 1fr); gap: 14px; align-items: start; }
+.rb-games.primeg.solo { grid-template-columns: minmax(0, 1fr); }
+.rb-games.primeg > .rb-pcol { display: flex; flex-direction: column; gap: 14px; min-width: 0; }
+.rb-games.primeg > .rb-pcol > * { margin: 0; }
+.rb-pk > b .t { min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.rb-g.hero { container-type: inline-size; }
+.rb-g.hero .rb-gh { gap: clamp(8px, 2cqw, 18px); padding: clamp(16px, 3.4cqw, 30px) clamp(16px, 3.4cqw, 30px) clamp(12px, 2.4cqw, 22px); }
+.rb-g.hero .rb-gh .tm { gap: clamp(6px, 1.4cqw, 12px); }
+.rb-g.hero .tl { width: clamp(36px, 8.5cqw, 76px); height: clamp(36px, 8.5cqw, 76px); }
+.rb-g.hero .ab { font-size: clamp(17px, 3.6cqw, 34px); }
+.rb-g.hero .sc { font-size: clamp(36px, 9.5cqw, 84px); margin: 0 clamp(2px, 1.2cqw, 14px); }
+.rb-g.hero .clk { font-size: clamp(12px, 2.3cqw, 22px); }
+.rb-g.hero .dd { font-size: clamp(11px, 1.8cqw, 17px); }
+.rb-g.hero .rb-rows { padding: 0 clamp(12px, 2.4cqw, 20px) clamp(12px, 2.4cqw, 20px); }
+.rb-g.hero .rb-pk > b { font-size: clamp(17px, 3cqw, 24px); }
+.rb-g.hero .rb-pos.st-pre .rb-st { display: none; }
+.rb-g.hero .rb-pos.st-pre { grid-template-columns: auto minmax(0, 1fr); }
+.rb-fld, .rb-lines, .rb-scp { margin-left: clamp(12px, 2.4cqw, 18px); margin-right: clamp(12px, 2.4cqw, 18px); }
+.rb-fld { padding-left: 0; padding-right: 0; }
+.rb-lines { display: flex; flex-wrap: wrap; }
+.rb-lines > div { flex: 1 1 130px; }
+.rb-games.primeg .rb-par { grid-template-columns: auto minmax(0, 1fr) auto; grid-template-areas: "av pk st" "av dt st"; row-gap: 7px; }
+.rb-games.primeg .rb-par > .rb-av { grid-area: av; }
+.rb-games.primeg .rb-par > .rb-pk { grid-area: pk; }
+.rb-games.primeg .rb-par > .rb-dots { grid-area: dt; }
+.rb-games.primeg .rb-par > .rb-st { grid-area: st; }
+.rb-games.primeg .rb-dots i { width: 11px; height: 11px; }
 .tdpl.on { border-color: var(--gold) !important; background: rgba(255,194,75,.14) !important; }
 .tdpl.on b::after { content: " ✓"; color: var(--gold); }
 </style>
@@ -2895,10 +2923,12 @@ body.tv.prime .rb-fld .ddx { font-size: 20px; }
   }
   // one person on a pick: their stake, or which leg of their parlay it is
   function whoLine(p) {
-    return p.entries.map((e) => {
-      const nm = esc(personName(e.b));
-      if (e.leg != null) return `<span class="rb-wl" style="--c:${personCol(e.b)}"><b>${nm}</b> leg ${e.leg + 1}/${e.nLegs}</span>`;
-      return `<span class="rb-wl" style="--c:${personCol(e.b)}"><b>${nm}</b> ${fOdds(e.b.odds)} · ${fU(e.b.units)}${e.b.tail ? ` · ${e.b.tail.kind === "fade" ? "fading" : "tailing"} ${esc(e.b.tail.name)}` : ""}</span>`;
+    const by = new Map();
+    for (const e of p.entries) { const k = personKey(e.b); if (!by.has(k)) by.set(k, { b: e.b, st: [], legs: [] }); (e.leg != null ? by.get(k).legs : by.get(k).st).push(e); }
+    return [...by.values()].map(({ b, st, legs }) => {
+      const parts = st.map((e) => `${fOdds(e.b.odds)} · ${fU(e.b.units)}${e.b.tail ? ` · ${e.b.tail.kind === "fade" ? "fading" : "tailing"} ${esc(e.b.tail.name)}` : ""}`);
+      if (legs.length === 1) parts.push(`leg ${legs[0].leg + 1}/${legs[0].nLegs}`); else if (legs.length) parts.push(`in ${legs.length} parlays`);
+      return `<span class="rb-wl" style="--c:${personCol(b)}"><b>${esc(personName(b))}</b> ${parts.join(" · ")}</span>`;
     }).join("");
   }
   // where a pick stands: settled result, the live grade, or the kickoff time
@@ -2927,7 +2957,7 @@ body.tv.prime .rb-fld .ddx { font-size: 20px; }
     const hs = p.sel && p.sel.p && p.sel.p.hs ? `<img class="rb-hs" src="${esc(p.sel.p.hs)}" alt="" loading="lazy" referrerpolicy="no-referrer" onerror="this.remove()">` : "";
     return `<div class="rb-pos st-${st.cls}${popCls(p)}${onAir(idsOf(p))}"${tapAttrs(idsOf(p), p.pick)}>
       <div class="rb-avs">${avs}</div>
-      <div class="rb-pk"><b>${hs}${esc(p.pick)}${ballTag(hb)}</b><div class="rb-wls">${whoLine(p)}</div></div>
+      <div class="rb-pk"><b>${hs}<span class="t">${esc(p.pick)}</span>${ballTag(hb)}</b><div class="rb-wls">${whoLine(p)}</div></div>
       <div class="rb-st">${esc(st.txt)}</div>${meter}</div>`;
   }
   // two people on opposite sides: a tug of war. The marker leans toward whoever's winning, by how much
@@ -2937,7 +2967,7 @@ body.tv.prime .rb-fld .ddx { font-size: 20px; }
     const pre = g.st === "pre", x = 50 - k * 44;
     const lead = pre || Math.abs(sl.m || 0) < 0.01 ? "" : sl.m > 0 ? "l" : "r";
     const who = (p) => [...new Map(p.entries.map((e) => [personKey(e.b), e.b])).values()];
-    const side = (p, s, d) => `<div class="rb-hs-side ${d}${lead === d ? " ahead" : ""}${onAir(idsOf(p))}"${tapAttrs(idsOf(p), p.pick)}><div class="rb-avs">${who(p).map((b) => avHtml(b)).join("")}</div><div class="rb-pk"><b>${esc(p.pick)}</b><div class="rb-wls">${whoLine(p)}</div></div><div class="rb-st st-${s.cls}">${esc(pre ? "" : s.txt)}</div></div>`;
+    const side = (p, s, d) => `<div class="rb-hs-side ${d}${lead === d ? " ahead" : ""}${onAir(idsOf(p))}"${tapAttrs(idsOf(p), p.pick)}><div class="rb-avs">${who(p).map((b) => avHtml(b)).join("")}</div><div class="rb-pk"><b><span class="t">${esc(p.pick)}</span></b><div class="rb-wls">${whoLine(p)}</div></div><div class="rb-st st-${s.cls}">${esc(pre ? "" : s.txt)}</div></div>`;
     const lc = personCol(l.entries[0].b), rc = personCol(r.entries[0].b);
     return `<div class="rb-h2h${popCls(l)}${popCls(r)}" style="--lc:${lc};--rc:${rc}">
       <div class="rb-h2h-top">${side(l, sl, "l")}<span class="rb-vs">VS</span>${side(r, sr, "r")}</div>
@@ -3151,7 +3181,9 @@ body.tv.prime .rb-fld .ddx { font-size: 20px; }
       $("#rbMark").innerHTML = th.t.lg ? `<img src="${esc(th.t.lg)}" alt="" referrerpolicy="no-referrer" onerror="this.remove()">` : "";
       rbPrime = th.t.ab;
     } else if (rbPrime) { body.classList.remove("prime"); $("#rbMark").innerHTML = ""; rbPrime = null; }
-    const html = list.map((G) => gameCard(G, G === prime)).join("") + parlayCard(parlays) + otherCard(other);
+    const rest = list.filter((G) => G !== prime).map((G) => gameCard(G, false)).join("") + parlayCard(parlays) + otherCard(other);
+    const html = prime ? `<div class="rb-pcol">${gameCard(prime, true)}</div>${rest ? `<div class="rb-pcol">${rest}</div>` : ""}` : list.map((G) => gameCard(G, false)).join("") + parlayCard(parlays) + otherCard(other);
+    $("#rbGames").classList.toggle("primeg", !!prime); $("#rbGames").classList.toggle("solo", !!prime && !rest);
     $("#rbGames").innerHTML = html || `<div class="rb-empty"><b>No bets on the board</b>${tv ? "Log a bet from your phone and it shows up here with everybody's." : "Hit + Bet when you place one. Everybody's bets show up here, game by game."}</div>`;
     $("#rbGames").classList.toggle("one", list.length + (parlays.length ? 1 : 0) + (other.length ? 1 : 0) <= 1);
     const [lbH, restH] = rail();
@@ -3563,7 +3595,7 @@ body.tv.prime .rb-fld .ddx { font-size: 20px; }
   // ---------- sheets ----------
   function openSheet(id) { $(id).hidden = false; }
   // keep every open screen current: when a new version is up, reload it (never mid-form or mid-animation)
-  const BUILD = "20261012193902";
+  const BUILD = "20261012200235";
   function checkBuild() {
     if (BUILD === "dev") return;
     fetch("version.json?t=" + Date.now(), { cache: "no-store" }).then((r) => (r.ok ? r.json() : null)).then((j) => {
