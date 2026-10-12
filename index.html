@@ -1842,6 +1842,55 @@ body.tv .rb-pl .pl-legs .t { font-size: 16px; }
 .rb-games.primeg .rb-par > .rb-dots { grid-area: dt; }
 .rb-games.primeg .rb-par > .rb-st { grid-area: st; }
 .rb-games.primeg .rb-dots i { width: 11px; height: 11px; }
+/* rides: two on a pick get a tag, three or more get the full treatment */
+/* before kickoff there's no state and no tug to show: no empty pills */
+.rb-st:empty { display: none; }
+.rb-tug.pre { display: none; }
+/* the side list scrolls: cards keep their full height instead of getting squeezed */
+#jbBets > * { flex-shrink: 0; }
+.rb-duo { flex: none; margin-left: 8px; padding: 3px 7px; border-radius: 6px; font: 800 10.5px/1 Inter, sans-serif; letter-spacing: .14em; text-transform: uppercase; color: rgba(255,255,255,.75); background: rgba(255,255,255,.09); }
+.rb-pos.duo { box-shadow: inset 3px 0 0 rgba(255,255,255,.3); }
+.rb-squad { flex: none; margin-left: 10px; padding: 4px 9px; border-radius: 6px; font: 900 11px/1 Inter, sans-serif; letter-spacing: .12em; text-transform: uppercase; color: #1a1205; background: linear-gradient(90deg, #ffd36b, #ffaa1c); box-shadow: 0 0 14px rgba(255,194,75,.45); animation: squadGlow 2.4s ease-in-out infinite; }
+@keyframes squadGlow { 50% { box-shadow: 0 0 24px rgba(255,194,75,.85); } }
+.rb-pos.squad, .rb-hs-side.squad { border: 1px solid rgba(255,194,75,.6) !important; background: linear-gradient(90deg, rgba(255,194,75,.16), rgba(255,194,75,.03)) !important; box-shadow: inset 4px 0 0 #ffc24b, 0 0 26px rgba(255,194,75,.16); }
+.rb-pos.squad .rb-av, .rb-hs-side.squad .rb-av { box-shadow: 0 0 0 2px #ffc24b; }
+.slip.squad .sl-card { box-shadow: 0 30px 80px rgba(0,0,0,.65), inset 0 4px 0 #ffc24b, 0 0 0 3px #ffc24b, 0 0 70px rgba(255,194,75,.45); }
+.slip.squad .sl-stamp { background: linear-gradient(90deg, #ffd36b, #ffaa1c); color: #1a1205; }
+.rb-inpar { display: flex; flex-wrap: wrap; align-items: center; gap: 8px 14px; margin-top: 4px; padding: 10px 12px 4px; border-top: 1px dashed rgba(255,255,255,.12); background: none; font: 600 13px/1 Inter, sans-serif; color: var(--ink-3, rgba(255,255,255,.55)); }
+.rb-inpar .lbl { font: 700 11px/1 Inter, sans-serif; letter-spacing: .16em; text-transform: uppercase; }
+.rb-inpar .who { display: inline-flex; align-items: center; gap: 6px; }
+.rb-inpar .who .rb-av { width: 22px; height: 22px; font-size: 11px; margin: 0; }
+/* the big screen's list of the room's bets: wider, and sized to the screen so it reads from the couch */
+.jumbo { grid-template-columns: minmax(0, 1fr) min(34vw, 700px); }
+.jumbo .jb-side h3 { font-size: 2.1vh; }
+.jumbo #jbBets .rb-g { margin-bottom: 1.2vh; }
+.jumbo #jbBets .rb-gs { padding: 1.3vh 1.3vh 1vh; }
+.jumbo #jbBets .rb-gs .tl { width: 3.2vh; height: 3.2vh; }
+.jumbo #jbBets .rb-gs .ab { font-size: 2.3vh; }
+.jumbo #jbBets .rb-gs .sc { font-size: 3vh; }
+.jumbo #jbBets .rb-gs .clk { font-size: 1.7vh; }
+.jumbo #jbBets .rb-gs .dd { font-size: 1.5vh; }
+.jumbo #jbBets .rb-rows { padding: 0 1vh 1vh; gap: .8vh; }
+.jumbo #jbBets .rb-pos { padding: 1.1vh 1.2vh; gap: 1.2vh; }
+.jumbo #jbBets .rb-pk > b { font-size: 2.3vh; }
+.jumbo #jbBets .rb-wl { font-size: 1.65vh; }
+.jumbo #jbBets .rb-st { font-size: 1.65vh; padding: .5vh .8vh; }
+.jumbo #jbBets .rb-av { width: 3.4vh; height: 3.4vh; font-size: 1.6vh; }
+.jumbo #jbBets .rb-hs { width: 2.6vh; height: 2.6vh; }
+.jumbo #jbBets .rb-squad, .jumbo #jbBets .rb-duo { font-size: 1.3vh; padding: .45vh .8vh; }
+.jumbo #jbBets .rb-ch h3 { font-size: 1.7vh; }
+.jumbo #jbBets .rb-pl { padding: 1.2vh 1.3vh 1vh; }
+.jumbo #jbBets .rb-pl .pl-t > b { font-size: 2.4vh; }
+.jumbo #jbBets .rb-pl .pl-legs { gap: .5vh; margin-top: 1vh; }
+.jumbo #jbBets .rb-pl .pl-legs li { grid-template-columns: 2.6vh minmax(0, 1fr) auto; padding: .7vh 1vh; }
+.jumbo #jbBets .rb-pl .pl-legs i { width: 2.6vh; height: 2.6vh; font-size: 1.3vh; }
+.jumbo #jbBets .rb-pl .pl-legs .t { font-size: 2vh; }
+.jumbo #jbBets .rb-pl .pl-legs .t .rb-hs { width: 2.4vh; height: 2.4vh; }
+.jumbo #jbBets .rb-pl .pl-legs .o { font-size: 1.9vh; }
+.jumbo #jbBets .rb-pl .pl-legs .s { font-size: 1.5vh; }
+.jumbo #jbBets .rb-inpar { font-size: 1.5vh; }
+.jumbo #jbBets .rb-inpar .lbl { font-size: 1.25vh; }
+@media (max-width: 780px) { .jumbo { grid-template-columns: 1fr; } }
 .tdpl.on { border-color: var(--gold) !important; background: rgba(255,194,75,.14) !important; }
 .tdpl.on b::after { content: " ✓"; color: var(--gold); }
 </style>
@@ -2800,7 +2849,7 @@ body.tv .rb-pl .pl-legs .t { font-size: 16px; }
   const personName = (b) => (isMe(b) ? S.hostName || "You" : whoName(b));
   const personCol = (b) => (isMe(b) ? "#d4ff3a" : b.who === "guest" ? guestCol(whoName(b)) : WHO_COL[b.who] || "#ff9f43");
   const normPick = (s) => String(s || "").toLowerCase().replace(/[−–—]/g, "-").replace(/[^a-z0-9.+\-/ ]/g, "").replace(/\s+/g, " ").trim();
-  const selKey = (s) => (s && s.g != null ? [s.g, s.m, s.s, isTd(s.m) ? normNm(s.p && s.p.nm) : ""].join("|") : null);
+  const selKey = (s) => (s && s.g != null ? [s.g, s.m, s.s, isTd(s.m) ? normNm(s.p && s.p.nm) : s.m === "sp" || s.m === "tot" ? (s.l == null ? "" : Number(s.l)) : ""].join("|") : null);
   function rideKey(b) {
     if (b.kind === "parlay") {
       const legs = Array.isArray(b.legs) ? b.legs : [], sels = Array.isArray(b.legSel) ? b.legSel : [];
@@ -2993,9 +3042,10 @@ body.tv .rb-pl .pl-legs .t { font-size: 16px; }
     const meter = st.ev && !st.ev.fin && g.st === "in" && !isTd(p.sel.m) ? meterHtml(p.sel, st.ev) : "";
     const avs = [...new Map(p.entries.map((e) => [personKey(e.b), e.b])).values()].map((b) => avHtml(b)).join("");
     const hs = p.sel && p.sel.p && p.sel.p.hs ? `<img class="rb-hs" src="${esc(p.sel.p.hs)}" alt="" loading="lazy" referrerpolicy="no-referrer" onerror="this.remove()">` : "";
-    return `<div class="rb-pos st-${st.cls}${popCls(p)}${onAir(idsOf(p))}"${tapAttrs(idsOf(p), p.pick)}>
+    const nP = p.people ? p.people.size : 1, crew = nP >= 3 ? " squad" : nP === 2 ? " duo" : "";
+    return `<div class="rb-pos st-${st.cls}${crew}${popCls(p)}${onAir(idsOf(p))}"${tapAttrs(idsOf(p), p.pick)}>
       <div class="rb-avs">${avs}</div>
-      <div class="rb-pk"><b>${hs}<span class="t">${esc(p.pick)}</span>${ballTag(hb)}</b><div class="rb-wls">${whoLine(p)}</div></div>
+      <div class="rb-pk"><b>${hs}<span class="t">${esc(p.pick)}</span>${ballTag(hb)}${nP >= 3 ? `<span class="rb-squad">Squad ride ×${nP}</span>` : nP === 2 ? '<span class="rb-duo">Ride</span>' : ""}</b><div class="rb-wls">${whoLine(p)}</div></div>
       <div class="rb-st">${esc(st.txt)}</div>${meter}</div>`;
   }
   // two people on opposite sides: a tug of war. The marker leans toward whoever's winning, by how much
@@ -3005,7 +3055,7 @@ body.tv .rb-pl .pl-legs .t { font-size: 16px; }
     const pre = g.st === "pre", x = 50 - k * 44;
     const lead = pre || Math.abs(sl.m || 0) < 0.01 ? "" : sl.m > 0 ? "l" : "r";
     const who = (p) => [...new Map(p.entries.map((e) => [personKey(e.b), e.b])).values()];
-    const side = (p, s, d) => `<div class="rb-hs-side ${d}${lead === d ? " ahead" : ""}${onAir(idsOf(p))}"${tapAttrs(idsOf(p), p.pick)}><div class="rb-avs">${who(p).map((b) => avHtml(b)).join("")}</div><div class="rb-pk"><b><span class="t">${esc(p.pick)}</span></b><div class="rb-wls">${whoLine(p)}</div></div><div class="rb-st st-${s.cls}">${esc(pre ? "" : s.txt)}</div></div>`;
+    const side = (p, s, d) => `<div class="rb-hs-side ${d}${lead === d ? " ahead" : ""}${p.people && p.people.size >= 3 ? " squad" : ""}${onAir(idsOf(p))}"${tapAttrs(idsOf(p), p.pick)}><div class="rb-avs">${who(p).map((b) => avHtml(b)).join("")}</div><div class="rb-pk"><b><span class="t">${esc(p.pick)}</span>${p.people && p.people.size >= 3 ? `<span class="rb-squad">Squad ride ×${p.people.size}</span>` : ""}</b><div class="rb-wls">${whoLine(p)}</div></div><div class="rb-st st-${s.cls}">${esc(pre ? "" : s.txt)}</div></div>`;
     const lc = personCol(l.entries[0].b), rc = personCol(r.entries[0].b);
     return `<div class="rb-h2h${popCls(l)}${popCls(r)}" style="--lc:${lc};--rc:${rc}">
       <div class="rb-h2h-top">${side(l, sl, "l")}<span class="rb-vs">VS</span>${side(r, sr, "r")}</div>
@@ -3068,6 +3118,7 @@ body.tv .rb-pl .pl-legs .t { font-size: 16px; }
       <div class="fi">${tos("a")}<span class="ddx">${esc(sit.dd || g.d || "")}</span>${sit.dr && sit.dr.t ? `<span class="drt">Drive · ${esc(sit.dr.t)}</span>` : ""}${tos("h")}</div>${wpH}</div>`;
   }
   function gameCard(G, hero) {
+    if (!hero && !G.entries.length) return "";
     const g = G.g, rows = gamePositions(G.entries);
     const live = g.st === "in", pos = (t) => (live && g.sit && g.sit.pos && String(t.id) === String(g.sit.pos) ? BALL : "");
     const sc = (t) => (g.st === "pre" || t.sc == null ? "" : `<span class="sc num">${t.sc}</span>`);
@@ -3092,8 +3143,9 @@ body.tv .rb-pl .pl-legs .t { font-size: 16px; }
   }
   function inParlays(G) {
     const legs = G.legs || []; if (!legs.length) return "";
-    const bs = [...new Map(legs.map((e) => [e.b.id, e.b])).values()], ppl = [...new Map(bs.map((b) => [personKey(b), b])).values()];
-    return `<div class="rb-inpar">${ppl.map((b) => avHtml(b, "sm")).join("")}<span>${G.entries.length ? "Also in" : "In"} ${bs.length} parlay${bs.length > 1 ? "s" : ""}</span></div>`;
+    const by = new Map();
+    for (const e of legs) { const k = personKey(e.b); if (!by.has(k)) by.set(k, { b: e.b, ids: new Set() }); by.get(k).ids.add(e.b.id); }
+    return `<div class="rb-inpar"><span class="lbl">Parlay legs on this game</span>${[...by.values()].map(({ b, ids }) => `<span class="who">${avHtml(b, "sm")}<b style="color:${personCol(b)}">${esc(personName(b))}</b>${ids.size > 1 ? ` ×${ids.size}` : ""}</span>`).join("")}</div>`;
   }
   function parlayCard(list) {
     if (!list.length) return "";
@@ -3467,12 +3519,14 @@ body.tv .rb-pl .pl-legs .t { font-size: 16px; }
     el.style.setProperty("--c", personCol(b));
     $("#slAv").textContent = personName(b).slice(0, 1).toUpperCase();
     $("#slWho").textContent = isMe(b) ? personName(b) + " · locked in" : personName(b) + " just bet";
-    $("#slStamp").textContent = b.tail ? (b.tail.kind === "fade" ? "Fade" : "Tail") : ride ? "Ride" : vs ? "Fade" : "Locked";
+    const squad = !!ride && new Set(ride.bets.map(personKey)).size >= 3;
+    $("#slStamp").textContent = b.tail ? (b.tail.kind === "fade" ? "Fade" : "Tail") : ride ? (squad ? "Squad ride" : "Ride") : vs ? "Fade" : "Locked";
     $("#slPick").textContent = b.pick;
     $("#slOdds").textContent = fOdds(b.odds);
     $("#slAmt").textContent = `${fU(b.units)} (${fUSD(b.units * S.unit)}) to win ${fU(b.units * ppu(b.odds))}`;
     $("#slSub").textContent = b.tail ? (b.tail.kind === "fade" ? "Fading " : "Tailing ") + b.tail.name : ride ? (viaLeg(b) ? "A leg rides with " : "Riding with ") + others.join(" + ") : vs ? (isMe(b) ? "Against " : "Fading ") + vs.map(personName).join(" + ") : b.kind === "parlay" ? (b.legs || []).length + "-leg parlay" : b.sport || "";
-    el.className = "slip" + (ride ? " ride" : vs ? " vs" : ""); el.hidden = false; void el.offsetWidth; el.classList.add("on");
+    el.className = "slip" + (ride ? " ride" : vs ? " vs" : "") + (squad ? " squad" : ""); el.hidden = false; void el.offsetWidth; el.classList.add("on");
+    if (squad) snSound("bc_sting", 0.85, 0);
     snSound("whoosh", 0.55, 0); snSound("slam", 0.7, 700);
     clearTimeout(slipT); slipT = setTimeout(() => { el.classList.add("out"); setTimeout(() => { el.hidden = true; el.className = "slip"; }, 500); }, 4600);
   }
@@ -3659,7 +3713,7 @@ body.tv .rb-pl .pl-legs .t { font-size: 16px; }
   // ---------- sheets ----------
   function openSheet(id) { $(id).hidden = false; }
   // keep every open screen current: when a new version is up, reload it (never mid-form or mid-animation)
-  const BUILD = "20261012211809";
+  const BUILD = "20261012012000";
   function checkBuild() {
     if (BUILD === "dev") return;
     fetch("version.json?t=" + Date.now(), { cache: "no-store" }).then((r) => (r.ok ? r.json() : null)).then((j) => {
