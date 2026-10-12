@@ -1407,6 +1407,15 @@ body.tv.prime .rb-g.hero { border-color: color-mix(in srgb, var(--tc) 55%, trans
 .rb-g.hero .rb-st { font-size: 17px; }
 .rb-g.hero .rb-av { width: 38px; height: 38px; font-size: 17px; }
 body.tv.prime .rb-pos.st-w, body.tv.prime .rb-hs-side.ahead { border-color: color-mix(in srgb, var(--win) 35%, transparent); }
+/* a team scored for somebody in the room: the clip plays in that team's colors with their name on it */
+.jb-team { position: absolute; left: 2%; top: 3%; display: flex; align-items: center; gap: .6em; padding: .4em 1.1em .4em .4em; border-radius: 12px; background: var(--jt1); border-right: .4em solid var(--jt2); color: var(--jtInk, #fff); font-size: clamp(16px, 3.2vh, 42px); box-shadow: 0 12px 34px rgba(0,0,0,.6), 0 0 0 2px rgba(255,255,255,.15); animation: jtIn .55s cubic-bezier(.2,.9,.3,1.25) both; z-index: 2; }
+.jb-team img { width: 2.3em; height: 2.3em; object-fit: contain; padding: .3em; border-radius: 50%; background: rgba(255,255,255,.92); box-shadow: 0 2px 8px rgba(0,0,0,.4); }
+.jb-team img[src=""] { display: none; }
+.jb-team b { display: block; font: 900 1.2em/1 Inter, sans-serif; letter-spacing: .01em; text-transform: uppercase; }
+.jb-team span { display: block; margin-top: .25em; font: 800 .62em/1 Inter, sans-serif; letter-spacing: .2em; text-transform: uppercase; opacity: .9; }
+@keyframes jtIn { from { transform: translateX(-40px) scale(.9); opacity: 0; } }
+.jumbo.teamed .jb-screen { outline-color: var(--jt2); box-shadow: 0 0 100px var(--jtA), 0 20px 60px rgba(0,0,0,.6); }
+.jumbo.teamed .jb-head { box-shadow: inset 0 -3px 0 var(--jt2); }
 </style>
 </head>
 <body>
@@ -1782,7 +1791,7 @@ body.tv.prime .rb-pos.st-w, body.tv.prime .rb-hs-side.ahead { border-color: colo
 <div class="jumbo" id="jumbo" hidden title="Tap to close">
   <div class="jb-head"><span class="jb-logo">SWEAT<b>ZONE</b></span><span class="jb-tag" id="jbTag">Live</span><b id="jbLbl"></b><span class="jb-x" aria-hidden="true">×</span></div>
   <div class="jb-main">
-    <div class="jb-screen"><video id="jbBg" muted playsinline preload="none" aria-hidden="true"></video><video id="pipVid" muted playsinline preload="none"></video><div class="jb-bug" id="jbBug" hidden></div><div class="jb-np" id="jbNp" hidden><div class="np-art" aria-hidden="true"><i></i><i></i><i></i><i></i><i></i><img id="npImg" alt="" hidden></div><div class="np-txt"><span>Now playing</span><b id="npSong"></b><em id="npArtist"></em></div></div></div>
+    <div class="jb-screen"><video id="jbBg" muted playsinline preload="none" aria-hidden="true"></video><video id="pipVid" muted playsinline preload="none"></video><div class="jb-bug" id="jbBug" hidden></div><div class="jb-team" id="jbTeam" hidden><img id="jbTeamLg" alt="" referrerpolicy="no-referrer"><div><b id="jbTeamNm"></b><span id="jbTeamEv"></span></div></div><div class="jb-np" id="jbNp" hidden><div class="np-art" aria-hidden="true"><i></i><i></i><i></i><i></i><i></i><img id="npImg" alt="" hidden></div><div class="np-txt"><span>Now playing</span><b id="npSong"></b><em id="npArtist"></em></div></div></div>
     <div class="jb-prog"><i id="jbProg"></i></div>
   </div>
   <aside class="jb-side"><h3><i class="dot"></i>Active bets</h3><div id="jbBets"></div></aside>
@@ -3083,7 +3092,7 @@ body.tv.prime .rb-pos.st-w, body.tv.prime .rb-hs-side.ahead { border-color: colo
   // ---------- sheets ----------
   function openSheet(id) { $(id).hidden = false; }
   // keep every open screen current: when a new version is up, reload it (never mid-form or mid-animation)
-  const BUILD = "20261012153946";
+  const BUILD = "20261012154435";
   function checkBuild() {
     if (BUILD === "dev") return;
     fetch("version.json?t=" + Date.now(), { cache: "no-store" }).then((r) => (r.ok ? r.json() : null)).then((j) => {
@@ -3559,7 +3568,7 @@ body.tv.prime .rb-pos.st-w, body.tv.prime .rb-hs-side.ahead { border-color: colo
   function lineGames() {
     const m = new Map();
     for (const b of S.bets.values()) {
-      if (b.status !== "open" || !isMe(b)) continue;
+      if (b.status !== "open") continue;
       const legs = b.kind === "parlay" ? legsOf(b) : null;
       if (legs && legs.some((l) => l.st === "miss")) continue;
       lineSels(b).forEach((s) => {
@@ -4263,6 +4272,7 @@ body.tv.prime .rb-pos.st-w, body.tv.prime .rb-hs-side.ahead { border-color: colo
 
   // ---------- Reactions: clips take over the screen like a jumbotron, live bets down the right ----------
   let statusSrc = null, statusBet = null, popT = 0, pipT = 0, hideT = 0, pipGo = 0, jbTick = 0;
+  let pipTeam = null; // set right before a team's moment plays: the next clip on the jumbo wears their colors
   function stopStatus() {
     pipGo++;
     try { if (statusSrc) statusSrc.stop(); } catch (e) {}
@@ -4494,7 +4504,8 @@ body.tv.prime .rb-pos.st-w, body.tv.prime .rb-hs-side.ahead { border-color: colo
   // start sound and video together once both are loaded
   let npT = 0;
   function showPip(b, P, mood, why, pre) {
-    const jb = $("#jumbo"), v = $("#pipVid"), bg = $("#jbBg"), c = ready(), go = ++pipGo, betId = b.id;
+    const jb = $("#jumbo"), v = $("#pipVid"), bg = $("#jbBg"), c = ready(), go = ++pipGo, betId = b.id, team = pipTeam;
+    pipTeam = null;
     const dj = !!(P.dj && P.bpm), vbase = dj ? DJ_BASE : P.base, rate = dj ? djRate(P.bpm) : 1;
     const src = vidSrc(vbase);
     if (v.dataset.base !== vbase) { v.dataset.base = vbase; v.src = src; v.load(); bg.src = src; bg.load(); }
@@ -4515,7 +4526,14 @@ body.tv.prime .rb-pos.st-w, body.tv.prime .rb-hs-side.ahead { border-color: colo
       if (song) { $("#npSong").textContent = song; $("#npArtist").textContent = artist || ""; np.hidden = false; npT = setTimeout(() => np.classList.add("on"), 700); } else np.hidden = true;
       $("#jbTag").textContent = why || MOOD_TAG[mood] || "Live";
       jbBug(b);
-      jb.className = "jumbo m-" + mood; jb.hidden = false;
+      jb.className = "jumbo m-" + mood + (team ? " teamed" : ""); jb.hidden = false;
+      const jt = $("#jbTeam");
+      if (team) {
+        const c1 = hexRgb(team.t.col) || [40, 44, 60], c2 = hexRgb(team.t.alt) || c1;
+        for (const [k, val] of [["--jt1", `rgb(${c1})`], ["--jt2", `rgb(${c2})`], ["--jtA", `rgba(${c2},.45)`], ["--jtInk", lum(c1) > 0.45 ? "#0b0f17" : "#fff"]]) jb.style.setProperty(k, val);
+        $("#jbTeamLg").src = team.t.lg || ""; $("#jbTeamNm").textContent = team.t.nm || team.t.ab; $("#jbTeamEv").textContent = team.word;
+        jt.hidden = false; jt.style.animation = "none"; void jt.offsetWidth; jt.style.animation = "";
+      } else jt.hidden = true;
       // picking up mid-clip: the video joins the sound where it is
       const off = pre ? Math.max(0, Math.min(P.ms - 800, performance.now() - pre.at)) : 0;
       const vt = sp ? 0 : dj ? djPos(P, off / 1000 + 0.08) : off / 1000;
@@ -4927,7 +4945,7 @@ body.tv.prime .rb-pos.st-w, body.tv.prime .rb-hs-side.ahead { border-color: colo
   function ridersOf(g) {
     const r = [];
     for (const b of S.bets.values()) {
-      if (b.status !== "open" || !isMe(b)) continue;
+      if (b.status !== "open") continue;
       const legs = b.kind === "parlay" ? legsOf(b) : null;
       if (legs && legs.some((l) => l.st === "miss")) continue; // dead ticket
       for (const s of selsOf(b)) if (String(s.g) === g.id) { if (legs && legs.find((l) => l.sel === s && l.st)) continue; r.push({ b, s }); }
@@ -5184,7 +5202,7 @@ body.tv.prime .rb-pos.st-w, body.tv.prime .rb-hs-side.ahead { border-color: colo
   const BUSY_GAP = 15e3;       // busy slate: alerts can come 15 seconds apart (lots of games)
   // songs that fit a bet's sport (no anthems), and the 1 PM touchdown edit: a Goldie edit, a hype song or DJ Goldie, in turn
   const musicFor = (b) => { const sp = (gameFor(b) || {}).sport || sportOf(b); return CLIPS.filter((c) => (c.song || c.music || c.dj) && !/anthem/i.test(c.artist || "") && forSport(c, sp) && fits(c, b)); };
-  let busyPops = 0, tdPops = 0, lastSong = "", showPops = 0, showTd = 0;
+  let busyPops = 0, tdPops = 0, lastSong = "", showPops = 0;
   const SHOW_EVERY = 2 * 60e3; // 4 PM: a DJ break, a clip or one of his scenes after 2 minutes without anything
   const PRIME_EVERY = 60e3;    // prime time: every minute of dead air, his scenes twice for every clip (DJ still every 4 minutes)
   const PRIME_TURNS = [2, 1, 2];
@@ -5193,7 +5211,7 @@ body.tv.prime .rb-pos.st-w, body.tv.prime .rb-hs-side.ahead { border-color: colo
   const DJ_DUE = 4 * 60e3;
   let lastDj = Date.now() - 3 * 60e3; // first one about a minute after the board opens
   function djBreak(now) {
-    const mine = [...S.bets.values()].filter((b) => b.status === "open" && isMe(b)), b = mine.find((x) => phase(x) === "live") || mine[0];
+    const mine = [...S.bets.values()].filter((b) => b.status === "open"), b = mine.find((x) => phase(x) === "live") || mine[0];
     const P = b && pickClip(newSong(CLIPS.filter((c) => c.dj)));
     if (!P) return false;
     lastAny = now; lastKind = "pop"; lastDj = now;
@@ -5208,6 +5226,15 @@ body.tv.prime .rb-pos.st-w, body.tv.prime .rb-hs-side.ahead { border-color: colo
     const k = tdPops++ % 3, pool = k === 0 ? edits : k === 1 && songs.length ? songs : CLIPS.filter((c) => c.dj);
     const P = pickClip(newSong(pool)) || pickClip(newSong(edits));
     if (P) react(b, "good", P, why);
+  }
+  function teamHype(b, g, e, why) {
+    if (!clipsOn() || !g || !e.side) return;
+    const t = g[e.side], own = CLIPS.filter((c) => c.fan === t.ab && (!c.sport || c.sport === g.sport));
+    const scenes = CLIPS.filter((c) => c.base.startsWith("sounds/aura/") && !c.dj && forSport(c, g.sport));
+    const P = (own.length && pickClip(own)) || pickClip(newSong(scenes));
+    if (!P) return;
+    pipTeam = { t, word: PC_TYPE[e.ev] || "Score" };
+    react(b, "good", P, why);
   }
   function slatePin() { try { return localStorage.getItem("sb-slate") || "auto"; } catch (e) { return "auto"; } }
   function slateGames() {
@@ -5235,7 +5262,7 @@ body.tv.prime .rb-pos.st-w, body.tv.prime .rb-hs-side.ahead { border-color: colo
     const now = Date.now(), swings = [], seenG = new Set(), mode = slateMode(), busy = mode === "busy";
     showMode();
     for (const b of S.bets.values()) {
-      if (b.status !== "open" || !isMe(b)) { lastRes.delete(b.id); legHits.delete(b.id); lastM.delete(b.id); continue; }
+      if (b.status !== "open") { lastRes.delete(b.id); legHits.delete(b.id); lastM.delete(b.id); continue; }
       for (const s of selsOf(b)) {
         const g = gameOf(s); if (!g || seenG.has(g.id)) continue;
         seenG.add(g.id);
@@ -5296,12 +5323,13 @@ body.tv.prime .rb-pos.st-w, body.tv.prime .rb-hs-side.ahead { border-color: colo
         const exactMine = exact.filter((c) => fits(c, top.b));
         const pool = exactMine.length ? exactMine : poolFor(top.b, k === "mid" ? "hype" : k);
         const P = pickClip(pool) || pickClip(libFor(top.b, ["hype", "vibe"]));
+        // a team scores for somebody in the room: the play card, then that team's own edit (or him in their colors)
+        if (CARD_EVS.has(e.ev) && top.g && top.h > 0 && e.side && ["td", "hr", "goal"].includes(e.ev)) { const tb = top.b, tg = top.g; showPlayCard(tg, e, tb, (why) => teamHype(tb, tg, e, why)); return; }
         if (CARD_EVS.has(e.ev) && top.g && busy) { // the alert; a touchdown for your side gets a music edit after it, anything else keeps the music going
           const tdb = top.b, mine = e.ev === "td" && top.h > 0;
           showPlayCard(top.g, e, tdb, (why) => { if (mine) tdHype(tdb, why); });
           return;
         }
-        if (CARD_EVS.has(e.ev) && top.g && e.ev === "td" && top.h > 0 && showTd++ % 2 === 0) { const tdb = top.b; showPlayCard(top.g, e, tdb, (why) => tdHype(tdb, why)); return; }
         if (CARD_EVS.has(e.ev) && top.g) {
           if (P && P.base) { clipBuf(P.base); const pv = document.createElement("video"); pv.muted = true; pv.preload = "auto"; pv.src = vidSrc(P.base); }
           const pre = preAudio(top.b, P);
@@ -5317,7 +5345,7 @@ body.tv.prime .rb-pos.st-w, body.tv.prime .rb-hs-side.ahead { border-color: colo
       // busy slate: DJ Goldie, now and then, over whichever of your bets is live
       const due = now - lastDj >= DJ_DUE && now - lastAny >= 20e3;
       if (now - lastAny < DJ_EVERY && !due) return;
-      const mine = [...S.bets.values()].filter((b) => b.status === "open" && isMe(b)), b = mine.find((x) => phase(x) === "live") || mine[0];
+      const mine = [...S.bets.values()].filter((b) => b.status === "open"), b = mine.find((x) => phase(x) === "live") || mine[0];
       if (!b) return;
       const other = musicFor(b).filter((c) => !c.dj), P = pickClip(newSong(!due && busyPops++ % 3 === 2 && other.length ? other : CLIPS.filter((c) => c.dj)));
       if (!P) return;
@@ -5327,7 +5355,7 @@ body.tv.prime .rb-pos.st-w, body.tv.prime .rb-hs-side.ahead { border-color: colo
     }
     // 4 PM and prime time: something every 2 minutes, taking turns: DJ {name} (off your Spotify playlist when the TV's
     // connected), a clip for how your bets are going (football edits, rap, comebacks), one of his scenes
-    const mine = [...S.bets.values()].filter((b) => b.status === "open" && isMe(b));
+    const mine = [...S.bets.values()].filter((b) => b.status === "open");
     const djDue = now - lastDj >= DJ_DUE && now - lastAny >= 20e3;
     const prime = mode === "prime";
     if (!mine.length || (now - lastAny < (prime ? PRIME_EVERY : SHOW_EVERY) && !djDue)) return;
@@ -5497,7 +5525,7 @@ body.tv.prime .rb-pos.st-w, body.tv.prime .rb-hs-side.ahead { border-color: colo
     return `<span class="wx${w.wet || w.windy || w.cold ? " hot" : ""}">${w.icon}${w.t != null ? " " + w.t + "°" : ""}${w.wind != null && w.wind >= 10 ? " · " + w.wind + " mph" : ""}</span>`;
   }
   const tkTeam = (x, won) => `${x.rank <= 25 ? `<i>#${x.rank}</i>` : ""}<b${won ? ' class="wn"' : ""}>${esc(x.ab)}</b>`;
-  const mineIds = () => { const s = new Set(); for (const b of S.bets.values()) if (b.status === "open" && isMe(b)) for (const x of selsOf(b)) s.add(String(x.g)); return s; };
+  const mineIds = () => { const s = new Set(); for (const b of S.bets.values()) if (b.status === "open") for (const x of selsOf(b)) s.add(String(x.g)); return s; };
   function renderTicker() {
     const el = $("#ticker"), now = Date.now(), mine = mineIds();
     const ahead = TK.lg === "NFL" ? 5 * 86400e3 : 4 * 3600e3; // the NFL ticker shows the week's slate with lines
