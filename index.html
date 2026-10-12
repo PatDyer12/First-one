@@ -1479,7 +1479,7 @@ body.tv.idle, body.tv.idle * { cursor: none !important; }
         <label><input type="radio" name="slate" value="feature"><span>4 PM</span></label>
         <label><input type="radio" name="slate" value="prime"><span>Prime time</span></label>
       </div>
-      <span class="hint">Auto goes by how many games are on. 1 PM mode (5+ games): touchdown and turnover alerts on your games, and every touchdown for your side gets a music edit after its alert (a <span class="gnm">Goldie</span> edit, a hype song or DJ <span class="gnm">Goldie</span>); in between it's DJ <span class="gnm">Goldie</span> and music every couple of minutes, no other clips. 4 PM mode (2 to 4 games) and prime time (one game): the full show, plus something every couple of minutes, taking turns: DJ <span class="gnm">Goldie</span> (off your Spotify playlist when it's connected), a football edit and one of his scenes. Each screen keeps its own setting.</span>
+      <span class="hint">Auto goes by how many games are on. 1 PM mode (5+ games): touchdown and turnover alerts on your games, and every touchdown for your side gets a music edit after its alert (a <span class="gnm">Goldie</span> edit, a hype song or DJ <span class="gnm">Goldie</span>); in between it's DJ <span class="gnm">Goldie</span> and music every couple of minutes, no other clips. 4 PM mode (2 to 4 games) and prime time (one game): the full show, plus something every couple of minutes (every minute in prime time, mostly his scenes), taking turns: DJ <span class="gnm">Goldie</span> (off your Spotify playlist when it's connected), a football edit and one of his scenes. Each screen keeps its own setting.</span>
     </div>
     <div class="field">
       <span class="lbl">His name</span>
@@ -2452,7 +2452,8 @@ body.tv.idle, body.tv.idle * { cursor: none !important; }
   let edBag = [], edLast = -1;
   function edShow(b, n, tag) {
     if (!edBag.length) { edBag = shuffled(EDITS.map((_, i) => i)); if (edBag[edBag.length - 1] === edLast) edBag.unshift(edBag.pop()); }
-    const c = EDITS[(edLast = edBag.pop())]; edPre(c);
+    let j = edBag.length - 1; while (j > 0 && EDITS[edBag[j]].fits && !EDITS[edBag[j]].fits(b)) j--;
+    const c = EDITS[(edLast = edBag.splice(j, 1)[0])]; edPre(c);
     fx(afterCard(() => { const ms = introEdit(c, b, n); if (tag) whoTag(tag, ms); return ms; }));
     if (isNuke(b)) nukeHit(b.pick, n); else if (isWhale(b)) whaleSplash(b, n);
   }
@@ -2654,7 +2655,7 @@ body.tv.idle, body.tv.idle * { cursor: none !important; }
   // ---------- sheets ----------
   function openSheet(id) { $(id).hidden = false; }
   // keep every open screen current: when a new version is up, reload it (never mid-form or mid-animation)
-  const BUILD = "20261011232910";
+  const BUILD = "20261012004528";
   function checkBuild() {
     if (BUILD === "dev") return;
     fetch("version.json?t=" + Date.now(), { cache: "no-store" }).then((r) => (r.ok ? r.json() : null)).then((j) => {
@@ -3888,6 +3889,9 @@ body.tv.idle, body.tv.idle * { cursor: none !important; }
     clip("aura/rain", "Goldie: made it rain", "up win vibe", 18.3, { song: "All There", artist: "Jeezy ft. Bankroll Fresh" }),
     clip("aura/take", "Goldie: pulled up", "up win", 20.0),
     clip("aura/bike", "Goldie: wheelie", "up win vibe", 18.0, { song: "All There", artist: "Jeezy ft. Bankroll Fresh" }),
+    clip("aura/td", "Goldie: touchdown", "up win", 17.0, { football: true }),
+    clip("aura/slots", "Goldie: jackpot", "up win vibe", 18.0, { song: "I'm Dat N****", artist: "Future" }),
+    clip("aura/hero", "Goldie: hero landing", "up win", 17.0),
     clip("clips/w02", "Car ride laughs", "up win", 22.45),
     clip("clips/w03", "Tiger: Pure.", "up win", 30),
     clip("clips/w04", "Migos carpool", "up win vibe", 30, { song: "Walk It Talk It", artist: "Migos ft. Drake" }),
@@ -4331,7 +4335,7 @@ body.tv.idle, body.tv.idle * { cursor: none !important; }
   // a clip for this sport: its own and the general ones. NFL bets never get a college edit (the college folders, anything
   // tagged college), just the NFL edits, the general fillers and the DJ
   const isCollege = (c) => c.sport === "CFB" || c.college || /^sounds\/(cfb|uga)\//.test(c.base);
-  const forSport = (c, sp) => (sp === "NFL" ? c.sport === "NFL" || (!c.sport && !isCollege(c)) : !c.sport || c.sport === sp);
+  const forSport = (c, sp) => (c.football ? sp === "NFL" || sp === "CFB" : sp === "NFL" ? c.sport === "NFL" || (!c.sport && !isCollege(c)) : !c.sport || c.sport === sp);
   // the team you're riding on this bet; null on a total (then nobody's fan clips play)
   function myTeam(b) {
     const g = gameFor(b); if (!g) return null;
@@ -4750,7 +4754,9 @@ body.tv.idle, body.tv.idle * { cursor: none !important; }
   // songs that fit a bet's sport (no anthems), and the 1 PM touchdown edit: a Goldie edit, a hype song or DJ Goldie, in turn
   const musicFor = (b) => { const sp = (gameFor(b) || {}).sport || sportOf(b); return CLIPS.filter((c) => (c.song || c.music || c.dj) && !/anthem/i.test(c.artist || "") && forSport(c, sp) && fits(c, b)); };
   let busyPops = 0, tdPops = 0, lastSong = "", showPops = 0, showTd = 0;
-  const SHOW_EVERY = 2 * 60e3; // 4 PM / prime: a DJ break, a clip or one of his scenes after 2 minutes without anything
+  const SHOW_EVERY = 2 * 60e3; // 4 PM: a DJ break, a clip or one of his scenes after 2 minutes without anything
+  const PRIME_EVERY = 60e3;    // prime time: every minute of dead air, his scenes twice for every clip (DJ still every 4 minutes)
+  const PRIME_TURNS = [2, 1, 2];
   // the DJ gets his turn every 4 minutes however busy the games are: plays keep coming on a full slate, so waiting for a
   // quiet 2 minutes meant he hardly ever came on. A big play (a touchdown, a turnover) still comes first and cuts him off
   const DJ_DUE = 4 * 60e3;
@@ -4892,21 +4898,23 @@ body.tv.idle, body.tv.idle * { cursor: none !important; }
     // connected), a clip for how your bets are going (football edits, rap, comebacks), one of his scenes
     const mine = [...S.bets.values()].filter((b) => b.status === "open" && isMe(b));
     const djDue = now - lastDj >= DJ_DUE && now - lastAny >= 20e3;
-    if (!mine.length || (now - lastAny < SHOW_EVERY && !djDue)) return;
+    const prime = mode === "prime";
+    if (!mine.length || (now - lastAny < (prime ? PRIME_EVERY : SHOW_EVERY) && !djDue)) return;
     let live = [];
     for (const b of mine) { const spot = liveSpot(b); if (spot && spot.state !== "L") live.push({ b, ...spot }); }
     const winning = live.filter((x) => x.state === "W");
     if (winning.length) live = winning;
-    const turn = djDue ? 0 : showPops++ % 3;
-    if (turn === 0 || !live.length) {
+    const turn = djDue ? 0 : prime ? PRIME_TURNS[showPops++ % PRIME_TURNS.length] : showPops++ % 3;
+    if (turn === 0 || (!live.length && !(prime && turn === 2))) {
       const b = (live[0] && live[0].b) || mine.find((x) => phase(x) === "live") || mine[0], P = pickClip(newSong(CLIPS.filter((c) => c.dj)));
       if (!P) return;
       lastAny = now; lastKind = "pop";
       react(b, "mid", P, "DJ " + gName());
       return;
     }
-    const pick = live.sort((x, y) => (lastFeat.get(x.b.id) || 0) - (lastFeat.get(y.b.id) || 0))[0];
-    const scenes = CLIPS.filter((c) => c.base.startsWith("sounds/aura/") && fits(c, pick.b));
+    // nothing live (halftime, before kickoff): his scene rides on your bet anyway
+    const pick = live.length ? live.sort((x, y) => (lastFeat.get(x.b.id) || 0) - (lastFeat.get(y.b.id) || 0))[0] : { b: mine.find((x) => phase(x) === "live") || mine[0], state: "" };
+    const scenes = CLIPS.filter((c) => c.base.startsWith("sounds/aura/") && !c.dj && fits(c, pick.b) && forSport(c, (gameFor(pick.b) || {}).sport || sportOf(pick.b)));
     const P = turn === 2 && scenes.length ? pickClip(newSong(scenes)) : pickClip(poolFor(pick.b, pick.state === "W" ? "rap" : pick.state === "C" ? "comeback" : "fill"));
     if (!P) return;
     lastAny = now; lastKind = "pop"; lastFeat.set(pick.b.id, now);
@@ -6299,6 +6307,9 @@ body.tv.idle, body.tv.idle * { cursor: none !important; }
     { name: "Made it rain", id: "rain", len: 18.3, hit: 15.1, cls: "lock" },
     { name: "Pulled up", id: "take", len: 20.0, hit: 16.7, cls: "lock" },
     { name: "Wheelie", id: "bike", len: 18.0, hit: 15.3, cls: "lock" },
+    { name: "Touchdown", id: "td", len: 17.0, hit: 14.03, cls: "lock", fits: (b) => footballBet(b) },
+    { name: "Jackpot", id: "slots", len: 18.0, hit: 14.37, cls: "lock" },
+    { name: "Hero landing", id: "hero", len: 17.0, hit: 13.03, cls: "lock", l3: [0.5, 3.6] },
   ];
   const edSrc = (c) => vidSrc("sounds/aura/" + c.id), edAud = (c) => "../aura/" + c.id;
   const edPreV = {};
@@ -6829,18 +6840,12 @@ body.tv.idle, body.tv.idle * { cursor: none !important; }
   // regular wins: a shuffled bag of every intro, no repeats until the bag is empty
   const footballBet = (b) => { const sp = String(sportOf(b) || "").toLowerCase(); return !sp || /football|nfl|cfb/.test(sp); };
   const QUICK = [
-    ...EDITS.map((c) => ({ name: c.name, run: (b, n) => introEdit(c, b, n), pre: () => edPre(c), w: 2 })),
-    { name: "Make it rain", run: introGun, mus: "gun" },
-    { name: "Jackpot", run: introSlots, mus: "slots" },
+    ...EDITS.map((c) => ({ name: c.name, run: (b, n) => introEdit(c, b, n), pre: () => edPre(c), w: 2, fits: c.fits })),
     { name: "Cash dance", run: introDance, mus: "dance" },
     { name: "Paid", run: introStamp, mus: "stamp" },
     { name: "Dear sportsbook", run: introMoon, mus: "moon" },
     { name: "Shake it", run: introTwerk, mus: "twerk" },
-    { name: "Dropped in", run: introSky, mus: "sky" },
-    { name: "Touchdown", run: introTD, mus: "td", fits: footballBet },
-    { name: "Went to war", run: introWar, mus: "war" },
     { name: "Lock it up", run: introLock, mus: "lock" },
-    { name: "Hero landing", run: introHero, mus: "hero" },
   ];
   let quickBag = [], quickLast = -1;
   function quickFill() {
