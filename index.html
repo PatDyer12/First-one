@@ -1734,6 +1734,8 @@ body:not(.tv) [data-ids]:active { transform: scale(.99); }
 @media (prefers-reduced-motion: reduce) {
   .bc *, .bc *::before, .bc *::after { animation-duration: .01s !important; animation-delay: 0s !important; }
 }
+.in-title.t-say .in-kick { position: relative; margin-bottom: 1.4vh; padding: .32em .9em .3em; border-radius: 999px; background: #fbf9f3; color: #0f0d0d; font: 900 clamp(24px, 4.4vh, 54px)/1 "Big Shoulders Display", "Barlow Condensed", Impact, sans-serif; letter-spacing: .02em; text-shadow: none; box-shadow: 0 0 0 .45vh #0f0d0d, 0 1.2vh 3vh rgba(0,0,0,.55); }
+.in-title.t-say .in-kick::after { content: ""; position: absolute; left: 22%; bottom: -1.5vh; border: 1vh solid transparent; border-top: 1.8vh solid #fbf9f3; border-bottom: 0; filter: drop-shadow(0 .35vh 0 #0f0d0d); }
 /* prime time: the drive on a field, timeouts, win probability; the lines before kickoff */
 .rb-fld { padding: 4px 18px 16px; display: grid; gap: 10px; }
 .rb-fld .fld { display: grid; grid-template-columns: 7% 1fr 7%; height: 74px; border-radius: 8px; overflow: hidden; background: #0f1a14; box-shadow: inset 0 0 0 1px rgba(255,255,255,.08); }
@@ -3604,7 +3606,7 @@ body.tv.prime .rb-fld .ddx { font-size: 20px; }
   // ---------- sheets ----------
   function openSheet(id) { $(id).hidden = false; }
   // keep every open screen current: when a new version is up, reload it (never mid-form or mid-animation)
-  const BUILD = "20261012202617";
+  const BUILD = "20261012210618";
   function checkBuild() {
     if (BUILD === "dev") return;
     fetch("version.json?t=" + Date.now(), { cache: "no-store" }).then((r) => (r.ok ? r.json() : null)).then((j) => {
@@ -7633,20 +7635,20 @@ body.tv.prime .rb-fld .ddx { font-size: 20px; }
   // ---- Goldie scenes: rendered from his pictures. The video is the picture, the music plays through WebAudio,
   // the pick rides a lower third, and your payout slams in on the scene's drop ----
   const EDITS = [
-    { name: "Sent it", id: "sky", len: 17.0, hit: 14.6, cls: "lock", l3: [4.3, 8.4] },
-    { name: "New whip", id: "whip", len: 20.6, hit: 17.2, cls: "lock" },
-    { name: "Went to war", id: "war", len: 19.4, hit: 16.7, cls: "lock" },
-    { name: "Strapped", id: "strap", len: 17.3, hit: 15.6, cls: "lock" },
-    { name: "Really high", id: "smoke", len: 16.9, hit: 13.0, cls: "green lock" },
-    { name: "Aura maxed", id: "aura", len: 15.6, hit: 13.9, cls: "lock" },
-    { name: "Made it rain", id: "rain", len: 18.3, hit: 15.1, cls: "lock" },
-    { name: "Pulled up", id: "take", len: 20.0, hit: 16.7, cls: "lock" },
-    { name: "Wheelie", id: "bike", len: 18.0, hit: 15.3, cls: "lock" },
-    { name: "Touchdown", id: "td", len: 17.0, hit: 14.03, cls: "lock", fits: (b) => footballBet(b) },
-    { name: "Jackpot", id: "slots", len: 18.0, hit: 14.37, cls: "lock" },
-    { name: "Hero landing", id: "hero", len: 17.0, hit: 13.03, cls: "lock", l3: [0.5, 3.6] },
-    { name: "Paid", id: "paid", len: 17.0, hit: 12.82, cls: "lock", l3: [2.3, 4.0] },
-    { name: "Lock it up", id: "lock", len: 17.0, hit: 12.91, cls: "lock", l3: [0.5, 4.2] },
+    { name: "Sent it", id: "sky", len: 17.0, hit: 14.6, cls: "lock", l3: [4.3, 8.4] , slam: "Cashed, bitch", say: [14.95, "Cashed, bitch"] },
+    { name: "New whip", id: "whip", len: 20.6, hit: 17.2, cls: "lock" , slam: "Skrrt, bitch", say: [17.55, "Skrrt, bitch"] },
+    { name: "Went to war", id: "war", len: 19.4, hit: 16.7, cls: "lock" , slam: "Fuck you, pay me", say: [17.05, "Fuck you, pay me"] },
+    { name: "Strapped", id: "strap", len: 17.3, hit: 15.6, cls: "lock" , slam: "Don't fuck with me", say: [15.95, "Don't fuck with me"] },
+    { name: "Really high", id: "smoke", len: 16.9, hit: 13.0, cls: "green lock" , slam: "High as fuck", say: [13.35, "High as fuck"] },
+    { name: "Aura maxed", id: "aura", len: 15.6, hit: 13.9, cls: "lock" , slam: "Bow down, bitches", say: [14.25, "Bow down, bitches"] },
+    { name: "Made it rain", id: "rain", len: 18.3, hit: 15.1, cls: "lock" , slam: "It's raining, bitch", say: [15.45, "It's raining, bitch"] },
+    { name: "Pulled up", id: "take", len: 20.0, hit: 16.7, cls: "lock" , slam: "We outside", say: [17.05, "We outside"] },
+    { name: "Wheelie", id: "bike", len: 18.0, hit: 15.3, cls: "lock" , slam: "Can't catch me", say: [15.65, "Can't catch me"] },
+    { name: "Touchdown", id: "td", len: 17.0, hit: 14.03, cls: "lock", fits: (b) => footballBet(b) , slam: "Six, motherfucker", say: [14.38, "Six, motherfucker"] },
+    { name: "Jackpot", id: "slots", len: 18.0, hit: 14.37, cls: "lock" , slam: "Jackpot, bitch", say: [14.72, "Jackpot, bitch"] },
+    { name: "Hero landing", id: "hero", len: 17.0, hit: 13.03, cls: "lock", l3: [0.5, 3.6] , slam: "Saved your ass", say: [13.38, "Saved your ass"] },
+    { name: "Paid", id: "paid", len: 17.0, hit: 12.82, cls: "lock", l3: [2.3, 4.0] , slam: "Pay me, bitch", say: [13.17, "Pay me, bitch"] },
+    { name: "Lock it up", id: "lock", len: 17.0, hit: 12.91, cls: "lock", l3: [0.5, 4.2] , slam: "Locked the fuck in", say: [13.26, "Locked the fuck in"] },
   ];
   const edSrc = (c) => vidSrc("sounds/aura/" + c.id), edAud = (c) => "../aura/" + c.id;
   const edPreV = {};
@@ -7674,7 +7676,7 @@ body.tv.prime .rb-fld .ddx { font-size: 20px; }
       ctx.fillStyle = "#000"; ctx.fillRect(0, 0, W, H);
       edDraw(ctx, W, H, v);
       const ct = started ? v.currentTime : 0;
-      if (!s.hit && ((started && ct >= c.hit) || k >= c.hit + 1.5)) { s.hit = k; if (c.loss) lossTitle(b, n, c.side); else { inSlam(c.name, b, n, c.cls); snSound("slam", 0.7, 0); } }
+      if (!s.hit && ((started && ct >= c.hit) || k >= c.hit + 1.5)) { s.hit = k; if (c.loss) lossTitle(b, n, c.side); else { inSlam(c.slam || c.name, b, n, c.slam ? c.cls + " say" : c.cls); snSound("slam", 0.7, 0); } }
       if (c.say && !s.said && ((started && ct >= c.say[0]) || k >= c.say[0] + 1.5)) { s.said = true; inVoice(c.say[1]); }
       const [l0, l1] = c.l3 || [0.5, 6];
       if (!s.hit && k >= l0) inL3(ctx, W, H, k - l0, c.loss ? "Final" : "Cashed", b.pick, Math.min(l1, c.hit - 1) - l0);
@@ -8335,7 +8337,7 @@ body.tv.prime .rb-fld .ddx { font-size: 20px; }
   }
   // the wipeouts, rendered like his win scenes: sound effects instead of a song
   const LOSS_EDITS = {
-    cliff: { name: "Cliff", id: "cliff", len: 9.0, hit: 6.5, loss: true, l3: [0.2, 2.2] },
+    cliff: { name: "Cliff", id: "cliff", len: 9.0, hit: 6.5, loss: true, l3: [0.2, 2.2], say: [5.7, "Oh fuck"] },
     train: { name: "Train", id: "train", len: 8.6, hit: 4.9, loss: true, side: true, l3: [0.2, 2.2], say: [6.0, "Fuck you"] },
   };
   const lossScene = (k, b, n) => { const c = LOSS_EDITS[k]; edPre(c); fx(() => introEdit(c, b, n)); };
