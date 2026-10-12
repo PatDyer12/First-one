@@ -1500,6 +1500,8 @@ body:not(.tv) [data-ids]:active { transform: scale(.99); }
 @keyframes jtIn { from { transform: translateX(-40px) scale(.9); opacity: 0; } }
 .jumbo.teamed .jb-screen { outline-color: var(--jt2); box-shadow: 0 0 100px var(--jtA), 0 20px 60px rgba(0,0,0,.6); }
 .jumbo.teamed .jb-head { box-shadow: inset 0 -3px 0 var(--jt2); }
+.tdpl.on { border-color: var(--gold) !important; background: rgba(255,194,75,.14) !important; }
+.tdpl.on b::after { content: " ✓"; color: var(--gold); }
 </style>
 </head>
 <body>
@@ -3217,7 +3219,7 @@ body:not(.tv) [data-ids]:active { transform: scale(.99); }
   // ---------- sheets ----------
   function openSheet(id) { $(id).hidden = false; }
   // keep every open screen current: when a new version is up, reload it (never mid-form or mid-animation)
-  const BUILD = "20261012190711";
+  const BUILD = "20261012191024";
   function checkBuild() {
     if (BUILD === "dev") return;
     fetch("version.json?t=" + Date.now(), { cache: "no-store" }).then((r) => (r.ok ? r.json() : null)).then((j) => {
@@ -3285,7 +3287,7 @@ body:not(.tv) [data-ids]:active { transform: scale(.99); }
       if (open) {
         const btn = (m, s) => { const p = mkPrefill(g, m, s); return `<button type="button" class="mkt${isOn(g, m, s) ? " on" : ""}" data-pick="${esc(g.id)}|${m}|${s}"><span>${esc(mkLabel(g, m, s, p.l))}</span><b>${p.o ? fOdds(p.o) : "—"}</b></button>`; };
         mk = `<div class="mkts">${btn("ml", "a")}${btn("ml", "h")}${btn("sp", "a")}${btn("sp", "h")}${btn("tot", "o")}${btn("tot", "u")}</div>`;
-        if ((g.sport === "CFB" || g.sport === "NFL") && kindNow() === "straight")
+        if (g.sport === "CFB" || g.sport === "NFL")
           mk += `<div class="tdmk">${[["td", "Anytime TD scorer"], ["ftd", "First TD scorer"]].map(([m, l]) => `<button type="button" class="mkt${F.tdG === g.id && F.tdM === m ? " on" : ""}" data-td="${esc(g.id)}|${m}"><span>${l}</span><b>${F.tdG === g.id && F.tdM === m ? "▾" : "›"}</b></button>`).join("")}</div>${F.tdG === g.id ? tdPanel(g) : ""}`;
       }
       return `<div class="g${open ? " open" : ""}"><button type="button" class="g-head" data-gopen="${esc(g.id)}" aria-expanded="${open}">
@@ -3352,7 +3354,7 @@ body:not(.tv) [data-ids]:active { transform: scale(.99); }
       const r = rosterOf(g, side); if (!r) return `<div class="tdl-h">${esc(g[side].nm)}</div><div class="gnone">Loading players…</div>`;
       const list = r.filter((p) => !q || p.nm.toLowerCase().includes(q) || p.j === q).map((p) => ({ p, od: propOdds(g, p, F.tdM) }));
       if (list.some((x) => x.od)) list.sort((x, y) => (x.od ? dec(x.od.o) : 999) - (y.od ? dec(y.od.o) : 999));
-      return `<div class="tdl-h">${esc(g[side].nm)}</div>` + (list.length ? list.slice(0, 40).map(({ p, od }) => `<button type="button" class="tdpl" data-tdp="${esc(g.id)}|${side}|${esc(p.id)}">${p.hs ? `<img src="${esc(p.hs)}" alt="" loading="lazy">` : '<span class="ph"></span>'}<b>${esc(p.nm)}</b><small>${esc([p.j ? "#" + p.j : "", p.pos].filter(Boolean).join(" · "))}</small>${od ? `<em class="tdodds" title="${od.book === "DK" ? "DraftKings" : "FanDuel"}">${fOdds(od.o)}${od.book !== curBook() ? `<i>${od.book}</i>` : ""}</em>` : ""}</button>`).join("") : '<div class="gnone">No match</div>');
+      return `<div class="tdl-h">${esc(g[side].nm)}</div>` + (list.length ? list.slice(0, 40).map(({ p, od }) => `<button type="button" class="tdpl${kindNow() === "parlay" && F.legs.some((x) => x.g === g.id && x.m === F.tdM && x.p && x.p.id === p.id) ? " on" : ""}" data-tdp="${esc(g.id)}|${side}|${esc(p.id)}">${p.hs ? `<img src="${esc(p.hs)}" alt="" loading="lazy">` : '<span class="ph"></span>'}<b>${esc(p.nm)}</b><small>${esc([p.j ? "#" + p.j : "", p.pos].filter(Boolean).join(" · "))}</small>${od ? `<em class="tdodds" title="${od.book === "DK" ? "DraftKings" : "FanDuel"}">${fOdds(od.o)}${od.book !== curBook() ? `<i>${od.book}</i>` : ""}</em>` : ""}</button>`).join("") : '<div class="gnone">No match</div>');
     }).join("");
   }
   function tdPanel(g) {
@@ -3401,8 +3403,14 @@ body:not(.tv) [data-ids]:active { transform: scale(.99); }
     const tp = e.target.closest("[data-tdp]");
     if (tp) {
       const [gid, side, pid] = tp.dataset.tdp.split("|"), g = S.games.get(gid), pl = g && (rosterOf(g, side) || []).find((x) => x.id === pid); if (!pl) return;
+      const od = propOdds(g, pl, F.tdM);
+      if (kindNow() === "parlay") {   // a parlay keeps the list open so you can stack scorers
+        const i = F.legs.findIndex((x) => x.g === gid && x.m === F.tdM && x.p && x.p.id === pl.id);
+        if (i >= 0) F.legs.splice(i, 1); else F.legs.push({ g: gid, m: F.tdM, s: side, l: null, p: pl, o: od ? od.o : null, sport: g.sport });
+        parlayOdds(); renderPicker(); renderGames(); updatePreview(); return;
+      }
       F.sel = { g: gid, m: F.tdM, s: side, l: null, p: pl }; F.custom = false; F.tdG = null;
-      const od = propOdds(g, pl, F.tdM); if (od) { setOdds(od.o); const r = document.querySelector(`input[name="book"][value="${od.book}"]`); if (r) r.checked = true; } else { $("#f-odds").value = ""; S.sign = 1; }
+      if (od) { setOdds(od.o); const r = document.querySelector(`input[name="book"][value="${od.book}"]`); if (r) r.checked = true; } else { $("#f-odds").value = ""; S.sign = 1; }
       F.oddsTouched = false;
       renderPicker(); updatePreview(); $("#f-odds").focus(); return;
     }
