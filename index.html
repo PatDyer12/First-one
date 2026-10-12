@@ -2268,7 +2268,7 @@ body.tv.prime .rb-pos.st-w, body.tv.prime .rb-hs-side.ahead { border-color: colo
       } else {
         const wh = b.who === "julian" ? "julian" : b.who === "guest" ? "g:" + guestKey(whoName(b)) : "me";
         const gs = guestList(); if (b.who === "guest" && !gs.some((n) => guestKey(n) === guestKey(whoName(b)))) gs.push(whoName(b));
-        actions = `<div class="actions"><span class="lbl">Whose bet</span>${[["me", "Mine"], ["julian", "Julian"], ...gs.map((n) => ["g:" + guestKey(n), n])].map(([k, l]) => `<button type="button" class="btn sm${wh === k ? " primary" : ""}" data-act="who-${esc(k)}">${esc(l)}</button>`).join("")}</div>
+        actions = tailRow(b) + `<div class="actions"><span class="lbl">Whose bet</span>${[["me", "Mine"], ["julian", "Julian"], ...gs.map((n) => ["g:" + guestKey(n), n])].map(([k, l]) => `<button type="button" class="btn sm${wh === k ? " primary" : ""}" data-act="who-${esc(k)}">${esc(l)}</button>`).join("")}</div>
           <div class="actions"><span class="lbl">Note</span>
           <input class="notein" id="nt-${esc(b.id)}" autocomplete="off" maxlength="60" placeholder="Score or note, like Q3 · up 4" value="${esc(b.note || "")}" aria-label="Score or note">
           <button type="button" class="btn sm" data-act="note">Save note</button></div>
@@ -2923,11 +2923,11 @@ body.tv.prime .rb-pos.st-w, body.tv.prime .rb-hs-side.ahead { border-color: colo
     el.style.setProperty("--c", personCol(b));
     $("#slAv").textContent = personName(b).slice(0, 1).toUpperCase();
     $("#slWho").textContent = isMe(b) ? personName(b) + " · locked in" : personName(b) + " just bet";
-    $("#slStamp").textContent = ride ? "Ride" : vs ? "Fade" : "Locked";
+    $("#slStamp").textContent = b.tail ? (b.tail.kind === "fade" ? "Fade" : "Tail") : ride ? "Ride" : vs ? "Fade" : "Locked";
     $("#slPick").textContent = b.pick;
     $("#slOdds").textContent = fOdds(b.odds);
     $("#slAmt").textContent = `${fU(b.units)} (${fUSD(b.units * S.unit)}) to win ${fU(b.units * ppu(b.odds))}`;
-    $("#slSub").textContent = ride ? (viaLeg(b) ? "A leg rides with " : "Riding with ") + others.join(" + ") : vs ? (isMe(b) ? "Against " : "Fading ") + vs.map(personName).join(" + ") : b.kind === "parlay" ? (b.legs || []).length + "-leg parlay" : b.sport || "";
+    $("#slSub").textContent = b.tail ? (b.tail.kind === "fade" ? "Fading " : "Tailing ") + b.tail.name : ride ? (viaLeg(b) ? "A leg rides with " : "Riding with ") + others.join(" + ") : vs ? (isMe(b) ? "Against " : "Fading ") + vs.map(personName).join(" + ") : b.kind === "parlay" ? (b.legs || []).length + "-leg parlay" : b.sport || "";
     el.className = "slip" + (ride ? " ride" : vs ? " vs" : ""); el.hidden = false; void el.offsetWidth; el.classList.add("on");
     snSound("whoosh", 0.55, 0); snSound("slam", 0.7, 700);
     clearTimeout(slipT); slipT = setTimeout(() => { el.classList.add("out"); setTimeout(() => { el.hidden = true; el.className = "slip"; }, 500); }, 4600);
@@ -3003,6 +3003,7 @@ body.tv.prime .rb-pos.st-w, body.tv.prime .rb-hs-side.ahead { border-color: colo
     else if (a === "del") { S.confirmDel = id; render(); }
     else if (a === "del-yes") { S.open = null; S.confirmDel = null; delBet(id).then((ok) => ok && toast("Bet deleted")); }
     else if (a === "cancel") { S.confirmDel = null; S.cashout = null; render(); }
+    else if (a === "tail" || a === "fade") { const b = S.bets.get(id); if (b) tailBet(b, a); }
   };
   const onCardKey = (e) => {
     if ((e.key === "Enter" || e.key === " ") && e.target.classList.contains("bet")) { e.preventDefault(); e.target.click(); }
@@ -3092,7 +3093,7 @@ body.tv.prime .rb-pos.st-w, body.tv.prime .rb-hs-side.ahead { border-color: colo
   // ---------- sheets ----------
   function openSheet(id) { $(id).hidden = false; }
   // keep every open screen current: when a new version is up, reload it (never mid-form or mid-animation)
-  const BUILD = "20261012154435";
+  const BUILD = "20261012154629";
   function checkBuild() {
     if (BUILD === "dev") return;
     fetch("version.json?t=" + Date.now(), { cache: "no-store" }).then((r) => (r.ok ? r.json() : null)).then((j) => {
@@ -3376,11 +3377,45 @@ body.tv.prime .rb-pos.st-w, body.tv.prime .rb-hs-side.ahead { border-color: colo
     const n = guestList().find((g) => guestKey(g) === x.dataset.rmguest);
     saveGuests(guestList().filter((g) => guestKey(g) !== x.dataset.rmguest)); toast(`Removed ${n || "that guest"}. Their bets stay.`);
   });
+  // tail or fade somebody's bet: the bet form opens with their pick (or the other side of it) filled in, yours to confirm
+  const fadeable = (b) => b.kind !== "parlay" && b.sel && b.sel.g != null && !isTd(b.sel.m) && S.games.has(String(b.sel.g));
+  const tailRow = (b) => (isMe(b) || b.synth || b.status !== "open" ? "" : `<div class="actions"><span class="lbl">Ride it</span><button type="button" class="btn sm primary" data-act="tail">Tail ${esc(personName(b))}</button>${fadeable(b) ? '<button type="button" class="btn sm" data-act="fade">Fade</button>' : ""}</div>`);
+  const flipSel = (x) => ({ ...x, s: x.m === "tot" ? (x.s === "o" ? "u" : "o") : x.s === "a" ? "h" : "a", l: x.m === "sp" && x.l != null ? -x.l : x.l });
+  function lineOdds(g, x) {
+    if (!g) return null;
+    if (x.m === "ml") return g.ml && g.ml[x.s];
+    if (x.m === "sp") return g.sp && g.sp[x.s] && g.sp[x.s].o;
+    if (x.m === "tot") return g.tot && g.tot[x.s];
+    return null;
+  }
+  function tailBet(b, kind) {
+    openAdd();
+    F.tail = { id: b.id, kind, who: personKey(b), name: personName(b) };
+    $("#addForm .sheet-head h3").textContent = (kind === "fade" ? "Fade " : "Tail ") + personName(b);
+    const parlay = b.kind === "parlay";
+    document.querySelector(`input[name="kind"][value="${parlay ? "parlay" : "straight"}"]`).checked = true;
+    if (parlay) {
+      const sels = Array.isArray(b.legSel) ? b.legSel : [];
+      F.legs = (b.legs || []).map((t, i) => { const x = sels[i]; return x && x.g != null && S.games.has(String(x.g)) ? { g: String(x.g), m: x.m, s: x.s, l: x.l, sport: x.sp, p: x.p } : { text: String(t).slice(0, 80) }; });
+      setOdds(b.odds);
+    } else if (b.sel && b.sel.g != null && S.games.has(String(b.sel.g))) {
+      const x = kind === "fade" ? flipSel(b.sel) : b.sel, g = S.games.get(String(x.g));
+      F.sel = { g: String(x.g), m: x.m, s: x.s, l: x.l, p: x.p }; F.sport = g.sport;
+      $("#f-line").value = x.l == null ? "" : String(x.l);
+      setOdds(kind === "fade" ? lineOdds(g, x) || -110 : b.odds);
+    } else {
+      F.custom = true; $("#f-pick").value = String(b.pick || "").slice(0, 80);
+      setOdds(b.odds);
+    }
+    F.oddsTouched = true; $("#f-units").value = String(b.units);
+    renderPicker(); updatePreview();
+  }
   function openAdd() {
     const me = document.querySelector('input[name="who"][value="me"]'); if (me) me.checked = true;
     $("#guestWrap").hidden = true; $("#f-guest").value = ""; renderGuests();
     $("#addForm").reset(); S.sign = -1; S.day = 0; $("#f-odds").value = "110"; $("#f-units").value = "1"; $("#f-err").textContent = "";
-    Object.assign(F, { sel: null, legs: [], q: "", openG: null, custom: false, oddsTouched: false, sport: focusLeague() });
+    Object.assign(F, { sel: null, legs: [], q: "", openG: null, custom: false, oddsTouched: false, sport: focusLeague(), tail: null });
+    $("#addForm .sheet-head h3").textContent = "Log a bet";
     scanNote(""); slipBets = [];
     renderPicker(); updatePreview(); openSheet("#addSheet"); loadPickerGames();
   }
@@ -3392,6 +3427,7 @@ body.tv.prime .rb-pos.st-w, body.tv.prime .rb-hs-side.ahead { border-color: colo
     const err = $("#f-err");
     const data = { book: document.querySelector('input[name="book"]:checked').value, kind, odds, units, status: "open", placedAt: Date.now(), legs: [], sport: "" };
     Object.assign(data, whoFields());
+    if (F.tail) data.tail = F.tail;
     let starts = [];
     if (kind === "straight") {
       if (F.sel) {
