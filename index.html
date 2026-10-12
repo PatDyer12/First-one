@@ -1500,6 +1500,240 @@ body:not(.tv) [data-ids]:active { transform: scale(.99); }
 @keyframes jtIn { from { transform: translateX(-40px) scale(.9); opacity: 0; } }
 .jumbo.teamed .jb-screen { outline-color: var(--jt2); box-shadow: 0 0 100px var(--jtA), 0 20px 60px rgba(0,0,0,.6); }
 .jumbo.teamed .jb-head { box-shadow: inset 0 -3px 0 var(--jt2); }
+/* ---------- broadcast package: stinger wipes, the scoring play, the parlay tracker, the slip and the result bar ---------- */
+.bc { --tc: #1b2433; --ta: #ffffff; --tk: #05070a; --ez: cubic-bezier(.16,1,.3,1); --ew: cubic-bezier(.77,0,.18,1); }
+.pc.bc { display: block; }
+.pc.bc.out { opacity: 1; transition: none; }
+/* the stinger: three slanted slabs sweep across; the graphic is revealed right behind the last one and hidden behind the first on the way out */
+.bc-sting { position: absolute; inset: 0; z-index: 6; overflow: hidden; pointer-events: none; }
+.bc-sting i { position: absolute; top: -12%; bottom: -12%; left: 0; width: 120vw; transform: translateX(-150vw) skewX(-16deg); animation: bcStIn .8s var(--ew) both; box-shadow: inset .8vh 0 0 rgba(255,255,255,.18); }
+.bc-sting i:nth-child(1) { background: var(--s1, var(--ta)); }
+.bc-sting i:nth-child(2) { background: var(--s2, var(--tc)); animation-delay: .035s; }
+.bc-sting i:nth-child(3) { background: var(--s3, #0b0e14); animation-delay: .07s; }
+.bc.out .bc-sting i { animation: bcStOut .5s var(--ew) both; }
+.bc.out .bc-sting i:nth-child(2) { animation-delay: .03s; }
+.bc.out .bc-sting i:nth-child(3) { animation-delay: .06s; }
+@keyframes bcStIn { from { transform: translateX(-150vw) skewX(-16deg); } to { transform: translateX(130vw) skewX(-16deg); } }
+@keyframes bcStOut { from { transform: translateX(-150vw) skewX(-16deg); } to { transform: translateX(130vw) skewX(-16deg); } }
+.bc-win { position: absolute; inset: 0; overflow: hidden; animation: bcRevIn .8s .07s var(--ew) both; }
+.bc.out .bc-win { animation: bcRevOut .5s var(--ew) both; }
+@keyframes bcRevIn { from { clip-path: polygon(0 0, -162vw 0, -162vw 100%, 0 100%); } to { clip-path: polygon(0 0, 118vw 0, 118vw 100%, 0 100%); } }
+@keyframes bcRevOut { from { clip-path: polygon(-42vw 0, 300vw 0, 300vw 100%, -42vw 100%); } to { clip-path: polygon(238vw 0, 300vw 0, 300vw 100%, 238vw 100%); } }
+/* shared motion */
+@keyframes bcWipe { to { clip-path: inset(0 0 0 0); } }
+@keyframes bcIn { from { opacity: 0; transform: translateY(1.6vh); } to { opacity: 1; transform: none; } }
+@keyframes bcSlideR { from { opacity: 0; transform: translateX(-3vw); } to { opacity: 1; transform: none; } }
+@keyframes bcUp { from { transform: translateY(108%); } to { transform: none; } }
+@keyframes bcFade { from { opacity: 0; } }
+@keyframes bcBlink { 50% { opacity: .25; } }
+/* block reveal: a bar draws across, the words appear under it, the bar pulls away */
+.bc-rv { position: relative; display: inline-block; }
+.bc-rv > span { display: inline-block; animation: bcRvT .9s var(--d, .55s) both, bcGlint 1.4s calc(var(--d, .55s) + 1.1s) var(--ew) both; background: linear-gradient(100deg, #fff 42%, color-mix(in srgb, var(--ta) 55%, #fff) 50%, #fff 58%) 100% 0 / 320% 100% no-repeat; -webkit-background-clip: text; background-clip: text; color: transparent; }
+.bc-rv::after { content: ""; position: absolute; left: -.12em; right: -.12em; top: 6%; bottom: 2%; background: var(--ta); transform: scaleX(0); transform-origin: left; animation: bcRvB .9s var(--d, .55s) var(--ew) both; }
+@keyframes bcRvB { 0% { transform: scaleX(0); transform-origin: left; } 45% { transform: scaleX(1); transform-origin: left; } 55% { transform: scaleX(1); transform-origin: right; } 100% { transform: scaleX(0); transform-origin: right; } }
+@keyframes bcRvT { 0%, 49% { opacity: 0; } 50%, 100% { opacity: 1; } }
+@keyframes bcGlint { from { background-position: 100% 0; } to { background-position: 0% 0; } }
+
+/* ---- the scoring play ---- */
+.bc-bg { position: absolute; inset: 0; overflow: hidden; background: radial-gradient(ellipse 46% 70% at 23% 62%, color-mix(in srgb, var(--tc) 55%, transparent), transparent 70%), radial-gradient(ellipse 60% 50% at 100% 0%, color-mix(in srgb, var(--tc) 18%, transparent), transparent 70%), linear-gradient(180deg, #0d1118, #07090d); }
+.bc-bg::before { content: ""; position: absolute; inset: -20%; background: repeating-linear-gradient(112deg, transparent 0 150px, rgba(255,255,255,.025) 150px 151px); animation: bcDrift 9s linear infinite; }
+.bc-bg::after { content: ""; position: absolute; left: 0; right: 0; top: 0; height: .35vh; background: linear-gradient(90deg, var(--tc), var(--ta) 40%, transparent 75%); }
+@keyframes bcDrift { to { transform: translateX(160px); } }
+.bc-wm { position: absolute; right: -12vw; top: 50%; height: 128vh; width: auto; transform: translateY(-50%); opacity: .05; filter: grayscale(1) brightness(2.6); animation: bcWm 7s linear both; }
+.bc-wm[src=""], .bc-wm:not([src]) { display: none; }
+@keyframes bcWm { from { transform: translateY(-50%) scale(1); } to { transform: translateY(-50%) scale(1.1); } }
+.bc-beam { position: absolute; top: -20%; bottom: -20%; left: -40vw; width: 26vw; background: linear-gradient(90deg, transparent, rgba(255,255,255,.12), transparent); transform: skewX(-16deg); animation: bcBeam 1.8s .9s var(--ew) both; z-index: 1; }
+@keyframes bcBeam { to { left: 125vw; } }
+.bc-grain { position: absolute; inset: -50%; opacity: .07; background: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='220' height='220'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.85' numOctaves='2' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E"); animation: bcGrain .5s steps(4) infinite; z-index: 1; }
+@keyframes bcGrain { 25% { transform: translate(-3%, 2%); } 50% { transform: translate(2%, -3%); } 75% { transform: translate(-2%, -1%); } }
+.bc-in { position: absolute; inset: 0; z-index: 2; }
+.bc-top { position: absolute; left: 4vw; top: 4.5vh; height: 4.6vh; display: flex; align-items: stretch; font: 800 2.1vh/1 var(--f-num); letter-spacing: .2em; text-transform: uppercase; z-index: 3; clip-path: inset(0 100% 0 0); animation: bcWipe .7s .5s var(--ez) both; }
+.bc-top > span { display: flex; align-items: center; padding: 0 1.8vh; }
+.bc-top .net { gap: .9vh; background: #fff; color: #05070a; }
+.bc-top .net i { width: 1.1vh; height: 1.1vh; border-radius: 50%; background: #e3183a; animation: bcBlink 1s steps(2) infinite; }
+.bc-top .sp { background: rgba(5,7,10,.82); color: #fff; box-shadow: inset 0 -.4vh 0 var(--ta); }
+.bc-top .clk { background: rgba(5,7,10,.6); color: rgba(255,255,255,.75); }
+.bc-art { position: absolute; left: 0; top: 0; bottom: 10vh; width: 46vw; }
+.bc-num { position: absolute; left: 3vw; top: 8vh; font: 900 66vh/.8 var(--f-display); letter-spacing: -.04em; color: transparent; -webkit-text-stroke: .3vh rgba(255,255,255,.14); animation: bcNum 1.6s .35s var(--ez) both; }
+@keyframes bcNum { from { opacity: 0; transform: translateX(-9vw); } to { opacity: .85; transform: none; } }
+.bc-glow { position: absolute; left: 50%; bottom: 0; width: 50vw; height: 74vh; transform: translateX(-50%); background: radial-gradient(ellipse at 50% 88%, color-mix(in srgb, var(--ta) 30%, transparent), transparent 60%); opacity: .45; animation: bcFade 1.2s .45s both; }
+.bc-cut { position: absolute; left: 50%; bottom: 0; height: 74vh; aspect-ratio: 600 / 436; transform: translateX(-50%); animation: bcPush 7s .4s linear both; -webkit-mask-image: linear-gradient(to top, transparent 0, #000 9%); mask-image: linear-gradient(to top, transparent 0, #000 9%); }
+.bc-cut img { display: block; width: 100%; height: 100%; object-fit: contain; object-position: bottom; filter: drop-shadow(0 2.5vh 4vh rgba(0,0,0,.55)) drop-shadow(-.3vh 0 0 color-mix(in srgb, var(--ta) 45%, transparent)); animation: bcRise 1s .42s var(--ez) both; }
+@keyframes bcRise { from { clip-path: inset(100% 0 0 0); transform: translateY(7vh); } to { clip-path: inset(0 0 0 0); transform: none; } }
+@keyframes bcPush { from { transform: translateX(-50%) scale(1); } to { transform: translateX(-50%) scale(1.06); } }
+.bc-lg { position: absolute; left: 50%; top: 50%; width: 50vh; height: 50vh; object-fit: contain; transform: translate(-50%, -50%); filter: drop-shadow(0 3vh 6vh rgba(0,0,0,.6)); animation: bcLogo 1.1s .4s var(--ez) both; }
+.bc-art.hs .bc-lg { display: none; }
+@keyframes bcLogo { from { opacity: 0; transform: translate(-50%, -50%) scale(.82); } to { opacity: 1; transform: translate(-50%, -50%); } }
+.bc-txt { position: absolute; left: 47vw; right: 4vw; top: 12vh; bottom: 12.5vh; display: flex; flex-direction: column; justify-content: center; gap: 1.5vh; z-index: 2; }
+.bc-tag { display: flex; align-items: stretch; align-self: flex-start; font: 800 2.5vh/1 var(--f-num); letter-spacing: .16em; text-transform: uppercase; clip-path: inset(0 100% 0 0); animation: bcWipe .6s .5s var(--ez) both; }
+.bc-tag > * { padding: 1.1vh 1.7vh; }
+.bc-tag b { background: var(--ta); color: var(--tk); }
+.bc-tag span { background: rgba(0,0,0,.5); color: #fff; }
+.bc-type { font: 900 clamp(70px, 17.5vh, 230px)/.8 var(--f-display); text-transform: uppercase; letter-spacing: -.005em; color: #fff; margin-left: -.4vh; filter: drop-shadow(0 .8vh 1.6vh rgba(0,0,0,.4)); }
+.bc-nm { display: flex; flex-direction: column; margin-top: .4vh; }
+.bc-nm .m { overflow: hidden; }
+.bc-nm .m > span { display: block; animation: bcUp .8s .8s var(--ez) both; }
+.bc-nm .m > .f { font: 700 4.4vh/1.08 var(--f-num); letter-spacing: .14em; text-transform: uppercase; color: rgba(255,255,255,.72); animation-delay: .76s; }
+.bc-nm .m > .l { font: 900 11.5vh/.86 var(--f-display); text-transform: uppercase; color: #fff; animation-delay: .86s; }
+.bc-nm.long .m > .l { font-size: 8.8vh; }
+.bc-meta { display: flex; flex-wrap: wrap; gap: .4vh 1.6vh; align-items: center; font: 700 2.5vh/1.2 var(--f-num); letter-spacing: .16em; text-transform: uppercase; color: rgba(255,255,255,.75); animation: bcIn .6s 1s var(--ez) both; }
+.bc-meta span + span::before { content: ""; display: inline-block; width: .6vh; height: .6vh; margin-right: 1.6vh; vertical-align: middle; background: var(--ta); transform: rotate(45deg); }
+.bc-meta b { color: #fff; padding-left: 1.6vh; border-left: .3vh solid rgba(255,255,255,.3); }
+.bc-play { font: 500 2.5vh/1.36 var(--f-ui); color: rgba(255,255,255,.88); background: rgba(255,255,255,.04); border-left: .4vh solid var(--ta); padding: 1.2vh 1.8vh; clip-path: inset(0 100% 0 0); animation: bcWipe .7s 1.1s var(--ez) both; }
+.bc-play span { display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; }
+.bc-txt.busy .bc-play span { -webkit-line-clamp: 1; }
+.bc-bets { display: grid; gap: .75vh; margin-top: .4vh; }
+.bc-bets h4 { margin: 0; font: 800 1.9vh/1 var(--f-num); letter-spacing: .26em; text-transform: uppercase; color: rgba(255,255,255,.55); animation: bcFade .5s 1.25s both; }
+.bc-bet { display: grid; grid-template-columns: auto minmax(0, 1fr) auto; align-items: center; gap: 1.4vh; padding: .8vh 1vh .8vh .9vh; background: rgba(255,255,255,.035); border-left: .4vh solid rgba(255,255,255,.2); animation: bcSlideR .6s calc(1.3s + var(--i, 0) * .08s) var(--ez) both; }
+.bc-bet .avs { display: flex; }
+.bc-av { width: 3.6vh; height: 3.6vh; border-radius: 50%; display: grid; place-items: center; background: var(--c); color: #05070a; font: 900 1.9vh/1 var(--f-num); font-style: normal; box-shadow: 0 0 0 .3vh #05070a; flex: none; }
+.bc-av + .bc-av { margin-left: -1vh; }
+.bc-bet b { font: 800 2.6vh/1.1 var(--f-num); color: #fff; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.bc-bet em { font: 800 2vh/1 var(--f-num); font-style: normal; letter-spacing: .06em; text-transform: uppercase; padding: .75vh 1.1vh; background: rgba(255,255,255,.09); color: rgba(255,255,255,.82); white-space: nowrap; }
+.bc-bet.st-w, .bc-bet.st-won { border-left-color: #2ee89a; }
+.bc-bet.st-w em, .bc-bet.st-won em { background: rgba(46,232,154,.14); color: #2ee89a; }
+.bc-bet.st-l, .bc-bet.st-lost { border-left-color: #ff4d5e; }
+.bc-bet.st-l em, .bc-bet.st-lost em { background: rgba(255,77,94,.14); color: #ff6b79; }
+.bc-bet.hot { background: rgba(255,255,255,.07); box-shadow: inset 0 0 0 1px rgba(255,255,255,.14); }
+.bc-more { font: 700 1.9vh/1 var(--f-num); letter-spacing: .14em; text-transform: uppercase; color: rgba(255,255,255,.5); animation: bcFade .5s 1.7s both; }
+.bc-bug { position: absolute; left: 0; right: 0; bottom: 0; height: 10vh; display: flex; align-items: stretch; background: #07090d; box-shadow: inset 0 1px 0 rgba(255,255,255,.1); z-index: 3; transform: translateY(100%); animation: bcBugIn .7s .45s var(--ez) both; }
+@keyframes bcBugIn { to { transform: none; } }
+.bc-bug .lbl { display: flex; align-items: center; gap: 1.2vh; padding: 0 3vh 0 4vw; font: 900 3.4vh/1 var(--f-display); letter-spacing: .08em; text-transform: uppercase; color: #fff; background: #0d1118; box-shadow: inset 0 .45vh 0 var(--ta); }
+.bc-t { position: relative; display: flex; align-items: center; gap: 1.6vh; padding: 0 3vh; min-width: 21vw; background: #0a0d13; box-shadow: inset 0 .45vh 0 color-mix(in srgb, var(--c) 70%, #0a0d13); border-right: 1px solid rgba(255,255,255,.07); overflow: hidden; }
+.bc-t img { width: 6vh; height: 6vh; object-fit: contain; }
+.bc-t b { font: 800 4vh/1 var(--f-num); letter-spacing: .05em; color: rgba(255,255,255,.82); }
+.bc-t .n { margin-left: auto; height: 7.2vh; overflow: hidden; font: 900 7.2vh/1 var(--f-display); color: #fff; }
+.bc-t .n i { display: block; font-style: normal; }
+.bc-t.sc { background: linear-gradient(90deg, color-mix(in srgb, var(--c) 34%, #0a0d13), #0a0d13); box-shadow: inset 0 .45vh 0 var(--c), inset .45vh 0 0 var(--c); }
+.bc-t.sc b { color: #fff; }
+.bc-t.sc .n i { animation: bcScore .8s 1.05s var(--ez) both; }
+.bc-t.sc::after { content: ""; position: absolute; inset: 0; background: linear-gradient(100deg, transparent 30%, rgba(255,255,255,.22) 50%, transparent 70%); transform: translateX(-100%); animation: bcSweep 1s 1.15s var(--ew) both; }
+@keyframes bcScore { 0% { transform: translateY(105%); } 100% { transform: none; } }
+@keyframes bcSweep { to { transform: translateX(100%); } }
+.bc-clk { display: flex; align-items: center; margin-left: auto; padding: 0 4vw 0 3vh; font: 800 3.4vh/1 var(--f-num); letter-spacing: .08em; text-transform: uppercase; color: #fff; }
+
+/* ---- the parlay tracker ---- */
+.legcard.bc { position: fixed; inset: 0; z-index: 115; display: block; place-items: unset; background: none; animation: none; pointer-events: none; --tc: #0c3a29; --ta: #2ee89a; --tk: #04130c; --s1: #2ee89a; --s2: #1d2430; --s3: #0b0e14; --pc: #d4ff3a; }
+.legcard.bc.miss { --ta: #ff4d5e; --tk: #fff; --s1: #ff4d5e; --tc: #3a0c13; }
+.legcard.bc.out { opacity: 1; }
+.lc-dim { position: absolute; inset: 0; background: radial-gradient(ellipse 40% 50% at 8% 22%, color-mix(in srgb, var(--ta) 13%, transparent), transparent 70%), linear-gradient(180deg, #0d1118, #07090d); }
+.lc-dim::after { content: ""; position: absolute; left: 0; right: 0; top: 0; height: .35vh; background: linear-gradient(90deg, var(--ta), transparent 60%); }
+.lc-panel { position: absolute; left: 6vw; right: 6vw; top: 8vh; bottom: 7vh; display: flex; flex-direction: column; justify-content: center; gap: 1.8vh; z-index: 2; }
+.lc-head { display: flex; align-items: stretch; height: 6vh; font: 800 2.5vh/1 var(--f-num); letter-spacing: .14em; text-transform: uppercase; clip-path: inset(0 100% 0 0); animation: bcWipe .7s .5s var(--ez) both; }
+.lc-head > * { display: flex; align-items: center; padding: 0 2vh; }
+.lc-head .bc-av { width: 6vh; height: 6vh; padding: 0; border-radius: 0; font-size: 3vh; box-shadow: none; justify-content: center; }
+.lc-head b { background: color-mix(in srgb, var(--c) 22%, #0d1118); color: #fff; box-shadow: inset 0 -.4vh 0 var(--c); }
+.lc-head span { background: rgba(255,255,255,.07); color: rgba(255,255,255,.85); }
+.lc-head em { margin-left: auto; font-style: normal; background: rgba(255,194,75,.12); color: #ffc24b; box-shadow: inset 0 -.4vh 0 #ffc24b; }
+.lc-title { display: flex; align-items: center; gap: 2.6vh; }
+.lc-ck { width: 12vh; height: 12vh; flex: none; fill: none; stroke: var(--ta); stroke-width: 4.5; stroke-linecap: round; stroke-linejoin: round; filter: drop-shadow(0 0 1.2vh color-mix(in srgb, var(--ta) 35%, transparent)); }
+.lc-ck circle { stroke-dasharray: 146; stroke-dashoffset: 146; animation: lcDraw .7s .55s var(--ez) forwards; }
+.lc-ck path { stroke-dasharray: 44; stroke-dashoffset: 44; animation: lcDraw .45s 1s var(--ez) forwards; }
+@keyframes lcDraw { to { stroke-dashoffset: 0; } }
+.lc-word { font: 900 15vh/.8 var(--f-display); text-transform: uppercase; color: #fff; }
+.lc-word .bc-rv::after { background: #fff; }
+.lc-count { margin-left: auto; display: flex; align-items: baseline; font: 900 14vh/1 var(--f-display); color: #fff; animation: bcFade .5s .9s both; }
+.lc-count .roll { display: inline-block; height: 1em; overflow: hidden; }
+.lc-count .roll i { display: block; height: 1em; font-style: normal; animation: lcRoll .7s 1.15s var(--ez) both; }
+.lc-count small { font-size: .42em; color: rgba(255,255,255,.45); margin-left: .6vh; }
+@keyframes lcRoll { to { transform: translateY(-100%); } }
+.lc-leg { display: flex; align-items: center; gap: 2vh; font: 800 5.2vh/1.05 var(--f-num); color: #fff; animation: bcIn .6s .85s var(--ez) both; }
+.lc-leg img { width: 9vh; height: 9vh; border-radius: 50%; object-fit: cover; object-position: top; background: rgba(255,255,255,.08); box-shadow: 0 0 0 .4vh var(--ta); flex: none; }
+.lc-leg small { display: block; margin-top: .6vh; font: 700 2.2vh/1.2 var(--f-num); letter-spacing: .14em; text-transform: uppercase; color: rgba(255,255,255,.55); }
+.lc-prog { display: flex; gap: .8vh; height: 1.3vh; flex: none; }
+.lc-prog span { flex: 1; position: relative; overflow: hidden; background: rgba(255,255,255,.1); }
+.lc-prog span.hit::after, .lc-prog span.miss::after { content: ""; position: absolute; inset: 0; background: var(--ta); }
+.lc-prog span.miss::after { background: #ff4d5e; }
+.lc-prog span.new::after { transform-origin: left; animation: lcFill .8s 1.1s var(--ez) both; }
+@keyframes lcFill { from { transform: scaleX(0); } to { transform: none; } }
+.lc-list { list-style: none; margin: 0; padding: 0; display: grid; gap: .7vh; align-content: start; overflow: hidden; flex: 0 1 auto; min-height: 0; counter-reset: lc; }
+.lc-list li { position: relative; display: grid; grid-template-columns: 4vh 3.6vh minmax(0, 1fr) auto; align-items: center; gap: 1.6vh; padding: .95vh 2vh .95vh 1.4vh; background: rgba(255,255,255,.045); font: 700 2.8vh/1.1 var(--f-num); color: rgba(255,255,255,.62); overflow: hidden; animation: bcSlideR .5s calc(.7s + var(--i, 0) * .06s) var(--ez) both; }
+.lc-list li::before { counter-increment: lc; content: counter(lc, decimal-leading-zero); font: 800 2.1vh/1 var(--f-num); letter-spacing: .06em; color: rgba(255,255,255,.35); position: relative; z-index: 1; }
+.lc-list li > * { position: relative; z-index: 1; }
+.lc-list li i { width: 3.6vh; height: 3.6vh; border-radius: 50%; display: grid; place-items: center; border: .3vh solid rgba(255,255,255,.22); font: 900 2vh/1 var(--f-num); font-style: normal; }
+.lc-list li span { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.lc-list li em { font: 700 2vh/1 var(--f-num); font-style: normal; letter-spacing: .08em; text-transform: uppercase; color: rgba(255,255,255,.45); white-space: nowrap; }
+.lc-list li.hit { color: #fff; }
+.lc-list li.hit i { background: #2ee89a; border-color: #2ee89a; color: #04130c; }
+.lc-list li.miss { color: rgba(255,255,255,.4); }
+.lc-list li.miss span { text-decoration: line-through; }
+.lc-list li.miss i { background: #ff4d5e; border-color: #ff4d5e; color: #fff; }
+.lc-list li.new { box-shadow: inset .4vh 0 0 var(--ta); color: #fff; }
+.lc-list li.new::after { content: ""; position: absolute; inset: 0; z-index: 0; background: linear-gradient(90deg, color-mix(in srgb, var(--ta) 16%, transparent), transparent 70%); transform-origin: left; animation: lcFill .7s 1.15s var(--ez) both; }
+.lc-list li.new i { animation: lcPopI .5s 1.3s var(--ez) both; }
+@keyframes lcPopI { from { transform: scale(0); } to { transform: none; } }
+.lc-list.many li { padding-top: .6vh; padding-bottom: .6vh; font-size: 2.2vh; }
+.lc-foot { margin-top: 1vh !important; font: 900 6vh/1 var(--f-display); letter-spacing: .02em; text-transform: uppercase; color: #ffc24b; animation: bcIn .6s 1.5s var(--ez) both; flex: none; }
+.lc-foot.one, .lc-foot.all { animation: bcIn .6s 1.5s var(--ez) both, lcPulse 1s 2.1s ease-in-out 3; }
+.legcard.miss .lc-foot { color: #ff4d5e; }
+@keyframes lcPulse { 50% { opacity: .55; } }
+
+/* the old leg card's rules, neutralised */
+.legcard.bc .lc-title { margin: 0; font: inherit; color: #fff; text-shadow: none; }
+.legcard.bc .lc-leg { margin: 0; }
+.legcard.bc .lc-prog { margin: 0; }
+.legcard.bc .lc-prog span { height: auto; border-radius: 0; background: rgba(255,255,255,.1); box-shadow: none; animation: none; }
+.legcard.bc .lc-list { margin: 0; }
+.legcard.bc .lc-list li { border-radius: 0; }
+.legcard.bc .lc-list li.new { background: rgba(255,255,255,.045); animation: bcSlideR .5s calc(.7s + var(--i, 0) * .06s) var(--ez) both; }
+.legcard.bc .lc-foot { margin: 0; }
+/* ---- bet slip and result bar, in the same look ---- */
+.slip { transform: none; clip-path: inset(0 0 0 100%); transition: clip-path .65s cubic-bezier(.16,1,.3,1); }
+.slip.on { transform: none; clip-path: inset(0 0 0 0); }
+.slip.out { transform: none; clip-path: inset(0 100% 0 0); transition-duration: .45s; }
+.sl-card { background: linear-gradient(180deg, #131823, #07090d); color: #fff; border-radius: 0; padding: 20px 26px 22px 34px; box-shadow: 0 30px 80px rgba(0,0,0,.65), inset 0 4px 0 var(--c); }
+.sl-card::before { width: 10px; }
+.sl-card::after { content: ""; position: absolute; inset: 0; background: linear-gradient(100deg, transparent 30%, rgba(255,255,255,.12) 50%, transparent 70%); transform: translateX(-100%); pointer-events: none; }
+.slip.on .sl-card::after { animation: bcSweep 1.1s .35s cubic-bezier(.77,0,.18,1) both; }
+.sl-who { color: rgba(255,255,255,.72); letter-spacing: .14em; }
+.sl-who i { border-radius: 0; }
+.sl-pick { color: #fff; font: 900 clamp(30px, 3.4vw, 54px)/.95 var(--f-display); text-transform: uppercase; letter-spacing: .005em; }
+.sl-row { color: rgba(255,255,255,.7); }
+.sl-row b { color: #fff; }
+.sl-sub { color: var(--c); letter-spacing: .1em; text-transform: uppercase; }
+.sl-stamp { right: 0; top: 22px; border: 0; border-radius: 0; padding: 9px 16px 8px; color: #05070a; background: var(--c); letter-spacing: .14em; transform: translateX(40px); opacity: 0; }
+.slip.on .sl-stamp { animation: slChip .55s .5s cubic-bezier(.16,1,.3,1) forwards; }
+.slip.vs .sl-stamp { color: #fff; background: #c8102e; }
+@keyframes slChip { to { transform: none; opacity: 1; } }
+.flash { border: 0; border-radius: 0; padding: 0; gap: 0; align-items: stretch; overflow: hidden; background: #07090d; box-shadow: 0 24px 60px rgba(0,0,0,.6), inset 0 -3px 0 var(--fc, #fff); transition: transform .5s cubic-bezier(.16,1,.3,1); }
+.flash.W { --fc: var(--win); } .flash.L { --fc: var(--loss); } .flash.P { --fc: var(--push); } .flash.N { --fc: var(--gold); }
+.flash.flash .word { display: flex; align-items: center; padding: 14px 22px; font: 900 38px/1 var(--f-display); letter-spacing: .04em; text-transform: uppercase; background: var(--fc, #fff); color: #05070a; }
+.flash .what { padding: 12px 20px; align-self: center; }
+.flash .what b { font: 800 21px/1.15 var(--f-num); color: #fff; }
+.flash .what span { font: 700 13px/1.3 var(--f-num); letter-spacing: .1em; text-transform: uppercase; color: rgba(255,255,255,.6); }
+
+@media (max-width: 860px) {
+  .bc-art { width: 100vw; top: 0; bottom: auto; height: 44vh; }
+  .bc-num { font-size: 38vh; left: 5vw; top: 6vh; }
+  .bc-cut { height: 36vh; }
+  .bc-lg { width: 24vh; height: 24vh; }
+  .bc-wm { height: 70vh; right: -30vw; top: 30%; }
+  .bc-top { top: 2.4vh; left: 4vw; height: 3.4vh; font-size: 1.4vh; }
+  .bc-top .clk { display: none; }
+  .bc-txt { left: 5vw; right: 5vw; top: 42vh; bottom: 9vh; justify-content: flex-start; gap: 1.1vh; }
+  .bc-tag { font-size: 1.6vh; }
+  .bc-type { font-size: min(16vw, 10vh); }
+  .bc-nm .m > .f { font-size: 2.3vh; }
+  .bc-nm .m > .l, .bc-nm.long .m > .l { font-size: min(12vw, 6.4vh); }
+  .bc-meta { font-size: 1.5vh; }
+  .bc-play { font-size: 1.7vh; }
+  .bc-bets h4 { font-size: 1.3vh; }
+  .bc-bet b { font-size: 1.9vh; } .bc-bet em { font-size: 1.4vh; padding: .6vh .8vh; }
+  .bc-av { width: 2.8vh; height: 2.8vh; font-size: 1.4vh; }
+  .bc-bug { height: 7.5vh; } .bc-bug .lbl { display: none; }
+  .bc-t { min-width: 0; flex: 1; gap: 1vh; padding: .45vh 1.6vh 0; } .bc-t img { width: 3.6vh; height: 3.6vh; } .bc-t b { font-size: 2.4vh; } .bc-t .n { font-size: 4.6vh; height: 4.6vh; }
+  .bc-clk { padding: .45vh 1.6vh 0; font-size: 1.9vh; }
+  .lc-panel { left: 5vw; right: 5vw; top: 5vh; bottom: 4vh; gap: 1.3vh; }
+  .lc-head { height: 4.4vh; font-size: 1.4vh; letter-spacing: .08em; } .lc-head > * { padding: 0 1.1vh; } .lc-head .bc-av { width: 4.4vh; height: 4.4vh; font-size: 2.2vh; } .lc-head span { display: none; }
+  .lc-ck { width: 7vh; height: 7vh; } .lc-word { font-size: min(15vw, 8vh); } .lc-count { font-size: min(14vw, 7.5vh); }
+  .lc-leg { font-size: 2.8vh; } .lc-leg img { width: 6vh; height: 6vh; } .lc-leg small { font-size: 1.4vh; }
+  .lc-list li { font-size: 1.9vh; grid-template-columns: 3vh 2.8vh minmax(0, 1fr); gap: 1vh; padding: .8vh 1.2vh; } .lc-list li em { display: none; } .lc-list li i { width: 2.8vh; height: 2.8vh; font-size: 1.5vh; } .lc-list li::before { font-size: 1.5vh; }
+  .lc-foot { font-size: 4.4vh; }
+  .slip { left: 12px; right: 12px; width: auto; top: 12vh; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .bc *, .bc *::before, .bc *::after { animation-duration: .01s !important; animation-delay: 0s !important; }
+}
 .tdpl.on { border-color: var(--gold) !important; background: rgba(255,194,75,.14) !important; }
 .tdpl.on b::after { content: " ✓"; color: var(--gold); }
 </style>
@@ -1875,7 +2109,7 @@ body:not(.tv) [data-ids]:active { transform: scale(.99); }
   <div class="in-title" id="inTitle"><div class="in-kick" id="inKick"></div><div class="in-big" id="inBig"></div><div class="in-mid" id="inMid"></div><div class="in-sub" id="inSub"></div></div>
 </div>
 <div class="ticker" id="ticker" hidden><div class="tk-lbl"><i class="dot"></i><span id="tkLbl">CFB</span></div><div class="tk-track"><div class="tk-run" id="tkRun"></div></div></div>
-<div class="pc" id="playCard" hidden aria-live="assertive"><div class="pc-bg"></div><div class="pc-in" id="pcIn"></div></div>
+<div class="pc bc" id="playCard" hidden aria-live="assertive"><div class="bc-win"><div class="bc-bg"><img class="bc-wm" id="pcWm" alt="" referrerpolicy="no-referrer"><i class="bc-beam"></i><i class="bc-grain"></i></div><div class="bc-in" id="pcIn"></div></div><div class="bc-sting" aria-hidden="true"><i></i><i></i><i></i></div></div>
 <div class="jumbo" id="jumbo" hidden title="Tap to close">
   <div class="jb-head"><span class="jb-logo">SWEAT<b>ZONE</b></span><span class="jb-tag" id="jbTag">Live</span><b id="jbLbl"></b><span class="jb-x" aria-hidden="true">×</span></div>
   <div class="jb-main">
@@ -1908,7 +2142,7 @@ body:not(.tv) [data-ids]:active { transform: scale(.99); }
 </div>
 
 <div class="slip" id="slip" hidden aria-live="polite"><div class="sl-card"><div class="sl-who"><i id="slAv"></i><span id="slWho"></span></div><div class="sl-pick" id="slPick"></div><div class="sl-row"><b id="slOdds"></b><span id="slAmt"></span></div><div class="sl-sub" id="slSub"></div><div class="sl-stamp" id="slStamp"></div></div></div>
-<div class="legcard" id="legCard" hidden aria-live="polite"><div class="lc-box"><div class="lc-kick" id="lcKick"></div><div class="lc-title"><span class="ck">✓</span>Leg hit</div><div class="lc-leg" id="lcLeg"></div><div class="lc-prog" id="lcProg"></div><ul class="lc-list" id="lcList"></ul><div class="lc-foot" id="lcFoot"></div></div></div>
+<div class="legcard bc" id="legCard" hidden aria-live="polite"><div class="bc-win"><div class="lc-dim"></div><i class="bc-grain"></i><div class="lc-panel"><div class="lc-head"><i class="bc-av" id="lcAv"></i><b id="lcWho"></b><span id="lcKick"></span><em id="lcWin"></em></div><div class="lc-title"><svg class="lc-ck" viewBox="0 0 52 52" aria-hidden="true"><circle cx="26" cy="26" r="23"/><path id="lcMark" d="M14 27l8 8 16-17"/></svg><div class="lc-word"><span class="bc-rv" style="--d:.5s"><span id="lcTitle">Leg hit</span></span></div><div class="lc-count" id="lcCount"></div></div><div class="lc-leg" id="lcLeg"></div><div class="lc-prog" id="lcProg"></div><ol class="lc-list" id="lcList"></ol><div class="lc-foot" id="lcFoot"></div></div></div><div class="bc-sting" aria-hidden="true"><i></i><i></i><i></i></div></div>
 <div class="safeframe" id="safeFrame" hidden aria-hidden="true"><i class="c tl"></i><i class="c tr"></i><i class="c bl"></i><i class="c br"></i><span id="safeLbl"></span></div>
 <div class="whotag" id="whoTag" hidden aria-live="polite"><i id="wtAv"></i><b id="wtName"></b><em id="wtSub"></em></div>
 <div class="flash" id="flash" aria-live="polite"><div class="word" id="fl-word"></div><div class="what"><b id="fl-pick"></b><span id="fl-detail"></span></div></div>
@@ -3064,25 +3298,37 @@ body:not(.tv) [data-ids]:active { transform: scale(.99); }
     }
   }
   function legFx(b, legs, i) {
-    const l = legs[i], hits = legs.filter((x) => x.st === "hit").length;
+    const l = legs[i], hits = legs.filter((x) => x.st === "hit").length, who = isMe(b) ? "" : personName(b).toUpperCase() + " · ";
     if (!isMe(b) && l.st === "hit" && tdCard.delete(b.id)) return;
-    if (!isMe(b)) { flash(l.st === "hit" ? "W" : "L", `${personName(b).toUpperCase()} · LEG ${l.st === "hit" ? "✓" : "✕"}`, l.t, `${b.pick} · ${hits}/${legs.length} legs`, false); return; }
-    if (l.st === "miss") { flash("L", "LEG ✕", l.t, `${b.pick} · parlay's dead`); return; }
-    if (!clipsOn()) { flash("W", "LEG ✓", l.t, hits === legs.length ? `${b.pick} · every leg hit, cash it` : `${b.pick} · ${hits}/${legs.length} legs in`, false); return; }
+    if (l.st === "miss") { flash("L", who + "LEG ✕", l.t, `${b.pick} · parlay's dead`, isMe(b)); return; }
+    if (!clipsOn()) { flash("W", who + "LEG ✓", l.t, hits === legs.length ? `${b.pick} · every leg hit, cash it` : `${b.pick} · ${hits}/${legs.length} legs in`, false); return; }
     const run = afterCard(() => legCard(b, legs, i)); run.keep = true; fx(run);
   }
   function legCard(b, legs, i) {
-    const ov = $("#legCard"), hits = legs.filter((x) => x.st === "hit").length, left = legs.length - hits;
-    $("#lcKick").textContent = `${legs.length}-leg parlay · ${fOdds(b.odds)} · ${fU(b.units)} to win ${fU(b.units * ppu(b.odds))}`;
-    $("#lcLeg").textContent = legs[i].t;
-    $("#lcList").innerHTML = legs.map((x, j) => `<li class="${x.st || ""}${j === i ? " new" : ""}"><i>${x.st === "hit" ? "✓" : x.st === "miss" ? "✕" : ""}</i><span>${esc(x.t)}</span></li>`).join("");
-    $("#lcProg").innerHTML = legs.map((x, j) => `<span class="${x.st === "hit" ? "hit" : ""}${j === i ? " new" : ""}"></span>`).join("");
-    $("#lcFoot").textContent = left === 0 ? "Every leg hit. Cash it." : left === 1 ? "One more. Job's not finished." : `${hits} down, ${left} to go`;
-    ov.hidden = false;
+    const ov = $("#legCard"), hits = legs.filter((x) => x.st === "hit").length, left = legs.length - hits, miss = legs[i].st === "miss";
+    const gl = (x) => { const g = x.sel && gameOf(x.sel); return g ? `${g.a.ab} ${g.a.sc ?? ""} · ${g.h.ab} ${g.h.sc ?? ""}${g.st === "post" ? " · Final" : g.st === "in" && g.d ? " · " + g.d : g.st === "pre" ? " · " + startLabel(g.t) : ""}` : ""; };
+    const nm = personName(b), hs = (x) => (x.sel && x.sel.p && x.sel.p.hs) || "";
+    ov.classList.toggle("miss", miss); ov.style.setProperty("--c", personCol(b));
+    $("#lcAv").textContent = nm.slice(0, 1).toUpperCase();
+    $("#lcWho").textContent = nm === "You" ? "Your parlay" : nm + "'s parlay";
+    $("#lcKick").textContent = `${legs.length}-leg · ${fOdds(b.odds)} · ${fU(b.units)}`;
+    $("#lcWin").textContent = `To win ${fU(b.units * ppu(b.odds))}`;
+    $("#lcTitle").textContent = miss ? "Leg missed" : left === 0 ? "Parlay hit" : "Leg hit";
+    $("#lcMark").setAttribute("d", miss ? "M17 17l18 18M35 17L17 35" : "M14 27l8 8 16-17");
+    $("#lcCount").innerHTML = miss ? "" : `<span class="roll"><i>${hits - 1}</i><i>${hits}</i></span><small>/${legs.length}</small>`;
+    $("#lcLeg").innerHTML = `${hs(legs[i]) ? `<img src="${esc(hs(legs[i]))}" alt="" referrerpolicy="no-referrer" onerror="this.remove()">` : ""}<div>${esc(legs[i].t)}<small>${esc(gl(legs[i]))}</small></div>`;
+    $("#lcProg").innerHTML = legs.map((x, j) => `<span class="${x.st || ""}${j === i ? " new" : ""}"></span>`).join("");
+    $("#lcList").className = "lc-list" + (legs.length > 6 ? " many" : "");
+    $("#lcList").innerHTML = legs.map((x, j) => `<li class="${x.st || ""}${j === i ? " new" : ""}" style="--i:${j}"><i>${x.st === "hit" ? "✓" : x.st === "miss" ? "✕" : ""}</i><span>${esc(x.t)}</span><em>${esc(gl(x))}</em></li>`).join("");
+    const f = $("#lcFoot"); f.className = "lc-foot" + (left === 1 && !miss ? " one" : left === 0 ? " all" : "");
+    f.textContent = miss ? "Parlay's dead" : left === 0 ? "Every leg hit. Cash it." : left === 1 ? "One leg away" : `${hits} down · ${left} to go`;
+    ov.classList.remove("out"); ov.hidden = false;
     for (const el of [ov, ...ov.querySelectorAll("*")]) { el.style.animation = "none"; void el.offsetWidth; el.style.animation = ""; }
-    snSound("slam", 0.8, 0); snSound("whoosh", 0.5, 120);
-    setTimeout(() => { ov.hidden = true; }, 4800);
-    return 4900;
+    snSound("bc_sting", 0.85, 0); snSound("bc_check", 0.8, 1000);
+    legs.forEach((x, j) => { if (j < 8) snSound("bc_tick", 0.25, 700 + j * 60); });
+    setTimeout(() => { ov.classList.add("out"); snSound("bc_out", 0.5, 0); }, 5000);
+    setTimeout(() => { ov.hidden = true; ov.classList.remove("out"); }, 5650);
+    return 5700;
   }
   function toast(msg) {
     const t = $("#toast"); t.textContent = msg; t.hidden = false;
@@ -3219,7 +3465,7 @@ body:not(.tv) [data-ids]:active { transform: scale(.99); }
   // ---------- sheets ----------
   function openSheet(id) { $(id).hidden = false; }
   // keep every open screen current: when a new version is up, reload it (never mid-form or mid-animation)
-  const BUILD = "20261012191024";
+  const BUILD = "20261012193134";
   function checkBuild() {
     if (BUILD === "dev") return;
     fetch("version.json?t=" + Date.now(), { cache: "no-store" }).then((r) => (r.ok ? r.json() : null)).then((j) => {
@@ -3897,7 +4143,7 @@ body:not(.tv) [data-ids]:active { transform: scale(.99); }
     }
     return SND.loading[name];
   }
-  function loadSounds() { loadBuf("sounds/" + S.winSound); loadBuf("loss"); loadBuf("sounds/nukeplace"); for (const x of ["bolt", "shot", "shatter", "whoosh", "slam"]) loadBuf("sounds/sniper/" + x); loadMe(); loadBuf("sounds/nuke"); loadBuf("sounds/nj"); loadBuf("sounds/whale"); loadBuf("sounds/splash"); loadBuf("sounds/chop"); loadBuf("sounds/lockin"); loadBuf("sounds/leg1"); loadVid("#pipVid", "sounds/chop"); loadCrew(); loadWhale(); setTimeout(quickPre, 4000); }
+  function loadSounds() { loadBuf("sounds/" + S.winSound); loadBuf("loss"); loadBuf("sounds/nukeplace"); for (const x of ["bolt", "shot", "shatter", "whoosh", "slam", "bc_sting", "bc_check", "bc_tick", "bc_out"]) loadBuf("sounds/sniper/" + x); loadMe(); loadBuf("sounds/nuke"); loadBuf("sounds/nj"); loadBuf("sounds/whale"); loadBuf("sounds/splash"); loadBuf("sounds/chop"); loadBuf("sounds/lockin"); loadBuf("sounds/leg1"); loadVid("#pipVid", "sounds/chop"); loadCrew(); loadWhale(); setTimeout(quickPre, 4000); }
   function playBuf(c, buf, vol) { const s = c.createBufferSource(), g = c.createGain(); g.gain.value = vol; s.buffer = buf; s.connect(g).connect(c.destination); s.start(); return s; }
   function unlock() {
     const wasLive = !!SND.ctx && SND.ctx.state === "running";
@@ -5126,31 +5372,97 @@ body:not(.tv) [data-ids]:active { transform: scale(.99); }
     const tid = side ? String(g[side].id) : null, low = (text || "").replace(/\([^)]*\)/g, "").toLowerCase();
     return (ath || []).filter((a) => a.nm && (!low || low.includes(a.nm.split(" ").slice(-1)[0].toLowerCase())) && (!tid || !a.tm || String(a.tm) === tid || /intercept|fumble/i.test(text))).slice(0, 2);
   }
+  // ---------- broadcast package: the scoring play and the parlay tracker ----------
+  const bcLum = (hex) => { const m = /^#?([0-9a-f]{6})$/i.exec(hex || ""); if (!m) return -1; const n = parseInt(m[1], 16); return (0.299 * (n >> 16) + 0.587 * ((n >> 8) & 255) + 0.114 * (n & 255)) / 255; };
+  // a team's main color for the panels and an accent that reads against it (white or black when the alt is too close)
+  function bcCols(tm) {
+    const c = (x) => (x ? (x[0] === "#" ? x : "#" + x) : "");
+    let tc = c(tm && tm.col), ta = c(tm && tm.alt);
+    if (bcLum(tc) < 0 || bcLum(tc) > 0.85) [tc, ta] = [bcLum(ta) >= 0 && bcLum(ta) <= 0.85 ? ta : "#1b2433", tc || "#ffffff"];
+    const rgb = (h) => { const n = parseInt(h.slice(1), 16); return [n >> 16, (n >> 8) & 255, n & 255]; };
+    const far = (x, y) => Math.hypot(...rgb(x).map((v, i) => v - rgb(y)[i])) / 441 > 0.32;
+    if (bcLum(ta) < 0 || (Math.abs(bcLum(ta) - bcLum(tc)) < 0.2 && !far(ta, tc))) ta = bcLum(tc) > 0.55 ? "#05070a" : "#ffffff";
+    return { tc, ta, tk: bcLum(ta) > 0.6 ? "#05070a" : "#ffffff" };
+  }
+  // "Amon-Ra St. Brown" -> Amon-Ra / St. Brown, "Marvin Harrison Jr." -> Marvin / Harrison Jr.
+  function bcName(nm) {
+    const w = String(nm || "").trim().split(/\s+/).filter(Boolean); if (!w.length) return { f: "", l: "" };
+    let k = w.length - 1;
+    if (k > 0 && /^(jr\.?|sr\.?|ii|iii|iv|v)$/i.test(w[k])) k--;
+    if (k > 1 && /^(st\.?|van|de|la|le|da|del|der|von|mc|di|du)$/i.test(w[k - 1])) k--;
+    return k === 0 ? { f: "", l: w.join(" ") } : { f: w.slice(0, k).join(" "), l: w.slice(k).join(" ") };
+  }
+  // who the card is about: the man who scored, not the quarterback who threw it
+  function pcLead(people, text, kind) {
+    if (people.length < 2) return 0;
+    const last = (nm) => nm.split(" ").filter((x) => !/^(jr\.?|sr\.?|ii|iii|iv)$/i.test(x)).slice(-1)[0].toLowerCase();
+    const s = scorerOf(text).toLowerCase();
+    let i = s ? people.findIndex((a) => s.endsWith(last(a.nm))) : -1;
+    if (i < 0) { const m = String(text || "").match(/\bto\s+([A-Z][\w.'-]*(?:\s+[A-Z][\w.'-]*)+)/); if (m) i = people.findIndex((a) => m[1].toLowerCase().includes(last(a.nm))); }
+    if (i < 0 && /pass/i.test(kind + " " + text)) i = people.findIndex((a) => a.pos !== "QB");
+    return Math.max(0, i);
+  }
+  // everybody's money on this game, the bet that triggered the card first
+  function pcBets(g, b) {
+    let rows = [];
+    try { rows = gamePositions(boardEntries().filter((x) => x.sel && String((gameOf(x.sel) || {}).id) === String(g.id))).flatMap((r) => r.h2h || [r.p]); } catch (err) { rows = []; }
+    const hot = (p) => (b && p.entries.some((x) => x.b.id === b.id) ? 1 : 0);
+    rows.sort((x, y) => hot(y) - hot(x));
+    const av = (x) => `<i class="bc-av" style="--c:${personCol(x)}">${esc(personName(x).slice(0, 1).toUpperCase())}</i>`;
+    const html = rows.slice(0, 4).map((p, i) => {
+      const st = posState(p, g), ppl = [...new Map(p.entries.map((x) => [personKey(x.b), x.b])).values()];
+      return `<div class="bc-bet st-${st.cls}${hot(p) ? " hot" : ""}" style="--i:${i}"><span class="avs">${ppl.map(av).join("")}</span><b>${esc(p.pick)}</b><em>${esc(st.txt)}</em></div>`;
+    }).join("");
+    if (html) return { n: Math.min(rows.length, 4), html: html + (rows.length > 4 ? `<div class="bc-more">+${rows.length - 4} more on this game</div>` : "") };
+    if (!b) return { n: 0, html: "" };
+    const ev = b.sel ? evalSel(b.sel) : null;
+    return { n: 1, html: `<div class="bc-bet hot st-${ev ? (ev.res === "W" ? "w" : ev.res === "L" ? "l" : "e") : "e"}" style="--i:0"><span class="avs">${av(b)}</span><b>${esc(b.pick)}</b><em>${esc(ev && ev.txt ? ev.txt : "Live")}</em></div>` };
+  }
   function pcFill(g, e, b, sp, ov) {
     const lp = (g.sit || {}).lp || {}, side = e.side, tm = side ? g[side] : null;
     const text = ov ? ov.text : e.ev === "redzone" ? [(g.sit || {}).dd, lp.text].filter(Boolean).join(" · ") : (sp && sp.text) || lp.text || "";
     const kind = ov ? ov.type : (sp && sp.type) || (e.ev === "redzone" ? "" : lp.type) || "";
+    const TYPE = PC_TYPE[e.ev] || e.tag, kindLabel = kind && !new RegExp("^" + TYPE + "$", "i").test(kind) ? kind : "";
+    const card = $("#playCard"), box = $("#pcIn");
+    // the scoring play's own text lands a beat later: swap it in without restarting the graphic
+    if (sp && !card.hidden && box.dataset.g === String(g.id)) {
+      const pl = box.querySelector(".bc-play span"); if (pl && text) pl.textContent = text;
+      const tg = box.querySelector(".bc-tag span"); if (tg && kindLabel) tg.textContent = kindLabel;
+      return box.dataset.who || "";
+    }
     const people = ov ? ov.people : e.ev === "redzone" ? [] : pcPeople(lp.ath, text, side, g);
-    const ev = b && b.sel ? evalSel(b.sel) : null;
-    $("#playCard").style.setProperty("--tc", (tm && (tm.col && tm.col !== "#ffffff" ? tm.col : tm.alt)) || "#1b2433");
-    const lead = g.a.sc > g.h.sc ? "a" : g.h.sc > g.a.sc ? "h" : "";
-    $("#pcIn").innerHTML = `${tm && tm.lg ? `<img class="pc-logo" src="${esc(tm.lg)}" alt="">` : "<span></span>"}
-      <div><div class="pc-kick">${esc([tm ? tm.nm || tm.ab : "", kind && !new RegExp("^" + PC_TYPE[e.ev] + "$", "i").test(kind) ? kind : "", g.d].filter(Boolean).join(" · "))}</div><div class="pc-type">${esc(PC_TYPE[e.ev] || e.tag)}</div></div>
-      ${people.length ? `<div class="pc-who">${people.map((a) => `<div class="pc-p">${a.hs ? `<img class="pc-head" src="${esc(a.hs)}" alt="">` : `<span class="pc-head">${esc(a.j ? "#" + a.j : pcInitials(a.nm))}</span>`}<div><div class="pc-name">${esc(a.nm)}</div><div class="pc-meta">${esc([a.j ? "#" + a.j : "", a.pos].filter(Boolean).join(" · "))}</div></div></div>`).join("")}</div>` : ""}
-      <div class="pc-text">${esc(text.length > 160 ? text.slice(0, 158) + "…" : text)}</div>
-      <div class="pc-foot"><div class="pc-score">${["a", "h"].map((x) => `${g[x].lg ? `<img src="${esc(g[x].lg)}" alt="">` : ""}<span class="${lead === x ? "lead" : lead ? "trail" : ""}">${esc(g[x].ab)} ${g[x].sc ?? ""}</span>`).join('<span class="trail">·</span>')}<em>${esc(g.d || "")}</em></div>
-      ${b ? `<div class="pc-bet${ev && ev.m < 0 ? " bad" : ""}">${esc(b.pick)}${ev && ev.txt ? " · " + esc(ev.txt) : ""}</div>` : ""}</div>`;
-    return people[0] ? people[0].sh || people[0].nm : "";
+    const C = bcCols(tm); card.style.setProperty("--tc", C.tc); card.style.setProperty("--ta", C.ta); card.style.setProperty("--tk", C.tk);
+    const wm = $("#pcWm"); if (tm && tm.lg) { wm.src = tm.lg; wm.hidden = false; } else { wm.removeAttribute("src"); wm.hidden = true; }
+    const li = pcLead(people, text, kind), lead = people[li], other = people.find((x, j) => j !== li);
+    const nm = bcName(lead && lead.nm), bets = pcBets(g, b);
+    const meta = lead ? [lead.j ? "#" + lead.j : "", lead.pos, tm ? tm.nm || tm.ab : ""].filter(Boolean) : [];
+    const assist = other ? (other.pos === "QB" && /pass/i.test(kind + " " + text) ? "Pass from " : "With ") + other.nm : "";
+    const top = ov ? "TD scorer" : e.ev === "redzone" ? "Red zone" : e.ev === "turnover" ? "Turnover" : "Scoring play";
+    box.dataset.g = String(g.id); box.dataset.who = lead ? lead.sh || lead.nm : "";
+    box.innerHTML = `<div class="bc-top"><span class="net"><i></i>Sweat Zone</span><span class="sp">${esc(top)}</span>${g.d ? `<span class="clk">${esc(g.d)}</span>` : ""}</div>
+      <div class="bc-art${lead && lead.hs ? " hs" : ""}">${lead && lead.j ? `<div class="bc-num">${esc(lead.j)}</div>` : ""}<div class="bc-glow"></div>
+        ${tm && tm.lg ? `<img class="bc-lg" src="${esc(tm.lg)}" alt="" referrerpolicy="no-referrer">` : ""}
+        ${lead && lead.hs ? `<div class="bc-cut"><img src="${esc(lead.hs)}" alt="" referrerpolicy="no-referrer" onerror="this.closest('.bc-art').classList.remove('hs');this.parentNode.remove()"></div>` : ""}</div>
+      <div class="bc-txt${bets.n > 2 ? " busy" : ""}">
+        <div class="bc-tag"><b>${esc(tm ? tm.nm || tm.ab : "Live")}</b>${kindLabel ? `<span>${esc(kindLabel)}</span>` : ""}</div>
+        <div class="bc-type"><span class="bc-rv"><span>${esc(TYPE)}</span></span></div>
+        ${lead ? `<div class="bc-nm${nm.l.length > 11 ? " long" : ""}">${nm.f ? `<div class="m"><span class="f">${esc(nm.f)}</span></div>` : ""}<div class="m"><span class="l">${esc(nm.l)}</span></div></div>
+        <div class="bc-meta">${meta.map((x) => `<span>${esc(x)}</span>`).join("")}${assist ? `<b>${esc(assist)}</b>` : ""}</div>` : ""}
+        ${text ? `<div class="bc-play"><span>${esc(text)}</span></div>` : ""}
+        ${bets.html ? `<div class="bc-bets"><h4>On the line</h4>${bets.html}</div>` : ""}
+      </div>
+      <div class="bc-bug"><div class="lbl">${esc(tm ? tm.ab : "Live")} ${esc(e.ev === "td" ? "TD" : TYPE)}</div>${["a", "h"].map((x) => { const t = g[x]; return `<div class="bc-t${x === side ? " sc" : ""}" style="--c:${bcCols(t).tc}">${t.lg ? `<img src="${esc(t.lg)}" alt="" referrerpolicy="no-referrer">` : ""}<b>${esc(t.ab)}</b><span class="n"><i>${esc(t.sc ?? "")}</i></span></div>`; }).join("")}<div class="bc-clk">${esc(g.d || "")}</div></div>`;
+    return box.dataset.who;
   }
   // show the card, then run `then` with a label for the clip ("Touchdown UGA · C. Young")
   function showPlayCard(g, e, b, then, ms, over) {
-    const ov = $("#playCard"); cardBusy = true; ms = ms || 4000;
+    const ov = $("#playCard"); cardBusy = true; ms = ms || 4800;
     const who = pcFill(g, e, b, null, over);
     ov.classList.remove("out"); ov.hidden = false; for (const el of ov.querySelectorAll("*")) { el.style.animation = "none"; void el.offsetWidth; el.style.animation = ""; }
-    snSound("slam", 0.85, 0); snSound("whoosh", 0.5, 0);
+    snSound("bc_sting", 0.9, 0);
     let label = who;
     if (!over && e.side && ["td", "fg", "safety", "hr", "run", "goal"].includes(e.ev)) scoringPlay(g, e.side).then((sp) => { if (sp && !ov.hidden && cardBusy) label = pcFill(g, e, b, sp) || label; });
-    setTimeout(() => ov.classList.add("out"), ms - 350);
+    setTimeout(() => { ov.classList.add("out"); snSound("bc_out", 0.5, 0); }, ms - 650);
     setTimeout(() => { ov.hidden = true; ov.classList.remove("out", "top"); cardBusy = false; then(label ? `${e.tag} · ${label}` : e.tag); }, ms);
   }
   $("#pcTest").addEventListener("click", () => {
@@ -5205,7 +5517,7 @@ body:not(.tv) [data-ids]:active { transform: scale(.99); }
     if (mine) {
       stopStatus();
       if (fxBusy) { $("#playCard").classList.add("top"); whoOff(); }
-      showPlayCard(g, { ev: "td", side: mine.sel.s, tag: "Touchdown " + g[mine.sel.s].ab }, mine.b, () => autoSettle(), 4500,
+      showPlayCard(g, { ev: "td", side: mine.sel.s, tag: "Touchdown " + g[mine.sel.s].ab }, mine.b, () => autoSettle(), 5200,
         { text: mine.hit.text, type: tdType(mine.sel, mine.hit, mine.b), people: tdPeople(mine.sel, mine.hit) });
     }
     // the crew on the same player as yours ride your card; anybody else's scorer gets a card of their own after
@@ -5241,7 +5553,7 @@ body:not(.tv) [data-ids]:active { transform: scale(.99); }
       autoSettle();
       if (!cashes && live) crewLegShow(live, who, player);
       crewTdT = setTimeout(crewTdNext, 600);
-    }, 4500, { text: lead.hit.text, type: tdType(lead.sel, lead.hit, lead.b), people: tdPeople(lead.sel, lead.hit) });
+    }, 5200, { text: lead.hit.text, type: tdType(lead.sel, lead.hit, lead.b), people: tdPeople(lead.sel, lead.hit) });
   }
   // their parlay leg landed: one of the Goldie scenes on the big screen with its song, their name on it
   function crewLegShow(b, who, player) {
