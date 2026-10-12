@@ -27,7 +27,7 @@ html,body{margin:0}img{max-width:100%}
   --dk: #C08BFF;
   --mood: rgba(255, 194, 75, 0.06);
   --f-display: "Big Shoulders Display", "Oswald", Impact, "Arial Narrow", sans-serif;
-  --f-body: "Archivo", system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+  --f-body: "Inter", "Archivo", system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
   --f-mono: "Azeret Mono", ui-monospace, "SFMono-Regular", Menlo, Consolas, monospace;
   --f-num: "Barlow Condensed", "Archivo Narrow", "Arial Narrow", sans-serif;
   color-scheme: dark;
@@ -1336,7 +1336,7 @@ body.tv .rb { display: grid; flex: 1 1 auto; min-height: 0; grid-template-column
 /* the rail: leaderboard, awards, head to head, results */
 .rb-sec { background: #0f151f; border: 1px solid rgba(255,255,255,.07); border-radius: 18px; padding: 16px 14px 12px; display: flex; flex-direction: column; gap: 9px; }
 .rb-sec h3 { padding: 0 4px 4px; }
-.rb-lr { position: relative; display: grid; grid-template-columns: 22px 44px minmax(0, 1fr) auto; grid-template-areas: "rk av nm net" "rk av ln ln" ". . l5 op"; align-items: center; column-gap: 12px; row-gap: 3px; padding: 12px 12px 11px; border-radius: 14px; background: rgba(255,255,255,.035); border: 1px solid transparent; overflow: hidden; }
+.rb-lr { position: relative; display: grid; grid-template-columns: 22px 44px minmax(0, 1fr) auto; grid-template-areas: "rk av nm net" "rk av ln ln" ". . ft ft"; align-items: center; column-gap: 12px; row-gap: 3px; padding: 12px 12px 11px; border-radius: 14px; background: rgba(255,255,255,.035); border: 1px solid transparent; overflow: hidden; }
 .rb-lr .rk { grid-area: rk; font: 800 18px/1 Inter, sans-serif; color: var(--ink-3); }
 .rb-lr.lead .rk { color: var(--gold); }
 .rb-lr > .rb-av { grid-area: av; }
@@ -1346,11 +1346,13 @@ body.tv .rb { display: grid; flex: 1 1 auto; min-height: 0; grid-template-column
 .rb-lr .net small { display: block; font: 600 12px/1.3 Inter, sans-serif; color: var(--ink-3); }
 .rb-lr .net.pos { color: var(--win); } .rb-lr .net.neg { color: var(--loss); } .rb-lr .net.zero { color: var(--ink-2); }
 .rb-lr .ln { grid-area: ln; font: 600 13px/1.3 Inter, sans-serif; color: var(--ink-2); }
-.rb-lr .l5 { grid-area: l5; display: flex; gap: 4px; margin-top: 3px; }
+.rb-lr .ft { grid-area: ft; display: flex; align-items: center; justify-content: space-between; gap: 10px; min-width: 0; margin-top: 3px; }
+.rb-lr .l5 { display: flex; gap: 4px; flex: none; }
 .rb-lr .l5 i { width: 18px; height: 6px; border-radius: 3px; }
 .rb-lr .l5 i.w { background: var(--win); } .rb-lr .l5 i.l { background: var(--loss); }
 .rb-lr .l5 em { font: 500 12px Inter, sans-serif; color: var(--ink-3); font-style: normal; }
-.rb-lr .op { grid-area: op; font: 600 12px/1.3 Inter, sans-serif; color: var(--ink-3); text-align: right; white-space: nowrap; }
+.rb-lr .op { font: 600 12px/1.3 Inter, sans-serif; color: var(--ink-3); text-align: right; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; min-width: 0; }
+.rb-lr .nm .rb-heat { flex: none; }
 .rb-av .crown { position: absolute; left: 50%; top: -16px; transform: translateX(-50%) rotate(-12deg); font-size: 18px; text-decoration: none; filter: drop-shadow(0 2px 3px rgba(0,0,0,.7)); }
 .rb-heat { font: 800 12px/1 Inter, sans-serif; letter-spacing: .04em; padding: 4px 7px; border-radius: 7px; white-space: nowrap; }
 .rb-heat.fire { color: #1a0900; background: linear-gradient(90deg, #ffb300, #ff5a1f); box-shadow: 0 0 14px rgba(255,110,30,.6); }
@@ -1407,6 +1409,88 @@ body.tv.prime .rb-g.hero { border-color: color-mix(in srgb, var(--tc) 55%, trans
 .rb-g.hero .rb-st { font-size: 17px; }
 .rb-g.hero .rb-av { width: 38px; height: 38px; font-size: 17px; }
 body.tv.prime .rb-pos.st-w, body.tv.prime .rb-hs-side.ahead { border-color: color-mix(in srgb, var(--win) 35%, transparent); }
+
+/* ---------- the same board everywhere: desktop and phone (TV has its own fit above) ---------- */
+.tabs { display: none; }
+body:not(.tv) .tabs { display: flex; gap: 4px; padding: 4px; margin: -4px 0 0; background: #0f151f; border: 1px solid rgba(255,255,255,.07); border-radius: 14px; position: sticky; top: 8px; z-index: 20; backdrop-filter: blur(8px); }
+.tabs button { flex: 1; border: 0; background: transparent; color: var(--ink-2); font: 700 15px/1 Inter, sans-serif; padding: 11px 12px; border-radius: 10px; }
+.tabs button[aria-pressed="true"] { background: rgba(255,255,255,.09); color: #fff; }
+body:not(.tv):not(.tab-me) main.grid { display: none; }
+body:not(.tv):not(.tab-me) .rb { display: grid; grid-template-columns: minmax(0, 1fr) 380px; gap: 16px; align-items: start; font-family: Inter, var(--f-body); }
+body:not(.tv) .rb-main, body:not(.tv) .rb-rail, body:not(.tv) .rb-rsc { overflow: visible !important; }
+body:not(.tv) [data-ids] { cursor: pointer; transition: background .15s, border-color .15s; }
+body:not(.tv) [data-ids]:hover { border-color: rgba(255,255,255,.18); }
+body:not(.tv) [data-ids]:active { transform: scale(.99); }
+.rb-pos.on, .rb-hs-side.on, .rb-par.on { box-shadow: 0 0 0 2px var(--gold), 0 0 22px rgba(255,194,75,.35); }
+@media (max-width: 860px) {
+  body:not(.tv):not(.tab-me) .rb { display: flex; flex-direction: column; gap: 14px; }
+  body:not(.tv) .rb-rail { display: contents; }
+  body:not(.tv) #rbLb { order: 1; }
+  body:not(.tv) .rb-main { order: 2; }
+  body:not(.tv) .rb-rsc { order: 3; }
+  body:not(.tv) .rb-games { column-width: auto; column-count: 1; }
+  body:not(.tv) .rb-gs { padding: 14px 14px 10px; }
+  body:not(.tv) .rb-gs .sc { font-size: 24px; }
+  body:not(.tv) .rb-gs .ab { font-size: 17px; }
+  body:not(.tv) .rb-gs .tl { width: 26px; height: 26px; }
+  body:not(.tv) .rb-gs .mid { min-width: 0; }
+  body:not(.tv) .rb-rows { padding: 0 8px 8px; }
+  body:not(.tv) .rb-pos { padding: 10px 10px; gap: 10px; }
+  body:not(.tv) .rb-pk > b { font-size: 17px; }
+  body:not(.tv) .rb-st { font-size: 12.5px; padding: 5px 8px; white-space: normal; max-width: 42vw; }
+  body:not(.tv) .rb-h2h-top { grid-template-columns: 1fr; gap: 4px; }
+  body:not(.tv) .rb-vs { justify-self: center; }
+  body:not(.tv) .rb-hs-side.r { grid-template-columns: auto minmax(0, 1fr); text-align: left; }
+  body:not(.tv) .rb-hs-side.r .rb-avs { grid-column: 1; }
+  body:not(.tv) .rb-hs-side.r .rb-pk, body:not(.tv) .rb-hs-side.r .rb-st { grid-column: 2; }
+  body:not(.tv) .rb-hs-side.r .rb-pk > b, body:not(.tv) .rb-hs-side.r .rb-wls { justify-content: flex-start; }
+  body:not(.tv) .rb-hs-side.r .rb-st { justify-self: start; }
+  body:not(.tv) .rb-lr .net { font-size: 21px; }
+  body:not(.tv) .rb-lr .nm b { font-size: 18px; }
+  body:not(.tv) .rb-par { grid-template-columns: auto minmax(0, 1fr) auto; }
+  body:not(.tv) .rb-par .rb-dots { grid-column: 2 / -1; }
+}
+/* the bet sheet (phone) */
+.betsheet { max-width: 560px; }
+#bsBody { display: flex; flex-direction: column; gap: 12px; }
+#bsBody .bet { margin: 0; }
+.bs-done { padding: 14px; border-radius: 14px; background: var(--panel-2); border: 1px solid var(--line); }
+.bs-row { display: grid; grid-template-columns: auto minmax(0, 1fr) auto; align-items: center; gap: 12px; }
+.bs-t b { display: block; font: 700 17px/1.25 Inter, sans-serif; }
+.bs-t small { display: block; font: 500 13px/1.3 Inter, sans-serif; color: var(--ink-3); margin-top: 2px; }
+.bs-res { font: 800 15px Inter, sans-serif; padding: 6px 10px; border-radius: 9px; white-space: nowrap; }
+.bs-res.W { color: var(--win); background: rgba(61,220,151,.12); } .bs-res.L { color: var(--loss); background: rgba(255,97,112,.12); } .bs-res.P { color: var(--ink-2); background: rgba(255,255,255,.06); }
+/* the jumbo's side list: the board's game cards, compact */
+#jbBets .rb-g { margin-bottom: 10px; border-radius: 14px; }
+#jbBets .rb-gs { padding: 12px 12px 8px; gap: 10px; }
+#jbBets .rb-gs .tl { width: 22px; height: 22px; }
+#jbBets .rb-gs .ab { font-size: 15px; }
+#jbBets .rb-gs .sc { font-size: 20px; }
+#jbBets .rb-gs .tms { gap: 4px; }
+#jbBets .rb-gs .mid { min-width: 0; padding-left: 10px; gap: 4px; }
+#jbBets .rb-gs .clk { font-size: 12px; }
+#jbBets .rb-gs .dd { font-size: 11px; }
+#jbBets .rb-rows { padding: 0 8px 8px; gap: 6px; }
+#jbBets .rb-pos, #jbBets .rb-par { padding: 8px 10px; gap: 9px; border-radius: 10px; }
+#jbBets .rb-pk > b { font-size: 15px; }
+#jbBets .rb-wl { font-size: 11.5px; }
+#jbBets .rb-st { font-size: 11.5px; padding: 4px 7px; }
+#jbBets .rb-av { width: 24px; height: 24px; font-size: 11px; }
+#jbBets .rb-h2h { padding: 8px; }
+#jbBets .rb-h2h-top { grid-template-columns: 1fr; gap: 2px; }
+#jbBets .rb-vs { justify-self: center; font-size: 10px; }
+#jbBets .rb-hs-side { padding: 4px 6px; }
+#jbBets .rb-hs-side.r { grid-template-columns: auto minmax(0, 1fr); text-align: left; }
+#jbBets .rb-hs-side.r .rb-avs { grid-column: 1; }
+#jbBets .rb-hs-side.r .rb-pk, #jbBets .rb-hs-side.r .rb-st { grid-column: 2; }
+#jbBets .rb-hs-side.r .rb-pk > b, #jbBets .rb-hs-side.r .rb-wls { justify-content: flex-start; }
+#jbBets .rb-hs-side.r .rb-st { justify-self: start; }
+#jbBets .rb-tug { height: 7px; margin-top: 6px; }
+#jbBets .rb-tug b { width: 13px; height: 13px; margin: -6.5px 0 0 -6.5px; }
+#jbBets .rb-dots i { width: 10px; height: 10px; }
+#jbBets .rb-ch { padding: 12px 12px 6px; }
+#jbBets .rb-ch h3 { font-size: 12px; }
+#jbBets .meter { margin-top: 0; }
 /* a team scored for somebody in the room: the clip plays in that team's colors with their name on it */
 .jb-team { position: absolute; left: 2%; top: 3%; display: flex; align-items: center; gap: .6em; padding: .4em 1.1em .4em .4em; border-radius: 12px; background: var(--jt1); border-right: .4em solid var(--jt2); color: var(--jtInk, #fff); font-size: clamp(16px, 3.2vh, 42px); box-shadow: 0 12px 34px rgba(0,0,0,.6), 0 0 0 2px rgba(255,255,255,.15); animation: jtIn .55s cubic-bezier(.2,.9,.3,1.25) both; z-index: 2; }
 .jb-team img { width: 2.3em; height: 2.3em; object-fit: contain; padding: .3em; border-radius: 50%; background: rgba(255,255,255,.92); box-shadow: 0 2px 8px rgba(0,0,0,.4); }
@@ -1443,6 +1527,7 @@ body.tv.prime .rb-pos.st-w, body.tv.prime .rb-hs-side.ahead { border-color: colo
   </header>
 
   <div class="banner" id="offline" hidden>Can't reach your bet database right now. Check your connection and reload.</div>
+  <nav class="tabs" id="tabs" aria-label="View"><button type="button" data-tab="board" aria-pressed="true">Board</button><button type="button" data-tab="me" aria-pressed="false">My stats</button></nav>
 
   <main class="grid">
     <section class="panel hero strip" aria-label="Results">
@@ -1600,6 +1685,7 @@ body.tv.prime .rb-pos.st-w, body.tv.prime .rb-hs-side.ahead { border-color: colo
   </form>
 </div>
 
+<div class="scrim" id="betSheet" hidden><div class="sheet betsheet"><div class="sheet-head"><h3 id="bsTitle">Bet</h3><button type="button" class="x" data-close aria-label="Close">×</button></div><div id="bsBody"></div></div></div>
 <div class="scrim" id="setSheet" hidden>
   <form class="sheet" id="setForm" novalidate>
     <div class="sheet-head"><h3>Settings</h3><button type="button" class="x" data-close aria-label="Close">×</button></div>
@@ -1794,7 +1880,7 @@ body.tv.prime .rb-pos.st-w, body.tv.prime .rb-hs-side.ahead { border-color: colo
     <div class="jb-screen"><video id="jbBg" muted playsinline preload="none" aria-hidden="true"></video><video id="pipVid" muted playsinline preload="none"></video><div class="jb-bug" id="jbBug" hidden></div><div class="jb-team" id="jbTeam" hidden><img id="jbTeamLg" alt="" referrerpolicy="no-referrer"><div><b id="jbTeamNm"></b><span id="jbTeamEv"></span></div></div><div class="jb-np" id="jbNp" hidden><div class="np-art" aria-hidden="true"><i></i><i></i><i></i><i></i><i></i><img id="npImg" alt="" hidden></div><div class="np-txt"><span>Now playing</span><b id="npSong"></b><em id="npArtist"></em></div></div></div>
     <div class="jb-prog"><i id="jbProg"></i></div>
   </div>
-  <aside class="jb-side"><h3><i class="dot"></i>Active bets</h3><div id="jbBets"></div></aside>
+  <aside class="jb-side"><h3><i class="dot"></i>The room's bets</h3><div id="jbBets"></div></aside>
 </div>
 <video id="pipVid2" muted playsinline preload="none" hidden></video>
 <div class="lockin" id="lockIn" hidden aria-hidden="true"><div>LOCK IN.</div></div>
@@ -2552,12 +2638,15 @@ body.tv.prime .rb-pos.st-w, body.tv.prime .rb-hs-side.ahead { border-color: colo
     return { cls: ev.fin ? (ev.res === "W" ? "won" : ev.res === "L" ? "lost" : "push") : ev.res === "W" ? "w" : ev.res === "L" ? "l" : "e", txt: ev.txt, m: ev.m, ev };
   }
   const popCls = (p) => { const t = Date.now(); for (const e of p.entries) { const pp = S.pops.get(e.b.id); if (pp && t < pp.until) return " pop-" + pp.kind; } return ""; };
+  const idsOf = (p) => [...new Set(p.entries.map((e) => e.b.id))];
+  const onAir = (ids) => (statusBet && ids.includes(statusBet) ? " on" : "");
+  const tapAttrs = (ids, title) => ` data-ids="${esc(ids.join(","))}" data-title="${esc(title)}"`;
   function posRow(p, g) {
     const st = posState(p, g), hb = p.sel ? hasBall(p.sel) : null;
     const meter = st.ev && !st.ev.fin && g.st === "in" && !isTd(p.sel.m) ? meterHtml(p.sel, st.ev) : "";
     const avs = [...new Map(p.entries.map((e) => [personKey(e.b), e.b])).values()].map((b) => avHtml(b)).join("");
     const hs = p.sel && p.sel.p && p.sel.p.hs ? `<img class="rb-hs" src="${esc(p.sel.p.hs)}" alt="" loading="lazy" referrerpolicy="no-referrer" onerror="this.remove()">` : "";
-    return `<div class="rb-pos st-${st.cls}${popCls(p)}">
+    return `<div class="rb-pos st-${st.cls}${popCls(p)}${onAir(idsOf(p))}"${tapAttrs(idsOf(p), p.pick)}>
       <div class="rb-avs">${avs}</div>
       <div class="rb-pk"><b>${hs}${esc(p.pick)}${ballTag(hb)}</b><div class="rb-wls">${whoLine(p)}</div></div>
       <div class="rb-st">${esc(st.txt)}</div>${meter}</div>`;
@@ -2569,7 +2658,7 @@ body.tv.prime .rb-pos.st-w, body.tv.prime .rb-hs-side.ahead { border-color: colo
     const pre = g.st === "pre", x = 50 - k * 44;
     const lead = pre || Math.abs(sl.m || 0) < 0.01 ? "" : sl.m > 0 ? "l" : "r";
     const who = (p) => [...new Map(p.entries.map((e) => [personKey(e.b), e.b])).values()];
-    const side = (p, s, d) => `<div class="rb-hs-side ${d}${lead === d ? " ahead" : ""}"><div class="rb-avs">${who(p).map((b) => avHtml(b)).join("")}</div><div class="rb-pk"><b>${esc(p.pick)}</b><div class="rb-wls">${whoLine(p)}</div></div><div class="rb-st st-${s.cls}">${esc(pre ? "" : s.txt)}</div></div>`;
+    const side = (p, s, d) => `<div class="rb-hs-side ${d}${lead === d ? " ahead" : ""}${onAir(idsOf(p))}"${tapAttrs(idsOf(p), p.pick)}><div class="rb-avs">${who(p).map((b) => avHtml(b)).join("")}</div><div class="rb-pk"><b>${esc(p.pick)}</b><div class="rb-wls">${whoLine(p)}</div></div><div class="rb-st st-${s.cls}">${esc(pre ? "" : s.txt)}</div></div>`;
     const lc = personCol(l.entries[0].b), rc = personCol(r.entries[0].b);
     return `<div class="rb-h2h${popCls(l)}${popCls(r)}" style="--lc:${lc};--rc:${rc}">
       <div class="rb-h2h-top">${side(l, sl, "l")}<span class="rb-vs">VS</span>${side(r, sr, "r")}</div>
@@ -2594,14 +2683,14 @@ body.tv.prime .rb-pos.st-w, body.tv.prime .rb-hs-side.ahead { border-color: colo
     const row = (b) => {
       const legs = legsOf(b), hit = legs.filter((l) => l.st === "hit").length, dead = legs.some((l) => l.st === "miss");
       const dots = legs.map((l) => `<i class="${l.st === "hit" ? "h" : l.st === "miss" ? "m" : l.ev && !l.ev.fin ? (l.ev.res === "W" ? "lw" : l.ev.res === "L" ? "ll" : "le") : ""}" title="${esc(l.t)}"></i>`).join("");
-      return `<div class="rb-par${dead ? " dead" : ""}">${avHtml(b)}<div class="rb-pk"><b>${legs.length}-leg parlay <span class="od num">${fOdds(b.odds)}</span></b><div class="rb-wls"><span class="rb-wl" style="--c:${personCol(b)}"><b>${esc(personName(b))}</b> ${fU(b.units)} → ${fU(b.units * ppu(b.odds), true)}</span></div></div>
+      return `<div class="rb-par${dead ? " dead" : ""}${onAir([b.id])}"${tapAttrs([b.id], personName(b) + "'s parlay")}>${avHtml(b)}<div class="rb-pk"><b>${legs.length}-leg parlay <span class="od num">${fOdds(b.odds)}</span></b><div class="rb-wls"><span class="rb-wl" style="--c:${personCol(b)}"><b>${esc(personName(b))}</b> ${fU(b.units)} → ${fU(b.units * ppu(b.odds), true)}</span></div></div>
         <div class="rb-dots">${dots}</div><div class="rb-st ${dead ? "st-lost" : hit === legs.length ? "st-won" : ""}">${dead ? "Dead" : `${hit}/${legs.length} hit`}</div></div>`;
     };
     return `<article class="rb-g rb-card"><header class="rb-ch"><h3>Parlays</h3><span>${list.length} open</span></header><div class="rb-rows">${list.map(row).join("")}</div></article>`;
   }
   function otherCard(entries) {
     if (!entries.length) return "";
-    return `<article class="rb-g rb-card"><header class="rb-ch"><h3>Other bets</h3></header><div class="rb-rows">${entries.map((e) => `<div class="rb-pos st-${e.b.status === "open" ? "e" : outcome(e.b) === "W" ? "won" : "lost"}"><div class="rb-avs">${avHtml(e.b)}</div><div class="rb-pk"><b>${esc(e.pick)}</b><div class="rb-wls">${whoLine({ entries: [e] })}</div></div><div class="rb-st">${e.b.status === "open" ? (phase(e.b) === "pre" ? startLabel(startOf(e.b)) : "Open") : outcome(e.b) === "W" ? "✓ Won" : "✕ Lost"}</div></div>`).join("")}</div></article>`;
+    return `<article class="rb-g rb-card"><header class="rb-ch"><h3>Other bets</h3></header><div class="rb-rows">${entries.map((e) => `<div class="rb-pos st-${e.b.status === "open" ? "e" : outcome(e.b) === "W" ? "won" : "lost"}${onAir([e.b.id])}"${tapAttrs([e.b.id], e.pick)}><div class="rb-avs">${avHtml(e.b)}</div><div class="rb-pk"><b>${esc(e.pick)}</b><div class="rb-wls">${whoLine({ entries: [e] })}</div></div><div class="rb-st">${e.b.status === "open" ? (phase(e.b) === "pre" ? startLabel(startOf(e.b)) : "Open") : outcome(e.b) === "W" ? "✓ Won" : "✕ Lost"}</div></div>`).join("")}</div></article>`;
   }
   // prime time: the board takes on the colors of the team the room's riding (most money on it; a totals-only room gets the home team)
   const hexRgb = (h) => { const m = /^#?([0-9a-f]{6})$/i.exec(String(h || "")); if (!m) return null; const n = parseInt(m[1], 16); return [(n >> 16) & 255, (n >> 8) & 255, n & 255]; };
@@ -2682,27 +2771,27 @@ body.tv.prime .rb-pos.st-w, body.tv.prime .rb-hs-side.ahead { border-color: colo
     const heatTag = (p) => (p.heat === "fire" ? `<span class="rb-heat fire">🔥 W${p.st}</span>` : p.heat === "ice" ? `<span class="rb-heat ice">🧊 L${p.st}</span>` : p.st >= 2 ? `<span class="rb-heat ${p.sd === "W" ? "warm" : "cool"}">${p.sd}${p.st}</span>` : "");
     const lb = rows.map((p, i) => {
       const winning = p.live.filter((ev) => ev.res === "W").length;
-      return `<div class="rb-lr${p.heat ? " " + p.heat : ""}${p.k === lead ? " lead" : ""}" data-k="${esc(p.k)}" style="--c:${p.col}">
+      const pids = [...p.open.slice().sort((x, y) => y.placedAt - x.placedAt), ...p.done.slice().reverse()].map((x) => x.id);
+      return `<div class="rb-lr${p.heat ? " " + p.heat : ""}${p.k === lead ? " lead" : ""}" data-k="${esc(p.k)}" style="--c:${p.col}"${pids.length ? tapAttrs(pids, p.name + (p.me ? "" : "'s bets")) : ""}>
         <span class="rk num">${i + 1}</span>
         <span class="rb-av big" style="--c:${p.col}">${esc(p.name.slice(0, 1).toUpperCase())}${p.k === lead ? '<s class="crown">👑</s>' : ""}</span>
         <div class="nm"><b>${esc(p.name)}</b>${heatTag(p)}</div>
         <div class="net num ${cls(p.net)}">${fU(p.net, true)}<small>${fUSD(p.net * S.unit, true)}</small></div>
         <div class="ln num">${p.w + p.l + p.p ? `${p.w}-${p.l}${p.p ? "-" + p.p : ""} · ${pct(p.hit)} hit · ROI ${p.roi == null ? "–" : (p.roi > 0 ? "+" : "") + Math.round(p.roi * 100) + "%"}` : "No results yet"}</div>
-        <div class="l5">${p.last5.map((o) => `<i class="${o === "W" ? "w" : "l"}"></i>`).join("")}</div>
-        <div class="op num">${p.open.length ? `${p.open.length} open${p.live.length ? ` · ${winning}/${p.live.length} winning` : ""} · to win ${fU(p.toWin)}` : "No open bets"}</div></div>`;
+        <div class="ft"><div class="l5">${p.last5.map((o) => `<i class="${o === "W" ? "w" : "l"}"></i>`).join("")}</div>
+        <div class="op num">${p.open.length ? `${p.open.length} open${p.live.length ? ` · ${winning}/${p.live.length} winning` : ""} · to win ${fU(p.toWin)}` : "No open bets"}</div></div></div>`;
     }).join("");
     const aw = awards(rows);
     const awHtml = aw.length ? `<section class="rb-sec"><h3>Awards <span>${esc(lbl)}</span></h3>${aw.map((a) => `<div class="rb-aw"><span class="ic">${a.ic}</span><div><b>${a.t}</b><small>${esc(a.d)}</small></div>${avHtml(a.p.b)}<span class="who">${esc(a.p.name)}</span></div>`).join("")}</section>` : "";
     const hh = h2hTally(S.range);
     const hhHtml = hh.length ? `<section class="rb-sec"><h3>Head to head <span>${esc(lbl)}</span></h3>${hh.map((x) => `<div class="rb-hh">${avHtml(x.a)}<b>${esc(personName(x.a))}</b><span class="num sc"><em class="${x.wa > x.wb ? "w" : ""}">${x.wa}</em> – <em class="${x.wb > x.wa ? "w" : ""}">${x.wb}</em></span><b>${esc(personName(x.b))}</b>${avHtml(x.b)}</div>`).join("")}</section>` : "";
     const start = rangeStart(S.range);
-    const res = [...S.bets.values()].filter((b) => b.status !== "open" && b.settledAt >= start).sort((x, y) => y.settledAt - x.settledAt).slice(0, 6);
-    const resHtml = res.length ? `<section class="rb-sec"><h3>Results</h3>${res.map((b) => { const o = outcome(b); return `<div class="rb-res ${o === "W" ? "w" : o === "L" ? "l" : "p"}">${avHtml(b)}<span class="pk">${esc(b.kind === "parlay" ? (b.legs || []).length + "-leg parlay" : b.pick)}</span><span class="num v">${o === "W" ? "✓" : o === "L" ? "✕" : "–"} ${fU(netOf(b), true)}</span></div>`; }).join("")}</section>` : "";
+    const res = [...S.bets.values()].filter((b) => b.status !== "open" && b.settledAt >= start).sort((x, y) => y.settledAt - x.settledAt).slice(0, document.body.classList.contains("tv") ? 6 : 25);
+    const resHtml = res.length ? `<section class="rb-sec"><h3>Results</h3>${res.map((b) => { const o = outcome(b); return `<div class="rb-res ${o === "W" ? "w" : o === "L" ? "l" : "p"}"${tapAttrs([b.id], b.pick)}>${avHtml(b)}<span class="pk">${esc(b.kind === "parlay" ? (b.legs || []).length + "-leg parlay" : b.pick)}</span><span class="num v">${o === "W" ? "✓" : o === "L" ? "✕" : "–"} ${fU(netOf(b), true)}</span></div>`; }).join("")}</section>` : "";
     return [`<section class="rb-sec lb"><h3>Leaderboard <span>${esc(lbl)}</span></h3>${lb}</section>`, awHtml + hhHtml + resHtml];
   }
   let rbPrime = null;
-  function renderRB() {
-    if (!document.body.classList.contains("tv") || !S.ready) return;
+  function boardGroups() {
     const games = new Map(), other = [], parlays = [];
     for (const e of boardEntries()) {
       const g = e.sel && e.sel.g != null ? S.games.get(String(e.sel.g)) : null;
@@ -2713,8 +2802,13 @@ body.tv.prime .rb-pos.st-w, body.tv.prime .rb-hs-side.ahead { border-color: colo
     }
     const rank = (G) => ({ in: 0, pre: 1, post: 2 }[G.g.st] ?? 3);
     const list = [...games.values()].sort((x, y) => rank(x) - rank(y) || (rank(x) === 1 ? x.g.t - y.g.t : new Set(y.entries.map((e) => personKey(e.b))).size - new Set(x.entries.map((e) => personKey(e.b))).size || y.entries.length - x.entries.length));
+    return { list, other, parlays };
+  }
+  function renderRB() {
+    if (!S.ready) return;
+    const tv = document.body.classList.contains("tv"), { list, other, parlays } = boardGroups();
     // prime time: one game, the room's team colors, a big scoreboard
-    const prime = slateMode() === "prime" && list.filter((G) => G.g.st !== "post").length === 1 ? list.find((G) => G.g.st !== "post") : null;
+    const prime = tv && slateMode() === "prime" && list.filter((G) => G.g.st !== "post").length === 1 ? list.find((G) => G.g.st !== "post") : null;
     const body = document.body;
     if (prime) {
       const th = teamTheme(prime);
@@ -2724,10 +2818,30 @@ body.tv.prime .rb-pos.st-w, body.tv.prime .rb-hs-side.ahead { border-color: colo
       rbPrime = th.t.ab;
     } else if (rbPrime) { body.classList.remove("prime"); $("#rbMark").innerHTML = ""; rbPrime = null; }
     const html = list.map((G) => gameCard(G, G === prime)).join("") + parlayCard(parlays) + otherCard(other);
-    $("#rbGames").innerHTML = html || `<div class="rb-empty"><b>No bets on the board</b>Log a bet from your phone and it shows up here with everybody's.</div>`;
+    $("#rbGames").innerHTML = html || `<div class="rb-empty"><b>No bets on the board</b>${tv ? "Log a bet from your phone and it shows up here with everybody's." : "Hit + Bet when you place one. Everybody's bets show up here, game by game."}</div>`;
     $("#rbGames").classList.toggle("one", list.length + (parlays.length ? 1 : 0) + (other.length ? 1 : 0) <= 1);
     const [lbH, restH] = rail();
     $("#rbLb").innerHTML = lbH; $("#rbRsc").innerHTML = restH;
+    if (!$("#betSheet").hidden) renderBetSheet();
+  }
+  // phone: tap a row (or a person) and their bets open in a sheet: settle, notes, whose, tail / fade, delete
+  let bsIds = [], bsTitle = "";
+  function openBets(ids, title) {
+    bsIds = ids; bsTitle = title; S.open = ids.length === 1 ? ids[0] : null; S.confirmDel = null; S.cashout = null;
+    $("#betSheet").hidden = false; renderBetSheet();
+  }
+  function settledHtml(b) {
+    const o = outcome(b), can = S.canWrite, ask = S.confirmDel === b.id;
+    const acts = !can ? "" : ask ? `<div class="actions"><span class="note">Delete this bet? It won't count anywhere.</span><span class="spacer"></span><button type="button" class="btn sm" data-act="cancel">Keep</button><button type="button" class="btn sm loss" data-act="del-yes">Delete</button></div>`
+      : `<div class="actions"><span class="spacer"></span><button type="button" class="btn sm ghost danger" data-act="del">Delete</button></div>`;
+    return `<article class="bet bs-done" data-id="${esc(b.id)}"><div class="bs-row">${avHtml(b)}<div class="bs-t"><b>${esc(b.pick)}</b><small>${esc(personName(b))} · ${fOdds(b.odds)} · ${fU(b.units)} · ${esc(when(b.settledAt))}</small></div>
+      <span class="bs-res ${o}">${o === "W" ? "Won" : o === "L" ? "Lost" : "Push"} ${fU(netOf(b), true)}</span></div>${acts}</article>`;
+  }
+  function renderBetSheet() {
+    const bets = bsIds.map((id) => S.bets.get(id)).filter(Boolean);
+    if (!bets.length) { $("#betSheet").hidden = true; bsIds = []; return; }
+    $("#bsTitle").textContent = bsTitle;
+    $("#bsBody").innerHTML = bets.map((b) => (b.status === "open" ? cardHtml(b, S.canWrite && !document.body.classList.contains("tv")) : settledHtml(b))).join("");
   }
   function niceStep(x) {
     const p = Math.pow(10, Math.floor(Math.log10(x))), m = x / p;
@@ -3010,7 +3124,17 @@ body.tv.prime .rb-pos.st-w, body.tv.prime .rb-hs-side.ahead { border-color: colo
     if (e.key === "Enter" && e.target.id && e.target.id.startsWith("nt-")) { e.preventDefault(); e.target.closest(".bet").querySelector('[data-act="note"]').click(); }
     if (e.key === "Enter" && e.target.id && e.target.id.startsWith("co-")) { e.preventDefault(); e.target.closest(".bet").querySelector('[data-act="co-save"]').click(); }
   };
-  for (const sel of ["#active", "#crew", "#rides"]) { $(sel).addEventListener("click", onCardClick); $(sel).addEventListener("keydown", onCardKey); }
+  for (const sel of ["#active", "#crew", "#rides", "#bsBody"]) { $(sel).addEventListener("click", onCardClick); $(sel).addEventListener("keydown", onCardKey); }
+  // the board on a phone: tap a row (or a person) to open their bets
+  $("#rb").addEventListener("click", (e) => { if (document.body.classList.contains("tv")) return; const r = e.target.closest("[data-ids]"); if (!r) return; const ids = r.dataset.ids.split(",").filter(Boolean); if (ids.length) openBets(ids, r.dataset.title || "Bet"); });
+  function setTab(t) {
+    document.body.classList.toggle("tab-me", t === "me");
+    document.querySelectorAll("#tabs button").forEach((b) => b.setAttribute("aria-pressed", String(b.dataset.tab === t)));
+    try { localStorage.setItem("sb-tab", t); } catch (e) {}
+    render(); scrollTo(0, 0);
+  }
+  $("#tabs").addEventListener("click", (e) => { const b = e.target.closest("[data-tab]"); if (b) setTab(b.dataset.tab); });
+  try { if (localStorage.getItem("sb-tab") === "me") document.body.classList.add("tab-me"), document.querySelectorAll("#tabs button").forEach((b) => b.setAttribute("aria-pressed", String(b.dataset.tab === "me"))); } catch (e) {}
   $("#recent").addEventListener("click", (e) => {
     if (!S.canWrite) return;
     const ask = e.target.closest("[data-delask]"), yes = e.target.closest("[data-delyes]");
@@ -3093,7 +3217,7 @@ body.tv.prime .rb-pos.st-w, body.tv.prime .rb-hs-side.ahead { border-color: colo
   // ---------- sheets ----------
   function openSheet(id) { $(id).hidden = false; }
   // keep every open screen current: when a new version is up, reload it (never mid-form or mid-animation)
-  const BUILD = "20261012154629";
+  const BUILD = "20261012190711";
   function checkBuild() {
     if (BUILD === "dev") return;
     fetch("version.json?t=" + Date.now(), { cache: "no-store" }).then((r) => (r.ok ? r.json() : null)).then((j) => {
@@ -3108,7 +3232,7 @@ body.tv.prime .rb-pos.st-w, body.tv.prime .rb-hs-side.ahead { border-color: colo
   }
   setInterval(checkBuild, 90000); setTimeout(checkBuild, 4000);
   document.addEventListener("visibilitychange", () => { if (!document.hidden) checkBuild(); });
-  function closeSheets() { $("#addSheet").hidden = true; $("#setSheet").hidden = true; }
+  function closeSheets() { $("#addSheet").hidden = true; $("#setSheet").hidden = true; $("#betSheet").hidden = true; bsIds = []; S.open = null; S.confirmDel = null; }
   document.querySelectorAll(".scrim").forEach((s) => s.addEventListener("click", (e) => { if (e.target === s || e.target.closest("[data-close]")) closeSheets(); }));
   document.addEventListener("keydown", (e) => { if (e.key === "Escape") closeSheets(); });
 
@@ -3389,6 +3513,7 @@ body.tv.prime .rb-pos.st-w, body.tv.prime .rb-hs-side.ahead { border-color: colo
     return null;
   }
   function tailBet(b, kind) {
+    $("#betSheet").hidden = true; bsIds = [];
     openAdd();
     F.tail = { id: b.id, kind, who: personKey(b), name: personName(b) };
     $("#addForm .sheet-head h3").textContent = (kind === "fade" ? "Fade " : "Tail ") + personName(b);
@@ -4495,30 +4620,9 @@ body.tv.prime .rb-pos.st-w, body.tv.prime .rb-hs-side.ahead { border-color: colo
   const MOOD_TAG = { up: "Cashing", down: "In trouble", hype: "Hype", vibe: "Vibes", game: "Live" };
   // right-hand rail: group rides, then yours, then the crew's; live ones first, the one this clip is about lit up
   function jumboBets() {
-    const rank = (b) => ({ live: 0, pre: 1, final: 2 }[phase(b)] ?? 1);
-    const room = roomGroups(), open = [...S.bets.values()].filter((b) => b.status === "open" && !room.inRide.has(b.id));
-    const mine = open.filter(isMe).sort((x, y) => rank(x) - rank(y)), crew = open.filter((b) => !isMe(b)).sort((x, y) => rank(x) - rank(y));
-    const row = (b, ride) => {
-      const ph = phase(b), legs = legsOf(b), ev = b.kind !== "parlay" && b.sel ? evalSel(b.sel) : null, g = b.sel ? gameOf(b.sel) : null;
-      const dead = legs.some((l) => l.st === "miss"), hits = legs.filter((l) => l.st === "hit").length;
-      const cls = ev ? (ev.res === "W" ? "w" : ev.res === "L" ? "l" : "e") : dead ? "l" : legs.length && hits === legs.length ? "w" : "";
-      const st = legs.length ? (dead ? "Dead · a leg missed" : hits === legs.length ? "Every leg hit" : `${hits} of ${legs.length} legs in`) : ev ? ev.txt : ph === "pre" ? startLabel(startOf(b)) : ph === "live" ? "Live" : "";
-      const pre = g && (g.st === "pre" || g.a.sc == null), side = b.sel && b.sel.m !== "tot" && !isTd(b.sel.m) ? b.sel.s : null;
-      const tm = (x) => `${lg(g[x])}<span class="${side === x ? "me" : ""}">${esc(g[x].ab)}${pre ? "" : " " + g[x].sc}</span>`;
-      const sc = !g ? "" : `${tm("a")}<i>·</i>${tm("h")}<i>·</i><em>${esc(pre ? startLabel(g.t) : g.st === "post" ? "Final" : g.d)}</em>`;
-      const riders = ride ? ride.bets : [b], pl = (x) => !!(ride && ride.legOf && ride.legOf.has(x.id)), cash = riders.filter((x) => !pl(x));
-      const who = riders.map((x) => `<s style="--c:${personCol(x)}">${esc(personName(x).slice(0, 1).toUpperCase())}</s>`).join("");
-      const units = cash.reduce((a, x) => a + x.units, 0), toWin = cash.reduce((a, x) => a + x.units * ppu(x.odds), 0);
-      const meter = ev && !ev.fin && ph === "live" ? meterHtml(b.sel, ev) : legs.length && ph !== "pre" ? legMeter(legs) : "";
-      const legRows = legs.length ? `<ul class="jl">${legs.map((l) => { const d = legShort(l); return `<li class="${l.st || d.cls}"><i>${l.st === "hit" ? "✓" : l.st === "miss" ? "✕" : ""}</i><span>${esc(l.t)}</span>${d.txt ? `<em>${esc(d.txt)}</em>` : ""}</li>`; }).join("")}</ul>` : "";
-      const on = b.id === statusBet || (ride && ride.bets.some((x) => x.id === statusBet));
-      return `<div class="jb-bet${on ? " on" : ""}${ride ? " ride" : isMe(b) ? "" : " cw"}" style="--c:${personCol(b)}">
-        <div class="r"><b>${esc(b.pick)}</b><span class="od">${b.odds == null ? "LEG" : fOdds(b.odds)}</span></div>
-        <div class="m"><span class="jb-who">${who}</span><span class="nm">${esc(riders.map((x) => personName(x) + (pl(x) ? " (parlay)" : "")).join(" + "))}</span>${cash.length ? `<span>${fU(units)} → ${fU(toWin, true)}</span>` : ""}</div>
-        ${sc ? `<div class="sc">${sc}</div>` : ""}<div class="st ${cls}">${ph === "live" ? '<i class="dot"></i>' : ""}${esc(st)}</div>${meter}${legRows}</div>`;
-    };
-    const html = [...room.rides.map((r) => row(r.lead, r)), ...mine.map((b) => row(b)), ...crew.map((b) => row(b))];
-    $("#jbBets").innerHTML = html.length ? html.join("") : '<div class="jb-none">No open bets</div>';
+    const { list, parlays, other } = boardGroups(), live = list.filter((G) => G.g.st !== "post");
+    const html = live.map((G) => gameCard(G, false)).join("") + parlayCard(parlays) + otherCard(other.filter((e) => e.b.status === "open"));
+    $("#jbBets").innerHTML = html || '<div class="jb-none">No open bets</div>';
     loopSyncEl($("#jbBets"));
   }
   const lg = (x) => (x.lg ? `<img src="${esc(x.lg)}" alt="">` : "");
