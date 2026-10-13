@@ -2129,10 +2129,84 @@ body.phone .ph-sheet, body.phone #addForm, body.phone #setForm { max-width: none
 #phActB .pa-legs { padding: 10px 12px; border-radius: 12px; background: rgba(255,255,255,.03); gap: 7px; }
 body.phone #toast { bottom: calc(96px + env(safe-area-inset-bottom)); max-width: calc(100% - 32px); text-align: center; }
 #phEditB .pe-leg + .pe-leg { margin-top: 6px; }
+/* hockey props: over / under next to the line */
+.ouseg { margin-left: auto; }
+.ppmk { grid-template-columns: repeat(auto-fill, minmax(150px, 1fr)) !important; }
+/* the GOAL card: a red lamp spinning behind it, scorer, assists, the score, the room's bets */
+.hg-wrap { position: relative; display: flex; flex-direction: column; gap: 16px; padding: 4px 0; }
+.hg-lamp { position: absolute; top: -70px; left: 50%; width: 560px; height: 560px; margin-left: -280px; border-radius: 50%; background: conic-gradient(from 0deg, rgba(255,40,40,0), rgba(255,40,40,.32) 8%, rgba(255,40,40,.5) 13%, rgba(255,40,40,.32) 18%, rgba(255,40,40,0) 30%, rgba(255,40,40,0) 50%, rgba(255,40,40,.32) 58%, rgba(255,40,40,.5) 63%, rgba(255,40,40,.32) 68%, rgba(255,40,40,0) 80%); -webkit-mask-image: radial-gradient(closest-side, #000 30%, transparent); mask-image: radial-gradient(closest-side, #000 30%, transparent); animation: hgSpin 1.1s linear infinite; will-change: transform; pointer-events: none; z-index: -1; }
+@keyframes hgSpin { to { transform: rotate(360deg); } }
+.hg-top { display: flex; align-items: center; justify-content: space-between; }
+.hg-word { font: 900 clamp(64px, 9vw, 132px)/.85 var(--f-display); letter-spacing: .02em; text-transform: uppercase; color: #fff; text-shadow: 0 0 30px rgba(255,60,60,.65), 0 0 2px #ff3b3b; animation: hgPulse .55s ease-in-out 6 alternate; }
+@keyframes hgPulse { from { color: #fff; } to { color: #ff4b4b; } }
+.hg-lg { width: clamp(70px, 8vw, 120px); height: clamp(70px, 8vw, 120px); object-fit: contain; filter: drop-shadow(0 6px 18px rgba(0,0,0,.5)); }
+.hg-main { display: grid; grid-template-columns: auto minmax(0, 1fr) auto; align-items: center; gap: 22px; }
+.hg-hs { width: clamp(96px, 10vw, 150px); height: clamp(96px, 10vw, 150px); border-radius: 50%; object-fit: cover; object-position: top; background: rgba(255,255,255,.08); box-shadow: 0 0 0 3px rgba(255,255,255,.85), 0 10px 30px rgba(0,0,0,.45); }
+.hg-who { display: flex; flex-direction: column; gap: 6px; min-width: 0; }
+.hg-who small { font: 700 clamp(18px, 1.8vw, 26px)/1 var(--f-num); letter-spacing: .1em; text-transform: uppercase; color: rgba(255,255,255,.75); }
+.hg-who b { font: 900 clamp(40px, 4.6vw, 72px)/.95 var(--f-display); text-transform: uppercase; color: #fff; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.hg-who b em { font-style: normal; color: rgba(255,255,255,.6); font-size: .6em; }
+.hg-who span { font: 600 clamp(15px, 1.4vw, 20px)/1.25 var(--f-ui); color: rgba(255,255,255,.85); }
+.hg-who .hg-ln { font: 700 clamp(14px, 1.3vw, 18px)/1 var(--f-num); letter-spacing: .14em; text-transform: uppercase; color: rgba(255,255,255,.6); }
+.hg-sc { display: flex; flex-direction: column; gap: 8px; font: 800 clamp(18px, 1.8vw, 26px)/1 var(--f-num); letter-spacing: .08em; color: rgba(255,255,255,.75); text-align: right; }
+.hg-sc b { color: #fff; font-size: 1.5em; margin-left: 8px; }
+.hg-bets h5 { margin: 0 0 8px; font: 700 13px/1 var(--f-num); letter-spacing: .22em; text-transform: uppercase; color: rgba(255,255,255,.6); }
+body.goal-lamp::after { content: ""; position: fixed; inset: 0; pointer-events: none; z-index: 70; background: radial-gradient(ellipse at center, transparent 55%, rgba(255,30,30,.42) 100%); animation: lampFlash .55s ease-in-out infinite alternate; will-change: opacity; }
+@keyframes lampFlash { from { opacity: .25; } to { opacity: 1; } }
+body.phone.goal-lamp::after { display: none; }
+/* ---------- hockey mode: ice ---------- */
+.ice, .zam { display: none; }
+body.tv.hockey::before { background: radial-gradient(1300px 700px at 50% -12%, rgba(150,210,255,.22), transparent 62%), radial-gradient(900px 600px at 0% 100%, rgba(80,150,230,.16), transparent 70%), radial-gradient(900px 600px at 100% 100%, rgba(80,150,230,.13), transparent 70%), linear-gradient(180deg, #091321, #050a12) !important; }
+body.tv.hockey .ice { display: block; position: fixed; inset: 0; z-index: 0; pointer-events: none; overflow: hidden;
+  background: radial-gradient(520px 340px at 0% 0%, rgba(225,242,255,.14), transparent 70%), radial-gradient(520px 340px at 100% 0%, rgba(225,242,255,.12), transparent 70%), radial-gradient(620px 300px at 0% 100%, rgba(225,242,255,.10), transparent 70%), radial-gradient(620px 300px at 100% 100%, rgba(225,242,255,.10), transparent 70%); }
+body.tv.hockey .ice::after { content: ""; position: absolute; inset: 0; opacity: .06; background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='260' height='260'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.9' numOctaves='3' stitchTiles='stitch'/%3E%3CfeColorMatrix values='0 0 0 0 .85 0 0 0 0 .93 0 0 0 0 1 0 0 0 1.4 -.35'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E"); }
+.ice-ln { position: absolute; top: 0; bottom: 0; width: 6px; }
+.ice-ln.c { left: calc(50% - 3px); background: rgba(255,70,70,.07); }
+.ice-ln.b1 { left: 32%; width: 10px; background: rgba(70,140,255,.06); }
+.ice-ln.b2 { left: 68%; width: 10px; background: rgba(70,140,255,.06); }
+.ice-ci { position: absolute; left: 50%; top: 50%; width: 46vh; height: 46vh; margin: -23vh 0 0 -23vh; border-radius: 50%; border: 5px solid rgba(70,140,255,.05); }
+body.tv.hockey .rb-g, body.tv.hockey .rb-sec, body.tv.hockey .rb-card { background: linear-gradient(180deg, rgba(19,33,52,.94), rgba(10,19,32,.96)); border-color: rgba(170,215,255,.15); box-shadow: inset 0 1px 0 rgba(225,242,255,.10), 0 18px 40px rgba(0,0,0,.25); }
+body.tv.hockey .rb-pos, body.tv.hockey .rb-h2h, body.tv.hockey .rb-pl .pl-legs li, body.tv.hockey .rb-lr { background-color: rgba(190,225,255,.045); }
+body.tv.hockey .top .brand h1 span { color: #bfe9ff; text-shadow: 0 0 18px rgba(140,210,255,.55); }
+body.tv.hockey .modechip { background: rgba(140,210,255,.14) !important; color: #cdeeff !important; border-color: rgba(140,210,255,.45) !important; }
+body.tv.hockey #ticker { background: linear-gradient(180deg, rgba(14,28,46,.96), rgba(8,16,28,.98)); border-top-color: rgba(170,215,255,.2); }
+/* the rink on the big game */
+.rb-rink { margin: 0 clamp(12px, 2.4cqw, 18px) 12px; display: flex; flex-direction: column; gap: 10px; }
+.rk-ends { display: flex; justify-content: space-between; font: 800 13px/1 var(--f-num); letter-spacing: .16em; text-transform: uppercase; color: var(--ink-2); }
+.rk-ends span { color: var(--c); } .rk-ends em { font-style: normal; color: var(--ink-3); letter-spacing: .1em; }
+.rk-svg { display: block; width: 100%; height: auto; max-height: 28vh; filter: drop-shadow(0 10px 24px rgba(0,0,0,.35)); }
+.rk-svg .new { animation: rkNew 1.6s ease-in-out infinite; transform-box: fill-box; transform-origin: center; }
+@keyframes rkNew { 50% { opacity: .35; } }
+.rk-bars { display: grid; grid-template-columns: 1fr 1fr; gap: 8px 22px; }
+.rk-bar { display: grid; grid-template-columns: 3.2em minmax(0, 1fr) 3.2em; align-items: center; gap: 10px; }
+.rk-bar > b { font: 800 18px/1 var(--f-num); color: #fff; }
+.rk-bar > b:last-child { text-align: right; }
+.rk-bar div { display: flex; flex-direction: column; gap: 5px; }
+.rk-bar span { font: 700 10.5px/1 var(--f-num); letter-spacing: .2em; text-transform: uppercase; color: var(--ink-3); text-align: center; }
+.rk-bar i { display: flex; height: 6px; border-radius: 3px; overflow: hidden; background: rgba(255,255,255,.08); }
+.rk-bar i em { height: 100%; transition: width .8s cubic-bezier(.16,1,.3,1); }
+.rk-bar i em + em { box-shadow: inset 2px 0 0 #07090d; }
+/* the Zamboni */
+body.tv.hockey .zam:not([hidden]) { display: block; position: fixed; left: 0; right: 0; bottom: calc(var(--sy, 0px) + 44px); height: 150px; z-index: 55; pointer-events: none; overflow: hidden; }
+.zam-car { position: absolute; bottom: 0; left: 0; width: 330px; height: 165px; transform: translateX(-360px); will-change: transform; }
+.zam.go .zam-car { animation: zamDrive 19s cubic-bezier(.45,.05,.55,.95) forwards; }
+@keyframes zamDrive { 0% { transform: translateX(-360px); } 100% { transform: translateX(calc(100vw + 40px)); } }
+.zam-car > svg { position: absolute; inset: 0; width: 100%; height: 100%; animation: zamBob .42s ease-in-out infinite alternate; will-change: transform; }
+@keyframes zamBob { to { transform: translateY(-1.5px); } }
+.zam-car .zw { transform-box: fill-box; transform-origin: center; animation: zamWheel .55s linear infinite; }
+@keyframes zamWheel { to { transform: rotate(360deg); } }
+.zam-car .zb { animation: zamBeacon .7s steps(2) infinite; }
+@keyframes zamBeacon { 50% { opacity: .25; } }
+.zam-trail { position: absolute; right: 93%; bottom: 14px; width: 106vw; height: 16px; border-radius: 8px 0 0 8px; overflow: hidden;
+  background: linear-gradient(180deg, rgba(255,255,255,.18), rgba(200,235,255,.06) 60%, rgba(255,255,255,.14)), linear-gradient(90deg, rgba(200,235,255,0), rgba(200,235,255,.12) 50%, rgba(225,245,255,.34) 92%, rgba(255,255,255,.6)); }
+.zam-trail::after { content: ""; position: absolute; top: 0; bottom: 0; right: 0; width: 180px; background: linear-gradient(100deg, transparent, rgba(255,255,255,.55) 50%, transparent); animation: zamGloss 2.6s linear infinite; will-change: transform; }
+@keyframes zamGloss { from { transform: translateX(0); } to { transform: translateX(-60vw); } }
 </style>
 </head>
 <body>
 
+<div class="ice" id="ice" aria-hidden="true"><i class="ice-ln c"></i><i class="ice-ln b1"></i><i class="ice-ln b2"></i><i class="ice-ci"></i></div>
+<div class="zam" id="zam" hidden aria-hidden="true"><div class="zam-car"><div class="zam-trail"></div><svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" viewBox="0 0 360 180" width="360" height="180" fill="none" stroke-linejoin="round" stroke-linecap="round"> <defs> <linearGradient id="zgB" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#fff"/><stop offset=".55" stop-color="#e3eef9"/><stop offset="1" stop-color="#b3cae3"/></linearGradient> <linearGradient id="zgT" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#fbfdff"/><stop offset=".6" stop-color="#dae8f6"/><stop offset="1" stop-color="#abc4df"/></linearGradient> <linearGradient id="zgN" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#26487f"/><stop offset="1" stop-color="#0d1f42"/></linearGradient> <linearGradient id="zgM" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#9fb1c6"/><stop offset="1" stop-color="#4d5e75"/></linearGradient> <linearGradient id="zgJ" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#3d6fbd"/><stop offset="1" stop-color="#22457f"/></linearGradient> <linearGradient id="zgA" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#8adcff"/><stop offset="1" stop-color="#1f74c9"/></linearGradient> <linearGradient id="zgS" x1="0" y1="0" x2="1" y2="0"><stop offset="0" stop-color="#bfe9ff" stop-opacity="0"/><stop offset=".65" stop-color="#dff4ff" stop-opacity=".55"/><stop offset="1" stop-color="#fff" stop-opacity=".95"/></linearGradient> <radialGradient id="zgW"><stop offset=".55" stop-color="#2e3540"/><stop offset=".9" stop-color="#181c23"/><stop offset="1" stop-color="#0c0f14"/></radialGradient> <radialGradient id="zgH" cx=".4" cy=".35" r=".7"><stop offset="0" stop-color="#fff"/><stop offset=".6" stop-color="#c6d2df"/><stop offset="1" stop-color="#7c8ca1"/></radialGradient> <radialGradient id="zgL" cx=".45" cy=".35" r=".75"><stop offset="0" stop-color="#fff6d0"/><stop offset=".45" stop-color="#ffb52e"/><stop offset="1" stop-color="#d96a00"/></radialGradient> <radialGradient id="zgG"><stop offset="0" stop-color="#ffc24a" stop-opacity=".75"/><stop offset="1" stop-color="#ffb020" stop-opacity="0"/></radialGradient> <path id="zpB" d="M56 90H274L282 80Q284 78 288 78H304C318 78 330 92 336 108L340 126Q342 136 333 137H299A25 25 0 0 0 249 137H137A25 25 0 0 0 87 137H62Q56 137 56 131Z"/> <path id="zpT" d="M62 90L58 42Q58 36 64 36H198Q204 36 206.5 41.5L229 90Z"/> <clipPath id="zcB"><use xlink:href="#zpB"/></clipPath> <clipPath id="zcT"><use xlink:href="#zpT"/></clipPath> <g id="zwh"> <circle r="21" fill="url(#zgW)" stroke="#05080c" stroke-width="1.5"/> <circle r="18.6" stroke="#47505e" stroke-width="2.4" stroke-dasharray="3.2 3.29"/> <circle r="11" fill="url(#zgH)" stroke="#0a1626" stroke-width="1.2"/> <circle r="7.2" stroke="#8a99ab" stroke-width=".8"/> <g fill="#4a5a70"><circle cy="-5" r="1.3"/><circle cx="4.76" cy="-1.55" r="1.3"/><circle cx="2.94" cy="4.05" r="1.3"/><circle cx="-2.94" cy="4.05" r="1.3"/><circle cx="-4.76" cy="-1.55" r="1.3"/></g> <circle r="2.4" fill="#1d2d46"/> </g> </defs>  <ellipse cx="186" cy="162.5" rx="156" ry="3.6" fill="#000" opacity=".45"/> <rect class="zsheen" x="0" y="158.4" width="14" height="4" rx="2" fill="url(#zgS)"/>  <g id="zbody" stroke="#0a1626" stroke-width="1.5"> <!-- conditioner linkage --> <path d="M80 102L40 130M76 120L54 133" stroke-width="5"/> <path d="M80 102L40 130M76 120L54 133" stroke="#8fa3ba" stroke-width="2.6"/> <path d="M78 112L56 128" stroke-width="3.6"/><path d="M78 112L56 128" stroke="#e6eef6" stroke-width="1.4"/> <rect x="82" y="108" width="222" height="29" fill="#0f1726" stroke="none"/>  <!-- snow tank --> <use xlink:href="#zpT" fill="url(#zgT)"/> <g clip-path="url(#zcT)" stroke="none"> <path d="M50 90V80L232 50V66L50 92z" fill="url(#zgN)"/> <path d="M50 94L232 69.5V72L50 96.5z" fill="#d62839"/> <path d="M84 36h12l-14 54H70z" fill="#fff" opacity=".35"/> <path d="M60 40.5H204" stroke="#fff" stroke-width="1.4"/> </g> <rect x="55" y="31" width="153" height="7" rx="3" fill="url(#zgB)"/> <path d="M58 33H205" stroke="#fff" stroke-width="1.2"/>  <!-- seat + driver --> <path d="M232 90V64Q232 58 238 58H242Q246 58 246 64V84H264Q268 84 268 88V90Z" fill="#3a4a66"/> <path d="M235 62V86" stroke="#6f84a6" stroke-width="1.2"/> <path d="M252 85L279 82" stroke="#1a2a45" stroke-width="8"/> <path d="M246 87C244 74 248 64 258 62C266 61 270 68 270 76L268 87Z" fill="url(#zgJ)"/> <path d="M256 63.5L254 86" stroke="#d62839" stroke-width="1.4"/> <circle cx="259" cy="52" r="7.5" fill="#efc7a0"/> <path d="M251.4 51.5A7.6 7.6 0 0 1 266.6 51.5Z" fill="url(#zgN)"/> <circle cx="259" cy="43" r="2.2" fill="#d62839" stroke-width="1"/>  <!-- main body --> <use xlink:href="#zpB" fill="url(#zgB)"/> <g clip-path="url(#zcB)" stroke="none"> <path d="M40 97H340V108H40z" fill="url(#zgN)"/> <path d="M40 111H340V113.2H40z" fill="#d62839"/> <path d="M60 92.6H272M290 80.6H304" stroke="#fff" stroke-width="1.4"/> </g> <!-- water tank sight glass --> <rect x="148" y="118" width="92" height="12" rx="6" fill="#0c1a2e"/> <rect x="150.5" y="122.5" width="87" height="5.5" rx="2.75" fill="url(#zgA)" stroke="none"/> <path d="M155 121.2H233" stroke="#bfeaff" stroke-width=".9" stroke-dasharray="1 7" opacity=".9"/> <rect x="57.5" y="115.5" width="4" height="8" rx="1.5" fill="#e0283a" stroke-width="1"/> <!-- headlight + bumper --> <circle cx="335" cy="114" r="9" fill="url(#zgG)" stroke="none"/> <ellipse cx="335.2" cy="114" rx="2.6" ry="4.4" fill="#fffbe3" stroke-width="1.1"/> <rect x="303" y="129" width="40" height="9" rx="3.5" fill="#1b2433"/>  <!-- steering + arm --> <path d="M297 80L286 69" stroke-width="4"/><path d="M297 80L286 69" stroke="#9fb1c6" stroke-width="1.8"/> <ellipse cx="284" cy="68" rx="2.6" ry="8.5" transform="rotate(-25 284 68)" stroke-width="4"/><ellipse cx="284" cy="68" rx="2.6" ry="8.5" transform="rotate(-25 284 68)" stroke="#7d8fa8" stroke-width="1.6"/> <path d="M262 66Q265 77 272 77L284 71" stroke="#0a1626" stroke-width="7.5"/> <path d="M262 66Q265 77 272 77L284 71" stroke="#3563ad" stroke-width="5"/> <circle cx="285.5" cy="70.5" r="2.6" fill="#efc7a0" stroke-width="1"/>  <!-- mirror --> <path d="M309 79Q318 68 321 52" stroke-width="3.6"/><path d="M309 79Q318 68 321 52" stroke="#a9bacd" stroke-width="1.6"/> <rect x="317" y="40" width="9" height="13" rx="3" fill="#1b2a44"/> <path d="M320 43.5V49.5" stroke="#9fd3ff" stroke-width="1.6"/>  <!-- beacon --> <rect x="186" y="27" width="12" height="4.5" rx="1" fill="#1b2433"/> <g class="zb"> <circle cx="192" cy="21" r="12" fill="url(#zgG)" stroke="none"/> <path d="M187 27.5V22A5 5 0 0 1 197 22V27.5Z" fill="url(#zgL)" stroke="#5a2c00" stroke-width="1"/> <path d="M189.2 25V22.4A2.6 2.6 0 0 1 191 19.6" stroke="#fff" stroke-width="1.1" opacity=".9"/> </g>  <!-- conditioner --> <path d="M16 152V134Q16 130 20 130H62Q66 130 66 134V152Z" fill="url(#zgM)"/> <path d="M26 134V149M36 134V149M46 134V149M56 134V149" stroke="#3b4a5f" stroke-width="1"/> <rect x="15" y="126" width="52" height="6" rx="2" fill="url(#zgN)"/> <path d="M18 132.2H64" stroke="#d62839" stroke-width="1.2"/> <rect x="14" y="152" width="54" height="5" rx="1.5" fill="#1a2230"/> <path d="M14 157H64L62 161.6H7Q9 158.6 14 157Z" fill="#eaf6ff" stroke-width="1"/>  <!-- wheels --> <g class="zw"><use xlink:href="#zwh" x="112" y="141"/></g> <g class="zw"><use xlink:href="#zwh" x="274" y="141"/></g> </g> </svg> </div></div>
 <div class="app">
   <section class="ph" id="ph" aria-label="Sweat Board">
     <header class="ph-top">
@@ -2282,7 +2356,7 @@ body.phone #toast { bottom: calc(96px + env(safe-area-inset-bottom)); max-width:
     <div class="field" id="selField" hidden>
       <span class="lbl">Your pick</span>
       <div class="selcard"><b id="selText"></b><span id="selGame"></span><button type="button" class="x" id="selClear" aria-label="Clear pick">×</button></div>
-      <div class="linein" id="lineWrap"><label for="f-line">Line</label><input type="text" id="f-line" inputmode="decimal" autocomplete="off"><span class="hint">Match your slip. Prefilled numbers are DraftKings' via ESPN.</span></div>
+      <div class="linein" id="lineWrap"><label for="f-line">Line</label><input type="text" id="f-line" inputmode="decimal" autocomplete="off"><div class="seg ouseg" id="ouSeg" role="group" aria-label="Over or under" hidden><button type="button" data-ou="o">Over</button><button type="button" data-ou="u">Under</button></div><span class="hint">Match your slip. Prefilled numbers are DraftKings' via ESPN.</span></div>
     </div>
     <div class="field" id="customField" hidden>
       <label for="f-pick">Pick</label>
@@ -2399,6 +2473,16 @@ body.phone #toast { bottom: calc(96px + env(safe-area-inset-bottom)); max-width:
       </div>
       <span class="hint">What the ticker follows (every score, spreads and totals before kickoff, upset watch, injury news) and which league the bet form opens to. Auto runs college Tuesday through Saturday and the NFL on Sunday, Monday and Thursday. Applies to every screen.</span>
       <label class="togrow"><input type="checkbox" id="tickerOn"> Show the ticker on this screen</label>
+    </div>
+    <div class="field">
+      <span class="lbl">Slate mode</span>
+      <span class="lbl">Hockey mode</span>
+      <div class="radios" id="hockeyRadios">
+        <label><input type="radio" name="hockey" value="auto"><span>Auto</span></label>
+        <label><input type="radio" name="hockey" value="on"><span>On</span></label>
+        <label><input type="radio" name="hockey" value="off"><span>Off</span></label>
+      </div>
+      <span class="hint">Auto turns it on when most of the room's bets are hockey: ice, the Zamboni between periods, the goal horn and a rink on the big game.</span>
     </div>
     <div class="field">
       <span class="lbl">Slate mode</span>
@@ -2866,8 +2950,91 @@ body.phone #toast { bottom: calc(96px + env(safe-area-inset-bottom)); max-width:
     else if (e.target.closest("#phUnit")) openSettings();
   });
   phoneQ.addEventListener("change", () => render());
+  function hockeyPin() { try { return localStorage.getItem("sb-hockey") || "auto"; } catch (e) { return "auto"; } }
+  // auto: when at least half of what the room has going (open, or settled in the last 8 hours) is hockey
+  function hockeyWant() {
+    const pin = hockeyPin(); if (pin === "on") return true; if (pin === "off") return false;
+    let n = 0, h = 0; const now = Date.now();
+    for (const b of S.bets.values()) {
+      if (b.status !== "open" && !(b.settledAt && now - b.settledAt < 8 * 36e5)) continue;
+      const sp = b.kind === "parlay" ? [...new Set((Array.isArray(b.legSel) ? b.legSel : []).filter(Boolean).map((x) => x.sp))] : [(b.sel && b.sel.sp) || b.sport];
+      for (const x of sp) { n++; if (x === "NHL") h++; }
+    }
+    return n > 0 && h / n >= 0.5;
+  }
+  function syncHockey() {
+    const on = !PHONE() && hockeyWant(), was = document.body.classList.contains("hockey");
+    if (on === was) return;
+    document.body.classList.toggle("hockey", on);
+    if (on && document.body.classList.contains("tv")) setTimeout(() => zamboni(), 4000);
+  }
+  // the Zamboni: across the bottom of the screen, a strip of fresh wet ice behind it
+  let zamAt = 0;
+  function zamboni() {
+    const z = $("#zam");
+    if (!z || !z.hidden || !document.body.classList.contains("tv") || !document.body.classList.contains("hockey")) return false;
+    zamAt = Date.now(); z.hidden = false; z.classList.remove("go"); void z.offsetWidth; z.classList.add("go");
+    setTimeout(() => { z.classList.remove("go"); z.hidden = true; }, 21000);
+    return true;
+  }
+  const zamPer = new Set();
+  function zamWatch() {
+    if (!document.body.classList.contains("hockey") || !document.body.classList.contains("tv")) return;
+    for (const g of ppGames().values()) {
+      if (g.st !== "in" || !/end|intermission/i.test(g.d)) continue;
+      const k = g.id + "|" + g.pd; if (zamPer.has(k)) continue;
+      zamPer.add(k); if (Date.now() - zamAt > 90e3) { zamboni(); return; }
+    }
+    if (Date.now() - zamAt > 25 * 60e3 && !cardBusy && $("#jumbo").hidden) zamboni();
+  }
+  setInterval(zamWatch, 20000);
+  $("#hockeyRadios").addEventListener("change", (e) => { try { localStorage.setItem("sb-hockey", e.target.value); } catch (err) {} render(); showMode(); });
+  // the big game on a rink: every shot and goal where it came from (each team shooting at the far net), and the team stat bars
+  function rinkHtml(g) {
+    const d = PPS.get(g.id); if (!d) return "";
+    const A = String(g.a.id), ca = bright(g.a), ch = bright(g.h);
+    const pt = (p) => { if (p.x == null || p.y == null) return null; let x = Number(p.x), y = Number(p.y); const want = p.tm === A ? 1 : -1; if (x && Math.sign(x) !== want) { x = -x; y = -y; } return { x: 100 + x, y: 42.5 - y }; };
+    const shots = d.plays.map((p) => ({ p, q: pt(p) })).filter((x) => x.q), lastId = shots.length ? shots[shots.length - 1].p.id : "";
+    const dot = ({ p, q }) => { const c = p.tm === A ? ca : ch;
+      return p.goal ? `<g class="rk-g${p.id === lastId ? " new" : ""}" transform="translate(${q.x.toFixed(1)} ${q.y.toFixed(1)})"><circle r="3.4" fill="${esc(c)}" stroke="#fff" stroke-width=".9"/><path d="M0-1.9l.56 1.15 1.27.18-.92.9.22 1.27L0 .9l-1.13.6.22-1.27-.92-.9 1.27-.18z" fill="#fff"/></g>`
+        : `<circle class="rk-s${p.id === lastId ? " new" : ""}" cx="${q.x.toFixed(1)}" cy="${q.y.toFixed(1)}" r="1.5" fill="${esc(c)}" stroke="rgba(0,0,0,.45)" stroke-width=".35"/>`; };
+    const circ = (x, y) => `<circle cx="${x}" cy="${y}" r="15" fill="none" stroke="#d6413e" stroke-width=".6"/><circle cx="${x}" cy="${y}" r="1" fill="#d6413e"/>`;
+    const rink = `<svg class="rk-svg" viewBox="0 0 200 85" preserveAspectRatio="xMidYMid meet" role="img" aria-label="Shot map">
+      <defs><linearGradient id="rkIce" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#f4fbff"/><stop offset="1" stop-color="#dcebf7"/></linearGradient>
+      <clipPath id="rkClip"><rect x="0" y="0" width="200" height="85" rx="28"/></clipPath></defs>
+      <rect x="0" y="0" width="200" height="85" rx="28" fill="url(#rkIce)"/>
+      <g clip-path="url(#rkClip)" opacity=".95">
+        ${g.a.lg ? `<image href="${esc(g.a.lg)}" x="20" y="27.5" width="30" height="30" opacity=".10"/>` : ""}${g.h.lg ? `<image href="${esc(g.h.lg)}" x="150" y="27.5" width="30" height="30" opacity=".10"/>` : ""}
+        <rect x="11" y="0" width=".5" height="85" fill="#d6413e"/><rect x="188.5" y="0" width=".5" height="85" fill="#d6413e"/>
+        <rect x="74" y="0" width="2" height="85" fill="#2f6fd6"/><rect x="124" y="0" width="2" height="85" fill="#2f6fd6"/>
+        <rect x="99.4" y="0" width="1.2" height="85" fill="#d6413e"/>
+        <circle cx="100" cy="42.5" r="15" fill="none" stroke="#2f6fd6" stroke-width=".6"/><circle cx="100" cy="42.5" r=".9" fill="#2f6fd6"/>
+        ${circ(31, 20.5)}${circ(31, 64.5)}${circ(169, 20.5)}${circ(169, 64.5)}
+        <path d="M11.5 36.5a6 6 0 0 1 0 12z" fill="#9fd0f5" stroke="#d6413e" stroke-width=".4"/><path d="M188.5 36.5a6 6 0 0 0 0 12z" fill="#9fd0f5" stroke="#d6413e" stroke-width=".4"/>
+        <rect x="7.5" y="39.5" width="4" height="6" rx="1" fill="none" stroke="#d6413e" stroke-width=".7"/><rect x="188.5" y="39.5" width="4" height="6" rx="1" fill="none" stroke="#d6413e" stroke-width=".7"/>
+        ${shots.filter((x) => !x.p.goal).map(dot).join("")}${shots.filter((x) => x.p.goal).map(dot).join("")}
+      </g>
+      <rect x=".5" y=".5" width="199" height="84" rx="27.5" fill="none" stroke="rgba(255,255,255,.9)" stroke-width="1"/>
+    </svg>`;
+    // shots, hits, faceoffs, power plays: split bars in the two teams' colors
+    const ta = d.tm[A] || {}, th = d.tm[String(g.h.id)] || {};
+    const sogA = shots.filter((x) => x.p.tm === A).length, sogH = shots.length - sogA;
+    const bar = (lbl, a, h, fa, fh) => { const x = Number(a) || 0, y = Number(h) || 0, t = x + y || 1;
+      return `<div class="rk-bar"><b class="num">${fa ?? a}</b><div><span>${lbl}</span><i><em style="width:${((100 * x) / t).toFixed(1)}%;background:${esc(ca)}"></em><em style="width:${((100 * y) / t).toFixed(1)}%;background:${esc(ch)}"></em></i></div><b class="num">${fh ?? h}</b></div>`; };
+    const sa = ta.shotsTotal ?? sogA, sh = th.shotsTotal ?? sogH;
+    return `<div class="rb-rink"><div class="rk-ends"><span style="--c:${esc(ca)}">${esc(g.a.ab)} <em>shoots →</em></span><span style="--c:${esc(ch)}"><em>← shoots</em> ${esc(g.h.ab)}</span></div>${rink}
+      <div class="rk-bars">${bar("Shots on goal", sa, sh)}${ta.hits != null ? bar("Hits", ta.hits, th.hits) : ""}${ta.faceoffPercent != null ? bar("Faceoffs", ta.faceoffPercent, th.faceoffPercent, ta.faceoffPercent + "%", th.faceoffPercent + "%") : ""}${ta.powerPlayOpportunities != null ? bar("Power play", ta.powerPlayGoals, th.powerPlayGoals, `${ta.powerPlayGoals}/${ta.powerPlayOpportunities}`, `${th.powerPlayGoals}/${th.powerPlayOpportunities}`) : ""}</div></div>`;
+  }
+  // the goals, newest first, in the same strip as football's scoring plays
+  function rinkGoals(g) {
+    const d = PPS.get(g.id); if (!d) return "";
+    const gl = d.plays.filter((p) => p.goal); if (!gl.length) return "";
+    const tmOf = (id) => (String(g.a.id) === id ? g.a : String(g.h.id) === id ? g.h : null);
+    return `<div class="rb-scp"><h4>Goals</h4>${gl.slice(-4).reverse().map((p, i) => { const t = tmOf(p.tm), sc = p.who.find((w) => w.type === "scorer") || p.who[0], as = p.who.filter((w) => w.type === "assister");
+      return `<div class="r${i === 0 ? " new" : ""}" style="--c:${esc(t ? bright(t) : "#8a94a8")}">${t && t.lg ? `<img src="${esc(t.lg)}" alt="" referrerpolicy="no-referrer">` : "<span></span>"}<span class="q num">${p.pd > 3 ? "OT" : "P" + p.pd} ${esc(p.clk)}</span><span class="tx"><b>${/power/i.test(p.str) ? "PP goal" : /short/i.test(p.str) ? "SH goal" : "Goal"}</b>${esc(sc ? sc.nm : "")}${sc && sc.n ? ` (${sc.n})` : ""}${as.length ? ` · ${esc(as.map((a) => a.nm.split(" ").slice(-1)[0]).join(", "))}` : ""}</span><span class="s num">${esc(g.a.ab)} ${p.as} · ${esc(g.h.ab)} ${p.hs}</span></div>`; }).join("")}</div>`;
+  }
   function render() {
-    syncPhone();
+    syncPhone(); syncHockey(); { const hr = document.querySelector(`input[name="hockey"][value="${hockeyPin()}"]`); if (hr) hr.checked = true; }
     const everyone = [...S.bets.values()], all = everyone.filter(isMe);
     const start = rangeStart(S.range);
     const settled = all.filter((b) => b.status !== "open" && b.settledAt && b.settledAt >= start).sort((a, b) => a.settledAt - b.settledAt);
@@ -3039,6 +3206,97 @@ body.phone #toast { bottom: calc(96px + env(safe-area-inset-bottom)); max-width:
   const TDP = new Map();
   const normNm = (x) => String(x || "").toLowerCase().replace(/\b(jr|sr|ii|iii|iv)\b\.?/g, "").replace(/[^a-z]/g, "");
   const scorerOf = (text) => { const m = String(text || "").match(/^(.+?)\s+\d+\s+(?:Yd|yd|Yds|yds|Yard|yard)/); return m ? m[1].trim() : ""; };
+  // the box score for hockey games the room is on: player lines, shots and goals (with where they came from), team totals
+  const PPS = new Map(), goalSeen = new Set();
+  function ppRow(d, p) { if (!d || !p) return null; return (p.id && d.by.get(String(p.id))) || d.names.get(normNm(p.nm)) || null; }
+  function evalPP(sel, g) {
+    const d = PPS.get(g.id), st = ppStat(sel.m), l = sel.l ?? PP_DEF[st] ?? 0.5, w = PP_WORD[st] || [st, st];
+    const fin = g.st === "post" && !!(d && d.final);
+    if (!d) return { m: 0, res: "P", fin: false, txt: "Getting the box score…", g };
+    const row = ppRow(d, sel.p);
+    if (!row && fin) return { m: 0, res: "P", fin: true, txt: "Didn't play · void", g };
+    const v = row ? (st === "pts" ? row.g + row.a : row[st] || 0) : 0, m = sel.s === "u" ? l - v : v - l, over = v > l;
+    const unit = (n) => (st === "sog" ? "SOG" : n === 1 ? w[0] : w[1]), need = Math.floor(l) + 1 - v;
+    let txt, done = fin;
+    if (sel.s !== "u") {
+      if (over) { done = true; txt = st === "g" && l === 0.5 ? (v > 1 ? `Scored ${v}` : "Scored") : `Hit · ${v} ${unit(v)}`; }
+      else txt = fin ? `Final · ${v} ${unit(v)}` : st === "g" && l === 0.5 ? "No goal yet" : `${v} ${unit(v)} · needs ${need} more`;
+    } else {
+      if (over) { done = true; txt = `Over the line · ${v} ${unit(v)}`; }
+      else txt = fin ? `Final · ${v} ${unit(v)}` : `${v} ${unit(v)} · ${trimL(l - v)} to spare`;
+    }
+    return { m, res: m > 0 ? "W" : m < 0 ? "L" : "P", fin: done, txt, g, v };
+  }
+  function ppsParse(j) {
+    const by = new Map(), names = new Map(), tm = {};
+    for (const t of (j.boxscore && j.boxscore.players) || []) for (const grp of t.statistics || []) {
+      const K = grp.keys || [];
+      for (const a of grp.athletes || []) {
+        if (!a.athlete) continue;
+        const v = {}; K.forEach((k, i) => (v[k] = a.stats ? a.stats[i] : null));
+        const n = (k) => { const x = parseFloat(v[k]); return Number.isFinite(x) ? x : 0; };
+        const row = { id: String(a.athlete.id), nm: a.athlete.displayName || "", tm: String(t.team && t.team.id), g: n("goals"), a: n("assists"), sog: n("shotsTotal"), sv: n("saves"), ga: n("goalsAgainst"), hits: n("hits"), blk: n("blockedShots"), toi: v.timeOnIce || "" };
+        row.pts = row.g + row.a;
+        const was = by.get(row.id); if (was) Object.keys(row).forEach((k) => { if (typeof row[k] === "number" && !row[k] && was[k]) row[k] = was[k]; });
+        by.set(row.id, row); names.set(normNm(row.nm), row);
+      }
+    }
+    for (const t of (j.boxscore && j.boxscore.teams) || []) { const st = {}; for (const x of t.statistics || []) st[x.name] = x.displayValue; tm[String(t.team && t.team.id)] = st; }
+    const plays = (j.plays || []).filter((p) => p.type && /^(shot|goal)$/i.test(p.type.text || "")).map((p) => ({ id: String(p.id), goal: !!p.scoringPlay || /goal/i.test(p.type.text), tm: p.team ? String(p.team.id) : "", x: p.coordinate ? p.coordinate.x : null, y: p.coordinate ? p.coordinate.y : null,
+      pd: p.period ? p.period.number : 0, clk: p.clock ? p.clock.displayValue : "", text: p.text || "", str: p.strength ? p.strength.abbreviation || "" : "", as: p.awayScore, hs: p.homeScore,
+      who: (p.participants || []).filter((x) => x.athlete).map((x) => ({ id: String(x.athlete.id), nm: x.athlete.displayName || "", hs: (x.athlete.headshot && x.athlete.headshot.href) || "", type: x.type || "", n: x.ytdGoals ?? x.ytdAssists ?? null })) }));
+    const last = (j.plays || [])[j.plays ? j.plays.length - 1 : 0];
+    const hd = j.header && j.header.competitions && j.header.competitions[0];
+    return { by, names, tm, plays, last: last ? { str: last.strength ? last.strength.abbreviation || "" : "", type: last.type ? last.type.text : "", tm: last.team ? String(last.team.id) : "" } : null,
+      final: !!(hd && hd.status && hd.status.type && hd.status.type.completed), videos: j.videos || [] };
+  }
+  // hockey games with something riding on them (or the one on the big screen), live or just finished
+  function ppGames() {
+    const ids = new Map(), now = Date.now();
+    for (const b of S.bets.values()) {
+      if (b.status !== "open" && !(b.settledAt && now - b.settledAt < 2 * 36e5)) continue;
+      const sels = b.kind === "parlay" ? (Array.isArray(b.legSel) ? b.legSel : []) : [b.sel];
+      for (const sl of sels) { const g = sl && gameOf(sl); if (g && g.sport === "NHL" && g.st !== "pre") ids.set(g.id, g); }
+    }
+    return ids;
+  }
+  function loadPPS(force) {
+    if (document.visibilityState !== "visible") return;
+    const now = Date.now(), list = force ? [force] : [...ppGames().values()];
+    for (const g of list) {
+      const c = PPS.get(g.id); if (c && (c.busy || c.final || (!force && now - c.at < 25e3))) continue;
+      const first = !c;
+      PPS.set(g.id, { ...(c || { by: new Map(), names: new Map(), tm: {}, plays: [] }), busy: true, at: now });
+      fetch(`https://site.api.espn.com/apis/site/v2/sports/hockey/nhl/summary?event=${g.id}`).then((r) => r.json()).then((j) => {
+        const v = ppsParse(j);
+        // the first look at a game: its goals so far are history, not news
+        if (first) v.plays.forEach((p) => { if (p.goal) goalSeen.add(p.id); });
+        const apply = () => { const prev = PPS.get(g.id); PPS.set(g.id, { ...v, at: Date.now(), busy: false }); if (!first) ppCheck(g, prev, v); render(); autoSettle(); };
+        if (first || v.final || force) apply(); else setTimeout(apply, tvDelay() * 1000);
+      }).catch(() => { const c2 = PPS.get(g.id); if (c2) c2.busy = false; });
+    }
+  }
+  setInterval(() => loadPPS(), 15000);
+  // what changed for the room's props since the last look: goals get the horn, shots get a quick note
+  function ppCheck(g, prev, v) {
+    const props = [];
+    for (const b of S.bets.values()) {
+      if (b.status !== "open") continue;
+      const sels = b.kind === "parlay" ? (Array.isArray(b.legSel) ? b.legSel : []) : [b.sel];
+      sels.forEach((sl) => { if (sl && isPP(sl.m) && String(sl.g) === g.id) props.push({ b, sl }); });
+    }
+    const seen = new Set((prev.plays || []).map((p) => p.id));
+    for (const p of v.plays) {
+      if (!p.goal || seen.has(p.id) || goalSeen.has(p.id)) continue;
+      const pick = props.find(({ sl }) => ["g", "a", "pts"].includes(ppStat(sl.m)) && p.who.some((w) => sameName(w.nm, sl.p && sl.p.nm) && (ppStat(sl.m) !== "g" || w.type === "scorer") && (ppStat(sl.m) !== "a" || w.type === "assister")));
+      if (pick) hockeyGoal(g, null, pick.b, null, p);
+    }
+    for (const { b, sl } of props) {
+      if (ppStat(sl.m) !== "sog") continue;
+      const was = ppRow(prev, sl.p), now = ppRow(v, sl.p); if (!was || !now || now.sog <= was.sog) continue;
+      const l = sl.l ?? 2.5; toast(`🏒 ${sl.p.nm} shot on goal · ${now.sog} SOG${sl.s !== "u" && now.sog <= l ? ` · ${Math.floor(l) + 1 - now.sog} to go` : ""}`);
+    }
+  }
   function evalTd(sel, g) {
     const d = TDP.get(g.id), tds = d ? d.plays : [], me = normNm(sel.p && sel.p.nm), fin = g.st === "post" && !!(d && d.final);
     if (sel.m === "td") {
@@ -3052,6 +3310,7 @@ body.phone #toast { bottom: calc(96px + env(safe-area-inset-bottom)); max-width:
     const g = gameOf(sel);
     if (!g || g.st === "pre" || g.a.sc == null || g.h.sc == null) return null;
     if (isTd(sel.m)) return evalTd(sel, g);
+    if (isPP(sel.m)) return evalPP(sel, g);
     const a = g.a.sc, h = g.h.sc, diff = sel.s === "a" ? a - h : h - a;
     let m;
     if (sel.m === "ml") m = diff;
@@ -3236,7 +3495,7 @@ body.phone #toast { bottom: calc(96px + env(safe-area-inset-bottom)); max-width:
     const s = l.sel, g = s ? gameOf(s) : null;
     if (!g) return "";
     if (g.st === "pre") return `<span class="ld"><em>${esc(startLabel(g.t))}</em></span>`;
-    const ev = l.ev, td = isTd(s.m), mine = s.m === "tot" || td ? null : s.s, opp = mine === "a" ? "h" : "a";
+    const ev = l.ev, td = isTd(s.m) || isPP(s.m), mine = s.m === "tot" || td ? null : s.s, opp = mine === "a" ? "h" : "a";
     const sc = td ? "" : mine ? `<b>${esc(g[mine].ab)} ${g[mine].sc}</b>–${g[opp].sc} ${esc(g[opp].ab)}` : `${esc(g.a.ab)} ${g.a.sc}–${g.h.sc} ${esc(g.h.ab)} · <b>${g.a.sc + g.h.sc}</b>/${s.l}`;
     const cls = l.st === "hit" ? "w" : l.st === "miss" ? "l" : ev ? (ev.res === "W" ? "w" : ev.res === "L" ? "l" : "e") : "";
     const how = l.st === "hit" ? "Hit" : l.st === "miss" ? "Missed" : ev ? ev.txt.replace(/^Final · /, "") : "";
@@ -3247,7 +3506,7 @@ body.phone #toast { bottom: calc(96px + env(safe-area-inset-bottom)); max-width:
     const s = l.sel, g = s ? gameOf(s) : null;
     if (!g) return { txt: "", cls: "" };
     if (g.st === "pre") return { txt: startLabel(g.t), cls: "" };
-    const ev = l.ev, td = isTd(s.m), mine = s.m === "tot" || td ? null : s.s, opp = mine === "a" ? "h" : "a";
+    const ev = l.ev, td = isTd(s.m) || isPP(s.m), mine = s.m === "tot" || td ? null : s.s, opp = mine === "a" ? "h" : "a";
     const sc = td ? "" : mine ? `${g[mine].ab} ${g[mine].sc}–${g[opp].sc}` : `${g.a.sc + g.h.sc}/${s.l}`;
     const how = l.st ? (l.st === "hit" ? "Hit" : "Missed") : ev ? ev.txt.replace(/^Final · /, "") : "";
     return { txt: [sc, g.st === "post" ? "Final" : g.d, how].filter(Boolean).join(" · "), cls: !l.st && ev ? (ev.res === "W" ? "lw" : ev.res === "L" ? "ll" : "le") : "" };
@@ -3302,7 +3561,7 @@ body.phone #toast { bottom: calc(96px + env(safe-area-inset-bottom)); max-width:
   const personName = (b) => (isMe(b) ? S.hostName || "You" : whoName(b));
   const personCol = (b) => (isMe(b) ? "#d4ff3a" : b.who === "guest" ? guestCol(whoName(b)) : WHO_COL[b.who] || "#ff9f43");
   const normPick = (s) => String(s || "").toLowerCase().replace(/[−–—]/g, "-").replace(/[^a-z0-9.+\-/ ]/g, "").replace(/\s+/g, " ").trim();
-  const selKey = (s) => (s && s.g != null ? [s.g, s.m, s.s, isTd(s.m) ? normNm(s.p && s.p.nm) : s.m === "sp" || s.m === "tot" ? (s.l == null ? "" : Number(s.l)) : ""].join("|") : null);
+  const selKey = (s) => (s && s.g != null ? [s.g, s.m, s.s, isTd(s.m) ? normNm(s.p && s.p.nm) : isPP(s.m) ? normNm(s.p && s.p.nm) + "@" + Number(s.l) : s.m === "sp" || s.m === "tot" ? (s.l == null ? "" : Number(s.l)) : ""].join("|") : null);
   function rideKey(b) {
     if (b.kind === "parlay") {
       const legs = Array.isArray(b.legs) ? b.legs : [], sels = Array.isArray(b.legSel) ? b.legSel : [];
@@ -3311,7 +3570,7 @@ body.phone #toast { bottom: calc(96px + env(safe-area-inset-bottom)); max-width:
     return selKey(b.sel) || "T:" + normPick(b.pick);
   }
   // which side of which game a single bet is on: a team (spread or moneyline) or the total
-  const sideKey = (b) => (b.kind === "parlay" || !b.sel || b.sel.g == null || isTd(b.sel.m) ? null : { g: String(b.sel.g), k: b.sel.m === "tot" ? "tot" : "team", s: b.sel.s });
+  const sideKey = (b) => (b.kind === "parlay" || !b.sel || b.sel.g == null || isTd(b.sel.m) || isPP(b.sel.m) ? null : { g: String(b.sel.g), k: b.sel.m === "tot" ? "tot" : "team", s: b.sel.s });
   const against = (x, y) => { const p = sideKey(x), q = sideKey(y); return !!(p && q && p.g === q.g && p.k === q.k && p.s !== q.s); };
   // a parlay leg's key: the same one a straight bet on that pick gets
   const legKey = (b, i) => selKey((Array.isArray(b.legSel) ? b.legSel : [])[i]) || "T:" + normPick((b.legs || [])[i]);
@@ -3449,7 +3708,7 @@ body.phone #toast { bottom: calc(96px + env(safe-area-inset-bottom)); max-width:
     }
     const pos = [...by.values()];
     for (const p of pos) { if (!p.pick) p.pick = p.entries[0].pick; const g = gameOf(p.sel); if (g && p.sel.m) p.pick = mkLabel(g, p.sel.m, p.sel.s, p.sel.l, p.sel.p).replace(/\s*·\s*[A-Z0-9]+\/[A-Z0-9]+$/, ""); p.people = new Set(p.entries.map((e) => personKey(e.b))); p.units = p.entries.reduce((a, e) => a + (e.leg == null ? e.b.units : e.b.units * 0.5), 0); }
-    const side = (p) => (p.sel && p.sel.g != null && !isTd(p.sel.m) ? { k: p.sel.m === "tot" ? "tot" : "team", s: p.sel.s } : null);
+    const side = (p) => (p.sel && p.sel.g != null && !isTd(p.sel.m) && !isPP(p.sel.m) ? { k: p.sel.m === "tot" ? "tot" : "team", s: p.sel.s } : null);
     const used = new Set(), rows = [];
     pos.sort((x, y) => y.people.size - x.people.size || y.units - x.units);
     for (const p of pos) {
@@ -3492,7 +3751,7 @@ body.phone #toast { bottom: calc(96px + env(safe-area-inset-bottom)); max-width:
   const tapAttrs = (ids, title) => ` data-ids="${esc(ids.join(","))}" data-title="${esc(title)}"`;
   function posRow(p, g) {
     const st = posState(p, g), hb = p.sel ? hasBall(p.sel) : null;
-    const meter = st.ev && !st.ev.fin && g.st === "in" && !isTd(p.sel.m) ? meterHtml(p.sel, st.ev) : "";
+    const meter = st.ev && !st.ev.fin && g.st === "in" && !isTd(p.sel.m) && !isPP(p.sel.m) ? meterHtml(p.sel, st.ev) : "";
     const avs = [...new Map(p.entries.map((e) => [personKey(e.b), e.b])).values()].map((b) => avHtml(b)).join("");
     const hs = p.sel && p.sel.p && p.sel.p.hs ? `<img class="rb-hs" src="${esc(p.sel.p.hs)}" alt="" loading="lazy" referrerpolicy="no-referrer" onerror="this.remove()">` : "";
     const nP = p.people ? p.people.size : 1, crew = nP >= 3 ? " squad" : nP === 2 ? " duo" : "";
@@ -3525,6 +3784,7 @@ body.phone #toast { bottom: calc(96px + env(safe-area-inset-bottom)); max-width:
   // the hero game's scoring plays from the game summary, behind the same TV delay as everything else
   const SUMM = new Map();
   function heroPlays(g) {
+    if (g.sport === "NHL") { loadPPS(); return null; }
     const c = SUMM.get(g.id), t = Date.now();
     if (g.st === "pre" || !ESPN[g.sport] || (c && (c.busy || t - c.at < (g.st === "post" ? 600e3 : 45e3)))) return c ? c.plays : null;
     SUMM.set(g.id, { ...(c || {}), plays: c ? c.plays : null, at: t, busy: true });
@@ -3536,12 +3796,14 @@ body.phone #toast { bottom: calc(96px + env(safe-area-inset-bottom)); max-width:
     return c ? c.plays : null;
   }
   function scoringHtml(g) {
+    if (g.sport === "NHL") return rinkGoals(g);
     const plays = heroPlays(g); if (!plays || !plays.length) return "";
     const tmOf = (id) => (String(g.a.id) === id ? g.a : String(g.h.id) === id ? g.h : null);
     return `<div class="rb-scp"><h4>Scoring</h4>${plays.slice(-4).reverse().map((p, i) => { const t = tmOf(p.tm);
       return `<div class="r${i === 0 ? " new" : ""}" style="--c:${esc(t ? bright(t) : "#8a94a8")}">${t && t.lg ? `<img src="${esc(t.lg)}" alt="" referrerpolicy="no-referrer">` : "<span></span>"}<span class="q num">Q${esc(p.q ?? "")} ${esc(p.clk)}</span><span class="tx"><b>${esc(p.type)}</b>${esc(p.text)}</span><span class="s num">${esc(g.a.ab)} ${p.a ?? ""} · ${esc(g.h.ab)} ${p.h ?? ""}</span></div>`; }).join("")}</div>`;
   }
   function fieldHtml(g) {
+    if (g.sport === "NHL" && g.st !== "pre") return rinkHtml(g);
     const sit = g.sit || {}, fb = g.sport === "NFL" || g.sport === "CFB";
     const col = (t) => esc(bright(t));
     if (g.st === "pre") {
@@ -3589,6 +3851,7 @@ body.phone #toast { bottom: calc(96px + env(safe-area-inset-bottom)); max-width:
   function legNowOdds(sel, g) {
     if (!sel || !g) return null;
     if (isTd(sel.m)) { const od = sel.p && propOdds(g, sel.p, sel.m); return od ? od.o : null; }
+    if (isPP(sel.m)) return null;
     if (sel.m === "ml") return g.ml ? g.ml[sel.s] : null;
     if (sel.m === "sp") return g.sp && g.sp[sel.s] && g.sp[sel.s].l === sel.l ? g.sp[sel.s].o : null;
     if (sel.m === "tot") return g.tot && g.tot.l === sel.l ? g.tot[sel.s] : null;
@@ -4016,7 +4279,7 @@ body.phone #toast { bottom: calc(96px + env(safe-area-inset-bottom)); max-width:
     for (const b of S.bets.values()) {
       if (b.kind !== "parlay" || b.status !== "open") { legSeen.delete(b.id); continue; }
       const legs = legsOf(b);
-      const cur = legs.map((l) => l.st || (l.sel && (!gameOf(l.sel) || (isTd(l.sel.m) && !TDP.get(String(l.sel.g)))) ? "?" : "-"));
+      const cur = legs.map((l) => l.st || (l.sel && (!gameOf(l.sel) || ((isTd(l.sel.m) && !TDP.get(String(l.sel.g))) || (isPP(l.sel.m) && !PPS.get(String(l.sel.g))))) ? "?" : "-"));
       const prev = legSeen.get(b.id); legSeen.set(b.id, cur);
       if (!prev || prev.length !== cur.length) continue;
       const i = cur.findIndex((s, j) => (s === "hit" || s === "miss") && prev[j] === "-");
@@ -4191,7 +4454,7 @@ body.phone #toast { bottom: calc(96px + env(safe-area-inset-bottom)); max-width:
   // ---------- sheets ----------
   function openSheet(id) { $(id).hidden = false; }
   // keep every open screen current: when a new version is up, reload it (never mid-form or mid-animation)
-  const BUILD = "20261013180916";
+  const BUILD = "20261013201749";
   function checkBuild() {
     if (BUILD === "dev") return;
     fetch("version.json?t=" + Date.now(), { cache: "no-store" }).then((r) => (r.ok ? r.json() : null)).then((j) => {
@@ -4217,7 +4480,21 @@ body.phone #toast { bottom: calc(96px + env(safe-area-inset-bottom)); max-width:
   const F = { sel: null, legs: [], sport: "All", q: "", openG: null, custom: false, oddsTouched: false };
   const kindNow = () => document.querySelector('input[name="kind"]:checked').value;
   const isTd = (m) => m === "td" || m === "ftd";
+  const isPP = (m) => typeof m === "string" && m.startsWith("pp_");
+  const ppStat = (m) => String(m).slice(3);
+  const PP_WORD = { g: ["goal", "goals"], a: ["assist", "assists"], pts: ["point", "points"], sog: ["SOG", "SOG"], sv: ["save", "saves"] };
+  const PP_DEF = { g: 0.5, a: 0.5, pts: 0.5, sog: 2.5, sv: 24.5 };
+  const PP_MK = [["pp_g", "Goal scorer"], ["pp_a", "Assists"], ["pp_pts", "Points"], ["pp_sog", "Shots on goal"], ["pp_sv", "Goalie saves"]];
+  function ppLabel(p, m, s, l) {
+    const st = ppStat(m), w = PP_WORD[st] || [st, st], nm = p ? p.nm : "Player";
+    if (l == null) l = PP_DEF[st] ?? 0.5;
+    if (st === "g" && s !== "u" && l === 0.5) return nm + " anytime goal";
+    if (s === "u") return `${nm} u${trimL(l)} ${w[1]}`;
+    if (st === "sog" || st === "sv") return `${nm} o${trimL(l)} ${w[1]}`;
+    const n = Math.floor(l) + 1; return `${nm} ${n}+ ${n === 1 ? w[0] : w[1]}`;
+  }
   function mkLabel(g, m, s, l, p) {
+    if (isPP(m)) return ppLabel(p, m, s, l);
     if (isTd(m)) return (p ? p.nm : "Player") + (m === "ftd" ? " first TD" : " anytime TD");
     if (m === "ml") return (s === "a" ? g.a : g.h).nm + " ML";
     if (m === "sp") return (s === "a" ? g.a : g.h).nm + " " + (l == null ? "spread" : fLine(l));
@@ -4303,6 +4580,8 @@ body.phone #toast { bottom: calc(96px + env(safe-area-inset-bottom)); max-width:
         if (curBook() === "PM") pmLoad(g);
         const btn = (m, s) => { const p = mkPrefill(g, m, s); return `<button type="button" class="mkt${isOn(g, m, s) ? " on" : ""}" data-pick="${esc(g.id)}|${m}|${s}"><span>${esc(mkLabel(g, m, s, p.l))}</span><b>${p.o ? fOdds(p.o) : "—"}${p.c ? `<i class="pmc">${Math.round(p.c * 100)}¢</i>` : ""}</b></button>`; };
         mk = `<div class="mkts">${btn("ml", "a")}${btn("ml", "h")}${btn("sp", "a")}${btn("sp", "h")}${btn("tot", "o")}${btn("tot", "u")}</div>`;
+        if (g.sport === "NHL")
+          mk += `<div class="tdmk ppmk">${PP_MK.map(([m, l]) => `<button type="button" class="mkt${F.tdG === g.id && F.tdM === m ? " on" : ""}" data-td="${esc(g.id)}|${m}"><span>${l}</span><b>${F.tdG === g.id && F.tdM === m ? "▾" : "›"}</b></button>`).join("")}</div>${F.tdG === g.id && isPP(F.tdM) ? tdPanel(g) : ""}`;
         if (g.sport === "CFB" || g.sport === "NFL")
           mk += `<div class="tdmk">${[["td", "Anytime TD scorer"], ["ftd", "First TD scorer"]].map(([m, l]) => `<button type="button" class="mkt${F.tdG === g.id && F.tdM === m ? " on" : ""}" data-td="${esc(g.id)}|${m}"><span>${l}</span><b>${F.tdG === g.id && F.tdM === m ? "▾" : "›"}</b></button>`).join("")}</div>${F.tdG === g.id ? tdPanel(g) : ""}`;
       }
@@ -4312,15 +4591,15 @@ body.phone #toast { bottom: calc(96px + env(safe-area-inset-bottom)); max-width:
     }).join("");
   }
   // TD scorer picker: both teams' skill players from ESPN rosters, with headshots
-  const ROSTER = new Map(), TD_POS = ["RB", "WR", "TE", "QB", "FB"];
+  const ROSTER = new Map(), TD_POS = ["RB", "WR", "TE", "QB", "FB"], NHL_POS = ["C", "LW", "RW", "D", "G"];
   function loadRoster(sport, tid) {
     const k = sport + "|" + tid; if (ROSTER.has(k)) return ROSTER.get(k);
     const pr = fetch(`https://site.api.espn.com/apis/site/v2/sports/${ESPN[sport]}/teams/${tid}/roster`).then((r) => r.json()).then((j) => {
       const items = []; for (const grp of j.athletes || []) for (const a of grp.items || (grp.displayName ? [grp] : [])) {
-        const pos = (a.position && a.position.abbreviation) || ""; if (!TD_POS.includes(pos)) continue;
+        const pos = (a.position && a.position.abbreviation) || ""; if (!(sport === "NHL" ? NHL_POS : TD_POS).includes(pos)) continue;
         items.push({ id: String(a.id), nm: a.displayName || a.fullName || "", j: a.jersey || "", pos, hs: (a.headshot && a.headshot.href) || "", tm: String(tid) });
       }
-      items.sort((x, y) => TD_POS.indexOf(x.pos) - TD_POS.indexOf(y.pos) || Number(x.j || 99) - Number(y.j || 99));
+      const PO = sport === "NHL" ? NHL_POS : TD_POS; items.sort((x, y) => PO.indexOf(x.pos) - PO.indexOf(y.pos) || Number(x.j || 99) - Number(y.j || 99));
       ROSTER.set(k, items); if (!$("#addSheet").hidden) renderGames(); return items;
     }).catch(() => { ROSTER.delete(k); return []; });
     ROSTER.set(k, pr); return pr;
@@ -4368,16 +4647,16 @@ body.phone #toast { bottom: calc(96px + env(safe-area-inset-bottom)); max-width:
     const q = (F.tdQ || "").trim().toLowerCase();
     return ["a", "h"].map((side) => {
       const r = rosterOf(g, side); if (!r) return `<div class="tdl-h">${esc(g[side].nm)}</div><div class="gnone">Loading players…</div>`;
-      const list = r.filter((p) => !q || p.nm.toLowerCase().includes(q) || p.j === q).map((p) => ({ p, od: propOdds(g, p, F.tdM) }));
+      const list = r.filter((p) => (!q || p.nm.toLowerCase().includes(q) || p.j === q) && (!isPP(F.tdM) || (F.tdM === "pp_sv") === (p.pos === "G"))).map((p) => ({ p, od: propOdds(g, p, F.tdM) }));
       if (list.some((x) => x.od)) list.sort((x, y) => (x.od ? dec(x.od.o) : 999) - (y.od ? dec(y.od.o) : 999));
       return `<div class="tdl-h">${esc(g[side].nm)}</div>` + (list.length ? list.slice(0, 40).map(({ p, od }) => `<button type="button" class="tdpl${kindNow() === "parlay" && F.legs.some((x) => x.g === g.id && x.m === F.tdM && x.p && x.p.id === p.id) ? " on" : ""}" data-tdp="${esc(g.id)}|${side}|${esc(p.id)}">${p.hs ? `<img src="${esc(p.hs)}" alt="" loading="lazy">` : '<span class="ph"></span>'}<b>${esc(p.nm)}</b><small>${esc([p.j ? "#" + p.j : "", p.pos].filter(Boolean).join(" · "))}</small>${od ? `<em class="tdodds" title="${od.book === "DK" ? "DraftKings" : "FanDuel"}">${fOdds(od.o)}${od.book !== curBook() ? `<i>${od.book}</i>` : ""}</em>` : ""}</button>`).join("") : '<div class="gnone">No match</div>');
     }).join("");
   }
   function tdPanel(g) {
     for (const side of ["a", "h"]) if (!rosterOf(g, side)) loadRoster(g.sport, g[side].id);
-    loadProps(g);
-    const v = PROPS.get(g.id);
-    const note = !S.oddsKey ? "Add your free odds key in Settings to see FanDuel and DraftKings prices here." : v && v.then ? "Getting prices…" : v && v.err === "key" ? "That odds key didn't work. Check it in Settings." : v && v.err ? "Couldn't get prices right now (out of requests?). Type the odds from your slip." : v && v.none ? "No player prop prices posted for this game yet." : "";
+    if (g.sport !== "NHL") loadProps(g);
+    const v = g.sport === "NHL" ? { map: new Map() } : PROPS.get(g.id);
+    const note = g.sport === "NHL" ? "Pick the player, then set the line and over/under to match your slip." : !S.oddsKey ? "Add your free odds key in Settings to see FanDuel and DraftKings prices here." : v && v.then ? "Getting prices…" : v && v.err === "key" ? "That odds key didn't work. Check it in Settings." : v && v.err ? "Couldn't get prices right now (out of requests?). Type the odds from your slip." : v && v.none ? "No player prop prices posted for this game yet." : "";
     return `<div class="tdp">${note ? `<div class="tdnote">${esc(note)}</div>` : ""}<input type="text" data-tdq autocomplete="off" placeholder="Search a player or number" value="${esc(F.tdQ || "")}" aria-label="Search a player"><div class="tdlist">${tdList(g)}</div></div>`;
   }
   const dec = (o) => (o > 0 ? 1 + o / 100 : 1 + 100 / Math.abs(o));
@@ -4404,6 +4683,7 @@ body.phone #toast { bottom: calc(96px + env(safe-area-inset-bottom)); max-width:
       $("#selText").textContent = g ? mkLabel(g, F.sel.m, F.sel.s, F.sel.l, F.sel.p) : "";
       $("#selGame").textContent = g ? `${g.sport} · ${g.a.nm} @ ${g.h.nm} · ${g.st === "in" ? "live now" : startLabel(g.t)}` : "";
       $("#lineWrap").hidden = F.sel.m === "ml" || isTd(F.sel.m);
+      $("#ouSeg").hidden = !isPP(F.sel.m); document.querySelectorAll("#ouSeg [data-ou]").forEach((x) => x.setAttribute("aria-pressed", String(x.dataset.ou === F.sel.s)));
     }
     $("#legCount").textContent = F.legs.length ? "· " + F.legs.length + " picked" : "· tap markets below or add your own";
     $("#legList").innerHTML = F.legs.map((x, i) => `<div class="legrow"><span class="lt">${esc(legText(x))}</span>
@@ -4422,10 +4702,11 @@ body.phone #toast { bottom: calc(96px + env(safe-area-inset-bottom)); max-width:
       const od = propOdds(g, pl, F.tdM);
       if (kindNow() === "parlay") {   // a parlay keeps the list open so you can stack scorers
         const i = F.legs.findIndex((x) => x.g === gid && x.m === F.tdM && x.p && x.p.id === pl.id);
-        if (i >= 0) F.legs.splice(i, 1); else F.legs.push({ g: gid, m: F.tdM, s: side, l: null, p: pl, o: od ? od.o : null, sport: g.sport });
+        if (i >= 0) F.legs.splice(i, 1); else F.legs.push(isPP(F.tdM) ? { g: gid, m: F.tdM, s: "o", l: PP_DEF[ppStat(F.tdM)], p: pl, o: null, sport: g.sport } : { g: gid, m: F.tdM, s: side, l: null, p: pl, o: od ? od.o : null, sport: g.sport });
         parlayOdds(); renderPicker(); renderGames(); updatePreview(); return;
       }
-      F.sel = { g: gid, m: F.tdM, s: side, l: null, p: pl }; F.custom = false; F.tdG = null;
+      F.sel = isPP(F.tdM) ? { g: gid, m: F.tdM, s: "o", l: PP_DEF[ppStat(F.tdM)], p: pl } : { g: gid, m: F.tdM, s: side, l: null, p: pl }; F.custom = false; F.tdG = null;
+      if (isPP(F.sel.m)) $("#f-line").value = String(F.sel.l);
       if (od) { setOdds(od.o); const r = document.querySelector(`input[name="book"][value="${od.book}"]`); if (r) r.checked = true; } else { $("#f-odds").value = ""; S.sign = 1; }
       F.oddsTouched = false;
       renderPicker(); updatePreview(); $("#f-odds").focus(); return;
@@ -4447,13 +4728,14 @@ body.phone #toast { bottom: calc(96px + env(safe-area-inset-bottom)); max-width:
   $("#g-q").addEventListener("input", (e) => { F.q = e.target.value; renderGames(); });
   document.querySelectorAll('input[name="book"]').forEach((r) => r.addEventListener("change", () => {
     if (!F.tdG) { renderGames(); if (curBook() !== "PM") $("#g-fresh").textContent = S.slateAt ? "· lines via ESPN, " + tm(S.slateAt) : ""; }
-    if (F.sel && !isTd(F.sel.m) && kindNow() === "straight") { const g = S.games.get(F.sel.g); if (g) { const p = mkPrefill(g, F.sel.m, F.sel.s); if (p.o) { if (F.sel.m !== "ml" && p.l != null) { F.sel.l = p.l; $("#f-line").value = String(p.l); } setOdds(p.o); renderPicker(); updatePreview(); } } }
+    if (F.sel && !isTd(F.sel.m) && !isPP(F.sel.m) && kindNow() === "straight") { const g = S.games.get(F.sel.g); if (g) { const p = mkPrefill(g, F.sel.m, F.sel.s); if (p.o) { if (F.sel.m !== "ml" && p.l != null) { F.sel.l = p.l; $("#f-line").value = String(p.l); } setOdds(p.o); renderPicker(); updatePreview(); } } }
     if (F.tdG) renderGames(); else if (F.sel && isTd(F.sel.m)) { const g = S.games.get(F.sel.g), od = g && propOdds(g, F.sel.p, F.sel.m); if (od && od.book === curBook()) { setOdds(od.o); updatePreview(); } } }));
   $("#g-list").addEventListener("input", (e) => { if (!e.target.matches("[data-tdq]")) return; F.tdQ = e.target.value; const g = S.games.get(F.tdG), box = e.target.parentElement.querySelector(".tdlist"); if (g && box) box.innerHTML = tdList(g); });
   $("#g-sports").addEventListener("change", (e) => { if (e.target.name === "gsport") { F.sport = e.target.value; renderGames(); } });
   $("#customToggle").addEventListener("click", () => { F.custom = true; F.sel = null; renderPicker(); updatePreview(); $("#f-pick").focus(); });
   $("#selClear").addEventListener("click", () => { F.sel = null; renderPicker(); updatePreview(); });
-  $("#f-line").addEventListener("input", (e) => { if (F.sel) { const v = num(e.target.value); F.sel.l = v; $("#selText").textContent = mkLabel(S.games.get(F.sel.g), F.sel.m, F.sel.s, v); } });
+  $("#f-line").addEventListener("input", (e) => { if (F.sel) { const v = num(e.target.value); F.sel.l = v; $("#selText").textContent = mkLabel(S.games.get(F.sel.g), F.sel.m, F.sel.s, v, F.sel.p); } });
+  $("#ouSeg").addEventListener("click", (e) => { const b = e.target.closest("[data-ou]"); if (!b || !F.sel) return; F.sel.s = b.dataset.ou; renderPicker(); updatePreview(); });
   $("#legList").addEventListener("click", (e) => { const b = e.target.closest("[data-rm]"); if (!b) return; F.legs.splice(Number(b.dataset.rm), 1); parlayOdds(); renderPicker(); updatePreview(); });
   $("#legList").addEventListener("input", (e) => {
     const i = e.target.dataset.ll; if (i == null) return;
@@ -4529,7 +4811,7 @@ body.phone #toast { bottom: calc(96px + env(safe-area-inset-bottom)); max-width:
     saveGuests(guestList().filter((g) => guestKey(g) !== x.dataset.rmguest)); toast(`Removed ${n || "that guest"}. Their bets stay.`);
   });
   // tail or fade somebody's bet: the bet form opens with their pick (or the other side of it) filled in, yours to confirm
-  const fadeable = (b) => b.kind !== "parlay" && b.sel && b.sel.g != null && !isTd(b.sel.m) && S.games.has(String(b.sel.g));
+  const fadeable = (b) => b.kind !== "parlay" && b.sel && b.sel.g != null && !isTd(b.sel.m) && !isPP(b.sel.m) && S.games.has(String(b.sel.g));
   const tailRow = (b) => (isMe(b) || b.synth || b.status !== "open" ? "" : `<div class="actions"><span class="lbl">Ride it</span><button type="button" class="btn sm primary" data-act="tail">Tail ${esc(personName(b))}</button>${fadeable(b) ? '<button type="button" class="btn sm" data-act="fade">Fade</button>' : ""}</div>`);
   const flipSel = (x) => ({ ...x, s: x.m === "tot" ? (x.s === "o" ? "u" : "o") : x.s === "a" ? "h" : "a", l: x.m === "sp" && x.l != null ? -x.l : x.l });
   function lineOdds(g, x) {
@@ -4588,7 +4870,7 @@ body.phone #toast { bottom: calc(96px + env(safe-area-inset-bottom)); max-width:
         if (F.sel.m !== "ml" && !isTd(F.sel.m) && F.sel.l == null) { err.textContent = "Add the line from your slip, like −3.5 or 47.5."; return; }
         data.pick = mkLabel(g, F.sel.m, F.sel.s, F.sel.l, F.sel.p); data.sport = g.sport;
         data.sel = { g: g.id, m: F.sel.m, s: F.sel.s, l: F.sel.l, sp: g.sport, t: g.t }; starts.push(g.t);
-        if (isTd(F.sel.m)) data.sel.p = F.sel.p;
+        if (isTd(F.sel.m) || isPP(F.sel.m)) data.sel.p = F.sel.p;
       } else if (F.custom) {
         data.pick = $("#f-pick").value.trim().slice(0, 80);
         if (!data.pick) { err.textContent = "Add the pick, like “Judge 1+ HR”."; return; }
@@ -6287,7 +6569,7 @@ body.phone #toast { bottom: calc(96px + env(safe-area-inset-bottom)); max-width:
     }
     return r;
   }
-  const helps = (s, e) => (!e.side || isTd(s.m) ? 0 : s.m === "tot" ? (e.noTot ? 0 : s.s === "o" ? 1 : -1) : e.side === s.s ? 1 : -1);
+  const helps = (s, e) => (!e.side || isTd(s.m) || isPP(s.m) ? 0 : s.m === "tot" ? (e.noTot ? 0 : s.s === "o" ? 1 : -1) : e.side === s.s ? 1 : -1);
   const EV_RANK = { td: 6, hr: 6, goal: 6, safety: 6, turnover: 6, run: 4, fg: 4, redzone: 3, crunch: 3, half: 2 };
   // ---------- play card: what happened, who did it and how, big, then the clip ----------
   const PC_TYPE = { td: "Touchdown", fg: "Field goal", safety: "Safety", turnover: "Turnover", redzone: "Red zone", hr: "Home run", run: "Run scores", goal: "Goal" };
@@ -6380,7 +6662,7 @@ body.phone #toast { bottom: calc(96px + env(safe-area-inset-bottom)); max-width:
     const nm = bcName(lead && lead.nm), bets = pcBets(g, b);
     const meta = lead ? [lead.j ? "#" + lead.j : "", lead.pos, tm ? tm.nm || tm.ab : ""].filter(Boolean) : [];
     const assist = other ? (other.pos === "QB" && /pass/i.test(kind + " " + text) ? "Pass from " : "With ") + other.nm : "";
-    const top = ov ? "TD scorer" : e.ev === "redzone" ? "Red zone" : e.ev === "turnover" ? "Turnover" : "Scoring play";
+    const top = ov ? ov.top || "TD scorer" : e.ev === "redzone" ? "Red zone" : e.ev === "turnover" ? "Turnover" : "Scoring play";
     box.dataset.g = String(g.id); box.dataset.who = lead ? lead.sh || lead.nm : "";
     box.innerHTML = `<div class="bc-top"><span class="net"><i></i>Sweat Zone</span><span class="sp">${esc(top)}</span>${g.d ? `<span class="clk">${esc(g.d)}</span>` : ""}</div>
       <div class="bc-art${lead && lead.hs ? " hs" : ""}">${lead && lead.j ? `<div class="bc-num">${esc(lead.j)}</div>` : ""}<div class="bc-glow"></div>
@@ -6707,6 +6989,35 @@ body.phone #toast { bottom: calc(96px + env(safe-area-inset-bottom)); max-width:
     return t.slice(0, 3);
   }
   // the card: same broadcast frame as the scoring play, his headshot cut out, the numbers counting up
+  const goalAt = new Map(), hgTries = new Map(), hgNow = () => Date.now();
+  function hockeyGoal(g, e, b, then, play) {
+    // find the goal on the box score (fetch it now if the scoreboard beat it there)
+    const side = e && e.side, team = side ? g[side] : null;
+    const pickPlay = () => { const d = PPS.get(g.id); if (!d) return null; const gl = d.plays.filter((p) => p.goal && !goalSeen.has(p.id) && (!team || p.tm === String(team.id))); return gl[gl.length - 1] || null; };
+    const go = (p) => {
+      if (p) goalSeen.add(p.id);
+      const sd = p ? (String(g.a.id) === p.tm ? "a" : "h") : side || "h";
+      const sc = p ? p.who.find((w) => w.type === "scorer") || p.who[0] : null, as = p ? p.who.filter((w) => w.type === "assister") : [];
+      const per = p ? (p.pd > 3 ? "OT" : ["", "1st", "2nd", "3rd"][p.pd] || "") + " · " + p.clk : "";
+      const kind = p && /power/i.test(p.str) ? "Power play goal" : p && /short/i.test(p.str) ? "Shorthanded goal" : p && /empty/i.test(p.text) ? "Empty netter" : "";
+      // the same broadcast card as a touchdown: the scorer's cutout, GOAL, assists, the room's bets, the scorebug
+      const ov = { top: per || "Goal", type: kind, text: p ? p.text : "", people: [...(sc ? [{ nm: sc.nm + (sc.n ? "" : ""), hs: sc.hs, j: "", pos: "" }] : []), ...as.map((a) => ({ nm: a.nm, hs: a.hs, j: "", pos: "" }))] };
+      document.body.classList.add("goal-lamp"); setTimeout(() => document.body.classList.remove("goal-lamp"), 8500);
+      snSound("goal_horn", 1, 0);
+      showPlayCard(g, { ev: "goal", side: sd, tag: "Goal" }, b, then, 7600, ov);
+    };
+    if (PHONE()) { if (then) setTimeout(then, 0); return; }
+    // one card per goal: the scoreboard and the box score can both report it
+    const key = g.id + "|" + (play ? play.tm : team ? team.id : "");
+    if (!play && hgNow() - (goalAt.get(key) || 0) < 90e3) { if (then) setTimeout(then, 0); return; }
+    goalAt.set(key, hgNow());
+    if (cardBusy && (hgTries.get(key) || 0) < 8) { hgTries.set(key, (hgTries.get(key) || 0) + 1); setTimeout(() => hockeyGoal(g, e, b, then, play), 1500); return; }
+    hgTries.delete(key);
+    if (play) return go(play);
+    const p0 = pickPlay(); if (p0) return go(p0);
+    loadPPS(g); let k = 0;
+    const iv = setInterval(() => { const p = pickPlay(); if (p || ++k > 16) { clearInterval(iv); go(p); } }, 250);
+  }
   function showBcCard(g, tm, html, ms, then) {
     if (PHONE()) { if (then) setTimeout(then, 0); return; }
     const ov = $("#playCard"), box = $("#pcIn"), C = bcCols(tm); cardBusy = true;
@@ -6891,7 +7202,7 @@ body.phone #toast { bottom: calc(96px + env(safe-area-inset-bottom)); max-width:
     const m = slateMode(), n = slateGames();
     el.hidden = !n && slatePin() === "auto";
     el.className = "chip modechip " + m;
-    el.textContent = MODE_LABEL[m] + (n ? ` · ${n} game${n > 1 ? "s" : ""}` : "");
+    el.textContent = (document.body.classList.contains("hockey") ? "Hockey night" : MODE_LABEL[m]) + (n ? ` · ${n} game${n > 1 ? "s" : ""}` : "");
   }
   function autoReact() {
     if (!S.ready) return;
@@ -6962,7 +7273,9 @@ body.phone #toast { bottom: calc(96px + env(safe-area-inset-bottom)); max-width:
         const pool = exactMine.length ? exactMine : poolFor(top.b, k === "mid" ? "hype" : k);
         const P = pickClip(pool) || pickClip(libFor(top.b, ["hype", "vibe"]));
         // a team scores for somebody in the room: the play card, then that team's own edit (or him in their colors)
+        if (e.ev === "goal" && top.g && top.h > 0 && e.side) { const tb = top.b, tg = top.g; hockeyGoal(tg, e, tb, (why) => teamHype(tb, tg, e, why)); return; }
         if (CARD_EVS.has(e.ev) && top.g && top.h > 0 && e.side && ["td", "hr", "goal"].includes(e.ev)) { const tb = top.b, tg = top.g; showPlayCard(tg, e, tb, (why) => teamHype(tb, tg, e, why)); return; }
+        if (e.ev === "goal" && top.g && top.h > 0 && e.side) { hockeyGoal(top.g, e, top.b, null); return; }
         if (CARD_EVS.has(e.ev) && top.g && busy) { // the alert; a touchdown for your side gets a music edit after it, anything else keeps the music going
           const tdb = top.b, mine = e.ev === "td" && top.h > 0;
           showPlayCard(top.g, e, tdb, (why) => { if (mine) tdHype(tdb, why); });
@@ -7051,7 +7364,7 @@ body.phone #toast { bottom: calc(96px + env(safe-area-inset-bottom)); max-width:
   // main sport: CFB, NFL, or auto (NFL on Sunday, Monday and Thursday, college the rest of the week)
   S.focus = S.focus || "auto";
   const etDow = () => ({ Sun: 0, Mon: 1, Tue: 2, Wed: 3, Thu: 4, Fri: 5, Sat: 6 })[new Intl.DateTimeFormat("en-US", { timeZone: "America/New_York", weekday: "short" }).format(new Date())];
-  const focusLeague = () => (S.focus === "CFB" || S.focus === "NFL" ? S.focus : [0, 1, 4].includes(etDow()) ? "NFL" : "CFB");
+  const focusLeague = () => (document.body.classList.contains("hockey") ? "NHL" : S.focus === "CFB" || S.focus === "NFL" ? S.focus : [0, 1, 4].includes(etDow()) ? "NFL" : "CFB");
   function showFocus() { const r = document.querySelector(`input[name="focus"][value="${S.focus}"]`); if (r) r.checked = true; }
   function setFocus(v) { if (v === S.focus) return; S.focus = v; showFocus(); loadTicker(); }
   function tickerOn() { try { return localStorage.getItem("sb-ticker") !== "off"; } catch (e) { return true; } }
@@ -9208,8 +9521,8 @@ body.phone #toast { bottom: calc(96px + env(safe-area-inset-bottom)); max-width:
 
   // ---------- scan a bet slip (Gemini via Firebase AI Logic) ----------
   const SLIP_MODELS = ["gemini-3.5-flash-lite", "gemini-3.8-flash"];
-  const SLIP_PROMPT = "You read screenshots of sportsbook bet slips (usually FanDuel, DraftKings or Polymarket) and extract each bet on them.\nRules:\n- One entry per bet. A parlay is ONE bet with several legs; a straight bet has exactly one leg.\n- odds: the American odds of the whole bet as an integer (e.g. -110, 250). For a parlay, the parlay's total odds.\n- stake: the dollar amount wagered. to_win: the dollar payout profit shown, if any.\n- For each leg: pick = the selection as written (team or player and line); team = the team or player name only;\n  market = \"ml\" (moneyline/to win), \"spread\" (point spread, run line, puck line, alt spread), \"total\" (over/under game total), \"anytime_td\" (anytime touchdown scorer, \"to score a TD\"), \"first_td\" (first touchdown scorer of the game) or \"prop\" (anything else);\n  player = for touchdown scorer bets, the player's full name exactly as written (e.g. \"Bucky Irving\"), else null; for those bets team = the player's team if shown;\n  side = \"over\" or \"under\" for totals, else null; line = the signed number for spreads (e.g. -6.5) or the total number (e.g. 48.5), else null;\n  away and home = the two teams of the game if shown (an \"A @ B\" matchup means A is away, B is home), else null;\n  sport = NFL, CFB, NBA, CBB, MLB, NHL or OTHER, judged from the teams and market.\n- book = \"FD\" for FanDuel, \"DK\" for DraftKings, \"PM\" for Polymarket (a prediction market: prices in cents like 62¢, shares, avg price, Buy / Yes / No), null if you can't tell.\n- Polymarket: price = the price paid per share in cents (e.g. 62 for 62¢; the avg price if shown), and odds = null unless American odds are printed; stake = the amount spent (cost / total); to_win = the profit if it pays (payout minus cost) when shown. The pick is the outcome bought: a team for a moneyline market like \"Bills vs. Rams\", \"Rams -3.5\" for \"Spread: Rams (-3.5)\", \"Over 54.5\" for \"O/U 54.5\"; buying \"No\" on one team of a two-team game means the other team. Take market, line and side from the market title.\n- Use null for anything not visible. Never invent numbers.";
-  const SLIP_SCHEMA = {"type": "OBJECT", "properties": {"bets": {"type": "ARRAY", "items": {"type": "OBJECT", "properties": {"book": {"type": "STRING", "enum": ["FD", "DK", "PM"], "nullable": true}, "price": {"type": "NUMBER", "nullable": true}, "kind": {"type": "STRING", "enum": ["straight", "parlay"]}, "odds": {"type": "INTEGER", "nullable": true}, "stake": {"type": "NUMBER", "nullable": true}, "to_win": {"type": "NUMBER", "nullable": true}, "legs": {"type": "ARRAY", "items": {"type": "OBJECT", "properties": {"pick": {"type": "STRING"}, "team": {"type": "STRING", "nullable": true}, "market": {"type": "STRING", "enum": ["ml", "spread", "total", "anytime_td", "first_td", "prop"]}, "player": {"type": "STRING", "nullable": true}, "side": {"type": "STRING", "enum": ["over", "under"], "nullable": true}, "line": {"type": "NUMBER", "nullable": true}, "odds": {"type": "INTEGER", "nullable": true}, "price": {"type": "NUMBER", "nullable": true}, "away": {"type": "STRING", "nullable": true}, "home": {"type": "STRING", "nullable": true}, "sport": {"type": "STRING", "enum": ["NFL", "CFB", "NBA", "CBB", "MLB", "NHL", "OTHER"]}}, "required": ["pick", "market", "sport"]}}}, "required": ["kind", "legs"]}}}, "required": ["bets"]};
+  const SLIP_PROMPT = "You read screenshots of sportsbook bet slips (usually FanDuel, DraftKings or Polymarket) and extract each bet on them.\nRules:\n- One entry per bet. A parlay is ONE bet with several legs; a straight bet has exactly one leg.\n- odds: the American odds of the whole bet as an integer (e.g. -110, 250). For a parlay, the parlay's total odds.\n- stake: the dollar amount wagered. to_win: the dollar payout profit shown, if any.\n- For each leg: pick = the selection as written (team or player and line); team = the team or player name only;\n  market = \"ml\" (moneyline/to win), \"spread\" (point spread, run line, puck line, alt spread), \"total\" (over/under game total), \"anytime_td\" (anytime touchdown scorer, \"to score a TD\"), \"first_td\" (first touchdown scorer of the game) or \"prop\" (anything else);\n  player = for touchdown scorer bets, the player's full name exactly as written (e.g. \"Bucky Irving\"), else null; for those bets team = the player's team if shown;\n  side = \"over\" or \"under\" for totals, else null; line = the signed number for spreads (e.g. -6.5) or the total number (e.g. 48.5), else null;\n  away and home = the two teams of the game if shown (an \"A @ B\" matchup means A is away, B is home), else null;\n  sport = NFL, CFB, NBA, CBB, MLB, NHL or OTHER, judged from the teams and market.\n- Hockey player props (NHL): market = \"prop\", player = the player's full name, stat = \"goals\", \"assists\", \"points\", \"shots_on_goal\" or \"saves\", side = \"over\" or \"under\", line = the number (\"To score a goal\" / anytime goal scorer = stat goals, side over, line 0.5; \"2+ shots\" = side over, line 1.5; \"1+ point\" = stat points, over 0.5), sport = NHL.\n- book = \"FD\" for FanDuel, \"DK\" for DraftKings, \"PM\" for Polymarket (a prediction market: prices in cents like 62¢, shares, avg price, Buy / Yes / No), null if you can't tell.\n- Polymarket: price = the price paid per share in cents (e.g. 62 for 62¢; the avg price if shown), and odds = null unless American odds are printed; stake = the amount spent (cost / total); to_win = the profit if it pays (payout minus cost) when shown. The pick is the outcome bought: a team for a moneyline market like \"Bills vs. Rams\", \"Rams -3.5\" for \"Spread: Rams (-3.5)\", \"Over 54.5\" for \"O/U 54.5\"; buying \"No\" on one team of a two-team game means the other team. Take market, line and side from the market title.\n- Use null for anything not visible. Never invent numbers.";
+  const SLIP_SCHEMA = {"type": "OBJECT", "properties": {"bets": {"type": "ARRAY", "items": {"type": "OBJECT", "properties": {"book": {"type": "STRING", "enum": ["FD", "DK", "PM"], "nullable": true}, "price": {"type": "NUMBER", "nullable": true}, "kind": {"type": "STRING", "enum": ["straight", "parlay"]}, "odds": {"type": "INTEGER", "nullable": true}, "stake": {"type": "NUMBER", "nullable": true}, "to_win": {"type": "NUMBER", "nullable": true}, "legs": {"type": "ARRAY", "items": {"type": "OBJECT", "properties": {"pick": {"type": "STRING"}, "team": {"type": "STRING", "nullable": true}, "market": {"type": "STRING", "enum": ["ml", "spread", "total", "anytime_td", "first_td", "prop"]}, "player": {"type": "STRING", "nullable": true}, "stat": {"type": "STRING", "enum": ["goals", "assists", "points", "shots_on_goal", "saves"], "nullable": true}, "side": {"type": "STRING", "enum": ["over", "under"], "nullable": true}, "line": {"type": "NUMBER", "nullable": true}, "odds": {"type": "INTEGER", "nullable": true}, "price": {"type": "NUMBER", "nullable": true}, "away": {"type": "STRING", "nullable": true}, "home": {"type": "STRING", "nullable": true}, "sport": {"type": "STRING", "enum": ["NFL", "CFB", "NBA", "CBB", "MLB", "NHL", "OTHER"]}}, "required": ["pick", "market", "sport"]}}}, "required": ["kind", "legs"]}}}, "required": ["bets"]};
   async function shrink(file) {
     const url = URL.createObjectURL(file);
     try {
@@ -9281,8 +9594,20 @@ body.phone #toast { bottom: calc(96px + env(safe-area-inset-bottom)); max-width:
     const w = (x) => String(x || "").toLowerCase().replace(/\b(jr|sr|ii|iii|iv)\b\.?/g, "").replace(/[^a-z\s.]/g, "").split(/[\s.]+/).filter(Boolean);
     const x = w(a), y = w(b); return x.length > 1 && y.length > 1 && x[x.length - 1] === y[y.length - 1] && x[0][0] === y[0][0];
   };
+  const PP_SLIP = { goals: "pp_g", assists: "pp_a", points: "pp_pts", shots_on_goal: "pp_sog", saves: "pp_sv" };
+  async function resolvePPLeg(leg) {
+    const m = PP_SLIP[leg.stat], base = matchLeg({ ...leg, market: "ml", team: leg.team || leg.away || leg.home });
+    const games = base ? [S.games.get(base.g)] : pickable().filter((g) => g.sport === "NHL");
+    const side = leg.side === "under" ? "u" : "o", l = leg.line == null ? PP_DEF[ppStat(m)] : Math.abs(leg.line);
+    for (const g of games) {
+      if (!g) continue;
+      const rs = await Promise.all(["a", "h"].map((sd) => loadRoster("NHL", g[sd].id)));
+      for (const r of rs) { const pl = (Array.isArray(r) ? r : []).find((x) => sameName(x.nm, leg.player)); if (pl) { leg._td = { g: g.id, m, s: side, l, o: leg.odds, sport: "NHL", p: pl }; return; } }
+    }
+  }
   async function resolveTdLegs(bets) {
     for (const pb of bets) for (const leg of pb.legs || []) {
+      if (leg && leg.market === "prop" && (leg.sport === "NHL" || !leg.sport || leg.sport === "OTHER") && PP_SLIP[leg.stat] && leg.player) { await resolvePPLeg(leg); continue; }
       if (!leg || (leg.market !== "anytime_td" && leg.market !== "first_td")) continue;
       const m = leg.market === "first_td" ? "ftd" : "td", who = leg.player || String(leg.pick || "").replace(/\b(anytime|first|td|touchdown|scorer|to score|a)\b/gi, "").trim();
       const base = matchLeg({ ...leg, market: "ml", team: leg.team || leg.away || leg.home });
@@ -9354,7 +9679,7 @@ body.phone #toast { bottom: calc(96px + env(safe-area-inset-bottom)); max-width:
       const c2o = (c) => (c > 0 && c < 100 ? pmAm(c / 100) : null);
       for (const b of bets) { if (!b.odds && c2o(b.price)) b.odds = c2o(b.price); for (const l of b.legs) if (l && !l.odds && c2o(l.price)) l.odds = c2o(l.price); if (!b.odds && b.legs.length === 1 && b.legs[0].odds) b.odds = b.legs[0].odds; if (b.price && !b.book) b.book = "PM"; }
       if (!bets.length) { scanNote("Couldn't find a bet on that image. Try a screenshot of the slip or the bet in My Bets."); return; }
-      if (bets.some((b) => b.legs.some((l) => l && (l.market === "anytime_td" || l.market === "first_td")))) { $("#scanLbl").textContent = "Finding the players…"; await resolveTdLegs(bets); }
+      if (bets.some((b) => b.legs.some((l) => l && (l.market === "anytime_td" || l.market === "first_td" || (l.market === "prop" && PP_SLIP[l.stat]))))) { $("#scanLbl").textContent = "Finding the players…"; await resolveTdLegs(bets); }
       slipBets = bets;
       fillFromSlip(bets[0]);
       const missing = [];
