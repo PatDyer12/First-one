@@ -1996,11 +1996,157 @@ body.tv .rb-games.primeg > .rb-pcol.pr, body.tv .rb-rsc { -webkit-mask-image: li
 .fo-ls + .fo-ft, .fo-bug + .fo-ft { margin-top: 2px; }
 .fo-ppl + .fo-ft { margin-top: 0; }
 #jbBets .rb-fol { display: none; }
+/* ---------- phone: the remote. No videos, no ticker; stats for everybody and every bet ---------- */
+.ph { display: none; }
+body.phone .ph { display: block; padding: 0 0 calc(86px + env(safe-area-inset-bottom)); }
+body.phone .app > header.top, body.phone #tabs, body.phone main.grid, body.phone #rb, body.phone #ticker, body.phone #jumbo, body.phone #playCard, body.phone #slip,
+body.phone #addFab, body.phone .lc, body.phone .in-title, body.phone #intros { display: none !important; }
+body.phone .app { height: auto !important; zoom: 1 !important; padding: 0 !important; gap: 0 !important; max-width: none; }
+.ph-top { position: sticky; top: 0; z-index: 20; display: flex; align-items: center; justify-content: space-between; padding: calc(12px + env(safe-area-inset-top)) 16px 10px; background: linear-gradient(180deg, #07090d 70%, rgba(7,9,13,0)); }
+.ph-brand { display: flex; align-items: center; gap: 6px; font: 900 22px/1 var(--f-display); letter-spacing: .02em; text-transform: uppercase; color: #fff; }
+.ph-brand span { color: var(--accent, #d4ff3a); }
+.ph-dot { width: 8px; height: 8px; border-radius: 50%; margin-left: 6px; background: var(--ink-3); }
+.ph-dot.on { background: #3ddc97; box-shadow: 0 0 0 3px rgba(61,220,151,.18); }
+.ph-dot.off { background: #ff6170; }
+.ph-unit { border: 1px solid rgba(255,255,255,.1); background: rgba(255,255,255,.04); color: var(--ink-2); border-radius: 999px; padding: 7px 12px; font: 700 13px/1 var(--f-num); letter-spacing: .06em; }
+.ph-range { display: grid; grid-template-columns: repeat(4, 1fr); gap: 4px; margin: 0 16px 14px; padding: 4px; border-radius: 12px; background: #0f151f; border: 1px solid rgba(255,255,255,.07); }
+.ph-range button { border: 0; background: none; color: var(--ink-3); padding: 9px 0; border-radius: 9px; font: 700 14px/1 var(--f-ui); }
+.ph-range button[aria-pressed="true"] { background: #fff; color: #07090d; }
+.ph-body { padding: 0 16px; display: flex; flex-direction: column; gap: 14px; }
+.ph-bar { position: fixed; left: 0; right: 0; bottom: 0; z-index: 40; display: grid; grid-template-columns: 1fr auto 1fr; align-items: center; gap: 8px; padding: 10px 16px calc(10px + env(safe-area-inset-bottom)); background: rgba(9,12,18,.94); border-top: 1px solid rgba(255,255,255,.08); backdrop-filter: blur(12px); }
+.ph-bar button { display: flex; flex-direction: column; align-items: center; gap: 4px; border: 0; background: none; color: var(--ink-3); font: 700 12px/1 var(--f-ui); padding: 6px 0; }
+.ph-bar button svg { width: 22px; height: 22px; fill: none; stroke: currentColor; stroke-width: 2.2; stroke-linecap: round; }
+.ph-bar button[aria-current="true"] { color: #fff; }
+.ph-bar .ph-add { flex-direction: row; gap: 8px; padding: 14px 22px; border-radius: 14px; background: var(--accent, #d4ff3a); color: #0b0f05; font: 800 16px/1 var(--f-ui); box-shadow: 0 8px 26px rgba(212,255,58,.22); }
+.ph-bar .ph-add svg { width: 18px; height: 18px; stroke-width: 3; }
+.ph-chips { display: flex; gap: 8px; overflow-x: auto; scrollbar-width: none; margin: 0 -16px; padding: 0 16px; }
+.ph-chips::-webkit-scrollbar { display: none; }
+.ph-chips button { flex: none; display: flex; align-items: center; gap: 7px; border: 1px solid rgba(255,255,255,.1); background: #0f151f; color: var(--ink-2); border-radius: 999px; padding: 8px 12px; font: 700 14px/1 var(--f-ui); }
+.ph-chips button i { width: 9px; height: 9px; border-radius: 50%; background: var(--c); }
+.ph-chips button span { font-size: 13px; color: var(--ink-3); }
+.ph-chips button[aria-pressed="true"] { background: #fff; color: #07090d; border-color: #fff; }
+.ph-chips button[aria-pressed="true"] span { color: #4b5563; }
+.ph-sum { display: grid; grid-template-columns: repeat(4, 1fr); border-radius: 14px; background: #0f151f; border: 1px solid rgba(255,255,255,.07); }
+.ph-sum > div { display: flex; flex-direction: column; gap: 5px; padding: 12px 10px; text-align: center; }
+.ph-sum > div + div { border-left: 1px solid rgba(255,255,255,.06); }
+.ph-sum b { font: 800 20px/1 var(--f-num); color: #fff; letter-spacing: .02em; }
+.ph-sum span { font: 700 10.5px/1 var(--f-num); letter-spacing: .14em; text-transform: uppercase; color: var(--ink-3); }
+.ph-sec h3 { display: flex; justify-content: space-between; align-items: baseline; margin: 6px 2px 9px; font: 800 13px/1 var(--f-num); letter-spacing: .2em; text-transform: uppercase; color: var(--ink-2); }
+.ph-sec h3 span { font-size: 12px; letter-spacing: .1em; color: var(--ink-3); }
+.ph-list { display: flex; flex-direction: column; gap: 8px; }
+.ph-bet { display: grid; grid-template-columns: auto minmax(0, 1fr) auto; gap: 12px; align-items: start; width: 100%; text-align: left; border: 1px solid rgba(255,255,255,.07); background: #0f151f; border-radius: 14px; padding: 13px 14px; color: inherit; box-shadow: inset 3px 0 0 var(--c); }
+.ph-bet:active { background: #141c28; }
+.ph-bet .t { min-width: 0; display: flex; flex-direction: column; gap: 4px; }
+.ph-bet .t b { font: 700 16px/1.25 var(--f-ui); color: #fff; overflow: hidden; text-overflow: ellipsis; }
+.ph-bet .t b em { font-style: normal; color: var(--gold, #ffc24b); font-weight: 800; }
+.ph-bet .t small { font: 500 13px/1.3 var(--f-ui); color: var(--ink-3); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.ph-bet .ln { display: flex; flex-wrap: wrap; align-items: center; gap: 6px 10px; margin-top: 2px; }
+.ph-bet .gm { font: 600 13px/1.2 var(--f-num); letter-spacing: .04em; color: var(--ink-2); white-space: nowrap; }
+.ph-bet .st { font: 700 12.5px/1.15 var(--f-ui); padding: 4px 8px; border-radius: 7px; background: rgba(255,255,255,.05); color: var(--ink-2); }
+.ph-bet.st-w .st, .pa-who .st.st-w { background: rgba(61,220,151,.12); color: var(--win, #3ddc97); }
+.ph-bet.st-l .st, .pa-who .st.st-l { background: rgba(255,97,112,.12); color: var(--loss, #ff6170); }
+.ph-bet.st-live .st, .pa-who .st.st-live { background: rgba(255,77,94,.1); color: #ff8a95; }
+.ph-bet .r { display: flex; flex-direction: column; align-items: flex-end; gap: 5px; text-align: right; padding-top: 1px; }
+.ph-bet .r b { font: 800 18px/1 var(--f-num); color: #fff; letter-spacing: .02em; white-space: nowrap; }
+.ph-bet .r small { font: 600 12px/1 var(--f-num); letter-spacing: .04em; color: var(--ink-3); white-space: nowrap; }
+.ph-bet.done { opacity: .85; box-shadow: none; }
+.ph-bet .rb-av { width: 30px; height: 30px; font-size: 14px; }
+.ph-legs { list-style: none; margin: 4px 0 0; padding: 0; display: flex; flex-direction: column; gap: 4px; }
+.ph-legs li { display: flex; align-items: center; gap: 8px; font: 500 13px/1.25 var(--f-ui); color: var(--ink-2); }
+.ph-legs li span { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; min-width: 0; }
+.ph-legs li em { margin-left: auto; flex: none; font: 700 12px/1 var(--f-num); font-style: normal; letter-spacing: .04em; color: var(--ink-3); }
+.ph-legs li em.w { color: var(--win, #3ddc97); } .ph-legs li em.l { color: var(--loss, #ff6170); }
+.ph-legs li i { flex: none; width: 16px; height: 16px; border-radius: 50%; display: grid; place-items: center; font: 800 10px/1 var(--f-ui); font-style: normal; box-shadow: inset 0 0 0 1.5px rgba(255,255,255,.2); }
+.ph-legs li.hit i { background: var(--win, #3ddc97); color: #04140c; box-shadow: none; }
+.ph-legs li.miss { color: var(--ink-3); text-decoration: line-through; }
+.ph-legs li.miss i { background: var(--loss, #ff6170); color: #1a0306; box-shadow: none; }
+.ph-empty { display: flex; flex-direction: column; align-items: center; gap: 8px; padding: 34px 20px; text-align: center; border-radius: 14px; border: 1px dashed rgba(255,255,255,.12); }
+.ph-empty b { font: 700 17px/1.2 var(--f-ui); color: #fff; }
+.ph-empty span { font: 500 14px/1.4 var(--f-ui); color: var(--ink-3); margin-bottom: 6px; }
+.ph-me { padding: 18px 16px 16px; border-radius: 18px; background: linear-gradient(160deg, color-mix(in srgb, var(--c) 9%, #0f151f), #0f151f 55%); border: 1px solid rgba(255,255,255,.08); }
+.ph-me .hd { display: flex; justify-content: space-between; font: 800 12px/1 var(--f-num); letter-spacing: .2em; text-transform: uppercase; color: var(--ink-3); }
+.ph-me .hd em { font-style: normal; color: var(--ink-2); letter-spacing: .1em; }
+.ph-me .net { display: flex; align-items: baseline; gap: 12px; margin: 12px 0 6px; }
+.ph-me .net b { font: 800 52px/1 var(--f-num); letter-spacing: -.01em; color: #fff; }
+.ph-me .net span { font: 700 18px/1 var(--f-num); color: var(--ink-2); }
+.ph-spark { display: block; width: 100%; height: 56px; margin: 4px 0 8px; }
+.ph-spark line { stroke: rgba(255,255,255,.12); stroke-dasharray: 3 4; }
+.ph-kpi { display: grid; grid-template-columns: repeat(3, 1fr); gap: 1px; margin-top: 8px; border-radius: 12px; overflow: hidden; background: rgba(255,255,255,.06); }
+.ph-kpi > div { display: flex; flex-direction: column; gap: 5px; padding: 11px 12px; background: #0d121b; }
+.ph-kpi b { font: 800 20px/1 var(--f-num); color: #fff; letter-spacing: .02em; }
+.ph-kpi span { font: 700 10.5px/1 var(--f-num); letter-spacing: .14em; text-transform: uppercase; color: var(--ink-3); }
+.ph-notes { display: flex; flex-wrap: wrap; gap: 6px 12px; margin-top: 12px; font: 600 13px/1.3 var(--f-ui); color: var(--ink-2); }
+.ph-notes .w { color: var(--win, #3ddc97); } .ph-notes .l { color: var(--loss, #ff6170); }
+.ph-pp { display: grid; grid-template-columns: 16px auto minmax(0, 1fr) auto; align-items: center; gap: 10px; width: 100%; text-align: left; border: 1px solid rgba(255,255,255,.07); background: #0f151f; border-radius: 14px; padding: 12px 14px; color: inherit; }
+.ph-pp.me { border-color: color-mix(in srgb, var(--c) 35%, transparent); }
+.ph-pp .rk { font: 800 15px/1 var(--f-num); color: var(--ink-3); }
+.ph-pp .rb-av { width: 36px; height: 36px; font-size: 16px; }
+.ph-pp .nm { min-width: 0; display: flex; flex-direction: column; gap: 4px; }
+.ph-pp .nm b { font: 700 16px/1.1 var(--f-ui); color: #fff; }
+.ph-pp .nm small { font: 600 12.5px/1.2 var(--f-num); letter-spacing: .03em; color: var(--ink-3); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.ph-pp .v { display: flex; flex-direction: column; align-items: flex-end; gap: 4px; }
+.ph-pp .v b { font: 800 20px/1 var(--f-num); color: #fff; }
+.ph-pp .v small { font: 600 12px/1 var(--f-num); color: var(--ink-3); }
+.ph-pp .l5 { display: flex; gap: 3px; }
+.ph-pp .l5 i { width: 10px; height: 4px; border-radius: 2px; background: var(--loss, #ff6170); }
+.ph-pp .l5 i.w { background: var(--win, #3ddc97); }
+.ph-splits { display: flex; flex-direction: column; border-radius: 14px; background: #0f151f; border: 1px solid rgba(255,255,255,.07); }
+.ph-splits > div { display: grid; grid-template-columns: 1fr auto 70px; gap: 12px; align-items: center; padding: 11px 14px; font: 600 14px/1 var(--f-ui); color: var(--ink-2); }
+.ph-splits > div + div { border-top: 1px solid rgba(255,255,255,.05); }
+.ph-splits em { font: 700 14px/1 var(--f-num); font-style: normal; color: var(--ink-3); }
+.ph-splits b { font: 800 16px/1 var(--f-num); text-align: right; color: #fff; }
+.ph-aw { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
+.ph-aw > div { display: grid; grid-template-columns: auto 1fr; column-gap: 8px; row-gap: 3px; padding: 11px 12px; border-radius: 12px; background: #0f151f; border: 1px solid rgba(255,255,255,.07); }
+.ph-aw .ic { grid-row: 1 / 3; font-size: 20px; }
+.ph-aw b { font: 700 14px/1.1 var(--f-ui); color: #fff; }
+.ph-aw small { font: 500 12px/1.25 var(--f-ui); color: var(--ink-3); overflow: hidden; text-overflow: ellipsis; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; }
+.ph-body .num.pos, .ph-body b.pos { color: var(--win, #3ddc97); } .ph-body .num.neg, .ph-body b.neg { color: var(--loss, #ff6170); }
+/* bet sheet + edit sheet: bottom sheets on the phone */
+body.phone #phAct, body.phone #phEdit, body.phone #addSheet, body.phone #setSheet { place-items: end stretch; padding: 0; }
+body.phone .ph-sheet, body.phone #addForm, body.phone #setForm { max-width: none; border-radius: 20px 20px 0 0; max-height: 92vh; padding-bottom: calc(20px + env(safe-area-inset-bottom)); }
+.ph-sheet h3 { font: 700 18px/1.25 var(--f-ui); color: #fff; padding-right: 10px; }
+.pa-who { display: flex; align-items: center; gap: 10px; }
+.pa-who b { font: 700 15px/1 var(--f-ui); color: var(--c); }
+.pa-who .st { margin-left: auto; font: 700 13px/1 var(--f-ui); padding: 6px 9px; border-radius: 8px; background: rgba(255,255,255,.06); color: var(--ink-2); }
+.pa-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 1px; border-radius: 12px; overflow: hidden; background: rgba(255,255,255,.06); }
+.pa-grid > div { display: flex; flex-direction: column; gap: 5px; padding: 10px 12px; background: #0d121b; }
+.pa-grid span { font: 700 10.5px/1 var(--f-num); letter-spacing: .14em; text-transform: uppercase; color: var(--ink-3); }
+.pa-grid b { font: 700 16px/1.1 var(--f-num); letter-spacing: .02em; color: #fff; }
+.pa-game { font: 600 14px/1 var(--f-num); letter-spacing: .05em; color: var(--ink-2); }
+.pa-legs { margin: 0; }
+.pa-acts { display: flex; flex-direction: column; gap: 8px; margin-top: 4px; }
+.pa-row { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
+.pa-row.three { grid-template-columns: 1fr 1fr 1fr; }
+.pa-acts .btn { padding: 14px 10px; font-size: 15px; font-weight: 700; }
+.pa-acts .btn.win { background: rgba(61,220,151,.14); border-color: rgba(61,220,151,.4); color: var(--win, #3ddc97); }
+.pa-acts .btn.loss { background: rgba(255,97,112,.14); border-color: rgba(255,97,112,.4); color: var(--loss, #ff6170); }
+.pa-acts .btn.danger { color: var(--loss, #ff6170); }
+.pa-ask { display: flex; flex-direction: column; gap: 10px; padding: 12px; border-radius: 12px; background: rgba(255,255,255,.04); font: 500 14px/1.4 var(--f-ui); color: var(--ink-2); }
+.pa-ask label { font: 700 11px/1 var(--f-num); letter-spacing: .14em; text-transform: uppercase; color: var(--ink-3); }
+.pa-ro { margin: 0; font: 500 14px/1.3 var(--f-ui); color: var(--ink-3); }
+#phEditB { display: flex; flex-direction: column; gap: 14px; }
+#phActB { display: flex; flex-direction: column; gap: 12px; }
+#phActB .pa-legs { padding: 10px 12px; border-radius: 12px; background: rgba(255,255,255,.03); gap: 7px; }
+body.phone #toast { bottom: calc(96px + env(safe-area-inset-bottom)); max-width: calc(100% - 32px); text-align: center; }
+#phEditB .pe-leg + .pe-leg { margin-top: 6px; }
 </style>
 </head>
 <body>
 
 <div class="app">
+  <section class="ph" id="ph" aria-label="Sweat Board">
+    <header class="ph-top">
+      <div class="ph-brand"><b>Sweat</b><span>Board</span><i class="ph-dot" id="phDot"></i></div>
+      <button type="button" class="ph-unit num" id="phUnit">1u = $15</button>
+    </header>
+    <div class="ph-range" id="phRange" role="group" aria-label="Time range"><button type="button" data-r="day">Today</button><button type="button" data-r="week">7D</button><button type="button" data-r="month">30D</button><button type="button" data-r="all">All</button></div>
+    <div class="ph-body" id="phBody"></div>
+    <nav class="ph-bar" aria-label="Phone">
+      <button type="button" data-ph="bets"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 6h16M4 12h16M4 18h10"/></svg>Bets</button>
+      <button type="button" class="ph-add" id="phAdd"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 5v14M5 12h14"/></svg>Add bet</button>
+      <button type="button" data-ph="stats"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M5 20V10M12 20V4M19 20v-7"/></svg>Stats</button>
+    </nav>
+  </section>
   <header class="top">
     <div class="brand">
       <h1>Sweat <span>Board</span></h1>
@@ -2182,6 +2328,8 @@ body.tv .rb-games.primeg > .rb-pcol.pr, body.tv .rb-rsc { -webkit-mask-image: li
   </form>
 </div>
 
+<div class="scrim" id="phAct" hidden><div class="sheet ph-sheet"><div class="sheet-head"><h3 id="phActT">Bet</h3><button type="button" class="x" data-close aria-label="Close">×</button></div><div id="phActB"></div></div></div>
+<div class="scrim" id="phEdit" hidden><form class="sheet ph-sheet" id="phEditF" novalidate><div class="sheet-head"><h3>Edit bet</h3><button type="button" class="x" data-close aria-label="Close">×</button></div><div id="phEditB"></div><div class="err" id="pe-err" role="alert"></div><button type="submit" class="btn primary" id="pe-save">Save changes</button></form></div>
 <div class="scrim" id="betSheet" hidden><div class="sheet betsheet"><div class="sheet-head"><h3 id="bsTitle">Bet</h3><button type="button" class="x" data-close aria-label="Close">×</button></div><div id="bsBody"></div></div></div>
 <div class="scrim" id="setSheet" hidden>
   <form class="sheet" id="setForm" novalidate>
@@ -2426,6 +2574,11 @@ body.tv .rb-games.primeg > .rb-pcol.pr, body.tv .rb-rsc { -webkit-mask-image: li
     open: null, confirmDel: null, cashout: null, sign: -1, day: 0, winSound: "jackpot", pops: new Map(), games: new Map(), slateAt: 0, lastSettled: [], dayKey: 0,
   };
   try { const r = localStorage.getItem("sb-range"); if (RANGE_LABEL[r]) S.range = r; } catch (e) {}
+  // the phone is the remote: no videos, no ticker, no sound. Numbers for everybody, and every bet to add, edit, settle or delete
+  const phoneQ = matchMedia("(max-width: 780px)");
+  const PHONE = () => document.body.classList.contains("phone");
+  const PH = { tab: "bets", who: "all", ask: null, co: null, id: null };
+  try { const t = localStorage.getItem("sb-phtab"); if (t === "bets" || t === "stats") PH.tab = t; } catch (e) {}
 
   // ---------- math ----------
   const ppu = (o) => (o > 0 ? o / 100 : 100 / Math.abs(o)); // profit per unit risked
@@ -2518,7 +2671,203 @@ body.tv .rb-games.primeg > .rb-pcol.pr, body.tv .rb-rsc { -webkit-mask-image: li
     const k = guestKey(name), i = guestList().map(guestKey).indexOf(k);
     return GUEST_COLS[(i >= 0 ? i : [...k].reduce((a, c) => a + c.charCodeAt(0), 0)) % GUEST_COLS.length];
   }
+  function syncPhone() {
+    const on = !document.body.classList.contains("tv") && phoneQ.matches;
+    if (on !== PHONE()) { document.body.classList.toggle("phone", on); if (on) { try { stopStatus(); } catch (e) {} } }
+    return on;
+  }
+  const phBook = (b) => ({ FD: "FanDuel", DK: "DraftKings", PM: "Polymarket" }[b.book] || "FanDuel");
+  const phRec = (p) => `${p.w}-${p.l}${p.p ? "-" + p.p : ""}`;
+  const phRoi = (r) => (r == null ? "–" : (r > 0 ? "+" : r < 0 ? "−" : "") + Math.abs(Math.round(r * 100)) + "%");
+  // where a bet stands right now, in a few words, and the color for it
+  function phState(b) {
+    if (b.status !== "open") { const o = outcome(b), n = netOf(b); return { c: o === "W" ? "w" : o === "L" ? "l" : "p", t: b.status === "cashout" ? `Cashed ${fU(n, true)}` : o === "W" ? `Won ${fU(n, true)}` : o === "L" ? `Lost ${fU(n, true)}` : "Push" }; }
+    const ph = phase(b);
+    if (b.kind === "parlay") {
+      const L = legsOf(b), h = L.filter((x) => x.st === "hit").length;
+      if (L.some((x) => x.st === "miss")) return { c: "l", t: "Leg missed" };
+      return { c: h === L.length && L.length ? "w" : "", t: ph === "pre" && startOf(b) ? startLabel(startOf(b)) : `${h}/${L.length} legs in` };
+    }
+    const ev = b.sel ? evalSel(b.sel) : null;
+    if (ev) return { c: ev.res === "W" ? "w" : ev.res === "L" ? "l" : "p", t: ev.txt };
+    if (ph === "pre" && startOf(b)) return { c: "", t: startLabel(startOf(b)) };
+    return { c: ph === "live" ? "live" : "", t: ph === "live" ? "Live" : "Open" };
+  }
+  function phGame(b) {
+    const g = b.kind !== "parlay" && b.sel ? gameOf(b.sel) : null; if (!g) return "";
+    return g.st === "pre" ? `${g.a.ab} @ ${g.h.ab}` : `${g.a.ab} ${g.a.sc ?? ""} · ${g.h.ab} ${g.h.sc ?? ""} · ${g.st === "post" ? "Final" : g.d}`;
+  }
+  function phRow(b) {
+    const st = phState(b), par = b.kind === "parlay", open = b.status === "open", o = open ? "" : outcome(b), net = open ? 0 : netOf(b);
+    // a parlay's legs, each with how it's doing right now
+    const legs = par ? legsOf(b) : [];
+    const lg = legs.length ? `<ol class="ph-legs">${legs.map((l) => `<li class="${l.st || ""}"><i>${l.st === "hit" ? "✓" : l.st === "miss" ? "✕" : ""}</i><span>${esc(l.t)}</span>${!l.st && l.ev && !l.ev.fin ? `<em class="${l.ev.res === "W" ? "w" : l.ev.res === "L" ? "l" : ""}">${esc(l.ev.txt)}</em>` : ""}</li>`).join("")}</ol>` : "";
+    const meta = [esc(personName(b)), par ? "" : fOdds(b.odds), phBook(b)].filter(Boolean).join(" · ");
+    const gm = phGame(b), line = open || gm ? `<div class="ln">${gm ? `<span class="gm num">${esc(gm)}</span>` : ""}${open ? `<span class="st">${esc(st.t)}</span>` : ""}</div>` : "";
+    const right = open ? `<b class="num">${fU(b.units)}</b><small class="num">to win ${fU(b.units * ppu(b.odds))}</small>`
+      : `<b class="num ${o === "W" ? "pos" : o === "L" ? "neg" : ""}">${o === "P" ? "Push" : fU(net, true)}</b><small>${b.status === "cashout" ? "Cashed out" : o === "W" ? "Won" : o === "L" ? "Lost" : ""}</small>`;
+    return `<button type="button" class="ph-bet${open ? "" : " done"} st-${st.c || "n"}" data-phbet="${esc(b.id)}" style="--c:${personCol(b)}">
+      ${avHtml(b)}<div class="t"><b>${esc(b.pick)}${par ? ` <em class="num">${fOdds(b.odds)}</em>` : ""}</b><small>${meta}</small>${line}${lg}</div>
+      <div class="r">${right}</div></button>`;
+  }
+  function phBets(rows) {
+    const start = rangeStart(S.range), all = [...S.bets.values()];
+    if (PH.who !== "all" && !rows.some((p) => p.k === PH.who)) PH.who = "all";
+    const mine = (b) => PH.who === "all" || personKey(b) === PH.who;
+    const open = sortOpen(all.filter((b) => b.status === "open" && mine(b)));
+    const done = all.filter((b) => b.status !== "open" && b.settledAt >= start && mine(b)).sort((x, y) => y.settledAt - x.settledAt);
+    const live = open.filter((b) => phase(b) === "live" || phase(b) === "final"), later = open.filter((b) => !live.includes(b));
+    const risk = open.reduce((a, b) => a + (Number(b.units) || 0), 0), win = open.reduce((a, b) => a + b.units * ppu(b.odds), 0);
+    const nOpen = (k) => all.filter((b) => b.status === "open" && (k === "all" || personKey(b) === k)).length;
+    const chips = `<div class="ph-chips">${[{ k: "all", name: "Everyone", col: "" }, ...rows].map((p) => `<button type="button" data-phwho="${esc(p.k)}" aria-pressed="${PH.who === p.k}"${p.col ? ` style="--c:${p.col}"` : ""}>${p.col ? `<i></i>` : ""}${esc(p.name)}<span class="num">${nOpen(p.k)}</span></button>`).join("")}</div>`;
+    const sum = `<div class="ph-sum"><div><b class="num">${open.length}</b><span>Open</span></div><div><b class="num">${fU(risk)}</b><span>At risk</span></div><div><b class="num">${fU(win)}</b><span>To win</span></div><div><b class="num ${cls(done.reduce((a, b) => a + netOf(b), 0))}">${fU(done.reduce((a, b) => a + netOf(b), 0), true)}</b><span>${esc(S.range === "day" ? "Today" : RANGE_LABEL[S.range])}</span></div></div>`;
+    const sec = (h, list, sub) => (list.length ? `<section class="ph-sec"><h3>${h}<span>${sub || list.length}</span></h3><div class="ph-list">${list.map(phRow).join("")}</div></section>` : "");
+    const empty = !open.length && !done.length ? `<div class="ph-empty"><b>No bets${PH.who === "all" ? "" : " here"} yet</b><span>Tap Add bet to log one. Screenshots of a slip work too.</span><button type="button" class="btn primary" data-phadd>Add bet</button></div>` : "";
+    return chips + sum + sec("Live", live) + sec("Up next", later) + sec("Settled", done.slice(0, 60), RANGE_LABEL[S.range] + (done.length > 60 ? ` · latest 60 of ${done.length}` : "")) + empty;
+  }
+  function phSpark(done) {
+    if (done.length < 2) return "";
+    const cum = [0]; for (const b of done) cum.push(cum[cum.length - 1] + netOf(b));
+    const lo = Math.min(0, ...cum), hi = Math.max(0, ...cum), W = 300, H = 56, n = cum.length - 1;
+    const x = (i) => (i * W) / n, y = (v) => 4 + ((hi - v) * (H - 8)) / (hi - lo || 1), end = cum[n];
+    const col = end > 0.004 ? "var(--win)" : end < -0.004 ? "var(--loss)" : "var(--ink-2)";
+    const d = cum.map((v, i) => `${i ? "L" : "M"}${x(i).toFixed(1)},${y(v).toFixed(1)}`).join("");
+    return `<svg class="ph-spark" viewBox="0 0 ${W} ${H}" preserveAspectRatio="none" aria-hidden="true"><line x1="0" x2="${W}" y1="${y(0).toFixed(1)}" y2="${y(0).toFixed(1)}"/><path d="${d}L${W},${y(0).toFixed(1)}L0,${y(0).toFixed(1)}Z" fill="${col}" opacity=".12"/><path d="${d}" fill="none" stroke="${col}" stroke-width="2.2" vector-effect="non-scaling-stroke"/></svg>`;
+  }
+  function phStats(rows) {
+    const lbl = RANGE_LABEL[S.range];
+    const me = rows.find((p) => p.me) || { k: "me", name: S.hostName || "You", col: "#d4ff3a", net: 0, w: 0, l: 0, p: 0, open: [], done: [], toWin: 0, last5: [], roi: null, hit: null, st: 0, sd: "" };
+    const rk = rows.indexOf(me) + 1, risk = me.open.reduce((a, x) => a + (Number(x.units) || 0), 0);
+    const best = me.done.filter((b) => outcome(b) === "W").sort((x, y) => netOf(y) - netOf(x))[0];
+    const kp = (v, k, c) => `<div><b class="num${c ? " " + c : ""}">${v}</b><span>${k}</span></div>`;
+    const my = `<section class="ph-me" style="--c:${me.col}">
+      <div class="hd"><span>Your ${esc(S.range === "day" ? "day" : lbl.toLowerCase())}</span>${rows.length > 1 && me.done.length ? `<em class="num">#${rk} of ${rows.length}</em>` : ""}</div>
+      <div class="net"><b class="num ${cls(me.net)}">${fU(me.net, true)}</b><span class="num">${fUSD(me.net * S.unit, true)}</span></div>
+      ${phSpark(me.done)}
+      <div class="ph-kpi">${kp(phRec(me), "Record")}${kp(pct(me.hit), "Hit rate")}${kp(phRoi(me.roi), "ROI", cls(me.roi || 0))}${kp(me.open.length, "Open")}${kp(fU(risk), "At risk")}${kp(fU(me.toWin), "To win")}</div>
+      ${me.st >= 2 || best ? `<div class="ph-notes">${me.st >= 2 ? `<span class="${me.sd === "W" ? "w" : "l"}">${me.sd === "W" ? "🔥 " + me.st + " straight wins" : "🧊 " + me.st + " straight losses"}</span>` : ""}${best ? `<span>Best: ${esc(best.pick)} ${fU(netOf(best), true)}</span>` : ""}</div>` : ""}
+    </section>`;
+    // everybody, ranked: you and the guests side by side
+    const card = (p, i) => `<button type="button" class="ph-pp${p.me ? " me" : ""}" data-phwho="${esc(p.k)}" style="--c:${p.col}">
+      <span class="rk num">${i + 1}</span><span class="rb-av" style="--c:${p.col}">${esc(p.name.slice(0, 1).toUpperCase())}</span>
+      <div class="nm"><b>${esc(p.name)}${p.heat === "fire" ? " 🔥" : p.heat === "ice" ? " 🧊" : ""}</b><small class="num">${p.w + p.l + p.p ? `${phRec(p)} · ${pct(p.hit)} hit · ROI ${phRoi(p.roi)}` : "No results yet"}</small>
+        <small class="num">${p.open.length ? `${p.open.length} open · to win ${fU(p.toWin)}` : "Nothing open"}</small></div>
+      <div class="v"><b class="num ${cls(p.net)}">${fU(p.net, true)}</b><small class="num">${fUSD(p.net * S.unit, true)}</small><span class="l5">${p.last5.map((o) => `<i class="${o === "W" ? "w" : "l"}"></i>`).join("")}</span></div></button>`;
+    const room = `<section class="ph-sec"><h3>The room<span>${esc(lbl)}</span></h3><div class="ph-list">${rows.map(card).join("")}</div></section>`;
+    // your splits: book and bet type
+    const start = rangeStart(S.range), mine = [...S.bets.values()].filter((b) => isMe(b) && b.status !== "open" && b.settledAt >= start);
+    const sp = [["FanDuel", (b) => b.book !== "DK" && b.book !== "PM"], ["DraftKings", (b) => b.book === "DK"], ["Polymarket", (b) => b.book === "PM"], ["Straights", (b) => b.kind !== "parlay"], ["Parlays", (b) => b.kind === "parlay"]]
+      .map(([n, f]) => ({ n, s: stats(mine.filter(f)) })).filter((x) => x.s.w + x.s.l + x.s.p || x.n === "Straights" || x.n === "Parlays");
+    const splits = mine.length ? `<section class="ph-sec"><h3>Your splits<span>${esc(lbl)}</span></h3><div class="ph-splits">${sp.map((x) => `<div><span>${x.n}</span><em class="num">${x.s.w}-${x.s.l}${x.s.p ? "-" + x.s.p : ""}</em><b class="num ${cls(x.s.net)}">${fU(x.s.net, true)}</b></div>`).join("")}</div></section>` : "";
+    const aw = awards(rows);
+    const awH = aw.length ? `<section class="ph-sec"><h3>Awards<span>${esc(lbl)}</span></h3><div class="ph-aw">${aw.map((a) => `<div><span class="ic">${a.ic}</span><b>${a.t}</b><small>${esc(a.p.name)} · ${esc(a.d)}</small></div>`).join("")}</div></section>` : "";
+    return my + room + splits + awH;
+  }
+  function renderPhone() {
+    if (!PHONE()) return;
+    document.querySelectorAll("#phRange [data-r]").forEach((b) => b.setAttribute("aria-pressed", String(b.dataset.r === S.range)));
+    document.querySelectorAll(".ph-bar [data-ph]").forEach((b) => b.setAttribute("aria-current", String(b.dataset.ph === PH.tab)));
+    $("#phUnit").textContent = "1u = $" + trim(S.unit);
+    $("#phDot").className = "ph-dot" + (S.offline ? " off" : S.ready ? " on" : "");
+    $("#phAdd").hidden = !S.canWrite;
+    const rows = standings(S.range);
+    const y = scrollY;
+    $("#phBody").innerHTML = PH.tab === "stats" ? phStats(rows) : phBets(rows);
+    if (!$("#phAct").hidden && PH.id) phActFill();
+    if (Math.abs(scrollY - y) > 2) scrollTo(0, y);
+  }
+  // one bet: everything about it, and what you can do to it
+  function phActFill() {
+    const b = S.bets.get(PH.id); if (!b) { $("#phAct").hidden = true; return; }
+    const st = phState(b), open = b.status === "open", can = S.canWrite, legs = legsOf(b);
+    $("#phActT").textContent = b.pick;
+    const row = (k, v) => `<div><span>${k}</span><b class="num">${v}</b></div>`;
+    const det = `<div class="pa-who" style="--c:${personCol(b)}">${avHtml(b)}<b>${esc(personName(b))}</b><span class="st st-${st.c || "n"}">${esc(st.t)}</span></div>
+      <div class="pa-grid">${row("Odds", fOdds(b.odds))}${row("Units", fU(b.units))}${row("Risk", fUSD(b.units * S.unit))}${row(open ? "To win" : "Net", open ? fU(b.units * ppu(b.odds)) + " · " + fUSD(b.units * ppu(b.odds) * S.unit) : fU(netOf(b), true) + " · " + fUSD(netOf(b) * S.unit, true))}${row("Book", phBook(b))}${row("Placed", esc(when(b.placedAt)))}</div>
+      ${phGame(b) ? `<div class="pa-game num">${esc(phGame(b))}</div>` : ""}
+      ${legs.length ? `<ol class="ph-legs pa-legs">${legs.map((l) => `<li class="${l.st || ""}"><i>${l.st === "hit" ? "✓" : l.st === "miss" ? "✕" : ""}</i><span>${esc(l.t)}</span></li>`).join("")}</ol>` : ""}`;
+    let acts = "";
+    if (!can) acts = `<p class="pa-ro">View only on this account.</p>`;
+    else if (PH.ask === "del") acts = `<div class="pa-ask"><span>Delete this bet? It comes off ${isMe(b) ? "your" : esc(personName(b)) + "'s"} record for good.</span><div class="pa-row"><button type="button" class="btn" data-pa="keep">Keep it</button><button type="button" class="btn loss" data-pa="del-yes">Delete</button></div></div>`;
+    else if (PH.co) acts = `<div class="pa-ask"><label for="pa-co">Cash out paid ($)</label><input type="text" id="pa-co" inputmode="decimal" autocomplete="off" placeholder="${fUSD(b.units * S.unit).slice(1)}"><div class="pa-row"><button type="button" class="btn" data-pa="keep">Cancel</button><button type="button" class="btn primary" data-pa="co-save">Cash out</button></div></div>`;
+    else acts = `${open ? `<div class="pa-row three"><button type="button" class="btn win" data-pa="won">Won</button><button type="button" class="btn loss" data-pa="lost">Lost</button><button type="button" class="btn" data-pa="push">Push</button></div><button type="button" class="btn ghost" data-pa="co">Cash out</button>` : `<button type="button" class="btn ghost" data-pa="reopen">Move back to open</button>`}
+      <div class="pa-row"><button type="button" class="btn" data-pa="edit">Edit</button><button type="button" class="btn ghost danger" data-pa="del">Delete</button></div>`;
+    $("#phActB").innerHTML = det + `<div class="pa-acts">${acts}</div>`;
+  }
+  function phOpen(id) { PH.id = id; PH.ask = null; PH.co = null; phActFill(); openSheet("#phAct"); }
+  // edit: whose it is, the pick (or each leg), book, odds, units, result
+  function phEditOpen(id) {
+    const b = S.bets.get(id); if (!b) return;
+    PH.id = id; $("#phAct").hidden = true;
+    const wk = isMe(b) ? "me" : b.who === "julian" ? "julian" : "g:" + guestKey(whoName(b));
+    const gl = guestList(); if (b.who === "guest" && !gl.some((n) => guestKey(n) === guestKey(whoName(b)))) gl.push(whoName(b));
+    const who = [["me", "Mine", "#d4ff3a"], ["julian", "Julian", WHO_COL.julian], ...gl.map((n) => ["g:" + guestKey(n), n, guestCol(n)])];
+    const radio = (name, v, label, on, dot) => `<label><input type="radio" name="${name}" value="${esc(v)}"${on ? " checked" : ""}><span>${dot ? `<i style="background:${dot}"></i>` : ""}${esc(label)}</span></label>`;
+    const o = Number(b.odds) || -110, stv = b.status === "cashout" ? "cashout" : b.status;
+    $("#phEditB").innerHTML = `<div class="field"><span class="lbl">Whose bet</span><div class="radios">${who.map(([v, l, c]) => radio("pe-who", v, l, v === wk, c)).join("")}</div></div>
+      ${b.kind === "parlay" && Array.isArray(b.legs) ? `<div class="field"><span class="lbl">Legs</span>${b.legs.map((l, i) => `<input type="text" class="pe-leg" data-i="${i}" value="${esc(l)}" maxlength="80" aria-label="Leg ${i + 1}">`).join("")}</div>`
+        : `<div class="field"><label for="pe-pick">Pick</label><input type="text" id="pe-pick" value="${esc(b.pick)}" maxlength="80" autocomplete="off"></div>`}
+      <div class="field"><span class="lbl">Book</span><div class="radios">${[["FD", "FanDuel"], ["DK", "DraftKings"], ["PM", "Polymarket"]].map(([v, l]) => radio("pe-book", v, l, (b.book || "FD") === v)).join("")}</div></div>
+      <div class="row2"><div class="field"><label for="pe-odds">Odds</label><div class="oddsin"><div class="seg" role="group" aria-label="Odds sign" id="pe-sign"><button type="button" data-s="-1" aria-pressed="${o < 0}">−</button><button type="button" data-s="1" aria-pressed="${o > 0}">+</button></div><input type="text" id="pe-odds" inputmode="numeric" autocomplete="off" value="${Math.abs(o)}"></div></div>
+        <div class="field"><label for="pe-units">Units</label><input type="text" id="pe-units" inputmode="decimal" autocomplete="off" value="${esc(trim(Number(b.units) || 1))}"></div></div>
+      <div class="field"><span class="lbl">Result</span><div class="radios">${[["open", "Open"], ["won", "Won"], ["lost", "Lost"], ["push", "Push"], ...(stv === "cashout" ? [["cashout", "Cashed out"]] : [])].map(([v, l]) => radio("pe-st", v, l, stv === v)).join("")}</div></div>`;
+    $("#pe-err").textContent = ""; openSheet("#phEdit");
+  }
+  $("#phEditB").addEventListener("click", (e) => { const sb = e.target.closest("#pe-sign [data-s]"); if (!sb) return; document.querySelectorAll("#pe-sign [data-s]").forEach((x) => x.setAttribute("aria-pressed", String(x === sb))); });
+  $("#phEditF").addEventListener("submit", async (e) => {
+    e.preventDefault();
+    const b = S.bets.get(PH.id), err = $("#pe-err"); if (!b) return;
+    const val = (n) => (document.querySelector(`input[name="${n}"]:checked`) || {}).value;
+    const sign = Number((document.querySelector('#pe-sign [aria-pressed="true"]') || {}).dataset?.s || -1);
+    const oa = parseFloat(String($("#pe-odds").value).replace(/[^\d.]/g, "")), units = parseFloat(String($("#pe-units").value).replace(/[^\d.]/g, ""));
+    if (!(oa >= 100)) { err.textContent = "Odds need to be 100 or more, like −110 or +250."; return; }
+    if (!(units > 0) || units > 100) { err.textContent = "Units should be a number above 0, like 1 or 0.5."; return; }
+    const patch = { odds: Math.round(sign * oa), units: Math.round(units * 1000) / 1000, book: val("pe-book") || "FD" };
+    if (b.kind === "parlay" && Array.isArray(b.legs)) {
+      const legs = [...document.querySelectorAll(".pe-leg")].map((x, i) => x.value.trim().slice(0, 80) || b.legs[i]);
+      if (legs.some((l, i) => l !== b.legs[i])) patch.legs = legs;
+    } else {
+      const pk = $("#pe-pick").value.trim().slice(0, 80);
+      if (!pk) { err.textContent = "The pick can't be empty."; return; }
+      if (pk !== b.pick) patch.pick = pk;
+    }
+    const w = val("pe-who") || "me", wk = isMe(b) ? "me" : b.who === "julian" ? "julian" : "g:" + guestKey(whoName(b));
+    if (w !== wk) Object.assign(patch, w === "me" ? { who: "me", whoName: "" } : w === "julian" ? { who: "julian", whoName: "Julian" } : { who: "guest", whoName: guestList().find((n) => guestKey(n) === w.slice(2)) || whoName(b) });
+    const st = val("pe-st") || b.status;
+    if (st === "open" && b.status !== "open") Object.assign(patch, { status: "open", settledAt: null, net: null, noAuto: true });
+    else if (st !== "open" && st !== "cashout") {
+      if (st !== b.status) { patch.status = st; patch.settledAt = b.settledAt || Date.now(); }
+      patch.net = netOf({ ...b, ...patch, status: st });
+    }
+    $("#pe-save").disabled = true;
+    const ok = await patchBet(PH.id, patch);
+    $("#pe-save").disabled = false;
+    if (ok) { $("#phEdit").hidden = true; toast("Bet updated"); }
+  });
+  $("#phActB").addEventListener("click", (e) => {
+    const a = e.target.closest("[data-pa]"); if (!a) return;
+    const id = PH.id, b = S.bets.get(id), k = a.dataset.pa; if (!b) return;
+    if (k === "won" || k === "lost" || k === "push") { settle(id, k); $("#phAct").hidden = true; toast(k === "won" ? "Marked won" : k === "lost" ? "Marked lost" : "Marked push"); }
+    else if (k === "co") { PH.co = true; phActFill(); const i = $("#pa-co"); if (i) i.focus(); }
+    else if (k === "co-save") { const v = parseFloat(String($("#pa-co").value).replace(/[$,\s]/g, "")); if (!(v >= 0)) { toast("Enter the dollar amount the cash out paid."); return; } settle(id, "cashout", Math.round((v / S.unit - b.units) * 1000) / 1000); $("#phAct").hidden = true; }
+    else if (k === "reopen") { patchBet(id, { status: "open", settledAt: null, net: null, noAuto: true }).then((ok) => ok && toast("Moved back to open")); $("#phAct").hidden = true; }
+    else if (k === "edit") phEditOpen(id);
+    else if (k === "del") { PH.ask = "del"; phActFill(); }
+    else if (k === "keep") { PH.ask = null; PH.co = null; phActFill(); }
+    else if (k === "del-yes") { $("#phAct").hidden = true; PH.ask = null; delBet(id).then((ok) => ok && toast("Bet deleted")); }
+  });
+  $("#ph").addEventListener("click", (e) => {
+    const t = e.target.closest("[data-ph]"), r = e.target.closest("#phRange [data-r]"), w = e.target.closest("[data-phwho]"), bt = e.target.closest("[data-phbet]");
+    if (t) { PH.tab = t.dataset.ph; try { localStorage.setItem("sb-phtab", PH.tab); } catch (err) {} renderPhone(); scrollTo(0, 0); }
+    else if (r) { const x = document.querySelector(`#range [data-r="${r.dataset.r}"]`); if (x) x.click(); }
+    else if (w) { PH.who = PH.who === w.dataset.phwho && PH.tab === "bets" ? "all" : w.dataset.phwho; if (PH.tab !== "bets") { PH.tab = "bets"; scrollTo(0, 0); } renderPhone(); }
+    else if (bt) phOpen(bt.dataset.phbet);
+    else if (e.target.closest("#phAdd, [data-phadd]")) openAdd();
+    else if (e.target.closest("#phUnit")) openSettings();
+  });
+  phoneQ.addEventListener("change", () => render());
   function render() {
+    syncPhone();
     const everyone = [...S.bets.values()], all = everyone.filter(isMe);
     const start = rangeStart(S.range);
     const settled = all.filter((b) => b.status !== "open" && b.settledAt && b.settledAt >= start).sort((a, b) => a.settledAt - b.settledAt);
@@ -2536,6 +2885,7 @@ body.tv .rb-games.primeg > .rb-pcol.pr, body.tv .rb-rsc { -webkit-mask-image: li
     renderRB();
     legWatch();
     fitTV();
+    renderPhone();
   }
   // the bet boards: group rides up top, then yours, then the crew's. A bet riding in a group shows once, in the ride
   function renderBets(open, everyone, start) {
@@ -3555,6 +3905,7 @@ body.tv .rb-games.primeg > .rb-pcol.pr, body.tv .rb-rsc { -webkit-mask-image: li
   // ---------- flash + toast ----------
   let flashT, toastT;
   function flash(kind, word, pick, detail, pulse = true) {
+    if (PHONE()) { toast([String(word).replace(/^[^A-Za-z0-9]+/, ""), pick, detail].filter(Boolean).join(" · ")); return; }
     const f = $("#flash");
     f.className = "flash " + kind;
     $("#fl-word").textContent = word; $("#fl-pick").textContent = pick; $("#fl-detail").textContent = detail;
@@ -3598,6 +3949,7 @@ body.tv .rb-games.primeg > .rb-pcol.pr, body.tv .rb-rsc { -webkit-mask-image: li
   }
   // $100+ gets the blockbuster, parlays get theirs, long-shot straights get the sniper; whale or nuke sized bets get that right after
   function winFx(b, n, tag) {
+    if (PHONE()) return;
     const big = isMoney(b, n), par = b.kind === "parlay", snipe = !big && !par && isSniper(b);
     const tagged = (run) => () => { const ms = run(); if (tag) whoTag(tag, ms); return ms; };
     if (big) fx(tagged(() => introMoney(b, n))); else if (par) fx(tagged(() => introParlay(b, n))); else if (snipe) sniperHit(b, n, tag);
@@ -3617,6 +3969,7 @@ body.tv .rb-games.primeg > .rb-pcol.pr, body.tv .rb-rsc { -webkit-mask-image: li
   // whose bet is on screen: a name pill riding over any animation
   let whoT = 0, whoJb = false;
   function whoTag(tag, ms, jb) {
+    if (PHONE()) return;
     const el = $("#whoTag"); whoJb = !!jb; el.classList.toggle("jb", whoJb);
     el.style.setProperty("--c", tag.col || "#ff9f43");
     $("#wtAv").textContent = String(tag.name || "?").slice(0, 1).toUpperCase(); $("#wtName").textContent = tag.name; $("#wtSub").textContent = tag.sub || "";
@@ -3637,6 +3990,7 @@ body.tv .rb-games.primeg > .rb-pcol.pr, body.tv .rb-rsc { -webkit-mask-image: li
   // a new bet: the slip slides in and gets stamped. Joining somebody's pick says so; so does taking the other side of yours
   let slipT = 0;
   function slipIn(b) {
+    if (PHONE()) return;
     const el = $("#slip"), room = roomGroups(), ride = room.rides.find((r) => r.bets.some((x) => x.id === b.id)), vs = room.vs.get(b.id);
     const viaLeg = (x) => !!(ride && ride.legOf && ride.legOf.has(x.id));
     const others = ride ? [...new Set(ride.bets.filter((x) => personKey(x) !== personKey(b)).map((x) => personName(x) + (viaLeg(x) && !viaLeg(b) ? "'s parlay" : "")))] : [];
@@ -3837,7 +4191,7 @@ body.tv .rb-games.primeg > .rb-pcol.pr, body.tv .rb-rsc { -webkit-mask-image: li
   // ---------- sheets ----------
   function openSheet(id) { $(id).hidden = false; }
   // keep every open screen current: when a new version is up, reload it (never mid-form or mid-animation)
-  const BUILD = "20261013175055";
+  const BUILD = "20261013180916";
   function checkBuild() {
     if (BUILD === "dev") return;
     fetch("version.json?t=" + Date.now(), { cache: "no-store" }).then((r) => (r.ok ? r.json() : null)).then((j) => {
@@ -3852,7 +4206,7 @@ body.tv .rb-games.primeg > .rb-pcol.pr, body.tv .rb-rsc { -webkit-mask-image: li
   }
   setInterval(checkBuild, 90000); setTimeout(checkBuild, 4000);
   document.addEventListener("visibilitychange", () => { if (!document.hidden) checkBuild(); });
-  function closeSheets() { $("#addSheet").hidden = true; $("#setSheet").hidden = true; $("#betSheet").hidden = true; bsIds = []; S.open = null; S.confirmDel = null; }
+  function closeSheets() { $("#phAct").hidden = true; $("#phEdit").hidden = true; PH.ask = null; PH.co = null; $("#addSheet").hidden = true; $("#setSheet").hidden = true; $("#betSheet").hidden = true; bsIds = []; S.open = null; S.confirmDel = null; }
   document.querySelectorAll(".scrim").forEach((s) => s.addEventListener("click", (e) => { if (e.target === s || e.target.closest("[data-close]")) closeSheets(); }));
   document.addEventListener("keydown", (e) => { if (e.key === "Escape") closeSheets(); });
 
@@ -4710,7 +5064,7 @@ body.tv .rb-games.primeg > .rb-pcol.pr, body.tv .rb-rsc { -webkit-mask-image: li
     try { localStorage.setItem("sb-sound", SND.on ? "on" : "off"); } catch (e) {}
     sndChip();
   });
-  function ready() { const c = SND.on && audio(); if (!c) return null; if (c.state !== "running") c.resume().catch(() => {}); return c.state === "running" ? c : null; }
+  function ready() { if (PHONE()) return null; const c = SND.on && audio(); if (!c) return null; if (c.state !== "running") c.resume().catch(() => {}); return c.state === "running" ? c : null; }
   function playWin() {
     const c = ready(); if (!c) return;
     loadBuf("sounds/" + S.winSound).then((buf) => buf && playBuf(c, buf, 0.9));
@@ -4757,7 +5111,7 @@ body.tv .rb-games.primeg > .rb-pcol.pr, body.tv .rb-rsc { -webkit-mask-image: li
 
   // ---------- big-bet effects queue: one full-screen effect at a time ----------
   const fxQ = []; let fxBusy = false;
-  function fx(run) { fxQ.push(run); if (!fxBusy) fxNext(); }
+  function fx(run) { if (PHONE()) return; fxQ.push(run); if (!fxBusy) fxNext(); }
   // a full-screen effect that holds its place in line until the play card on screen is done
   const afterCard = (run) => { const w = () => (cardBusy ? (fxQ.unshift(w), 250) : run()); return w; };
   function fxNext() {
@@ -5129,6 +5483,7 @@ body.tv .rb-games.primeg > .rb-pcol.pr, body.tv .rb-rsc { -webkit-mask-image: li
   // the song plays from the top; the bomb drops on "...blow New Jersey UP" (4.96s in)
   const NJ_DROP = 5.0;
   function nukeHit(pick, n) {
+    if (PHONE()) return;
     fx(() => {
       const c = ready(), song = SND.bufs["sounds/nj"];
       if (!c || !song) { if (c) loadBuf("sounds/nj"); detonate(pick, n, false); return 6300; }
@@ -5479,6 +5834,7 @@ body.tv .rb-games.primeg > .rb-pcol.pr, body.tv .rb-rsc { -webkit-mask-image: li
   // start sound and video together once both are loaded
   let npT = 0;
   function showPip(b, P, mood, why, pre) {
+    if (PHONE()) return;
     const jb = $("#jumbo"), v = $("#pipVid"), bg = $("#jbBg"), c = ready(), go = ++pipGo, betId = b.id, team = pipTeam;
     pipTeam = null;
     const dj = !!(P.dj && P.bpm), vbase = dj ? DJ_BASE : P.base, rate = dj ? djRate(P.bpm) : 1;
@@ -5713,6 +6069,7 @@ body.tv .rb-games.primeg > .rb-pcol.pr, body.tv .rb-rsc { -webkit-mask-image: li
   $("#spTest").addEventListener("click", () => { closeSheets(); const P = pickClip(CLIPS.filter((c) => c.dj)); if (P) react(anyOpen(), "mid", P, "DJ " + gName()); });
   spCallback(); if (SP.tok) spBoot(); spShow();
   function lockIn(b) {
+    if (PHONE()) return;
     const ov = $("#lockIn"); ov.hidden = false; ov.style.animation = "none"; void ov.offsetWidth; ov.style.animation = "";
     ov.firstElementChild.style.animation = "none"; void ov.offsetWidth; ov.firstElementChild.style.animation = "";
     setTimeout(() => (ov.hidden = true), 3400);
@@ -5827,6 +6184,7 @@ body.tv .rb-games.primeg > .rb-pcol.pr, body.tv .rb-rsc { -webkit-mask-image: li
   }
   function reactPre(b, kind, P, why, pre) { glow(b.id, kind); render(); statusBet = b.id; showPip(b, P, moodOf(kind, P), why, pre); }
   function react(b, kind, P, why) {
+    if (PHONE()) { render(); return; }
     glow(b.id, kind);
     render();
     if (!P) {
@@ -5854,7 +6212,7 @@ body.tv .rb-games.primeg > .rb-pcol.pr, body.tv .rb-rsc { -webkit-mask-image: li
   const lastRes = new Map(), lastReact = new Map(), legHits = new Map(), gameSt = new Map(), gameSc = new Map(), lastM = new Map(), lastFeat = new Map();
   let lastKind = "";
   let lastAny = Date.now() - POP_EVERY + 2 * 60e3; // first pop-up no sooner than 2 min after the board opens
-  function clipsOn() { try { return localStorage.getItem("sb-clips") !== "off"; } catch (e) { return true; } }
+  function clipsOn() { if (PHONE()) return false; try { return localStorage.getItem("sb-clips") !== "off"; } catch (e) { return true; } }
   const clipBusy = () => fxBusy || cardBusy || !!statusSrc || !$("#jumbo").hidden;
   function swingState(b, ev, prev) {
     const bar = BARS[(b.sel && b.sel.sp) || b.sport] || 3;
@@ -6041,6 +6399,7 @@ body.tv .rb-games.primeg > .rb-pcol.pr, body.tv .rb-rsc { -webkit-mask-image: li
   }
   // show the card, then run `then` with a label for the clip ("Touchdown UGA · C. Young")
   function showPlayCard(g, e, b, then, ms, over) {
+    if (PHONE()) { if (then) setTimeout(then, 0); return; }
     const ov = $("#playCard"); cardBusy = true; ms = ms || 4800;
     const who = pcFill(g, e, b, null, over);
     ov.classList.remove("out"); ov.hidden = false; for (const el of ov.querySelectorAll("*")) { el.style.animation = "none"; void el.offsetWidth; el.style.animation = ""; }
@@ -6256,6 +6615,7 @@ body.tv .rb-games.primeg > .rb-pcol.pr, body.tv .rb-rsc { -webkit-mask-image: li
   const DJ_DUE = 4 * 60e3;
   let lastDj = Date.now() - 3 * 60e3; // first one about a minute after the board opens
   function djBreak(now) {
+    if (PHONE()) return false;
     const mine = [...S.bets.values()].filter((b) => b.status === "open"), b = mine.find((x) => phase(x) === "live") || mine[0];
     const P = b && pickClip(newSong(CLIPS.filter((c) => c.dj)));
     if (!P) return false;
@@ -6348,6 +6708,7 @@ body.tv .rb-games.primeg > .rb-pcol.pr, body.tv .rb-rsc { -webkit-mask-image: li
   }
   // the card: same broadcast frame as the scoring play, his headshot cut out, the numbers counting up
   function showBcCard(g, tm, html, ms, then) {
+    if (PHONE()) { if (then) setTimeout(then, 0); return; }
     const ov = $("#playCard"), box = $("#pcIn"), C = bcCols(tm); cardBusy = true;
     ov.style.setProperty("--tc", C.tc); ov.style.setProperty("--ta", C.ta); ov.style.setProperty("--tk", C.tk);
     const wm = $("#pcWm"); if (tm && tm.lg) { wm.src = tm.lg; wm.hidden = false; } else { wm.removeAttribute("src"); wm.hidden = true; }
@@ -6385,6 +6746,7 @@ body.tv .rb-games.primeg > .rb-pcol.pr, body.tv .rb-rsc { -webkit-mask-image: li
   function anyBacker(g) { return backer(g, "a") || backer(g, "h") || [...S.bets.values()].find((b) => b.status === "open") || null; }
   function hlTeam(g, v) { const h = v.hl.toLowerCase(); return [g.a, g.h].find((t) => [t.nm, t.ab, t.fn].some((n) => n && h.includes(String(n).toLowerCase()))) || null; }
   function playHL(g, v, why, who) {
+    if (PHONE()) return false;
     const b = anyBacker(g); if (!b || !v) return false;
     hlSeen.add(v.id); keep("sb-hl", hlSeen);
     const t = who ? (String(g.a.id) === who.tm ? g.a : g.h) : hlTeam(g, v); if (t) pipTeam = { t, word: why || "Highlight", pl: who ? who.nm : "" };
