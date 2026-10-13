@@ -2240,11 +2240,26 @@ body.tv.hockey .zam:not([hidden]) { display: block; position: fixed; left: 0; ri
 .sp-panel[hidden] { display: none; }
 .sp-row { display: flex; flex-direction: column; gap: 6px; }
 .sp-row > span { font: 700 11px/1 var(--f-num); letter-spacing: .14em; text-transform: uppercase; color: var(--ink-3); }
+/* tighter trackers before anything gets scaled: smaller rink and field, then fewer extras */
+.rb-pcol.f9 .rk-svg { max-height: 20vh; }
+.rb-pcol.f9 .dm-svg { max-height: 22vh; }
+.rb-pcol.f9 .dm-key, .rb-pcol.f9 .dm-last, .rb-pcol.f9 .rk-ends { display: none; }
+.rb-pcol.f9 .rk-bars .rk-bar:nth-child(n+3) { display: none; }
+.rb-pcol.f10 .dm-ls, .rb-pcol.f10 .rk-bars .rk-bar:nth-child(n+2) { display: none; }
+.rb-pcol.f10 .rk-svg { max-height: 17vh; }
+.rb-pcol.f10 .dm-svg { max-height: 19vh; }
 /* a column of rinks and fields: a little smaller when there are a lot of them, side by side for two */
 .rb-pcol .rb-g.hero { transform-origin: top center; }
 body.tv .rb-games.primeg > .rb-pcol.duo { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); align-items: start; align-content: start; gap: 14px; }
 .rb-pcol.duo > .rb-fol { grid-column: 1 / -1; }
 @container (max-width: 600px) {
+  .rb-g.hero .rb-gh { grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); row-gap: 6px; }
+  .rb-g.hero .rb-gh .mid { grid-column: 1 / -1; grid-row: 2; }
+  .rb-g.hero .rb-gh .sc { font-size: 44px; }
+  .rb-g.hero .rb-gh .tl { width: 34px; height: 34px; }
+  .rb-scp .r { grid-template-columns: 22px 62px minmax(0, 1fr); }
+  .rb-scp .r .s { display: none; }
+  .fo-ls { font-size: 12px; letter-spacing: 0; }
   .dm-top { grid-template-columns: 1fr; }
   .dm-side { flex-direction: row; flex-wrap: wrap; align-items: center; gap: 10px 16px; }
   .rk-bars { grid-template-columns: 1fr; }
@@ -2253,6 +2268,16 @@ body.tv .rb-games.primeg > .rb-pcol.duo { display: grid; grid-template-columns: 
 .rb-pcol.many .rk-svg { max-height: 21vh; }
 .rb-pcol.many .dm-svg { max-height: 24vh; }
 .rb-pcol.many .rb-g.hero .rb-gh { padding-top: 12px; padding-bottom: 8px; }
+/* the bets column is narrow: two sides of a matchup stack instead of squeezing names to "Dodger..." */
+body.tv .rb-pcol.pr .rb-h2h-top { grid-template-columns: 1fr; gap: 2px; }
+body.tv .rb-pcol.pr .rb-vs { justify-self: center; font-size: 10px; }
+body.tv .rb-pcol.pr .rb-hs-side.r { grid-template-columns: auto minmax(0, 1fr); text-align: left; }
+body.tv .rb-pcol.pr .rb-hs-side.r .rb-avs { grid-column: 1; }
+body.tv .rb-pcol.pr .rb-hs-side.r .rb-pk, body.tv .rb-pcol.pr .rb-hs-side.r .rb-st { grid-column: 2; }
+body.tv .rb-pcol.pr .rb-hs-side.r .rb-pk > b, body.tv .rb-pcol.pr .rb-hs-side.r .rb-wls { justify-content: flex-start; }
+body.tv .rb-pcol.pr .rb-hs-side.r .rb-st { justify-self: start; }
+/* a game card with its bets moved to the other column: the scoreboard and the rink / field, no empty rows box */
+.rb-g.hero:not(:has(.rb-rows)) { padding-bottom: 6px; }
 </style>
 </head>
 <body>
@@ -3199,9 +3224,11 @@ body.tv .rb-games.primeg > .rb-pcol.duo { display: grid; grid-template-columns: 
     for (const k of [...el.children]) c.appendChild(k.cloneNode(true));
     el.appendChild(c); st.clone = c;
     st.period = c.offsetTop - kids[0].offsetTop;
+    st.stops = kids.slice(1).map((k) => k.offsetTop - kids[0].offsetTop).filter((v) => v > 0 && v < st.period);
     if (st.period > 0) st.pos %= st.period;
   }
   const loopSyncEl = (el) => loopSync(ASC.find((s) => s.el === el));
+  const DWELL = 2600;
   function ascTick(now) {
     const on = document.body.classList.contains("tv");
     for (const st of ASC) {
@@ -3209,13 +3236,17 @@ body.tv .rb-games.primeg > .rb-pcol.duo { display: grid; grid-template-columns: 
       if (!on || !el.isConnected || el.offsetParent === null) continue;
       if (!st.period) { if (el.scrollTop) el.scrollTop = 0; continue; }
       if (now - st.user < 15000 || now < st.hold) continue;
+      const was = st.pos;
       st.pos += st.speed * dt;
-      if (st.pos >= st.period) st.pos -= st.period;
+      // a card reaching the top holds there a moment; so does the top of the list coming back around
+      const stop = st.stops && st.stops.find((v) => v > was + 0.5 && v <= st.pos);
+      if (stop != null) { st.pos = stop; st.hold = now + DWELL; }
+      if (st.pos >= st.period) { st.pos -= st.period; st.hold = now + DWELL; }
       el.scrollTop = st.pos;
     }
     requestAnimationFrame(ascTick);
   }
-  autoScroll($(".mainc"), 30); autoScroll($("#jbBets"), 34); autoScroll($("#rbMain"), 26); autoScroll($("#rbRsc"), 22);
+  autoScroll($(".mainc"), 16); autoScroll($("#jbBets"), 18); autoScroll($("#rbMain"), 14); autoScroll($("#rbRsc"), 13);
   requestAnimationFrame(ascTick);
   let fitT = 0;
   const refit = () => { clearTimeout(fitT); fitT = setTimeout(fitTV, 120); };
@@ -4003,7 +4034,7 @@ body.tv .rb-games.primeg > .rb-pcol.duo { display: grid; grid-template-columns: 
       <div class="fld"><div class="ez" style="--c:${esc(g.a.col || "#445")}"><span>${esc(g.a.ab)}</span></div><div class="pf"><div class="yd">${nums}</div>${fld}</div><div class="ez" style="--c:${esc(g.h.col || "#445")}"><span>${esc(g.h.ab)}</span></div></div>
       <div class="fi">${tos("a")}<span class="ddx">${esc(sit.dd || g.d || "")}</span>${sit.dr && sit.dr.t ? `<span class="drt">Drive · ${esc(sit.dr.t)}</span>` : ""}${tos("h")}</div>${wpH}</div>`;
   }
-  function gameCard(G, hero) {
+  function gameCard(G, hero, bare) {
     if (!hero && !G.entries.length) return "";
     const g = G.g, rows = gamePositions(G.entries);
     const live = g.st === "in", pos = (t) => (live && g.sit && g.sit.pos && String(t.id) === String(g.sit.pos) ? BALL : "");
@@ -4016,7 +4047,7 @@ body.tv .rb-games.primeg > .rb-pcol.duo { display: grid; grid-template-columns: 
     const mid = `<div class="mid"><span class="clk${live ? " on" : ""}">${esc(clk)}</span>${dd}${rz}</div>`;
     return `<article class="rb-g ${g.st}${hero ? " hero" : ""}" style="--ca:${esc(g.a.col || "#445")};--ch:${esc(g.h.col || "#445")}">
       ${hero ? `<header class="rb-gh">${tm(g.a, "a")}${mid}${tm(g.h, "h")}</header>${fieldHtml(g)}` : `<header class="rb-gs"><div class="tms">${tm(g.a, "a")}${tm(g.h, "h")}</div>${mid}</header>`}
-      <div class="rb-rows">${rows.map((r) => (r.h2h ? h2hRow(r.h2h[0], r.h2h[1], g) : posRow(r.p, g))).join("")}${inParlays(G)}</div>${hero ? scoringHtml(g) : ""}</article>`;
+      ${bare ? "" : `<div class="rb-rows">${rows.map((r) => (r.h2h ? h2hRow(r.h2h[0], r.h2h[1], g) : posRow(r.p, g))).join("")}${inParlays(G)}</div>`}${hero ? scoringHtml(g) : ""}</article>`;
   }
   // the sportsbook number for a leg right now (a parlay logged before leg odds were saved)
   function legNowOdds(sel, g) {
@@ -4174,7 +4205,7 @@ body.tv .rb-games.primeg > .rb-pcol.duo { display: grid; grid-template-columns: 
   // win-probability caption, a followed team that isn't playing right now, then older scoring plays). Only then does it roll
   function primeFit() {
     const L = $("#rbColL"); if (!L || !L.isConnected) return;
-    const F = ["f1", "f2", "f3", "f4", "f5", "f6", "f7", "f8"]; L.classList.remove(...F, "many", "duo");
+    const F = ["f1", "f2", "f3", "f4", "f5", "f6", "f7", "f8", "f9", "f10"]; L.classList.remove(...F, "many", "duo");
     const kids = [...L.children].filter((k) => !k.classList.contains("loopclone")); kids.forEach((k) => { k.style.transform = ""; k.style.marginBottom = ""; });
     if (!document.body.classList.contains("tv")) return;
     const n = Number(L.dataset.n || 1), over = () => L.scrollHeight > L.clientHeight + 2;
@@ -4182,8 +4213,8 @@ body.tv .rb-games.primeg > .rb-pcol.duo { display: grid; grid-template-columns: 
     if (n >= 3) { L.classList.add("many", "f1", "f2", "f3", "f4", "f5", "f7"); return; }
     const step = () => { for (let i = 0; i < F.length && over(); i++) L.classList.add(F[i]); };
     step();
-    // two games that don't fit stacked go side by side, like a split screen
-    if (n === 2 && over()) { L.classList.remove(...F); L.classList.add("duo"); step(); }
+    // two games stay stacked full width when a little shrinking fits them; only a lot of overflow puts them side by side
+    if (n === 2 && over() && L.clientHeight / L.scrollHeight < 0.62) { L.classList.remove(...F); L.classList.add("duo"); step(); }
     // one or two never roll: whatever still runs over is scaled down (the cards keep their own layout, just smaller)
     if (over()) {
       const games = kids.filter((k) => k.classList.contains("hero")), hMax = Math.max(...games.map((k) => k.offsetHeight), 1);
@@ -4192,6 +4223,7 @@ body.tv .rb-games.primeg > .rb-pcol.duo { display: grid; grid-template-columns: 
       games.forEach((k) => { k.style.transform = `scale(${z.toFixed(3)})`; k.style.marginBottom = `-${Math.ceil(k.offsetHeight * (1 - z))}px`; });
     }
   }
+  let heroIds = new Set();   // the games on the big cards right now (a followed team's card steps aside for them)
   function renderRB() {
     if (!S.ready) return;
     const tv = document.body.classList.contains("tv"), { list, other, parlays } = boardGroups();
@@ -4199,7 +4231,11 @@ body.tv .rb-games.primeg > .rb-pcol.duo { display: grid; grid-template-columns: 
     const prime = tv && slateMode() === "prime" && list.filter((G) => G.g.st !== "post").length === 1 ? list.find((G) => G.g.st !== "post") : null;
     // one or two hold still and fit the frame; three or more roll
     const act = list.filter((G) => G.g.st !== "post");
-    const heroes = prime ? [prime] : tv && act.some((G) => G.g.sport === "NHL" || G.g.sport === "MLB") ? act : [];
+    heroIds = new Set();
+    // trackers for: any hockey / baseball night, or a football window of 2 to 4 games (a full Sunday stays the rolling board)
+    const fb = (G) => G.g.sport === "NFL" || G.g.sport === "CFB";
+    let heroes = prime ? [prime] : tv && (act.some((G) => G.g.sport === "NHL" || G.g.sport === "MLB") || (act.length >= 2 && act.length <= 4 && act.every(fb))) ? act : [];
+    heroIds = new Set(heroes.map((G) => G.g.id));
     const body = document.body;
     if (prime) {
       const th = teamTheme(prime);
@@ -4208,7 +4244,9 @@ body.tv .rb-games.primeg > .rb-pcol.duo { display: grid; grid-template-columns: 
       $("#rbMark").innerHTML = th.t.lg ? `<img src="${esc(th.t.lg)}" alt="" referrerpolicy="no-referrer" onerror="this.remove()">` : "";
       rbPrime = th.t.ab;
     } else if (rbPrime) { body.classList.remove("prime"); $("#rbMark").innerHTML = ""; rbPrime = null; }
-    const rest = list.filter((G) => !heroes.includes(G)).map((G) => gameCard(G, false)).join("") + parlayCard(parlays) + otherCard(other);
+    // one football game keeps its bets in the big card (the MNF look); everything else puts the bets in their own rolling column
+    const split = heroes.length > 0 && !(prime && (prime.g.sport === "NFL" || prime.g.sport === "CFB"));
+    const rest = (split ? heroes.map((G) => gameCard(G, false)).join("") : "") + list.filter((G) => !heroes.includes(G)).map((G) => gameCard(G, false)).join("") + parlayCard(parlays) + otherCard(other);
     const fol = followCards();
     $("#rbGames").classList.toggle("primeg", heroes.length > 0); $("#rbGames").classList.toggle("solo", heroes.length > 0 && !rest);
     if (heroes.length) {
@@ -4217,9 +4255,9 @@ body.tv .rb-games.primeg > .rb-pcol.duo { display: grid; grid-template-columns: 
         $("#rbGames").innerHTML = '<div class="rb-pcol pl" id="rbColL"></div><div class="rb-pcol pr" id="rbColR"></div>';
         L = $("#rbColL"); R = $("#rbColR");
         for (let i = ASC.length - 1; i >= 0; i--) if (!ASC[i].el.isConnected) ASC.splice(i, 1);
-        autoScroll(L, 22); autoScroll(R, 24);
+        autoScroll(L, 13); autoScroll(R, 14);
       }
-      L.dataset.n = String(heroes.length); L.innerHTML = heroes.map((G) => gameCard(G, true)).join("") + fol; R.innerHTML = rest; R.hidden = !rest;
+      L.dataset.n = String(heroes.length); L.innerHTML = heroes.map((G) => gameCard(G, true, split)).join("") + fol; R.innerHTML = rest; R.hidden = !rest;
       primeFit(); loopSyncEl(L); loopSyncEl(R);
     } else {
     const html = list.map((G) => gameCard(G, false)).join("") + fol + parlayCard(parlays) + otherCard(other);
@@ -4642,7 +4680,7 @@ body.tv .rb-games.primeg > .rb-pcol.duo { display: grid; grid-template-columns: 
   // ---------- sheets ----------
   function openSheet(id) { $(id).hidden = false; }
   // keep every open screen current: when a new version is up, reload it (never mid-form or mid-animation)
-  const BUILD = "20261013204230";
+  const BUILD = "20261013210351";
   function checkBuild() {
     if (BUILD === "dev") return;
     fetch("version.json?t=" + Date.now(), { cache: "no-store" }).then((r) => (r.ok ? r.json() : null)).then((j) => {
@@ -5263,7 +5301,7 @@ body.tv .rb-games.primeg > .rb-pcol.duo { display: grid; grid-template-columns: 
     // which game: the one on now, last night's final until the morning, else the next one
     const recent = fn.last && now - fn.last.t < 10 * 36e5;
     const x = fn.live || (recent ? fn.last : null) || fn.next || (fn.last && now - fn.last.t < 48 * 36e5 ? fn.last : null);
-    if (!x) return "";
+    if (!x || heroIds.has(x.id)) return "";
     const g = S.games.get(x.id), m = (g && g.mlb) || {}, st = g ? g.st : x.st, live = st === "in", pre = st === "pre";
     const A = g ? g.a : x.a, H = g ? g.h : x.h, fav = A.ab === f.ab ? "a" : "h", favT = fav === "a" ? A : H;
     const ra = A.sc ?? 0, rh = H.sc ?? 0;
