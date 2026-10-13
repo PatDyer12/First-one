@@ -4680,7 +4680,7 @@ body.tv .rb-pcol.pr .rb-hs-side.r .rb-st { justify-self: start; }
   // ---------- sheets ----------
   function openSheet(id) { $(id).hidden = false; }
   // keep every open screen current: when a new version is up, reload it (never mid-form or mid-animation)
-  const BUILD = "20261013225147";
+  const BUILD = "20261013225853";
   function checkBuild() {
     if (BUILD === "dev") return;
     fetch("version.json?t=" + Date.now(), { cache: "no-store" }).then((r) => (r.ok ? r.json() : null)).then((j) => {
@@ -7229,7 +7229,7 @@ body.tv .rb-pcol.pr .rb-hs-side.r .rb-st { justify-self: start; }
     return t.slice(0, 3);
   }
   // the card: same broadcast frame as the scoring play, his headshot cut out, the numbers counting up
-  const HORN_TEAMS = new Set(["ANA", "BOS", "BUF", "CAR", "CBJ", "CGY", "CHI", "COL"]);
+  const HORN_TEAMS = new Set(["ANA", "BOS", "BUF", "CAR", "CBJ", "CGY", "CHI", "COL", "DAL", "DET", "EDM", "FLA", "LA", "MIN", "MTL", "NJ", "NSH", "NYI", "NYR", "OTT", "PHI", "PIT", "SEA", "SJ", "STL", "TB", "TOR", "UTAH", "VAN", "VGK", "WPG", "WSH"]);
   const teamHorn = (t) => (t && HORN_TEAMS.has(t.ab) && sset("NHL", "teamhorn") ? "../nhl/horn_" + t.ab.toLowerCase() : "goal_horn");
   const goalAt = new Map(), hgTries = new Map(), hgNow = () => Date.now();
   function hockeyGoal(g, e, b, then, play) {
