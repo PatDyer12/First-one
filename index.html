@@ -1893,6 +1893,39 @@ body.tv .rb-pl .pl-legs .t { font-size: 16px; }
 @media (max-width: 780px) { .jumbo { grid-template-columns: 1fr; } }
 .tdpl.on { border-color: var(--gold) !important; background: rgba(255,194,75,.14) !important; }
 .tdpl.on b::after { content: " ✓"; color: var(--gold); }
+/* the baseball field on the big game */
+.rb-dia { margin: 0 clamp(12px, 2.4cqw, 18px) 12px; display: flex; flex-direction: column; gap: 10px; }
+.dm-top { display: grid; grid-template-columns: minmax(0, 1.25fr) minmax(0, 1fr); gap: clamp(12px, 2.4cqw, 22px); align-items: center; }
+.dm-svg { display: block; width: 100%; height: auto; max-height: 34vh; filter: drop-shadow(0 10px 22px rgba(0,0,0,.35)); }
+.dm-base { fill: #f4f4f0; stroke: rgba(0,0,0,.35); stroke-width: .4; }
+.dm-base.on { fill: #ffd34d; stroke: #fff; stroke-width: .8; filter: drop-shadow(0 0 3px rgba(255,211,77,.9)); }
+.dm-svg .new { animation: dmNew 1.4s ease-in-out infinite; transform-box: fill-box; transform-origin: center; }
+@keyframes dmNew { 50% { opacity: .35; } }
+.dm-fl { animation: dmFly 1.6s ease-out both; stroke-dashoffset: 0; }
+@keyframes dmFly { from { opacity: 0; } to { opacity: .75; } }
+.dm-side { display: flex; flex-direction: column; gap: 12px; min-width: 0; }
+.dm-inn { display: flex; align-items: center; gap: 8px; font: 800 clamp(18px, 3cqw, 26px)/1 var(--f-num); letter-spacing: .08em; text-transform: uppercase; color: #fff; }
+.dm-inn .arw { width: 0; height: 0; border-left: 6px solid transparent; border-right: 6px solid transparent; }
+.dm-inn .arw.top { border-bottom: 9px solid #ff5d6c; } .dm-inn .arw.bot { border-top: 9px solid #ff5d6c; }
+.dm-cnt { display: flex; gap: 14px; flex-wrap: wrap; }
+.dm-cnt > div { display: flex; flex-direction: column; gap: 6px; }
+.dm-cnt span { font: 700 10.5px/1 var(--f-num); letter-spacing: .18em; text-transform: uppercase; color: var(--ink-3); }
+.dm-cnt b { display: flex; gap: 4px; }
+.dm-cnt i { width: 11px; height: 11px; border-radius: 50%; box-shadow: inset 0 0 0 1.5px rgba(255,255,255,.28); }
+.dm-cnt i.on.b { background: #3ddc97; box-shadow: none; } .dm-cnt i.on.s { background: #ffd34d; box-shadow: none; } .dm-cnt i.on.o { background: #ff5d6c; box-shadow: none; }
+.dm-pp { display: grid; grid-template-columns: auto auto minmax(0, 1fr); grid-template-rows: auto auto; column-gap: 8px; row-gap: 2px; align-items: center; }
+.dm-pp em { grid-row: 1 / 3; font: 700 10px/1.1 var(--f-num); font-style: normal; letter-spacing: .16em; text-transform: uppercase; color: var(--ink-3); width: 4.6em; }
+.dm-pp img { grid-row: 1 / 3; width: 30px; height: 30px; border-radius: 50%; object-fit: cover; object-position: top; background: #1b2433; }
+.dm-pp b { font: 600 clamp(14px, 2.2cqw, 17px)/1.1 var(--f-ui); color: #fff; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.dm-pp small { font: 600 12.5px/1 var(--f-num); letter-spacing: .04em; color: var(--ink-3); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.dm-key { display: flex; flex-wrap: wrap; gap: 6px 16px; font: 700 11px/1 var(--f-num); letter-spacing: .16em; text-transform: uppercase; color: var(--ink-3); }
+.dm-key span { display: flex; align-items: center; gap: 6px; }
+.dm-key i { width: 9px; height: 9px; border-radius: 50%; font-style: normal; }
+.dm-key i.h { background: #fff; } .dm-key i.o { box-shadow: inset 0 0 0 1.5px #fff; } .dm-key i.hr { width: auto; height: auto; color: #ffd34d; font-size: 13px; }
+.dm-key .tm { color: var(--c); } .dm-key .tm::before { content: ""; width: 9px; height: 9px; border-radius: 50%; background: var(--c); }
+.dm-last { display: flex; align-items: center; gap: 10px; font: 500 clamp(13px, 2cqw, 15px)/1.35 var(--f-ui); color: var(--ink-2); }
+.dm-last i { flex: none; width: 8px; height: 8px; border-radius: 50%; }
+.dm-ls { margin: 0; }
 /* prime time: the game column holds still, the side column rolls on its own only when it overflows */
 body.tv .rb-games.primeg { height: 100%; grid-template-rows: minmax(0, 1fr); align-items: stretch; }
 body.tv .rb-games.primeg > .rb-pcol { min-height: 0; overflow: hidden; scrollbar-width: none; }
@@ -2155,11 +2188,11 @@ body.goal-lamp::after { content: ""; position: fixed; inset: 0; pointer-events: 
 @keyframes lampFlash { from { opacity: .25; } to { opacity: 1; } }
 body.phone.goal-lamp::after { display: none; }
 /* ---------- hockey mode: ice ---------- */
-.ice, .zam { display: none; }
+#ice, .zam { display: none; }
 body.tv.hockey::before { background: radial-gradient(1300px 700px at 50% -12%, rgba(150,210,255,.22), transparent 62%), radial-gradient(900px 600px at 0% 100%, rgba(80,150,230,.16), transparent 70%), radial-gradient(900px 600px at 100% 100%, rgba(80,150,230,.13), transparent 70%), linear-gradient(180deg, #091321, #050a12) !important; }
-body.tv.hockey .ice { display: block; position: fixed; inset: 0; z-index: 0; pointer-events: none; overflow: hidden;
-  background: radial-gradient(520px 340px at 0% 0%, rgba(225,242,255,.14), transparent 70%), radial-gradient(520px 340px at 100% 0%, rgba(225,242,255,.12), transparent 70%), radial-gradient(620px 300px at 0% 100%, rgba(225,242,255,.10), transparent 70%), radial-gradient(620px 300px at 100% 100%, rgba(225,242,255,.10), transparent 70%); }
-body.tv.hockey .ice::after { content: ""; position: absolute; inset: 0; opacity: .06; background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='260' height='260'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.9' numOctaves='3' stitchTiles='stitch'/%3E%3CfeColorMatrix values='0 0 0 0 .85 0 0 0 0 .93 0 0 0 0 1 0 0 0 1.4 -.35'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E"); }
+body.tv.hockey #ice { display: block; position: fixed; inset: 0; z-index: 0; pointer-events: none; overflow: hidden;
+  background: radial-gradient(520px 340px at 0% 0%, rgba(225,242,255,.08), transparent 70%), radial-gradient(520px 340px at 100% 0%, rgba(225,242,255,.07), transparent 70%), radial-gradient(620px 300px at 0% 100%, rgba(225,242,255,.06), transparent 70%), radial-gradient(620px 300px at 100% 100%, rgba(225,242,255,.06), transparent 70%); }
+body.tv.hockey #ice::after { content: ""; position: absolute; inset: 0; opacity: .025; background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='260' height='260'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.9' numOctaves='3' stitchTiles='stitch'/%3E%3CfeColorMatrix values='0 0 0 0 .85 0 0 0 0 .93 0 0 0 0 1 0 0 0 1.4 -.35'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E"); }
 .ice-ln { position: absolute; top: 0; bottom: 0; width: 6px; }
 .ice-ln.c { left: calc(50% - 3px); background: rgba(255,70,70,.07); }
 .ice-ln.b1 { left: 32%; width: 10px; background: rgba(70,140,255,.06); }
@@ -2201,11 +2234,24 @@ body.tv.hockey .zam:not([hidden]) { display: block; position: fixed; left: 0; ri
   background: linear-gradient(180deg, rgba(255,255,255,.18), rgba(200,235,255,.06) 60%, rgba(255,255,255,.14)), linear-gradient(90deg, rgba(200,235,255,0), rgba(200,235,255,.12) 50%, rgba(225,245,255,.34) 92%, rgba(255,255,255,.6)); }
 .zam-trail::after { content: ""; position: absolute; top: 0; bottom: 0; right: 0; width: 180px; background: linear-gradient(100deg, transparent, rgba(255,255,255,.55) 50%, transparent); animation: zamGloss 2.6s linear infinite; will-change: transform; }
 @keyframes zamGloss { from { transform: translateX(0); } to { transform: translateX(-60vw); } }
+/* a column of rinks and fields: a little smaller when there are a lot of them, side by side for two */
+.rb-pcol .rb-g.hero { transform-origin: top center; }
+body.tv .rb-games.primeg > .rb-pcol.duo { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); align-items: start; align-content: start; gap: 14px; }
+.rb-pcol.duo > .rb-fol { grid-column: 1 / -1; }
+@container (max-width: 600px) {
+  .dm-top { grid-template-columns: 1fr; }
+  .dm-side { flex-direction: row; flex-wrap: wrap; align-items: center; gap: 10px 16px; }
+  .rk-bars { grid-template-columns: 1fr; }
+  .rb-g.hero .rb-gh .ab { font-size: 18px; }
+}
+.rb-pcol.many .rk-svg { max-height: 21vh; }
+.rb-pcol.many .dm-svg { max-height: 24vh; }
+.rb-pcol.many .rb-g.hero .rb-gh { padding-top: 12px; padding-bottom: 8px; }
 </style>
 </head>
 <body>
 
-<div class="ice" id="ice" aria-hidden="true"><i class="ice-ln c"></i><i class="ice-ln b1"></i><i class="ice-ln b2"></i><i class="ice-ci"></i></div>
+<div class="rinkice" id="ice" aria-hidden="true"><i class="ice-ln c"></i><i class="ice-ln b1"></i><i class="ice-ln b2"></i><i class="ice-ci"></i></div>
 <div class="zam" id="zam" hidden aria-hidden="true"><div class="zam-car"><div class="zam-trail"></div><svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" viewBox="0 0 360 180" width="360" height="180" fill="none" stroke-linejoin="round" stroke-linecap="round"> <defs> <linearGradient id="zgB" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#fff"/><stop offset=".55" stop-color="#e3eef9"/><stop offset="1" stop-color="#b3cae3"/></linearGradient> <linearGradient id="zgT" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#fbfdff"/><stop offset=".6" stop-color="#dae8f6"/><stop offset="1" stop-color="#abc4df"/></linearGradient> <linearGradient id="zgN" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#26487f"/><stop offset="1" stop-color="#0d1f42"/></linearGradient> <linearGradient id="zgM" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#9fb1c6"/><stop offset="1" stop-color="#4d5e75"/></linearGradient> <linearGradient id="zgJ" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#3d6fbd"/><stop offset="1" stop-color="#22457f"/></linearGradient> <linearGradient id="zgA" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#8adcff"/><stop offset="1" stop-color="#1f74c9"/></linearGradient> <linearGradient id="zgS" x1="0" y1="0" x2="1" y2="0"><stop offset="0" stop-color="#bfe9ff" stop-opacity="0"/><stop offset=".65" stop-color="#dff4ff" stop-opacity=".55"/><stop offset="1" stop-color="#fff" stop-opacity=".95"/></linearGradient> <radialGradient id="zgW"><stop offset=".55" stop-color="#2e3540"/><stop offset=".9" stop-color="#181c23"/><stop offset="1" stop-color="#0c0f14"/></radialGradient> <radialGradient id="zgH" cx=".4" cy=".35" r=".7"><stop offset="0" stop-color="#fff"/><stop offset=".6" stop-color="#c6d2df"/><stop offset="1" stop-color="#7c8ca1"/></radialGradient> <radialGradient id="zgL" cx=".45" cy=".35" r=".75"><stop offset="0" stop-color="#fff6d0"/><stop offset=".45" stop-color="#ffb52e"/><stop offset="1" stop-color="#d96a00"/></radialGradient> <radialGradient id="zgG"><stop offset="0" stop-color="#ffc24a" stop-opacity=".75"/><stop offset="1" stop-color="#ffb020" stop-opacity="0"/></radialGradient> <path id="zpB" d="M56 90H274L282 80Q284 78 288 78H304C318 78 330 92 336 108L340 126Q342 136 333 137H299A25 25 0 0 0 249 137H137A25 25 0 0 0 87 137H62Q56 137 56 131Z"/> <path id="zpT" d="M62 90L58 42Q58 36 64 36H198Q204 36 206.5 41.5L229 90Z"/> <clipPath id="zcB"><use xlink:href="#zpB"/></clipPath> <clipPath id="zcT"><use xlink:href="#zpT"/></clipPath> <g id="zwh"> <circle r="21" fill="url(#zgW)" stroke="#05080c" stroke-width="1.5"/> <circle r="18.6" stroke="#47505e" stroke-width="2.4" stroke-dasharray="3.2 3.29"/> <circle r="11" fill="url(#zgH)" stroke="#0a1626" stroke-width="1.2"/> <circle r="7.2" stroke="#8a99ab" stroke-width=".8"/> <g fill="#4a5a70"><circle cy="-5" r="1.3"/><circle cx="4.76" cy="-1.55" r="1.3"/><circle cx="2.94" cy="4.05" r="1.3"/><circle cx="-2.94" cy="4.05" r="1.3"/><circle cx="-4.76" cy="-1.55" r="1.3"/></g> <circle r="2.4" fill="#1d2d46"/> </g> </defs>  <ellipse cx="186" cy="162.5" rx="156" ry="3.6" fill="#000" opacity=".45"/> <rect class="zsheen" x="0" y="158.4" width="14" height="4" rx="2" fill="url(#zgS)"/>  <g id="zbody" stroke="#0a1626" stroke-width="1.5"> <!-- conditioner linkage --> <path d="M80 102L40 130M76 120L54 133" stroke-width="5"/> <path d="M80 102L40 130M76 120L54 133" stroke="#8fa3ba" stroke-width="2.6"/> <path d="M78 112L56 128" stroke-width="3.6"/><path d="M78 112L56 128" stroke="#e6eef6" stroke-width="1.4"/> <rect x="82" y="108" width="222" height="29" fill="#0f1726" stroke="none"/>  <!-- snow tank --> <use xlink:href="#zpT" fill="url(#zgT)"/> <g clip-path="url(#zcT)" stroke="none"> <path d="M50 90V80L232 50V66L50 92z" fill="url(#zgN)"/> <path d="M50 94L232 69.5V72L50 96.5z" fill="#d62839"/> <path d="M84 36h12l-14 54H70z" fill="#fff" opacity=".35"/> <path d="M60 40.5H204" stroke="#fff" stroke-width="1.4"/> </g> <rect x="55" y="31" width="153" height="7" rx="3" fill="url(#zgB)"/> <path d="M58 33H205" stroke="#fff" stroke-width="1.2"/>  <!-- seat + driver --> <path d="M232 90V64Q232 58 238 58H242Q246 58 246 64V84H264Q268 84 268 88V90Z" fill="#3a4a66"/> <path d="M235 62V86" stroke="#6f84a6" stroke-width="1.2"/> <path d="M252 85L279 82" stroke="#1a2a45" stroke-width="8"/> <path d="M246 87C244 74 248 64 258 62C266 61 270 68 270 76L268 87Z" fill="url(#zgJ)"/> <path d="M256 63.5L254 86" stroke="#d62839" stroke-width="1.4"/> <circle cx="259" cy="52" r="7.5" fill="#efc7a0"/> <path d="M251.4 51.5A7.6 7.6 0 0 1 266.6 51.5Z" fill="url(#zgN)"/> <circle cx="259" cy="43" r="2.2" fill="#d62839" stroke-width="1"/>  <!-- main body --> <use xlink:href="#zpB" fill="url(#zgB)"/> <g clip-path="url(#zcB)" stroke="none"> <path d="M40 97H340V108H40z" fill="url(#zgN)"/> <path d="M40 111H340V113.2H40z" fill="#d62839"/> <path d="M60 92.6H272M290 80.6H304" stroke="#fff" stroke-width="1.4"/> </g> <!-- water tank sight glass --> <rect x="148" y="118" width="92" height="12" rx="6" fill="#0c1a2e"/> <rect x="150.5" y="122.5" width="87" height="5.5" rx="2.75" fill="url(#zgA)" stroke="none"/> <path d="M155 121.2H233" stroke="#bfeaff" stroke-width=".9" stroke-dasharray="1 7" opacity=".9"/> <rect x="57.5" y="115.5" width="4" height="8" rx="1.5" fill="#e0283a" stroke-width="1"/> <!-- headlight + bumper --> <circle cx="335" cy="114" r="9" fill="url(#zgG)" stroke="none"/> <ellipse cx="335.2" cy="114" rx="2.6" ry="4.4" fill="#fffbe3" stroke-width="1.1"/> <rect x="303" y="129" width="40" height="9" rx="3.5" fill="#1b2433"/>  <!-- steering + arm --> <path d="M297 80L286 69" stroke-width="4"/><path d="M297 80L286 69" stroke="#9fb1c6" stroke-width="1.8"/> <ellipse cx="284" cy="68" rx="2.6" ry="8.5" transform="rotate(-25 284 68)" stroke-width="4"/><ellipse cx="284" cy="68" rx="2.6" ry="8.5" transform="rotate(-25 284 68)" stroke="#7d8fa8" stroke-width="1.6"/> <path d="M262 66Q265 77 272 77L284 71" stroke="#0a1626" stroke-width="7.5"/> <path d="M262 66Q265 77 272 77L284 71" stroke="#3563ad" stroke-width="5"/> <circle cx="285.5" cy="70.5" r="2.6" fill="#efc7a0" stroke-width="1"/>  <!-- mirror --> <path d="M309 79Q318 68 321 52" stroke-width="3.6"/><path d="M309 79Q318 68 321 52" stroke="#a9bacd" stroke-width="1.6"/> <rect x="317" y="40" width="9" height="13" rx="3" fill="#1b2a44"/> <path d="M320 43.5V49.5" stroke="#9fd3ff" stroke-width="1.6"/>  <!-- beacon --> <rect x="186" y="27" width="12" height="4.5" rx="1" fill="#1b2433"/> <g class="zb"> <circle cx="192" cy="21" r="12" fill="url(#zgG)" stroke="none"/> <path d="M187 27.5V22A5 5 0 0 1 197 22V27.5Z" fill="url(#zgL)" stroke="#5a2c00" stroke-width="1"/> <path d="M189.2 25V22.4A2.6 2.6 0 0 1 191 19.6" stroke="#fff" stroke-width="1.1" opacity=".9"/> </g>  <!-- conditioner --> <path d="M16 152V134Q16 130 20 130H62Q66 130 66 134V152Z" fill="url(#zgM)"/> <path d="M26 134V149M36 134V149M46 134V149M56 134V149" stroke="#3b4a5f" stroke-width="1"/> <rect x="15" y="126" width="52" height="6" rx="2" fill="url(#zgN)"/> <path d="M18 132.2H64" stroke="#d62839" stroke-width="1.2"/> <rect x="14" y="152" width="54" height="5" rx="1.5" fill="#1a2230"/> <path d="M14 157H64L62 161.6H7Q9 158.6 14 157Z" fill="#eaf6ff" stroke-width="1"/>  <!-- wheels --> <g class="zw"><use xlink:href="#zwh" x="112" y="141"/></g> <g class="zw"><use xlink:href="#zwh" x="274" y="141"/></g> </g> </svg> </div></div>
 <div class="app">
   <section class="ph" id="ph" aria-label="Sweat Board">
@@ -2991,7 +3037,7 @@ body.tv.hockey .zam:not([hidden]) { display: block; position: fixed; left: 0; ri
   $("#hockeyRadios").addEventListener("change", (e) => { try { localStorage.setItem("sb-hockey", e.target.value); } catch (err) {} render(); showMode(); });
   // the big game on a rink: every shot and goal where it came from (each team shooting at the far net), and the team stat bars
   function rinkHtml(g) {
-    const d = PPS.get(g.id); if (!d) return "";
+    const d = PPS.get(g.id); if (!d) { setTimeout(() => loadPPS(), 0); return ""; }
     const A = String(g.a.id), ca = bright(g.a), ch = bright(g.h);
     const pt = (p) => { if (p.x == null || p.y == null) return null; let x = Number(p.x), y = Number(p.y); const want = p.tm === A ? 1 : -1; if (x && Math.sign(x) !== want) { x = -x; y = -y; } return { x: 100 + x, y: 42.5 - y }; };
     const shots = d.plays.map((p) => ({ p, q: pt(p) })).filter((x) => x.q), lastId = shots.length ? shots[shots.length - 1].p.id : "";
@@ -3206,6 +3252,91 @@ body.tv.hockey .zam:not([hidden]) { display: block; position: fixed; left: 0; ri
   const TDP = new Map();
   const normNm = (x) => String(x || "").toLowerCase().replace(/\b(jr|sr|ii|iii|iv)\b\.?/g, "").replace(/[^a-z]/g, "");
   const scorerOf = (text) => { const m = String(text || "").match(/^(.+?)\s+\d+\s+(?:Yd|yd|Yds|yds|Yard|yard)/); return m ? m[1].trim() : ""; };
+  // the hero baseball game's play-by-play: batted balls with where they went (ESPN's field coordinates: home plate near 125,205,
+  // about 2.5 feet to a unit), and the scoring plays
+  const MLBS = new Map();
+  const MLB_HIT = /^(single|double|triple|bunt single|ground rule double|inside the park)/i, MLB_SKIP = /^(foul|end batter|start batter|bunted foul|play result)$/i;
+  function mlbParse(j) {
+    const ab = new Map(), res = new Map();
+    for (const p of j.plays || []) {
+      const t = (p.type && p.type.text) || "", id = p.atBatId || p.id, top = p.period && /top/i.test(p.period.type || "");
+      if (t === "Play Result" && p.text) res.set(id, { text: p.text, sc: !!p.scoringPlay, as: p.awayScore, hs: p.homeScore, inn: p.period ? p.period.number : 0, top });
+      if (!p.hitCoordinate || MLB_SKIP.test(t) || /foul/i.test(t)) continue;
+      ab.set(id, { id: String(id), x: p.hitCoordinate.x, y: p.hitCoordinate.y, t, tr: p.trajectory || "", top, inn: p.period ? p.period.number : 0, hr: /home run/i.test(t), hit: MLB_HIT.test(t) });
+    }
+    const hits = [...ab.values()].map((h) => ({ ...h, text: (res.get(h.id) || {}).text || h.t }));
+    const scoring = [...res.entries()].filter(([, r]) => r.sc).map(([id, r]) => ({ id, ...r }));
+    const hd = j.header && j.header.competitions && j.header.competitions[0];
+    return { hits, scoring, final: !!(hd && hd.status && hd.status.type && hd.status.type.completed) };
+  }
+  function loadMLBS() {
+    if (document.visibilityState !== "visible") return;
+    const now = Date.now(), want = new Map();
+    for (const b of S.bets.values()) {
+      if (b.status !== "open") continue;
+      for (const sl of b.kind === "parlay" ? (Array.isArray(b.legSel) ? b.legSel : []) : [b.sel]) { const g = sl && gameOf(sl); if (g && g.sport === "MLB" && g.st !== "pre") want.set(g.id, g); }
+    }
+    for (const g of want.values()) {
+      const c = MLBS.get(g.id); if (c && (c.busy || c.final || now - c.at < 40e3)) continue;
+      const first = !c; MLBS.set(g.id, { ...(c || { hits: [], scoring: [] }), busy: true, at: now });
+      fetch(`https://site.api.espn.com/apis/site/v2/sports/baseball/mlb/summary?event=${g.id}`).then((r) => r.json()).then((j) => {
+        const v = mlbParse(j), apply = () => { MLBS.set(g.id, { ...v, at: Date.now(), busy: false }); render(); };
+        if (first || v.final) apply(); else setTimeout(apply, tvDelay() * 1000);
+      }).catch(() => { const c2 = MLBS.get(g.id); if (c2) c2.busy = false; });
+    }
+  }
+  setInterval(loadMLBS, 20000);
+  const MLB_H = [125, 205], MLB_B = { 1: [150.5, 179.5], 2: [125, 154], 3: [99.5, 179.5] };
+  function diamondHtml(g) {
+    const d = MLBS.get(g.id), m = g.mlb || {}, live = g.st === "in";
+    if (!d || Date.now() - d.at > 40e3) setTimeout(loadMLBS, 0);
+    const ca = bright(g.a), ch = bright(g.h);
+    const hits = d ? d.hits : [], last = hits.length ? hits[hits.length - 1] : null;
+    // each ball in play: hits solid, home runs a star past the wall, outs a ring; the latest one with its flight
+    const mark = (h) => { const c = h.top ? ca : ch, x = h.x.toFixed(1), y = h.y.toFixed(1), nw = h === last ? " new" : "";
+      if (h.hr) return `<g class="dm-hr${nw}" transform="translate(${x} ${y})"><circle r="5.5" fill="${esc(c)}" opacity=".25"/><path d="M0-4.2l1.2 2.5 2.8.4-2 1.9.5 2.7L0 2 -2.5 3.3l.5-2.7-2-1.9 2.8-.4z" fill="#ffd34d" stroke="#3a2a00" stroke-width=".4"/></g>`;
+      return h.hit ? `<circle class="dm-h${nw}" cx="${x}" cy="${y}" r="2.6" fill="${esc(c)}" stroke="#fff" stroke-width=".7"/>` : `<circle class="dm-o${nw}" cx="${x}" cy="${y}" r="2" fill="none" stroke="${esc(c)}" stroke-width=".9" opacity=".7"/>`; };
+    const arc = last ? (() => { const [hx, hy] = MLB_H, mx = (hx + last.x) / 2, my = (hy + last.y) / 2, dist = Math.hypot(last.x - hx, last.y - hy), lift = last.tr === "G" ? 0 : last.tr === "L" ? dist * 0.12 : dist * 0.42;
+      return `<path class="dm-fl" d="M${hx},${hy} Q${mx.toFixed(1)},${(my - lift).toFixed(1)} ${last.x},${last.y}" fill="none" stroke="#fff" stroke-width=".8" stroke-dasharray="2 2.2" opacity=".75"/>`; })() : "";
+    const on = m.on || [false, false, false];
+    const base = (k) => { const [x, y] = MLB_B[k]; return `<rect x="${x - 3.2}" y="${y - 3.2}" width="6.4" height="6.4" transform="rotate(45 ${x} ${y})" class="dm-base${on[k - 1] ? " on" : ""}"/>`; };
+    const field = `<svg class="dm-svg" viewBox="18 18 214 202" preserveAspectRatio="xMidYMid meet" role="img" aria-label="Spray chart">
+      <defs><pattern id="dmMow" width="14" height="14" patternUnits="userSpaceOnUse" patternTransform="rotate(45 125 205)"><rect width="14" height="14" fill="#2f7d3a"/><rect width="7" height="14" fill="#2a7134"/></pattern>
+        <clipPath id="dmFair"><path d="M125,205 L31.7,111.7 Q125,-21.7 218.3,111.7 Z"/></clipPath></defs>
+      <path d="M125,212 L18,105 Q125,-40 232,105 Z" fill="#1d4f27" opacity=".55"/>
+      <path d="M125,205 L31.7,111.7 Q125,-21.7 218.3,111.7 Z" fill="url(#dmMow)"/>
+      <path d="M31.7,111.7 Q125,-21.7 218.3,111.7" fill="none" stroke="#b48a5a" stroke-width="7" opacity=".85" clip-path="url(#dmFair)"/>
+      <path d="M31.7,111.7 Q125,-21.7 218.3,111.7" fill="none" stroke="#e9eef3" stroke-width="1.6"/>
+      <g clip-path="url(#dmFair)"><circle cx="125" cy="179" r="40" fill="#b88b5c"/></g>
+      <path d="M125,198 L145,178 L125,158 L105,178 Z" fill="#2f7d3a"/>
+      <circle cx="125" cy="181" r="4.2" fill="#b88b5c"/><rect x="123.4" y="180.6" width="3.2" height=".8" fill="#fff"/>
+      <circle cx="125" cy="203" r="7.5" fill="#b88b5c"/>
+      <path d="M125,205 L31.7,111.7 M125,205 L218.3,111.7" stroke="#fff" stroke-width=".9" opacity=".9"/>
+      ${base(1)}${base(2)}${base(3)}<path d="M122.6,203.2 h4.8 v2 l-2.4,2 l-2.4,-2z" fill="#fff"/>
+      ${hits.filter((h) => h !== last).map(mark).join("")}${arc}${last ? mark(last) : ""}
+    </svg>`;
+    // inning, count, outs
+    const inn = /^(top|bot|bottom|mid|middle|end)\w*\s+(.*)$/i.exec(g.d || ""), half = inn ? inn[1].slice(0, 3).toLowerCase() : "";
+    const side = live ? `<div class="dm-side"><div class="dm-inn num">${half === "top" || half === "bot" ? `<i class="arw ${half}"></i>` : ""}${esc(inn ? (half === "mid" ? "Mid " : half === "end" ? "End " : "") + inn[2] : g.d)}</div>
+      <div class="dm-cnt"><div><span>Balls</span><b>${[0, 1, 2, 3].map((i) => `<i class="${i < (m.b || 0) ? "on b" : ""}"></i>`).join("")}</b></div><div><span>Strikes</span><b>${[0, 1, 2].map((i) => `<i class="${i < (m.s || 0) ? "on s" : ""}"></i>`).join("")}</b></div><div><span>Outs</span><b>${[0, 1, 2].map((i) => `<i class="${i < (m.o || 0) ? "on o" : ""}"></i>`).join("")}</b></div></div>
+      ${m.p ? `<div class="dm-pp"><em>Pitching</em>${m.p.hs ? `<img src="${esc(m.p.hs)}" alt="" referrerpolicy="no-referrer" onerror="this.remove()">` : ""}<b>${esc(m.p.sh)}</b><small class="num">${esc(m.p.sum || "")}</small></div>` : ""}
+      ${m.bat ? `<div class="dm-pp"><em>At bat</em>${m.bat.hs ? `<img src="${esc(m.bat.hs)}" alt="" referrerpolicy="no-referrer" onerror="this.remove()">` : ""}<b>${esc(m.bat.sh)}</b><small class="num">${esc(m.bat.sum || "")}</small></div>` : ""}</div>` : "";
+    // line score
+    let ls = "";
+    if (m.a && m.h && (m.a.ls.length || m.h.ls.length)) {
+      const n = Math.max(9, m.a.ls.length, m.h.ls.length), cur = live ? (g.pd || 1) - 1 : -1;
+      const cells = (sd, t) => Array.from({ length: n }, (_, i) => `<span class="${i === cur ? "cur" : ""}">${esc(m[sd].ls[i] ?? "")}</span>`).join("") + `<b class="rhe">${t.sc ?? 0}</b><span>${m[sd].h ?? ""}</span><span>${m[sd].e ?? ""}</span>`;
+      ls = `<div class="fo-ls dm-ls num" style="--n:${n}"><span></span>${Array.from({ length: n }, (_, i) => `<span class="hd">${i + 1}</span>`).join("")}<span class="hd rhe">R</span><span class="hd">H</span><span class="hd">E</span><span class="ab">${esc(g.a.ab)}</span>${cells("a", g.a)}<span class="ab">${esc(g.h.ab)}</span>${cells("h", g.h)}</div>`;
+    }
+    const lp = last ? `<div class="dm-last"><i style="background:${esc(last.top ? ca : ch)}"></i><span>${esc(last.text)}</span></div>` : "";
+    const key = `<div class="dm-key"><span><i class="h"></i>Hit</span><span><i class="o"></i>Out</span><span><i class="hr">★</i>Home run</span><span class="tm" style="--c:${esc(ca)}">${esc(g.a.ab)}</span><span class="tm" style="--c:${esc(ch)}">${esc(g.h.ab)}</span></div>`;
+    return `<div class="rb-dia"><div class="dm-top">${field}${side}</div>${key}${lp}${ls}</div>`;
+  }
+  function mlbScoring(g) {
+    const d = MLBS.get(g.id); if (!d || !d.scoring.length) return "";
+    return `<div class="rb-scp"><h4>Scoring</h4>${d.scoring.slice(-4).reverse().map((p, i) => { const t = p.top ? g.a : g.h;
+      return `<div class="r${i === 0 ? " new" : ""}" style="--c:${esc(bright(t))}">${t.lg ? `<img src="${esc(t.lg)}" alt="" referrerpolicy="no-referrer">` : "<span></span>"}<span class="q num">${p.top ? "▲" : "▼"} ${p.inn}</span><span class="tx">${esc(p.text)}</span><span class="s num">${esc(g.a.ab)} ${p.as} · ${esc(g.h.ab)} ${p.hs}</span></div>`; }).join("")}</div>`;
+  }
   // the box score for hockey games the room is on: player lines, shots and goals (with where they came from), team totals
   const PPS = new Map(), goalSeen = new Set();
   function ppRow(d, p) { if (!d || !p) return null; return (p.id && d.by.get(String(p.id))) || d.names.get(normNm(p.nm)) || null; }
@@ -3785,6 +3916,7 @@ body.tv.hockey .zam:not([hidden]) { display: block; position: fixed; left: 0; ri
   const SUMM = new Map();
   function heroPlays(g) {
     if (g.sport === "NHL") { loadPPS(); return null; }
+    if (g.sport === "MLB") { loadMLBS(); return null; }
     const c = SUMM.get(g.id), t = Date.now();
     if (g.st === "pre" || !ESPN[g.sport] || (c && (c.busy || t - c.at < (g.st === "post" ? 600e3 : 45e3)))) return c ? c.plays : null;
     SUMM.set(g.id, { ...(c || {}), plays: c ? c.plays : null, at: t, busy: true });
@@ -3797,6 +3929,7 @@ body.tv.hockey .zam:not([hidden]) { display: block; position: fixed; left: 0; ri
   }
   function scoringHtml(g) {
     if (g.sport === "NHL") return rinkGoals(g);
+    if (g.sport === "MLB") return mlbScoring(g);
     const plays = heroPlays(g); if (!plays || !plays.length) return "";
     const tmOf = (id) => (String(g.a.id) === id ? g.a : String(g.h.id) === id ? g.h : null);
     return `<div class="rb-scp"><h4>Scoring</h4>${plays.slice(-4).reverse().map((p, i) => { const t = tmOf(p.tm);
@@ -3804,6 +3937,7 @@ body.tv.hockey .zam:not([hidden]) { display: block; position: fixed; left: 0; ri
   }
   function fieldHtml(g) {
     if (g.sport === "NHL" && g.st !== "pre") return rinkHtml(g);
+    if (g.sport === "MLB" && g.st !== "pre") return diamondHtml(g);
     const sit = g.sit || {}, fb = g.sport === "NFL" || g.sport === "CFB";
     const col = (t) => esc(bright(t));
     if (g.st === "pre") {
@@ -4003,15 +4137,32 @@ body.tv.hockey .zam:not([hidden]) { display: block; position: fixed; left: 0; ri
   // win-probability caption, a followed team that isn't playing right now, then older scoring plays). Only then does it roll
   function primeFit() {
     const L = $("#rbColL"); if (!L || !L.isConnected) return;
-    const F = ["f1", "f2", "f3", "f4", "f5", "f6", "f7", "f8"]; L.classList.remove(...F);
+    const F = ["f1", "f2", "f3", "f4", "f5", "f6", "f7", "f8"]; L.classList.remove(...F, "many", "duo");
+    const kids = [...L.children].filter((k) => !k.classList.contains("loopclone")); kids.forEach((k) => { k.style.transform = ""; k.style.marginBottom = ""; });
     if (!document.body.classList.contains("tv")) return;
-    for (let i = 0; i < F.length && L.scrollHeight > L.clientHeight + 2; i++) L.classList.add(F[i]);
+    const n = Number(L.dataset.n || 1), over = () => L.scrollHeight > L.clientHeight + 2;
+    // three or more games: tighter cards and the column rolls
+    if (n >= 3) { L.classList.add("many", "f1", "f2", "f3", "f4", "f5", "f7"); return; }
+    const step = () => { for (let i = 0; i < F.length && over(); i++) L.classList.add(F[i]); };
+    step();
+    // two games that don't fit stacked go side by side, like a split screen
+    if (n === 2 && over()) { L.classList.remove(...F); L.classList.add("duo"); step(); }
+    // one or two never roll: whatever still runs over is scaled down (the cards keep their own layout, just smaller)
+    if (over()) {
+      const games = kids.filter((k) => k.classList.contains("hero")), hMax = Math.max(...games.map((k) => k.offsetHeight), 1);
+      const room = L.clientHeight - (L.classList.contains("duo") ? 0 : 14 * Math.max(0, games.length - 1)) - kids.filter((k) => !games.includes(k) && k.offsetParent).reduce((a, k) => a + k.offsetHeight + 14, 0);
+      const z = Math.max(0.4, Math.min(1, (L.classList.contains("duo") ? room : room / games.length) / hMax) - 0.01);
+      games.forEach((k) => { k.style.transform = `scale(${z.toFixed(3)})`; k.style.marginBottom = `-${Math.ceil(k.offsetHeight * (1 - z))}px`; });
+    }
   }
   function renderRB() {
     if (!S.ready) return;
     const tv = document.body.classList.contains("tv"), { list, other, parlays } = boardGroups();
     // prime time: one game, the room's team colors, a big scoreboard
     const prime = tv && slateMode() === "prime" && list.filter((G) => G.g.st !== "post").length === 1 ? list.find((G) => G.g.st !== "post") : null;
+    // one or two hold still and fit the frame; three or more roll
+    const act = list.filter((G) => G.g.st !== "post");
+    const heroes = prime ? [prime] : tv && act.some((G) => G.g.sport === "NHL" || G.g.sport === "MLB") ? act : [];
     const body = document.body;
     if (prime) {
       const th = teamTheme(prime);
@@ -4020,10 +4171,10 @@ body.tv.hockey .zam:not([hidden]) { display: block; position: fixed; left: 0; ri
       $("#rbMark").innerHTML = th.t.lg ? `<img src="${esc(th.t.lg)}" alt="" referrerpolicy="no-referrer" onerror="this.remove()">` : "";
       rbPrime = th.t.ab;
     } else if (rbPrime) { body.classList.remove("prime"); $("#rbMark").innerHTML = ""; rbPrime = null; }
-    const rest = list.filter((G) => G !== prime).map((G) => gameCard(G, false)).join("") + parlayCard(parlays) + otherCard(other);
+    const rest = list.filter((G) => !heroes.includes(G)).map((G) => gameCard(G, false)).join("") + parlayCard(parlays) + otherCard(other);
     const fol = followCards();
-    $("#rbGames").classList.toggle("primeg", !!prime); $("#rbGames").classList.toggle("solo", !!prime && !rest);
-    if (prime) {
+    $("#rbGames").classList.toggle("primeg", heroes.length > 0); $("#rbGames").classList.toggle("solo", heroes.length > 0 && !rest);
+    if (heroes.length) {
       let L = $("#rbColL"), R = $("#rbColR");
       if (!L || L.parentNode !== $("#rbGames")) {
         $("#rbGames").innerHTML = '<div class="rb-pcol pl" id="rbColL"></div><div class="rb-pcol pr" id="rbColR"></div>';
@@ -4031,7 +4182,7 @@ body.tv.hockey .zam:not([hidden]) { display: block; position: fixed; left: 0; ri
         for (let i = ASC.length - 1; i >= 0; i--) if (!ASC[i].el.isConnected) ASC.splice(i, 1);
         autoScroll(L, 22); autoScroll(R, 24);
       }
-      L.innerHTML = gameCard(prime, true) + fol; R.innerHTML = rest; R.hidden = !rest;
+      L.dataset.n = String(heroes.length); L.innerHTML = heroes.map((G) => gameCard(G, true)).join("") + fol; R.innerHTML = rest; R.hidden = !rest;
       primeFit(); loopSyncEl(L); loopSyncEl(R);
     } else {
     const html = list.map((G) => gameCard(G, false)).join("") + fol + parlayCard(parlays) + otherCard(other);
@@ -4454,7 +4605,7 @@ body.tv.hockey .zam:not([hidden]) { display: block; position: fixed; left: 0; ri
   // ---------- sheets ----------
   function openSheet(id) { $(id).hidden = false; }
   // keep every open screen current: when a new version is up, reload it (never mid-form or mid-animation)
-  const BUILD = "20261013201749";
+  const BUILD = "20261013203604";
   function checkBuild() {
     if (BUILD === "dev") return;
     fetch("version.json?t=" + Date.now(), { cache: "no-store" }).then((r) => (r.ok ? r.json() : null)).then((j) => {
