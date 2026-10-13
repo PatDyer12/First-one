@@ -2566,7 +2566,7 @@ body.tv .rb-pcol.pr .rb-hs-side.r .rb-st { justify-self: start; }
           <label><input type="radio" name="ss-horn" value="normal"><span>Normal</span></label>
           <label><input type="radio" name="ss-horn" value="soft"><span>Soft</span></label>
           <label><input type="radio" name="ss-horn" value="off"><span>Off</span></label>
-        </div></div><label class="togrow"><input type="checkbox" data-ss="NHL.cards"> GOAL card with the red lamp</label><label class="togrow"><input type="checkbox" data-ss="NHL.zamboni"> Zamboni between periods</label><label class="togrow"><input type="checkbox" data-ss="NHL.tracker"> Rink with the shot map on the big game</label><label class="togrow"><input type="checkbox" data-ss="NHL.sog"> A note on every shot for shots-on-goal props</label><label class="togrow"><input type="checkbox" data-ss="NHL.clips"> Clips and edits after a goal</label>
+        </div></div><label class="togrow"><input type="checkbox" data-ss="NHL.teamhorn"> Each team's own horn (off: one horn for everybody)</label><label class="togrow"><input type="checkbox" data-ss="NHL.cards"> GOAL card with the red lamp</label><label class="togrow"><input type="checkbox" data-ss="NHL.zamboni"> Zamboni between periods</label><label class="togrow"><input type="checkbox" data-ss="NHL.tracker"> Rink with the shot map on the big game</label><label class="togrow"><input type="checkbox" data-ss="NHL.sog"> A note on every shot for shots-on-goal props</label><label class="togrow"><input type="checkbox" data-ss="NHL.clips"> Clips and edits after a goal</label>
         <span class="hint">Hockey mode Auto turns on when most of the room's bets are hockey: ice, the Zamboni, the horn and the rink.</span>
       </div>
       <div class="sp-panel" data-spp="MLB" hidden><label class="togrow"><input type="checkbox" data-ss="MLB.tracker"> Field with the spray chart on the big game</label><label class="togrow"><input type="checkbox" data-ss="MLB.cards"> Home run and run cards</label><label class="togrow"><input type="checkbox" data-ss="MLB.clips"> Clips and edits when your side scores</label></div>
@@ -4680,7 +4680,7 @@ body.tv .rb-pcol.pr .rb-hs-side.r .rb-st { justify-self: start; }
   // ---------- sheets ----------
   function openSheet(id) { $(id).hidden = false; }
   // keep every open screen current: when a new version is up, reload it (never mid-form or mid-animation)
-  const BUILD = "20261013222932";
+  const BUILD = "20261013225147";
   function checkBuild() {
     if (BUILD === "dev") return;
     fetch("version.json?t=" + Date.now(), { cache: "no-store" }).then((r) => (r.ok ? r.json() : null)).then((j) => {
@@ -7229,6 +7229,8 @@ body.tv .rb-pcol.pr .rb-hs-side.r .rb-st { justify-self: start; }
     return t.slice(0, 3);
   }
   // the card: same broadcast frame as the scoring play, his headshot cut out, the numbers counting up
+  const HORN_TEAMS = new Set(["ANA", "BOS", "BUF", "CAR", "CBJ", "CGY", "CHI", "COL"]);
+  const teamHorn = (t) => (t && HORN_TEAMS.has(t.ab) && sset("NHL", "teamhorn") ? "../nhl/horn_" + t.ab.toLowerCase() : "goal_horn");
   const goalAt = new Map(), hgTries = new Map(), hgNow = () => Date.now();
   function hockeyGoal(g, e, b, then, play) {
     // find the goal on the box score (fetch it now if the scoreboard beat it there)
@@ -7243,7 +7245,7 @@ body.tv .rb-pcol.pr .rb-hs-side.r .rb-st { justify-self: start; }
       // the same broadcast card as a touchdown: the scorer's cutout, GOAL, assists, the room's bets, the scorebug
       const ov = { top: per || "Goal", type: kind, text: p ? p.text : "", people: [...(sc ? [{ nm: sc.nm + (sc.n ? "" : ""), hs: sc.hs, j: "", pos: "" }] : []), ...as.map((a) => ({ nm: a.nm, hs: a.hs, j: "", pos: "" }))] };
       if (sset("NHL", "cards")) { document.body.classList.add("goal-lamp"); setTimeout(() => document.body.classList.remove("goal-lamp"), 8500); }
-      { const hv = { loud: 1, normal: 0.6, soft: 0.3 }[sset("NHL", "horn")]; if (hv) snSound("goal_horn", hv, 0); }
+      { const hv = { loud: 1, normal: 0.6, soft: 0.3 }[sset("NHL", "horn")]; if (hv) snSound(teamHorn(g[sd]), hv, 0); }
       showPlayCard(g, { ev: "goal", side: sd, tag: "Goal" }, b, then, 7600, ov);
     };
     if (PHONE()) { if (then) setTimeout(then, 0); return; }
