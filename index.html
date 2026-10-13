@@ -2234,6 +2234,12 @@ body.tv.hockey .zam:not([hidden]) { display: block; position: fixed; left: 0; ri
   background: linear-gradient(180deg, rgba(255,255,255,.18), rgba(200,235,255,.06) 60%, rgba(255,255,255,.14)), linear-gradient(90deg, rgba(200,235,255,0), rgba(200,235,255,.12) 50%, rgba(225,245,255,.34) 92%, rgba(255,255,255,.6)); }
 .zam-trail::after { content: ""; position: absolute; top: 0; bottom: 0; right: 0; width: 180px; background: linear-gradient(100deg, transparent, rgba(255,255,255,.55) 50%, transparent); animation: zamGloss 2.6s linear infinite; will-change: transform; }
 @keyframes zamGloss { from { transform: translateX(0); } to { transform: translateX(-60vw); } }
+/* settings: one panel per sport */
+.sp-tabs { display: flex; flex-wrap: wrap; align-self: flex-start; }
+.sp-panel { display: flex; flex-direction: column; gap: 10px; padding: 12px 14px; border-radius: 12px; background: rgba(255,255,255,.03); border: 1px solid rgba(255,255,255,.06); }
+.sp-panel[hidden] { display: none; }
+.sp-row { display: flex; flex-direction: column; gap: 6px; }
+.sp-row > span { font: 700 11px/1 var(--f-num); letter-spacing: .14em; text-transform: uppercase; color: var(--ink-3); }
 /* a column of rinks and fields: a little smaller when there are a lot of them, side by side for two */
 .rb-pcol .rb-g.hero { transform-origin: top center; }
 body.tv .rb-games.primeg > .rb-pcol.duo { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); align-items: start; align-content: start; gap: 14px; }
@@ -2520,15 +2526,27 @@ body.tv .rb-games.primeg > .rb-pcol.duo { display: grid; grid-template-columns: 
       <span class="hint">What the ticker follows (every score, spreads and totals before kickoff, upset watch, injury news) and which league the bet form opens to. Auto runs college Tuesday through Saturday and the NFL on Sunday, Monday and Thursday. Applies to every screen.</span>
       <label class="togrow"><input type="checkbox" id="tickerOn"> Show the ticker on this screen</label>
     </div>
-    <div class="field">
-      <span class="lbl">Slate mode</span>
-      <span class="lbl">Hockey mode</span>
-      <div class="radios" id="hockeyRadios">
-        <label><input type="radio" name="hockey" value="auto"><span>Auto</span></label>
-        <label><input type="radio" name="hockey" value="on"><span>On</span></label>
-        <label><input type="radio" name="hockey" value="off"><span>Off</span></label>
+    <div class="field sp-set" id="spSet">
+      <span class="lbl">Sports</span>
+      <div class="seg sp-tabs" id="spTabs" role="group" aria-label="Sport"><button type="button" data-spt="FB" aria-pressed="true">Football</button><button type="button" data-spt="NHL" aria-pressed="false">Hockey</button><button type="button" data-spt="MLB" aria-pressed="false">Baseball</button><button type="button" data-spt="BB" aria-pressed="false">Basketball</button></div>
+      <div class="sp-panel" data-spp="FB"><label class="togrow"><input type="checkbox" data-ss="FB.cards"> Touchdown, turnover and field goal cards</label><label class="togrow"><input type="checkbox" data-ss="FB.clips"> Clips and edits when your side scores</label><label class="togrow"><input type="checkbox" data-ss="FB.tracker"> Field and drive tracker on the big game</label></div>
+      <div class="sp-panel" data-spp="NHL" hidden>
+        <div class="sp-row"><span>Hockey mode</span><div class="radios" id="hockeyRadios">
+          <label><input type="radio" name="hockey" value="auto"><span>Auto</span></label>
+          <label><input type="radio" name="hockey" value="on"><span>On</span></label>
+          <label><input type="radio" name="hockey" value="off"><span>Off</span></label>
+        </div></div>
+        <div class="sp-row"><span>Goal horn</span><div class="radios" id="hornRadios">
+          <label><input type="radio" name="ss-horn" value="loud"><span>Loud</span></label>
+          <label><input type="radio" name="ss-horn" value="normal"><span>Normal</span></label>
+          <label><input type="radio" name="ss-horn" value="soft"><span>Soft</span></label>
+          <label><input type="radio" name="ss-horn" value="off"><span>Off</span></label>
+        </div></div><label class="togrow"><input type="checkbox" data-ss="NHL.cards"> GOAL card with the red lamp</label><label class="togrow"><input type="checkbox" data-ss="NHL.zamboni"> Zamboni between periods</label><label class="togrow"><input type="checkbox" data-ss="NHL.tracker"> Rink with the shot map on the big game</label><label class="togrow"><input type="checkbox" data-ss="NHL.sog"> A note on every shot for shots-on-goal props</label><label class="togrow"><input type="checkbox" data-ss="NHL.clips"> Clips and edits after a goal</label>
+        <span class="hint">Hockey mode Auto turns on when most of the room's bets are hockey: ice, the Zamboni, the horn and the rink.</span>
       </div>
-      <span class="hint">Auto turns it on when most of the room's bets are hockey: ice, the Zamboni between periods, the goal horn and a rink on the big game.</span>
+      <div class="sp-panel" data-spp="MLB" hidden><label class="togrow"><input type="checkbox" data-ss="MLB.tracker"> Field with the spray chart on the big game</label><label class="togrow"><input type="checkbox" data-ss="MLB.cards"> Home run and run cards</label><label class="togrow"><input type="checkbox" data-ss="MLB.clips"> Clips and edits when your side scores</label></div>
+      <div class="sp-panel" data-spp="BB" hidden><label class="togrow"><input type="checkbox" data-ss="BB.clips"> Clips and edits on big swings</label></div>
+      <span class="hint">These are for this screen. Set the TV and your phone separately.</span>
     </div>
     <div class="field">
       <span class="lbl">Slate mode</span>
@@ -3018,7 +3036,7 @@ body.tv .rb-games.primeg > .rb-pcol.duo { display: grid; grid-template-columns: 
   let zamAt = 0;
   function zamboni() {
     const z = $("#zam");
-    if (!z || !z.hidden || !document.body.classList.contains("tv") || !document.body.classList.contains("hockey")) return false;
+    if (!z || !z.hidden || !document.body.classList.contains("tv") || !document.body.classList.contains("hockey") || !sset("NHL", "zamboni")) return false;
     zamAt = Date.now(); z.hidden = false; z.classList.remove("go"); void z.offsetWidth; z.classList.add("go");
     setTimeout(() => { z.classList.remove("go"); z.hidden = true; }, 21000);
     return true;
@@ -3079,6 +3097,24 @@ body.tv .rb-games.primeg > .rb-pcol.duo { display: grid; grid-template-columns: 
     return `<div class="rb-scp"><h4>Goals</h4>${gl.slice(-4).reverse().map((p, i) => { const t = tmOf(p.tm), sc = p.who.find((w) => w.type === "scorer") || p.who[0], as = p.who.filter((w) => w.type === "assister");
       return `<div class="r${i === 0 ? " new" : ""}" style="--c:${esc(t ? bright(t) : "#8a94a8")}">${t && t.lg ? `<img src="${esc(t.lg)}" alt="" referrerpolicy="no-referrer">` : "<span></span>"}<span class="q num">${p.pd > 3 ? "OT" : "P" + p.pd} ${esc(p.clk)}</span><span class="tx"><b>${/power/i.test(p.str) ? "PP goal" : /short/i.test(p.str) ? "SH goal" : "Goal"}</b>${esc(sc ? sc.nm : "")}${sc && sc.n ? ` (${sc.n})` : ""}${as.length ? ` · ${esc(as.map((a) => a.nm.split(" ").slice(-1)[0]).join(", "))}` : ""}</span><span class="s num">${esc(g.a.ab)} ${p.as} · ${esc(g.h.ab)} ${p.hs}</span></div>`; }).join("")}</div>`;
   }
+  // per-sport switches, saved on this screen: football and basketball cover both their leagues
+  const SS_GRP = { FB: ["NFL", "CFB"], NHL: ["NHL"], MLB: ["MLB"], BB: ["NBA", "CBB"] };
+  let SS = {}; try { SS = JSON.parse(localStorage.getItem("sb-sports") || "{}") || {}; } catch (e) { SS = {}; }
+  function sset(sp, k) { const v = SS[sp] && SS[sp][k]; return v === undefined ? (k === "horn" ? "loud" : true) : v; }
+  function ssSave(grp, k, v) { for (const sp of SS_GRP[grp] || [grp]) SS[sp] = { ...(SS[sp] || {}), [k]: v }; try { localStorage.setItem("sb-sports", JSON.stringify(SS)); } catch (e) {} render(); }
+  function ssSync() {
+    document.querySelectorAll("#spSet [data-ss]").forEach((i) => { const [grp, k] = i.dataset.ss.split("."); i.checked = !!sset(SS_GRP[grp][0], k); });
+    const h = document.querySelector(`input[name="ss-horn"][value="${sset("NHL", "horn")}"]`); if (h) h.checked = true;
+  }
+  $("#spSet").addEventListener("change", (e) => {
+    const i = e.target; if (i.dataset.ss) { const [grp, k] = i.dataset.ss.split("."); ssSave(grp, k, i.checked); }
+    else if (i.name === "ss-horn") ssSave("NHL", "horn", i.value);
+  });
+  $("#spTabs").addEventListener("click", (e) => {
+    const b = e.target.closest("[data-spt]"); if (!b) return;
+    document.querySelectorAll("#spTabs [data-spt]").forEach((x) => x.setAttribute("aria-pressed", String(x === b)));
+    document.querySelectorAll("#spSet [data-spp]").forEach((p) => (p.hidden = p.dataset.spp !== b.dataset.spt));
+  });
   function render() {
     syncPhone(); syncHockey(); { const hr = document.querySelector(`input[name="hockey"][value="${hockeyPin()}"]`); if (hr) hr.checked = true; }
     const everyone = [...S.bets.values()], all = everyone.filter(isMe);
@@ -3423,7 +3459,7 @@ body.tv .rb-games.primeg > .rb-pcol.duo { display: grid; grid-template-columns: 
       if (pick) hockeyGoal(g, null, pick.b, null, p);
     }
     for (const { b, sl } of props) {
-      if (ppStat(sl.m) !== "sog") continue;
+      if (ppStat(sl.m) !== "sog" || !sset("NHL", "sog")) continue;
       const was = ppRow(prev, sl.p), now = ppRow(v, sl.p); if (!was || !now || now.sog <= was.sog) continue;
       const l = sl.l ?? 2.5; toast(`🏒 ${sl.p.nm} shot on goal · ${now.sog} SOG${sl.s !== "u" && now.sog <= l ? ` · ${Math.floor(l) + 1 - now.sog} to go` : ""}`);
     }
@@ -3936,6 +3972,7 @@ body.tv .rb-games.primeg > .rb-pcol.duo { display: grid; grid-template-columns: 
       return `<div class="r${i === 0 ? " new" : ""}" style="--c:${esc(t ? bright(t) : "#8a94a8")}">${t && t.lg ? `<img src="${esc(t.lg)}" alt="" referrerpolicy="no-referrer">` : "<span></span>"}<span class="q num">Q${esc(p.q ?? "")} ${esc(p.clk)}</span><span class="tx"><b>${esc(p.type)}</b>${esc(p.text)}</span><span class="s num">${esc(g.a.ab)} ${p.a ?? ""} · ${esc(g.h.ab)} ${p.h ?? ""}</span></div>`; }).join("")}</div>`;
   }
   function fieldHtml(g) {
+    if (!sset(g.sport, "tracker")) return "";
     if (g.sport === "NHL" && g.st !== "pre") return rinkHtml(g);
     if (g.sport === "MLB" && g.st !== "pre") return diamondHtml(g);
     const sit = g.sit || {}, fb = g.sport === "NFL" || g.sport === "CFB";
@@ -4605,7 +4642,7 @@ body.tv .rb-games.primeg > .rb-pcol.duo { display: grid; grid-template-columns: 
   // ---------- sheets ----------
   function openSheet(id) { $(id).hidden = false; }
   // keep every open screen current: when a new version is up, reload it (never mid-form or mid-animation)
-  const BUILD = "20261013203604";
+  const BUILD = "20261013204230";
   function checkBuild() {
     if (BUILD === "dev") return;
     fetch("version.json?t=" + Date.now(), { cache: "no-store" }).then((r) => (r.ok ? r.json() : null)).then((j) => {
@@ -5060,7 +5097,7 @@ body.tv .rb-games.primeg > .rb-pcol.duo { display: grid; grid-template-columns: 
     write((db) => db.doc("config/settings").set({ oddsKey: k }, { merge: true }), () => {});
     toast(k ? "Odds key saved. Prices show up in the TD scorer picker." : "Odds key removed");
   });
-  function openSettings() { renderGuests(); $("#f-oddskey").value = S.oddsKey || ""; $("#f-unit").value = trim(S.unit); $("#u-err").textContent = ""; resetClear(); openSheet("#setSheet"); }
+  function openSettings() { ssSync(); renderGuests(); $("#f-oddskey").value = S.oddsKey || ""; $("#f-unit").value = trim(S.unit); $("#u-err").textContent = ""; resetClear(); openSheet("#setSheet"); }
   $("#unitChip").addEventListener("click", openSettings);
   $("#sampleChip").addEventListener("click", openSettings);
   $("#setForm").addEventListener("submit", async (e) => {
@@ -6618,6 +6655,7 @@ body.tv .rb-games.primeg > .rb-pcol.duo { display: grid; grid-template-columns: 
   function reactPre(b, kind, P, why, pre) { glow(b.id, kind); render(); statusBet = b.id; showPip(b, P, moodOf(kind, P), why, pre); }
   function react(b, kind, P, why) {
     if (PHONE()) { render(); return; }
+    { const spx = (gameFor(b) || {}).sport || sportOf(b); if (spx && !sset(spx, "clips")) { render(); return; } }
     glow(b.id, kind);
     render();
     if (!P) {
@@ -6832,7 +6870,7 @@ body.tv .rb-games.primeg > .rb-pcol.duo { display: grid; grid-template-columns: 
   }
   // show the card, then run `then` with a label for the clip ("Touchdown UGA · C. Young")
   function showPlayCard(g, e, b, then, ms, over) {
-    if (PHONE()) { if (then) setTimeout(then, 0); return; }
+    if (PHONE() || (g && !sset(g.sport, "cards"))) { if (then) setTimeout(then, 0); return; }
     const ov = $("#playCard"); cardBusy = true; ms = ms || 4800;
     const who = pcFill(g, e, b, null, over);
     ov.classList.remove("out"); ov.hidden = false; for (const el of ov.querySelectorAll("*")) { el.style.animation = "none"; void el.offsetWidth; el.style.animation = ""; }
@@ -7153,8 +7191,8 @@ body.tv .rb-games.primeg > .rb-pcol.duo { display: grid; grid-template-columns: 
       const kind = p && /power/i.test(p.str) ? "Power play goal" : p && /short/i.test(p.str) ? "Shorthanded goal" : p && /empty/i.test(p.text) ? "Empty netter" : "";
       // the same broadcast card as a touchdown: the scorer's cutout, GOAL, assists, the room's bets, the scorebug
       const ov = { top: per || "Goal", type: kind, text: p ? p.text : "", people: [...(sc ? [{ nm: sc.nm + (sc.n ? "" : ""), hs: sc.hs, j: "", pos: "" }] : []), ...as.map((a) => ({ nm: a.nm, hs: a.hs, j: "", pos: "" }))] };
-      document.body.classList.add("goal-lamp"); setTimeout(() => document.body.classList.remove("goal-lamp"), 8500);
-      snSound("goal_horn", 1, 0);
+      if (sset("NHL", "cards")) { document.body.classList.add("goal-lamp"); setTimeout(() => document.body.classList.remove("goal-lamp"), 8500); }
+      { const hv = { loud: 1, normal: 0.6, soft: 0.3 }[sset("NHL", "horn")]; if (hv) snSound("goal_horn", hv, 0); }
       showPlayCard(g, { ev: "goal", side: sd, tag: "Goal" }, b, then, 7600, ov);
     };
     if (PHONE()) { if (then) setTimeout(then, 0); return; }
