@@ -4680,7 +4680,7 @@ body.tv .rb-pcol.pr .rb-hs-side.r .rb-st { justify-self: start; }
   // ---------- sheets ----------
   function openSheet(id) { $(id).hidden = false; }
   // keep every open screen current: when a new version is up, reload it (never mid-form or mid-animation)
-  const BUILD = "20261013210351";
+  const BUILD = "20261013222932";
   function checkBuild() {
     if (BUILD === "dev") return;
     fetch("version.json?t=" + Date.now(), { cache: "no-store" }).then((r) => (r.ok ? r.json() : null)).then((j) => {
@@ -6352,7 +6352,8 @@ body.tv .rb-pcol.pr .rb-hs-side.r .rb-st { justify-self: start; }
     for (const x of [v, bg]) { x.loop = dj; x.defaultPlaybackRate = rate; x.playbackRate = rate; }
     const own = () => (pre || !c || P.ext ? null : P.lib ? clipBuf(P.base) : loadBuf(P.base));
     // a DJ break plays off your Spotify playlist when this screen's connected to it (the built-in song when Spotify can't)
-    const sound = dj && !pre && spUsable() ? spPlay().then((t) => t || own()) : own();
+    if (dj && !pre && !spUsable()) spWhy();
+    const sound = dj && !pre && spUsable() ? spPlay().then((t) => { if (!t) spWhy(); return t || own(); }) : own();
     Promise.all([sound, vidReady(v)]).then(([buf]) => {
       const sp = buf && buf.sp ? buf : null, ms = sp ? sp.ms : P.ms, r = sp ? 1 : rate;
       if (go !== pipGo || statusBet !== betId) { if (sp && SP.seq === sp.seq) spStop(); return; }
@@ -6397,7 +6398,7 @@ body.tv .rb-pcol.pr .rb-hs-side.r .rb-st { justify-self: start; }
   // falls back to the built-in songs
   const SP_REDIRECT = location.origin + location.pathname.replace(/index\.html$/, "");
   const SP_SCOPES = "streaming user-read-email user-read-private user-modify-playback-state user-read-playback-state playlist-read-private playlist-read-collaborative";
-  const SP_BREAK = 60e3, SP_VOL = 0.9;
+  const SP_BREAK = 90e3, SP_VOL = 0.9;
   const SP = { client: "", playlist: "", tok: null, player: null, dev: null, err: "", list: [], bag: [], last: "", name: "", loading: false, on: false, seq: 0, vol: SP_VOL, fade: 0, bootT: 0 };
   const spGet = (k) => { try { return localStorage.getItem("sb-sp-" + k); } catch (e) { return null; } };
   const spSet = (k, v) => { try { if (v == null) localStorage.removeItem("sb-sp-" + k); else localStorage.setItem("sb-sp-" + k, v); } catch (e) {} };
@@ -6487,8 +6488,11 @@ body.tv .rb-pcol.pr .rb-hs-side.r .rb-st { justify-self: start; }
     const pid = SP.playlist; SP.loading = true; spShow();
     try {
       const pl = await spApi(`/playlists/${pid}?fields=name`).catch(() => null), list = [];
-      for (let off = 0, n = 0; n < 10; n++, off += 50) {
-        const j = await spApi(`/playlists/${pid}/items?limit=50&offset=${off}`);
+      let path = "items";
+      for (let off = 0, n = 0; n < 200; n++, off += 50) {
+        let j;
+        try { j = await spApi(`/playlists/${pid}/${path}?limit=50&offset=${off}`); }
+        catch (e) { if (e.status === 404 && path === "items" && off === 0) { path = "tracks"; j = await spApi(`/playlists/${pid}/tracks?limit=50&offset=0`); } else throw e; }
         for (const x of (j && j.items) || []) {
           const t = x && (x.item || x.track);
           if (!t || x.is_local || t.type !== "track" || !t.uri || !(t.duration_ms > 75e3)) continue;
@@ -6546,6 +6550,15 @@ body.tv .rb-pcol.pr .rb-hs-side.r .rb-st { justify-self: start; }
       }
     }
     return null;
+  }
+  // why a DJ break is on the built-in songs instead of the playlist: a quick note on the TV, at most every 20 minutes
+  let spWhyAt = 0;
+  function spWhy() {
+    if (!document.body.classList.contains("tv") || Date.now() - spWhyAt < 20 * 60e3) return;
+    if (!SP.playlist && !SP.client) return;   // Spotify was never set up: the built-in songs are the plan
+    spWhyAt = Date.now();
+    const why = SP.err ? SP.err : !SP.tok ? "Spotify isn't connected on this screen" : !SP.player || !SP.dev ? "Spotify's player hasn't started on this screen" : SP.loading ? "the playlist is still loading" : !SP.list.length ? "the playlist didn't load" : "the sound isn't on yet (click the board once)";
+    toast(`DJ is on the built-in songs: ${why}. Settings → Spotify to fix it.`);
   }
   function spStop() {
     if (!SP.on || !SP.player) return;
