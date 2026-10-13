@@ -1893,6 +1893,109 @@ body.tv .rb-pl .pl-legs .t { font-size: 16px; }
 @media (max-width: 780px) { .jumbo { grid-template-columns: 1fr; } }
 .tdpl.on { border-color: var(--gold) !important; background: rgba(255,194,75,.14) !important; }
 .tdpl.on b::after { content: " ✓"; color: var(--gold); }
+/* prime time: the game column holds still, the side column rolls on its own only when it overflows */
+body.tv .rb-games.primeg { height: 100%; grid-template-rows: minmax(0, 1fr); align-items: stretch; }
+body.tv .rb-games.primeg > .rb-pcol { min-height: 0; overflow: hidden; scrollbar-width: none; }
+body.tv .rb-games.primeg > .rb-pcol::-webkit-scrollbar { display: none; }
+.rb-games.primeg > .rb-pcol > * { flex-shrink: 0; }
+.rb-games.primeg > .rb-pcol > .loopclone { display: flex; flex-direction: column; gap: 14px; }
+.rb-pcol.f1 .rb-fol .fo-ft, .rb-pcol.f2 .rb-fol .fo-ls, .rb-pcol.f3 .rb-fol .fo-ppl, .rb-pcol.f4 .rb-fld .wp em { display: none; }
+.rb-pcol.f5 .rb-fol.idle, .rb-pcol.f6 .rb-scp .r:nth-of-type(n+4), .rb-pcol.f7 .rb-scp .r:nth-of-type(n+3), .rb-pcol.f8 .rb-scp { display: none; }
+body.tv .rb-games.primeg .rb-g.hero .rb-rows { padding-bottom: 10px; }
+body.tv .rb-games.primeg .rb-scp { margin-bottom: 10px; }
+/* prime time, the game column: same pieces, less air */
+body.tv .rb-games.primeg .rb-g.hero .rb-gh { padding-top: clamp(14px, 2.6cqw, 22px); padding-bottom: clamp(8px, 1.6cqw, 14px); }
+body.tv .rb-games.primeg .rb-g.hero .rb-pos { padding-top: 8px; padding-bottom: 8px; }
+body.tv .rb-games.primeg .rb-g.hero .rb-inpar { padding-top: 8px; padding-bottom: 2px; }
+body.tv .rb-games.primeg .rb-scp { gap: 4px; margin-bottom: 14px; }
+body.tv .rb-games.primeg .rb-scp .r { padding: 4px 12px; min-height: 32px; }
+body.tv .rb-games.primeg .rb-scp img { width: 22px; height: 22px; }
+/* the game's two sides: in the TV game card each status flanks the tug bar, one line instead of one under each pick */
+.rb-tugrow { display: contents; }
+.rb-tugrow > .rb-st { display: none; }
+body.tv .rb-g.hero .rb-hs-side > .rb-st { display: none; }
+body.tv .rb-g.hero .rb-tugrow { display: flex; align-items: center; gap: 14px; margin: 10px 8px 0; }
+body.tv .rb-g.hero .rb-tugrow.pre { display: none; }
+body.tv .rb-g.hero .rb-tugrow > .rb-st { display: block; flex: none; margin: 0; padding: 4px 9px; font-size: 14px; }
+body.tv .rb-g.hero .rb-tugrow > .rb-st:empty { display: none; }
+body.tv .rb-g.hero .rb-tugrow .rb-tug { flex: 1 1 auto; margin: 0; }
+
+
+body.tv .rb-games.primeg > .rb-pcol.pr, body.tv .rb-rsc { -webkit-mask-image: linear-gradient(180deg, transparent 0, #000 18px, #000 calc(100% - 28px), transparent 100%); mask-image: linear-gradient(180deg, transparent 0, #000 18px, #000 calc(100% - 28px), transparent 100%); }
+/* a followed team's game: a broadcast scorebug, same charcoal as the rest */
+.rb-fol { container-type: inline-size; transition: box-shadow .6s; }
+.rb-fol::before { background: linear-gradient(90deg, var(--ca) 0 50%, var(--ch) 50% 100%); opacity: .9; }
+.rb-fol.post { opacity: 1; }
+.rb-fol.hot { animation: foHot 8s ease-out; }
+@keyframes foHot { 0%, 60% { box-shadow: 0 0 0 1px var(--fc), 0 0 36px -8px var(--fc); } 100% { box-shadow: 0 0 0 1px transparent, 0 0 0 0 transparent; } }
+.fo-hd { display: flex; align-items: center; gap: 12px; min-width: 0; padding: clamp(14px, 2.6cqw, 20px) clamp(14px, 3cqw, 22px) 0; font: 700 clamp(12px, 1.9cqw, 14px)/1 var(--f-num); letter-spacing: .2em; text-transform: uppercase; color: var(--ink-3); white-space: nowrap; }
+.fo-hd b { color: #fff; font-weight: 800; letter-spacing: .16em; }
+.fo-hd .ev { overflow: hidden; text-overflow: ellipsis; }
+.fo-hd .ev::before { content: ""; display: inline-block; width: 1px; height: .9em; background: rgba(255,255,255,.18); margin-right: 12px; vertical-align: -1px; }
+.fo-hd .ser { margin-left: auto; color: var(--ink-2); letter-spacing: .1em; }
+.fo-run { padding: 5px 9px 4px; font: 800 clamp(12px, 2cqw, 15px)/1 var(--f-num); text-transform: uppercase; border-radius: 5px; background: var(--fc); color: #fff; letter-spacing: .14em; animation: foRun 8s ease-out both; }
+@keyframes foRun { 0% { transform: translateX(14px); opacity: 0; } 5%, 88% { transform: none; opacity: 1; } 100% { opacity: 0; } }
+.fo-bug { display: flex; align-items: center; gap: clamp(12px, 3cqw, 22px); padding: clamp(14px, 2.4cqw, 18px) clamp(14px, 3cqw, 22px); }
+.fo-bug + .fo-ls { margin-top: -4px; }
+.fo-bug .tms { display: flex; align-items: center; gap: clamp(10px, 2.6cqw, 22px); min-width: 0; flex: 1 1 auto; }
+.fo-bug .tm { display: flex; align-items: center; gap: clamp(8px, 1.6cqw, 12px); }
+.fo-bug .sep { width: 1px; align-self: stretch; margin: 4px 0; background: rgba(255,255,255,.1); font: 700 12px/1 var(--f-num); font-style: normal; letter-spacing: .16em; text-transform: uppercase; color: var(--ink-3); }
+.fo-bug .sep:not(:empty) { width: auto; background: none; align-self: center; margin: 0; }
+.fo-bug .tl { width: clamp(26px, 5cqw, 36px); height: clamp(26px, 5cqw, 36px); object-fit: contain; flex: none; }
+.fo-bug .ab { font: 800 clamp(18px, 3.4cqw, 25px)/1 var(--f-num); letter-spacing: .06em; color: var(--ink-2); }
+.fo-bug .tm.fav .ab { color: #fff; }
+.fo-bug .rec { font: 600 clamp(12px, 2cqw, 15px)/1 var(--f-num); letter-spacing: .06em; color: var(--ink-3); }
+.fo-bug .sc { margin-left: 4px; font: 800 clamp(28px, 5.6cqw, 42px)/.9 var(--f-num); color: var(--ink-2); min-width: .7em; text-align: right; }
+.fo-bug .tm.lead .sc { color: #fff; }
+.fo-bug .sc.pop { animation: foPop 8s cubic-bezier(.2, .8, .2, 1); }
+@keyframes foPop { 0% { transform: scale(1.45); color: var(--fc); } 6% { transform: scale(1); } 75% { color: #fff; } }
+.fo-bug > .fo-sit, .fo-bug > .fo-when { margin-left: auto; flex: none; }
+.fo-id { display: flex; flex-direction: column; align-items: flex-end; gap: 6px; flex: none; padding-left: clamp(12px, 3cqw, 22px); border-left: 1px solid rgba(255,255,255,.08); text-align: right; white-space: nowrap; }
+.fo-id b { font: 800 clamp(12px, 2cqw, 15px)/1 var(--f-num); letter-spacing: .16em; text-transform: uppercase; color: #fff; }
+.fo-id span { font: 700 clamp(11px, 1.8cqw, 13px)/1 var(--f-num); letter-spacing: .14em; text-transform: uppercase; color: var(--ink-3); }
+.fo-id .fo-run { color: #fff; background: var(--fc); }
+@container (max-width: 520px) {
+  .fo-bug { align-items: stretch; }
+  .fo-bug .tms { flex-direction: column; align-items: stretch; gap: 8px; }
+  .fo-bug .sep { display: none; }
+  .fo-bug { flex-wrap: wrap; }
+  .fo-id { order: -1; flex: 1 0 100%; flex-direction: row; justify-content: space-between; align-items: center; padding: 0 0 10px; border: 0; border-bottom: 1px solid rgba(255,255,255,.06); }
+  .fo-bug .sc { margin-left: auto; }
+}
+.fo-sit { display: grid; grid-template-columns: auto auto; grid-template-rows: auto auto; column-gap: clamp(10px, 2.4cqw, 18px); row-gap: 8px; align-items: center; padding-left: clamp(12px, 3cqw, 22px); border-left: 1px solid rgba(255,255,255,.08); }
+.fo-sit.brk { grid-template-columns: auto; }
+.fo-dia { grid-row: 1 / 3; width: clamp(44px, 8.6cqw, 62px); height: auto; }
+.fo-dia rect { fill: rgba(255,255,255,.04); stroke: rgba(255,255,255,.32); stroke-width: 1.5; transition: fill .4s, stroke .4s; }
+.fo-dia rect.on { fill: #f2c94c; stroke: #f2c94c; }
+.fo-inn { display: flex; align-items: center; gap: 7px; font: 800 clamp(15px, 2.6cqw, 19px)/1 var(--f-num); letter-spacing: .08em; text-transform: uppercase; color: #fff; white-space: nowrap; }
+.fo-inn .arw { width: 0; height: 0; border-left: 5px solid transparent; border-right: 5px solid transparent; }
+.fo-inn .arw.top { border-bottom: 7px solid #ff5d6c; }
+.fo-inn .arw.bot { border-top: 7px solid #ff5d6c; }
+.fo-cnt { display: flex; align-items: center; gap: 10px; font: 700 clamp(14px, 2.4cqw, 17px)/1 var(--f-num); letter-spacing: .06em; color: var(--ink-2); }
+.fo-cnt .outs { display: flex; gap: 4px; }
+.fo-cnt .outs i { width: 8px; height: 8px; border-radius: 50%; box-shadow: inset 0 0 0 1.5px rgba(255,255,255,.3); }
+.fo-cnt .outs i.on { background: #ff5d6c; box-shadow: none; }
+.fo-when { display: flex; flex-direction: column; align-items: flex-end; gap: 6px; text-align: right; padding-left: clamp(12px, 3cqw, 22px); border-left: 1px solid rgba(255,255,255,.08); }
+.fo-when b { font: 800 clamp(15px, 2.6cqw, 19px)/1 var(--f-num); letter-spacing: .08em; text-transform: uppercase; color: #fff; white-space: nowrap; }
+.fo-when span { font: 700 clamp(12px, 1.9cqw, 14px)/1 var(--f-num); letter-spacing: .14em; text-transform: uppercase; color: var(--ink-3); }
+.fo-ls { display: grid; grid-template-columns: 3.4em repeat(var(--n), minmax(0, 1fr)) repeat(3, 2.1em); align-items: center; margin: 0 clamp(14px, 3cqw, 22px); padding: 6px 10px; border-radius: 6px; background: rgba(255,255,255,.03); font: 600 clamp(13px, 2.1cqw, 16px)/1.75 var(--f-num); color: var(--ink-2); text-align: center; }
+.fo-ls .hd { font-size: .78em; letter-spacing: .12em; color: var(--ink-3); }
+.fo-ls .ab { text-align: left; font-weight: 800; letter-spacing: .06em; color: var(--ink-2); }
+.fo-ls .rhe { border-left: 1px solid rgba(255,255,255,.1); }
+.fo-ls b { color: #fff; font-weight: 800; }
+.fo-ls .cur { color: #fff; background: rgba(255,255,255,.07); border-radius: 3px; }
+.fo-ppl { display: flex; flex-wrap: wrap; gap: 8px clamp(16px, 4cqw, 30px); padding: clamp(10px, 2cqw, 14px) clamp(14px, 3cqw, 22px) clamp(12px, 2.4cqw, 18px); }
+.fo-pp { display: flex; align-items: center; gap: 8px; min-width: 0; }
+.fo-pp em { font: 700 11px/1 var(--f-num); font-style: normal; letter-spacing: .18em; text-transform: uppercase; color: var(--ink-3); }
+.fo-pp .fo-hs { width: 28px; height: 28px; border-radius: 50%; object-fit: cover; object-position: top; background: #1b2433; flex: none; }
+.fo-pp b { font: 600 clamp(14px, 2.2cqw, 16px)/1.1 var(--f-ui); color: #fff; white-space: nowrap; }
+.fo-pp span { font: 600 clamp(13px, 2cqw, 15px)/1 var(--f-num); letter-spacing: .04em; color: var(--ink-3); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.fo-pp.dec em { min-width: auto; }
+.fo-ft { margin: 0 clamp(14px, 3cqw, 22px); padding: 11px 0 clamp(12px, 2.4cqw, 16px); border-top: 1px solid rgba(255,255,255,.06); font: 500 clamp(13px, 2cqw, 15px)/1.35 var(--f-ui); color: var(--ink-2); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.fo-ft em { font: 700 11px/1 var(--f-num); font-style: normal; letter-spacing: .18em; text-transform: uppercase; color: var(--ink-3); margin-right: 10px; }
+.fo-ls + .fo-ft, .fo-bug + .fo-ft { margin-top: 2px; }
+.fo-ppl + .fo-ft { margin-top: 0; }
+#jbBets .rb-fol { display: none; }
 </style>
 </head>
 <body>
@@ -2457,7 +2560,7 @@ body.tv .rb-pl .pl-legs .t { font-size: 16px; }
     const tk = $("#ticker"), tkh = tk && !tk.hidden ? tk.offsetHeight : 0;
     app.style.height = Math.floor((innerHeight - 2 * sy - tkh) / z) + "px";
     loopDrop();
-    densify();
+    densify(); primeFit();
     for (const st of ASC) if (st.el.id !== "jbBets") loopSync(st);
   }
   let dens = 0;
@@ -3059,7 +3162,7 @@ body.tv .rb-pl .pl-legs .t { font-size: 16px; }
     const lc = personCol(l.entries[0].b), rc = personCol(r.entries[0].b);
     return `<div class="rb-h2h${popCls(l)}${popCls(r)}" style="--lc:${lc};--rc:${rc}">
       <div class="rb-h2h-top">${side(l, sl, "l")}<span class="rb-vs">VS</span>${side(r, sr, "r")}</div>
-      <div class="rb-tug${pre ? " pre" : ""}"><i class="lfill" style="width:${lead === "l" ? (50 - x).toFixed(1) : 0}%"></i><i class="rfill" style="width:${lead === "r" ? (x - 50).toFixed(1) : 0}%"></i><b style="left:${x.toFixed(1)}%"></b></div></div>`;
+      <div class="rb-tugrow${pre ? " pre" : ""}"><span class="rb-st st-${sl.cls}">${esc(pre ? "" : sl.txt)}</span><div class="rb-tug${pre ? " pre" : ""}"><i class="lfill" style="width:${lead === "l" ? (50 - x).toFixed(1) : 0}%"></i><i class="rfill" style="width:${lead === "r" ? (x - 50).toFixed(1) : 0}%"></i><b style="left:${x.toFixed(1)}%"></b></div><span class="rb-st st-${sr.cls}">${esc(pre ? "" : sr.txt)}</span></div></div>`;
   }
   // prime time, a football game on: the drive on a field (away team's end zone on the left, so the team on the left attacks right),
   // the first-down line, timeouts and the live win probability. Before kickoff: the lines.
@@ -3283,6 +3386,14 @@ body.tv .rb-pl .pl-legs .t { font-size: 16px; }
     const list = [...games.values()].sort((x, y) => rank(x) - rank(y) || (rank(x) === 1 ? x.g.t - y.g.t : new Set(y.entries.map((e) => personKey(e.b))).size - new Set(x.entries.map((e) => personKey(e.b))).size || y.entries.length - x.entries.length));
     return { list, other, parlays };
   }
+  // the game column holds still: step it down until it fits the screen (the followed game's extras first, then the
+  // win-probability caption, a followed team that isn't playing right now, then older scoring plays). Only then does it roll
+  function primeFit() {
+    const L = $("#rbColL"); if (!L || !L.isConnected) return;
+    const F = ["f1", "f2", "f3", "f4", "f5", "f6", "f7", "f8"]; L.classList.remove(...F);
+    if (!document.body.classList.contains("tv")) return;
+    for (let i = 0; i < F.length && L.scrollHeight > L.clientHeight + 2; i++) L.classList.add(F[i]);
+  }
   function renderRB() {
     if (!S.ready) return;
     const tv = document.body.classList.contains("tv"), { list, other, parlays } = boardGroups();
@@ -3297,9 +3408,22 @@ body.tv .rb-pl .pl-legs .t { font-size: 16px; }
       rbPrime = th.t.ab;
     } else if (rbPrime) { body.classList.remove("prime"); $("#rbMark").innerHTML = ""; rbPrime = null; }
     const rest = list.filter((G) => G !== prime).map((G) => gameCard(G, false)).join("") + parlayCard(parlays) + otherCard(other);
-    const html = prime ? `<div class="rb-pcol">${gameCard(prime, true)}</div>${rest ? `<div class="rb-pcol">${rest}</div>` : ""}` : list.map((G) => gameCard(G, false)).join("") + parlayCard(parlays) + otherCard(other);
+    const fol = followCards();
     $("#rbGames").classList.toggle("primeg", !!prime); $("#rbGames").classList.toggle("solo", !!prime && !rest);
+    if (prime) {
+      let L = $("#rbColL"), R = $("#rbColR");
+      if (!L || L.parentNode !== $("#rbGames")) {
+        $("#rbGames").innerHTML = '<div class="rb-pcol pl" id="rbColL"></div><div class="rb-pcol pr" id="rbColR"></div>';
+        L = $("#rbColL"); R = $("#rbColR");
+        for (let i = ASC.length - 1; i >= 0; i--) if (!ASC[i].el.isConnected) ASC.splice(i, 1);
+        autoScroll(L, 22); autoScroll(R, 24);
+      }
+      L.innerHTML = gameCard(prime, true) + fol; R.innerHTML = rest; R.hidden = !rest;
+      primeFit(); loopSyncEl(L); loopSyncEl(R);
+    } else {
+    const html = list.map((G) => gameCard(G, false)).join("") + fol + parlayCard(parlays) + otherCard(other);
     $("#rbGames").innerHTML = html || `<div class="rb-empty"><b>No bets on the board</b>${tv ? "Log a bet from your phone and it shows up here with everybody's." : "Hit + Bet when you place one. Everybody's bets show up here, game by game."}</div>`;
+    }
     $("#rbGames").classList.toggle("one", list.length + (parlays.length ? 1 : 0) + (other.length ? 1 : 0) <= 1);
     const [lbH, restH] = rail();
     $("#rbLb").innerHTML = lbH; $("#rbRsc").innerHTML = restH;
@@ -3713,7 +3837,7 @@ body.tv .rb-pl .pl-legs .t { font-size: 16px; }
   // ---------- sheets ----------
   function openSheet(id) { $(id).hidden = false; }
   // keep every open screen current: when a new version is up, reload it (never mid-form or mid-animation)
-  const BUILD = "20261012213549";
+  const BUILD = "20261013175055";
   function checkBuild() {
     if (BUILD === "dev") return;
     fetch("version.json?t=" + Date.now(), { cache: "no-store" }).then((r) => (r.ok ? r.json() : null)).then((j) => {
@@ -4219,6 +4343,7 @@ body.tv .rb-pl .pl-legs .t { font-size: 16px; }
       to: { a: si.awayTimeouts ?? null, h: si.homeTimeouts ?? null }, wp: lp && lp.probability && typeof lp.probability.homeWinPercentage === "number" ? lp.probability.homeWinPercentage : null,
       dr: lp && lp.drive ? { t: lp.drive.description || "", s: lp.drive.start && typeof lp.drive.start.yardLine === "number" ? lp.drive.start.yardLine : null } : null, lp: lp ? { id: String(lp.id), type: (lp.type && lp.type.text) || "", text: lp.text || "", team: lp.team && lp.team.id, st: lp.start && lp.start.team ? lp.start.team.id : null, yd: typeof lp.statYardage === "number" ? lp.statYardage : null,
       ath: (lp.athletesInvolved || []).slice(0, 3).map((a) => ({ nm: a.displayName || a.fullName || "", sh: a.shortName || "", hs: a.headshot || "", j: a.jersey || "", pos: a.position || "", tm: a.team && a.team.id })) } : null };
+    if (sport === "MLB") { try { g.mlb = mlbOf(c, si); } catch (err) {} }
     const o = (c.odds || [])[0];
     if (o) {
       const ml = o.moneyline || {}, sp = o.pointSpread || {}, tot = o.total || {};
@@ -4228,6 +4353,133 @@ body.tv .rb-pl .pl-legs .t { font-size: 16px; }
       if (g.sp.h.l == null && o.spread != null) g.sp = { h: { l: Number(o.spread), o: null }, a: { l: -Number(o.spread), o: null } };
     }
     return g;
+  }
+  function mlbOf(c, si) {
+    const ath = (x, sum) => { const a = x && x.athlete; return a ? { nm: a.displayName || a.fullName || "", sh: a.shortName || a.displayName || "", hs: a.headshot || "", sum: sum || "" } : null; };
+    const side = (x) => { const pp = (x.probables || [])[0]; return { h: x.hits ?? null, e: x.errors ?? null, ls: (x.linescores || []).map((l) => (l.displayValue ?? (l.value != null ? Math.round(l.value) : ""))), rec: ((x.records || []).find((r) => r.type === "total") || {}).summary || "", pp: pp ? ath(pp, pp.record || "") : null }; };
+    const t = {}; for (const x of c.competitors) t[x.homeAway] = side(x);
+    const lp = si && si.lastPlay, fa = (c.status && c.status.featuredAthletes) || [];
+    const dec = (n) => { const f = fa.find((x) => x.name === n); return f && f.athlete ? f.athlete.shortName || f.athlete.displayName || "" : ""; };
+    return { a: t.away, h: t.home, b: si ? si.balls ?? null : null, s: si ? si.strikes ?? null : null, o: si ? si.outs ?? null : null,
+      on: si ? [!!si.onFirst, !!si.onSecond, !!si.onThird] : [false, false, false],
+      p: si ? ath(si.pitcher, si.pitcher && si.pitcher.summary) : null, bat: si ? ath(si.batter, si.batter && si.batter.summary) : null,
+      lp: lp && lp.text && !/^pitch\s*\d/i.test(lp.text) ? lp.text : "", ser: (c.series && c.series.summary) || "",
+      w: dec("winningPitcher"), l: dec("losingPitcher"), sv: dec("savingPitcher") };
+  }
+  // ---------- teams you follow without a bet: their game rides under the main one ----------
+  const FOLLOW = [{ sp: "MLB", ab: "LAD", slug: "lad", col: "#1e6fd0" }];
+  const FSCH = new Map(); // "MLB|LAD" -> { at, games } from the team's schedule
+  const fKey = (f) => f.sp + "|" + f.ab;
+  async function loadFollow() {
+    const now = Date.now();
+    await Promise.all(FOLLOW.map(async (f) => {
+      const c = FSCH.get(fKey(f)), fn = c && followNow(f, now), hot = fn && (fn.live || (fn.next && fn.next.t - now < 30 * 60e3));
+      if (c && now - c.at < (hot ? 3 : 20) * 60e3) return;
+      try {
+        const r = await fetch(`https://site.api.espn.com/apis/site/v2/sports/${ESPN[f.sp]}/teams/${f.slug}/schedule`); if (!r.ok) return;
+        const j = await r.json();
+        const tmOf = (x) => { const lg = (x.team.logos || []).find((l) => (l.rel || []).includes("scoreboard") && !(l.rel || []).includes("dark")) || (x.team.logos || [])[0];
+          const sc = x.score && typeof x.score === "object" ? x.score.displayValue : x.score;
+          return { id: String(x.team.id), ab: x.team.abbreviation || "", nm: x.team.shortDisplayName || "", lg: lg ? lg.href : "", sc: /^\d+$/.test(String(sc)) ? Number(sc) : null, win: !!x.winner }; };
+        const games = (j.events || []).map((e) => { const cp = e.competitions[0], st = cp.status.type, tm = {};
+          for (const x of cp.competitors) tm[x.homeAway] = tmOf(x);
+          return { id: String(e.id), t: Date.parse(e.date), st: st.state || "pre", d: st.shortDetail || "", note: ((cp.notes || [])[0] || {}).headline || "", a: tm.away, h: tm.home,
+            tv: (cp.broadcasts || []).map((b) => b.media && b.media.shortName).filter(Boolean)[0] || "" }; }).filter((x) => x.a && x.h);
+        FSCH.set(fKey(f), { at: Date.now(), games, col: j.team && j.team.color ? "#" + j.team.color : "" });
+        render();
+      } catch (err) {}
+    }));
+  }
+  // a playoff series from the schedule: "NLCS - Game 3" -> NLCS, wins each way, decided or not
+  const SER_NEED = (p) => (/world series|cs\b|lcs/i.test(p) ? 4 : /ds\b|division/i.test(p) ? 3 : /wild ?card/i.test(p) ? 2 : 0);
+  function serOf(f, games, note) {
+    const p = String(note || "").split(/\s+-\s+/)[0]; if (!p || !/game/i.test(note)) return null;
+    let w = 0, l = 0, opp = "";
+    for (const x of games) {
+      if (String(x.note).split(/\s+-\s+/)[0] !== p || x.st !== "post") continue;
+      const me = x.a.ab === f.ab ? x.a : x.h, them = me === x.a ? x.h : x.a; opp = them.ab;
+      if (me.win) w++; else if (them.win) l++;
+    }
+    const need = SER_NEED(p), done = need && (w >= need || l >= need);
+    const txt = !w && !l ? `${p}` : w === l ? `${p} tied ${w}-${l}` : done ? `${w > l ? f.ab : opp} wins ${p} ${Math.max(w, l)}-${Math.min(w, l)}` : `${w > l ? f.ab : opp} leads ${p} ${Math.max(w, l)}-${Math.min(w, l)}`;
+    return { p, w, l, done, txt };
+  }
+  function followNow(f, now = Date.now()) {
+    const c = FSCH.get(fKey(f)); if (!c) return null;
+    const cur = (x) => { const g = S.games.get(x.id); return g ? g.st : x.st; };
+    const gs = c.games.filter((x) => !/postpon|cancel|suspend/i.test(x.d));
+    const decided = new Set(gs.map((x) => serOf(f, gs, x.note)).filter((x) => x && x.done).map((x) => x.p));
+    const live = gs.find((x) => cur(x) === "in") || null;
+    const last = gs.filter((x) => cur(x) === "post").sort((x, y) => y.t - x.t)[0] || null;
+    const next = gs.filter((x) => cur(x) === "pre" && x.t > now - 3 * 36e5 && !decided.has(String(x.note).split(/\s+-\s+/)[0])).sort((x, y) => x.t - y.t)[0] || null;
+    return { live, last, next, games: gs, col: c.col };
+  }
+  // the scoreboard day to keep fresh for a followed team: the game on now, today's, or last night's final
+  function followKeys(now = Date.now()) {
+    const keys = [];
+    for (const f of FOLLOW) {
+      const fn = followNow(f, now); if (!fn || !ESPN[f.sp]) continue;
+      const x = fn.live || (fn.next && fn.next.t - now < 14 * 36e5 ? fn.next : null) || (fn.last && now - fn.last.t < 12 * 36e5 ? fn.last : null);
+      if (!x) continue;
+      const key = f.sp + "|" + etDate(x.t), age = now - (boardAt.get(key) || 0), g = S.games.get(x.id), st = g ? g.st : x.st;
+      if (st === "in" || (st === "pre" && x.t - now < 15 * 60e3) || age > 10 * 60e3) keys.push(key);
+    }
+    return keys;
+  }
+  const FO_SC = new Map(); // game id -> runs last seen and the latest run, for the score pop
+  const foDay = (t) => { const d = new Date(t), n = new Date(), tm1 = new Date(n); tm1.setDate(n.getDate() + 1);
+    const hm = tm(t); return d.toDateString() === n.toDateString() ? (d.getHours() >= 17 ? "Tonight " : "Today ") + hm : d.toDateString() === tm1.toDateString() ? "Tomorrow " + hm : d - n < 6 * 864e5 ? d.toLocaleDateString([], { weekday: "short" }) + " " + hm : d.toLocaleDateString([], { month: "short", day: "numeric" }) + " · " + hm; };
+  const foNote = (n) => String(n || "").replace(/\s+-\s+/, " · ").replace(/\s*If Necessary/i, "");
+  const foDia = (on) => `<svg class="fo-dia" viewBox="0 0 48 34" aria-hidden="true">${[[37, 21, 0], [24, 8, 1], [11, 21, 2]].map(([x, y, i]) => `<rect x="${x - 6}" y="${y - 6}" width="12" height="12" rx="1.5" transform="rotate(45 ${x} ${y})" class="${on && on[i] ? "on" : ""}"/>`).join("")}</svg>`;
+  function followCards() {
+    const now = Date.now();
+    return FOLLOW.map((f) => { const fn = followNow(f, now); return fn ? followCard(f, fn, now) : ""; }).join("");
+  }
+  function followCard(f, fn, now) {
+    // which game: the one on now, last night's final until the morning, else the next one
+    const recent = fn.last && now - fn.last.t < 10 * 36e5;
+    const x = fn.live || (recent ? fn.last : null) || fn.next || (fn.last && now - fn.last.t < 48 * 36e5 ? fn.last : null);
+    if (!x) return "";
+    const g = S.games.get(x.id), m = (g && g.mlb) || {}, st = g ? g.st : x.st, live = st === "in", pre = st === "pre";
+    const A = g ? g.a : x.a, H = g ? g.h : x.h, fav = A.ab === f.ab ? "a" : "h", favT = fav === "a" ? A : H;
+    const ra = A.sc ?? 0, rh = H.sc ?? 0;
+    let k = FO_SC.get(x.id);
+    if (!k) { k = { a: ra, h: rh, pop: null }; FO_SC.set(x.id, k); }
+    for (const sd of ["a", "h"]) { const r = sd === "a" ? ra : rh; if (!pre && r > k[sd]) k.pop = { s: sd, n: r - k[sd], at: now }; k[sd] = r; }
+    const pop = k.pop && now - k.pop.at < 8000 ? k.pop : null, popD = pop ? `animation-delay:-${now - pop.at}ms` : "";
+    const lead = pre || ra === rh ? "" : ra > rh ? "a" : "h";
+    const ser = serOf(f, fn.games, x.note), serTxt = (m.ser && !/^series starts/i.test(m.ser) ? m.ser.replace(/\bseries\s+/i, (ser && ser.p ? ser.p + " " : "")) : "") || (ser ? ser.txt : "");
+    const col = (t) => esc((t === favT ? fn.col || f.col : t.col) || "#3a4252");
+    const row = (t, sd) => { const sdm = m[sd] || {};
+      return `<div class="tm${lead === sd ? " lead" : ""}${fav === sd ? " fav" : ""}">${t.lg ? `<img class="tl" src="${esc(t.lg)}" alt="" referrerpolicy="no-referrer" onerror="this.remove()">` : ""}<span class="ab">${esc(t.ab)}</span>${pre && sdm.rec ? `<span class="rec num">${esc(sdm.rec)}</span>` : ""}${pre ? "" : `<span class="sc num${pop && pop.s === sd ? " pop" : ""}" style="${popD}">${t.sc ?? 0}</span>`}</div>`; };
+    // the middle: bases, inning, count and outs while it's on; the time and channel before; final after
+    let mid;
+    if (live) {
+      const inn = /^(top|bot|bottom|mid|middle|end)\w*\s+(.*)$/i.exec((g && g.d) || x.d || ""), half = inn ? inn[1].slice(0, 3).toLowerCase() : "", num = inn ? inn[2] : (g && g.d) || "";
+      const brk = half === "mid" || half === "end";
+      mid = `<div class="fo-sit${brk ? " brk" : ""}">${brk ? "" : foDia(m.on)}<div class="fo-inn num">${half === "top" || half === "bot" ? `<i class="arw ${half}"></i>` : ""}${esc(brk ? (half === "mid" ? "Mid " : "End ") + num : num)}</div>${brk ? "" : `<div class="fo-cnt num"><b>${m.b ?? 0}-${m.s ?? 0}</b><span class="outs">${[0, 1, 2].map((i) => `<i class="${i < (m.o || 0) ? "on" : ""}"></i>`).join("")}</span></div>`}</div>`;
+    } else if (pre) mid = `<div class="fo-when"><b class="num">${esc(foDay(x.t))}</b>${x.tv ? `<span>${esc(x.tv)}</span>` : ""}</div>`;
+    else mid = `<div class="fo-when"><b class="num">${esc(/final/i.test((g && g.d) || x.d) ? (g && g.d) || x.d : "Final")}</b><span>${esc(now - x.t < 20 * 36e5 && new Date(x.t).getDate() === new Date(now).getDate() ? "Today" : new Date(x.t).toLocaleDateString([], { weekday: "short", month: "short", day: "numeric" }))}</span></div>`;
+    // line score: every inning, the current one lit, then R H E
+    let ls = "";
+    if (!pre && m.a && m.h && (m.a.ls.length || m.h.ls.length)) {
+      const n = Math.max(9, m.a.ls.length, m.h.ls.length), curI = live ? (g.pd || 1) - 1 : -1;
+      const cells = (sd, t) => Array.from({ length: n }, (_, i) => `<span class="${i === curI ? "cur" : ""}">${esc(m[sd].ls[i] ?? "")}</span>`).join("") + `<b class="rhe">${t.sc ?? 0}</b><span>${m[sd].h ?? ""}</span><span>${m[sd].e ?? ""}</span>`;
+      ls = `<div class="fo-ls num" style="--n:${n}"><span></span>${Array.from({ length: n }, (_, i) => `<span class="hd">${i + 1}</span>`).join("")}<span class="hd rhe">R</span><span class="hd">H</span><span class="hd">E</span><span class="ab">${esc(A.ab)}</span>${cells("a", A)}<span class="ab">${esc(H.ab)}</span>${cells("h", H)}</div>`;
+    }
+    const who = (lbl, p) => (p && p.sh ? `<div class="fo-pp"><em>${lbl}</em>${p.hs ? `<img class="fo-hs" src="${esc(p.hs)}" alt="" referrerpolicy="no-referrer" onerror="this.remove()">` : ""}<b>${esc(p.sh)}</b>${p.sum ? `<span class="num">${esc(p.sum)}</span>` : ""}</div>` : "");
+    let ppl = "";
+    if (live) ppl = who("Pitching", m.p) + who("At bat", m.bat);
+    else if (pre) ppl = who(A.ab, m.a && m.a.pp) + who(H.ab, m.h && m.h.pp);
+    else ppl = ["W", "L", "SV"].map((lbl) => { const nm = m[{ W: "w", L: "l", SV: "sv" }[lbl]]; return nm ? `<div class="fo-pp dec"><em>${lbl}</em><b>${esc(nm)}</b></div>` : ""; }).join("");
+    // under the bug: the play that just happened, or what's next / how the last one went
+    let foot = "";
+    if (live && m.lp) foot = `<div class="fo-ft lp">${esc(m.lp)}</div>`;
+    else if (!live && !pre && fn.next && fn.next !== x) foot = `<div class="fo-ft"><em>Next</em>${fn.next.note && /game/i.test(fn.next.note) ? esc(String(fn.next.note).split(/\s+-\s+/).pop().replace(/\s*If Necessary/i, "")) + " · " : ""}${esc(foDay(fn.next.t))} ${fn.next.a.ab === f.ab ? "at " + esc(fn.next.h.ab) : "vs " + esc(fn.next.a.ab)}${fn.next.tv ? " · " + esc(fn.next.tv) : ""}</div>`;
+    else if (pre && fn.last && fn.last !== x) { const L = fn.last, me = L.a.ab === f.ab ? L.a : L.h, them = me === L.a ? L.h : L.a; const gm = L.note ? String(L.note).split(/\s+-\s+/)[1] || "" : ""; foot = `<div class="fo-ft"><em>Last</em>${me.win ? "Won" : them.win ? "Lost" : "Played"}${gm ? " " + esc(gm) : ""}, ${Math.max(me.sc ?? 0, them.sc ?? 0)}-${Math.min(me.sc ?? 0, them.sc ?? 0)} ${me === L.a ? "at" : "vs"} ${esc(them.ab)}</div>`; }
+    const hot = pop && pop.s === fav;
+    return `<article class="rb-g rb-fol ${st}${live ? "" : " idle"}${hot ? " hot" : ""}" style="--ca:${col(A)};--ch:${col(H)};--fc:${esc(f.col || fn.col)}${hot ? ";" + popD : ""}">
+      <div class="fo-bug"><div class="tms">${row(A, "a")}<i class="sep">${pre ? "at" : ""}</i>${row(H, "h")}</div>${mid}<div class="fo-id">${pop ? `<span class="fo-run" style="${popD}">${esc((pop.s === "a" ? A : H).nm || (pop.s === "a" ? A : H).ab)} ${pop.n > 1 ? `+${pop.n}` : "score"}</span>` : `<b>${esc(x.note ? foNote(x.note) : (favT.nm || f.ab))}</b>`}${serTxt ? `<span>${esc(serTxt)}</span>` : ""}</div></div>${ls}${ppl ? `<div class="fo-ppl">${ppl}</div>` : ""}${foot}</article>`;
   }
   async function loadBoards(keys) {
     const got = await Promise.all(keys.map(async (key) => {
@@ -4273,7 +4525,8 @@ body.tv .rb-pl .pl-legs .t { font-size: 16px; }
     }
     return [...keys];
   }
-  async function pollLive() { if (document.visibilityState === "visible") { const k = liveKeys(); if (k.length) await loadBoards(k); loadLines(); } }
+  async function pollLive() { if (document.visibilityState === "visible") { loadFollow(); const k = [...new Set([...liveKeys(), ...followKeys()])]; if (k.length) await loadBoards(k); loadLines(); } }
+  setTimeout(() => loadFollow().then(() => { const k = followKeys(); if (k.length) loadBoards(k); }), 1200);
   // ---------- Live lines: DraftKings moneyline / spread / total for every game you're on ----------
   const LINES = new Map(), LCHG = new Map(); // gameId -> latest lines; "gameId:cell" -> { dir, at } when a number moves
   const lineSels = (b) => (b.kind === "parlay" ? (Array.isArray(b.legSel) ? b.legSel : []) : [b.sel]).filter((s) => s && s.g != null);
