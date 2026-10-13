@@ -70,7 +70,7 @@ ODDS_API_ALIASES = {
     "LIU Sharks": "Long Island University Sharks", "Louisiana Ragin Cajuns": "Louisiana Ragin' Cajuns",
     "Sam Houston State Bearkats": "Sam Houston Bearkats", "Southern Mississippi Golden Eagles": "Southern Miss Golden Eagles",
     "UMass Minutemen": "Massachusetts Minutemen", "William and Mary Tribe": "William & Mary Tribe",
-    "San Jose State Spartans": "San José State Spartans",
+    "San Jose State Spartans": "San José State Spartans", "Citadel Bulldogs": "The Citadel Bulldogs",
 }
 
 
