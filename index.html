@@ -4680,7 +4680,7 @@ body.tv .rb-pcol.pr .rb-hs-side.r .rb-st { justify-self: start; }
   // ---------- sheets ----------
   function openSheet(id) { $(id).hidden = false; }
   // keep every open screen current: when a new version is up, reload it (never mid-form or mid-animation)
-  const BUILD = "20261014013441";
+  const BUILD = "20261014013754";
   function checkBuild() {
     if (BUILD === "dev") return;
     fetch("version.json?t=" + Date.now(), { cache: "no-store" }).then((r) => (r.ok ? r.json() : null)).then((j) => {
@@ -5749,7 +5749,7 @@ body.tv .rb-pcol.pr .rb-hs-side.r .rb-st { justify-self: start; }
       if (m2) { m2.clearRect(0, 0, w, h); m2.drawImage(cv, 0, 0); }
     };
   }
-  const AURAH = new Set(["dj", "sky", "war", "whip"]);
+  const AURAH = new Set(["dj"]);
   const hockeyBase = (base) => { const m = /^sounds\/aura\/([a-z0-9]+)$/.exec(base); return m && AURAH.has(m[1]) && document.body.classList.contains("hockey") ? "sounds/aurah/" + m[1] : base; };
   const vidSrc = (base0) => { const base = hockeyBase(base0); return (document.createElement("video").canPlayType('video/mp4; codecs="avc1.42E01E"') ? base + ".mp4" : base + ".webm") + (base === "sounds/aura/dj" ? "?v=2" : "?v=1"); }; // v=2: the DJ loop with Sweat Zone signs
   function loadVid(id, base) { const v = $(id); if (!v.getAttribute("src")) { v.preload = "auto"; v.src = vidSrc(base); v.load(); } }
