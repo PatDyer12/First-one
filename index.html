@@ -2566,7 +2566,7 @@ body.tv .rb-pcol.pr .rb-hs-side.r .rb-st { justify-self: start; }
           <label><input type="radio" name="ss-horn" value="normal"><span>Normal</span></label>
           <label><input type="radio" name="ss-horn" value="soft"><span>Soft</span></label>
           <label><input type="radio" name="ss-horn" value="off"><span>Off</span></label>
-        </div></div><label class="togrow"><input type="checkbox" data-ss="NHL.teamhorn"> Each team's own horn (off: one horn for everybody)</label><label class="togrow"><input type="checkbox" data-ss="NHL.cards"> GOAL card with the red lamp</label><label class="togrow"><input type="checkbox" data-ss="NHL.zamboni"> Zamboni between periods</label><label class="togrow"><input type="checkbox" data-ss="NHL.tracker"> Rink with the shot map on the big game</label><label class="togrow"><input type="checkbox" data-ss="NHL.sog"> A note on every shot for shots-on-goal props</label><label class="togrow"><input type="checkbox" data-ss="NHL.clips"> Clips and edits after a goal</label>
+        </div></div><label class="togrow"><input type="checkbox" data-ss="NHL.teamhorn"> Each team's own horn (off: one horn for everybody)</label><label class="togrow"><input type="checkbox" data-ss="NHL.cards"> GOAL card with the red lamp</label><label class="togrow"><input type="checkbox" data-ss="NHL.zamboni"> Zamboni between periods</label><label class="togrow"><input type="checkbox" data-ss="NHL.tracker"> Rink with the shot map on the big game</label><label class="togrow"><input type="checkbox" data-ss="NHL.sog"> A note on every shot for shots-on-goal props</label><label class="togrow"><input type="checkbox" data-ss="NHL.clips"> Clips and edits after a goal</label><label class="togrow"><input type="checkbox" data-ss="NHL.replay"> The goal's replay once ESPN posts it (about 5 min later)</label>
         <span class="hint">Hockey mode Auto turns on when most of the room's bets are hockey: ice, the Zamboni, the horn and the rink.</span>
       </div>
       <div class="sp-panel" data-spp="MLB" hidden><label class="togrow"><input type="checkbox" data-ss="MLB.tracker"> Field with the spray chart on the big game</label><label class="togrow"><input type="checkbox" data-ss="MLB.cards"> Home run and run cards</label><label class="togrow"><input type="checkbox" data-ss="MLB.clips"> Clips and edits when your side scores</label></div>
@@ -4680,7 +4680,7 @@ body.tv .rb-pcol.pr .rb-hs-side.r .rb-st { justify-self: start; }
   // ---------- sheets ----------
   function openSheet(id) { $(id).hidden = false; }
   // keep every open screen current: when a new version is up, reload it (never mid-form or mid-animation)
-  const BUILD = "20261013225853";
+  const BUILD = "20261014004906";
   function checkBuild() {
     if (BUILD === "dev") return;
     fetch("version.json?t=" + Date.now(), { cache: "no-store" }).then((r) => (r.ok ? r.json() : null)).then((j) => {
@@ -7229,8 +7229,9 @@ body.tv .rb-pcol.pr .rb-hs-side.r .rb-st { justify-self: start; }
     return t.slice(0, 3);
   }
   // the card: same broadcast frame as the scoring play, his headshot cut out, the numbers counting up
-  const HORN_TEAMS = new Set(["ANA", "BOS", "BUF", "CAR", "CBJ", "CGY", "CHI", "COL", "DAL", "DET", "EDM", "FLA", "LA", "MIN", "MTL", "NJ", "NSH", "NYI", "NYR", "OTT", "PHI", "PIT", "SEA", "SJ", "STL", "TB", "TOR", "UTAH", "VAN", "VGK", "WPG", "WSH"]);
-  const teamHorn = (t) => (t && HORN_TEAMS.has(t.ab) && sset("NHL", "teamhorn") ? "../nhl/horn_" + t.ab.toLowerCase() : "goal_horn");
+  const HORN_TEAMS = new Set(["ANA", "BOS", "BUF", "CAR", "CBJ", "CGY", "CHI", "COL", "DAL", "DET", "EDM", "FLA", "LA", "MIN", "MTL", "NJ", "NSH", "NYI", "NYR", "OTT", "PHI", "PIT", "SEA", "SJ", "STL", "TB", "TOR", "UTA", "VAN", "VGK", "WPG", "WSH"]);
+  const hornKey = (t) => (t && t.ab === "UTAH" ? "UTA" : t && t.ab);   // the scoreboard says UTA, ESPN's team list says UTAH
+  const teamHorn = (t) => (t && HORN_TEAMS.has(hornKey(t)) && sset("NHL", "teamhorn") ? "../nhl/horn_" + hornKey(t).toLowerCase() : "goal_horn");
   const goalAt = new Map(), hgTries = new Map(), hgNow = () => Date.now();
   function hockeyGoal(g, e, b, then, play) {
     // find the goal on the box score (fetch it now if the scoreboard beat it there)
@@ -7247,6 +7248,7 @@ body.tv .rb-pcol.pr .rb-hs-side.r .rb-st { justify-self: start; }
       if (sset("NHL", "cards")) { document.body.classList.add("goal-lamp"); setTimeout(() => document.body.classList.remove("goal-lamp"), 8500); }
       { const hv = { loud: 1, normal: 0.6, soft: 0.3 }[sset("NHL", "horn")]; if (hv) snSound(teamHorn(g[sd]), hv, 0); }
       showPlayCard(g, { ev: "goal", side: sd, tag: "Goal" }, b, then, 7600, ov);
+      replayWant(g, sd, sc, b);
     };
     if (PHONE()) { if (then) setTimeout(then, 0); return; }
     // one card per goal: the scoreboard and the box score can both report it
@@ -7260,6 +7262,46 @@ body.tv .rb-pcol.pr .rb-hs-side.r .rb-st { justify-self: start; }
     loadPPS(g); let k = 0;
     const iv = setInterval(() => { const p = pickPlay(); if (p || ++k > 16) { clearInterval(iv); go(p); } }, 250);
   }
+  const RPQ = [], RPV = [], rpAt = new Map();   // goals waiting on their video; videos found, waiting for a quiet moment
+  const rpNorm = (x) => String(x || "").normalize("NFD").replace(/[̀-ͯ]/g, "").toLowerCase();
+  function replayWant(g, sd, sc, b) {
+    if (PHONE() || !sset("NHL", "replay")) return;
+    const d = PPS.get(g.id), old = new Set(((d && d.videos) || []).map((v) => String(v.id)));   // the clips ESPN already had are older goals
+    const last = sc ? rpNorm(sc.nm).split(/\s+/).filter((w) => w && !/^(jr|sr|ii|iii|iv)\.?$/.test(w)).pop() || "" : "";
+    RPQ.push({ g, sd, b, nm: sc ? sc.nm : "", tm: String(g[sd].id), last, old, at: Date.now() });
+  }
+  function rpMatch(id, videos) {
+    const vids = videos.map((v) => { const x = (v.links && v.links.source) || {}; return { id: String(v.id), hl: v.headline || "", ms: (v.duration || 0) * 1000, src: (x.HD && x.HD.href) || x.href || "", at: Date.parse(v.originalPublishDate || v.lastModified || "") || 0 }; })
+      .filter((v) => v.src && /\.mp4(\?|$)/.test(v.src) && v.ms > 3000 && v.ms <= 150e3).sort((x, y) => x.at - y.at);
+    const taken = new Set(RPV.map((x) => x.v.id));
+    for (const r of RPQ.filter((r) => r.g.id === id)) {
+      // new since the goal, not played yet, and about him (no scorer on the box score: a goal clip naming his team)
+      const fresh = vids.filter((v) => !r.old.has(v.id) && !hlSeen.has(v.id) && !taken.has(v.id) && (!v.at || v.at > r.at - tvDelay() * 1000 - 120e3));
+      const T = r.g[r.sd], tn = [T.nm, T.fn].filter(Boolean).map(rpNorm);
+      const v = r.last ? fresh.find((v) => rpNorm(v.hl).includes(r.last)) : fresh.find((v) => tn.some((n) => rpNorm(v.hl).includes(n)) && /goal|score|nets|lamp|tall|beam|back of the net|buries|snipe/i.test(v.hl));
+      if (!v) continue;
+      taken.add(v.id); RPV.push({ r, v, at: Date.now() }); RPQ.splice(RPQ.indexOf(r), 1);
+    }
+  }
+  function replayLook() {
+    const now = Date.now();
+    // ESPN never posted it (20 minutes), or replays got switched off
+    for (let i = RPQ.length - 1; i >= 0; i--) if (now - RPQ[i].at > 20 * 60e3 || !sset("NHL", "replay")) RPQ.splice(i, 1);
+    for (let i = RPV.length - 1; i >= 0; i--) if (now - RPV[i].at > 8 * 60e3 || !sset("NHL", "replay")) RPV.splice(i, 1);
+    // ESPN is never faster than about 4 minutes: start looking at 2½, then every 30 seconds
+    for (const id of new Set(RPQ.filter((r) => now - r.at > 150e3).map((r) => r.g.id))) {
+      if (now - (rpAt.get(id) || 0) < 30e3) continue;
+      rpAt.set(id, now);
+      fetch(`https://site.api.espn.com/apis/site/v2/sports/hockey/nhl/summary?event=${id}`).then((r) => r.json()).then((j) => rpMatch(id, j.videos || [])).catch(() => {});
+    }
+    if (!RPV.length || !clipsOn() || clipBusy() || document.visibilityState !== "visible") return;
+    const { r, v } = RPV.shift(), b = anyBacker(r.g) || r.b; if (!b) return;
+    hlSeen.add(v.id); keep("sb-hl", hlSeen);
+    pipTeam = { t: r.g[r.sd], word: "Goal replay", pl: r.nm };
+    lastAny = Date.now(); lastKind = "pop";
+    react(b, "mid", { base: "espn/" + v.id, ext: v.src, label: v.hl, mood: "hype", ms: v.ms + 300, hl: true }, "Goal replay");
+  }
+  setInterval(replayLook, 4000);
   function showBcCard(g, tm, html, ms, then) {
     if (PHONE()) { if (then) setTimeout(then, 0); return; }
     const ov = $("#playCard"), box = $("#pcIn"), C = bcCols(tm); cardBusy = true;
