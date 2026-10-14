@@ -4716,7 +4716,7 @@ body.tv .rb-pcol.pr .rb-hs-side.r .rb-st { justify-self: start; }
   // ---------- sheets ----------
   function openSheet(id) { $(id).hidden = false; }
   // keep every open screen current: when a new version is up, reload it (never mid-form or mid-animation)
-  const BUILD = "20261014030519";
+  const BUILD = "20261014034219";
   function checkBuild() {
     if (BUILD === "dev") return;
     fetch("version.json?t=" + Date.now(), { cache: "no-store" }).then((r) => (r.ok ? r.json() : null)).then((j) => {
@@ -5785,7 +5785,7 @@ body.tv .rb-pcol.pr .rb-hs-side.r .rb-st { justify-self: start; }
       if (m2) { m2.clearRect(0, 0, w, h); m2.drawImage(cv, 0, 0); }
     };
   }
-  const KIT_V = {"hockey": {"dj": "1c54552", "sky": "3cc652", "whip": "3cb2e"}, "baseball": {"aura": "73b40", "bike": "192efc", "cliff": "c028", "dj": "2a7fe0", "hero": "365ce", "lock": "2a977", "paid": "7f645a", "rain": "1268f6", "sky": "3ea689", "slots": "ddc0b", "strap": "3fdb73", "train": "676f1", "war": "991d7", "whip": "1c5121"}}, KIT_DIR = { hockey: "aurah", baseball: "aurab" };
+  const KIT_V = {"hockey": {"aura": "3d8448", "bike": "ad29f", "cliff": "1dc72", "dj": "1c54552", "hero": "48e", "lock": "28033", "paid": "78071", "rain": "15a58e", "sky": "3cc652", "slots": "125a29", "strap": "323fb", "train": "3b819", "war": "79fc87", "whip": "3cb2e"}, "baseball": {"aura": "73b40", "bike": "192efc", "cliff": "c028", "dj": "2a7fe0", "hero": "365ce", "lock": "2a977", "paid": "7f645a", "rain": "1268f6", "sky": "3ea689", "slots": "ddc0b", "strap": "3fdb73", "train": "676f1", "war": "991d7", "whip": "1c5121"}}, KIT_DIR = { hockey: "aurah", baseball: "aurab" };
   const kitOn = () => (document.body.classList.contains("hockey") ? "hockey" : document.body.classList.contains("baseball") ? "baseball" : "");
   const hockeyBase = (base) => { const m = /^sounds\/aura\/([a-z0-9]+)$/.exec(base), k = kitOn(); return m && k && KIT_V[k][m[1]] ? "sounds/" + KIT_DIR[k] + "/" + m[1] : base; };
   const vidSrc = (base0) => { const base = hockeyBase(base0); const h = base !== base0 ? KIT_V[kitOn()][base0.slice(12)] : ""; return (document.createElement("video").canPlayType('video/mp4; codecs="avc1.42E01E"') ? base + ".mp4" : base + ".webm") + (h ? "?h=" + h : base === "sounds/aura/dj" ? "?v=2" : "?v=1"); }; // v=2: the DJ loop with Sweat Zone signs
