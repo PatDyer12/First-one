@@ -4680,7 +4680,7 @@ body.tv .rb-pcol.pr .rb-hs-side.r .rb-st { justify-self: start; }
   // ---------- sheets ----------
   function openSheet(id) { $(id).hidden = false; }
   // keep every open screen current: when a new version is up, reload it (never mid-form or mid-animation)
-  const BUILD = "20261014012253";
+  const BUILD = "20261014013441";
   function checkBuild() {
     if (BUILD === "dev") return;
     fetch("version.json?t=" + Date.now(), { cache: "no-store" }).then((r) => (r.ok ? r.json() : null)).then((j) => {
@@ -6185,6 +6185,15 @@ body.tv .rb-pcol.pr .rb-hs-side.r .rb-st { justify-self: start; }
     clip("music/mus01", "My word is like gold", "vibe", 36, { dj: 1, bpm: 128.01, b0: 0.344, music: true }),
     clip("music/mus02", "Flow state", "vibe", 36, { dj: 1, bpm: 144.51, b0: 1.813, music: true }),
     clip("music/mus03", "From the hood to the big league", "vibe", 30, { dj: 1, bpm: 115.0, b0: 0.245, music: true }),
+    // the library's party songs as DJ breaks too (their audio under the DJ loop; tempo and first beat measured off each one)
+    clip("win/win09", "All There", "vibe", 30, { dj: 1, bpm: 142.37, b0: 0.925, song: "All There", artist: "Jeezy ft. Bankroll Fresh" }),
+    clip("win/win17", "I'm Dat N****", "vibe", 30, { dj: 1, bpm: 144.0, b0: 1.949, song: "I'm Dat N****", artist: "Future" }),
+    clip("clips/w04", "Walk It Talk It", "vibe", 30, { dj: 1, bpm: 146.86, b0: 0.849, song: "Walk It Talk It", artist: "Migos ft. Drake" }),
+    clip("clips/w16", "Back to Back", "vibe", 30, { dj: 1, bpm: 129.96, b0: 0.973, song: "Back to Back", artist: "Drake" }),
+    clip("nfl/nfl04", "I Love It", "vibe", 28, { dj: 1, bpm: 126.08, b0: 0.137, song: "I Love It", artist: "Icona Pop ft. Charli XCX" }),
+    clip("cfb/cfb24", "Seven Nation Army", "vibe", 33, { dj: 1, bpm: 118.91, b0: 1.198, song: "Seven Nation Army", artist: "The White Stripes" }),
+    clip("cfb/cfb12", "Poison", "vibe", 26, { dj: 1, bpm: 108.04, b0: 2.234, song: "Poison", artist: "Bell Biv DeVoe" }),
+    clip("win/win13", "In the Air Tonight", "vibe", 31, { dj: 1, bpm: 94.76, b0: 0.874, song: "In the Air Tonight", artist: "Phil Collins" }),
     clip("clips/w15", "July 4, 1776", "up win", 15.05),
     clip("clips/w16", "Chuck E. Cheese party", "up win vibe", 29.85, { song: "Back to Back", artist: "Drake" }),
     clip("win/win09", "Ant Edwards takeover", "up win vibe", 30, { song: "All There", artist: "Jeezy ft. Bankroll Fresh" }),
@@ -6352,20 +6361,24 @@ body.tv .rb-pcol.pr .rb-hs-side.r .rb-st { justify-self: start; }
     v.muted = true; v.onerror = P.ext ? () => { if (go === pipGo) stopStatus(); } : null;
     if (v.dataset.base !== vbase || (!P.ext && v.dataset.src !== src)) { v.dataset.base = vbase; v.dataset.src = src; v.src = src; v.load(); bg.src = src; bg.load(); }
     for (const x of [v, bg]) { x.loop = dj; x.defaultPlaybackRate = rate; x.playbackRate = rate; }
-    const own = () => (pre || !c || P.ext ? null : P.lib ? clipBuf(P.base) : loadBuf(P.base));
-    // a DJ break plays off your Spotify playlist when this screen's connected to it (the built-in song when Spotify can't)
+    // a DJ break plays off your Spotify playlist when this screen's connected to it (the built-in song when Spotify can't);
+    // so does one of Meegy's scenes, and without Spotify a scene whose song was just on borrows a fresher built-in one
+    const scene = !dj && !pre && !P.ext && /^sounds\/aura\//.test(P.base || "");
+    const swap = scene && !spUsable() ? sceneSong(P) : null;
+    const mine = () => (P.lib ? clipBuf(P.base) : loadBuf(P.base));
+    const own = () => (pre || !c || P.ext ? null : swap ? clipBuf(swap.base).then((x) => x || mine()) : mine());
     if (dj && !pre && !spUsable()) spWhy();
-    const sound = dj && !pre && spUsable() ? spPlay().then((t) => { if (!t) spWhy(); return t || own(); }) : own();
+    const sound = (dj || scene) && !pre && spUsable() ? spPlay().then((t) => { if (!t && dj) spWhy(); return t || own(); }) : own();
     Promise.all([sound, vidReady(v)]).then(([buf]) => {
-      const sp = buf && buf.sp ? buf : null, ms = sp ? sp.ms : P.ms, r = sp ? 1 : rate;
+      const sp = buf && buf.sp ? buf : null, ms = sp && dj ? sp.ms : P.ms, r = sp ? 1 : rate;
       if (go !== pipGo || statusBet !== betId) { if (sp && SP.seq === sp.seq) spStop(); return; }
       clearTimeout(hideT);
-      $("#jbLbl").textContent = sp ? sp.name : gLbl(P.label);
+      $("#jbLbl").textContent = sp && dj ? sp.name : gLbl(P.label);
       // songs get a now-playing card (song and artist), slid in a beat after the clip starts; a Spotify song brings its cover
       const np = $("#jbNp"); np.classList.remove("on"); clearTimeout(npT); spArt(sp && sp.art);
-      if (P.song && !sp) lastSong = P.song;
+      if (!sp) { const h = swap || P; if (h.song) lastSong = h.song; if (buf && !pre) heardSet(h); }
       if (P.dj) lastDj = Date.now();
-      const song = sp ? sp.name : P.song, artist = sp ? sp.artist : P.artist;
+      const song = sp ? sp.name : swap ? swap.song : P.song, artist = sp ? sp.artist : swap ? swap.artist : P.artist;
       if (song) { $("#npSong").textContent = song; $("#npArtist").textContent = artist || ""; np.hidden = false; npT = setTimeout(() => np.classList.add("on"), 700); } else np.hidden = true;
       $("#jbTag").textContent = why || MOOD_TAG[mood] || "Live";
       jbBug(b);
@@ -6607,6 +6620,16 @@ body.tv .rb-pcol.pr .rb-hs-side.r .rb-st { justify-self: start; }
   function shuffled(a) { a = a.slice(); for (let i = a.length - 1; i > 0; i--) { const j = Math.floor(Math.random() * (i + 1)); [a[i], a[j]] = [a[j], a[i]]; } return a; }
   // don't play the same clip twice in a row: pick from whichever ones have gone longest unplayed
   const played = new Map();
+  // when each song was last actually heard on this screen (a scene's song, a DJ song, a borrowed one)
+  const heard = new Map((() => { try { return JSON.parse(localStorage.getItem("sb-heard") || "[]"); } catch (e) { return []; } })());
+  const hearKey = (p) => songKey(p) || "song:" + p.base;
+  function heardSet(p) { heard.set(hearKey(p), Date.now()); if (songKey(p)) played.set(songKey(p), Date.now()); try { localStorage.setItem("sb-heard", JSON.stringify([...heard].slice(-200))); } catch (e) {} }
+  // a scene's own song was on in the last 45 minutes: the built-in song that's gone longest unheard (null: play its own)
+  function sceneSong(P) {
+    if (Date.now() - (heard.get(hearKey(P)) || 0) > 45 * 60e3) return null;
+    const pool = CLIPS.filter((c) => c.dj && c.song && c.lib).map((c) => [c, heard.get(hearKey(c)) || 0, Math.random()]).sort((x, y) => x[1] - y[1] || x[2] - y[2]);
+    return pool.length ? pool[0][0] : null;
+  }
   try { for (const [k, t] of JSON.parse(localStorage.getItem("sb-played") || "[]")) played.set(k, t); } catch (e) {}
   const clipKey = (p) => (p === "lockin" ? p : p.base);
   // several clips ride the same song: the song counts too, so a different clip with the song you just heard waits its turn
