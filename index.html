@@ -2268,6 +2268,18 @@ body.tv .rb-games.primeg > .rb-pcol.duo { display: grid; grid-template-columns: 
 .rb-pcol.many .rk-svg { max-height: 21vh; }
 .rb-pcol.many .dm-svg { max-height: 24vh; }
 .rb-pcol.many .rb-g.hero .rb-gh { padding-top: 12px; padding-bottom: 8px; }
+/* ---------- baseball mode: the ballpark at night ---------- */
+body.tv.baseball::before { background:
+  radial-gradient(700px 420px at 4% -6%, rgba(255,246,220,.20), transparent 64%), radial-gradient(700px 420px at 96% -6%, rgba(255,246,220,.18), transparent 64%),
+  radial-gradient(1400px 520px at 50% 118%, rgba(40,150,70,.30), transparent 70%),
+  repeating-linear-gradient(90deg, rgba(60,170,80,.035) 0 90px, rgba(60,170,80,0) 90px 180px),
+  linear-gradient(180deg, #070b16 0%, #08111c 55%, #0a1a12 100%) !important; }
+body.tv.baseball .rb-g, body.tv.baseball .rb-sec, body.tv.baseball .rb-card { background: linear-gradient(180deg, rgba(14,26,38,.95), rgba(8,16,24,.97)); border-color: rgba(120,200,140,.16); box-shadow: inset 0 1px 0 rgba(235,255,240,.08), 0 18px 40px rgba(0,0,0,.35); }
+body.tv.baseball .rb-pos, body.tv.baseball .rb-h2h, body.tv.baseball .rb-pl .pl-legs li, body.tv.baseball .rb-lr { background-color: rgba(150,230,170,.04); }
+body.tv.baseball .top .brand h1 span { color: #ffe9b0; text-shadow: 0 0 18px rgba(255,220,140,.45); }
+body.tv.baseball .modechip { background: rgba(60,170,90,.18) !important; color: #d8ffe2 !important; border-color: rgba(110,210,140,.5) !important; }
+body.tv.baseball #ticker { background: linear-gradient(180deg, rgba(10,30,18,.96), rgba(6,18,11,.98)); border-top-color: rgba(120,200,140,.25); }
+body.tv.baseball .rb-g.hero { border-color: rgba(255,236,180,.22); }
 /* the bets column is narrow: two sides of a matchup stack instead of squeezing names to "Dodger..." */
 body.tv .rb-pcol.pr .rb-h2h-top { grid-template-columns: 1fr; gap: 2px; }
 body.tv .rb-pcol.pr .rb-vs { justify-self: center; font-size: 10px; }
@@ -2569,7 +2581,12 @@ body.tv .rb-pcol.pr .rb-hs-side.r .rb-st { justify-self: start; }
         </div></div><label class="togrow"><input type="checkbox" data-ss="NHL.teamhorn"> Each team's own horn (off: one horn for everybody)</label><label class="togrow"><input type="checkbox" data-ss="NHL.cards"> GOAL card with the red lamp</label><label class="togrow"><input type="checkbox" data-ss="NHL.zamboni"> Zamboni between periods</label><label class="togrow"><input type="checkbox" data-ss="NHL.tracker"> Rink with the shot map on the big game</label><label class="togrow"><input type="checkbox" data-ss="NHL.sog"> A note on every shot for shots-on-goal props</label><label class="togrow"><input type="checkbox" data-ss="NHL.clips"> Clips and edits after a goal</label><label class="togrow"><input type="checkbox" data-ss="NHL.replay"> The goal's replay once ESPN posts it (about 5 min later)</label>
         <span class="hint">Hockey mode Auto turns on when most of the room's bets are hockey: ice, the Zamboni, the horn and the rink.</span>
       </div>
-      <div class="sp-panel" data-spp="MLB" hidden><label class="togrow"><input type="checkbox" data-ss="MLB.tracker"> Field with the spray chart on the big game</label><label class="togrow"><input type="checkbox" data-ss="MLB.cards"> Home run and run cards</label><label class="togrow"><input type="checkbox" data-ss="MLB.clips"> Clips and edits when your side scores</label></div>
+      <div class="sp-panel" data-spp="MLB" hidden>
+        <div class="sp-row"><span>Baseball mode</span><div class="radios" id="ballRadios">
+          <label><input type="radio" name="baseball" value="auto"><span>Auto</span></label>
+          <label><input type="radio" name="baseball" value="on"><span>On</span></label>
+          <label><input type="radio" name="baseball" value="off"><span>Off</span></label>
+        </div></div><label class="togrow"><input type="checkbox" data-ss="MLB.tracker"> Field with the spray chart on the big game</label><label class="togrow"><input type="checkbox" data-ss="MLB.cards"> Home run and run cards</label><label class="togrow"><input type="checkbox" data-ss="MLB.clips"> Clips and edits when your side scores</label></div>
       <div class="sp-panel" data-spp="BB" hidden><label class="togrow"><input type="checkbox" data-ss="BB.clips"> Clips and edits on big swings</label></div>
       <span class="hint">These are for this screen. Set the TV and your phone separately.</span>
     </div>
@@ -3041,15 +3058,33 @@ body.tv .rb-pcol.pr .rb-hs-side.r .rb-st { justify-self: start; }
   phoneQ.addEventListener("change", () => render());
   function hockeyPin() { try { return localStorage.getItem("sb-hockey") || "auto"; } catch (e) { return "auto"; } }
   // auto: when at least half of what the room has going (open, or settled in the last 8 hours) is hockey
+  function nightSport() {
+    const now = Date.now(), tally = (keep) => {
+      const c = new Map();
+      for (const b of S.bets.values()) {
+        if (!keep(b)) continue;
+        const sp = b.kind === "parlay" ? [...new Set((Array.isArray(b.legSel) ? b.legSel : []).filter(Boolean).map((x) => x.sp))] : [(b.sel && b.sel.sp) || b.sport];
+        for (const x of sp) if (x) c.set(x, (c.get(x) || 0) + 1);
+      }
+      const top = [...c].sort((a, b) => b[1] - a[1])[0]; return top ? top[0] : null;
+    };
+    const live = (b) => { const g = b.status === "open" && gameFor(b); return !!(g && g.st === "in"); };
+    return tally(live) || tally((b) => b.status === "open") || tally((b) => b.settledAt && now - b.settledAt < 2 * 36e5);
+  }
   function hockeyWant() {
     const pin = hockeyPin(); if (pin === "on") return true; if (pin === "off") return false;
-    let n = 0, h = 0; const now = Date.now();
-    for (const b of S.bets.values()) {
-      if (b.status !== "open" && !(b.settledAt && now - b.settledAt < 8 * 36e5)) continue;
-      const sp = b.kind === "parlay" ? [...new Set((Array.isArray(b.legSel) ? b.legSel : []).filter(Boolean).map((x) => x.sp))] : [(b.sel && b.sel.sp) || b.sport];
-      for (const x of sp) { n++; if (x === "NHL") h++; }
-    }
-    return n > 0 && h / n >= 0.5;
+    return nightSport() === "NHL";
+  }
+  // baseball night: the ballpark look, and Neegy in his cap and pinstripes
+  function ballPin() { try { return localStorage.getItem("sb-baseball") || "auto"; } catch (e) { return "auto"; } }
+  function ballWant() {
+    if (document.body.classList.contains("hockey")) return false;
+    const pin = ballPin(); if (pin === "on") return true; if (pin === "off") return false;
+    return nightSport() === "MLB";
+  }
+  function syncBall() {
+    const on = !PHONE() && ballWant();
+    if (on !== document.body.classList.contains("baseball")) { document.body.classList.toggle("baseball", on); loadTicker(); }
   }
   function syncHockey() {
     const on = !PHONE() && hockeyWant(), was = document.body.classList.contains("hockey");
@@ -3078,6 +3113,7 @@ body.tv .rb-pcol.pr .rb-hs-side.r .rb-st { justify-self: start; }
   }
   setInterval(zamWatch, 20000);
   $("#hockeyRadios").addEventListener("change", (e) => { try { localStorage.setItem("sb-hockey", e.target.value); } catch (err) {} render(); showMode(); });
+  $("#ballRadios").addEventListener("change", (e) => { try { localStorage.setItem("sb-baseball", e.target.value); } catch (err) {} render(); showMode(); });
   // the big game on a rink: every shot and goal where it came from (each team shooting at the far net), and the team stat bars
   function rinkHtml(g) {
     const d = PPS.get(g.id); if (!d) { setTimeout(() => loadPPS(), 0); return ""; }
@@ -3141,7 +3177,7 @@ body.tv .rb-pcol.pr .rb-hs-side.r .rb-st { justify-self: start; }
     document.querySelectorAll("#spSet [data-spp]").forEach((p) => (p.hidden = p.dataset.spp !== b.dataset.spt));
   });
   function render() {
-    syncPhone(); syncHockey(); { const hr = document.querySelector(`input[name="hockey"][value="${hockeyPin()}"]`); if (hr) hr.checked = true; }
+    syncPhone(); syncHockey(); syncBall(); { const hr = document.querySelector(`input[name="hockey"][value="${hockeyPin()}"]`); if (hr) hr.checked = true; const br = document.querySelector(`input[name="baseball"][value="${ballPin()}"]`); if (br) br.checked = true; }
     const everyone = [...S.bets.values()], all = everyone.filter(isMe);
     const start = rangeStart(S.range);
     const settled = all.filter((b) => b.status !== "open" && b.settledAt && b.settledAt >= start).sort((a, b) => a.settledAt - b.settledAt);
@@ -4680,7 +4716,7 @@ body.tv .rb-pcol.pr .rb-hs-side.r .rb-st { justify-self: start; }
   // ---------- sheets ----------
   function openSheet(id) { $(id).hidden = false; }
   // keep every open screen current: when a new version is up, reload it (never mid-form or mid-animation)
-  const BUILD = "20261014015843";
+  const BUILD = "20261014021218";
   function checkBuild() {
     if (BUILD === "dev") return;
     fetch("version.json?t=" + Date.now(), { cache: "no-store" }).then((r) => (r.ok ? r.json() : null)).then((j) => {
@@ -5749,9 +5785,10 @@ body.tv .rb-pcol.pr .rb-hs-side.r .rb-st { justify-self: start; }
       if (m2) { m2.clearRect(0, 0, w, h); m2.drawImage(cv, 0, 0); }
     };
   }
-  const AURAH_V = {"dj": "1c54552"}, AURAH = new Set(Object.keys(AURAH_V));
-  const hockeyBase = (base) => { const m = /^sounds\/aura\/([a-z0-9]+)$/.exec(base); return m && AURAH.has(m[1]) && document.body.classList.contains("hockey") ? "sounds/aurah/" + m[1] : base; };
-  const vidSrc = (base0) => { const base = hockeyBase(base0); const h = base !== base0 ? AURAH_V[base0.slice(12)] : ""; return (document.createElement("video").canPlayType('video/mp4; codecs="avc1.42E01E"') ? base + ".mp4" : base + ".webm") + (h ? "?h=" + h : base === "sounds/aura/dj" ? "?v=2" : "?v=1"); }; // v=2: the DJ loop with Sweat Zone signs
+  const KIT_V = {"hockey": {"dj": "1c54552", "sky": "3cc652", "whip": "3cb2e"}, "baseball": {}}, KIT_DIR = { hockey: "aurah", baseball: "aurab" };
+  const kitOn = () => (document.body.classList.contains("hockey") ? "hockey" : document.body.classList.contains("baseball") ? "baseball" : "");
+  const hockeyBase = (base) => { const m = /^sounds\/aura\/([a-z0-9]+)$/.exec(base), k = kitOn(); return m && k && KIT_V[k][m[1]] ? "sounds/" + KIT_DIR[k] + "/" + m[1] : base; };
+  const vidSrc = (base0) => { const base = hockeyBase(base0); const h = base !== base0 ? KIT_V[kitOn()][base0.slice(12)] : ""; return (document.createElement("video").canPlayType('video/mp4; codecs="avc1.42E01E"') ? base + ".mp4" : base + ".webm") + (h ? "?h=" + h : base === "sounds/aura/dj" ? "?v=2" : "?v=1"); }; // v=2: the DJ loop with Sweat Zone signs
   function loadVid(id, base) { const v = $(id); if (!v.getAttribute("src")) { v.preload = "auto"; v.src = vidSrc(base); v.load(); } }
   // play a cut-out video into its canvas; `then` runs once it's rolling (or right away if it can't)
   function playCut(v, draw, onShow, then) {
@@ -6664,7 +6701,9 @@ body.tv .rb-pcol.pr .rb-hs-side.r .rb-st { justify-self: start; }
   // a clip for this sport: its own and the general ones. NFL bets never get a college edit (the college folders, anything
   // tagged college), just the NFL edits, the general fillers and the DJ
   const isCollege = (c) => c.sport === "CFB" || c.college || /^sounds\/(cfb|uga)\//.test(c.base);
-  const forSport = (c, sp) => (c.football ? sp === "NFL" || sp === "CFB" : sp === "NFL" ? c.sport === "NFL" || (!c.sport && !isCollege(c)) : !c.sport || c.sport === sp);
+  const FB_GEN = new Set(["sounds/clips/g06", "sounds/clips/g08", "sounds/clips/g09", "sounds/clips/l04", "sounds/clips/w07", "sounds/clips/w09"]);
+  const isFootball = (c) => !!(c.football || isCollege(c) || c.sport === "NFL" || /^sounds\/(nfl|cfb|uga)\//.test(c.base) || FB_GEN.has(c.base));
+  const forSport = (c, sp) => (c.football ? sp === "NFL" || sp === "CFB" : sp === "NFL" ? c.sport === "NFL" || (!c.sport && !isCollege(c)) : sp === "CFB" ? !c.sport || c.sport === sp : (!c.sport || c.sport === sp) && !isFootball(c));
   // the team you're riding on this bet; null on a total (then nobody's fan clips play)
   function myTeam(b) {
     const g = gameFor(b); if (!g) return null;
@@ -7511,7 +7550,7 @@ body.tv .rb-pcol.pr .rb-hs-side.r .rb-st { justify-self: start; }
     const m = slateMode(), n = slateGames();
     el.hidden = !n && slatePin() === "auto";
     el.className = "chip modechip " + m;
-    el.textContent = (document.body.classList.contains("hockey") ? "Hockey night" : MODE_LABEL[m]) + (n ? ` · ${n} game${n > 1 ? "s" : ""}` : "");
+    el.textContent = (document.body.classList.contains("hockey") ? "Hockey night" : document.body.classList.contains("baseball") ? "Ballpark" : MODE_LABEL[m]) + (n ? ` · ${n} game${n > 1 ? "s" : ""}` : "");
   }
   function autoReact() {
     if (!S.ready) return;
@@ -7673,7 +7712,7 @@ body.tv .rb-pcol.pr .rb-hs-side.r .rb-st { justify-self: start; }
   // main sport: CFB, NFL, or auto (NFL on Sunday, Monday and Thursday, college the rest of the week)
   S.focus = S.focus || "auto";
   const etDow = () => ({ Sun: 0, Mon: 1, Tue: 2, Wed: 3, Thu: 4, Fri: 5, Sat: 6 })[new Intl.DateTimeFormat("en-US", { timeZone: "America/New_York", weekday: "short" }).format(new Date())];
-  const focusLeague = () => (document.body.classList.contains("hockey") ? "NHL" : S.focus === "CFB" || S.focus === "NFL" ? S.focus : [0, 1, 4].includes(etDow()) ? "NFL" : "CFB");
+  const focusLeague = () => (document.body.classList.contains("hockey") ? "NHL" : document.body.classList.contains("baseball") ? "MLB" : S.focus === "CFB" || S.focus === "NFL" ? S.focus : [0, 1, 4].includes(etDow()) ? "NFL" : "CFB");
   function showFocus() { const r = document.querySelector(`input[name="focus"][value="${S.focus}"]`); if (r) r.checked = true; }
   function setFocus(v) { if (v === S.focus) return; S.focus = v; showFocus(); loadTicker(); }
   function tickerOn() { try { return localStorage.getItem("sb-ticker") !== "off"; } catch (e) { return true; } }
