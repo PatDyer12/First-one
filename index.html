@@ -4716,7 +4716,7 @@ body.tv .rb-pcol.pr .rb-hs-side.r .rb-st { justify-self: start; }
   // ---------- sheets ----------
   function openSheet(id) { $(id).hidden = false; }
   // keep every open screen current: when a new version is up, reload it (never mid-form or mid-animation)
-  const BUILD = "20261014021923";
+  const BUILD = "20261014023726";
   function checkBuild() {
     if (BUILD === "dev") return;
     fetch("version.json?t=" + Date.now(), { cache: "no-store" }).then((r) => (r.ok ? r.json() : null)).then((j) => {
@@ -5785,7 +5785,7 @@ body.tv .rb-pcol.pr .rb-hs-side.r .rb-st { justify-self: start; }
       if (m2) { m2.clearRect(0, 0, w, h); m2.drawImage(cv, 0, 0); }
     };
   }
-  const KIT_V = {"hockey": {"dj": "1c54552", "sky": "3cc652", "whip": "3cb2e"}, "baseball": {"dj": "2a7fe0"}}, KIT_DIR = { hockey: "aurah", baseball: "aurab" };
+  const KIT_V = {"hockey": {"dj": "1c54552", "sky": "3cc652", "whip": "3cb2e"}, "baseball": {"dj": "2a7fe0", "sky": "3ea689", "war": "991d7", "whip": "1c5121"}}, KIT_DIR = { hockey: "aurah", baseball: "aurab" };
   const kitOn = () => (document.body.classList.contains("hockey") ? "hockey" : document.body.classList.contains("baseball") ? "baseball" : "");
   const hockeyBase = (base) => { const m = /^sounds\/aura\/([a-z0-9]+)$/.exec(base), k = kitOn(); return m && k && KIT_V[k][m[1]] ? "sounds/" + KIT_DIR[k] + "/" + m[1] : base; };
   const vidSrc = (base0) => { const base = hockeyBase(base0); const h = base !== base0 ? KIT_V[kitOn()][base0.slice(12)] : ""; return (document.createElement("video").canPlayType('video/mp4; codecs="avc1.42E01E"') ? base + ".mp4" : base + ".webm") + (h ? "?h=" + h : base === "sounds/aura/dj" ? "?v=2" : "?v=1"); }; // v=2: the DJ loop with Sweat Zone signs
@@ -6231,6 +6231,15 @@ body.tv .rb-pcol.pr .rb-hs-side.r .rb-st { justify-self: start; }
     clip("cfb/cfb24", "Seven Nation Army", "vibe", 33, { dj: 1, bpm: 118.91, b0: 1.198, song: "Seven Nation Army", artist: "The White Stripes" }),
     clip("cfb/cfb12", "Poison", "vibe", 26, { dj: 1, bpm: 108.04, b0: 2.234, song: "Poison", artist: "Bell Biv DeVoe" }),
     clip("win/win13", "In the Air Tonight", "vibe", 31, { dj: 1, bpm: 94.76, b0: 0.874, song: "In the Air Tonight", artist: "Phil Collins" }),
+    clip("nhlv/hk01", "Hockey: the Cup run", "up win hype", 46.7, { sport: "NHL" }),
+    clip("nhlv/hk02", "Hockey: Caps room", "up win hype", 39.9, { sport: "NHL", fan: "WSH" }),
+    clip("nhlv/hk03", "Hockey: Caufield", "up win hype", 17.5, { sport: "NHL", fan: "MTL" }),
+    clip("nhlv/hk04", "Hockey: playoff hockey", "up win hype", 36.0, { sport: "NHL" }),
+    clip("nhlv/hk05", "Hockey: Caufield", "up win hype", 18.0, { sport: "NHL", fan: "MTL" }),
+    clip("nhlv/hk06", "Hockey: Bruins in net", "up win hype", 34.3, { sport: "NHL", fan: "BOS" }),
+    clip("nhlv/hk07", "Hockey: playoffs", "up win hype", 45.2, { sport: "NHL" }),
+    clip("nhlv/hk08", "Hockey: Bruins", "up win hype", 13.9, { sport: "NHL", fan: "BOS" }),
+    clip("nhlv/hk09", "Hockey: This is SportsCenter", "hype", 30.1, { sport: "NHL", fan: "WSH" }),
     clip("clips/w15", "July 4, 1776", "up win", 15.05),
     clip("clips/w16", "Chuck E. Cheese party", "up win vibe", 29.85, { song: "Back to Back", artist: "Drake" }),
     clip("win/win09", "Ant Edwards takeover", "up win vibe", 30, { song: "All There", artist: "Jeezy ft. Bankroll Fresh" }),
