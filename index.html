@@ -7,7 +7,7 @@
 <title>Sweat Board</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Archivo:wght@400;500;600;700&family=Azeret+Mono:wght@400;500;600&family=Big+Shoulders+Display:wght@700;800;900&family=Barlow+Condensed:wght@500;600;700;800&family=Inter:wght@400;500;600;700;800&display=swap">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Archivo:wght@400;500;600;700&family=Azeret+Mono:wght@400;500;600&family=Big+Shoulders+Display:wght@700;800;900&family=Barlow+Condensed:wght@500;600;700;800&family=Inter:wght@400;500;600;700;800&family=Cormorant+Garamond:ital,wght@0,500;0,600;1,500;1,600&display=swap">
 <style>
 html,body{margin:0}img{max-width:100%}
 /* Layout: arena scoreboard at night. Wide screens = three columns (score | the sweat | trend); phones stack with a floating + Bet. Single dark look on purpose: it lives on a monitor in a dim room. */
@@ -2335,6 +2335,41 @@ body.tv .rb-pcol.pr .rb-hs-side.r .rb-pk > b, body.tv .rb-pcol.pr .rb-hs-side.r 
 body.tv .rb-pcol.pr .rb-hs-side.r .rb-st { justify-self: start; }
 /* a game card with its bets moved to the other column: the scoreboard and the rink / field, no empty rows box */
 .rb-g.hero:not(:has(.rb-rows)) { padding-bottom: 6px; }
+/* house: a quieter, richer frame. Black, ivory and champagne gold, a serif title, hairlines and corner marks instead of neon */
+.jumbo.lux { --mc: 201,164,92; --lx-g: #c9a45c; --lx-g2: #e8d3a2; --lx-iv: #f3ead6; background: radial-gradient(140% 110% at 28% 0%, #1d1810 0%, #0c0b09 52%, #060606 100%); animation: luxIn .8s ease-out both; }
+@keyframes luxIn { from { opacity: 0; } to { opacity: 1; } }
+.jumbo.lux .jb-head { background: linear-gradient(180deg, #0e0d0b, #080706); border-bottom: 1px solid rgba(201,164,92,.6); box-shadow: 0 1px 0 rgba(201,164,92,.16), 0 14px 40px rgba(0,0,0,.55); padding: 1.7vh 2.4vw; gap: 1.6vw; }
+.jumbo.lux .jb-logo { font-style: normal; font-size: 2.9vh; letter-spacing: .1em; color: var(--lx-iv); text-shadow: none; }
+.jumbo.lux .jb-logo b { color: #0c0b09; background: linear-gradient(135deg, #f0dfb4, #c9a45c 55%, #8f6f33); border-radius: 1px; }
+.jumbo.lux .jb-tag { background: transparent; color: var(--lx-g2); border: 1px solid rgba(201,164,92,.7); border-radius: 999px; font: 600 1.55vh/1 var(--f-body); letter-spacing: .34em; padding: .95vh 1.1vw .95vh 1.45vw; }
+.jumbo.lux .jb-head > b { font: italic 600 4.6vh/1.05 "Cormorant Garamond", Georgia, "Times New Roman", serif; text-transform: none; letter-spacing: .005em; color: var(--lx-iv); }
+.jumbo.lux .jb-x { color: rgba(232,211,162,.55); }
+.jumbo.lux .jb-screen { border: 1px solid rgba(232,211,162,.85); outline: 1px solid rgba(201,164,92,.38); outline-offset: 10px; border-radius: 2px; background: #050505; box-shadow: 0 40px 100px rgba(0,0,0,.75); }
+.jumbo.lux .jb-screen #jbBg { filter: blur(40px) brightness(.26) saturate(.5) sepia(.4); }
+.jumbo.lux #pipVid { filter: contrast(1.05) saturate(.92) sepia(.06); }
+.jumbo.lux .jb-screen::after { content: ""; position: absolute; inset: 0; z-index: 2; pointer-events: none; background: radial-gradient(130% 110% at 50% 50%, transparent 60%, rgba(0,0,0,.42) 100%); }
+.jumbo.lux .jb-screen::before { content: ""; position: absolute; inset: 16px; z-index: 3; pointer-events: none; opacity: .8;
+  background: linear-gradient(var(--lx-g2), var(--lx-g2)) left top / 38px 1px no-repeat, linear-gradient(var(--lx-g2), var(--lx-g2)) left top / 1px 38px no-repeat,
+    linear-gradient(var(--lx-g2), var(--lx-g2)) right top / 38px 1px no-repeat, linear-gradient(var(--lx-g2), var(--lx-g2)) right top / 1px 38px no-repeat,
+    linear-gradient(var(--lx-g2), var(--lx-g2)) left bottom / 38px 1px no-repeat, linear-gradient(var(--lx-g2), var(--lx-g2)) left bottom / 1px 38px no-repeat,
+    linear-gradient(var(--lx-g2), var(--lx-g2)) right bottom / 38px 1px no-repeat, linear-gradient(var(--lx-g2), var(--lx-g2)) right bottom / 1px 38px no-repeat; }
+.jumbo.lux .jb-bug, .jumbo.lux .jb-np, .jumbo.lux .jb-team { z-index: 4; }
+.jumbo.lux .jb-prog { height: 2px; border-radius: 0; background: rgba(201,164,92,.14); }
+.jumbo.lux .jb-prog i { background: linear-gradient(90deg, #8f6f33, #e8d3a2); }
+.jumbo.lux .jb-bug { border-radius: 2px; box-shadow: 0 12px 34px rgba(0,0,0,.6), 0 0 0 1px rgba(201,164,92,.55); }
+.jumbo.lux .jb-bug .gm { background: #0c0b09; }
+.jumbo.lux .jb-bug .gm em { color: var(--lx-g2); }
+.jumbo.lux .jb-bug .bt { background: var(--lx-iv); color: #12100c; }
+.jumbo.lux .jb-bug .bt .st.w { background: #8f6f33; }
+.jumbo.lux .jb-np { border-radius: 3px; background: rgba(9,8,7,.8); border-color: rgba(201,164,92,.45); }
+.jumbo.lux .np-art { border-radius: 2px; background: linear-gradient(135deg, #f0dfb4, #c9a45c 55%, #6f5426); }
+.jumbo.lux .np-txt span { color: var(--lx-g2); letter-spacing: .3em; font-weight: 600; }
+.jumbo.lux .np-txt b { font: italic 600 1.3em/1.1 "Cormorant Garamond", Georgia, serif; color: var(--lx-iv); }
+.jumbo.lux .jb-side { background: rgba(10,9,8,.94); border-left: 1px solid rgba(201,164,92,.22); }
+.jumbo.lux .jb-side h3 { color: var(--lx-g2); font-weight: 600; letter-spacing: .3em; }
+.jumbo.lux .jb-side .dot { background: var(--lx-g); box-shadow: 0 0 10px rgba(201,164,92,.8); }
+.jumbo.lux .jb-bet.on { border-color: rgba(201,164,92,.75); background: rgba(201,164,92,.07); box-shadow: none; }
+.jumbo.lux.teamed .jb-head { box-shadow: inset 0 -1px 0 var(--jt2), 0 14px 40px rgba(0,0,0,.55); }
 </style>
 </head>
 <body>
@@ -2683,6 +2718,7 @@ body.tv .rb-pcol.pr .rb-hs-side.r .rb-st { justify-self: start; }
     <div class="field" id="spField">
       <span class="lbl">Spotify for the DJ breaks</span>
       <div class="linein"><label for="f-spclient">Client ID</label><input type="text" class="wide" id="f-spclient" autocomplete="off" spellcheck="false" placeholder="From your Spotify app's settings"><button type="button" class="btn sm" id="spClientSave">Save</button></div>
+      <div class="linein"><label for="f-sphouse">House playlist</label><input type="text" class="wide" id="f-sphouse" autocomplete="off" spellcheck="false" placeholder="Paste your house playlist link"><button type="button" class="btn sm" id="spHouseSave">Save</button></div>
       <div class="linein"><label for="f-splist">Playlist</label><input type="text" class="wide" id="f-splist" autocomplete="off" spellcheck="false" placeholder="Paste a playlist link"><button type="button" class="btn sm" id="spListSave">Save</button></div>
       <div style="display:flex;gap:8px;flex-wrap:wrap;align-items:center">
         <button type="button" class="btn sm primary" id="spConnect">Connect Spotify on this screen</button>
@@ -4857,7 +4893,7 @@ body.tv .rb-pcol.pr .rb-hs-side.r .rb-st { justify-self: start; }
   // ---------- sheets ----------
   function openSheet(id) { $(id).hidden = false; }
   // keep every open screen current: when a new version is up, reload it (never mid-form or mid-animation)
-  const BUILD = "20261015180132";
+  const BUILD = "20261015182658";
   function checkBuild() {
     if (BUILD === "dev") return;
     fetch("version.json?t=" + Date.now(), { cache: "no-store" }).then((r) => (r.ok ? r.json() : null)).then((j) => {
@@ -6374,6 +6410,26 @@ body.tv .rb-pcol.pr .rb-hs-side.r .rb-st { justify-self: start; }
     clip("aura/hero", "Goldie: hero landing", "up win", 17.0, { songId: "bp2" }),
     clip("aura/paid", "Goldie: paid", "up win", 17.0, { songId: "p01" }),
     clip("aura/lock", "Goldie: locked in", "up win", 17.0, { songId: "p01" }),
+    clip("house/hs01", "Fairway money", "up win vibe", 13.05, { house: 1, lux: 1, music: true, songId: "hs01" }),
+    clip("house/hs02", "Get after it", "up win vibe", 19.55, { house: 1, lux: 1, music: true, songId: "hs02" }),
+    clip("house/hs03", "The good life", "up win vibe", 21.35, { house: 1, lux: 1, music: true, songId: "hs03" }),
+    clip("house/hs04", "Ari energy", "up win vibe", 19.35, { house: 1, lux: 1, music: true, songId: "hs04" }),
+    clip("house/hs05", "The world is yours", "up win vibe", 26.25, { house: 1, lux: 1, music: true, songId: "hs05" }),
+    clip("house/hs06", "Free fall", "up win vibe", 39.65, { house: 1, lux: 1, music: true, songId: "hs06" }),
+    clip("house/hs07", "The next two years", "up win vibe", 15.05, { house: 1, lux: 1, music: true, songId: "hs07" }),
+    clip("house/hs08", "Champions only", "up win vibe", 21.65, { house: 1, lux: 1, music: true, songId: "hs08" }),
+    clip("house/hs09", "Being rich", "up win vibe", 17.65, { house: 1, lux: 1, music: true, songId: "hs09" }),
+    clip("house/hs10", "Wolfpack", "up win vibe", 16.35, { house: 1, lux: 1, music: true, songId: "hs10" }),
+    clip("house/hs11", "Harvey mode", "up win vibe", 12.65, { house: 1, lux: 1, music: true, songId: "hs11" }),
+    clip("house/hs12", "Victory lap", "up win vibe", 36.35, { house: 1, lux: 1, music: true, songId: "hs12" }),
+    clip("house/hs13", "Endgame", "up win vibe", 31.65, { house: 1, lux: 1, music: true, songId: "hs13" }),
+    clip("house/hs14", "Wolf mode", "up win vibe", 21.05, { house: 1, lux: 1, music: true, songId: "hs14" }),
+    clip("house/hs15", "Big wave", "up win vibe", 21.85, { house: 1, lux: 1, music: true, songId: "hs15" }),
+    clip("house/hs12", "House: Victory lap", "vibe", 36.35, { dj: 1, bpm: 127.99, b0: 0.275, house: 1, lux: 1, music: true, songId: "hs12" }),
+    clip("house/hs04", "House: Ari energy", "vibe", 19.35, { dj: 1, bpm: 132.01, b0: 0.331, house: 1, lux: 1, music: true, songId: "hs04" }),
+    clip("house/hs14", "House: Wolf mode", "vibe", 21.05, { dj: 1, bpm: 132.01, b0: 0.187, house: 1, lux: 1, music: true, songId: "hs14" }),
+    clip("house/hs10", "House: Wolfpack", "vibe", 16.35, { dj: 1, bpm: 132.07, b0: 0.45, house: 1, lux: 1, music: true, songId: "hs10" }),
+    clip("house/hs03", "House: The good life", "vibe", 21.35, { dj: 1, bpm: 130.0, b0: 0.03, house: 1, lux: 1, music: true, songId: "hs03" }),
     clip("clips/w02", "Car ride laughs", "up win", 22.45),
     clip("clips/w03", "Tiger: Pure.", "up win", 30),
     clip("clips/w04", "Migos carpool", "up win vibe", 30, { song: "Walk It Talk It", artist: "Migos ft. Drake" }),
@@ -6576,7 +6632,10 @@ body.tv .rb-pcol.pr .rb-hs-side.r .rb-st { justify-self: start; }
     if (PHONE()) return;
     const jb = $("#jumbo"), v = $("#pipVid"), bg = $("#jbBg"), c = ready(), go = ++pipGo, betId = b.id, team = pipTeam;
     pipTeam = null;
-    const dj = !!(P.dj && P.bpm), vbase = dj ? DJ_BASE : P.base, rate = dj ? djRate(P.bpm) : 1;
+    const hz = !!(P.dj && P.bpm) && !pre && houseDj(P); SP.useHouse = hz;
+    if (hz && /^DJ /.test(why || "")) why = "House · " + why;
+    const lux = !!P.lux || hz;
+    const dj = !!(P.dj && P.bpm), vbase = dj ? (hz ? HOUSE_DJ : DJ_BASE) : P.base, rate = dj ? djRate(P.bpm) : 1;
     const src = P.ext || vidSrc(vbase);
     v.muted = true; v.onerror = P.ext ? () => { if (go === pipGo) stopStatus(); } : null;
     if (v.dataset.base !== vbase || (!P.ext && v.dataset.src !== src)) { v.dataset.base = vbase; v.dataset.src = src; v.src = src; v.load(); bg.src = src; bg.load(); }
@@ -6588,7 +6647,7 @@ body.tv .rb-pcol.pr .rb-hs-side.r .rb-st { justify-self: start; }
     const mine = () => (P.lib ? clipBuf(P.base) : loadBuf(P.base));
     const own = () => (pre || !c || P.ext ? null : swap ? clipBuf(swap.base).then((x) => x || mine()) : mine());
     if (dj && !pre && !spUsable()) spWhy();
-    const sound = (dj || scene) && !pre && spUsable() ? spPlay().then((t) => { if (!t && dj) spWhy(); return t || own(); }) : own();
+    const sound = (dj || scene) && !pre && spUsable() && !(P.house && !SP.hlist.length) ? spPlay().then((t) => { if (!t && dj) spWhy(); return t || own(); }) : own();
     Promise.all([sound, vidReady(v)]).then(([buf]) => {
       const sp = buf && buf.sp ? buf : null, ms = sp && dj ? sp.ms : P.ms, r = sp ? 1 : rate;
       if (go !== pipGo || statusBet !== betId) { if (sp && SP.seq === sp.seq) spStop(); return; }
@@ -6602,7 +6661,7 @@ body.tv .rb-pcol.pr .rb-hs-side.r .rb-st { justify-self: start; }
       if (song) { $("#npSong").textContent = song; $("#npArtist").textContent = artist || ""; np.hidden = false; npT = setTimeout(() => np.classList.add("on"), 700); } else np.hidden = true;
       $("#jbTag").textContent = why || MOOD_TAG[mood] || "Live";
       jbBug(b);
-      jb.className = "jumbo m-" + mood + (team ? " teamed" : ""); jb.hidden = false;
+      jb.className = "jumbo m-" + mood + (team ? " teamed" : "") + (lux ? " lux" : ""); jb.hidden = false;
       const jt = $("#jbTeam");
       if (team) {
         const c1 = hexRgb(team.t.col) || [40, 44, 60], c2 = hexRgb(team.t.alt) || c1;
@@ -6639,7 +6698,7 @@ body.tv .rb-pcol.pr .rb-hs-side.r .rb-st { justify-self: start; }
   const spSet = (k, v) => { try { if (v == null) localStorage.removeItem("sb-sp-" + k); else localStorage.setItem("sb-sp-" + k, v); } catch (e) {} };
   try { SP.tok = JSON.parse(spGet("tok") || "null"); } catch (e) {}
   const spPid = (x) => { const t = String(x || "").trim(), m = t.match(/playlist[/:]([A-Za-z0-9]{22})/) || t.match(/^([A-Za-z0-9]{22})$/); return m ? m[1] : ""; };
-  const spUsable = () => !!(SP.player && SP.dev && SP.list.length && ready());
+  const spUsable = () => !!(SP.player && SP.dev && (SP.list.length || SP.hlist.length) && ready());
   const b64u = (a) => btoa(String.fromCharCode(...new Uint8Array(a))).replace(/\+/g, "-").replace(/\//g, "_").replace(/=+$/, "");
   // sign in with Spotify (PKCE: no secret on the page); Spotify sends you back here with a code
   async function spConnect() {
@@ -6697,7 +6756,7 @@ body.tv .rb-pcol.pr .rb-hs-side.r .rb-st { justify-self: start; }
       if (SP.player || !SP.tok) return;
       const p = new window.Spotify.Player({ name: "Sweat Board", getOAuthToken: (cb) => { spToken().then((t) => t && cb(t)); }, volume: SP_VOL });
       const say = (m) => { SP.err = m; spShow(); };
-      p.addListener("ready", ({ device_id }) => { SP.dev = device_id; SP.err = ""; clearTimeout(SP.bootT); spShow(); if (!SP.list.length) spLoad(); });
+      p.addListener("ready", ({ device_id }) => { SP.dev = device_id; SP.err = ""; clearTimeout(SP.bootT); spShow(); if (!SP.list.length) spLoad(); if (SP.house && !SP.hlist.length) spLoadH(); });
       p.addListener("not_ready", () => { SP.dev = null; spShow(); });
       p.addListener("initialization_error", ({ message }) => say(`This browser can't play Spotify (${message}).`));
       p.addListener("authentication_error", () => say("Spotify's sign-in didn't take. Hit Reconnect."));
@@ -6744,6 +6803,46 @@ body.tv .rb-pcol.pr .rb-hs-side.r .rb-st { justify-self: start; }
     if (SP.playlist !== pid) { spLoad(); return; }
     spShow();
   }
+  // the house playlist: same rules as the main one (only playlists you made), its own shuffle
+  Object.assign(SP, { house: "", hlist: [], hbag: [], hname: "", hlast: "", hloading: false, herr: "", useHouse: false });
+  async function spLoadH() {
+    if (!SP.house || !SP.tok || SP.hloading) { spShow(); return; }
+    const pid = SP.house; SP.hloading = true; spShow();
+    try {
+      const pl = await spApi(`/playlists/${pid}?fields=name`).catch(() => null), list = [];
+      let path = "items";
+      for (let off = 0, n = 0; n < 200; n++, off += 50) {
+        let j;
+        try { j = await spApi(`/playlists/${pid}/${path}?limit=50&offset=${off}`); }
+        catch (e) { if (e.status === 404 && path === "items" && off === 0) { path = "tracks"; j = await spApi(`/playlists/${pid}/tracks?limit=50&offset=0`); } else throw e; }
+        for (const x of (j && j.items) || []) {
+          const t = x && (x.item || x.track);
+          if (!t || x.is_local || t.type !== "track" || !t.uri || !(t.duration_ms > 75e3)) continue;
+          const im = ((t.album && t.album.images) || []).slice().sort((a, b) => (a.width || 0) - (b.width || 0)).find((i) => (i.width || 300) >= 120);
+          list.push({ uri: t.uri, name: t.name || "", artist: (t.artists || []).map((a) => a.name).join(", "), dur: t.duration_ms, art: im ? im.url : "" });
+        }
+        if (!j || !j.next) break;
+      }
+      if (SP.house === pid) { SP.hlist = list; SP.hbag = []; SP.hname = (pl && pl.name) || ""; SP.herr = list.length ? "" : "The house playlist doesn't have any songs Spotify will play here."; }
+    } catch (e) {
+      if (SP.house === pid) { SP.hlist = []; SP.herr = e.status === 403 || e.status === 404 ? "Spotify only lets this app read playlists you made: paste a house playlist of yours." : `Couldn't load the house playlist (${e.message}).`; }
+    }
+    SP.hloading = false;
+    if (SP.house !== pid) { spLoadH(); return; }
+    spShow();
+  }
+  function spPickH() {
+    if (!SP.hbag.length) { SP.hbag = shuffled(SP.hlist.map((_, i) => i)); if (SP.hlist.length > 1 && SP.hlist[SP.hbag[SP.hbag.length - 1]].uri === SP.hlast) SP.hbag.unshift(SP.hbag.pop()); }
+    const t = SP.hlist[SP.hbag.pop()]; SP.hlast = t.uri;
+    return t;
+  }
+  $("#spHouseSave").addEventListener("click", () => {
+    const raw = $("#f-sphouse").value.trim(), id = spPid(raw);
+    if (raw && !id) { toast("That doesn't look like a Spotify playlist link."); return; }
+    SP.house = id; SP.hlist = []; SP.herr = ""; $("#f-sphouse").value = id ? "https://open.spotify.com/playlist/" + id : "";
+    write((db) => db.doc("config/settings").set({ spHouse: id }, { merge: true }), () => {}).then((ok) => ok && toast(id ? "House playlist saved" : "House playlist removed"));
+    spLoadH();
+  });
   // shuffled, every song once before any repeats, never the same one twice running
   function spPick() {
     if (!SP.bag.length) {
@@ -6771,13 +6870,13 @@ body.tv .rb-pcol.pr .rb-hs-side.r .rb-st { justify-self: start; }
     const p = SP.player, me = ++SP.seq; clearInterval(SP.fade);
     try { p.activateElement(); } catch (e) {}
     for (let k = 0; k < 3; k++) {
-      const t = spPick(), at = spHook(t.dur);
+      const hz = (SP.useHouse && SP.hlist.length > 0) || !SP.list.length, t = hz ? spPickH() : spPick(), at = spHook(t.dur);
       try {
         SP.vol = 0.02; await p.setVolume(0.02).catch(() => {});
         await spApi(`/me/player/play?device_id=${encodeURIComponent(SP.dev)}`, "PUT", { uris: [t.uri], position_ms: Math.round(at) });
         if (me !== SP.seq) return null;
         SP.on = true; if (SP.err) { SP.err = ""; spShow(); } spFade(SP_VOL, 1500);
-        return { sp: true, seq: me, name: t.name, artist: t.artist, art: t.art, ms: Math.max(15e3, Math.min(SP_BREAK, t.dur - at - 2e3)) };
+        return { sp: true, seq: me, name: t.name, artist: t.artist, art: t.art, house: hz, ms: Math.max(15e3, Math.min(SP_BREAK, t.dur - at - 2e3)) };
       } catch (e) {
         if (e.status === 404 && k === 0) { await spApi("/me/player", "PUT", { device_ids: [SP.dev], play: false }).catch(() => {}); continue; } // wake the player up, then try again
         if ((e.status === 400 || e.status === 403) && k < 2) continue; // that song won't play here: the next one
@@ -6809,6 +6908,7 @@ body.tv .rb-pcol.pr .rb-hs-side.r .rb-st { justify-self: start; }
     st.textContent = SP.err || (!con ? "Not connected on this screen." : !SP.player ? "Starting Spotify…" : !SP.dev ? "Waiting on Spotify's player…" : !SP.playlist ? "Connected. Paste a playlist link and hit Save."
       : SP.loading ? "Loading the playlist…" : SP.list.length ? `Connected. DJ breaks on this screen play ${SP.list.length} songs from ${SP.name || "your playlist"}.` : "Connected.");
     st.classList.toggle("err", !!SP.err);
+    if (!SP.err && SP.tok && SP.house) st.textContent += SP.hloading ? " Loading the house playlist…" : SP.hlist.length ? ` House breaks: ${SP.hlist.length} songs from ${SP.hname || "your house playlist"}.` : SP.herr ? " " + SP.herr : "";
   }
   function spSaveClient(v) { SP.client = v; return write((db) => db.doc("config/settings").set({ spClient: v }, { merge: true }), () => {}); }
   $("#spRedir").textContent = SP_REDIRECT;
@@ -7807,7 +7907,7 @@ body.tv .rb-pcol.pr .rb-hs-side.r .rb-st { justify-self: start; }
     if (!playHL(S.games.get(j.g.id) || j.g, j.v, "Highlight")) HL2Q.unshift(j);
   }
   setInterval(hlPoll, 5000);
-  const VIBE = clip("aura/vibe", "Goldie: good vibes", "up win", 16.7, { songId: "sz-rooftop", own: true, song: "Rooftop Hours", artist: "Sweat Zone house" });
+  const VIBE = clip("aura/vibe", "Goldie: good vibes", "up win", 16.7, { songId: "sz-rooftop", own: true, lux: true, song: "Rooftop Hours", artist: "Sweat Zone house" });
   const VB = new Map(), VB_LEAD = { NBA: 4, CBB: 4 }, VB_RUN = { NBA: 10, CBB: 10, NFL: 14, CFB: 14, MLB: 3, NHL: 2 };
   let VQ = null, vbLast = 0;
   const vbDone = () => { try { const o = JSON.parse(localStorage.getItem("sb-vibed") || "{}"), now = Date.now(); for (const k in o) if (now - o[k] > 20 * 3600e3) delete o[k]; return o; } catch (e) { return {}; } };
@@ -7856,12 +7956,12 @@ body.tv .rb-pcol.pr .rb-hs-side.r .rb-st { justify-self: start; }
   }
   // the scoring play's own clip for a bet in that game becomes the scene
   function vibeTake(b, kind, P) {
-    if (!VQ || kind !== "good" || P === VIBE || P === "lockin") return null;
+    if (!VQ || kind !== "good" || P === "lockin" || (P && P.lux)) return null;
     if (Date.now() - vbLast < (slateMode() === "busy" ? 10 : 5) * 60e3) return null;   // one just played: this play keeps its own clip
     const q = VQ;
     if (!selsOf(b).some((x) => { const g = gameOf(x); return g && g.id === q.g.id; })) return null;
     VQ = null; vbMark(q.g.id); vbLast = Date.now();
-    return { b: q.b, P: VIBE, why: q.why };
+    return { b: q.b, P: vibePick(), why: q.why };
   }
   function vibeTick() {
     if (!VQ) return;
@@ -7874,9 +7974,27 @@ body.tv .rb-pcol.pr .rb-hs-side.r .rb-st { justify-self: start; }
     if (now - vbLast < (slateMode() === "busy" ? 10 : 5) * 60e3) { VQ = null; return; }
     const q = VQ; VQ = null; vbMark(q.g.id); vbLast = now;
     lastAny = now; lastKind = "play";
-    react(q.b, "good", VIBE, q.why);
+    react(q.b, "good", vibePick(), q.why);
   }
   setInterval(vibeTick, 2000);
+  const HOUSE_DJ = "sounds/house/dj";
+  const houseEdits = () => CLIPS.filter((c) => c.house && !c.dj);
+  let vibeAt = 0;
+  function vibePick() {
+    // the rooftop scene when it hasn't been on in a while (or a third of the time), otherwise a house edit
+    const P = Date.now() - vibeAt > 45 * 60e3 || Math.random() < 0.34 ? VIBE : pickClip(houseEdits()) || VIBE;
+    if (P === VIBE) vibeAt = Date.now();
+    return P;
+  }
+  // a DJ break goes house: a built-in house track, or (Spotify) every other break and every one while the room's up
+  let hzTurn = 0;
+  const roomUp = () => [...lastRes.values()].includes("W");
+  function houseDj(P) {
+    if (P.house) return true;
+    if (!spUsable() || !SP.hlist.length) return false;
+    if (!SP.list.length) return true;
+    return roomUp() || hzTurn++ % 2 === 1;
+  }
   function teamHype(b, g, e, why) {
     if (!clipsOn() || !g || !e.side) return;
     const t = g[e.side], own = CLIPS.filter((c) => c.fan === t.ab && (!c.sport || c.sport === g.sport) && c.pl !== "simpson");
@@ -10574,6 +10692,8 @@ body.tv .rb-pcol.pr .rb-hs-side.r .rb-st { justify-self: start; }
         if (spc != null && spc !== SP.client) { SP.client = spc; $("#f-spclient").value = spc; }
         const spl = s.exists ? s.data().spPlaylist : null;
         if (spl != null && spl !== SP.playlist) { SP.playlist = spl; SP.list = []; $("#f-splist").value = spl ? "https://open.spotify.com/playlist/" + spl : ""; spLoad(); }
+        const sph = s.exists ? s.data().spHouse : null;
+        if (sph != null && sph !== SP.house) { SP.house = sph; SP.hlist = []; $("#f-sphouse").value = sph ? "https://open.spotify.com/playlist/" + sph : ""; spLoadH(); }
         const cn = s.exists ? s.data().charName : null;
         if (cn != null && cn !== S.charName) { S.charName = cn; $("#f-char").value = cn; showGName(); }
         const hn = s.exists ? s.data().hostName : null;
