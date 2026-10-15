@@ -2286,6 +2286,28 @@ body.tv.baseball #bfield { display: block; position: fixed; inset: 0; z-index: 0
 body.tv.baseball #bfield svg { display: block; width: 100%; height: 100%; }
 body.tv.baseball #bfield::after { content: ""; position: absolute; inset: 0; background: radial-gradient(1200px 700px at 50% 45%, rgba(4,8,12,.15), rgba(4,8,12,.55) 100%); }
 body.tv.baseball .rb-g, body.tv.baseball .rb-sec, body.tv.baseball .rb-card { background: linear-gradient(180deg, rgba(10,20,26,.84), rgba(6,12,16,.9)) !important; }
+/* home run banner and fireworks */
+.hrban { position: fixed; left: 50%; top: 86px; z-index: 130; transform: translate(-50%, -140%); pointer-events: none; }
+.hrban.hb-on { animation: hbIn .55s cubic-bezier(.2,1.2,.3,1) forwards; }
+.hrban.hb-off { animation: hbOut .5s ease-in forwards; }
+@keyframes hbIn { from { transform: translate(-50%, -140%); } to { transform: translate(-50%, 0); } }
+@keyframes hbOut { from { transform: translate(-50%, 0); opacity: 1; } to { transform: translate(-50%, -30%); opacity: 0; } }
+.hb-in { display: grid; grid-template-columns: auto auto minmax(0, 1fr) auto; align-items: center; gap: 18px; padding: 12px 26px 12px 12px; border-radius: 14px;
+  background: linear-gradient(90deg, var(--tc), #0b0f17 46%); box-shadow: 0 18px 50px rgba(0,0,0,.55), inset 0 0 0 2px rgba(255,255,255,.12); min-width: 640px; }
+.hrban.mine .hb-in { box-shadow: 0 0 0 3px #ffd34d, 0 18px 60px rgba(255,200,60,.35); }
+.hb-word { font: 900 34px/1 var(--f-display); text-transform: uppercase; letter-spacing: .02em; color: #fff; background: #c8102e; padding: 10px 16px; border-radius: 9px; text-shadow: 0 2px 0 rgba(0,0,0,.25); animation: hbPulse .6s ease-in-out 4 alternate; }
+.hrban.mine .hb-word { background: #ffd34d; color: #111; }
+@keyframes hbPulse { to { transform: scale(1.06); } }
+.hb-lg { width: 54px; height: 54px; object-fit: contain; filter: drop-shadow(0 2px 6px rgba(0,0,0,.5)); }
+.hb-who { display: flex; flex-direction: column; gap: 4px; min-width: 0; }
+.hb-who b { font: 900 28px/1.05 var(--f-display); color: #fff; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.hb-who span { font: 800 15px/1 var(--f-num); letter-spacing: .14em; text-transform: uppercase; color: #ffd34d; }
+.hb-sc { font: 800 18px/1 var(--f-num); color: rgba(255,255,255,.85); white-space: nowrap; }
+.hrfx { position: fixed; inset: 0; z-index: 131; pointer-events: none; overflow: hidden; }
+.hrfx i { position: absolute; width: 7px; height: 7px; border-radius: 50%; opacity: 0; box-shadow: 0 0 10px currentColor; }
+.hrfx.go i { animation: hrSpark 1.5s cubic-bezier(.15,.7,.3,1) var(--d) forwards; }
+@keyframes hrSpark { 0% { transform: translate(0, 0) scale(1.4); opacity: 1; } 70% { opacity: .9; } 100% { transform: translate(var(--dx), calc(var(--dy) + 40px)) scale(.4); opacity: 0; } }
+@media (max-width: 860px) { .hb-in { min-width: 0; grid-template-columns: auto minmax(0, 1fr); } .hb-lg, .hb-sc { display: none; } }
 /* the bets column is narrow: two sides of a matchup stack instead of squeezing names to "Dodger..." */
 body.tv .rb-pcol.pr .rb-h2h-top { grid-template-columns: 1fr; gap: 2px; }
 body.tv .rb-pcol.pr .rb-vs { justify-self: center; font-size: 10px; }
@@ -2324,7 +2346,7 @@ body.tv .rb-pcol.pr .rb-hs-side.r .rb-st { justify-self: start; }
 <g stroke="#f4f1ea" stroke-width="5" stroke-linecap="round"><line x1="800" y1="880" x2="-140" y2="262"/><line x1="800" y1="880" x2="1740" y2="262"/></g>
 <rect x="1137" y="642.85" width="26" height="14.3" fill="#f4f1ea"/><rect x="787" y="507.85" width="26" height="14.3" fill="#f4f1ea"/><rect x="437" y="642.85" width="26" height="14.3" fill="#f4f1ea"/>
 <rect width="1600" height="900" fill="url(#bfL1)"/><rect width="1600" height="900" fill="url(#bfL2)"/>
-</svg></div><div class="rinkice" id="ice" aria-hidden="true"><i class="ice-ln c"></i><i class="ice-ln b1"></i><i class="ice-ln b2"></i><i class="ice-ci"></i></div>
+</svg></div><div class="hrban" id="hrBan" hidden><div class="hb-in"><div class="hb-word">Home run</div><img class="hb-lg" alt="" referrerpolicy="no-referrer"><div class="hb-who"><b></b><span></span></div><div class="hb-sc"></div></div></div><div class="hrfx" id="hrFx" aria-hidden="true"></div><div class="rinkice" id="ice" aria-hidden="true"><i class="ice-ln c"></i><i class="ice-ln b1"></i><i class="ice-ln b2"></i><i class="ice-ci"></i></div>
 <div class="zam" id="zam" hidden aria-hidden="true"><div class="zam-car"><div class="zam-trail"></div><svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" viewBox="0 0 360 180" width="360" height="180" fill="none" stroke-linejoin="round" stroke-linecap="round"> <defs> <linearGradient id="zgB" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#fff"/><stop offset=".55" stop-color="#e3eef9"/><stop offset="1" stop-color="#b3cae3"/></linearGradient> <linearGradient id="zgT" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#fbfdff"/><stop offset=".6" stop-color="#dae8f6"/><stop offset="1" stop-color="#abc4df"/></linearGradient> <linearGradient id="zgN" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#26487f"/><stop offset="1" stop-color="#0d1f42"/></linearGradient> <linearGradient id="zgM" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#9fb1c6"/><stop offset="1" stop-color="#4d5e75"/></linearGradient> <linearGradient id="zgJ" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#3d6fbd"/><stop offset="1" stop-color="#22457f"/></linearGradient> <linearGradient id="zgA" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#8adcff"/><stop offset="1" stop-color="#1f74c9"/></linearGradient> <linearGradient id="zgS" x1="0" y1="0" x2="1" y2="0"><stop offset="0" stop-color="#bfe9ff" stop-opacity="0"/><stop offset=".65" stop-color="#dff4ff" stop-opacity=".55"/><stop offset="1" stop-color="#fff" stop-opacity=".95"/></linearGradient> <radialGradient id="zgW"><stop offset=".55" stop-color="#2e3540"/><stop offset=".9" stop-color="#181c23"/><stop offset="1" stop-color="#0c0f14"/></radialGradient> <radialGradient id="zgH" cx=".4" cy=".35" r=".7"><stop offset="0" stop-color="#fff"/><stop offset=".6" stop-color="#c6d2df"/><stop offset="1" stop-color="#7c8ca1"/></radialGradient> <radialGradient id="zgL" cx=".45" cy=".35" r=".75"><stop offset="0" stop-color="#fff6d0"/><stop offset=".45" stop-color="#ffb52e"/><stop offset="1" stop-color="#d96a00"/></radialGradient> <radialGradient id="zgG"><stop offset="0" stop-color="#ffc24a" stop-opacity=".75"/><stop offset="1" stop-color="#ffb020" stop-opacity="0"/></radialGradient> <path id="zpB" d="M56 90H274L282 80Q284 78 288 78H304C318 78 330 92 336 108L340 126Q342 136 333 137H299A25 25 0 0 0 249 137H137A25 25 0 0 0 87 137H62Q56 137 56 131Z"/> <path id="zpT" d="M62 90L58 42Q58 36 64 36H198Q204 36 206.5 41.5L229 90Z"/> <clipPath id="zcB"><use xlink:href="#zpB"/></clipPath> <clipPath id="zcT"><use xlink:href="#zpT"/></clipPath> <g id="zwh"> <circle r="21" fill="url(#zgW)" stroke="#05080c" stroke-width="1.5"/> <circle r="18.6" stroke="#47505e" stroke-width="2.4" stroke-dasharray="3.2 3.29"/> <circle r="11" fill="url(#zgH)" stroke="#0a1626" stroke-width="1.2"/> <circle r="7.2" stroke="#8a99ab" stroke-width=".8"/> <g fill="#4a5a70"><circle cy="-5" r="1.3"/><circle cx="4.76" cy="-1.55" r="1.3"/><circle cx="2.94" cy="4.05" r="1.3"/><circle cx="-2.94" cy="4.05" r="1.3"/><circle cx="-4.76" cy="-1.55" r="1.3"/></g> <circle r="2.4" fill="#1d2d46"/> </g> </defs>  <ellipse cx="186" cy="162.5" rx="156" ry="3.6" fill="#000" opacity=".45"/> <rect class="zsheen" x="0" y="158.4" width="14" height="4" rx="2" fill="url(#zgS)"/>  <g id="zbody" stroke="#0a1626" stroke-width="1.5"> <!-- conditioner linkage --> <path d="M80 102L40 130M76 120L54 133" stroke-width="5"/> <path d="M80 102L40 130M76 120L54 133" stroke="#8fa3ba" stroke-width="2.6"/> <path d="M78 112L56 128" stroke-width="3.6"/><path d="M78 112L56 128" stroke="#e6eef6" stroke-width="1.4"/> <rect x="82" y="108" width="222" height="29" fill="#0f1726" stroke="none"/>  <!-- snow tank --> <use xlink:href="#zpT" fill="url(#zgT)"/> <g clip-path="url(#zcT)" stroke="none"> <path d="M50 90V80L232 50V66L50 92z" fill="url(#zgN)"/> <path d="M50 94L232 69.5V72L50 96.5z" fill="#d62839"/> <path d="M84 36h12l-14 54H70z" fill="#fff" opacity=".35"/> <path d="M60 40.5H204" stroke="#fff" stroke-width="1.4"/> </g> <rect x="55" y="31" width="153" height="7" rx="3" fill="url(#zgB)"/> <path d="M58 33H205" stroke="#fff" stroke-width="1.2"/>  <!-- seat + driver --> <path d="M232 90V64Q232 58 238 58H242Q246 58 246 64V84H264Q268 84 268 88V90Z" fill="#3a4a66"/> <path d="M235 62V86" stroke="#6f84a6" stroke-width="1.2"/> <path d="M252 85L279 82" stroke="#1a2a45" stroke-width="8"/> <path d="M246 87C244 74 248 64 258 62C266 61 270 68 270 76L268 87Z" fill="url(#zgJ)"/> <path d="M256 63.5L254 86" stroke="#d62839" stroke-width="1.4"/> <circle cx="259" cy="52" r="7.5" fill="#efc7a0"/> <path d="M251.4 51.5A7.6 7.6 0 0 1 266.6 51.5Z" fill="url(#zgN)"/> <circle cx="259" cy="43" r="2.2" fill="#d62839" stroke-width="1"/>  <!-- main body --> <use xlink:href="#zpB" fill="url(#zgB)"/> <g clip-path="url(#zcB)" stroke="none"> <path d="M40 97H340V108H40z" fill="url(#zgN)"/> <path d="M40 111H340V113.2H40z" fill="#d62839"/> <path d="M60 92.6H272M290 80.6H304" stroke="#fff" stroke-width="1.4"/> </g> <!-- water tank sight glass --> <rect x="148" y="118" width="92" height="12" rx="6" fill="#0c1a2e"/> <rect x="150.5" y="122.5" width="87" height="5.5" rx="2.75" fill="url(#zgA)" stroke="none"/> <path d="M155 121.2H233" stroke="#bfeaff" stroke-width=".9" stroke-dasharray="1 7" opacity=".9"/> <rect x="57.5" y="115.5" width="4" height="8" rx="1.5" fill="#e0283a" stroke-width="1"/> <!-- headlight + bumper --> <circle cx="335" cy="114" r="9" fill="url(#zgG)" stroke="none"/> <ellipse cx="335.2" cy="114" rx="2.6" ry="4.4" fill="#fffbe3" stroke-width="1.1"/> <rect x="303" y="129" width="40" height="9" rx="3.5" fill="#1b2433"/>  <!-- steering + arm --> <path d="M297 80L286 69" stroke-width="4"/><path d="M297 80L286 69" stroke="#9fb1c6" stroke-width="1.8"/> <ellipse cx="284" cy="68" rx="2.6" ry="8.5" transform="rotate(-25 284 68)" stroke-width="4"/><ellipse cx="284" cy="68" rx="2.6" ry="8.5" transform="rotate(-25 284 68)" stroke="#7d8fa8" stroke-width="1.6"/> <path d="M262 66Q265 77 272 77L284 71" stroke="#0a1626" stroke-width="7.5"/> <path d="M262 66Q265 77 272 77L284 71" stroke="#3563ad" stroke-width="5"/> <circle cx="285.5" cy="70.5" r="2.6" fill="#efc7a0" stroke-width="1"/>  <!-- mirror --> <path d="M309 79Q318 68 321 52" stroke-width="3.6"/><path d="M309 79Q318 68 321 52" stroke="#a9bacd" stroke-width="1.6"/> <rect x="317" y="40" width="9" height="13" rx="3" fill="#1b2a44"/> <path d="M320 43.5V49.5" stroke="#9fd3ff" stroke-width="1.6"/>  <!-- beacon --> <rect x="186" y="27" width="12" height="4.5" rx="1" fill="#1b2433"/> <g class="zb"> <circle cx="192" cy="21" r="12" fill="url(#zgG)" stroke="none"/> <path d="M187 27.5V22A5 5 0 0 1 197 22V27.5Z" fill="url(#zgL)" stroke="#5a2c00" stroke-width="1"/> <path d="M189.2 25V22.4A2.6 2.6 0 0 1 191 19.6" stroke="#fff" stroke-width="1.1" opacity=".9"/> </g>  <!-- conditioner --> <path d="M16 152V134Q16 130 20 130H62Q66 130 66 134V152Z" fill="url(#zgM)"/> <path d="M26 134V149M36 134V149M46 134V149M56 134V149" stroke="#3b4a5f" stroke-width="1"/> <rect x="15" y="126" width="52" height="6" rx="2" fill="url(#zgN)"/> <path d="M18 132.2H64" stroke="#d62839" stroke-width="1.2"/> <rect x="14" y="152" width="54" height="5" rx="1.5" fill="#1a2230"/> <path d="M14 157H64L62 161.6H7Q9 158.6 14 157Z" fill="#eaf6ff" stroke-width="1"/>  <!-- wheels --> <g class="zw"><use xlink:href="#zwh" x="112" y="141"/></g> <g class="zw"><use xlink:href="#zwh" x="274" y="141"/></g> </g> </svg> </div></div>
 <div class="app">
   <section class="ph" id="ph" aria-label="Sweat Board">
@@ -2616,7 +2638,7 @@ body.tv .rb-pcol.pr .rb-hs-side.r .rb-st { justify-self: start; }
           <label><input type="radio" name="baseball" value="auto"><span>Auto</span></label>
           <label><input type="radio" name="baseball" value="on"><span>On</span></label>
           <label><input type="radio" name="baseball" value="off"><span>Off</span></label>
-        </div></div><label class="togrow"><input type="checkbox" data-ss="MLB.tracker"> Field with the spray chart on the big game</label><label class="togrow"><input type="checkbox" data-ss="MLB.cards"> Home run and run cards</label><label class="togrow"><input type="checkbox" data-ss="MLB.clips"> Clips and edits when your side scores</label></div>
+        </div></div><label class="togrow"><input type="checkbox" data-ss="MLB.tracker"> Field with the spray chart on the big game</label><label class="togrow"><input type="checkbox" data-ss="MLB.cards"> Home run and run cards</label><label class="togrow"><input type="checkbox" data-ss="MLB.hrall"> A banner for every home run in baseball (off: just the games the room's on)</label><label class="togrow"><input type="checkbox" data-ss="MLB.clips"> Clips and edits when your side scores</label></div>
       <div class="sp-panel" data-spp="BB" hidden><label class="togrow"><input type="checkbox" data-ss="BB.clips"> Clips and edits on big swings</label></div>
       <span class="hint">These are for this screen. Set the TV and your phone separately.</span>
     </div>
@@ -4746,7 +4768,7 @@ body.tv .rb-pcol.pr .rb-hs-side.r .rb-st { justify-self: start; }
   // ---------- sheets ----------
   function openSheet(id) { $(id).hidden = false; }
   // keep every open screen current: when a new version is up, reload it (never mid-form or mid-animation)
-  const BUILD = "20261015151551";
+  const BUILD = "20261015152337";
   function checkBuild() {
     if (BUILD === "dev") return;
     fetch("version.json?t=" + Date.now(), { cache: "no-store" }).then((r) => (r.ok ? r.json() : null)).then((j) => {
@@ -5271,7 +5293,7 @@ body.tv .rb-pcol.pr .rb-hs-side.r .rb-st { justify-self: start; }
       to: { a: si.awayTimeouts ?? null, h: si.homeTimeouts ?? null }, wp: lp && lp.probability && typeof lp.probability.homeWinPercentage === "number" ? lp.probability.homeWinPercentage : null,
       dr: lp && lp.drive ? { t: lp.drive.description || "", s: lp.drive.start && typeof lp.drive.start.yardLine === "number" ? lp.drive.start.yardLine : null } : null, lp: lp ? { id: String(lp.id), type: (lp.type && lp.type.text) || "", text: lp.text || "", team: lp.team && lp.team.id, st: lp.start && lp.start.team ? lp.start.team.id : null, yd: typeof lp.statYardage === "number" ? lp.statYardage : null,
       ath: (lp.athletesInvolved || []).slice(0, 3).map((a) => ({ nm: a.displayName || a.fullName || "", sh: a.shortName || "", hs: a.headshot || "", j: a.jersey || "", pos: a.position || "", tm: a.team && a.team.id })) } : null };
-    if (sport === "MLB") { try { g.mlb = mlbOf(c, si); } catch (err) {} }
+    if (sport === "MLB") { try { g.mlb = mlbOf(c, si); } catch (err) {} try { hrScan(g, lp, "bets"); } catch (err) {} }
     const o = (c.odds || [])[0];
     if (o) {
       const ml = o.moneyline || {}, sp = o.pointSpread || {}, tot = o.total || {};
@@ -6903,6 +6925,63 @@ body.tv .rb-pcol.pr .rb-hs-side.r .rb-st { justify-self: start; }
     return out;
   }
   // which of your picks ride on this game, and is a play by `side` good (+1) or bad (-1) for each
+  const HR_SEEN = new Set(), HR_LOOKED = new Set(), HRQ = [];
+  function hrScan(g, lp, from) {
+    if (!lp || lp.id == null || !g || !g.id) return;
+    const key = from + ":" + g.id + ":" + lp.id;   // the bet games and the ticker each keep their own look (same game, two feeds)
+    // the first look at a game: whatever already happened is history
+    if (!HR_LOOKED.has(from + ":" + g.id)) { HR_LOOKED.add(from + ":" + g.id); HR_SEEN.add(key); return; }
+    if (HR_SEEN.has(key)) return; HR_SEEN.add(key);
+    const txt = ((lp.type && (lp.type.text || lp.type)) || "") + " " + (lp.text || "");
+    if (!/homered|home run|grand slam/i.test(txt) || g.st !== "in") return;
+    const tm = lp.team && lp.team.id != null ? String(lp.team.id) : "", side = tm === String(g.a.id) ? "a" : tm === String(g.h.id) ? "h" : null;
+    const ath = (lp.athletesInvolved || [])[0] || {};
+    const who = ath.displayName || ath.fullName || ((lp.text || "").match(/^(.+?)\s+(?:homered|hit a grand slam)/i) || [])[1] || "";
+    const ft = ((lp.text || "").match(/\((\d{3})\s*feet\)/i) || [])[1];
+    const runs = /grand slam/i.test(txt) ? 4 : 1 + ((lp.text || "").match(/\bscored\b/gi) || []).length;
+    const info = { g, side, who, hs: ath.headshot && (ath.headshot.href || ath.headshot) || "", ft: ft ? Number(ft) : null, runs, from };
+    hrFire(info);   // both feeds already wait out the TV delay before they get here
+  }
+  function hrFire(x) {
+    const g = S.games.get(x.g.id) || x.g, riders = ridersOf(g);
+    const helped = x.side && riders.some(({ s }) => helps(s, { ev: "hr", side: x.side }) > 0);
+    const word = x.runs === 4 ? "Grand slam" : x.runs === 3 ? "3-run shot" : x.runs === 2 ? "2-run shot" : "Solo shot";
+    const team = x.side ? g[x.side] : null;
+    // the bet games' feed calls the room's games; the ticker's calls everything else
+    if (x.from === "bets" ? !riders.length : riders.length || !sset("MLB", "hrall")) return;
+    if (PHONE()) { if (riders.length) toast(`⚾ Home run · ${team ? team.ab + " · " : ""}${x.who}${x.ft ? " · " + x.ft + " ft" : ""}`); return; }
+    if (helped) { setTimeout(() => { hrFireworks(); snSound("launch", 0.7, 0); }, 900); return; }   // the play card has it: fireworks over the card
+    HRQ.push({ g, team, who: x.who, hs: x.hs, line: [x.ft ? x.ft + " ft" : "", word].filter(Boolean).join(" · "), mine: riders.length > 0 }); hrNext();
+  }
+  let hrBusy = false;
+  function hrNext() {
+    if (hrBusy || !HRQ.length) return;
+    if (cardBusy) { setTimeout(hrNext, 1500); return; }
+    const j = HRQ.shift(), el = $("#hrBan"), g = j.g, t = j.team; hrBusy = true;
+    el.querySelector(".hb-lg").src = (t && t.lg) || ""; el.querySelector(".hb-lg").hidden = !(t && t.lg);
+    el.querySelector(".hb-who b").textContent = j.who || (t ? t.nm || t.ab : "Home run");
+    el.querySelector(".hb-who span").textContent = j.line;
+    const sc = (x) => `${g[x].ab} ${g[x].sc ?? ""}`;
+    el.querySelector(".hb-sc").textContent = `${sc("a")} · ${sc("h")}${g.d ? " · " + g.d : ""}`;
+    el.style.setProperty("--tc", (t && t.col) || "#c8102e");
+    el.classList.toggle("mine", j.mine); el.hidden = false; el.classList.remove("hb-off"); void el.offsetWidth; el.classList.add("hb-on");
+    snSound("bc_sting", j.mine ? 0.8 : 0.6, 0);   // the other side's homer: called, not celebrated (fireworks are for yours)
+    setTimeout(() => { el.classList.add("hb-off"); }, j.mine ? 7000 : 5200);
+    setTimeout(() => { el.hidden = true; el.classList.remove("hb-on", "hb-off"); hrBusy = false; hrNext(); }, j.mine ? 7600 : 5800);
+  }
+  // fireworks: a few bursts of sparks over the top of the screen (transforms and opacity only)
+  function hrFireworks() {
+    const fx = $("#hrFx"); if (!fx || PHONE()) return;
+    const cols = ["#ffd34d", "#ff4d4d", "#ffffff", "#6fb6ff", "#ff9a3c"];
+    let html = "";
+    for (let k = 0; k < 5; k++) {
+      const x = 12 + Math.random() * 76, y = 10 + Math.random() * 28, d = k * 0.32, c = cols[k % cols.length];
+      for (let i = 0; i < 18; i++) { const a = (i / 18) * Math.PI * 2, r = 70 + Math.random() * 60; html += `<i style="left:${x}vw;top:${y}vh;--dx:${(Math.cos(a) * r).toFixed(0)}px;--dy:${(Math.sin(a) * r).toFixed(0)}px;--d:${d}s;background:${c}"></i>`; }
+    }
+    fx.innerHTML = html; fx.classList.remove("go"); void fx.offsetWidth; fx.classList.add("go");
+    snSound("slam", 0.35, 0.25); snSound("slam", 0.3, 0.9);
+    clearTimeout(hrFireworks.t); hrFireworks.t = setTimeout(() => { fx.classList.remove("go"); fx.innerHTML = ""; }, 3600);
+  }
   function ridersOf(g) {
     const r = [];
     for (const b of S.bets.values()) {
@@ -7785,6 +7864,7 @@ body.tv .rb-pcol.pr .rb-hs-side.r .rb-st { justify-self: start; }
         g.wx = ven.indoor ? { dome: true } : wr ? { t: wr.temperature, txt: /^\d+$/.test(dv) ? ci : dv } : null;
         g.loc = ven.address && ven.address.city ? { city: ven.address.city, st: ven.address.state || "", ctry: ven.address.country || "" } : null;
         games.push(g);
+        if (lg === "MLB") { try { hrScan(g, lp, "ticker"); } catch (err) {} }
         // a score since the last look: say who and what
         const was = TK.prev.get(g.id);
         if (was && g.st === "in") for (const side of ["a", "h"]) {
