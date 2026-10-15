@@ -2674,9 +2674,9 @@ body.tv .rb-pcol.pr .rb-hs-side.r .rb-st { justify-self: start; }
     </div>
     <div class="field" id="roomField">
       <span class="lbl">Guests add their own bets</span>
-      <div class="linein"><label for="f-room">Room code</label><input type="text" id="f-room" maxlength="24" autocomplete="off" spellcheck="false" placeholder="Any word, like sweat24"><button type="button" class="btn sm" id="roomSave">Save</button></div>
+      <label class="togrow"><input type="checkbox" id="f-roomOpen" checked> Guests can join (on unless you switch it off)</label>
       <div class="room-link" id="roomLink" hidden><canvas id="roomQr" width="132" height="132" aria-label="QR code for the guest link"></canvas><div><code id="roomUrl"></code><button type="button" class="btn sm" id="roomCopy">Copy link</button><label class="togrow"><input type="checkbox" id="roomTv"> Show the QR on the TV</label></div></div>
-      <span class="hint">Guests open the link (or scan the QR on the TV), put their name in and add bets from their own phones. They only see and change their own bets; the board settles them. Turn on Anonymous sign-in in Firebase (Authentication → Sign-in method) and paste the guest rules into Firestore.</span>
+      <span class="hint">Always open: guests open the link (or scan the QR on the TV), put their name in and add bets from their own phones. They only see and change their own bets; the board settles them. Needs Anonymous sign-in on in Firebase (Authentication → Sign-in method) and the guest rules in Firestore.</span>
     </div>
     <div class="field" id="spField">
       <span class="lbl">Spotify for the DJ breaks</span>
@@ -2739,7 +2739,6 @@ body.tv .rb-pcol.pr .rb-hs-side.r .rb-st { justify-self: start; }
     <div id="gate-guest" hidden>
       <p>Join the room to add your bets. They show up on the big screen with everyone else's, and settle themselves.</p>
       <div class="field"><label class="lbl" for="gu-name">Your name</label><input type="text" id="gu-name" maxlength="20" autocomplete="nickname" placeholder="Name on the board"></div>
-      <div class="field" id="gu-codeF"><label class="lbl" for="gu-code">Room code</label><input type="text" id="gu-code" maxlength="24" autocomplete="off" spellcheck="false" placeholder="From the host"></div>
       <button type="button" class="btn primary" id="guJoin">Join</button>
       <button type="button" class="btn ghost" id="guGoogle">Join with Google instead</button>
     </div>
@@ -2926,8 +2925,7 @@ body.tv .rb-pcol.pr .rb-hs-side.r .rb-st { justify-self: start; }
   // ---------- render ----------
   // bets you log for other people (Julian, a guest) live in their own section and never count toward yours
   const GUEST = (() => { try { const q = new URLSearchParams(location.search); if (!q.has("guest")) return null;
-    const c = q.get("guest") || localStorage.getItem("sb-guest-code") || ""; if (c) localStorage.setItem("sb-guest-code", c);
-    return { code: c, name: localStorage.getItem("sb-guest-name") || "", uid: null }; } catch (e) { return null; } })();
+    return { name: localStorage.getItem("sb-guest-name") || "", uid: null }; } catch (e) { return null; } })();
   if (GUEST) document.documentElement.classList.add("guestmode");
   const isMe = (b) => (GUEST ? !!b && !!GUEST.uid && b.uid === GUEST.uid : !b || !b.who || b.who === "me");
   const whoName = (b) => (b.whoName || (b.who === "julian" ? "Julian" : S.guestName || "Guest"));
@@ -4549,7 +4547,7 @@ body.tv .rb-pcol.pr .rb-hs-side.r .rb-st { justify-self: start; }
     }
   }
   const colOf = (id) => (GUEST || (S.bets.get(id) || {})._col === "guestBets" ? "guestBets" : "bets");
-  const guestStamp = (data) => (GUEST ? { ...data, who: "guest", whoName: GUEST.name || "Guest", uid: GUEST.uid, code: GUEST.code, status: data.status || "open" } : data);
+  const guestStamp = (data) => (GUEST ? { ...data, who: "guest", whoName: GUEST.name || "Guest", uid: GUEST.uid, status: data.status || "open" } : data);
   const putBet = (id, data0) => { const data = guestStamp(data0); return write((db) => db.collection(GUEST ? "guestBets" : "bets").doc(id).set(data), () => S.bets.set(id, { id, ...data })); };
   const patchBet = (id, patch) => write((db) => db.doc(colOf(id) + "/" + id).update(patch), () => {
     const b = S.bets.get(id), prev = b && b.status;
@@ -4857,7 +4855,7 @@ body.tv .rb-pcol.pr .rb-hs-side.r .rb-st { justify-self: start; }
   // ---------- sheets ----------
   function openSheet(id) { $(id).hidden = false; }
   // keep every open screen current: when a new version is up, reload it (never mid-form or mid-animation)
-  const BUILD = "20261015154641";
+  const BUILD = "20261015160944";
   function checkBuild() {
     if (BUILD === "dev") return;
     fetch("version.json?t=" + Date.now(), { cache: "no-store" }).then((r) => (r.ok ? r.json() : null)).then((j) => {
@@ -8180,9 +8178,9 @@ body.tv .rb-pcol.pr .rb-hs-side.r .rb-st { justify-self: start; }
   showSlate();
   $("#slateRadios").addEventListener("change", (e) => { try { localStorage.setItem("sb-slate", e.target.value); } catch (err) {} showMode(); });
   $("#f-char").value = S.charName || "";
-  // the room code and the guest link + QR
-  S.roomCode = "";
-  const roomUrl = () => location.origin + location.pathname + "?guest=" + encodeURIComponent(S.roomCode);
+  // the guest link + QR, and the off switch
+  S.roomOpen = null;
+  const roomUrl = () => location.origin + location.pathname + "?guest";
   const roomTvOn = () => { try { return localStorage.getItem("sb-roomtv") !== "off"; } catch (e) { return true; } };
   function qrDraw(cv, text) {
     const draw = () => { try { const q = window.qrcode(0, "M"); q.addData(text); q.make(); const n = q.getModuleCount(), c = cv.getContext("2d"), k = cv.width / (n + 4);
@@ -8193,16 +8191,17 @@ body.tv .rb-pcol.pr .rb-hs-side.r .rb-st { justify-self: start; }
     qrDraw.ld.then(draw);
   }
   function showRoom() {
-    const on = !!S.roomCode && !GUEST;
+    const on = S.roomOpen !== false && !GUEST;
     $("#roomLink").hidden = !on; $("#roomTv").checked = roomTvOn();
     if (on) { $("#roomUrl").textContent = roomUrl(); qrDraw($("#roomQr"), roomUrl()); }
     const tvq = $("#roomTvQr"); tvq.hidden = !(on && roomTvOn());
     if (!tvq.hidden) qrDraw($("#roomTvCv"), roomUrl());
   }
-  $("#roomSave").addEventListener("click", () => {
-    const c = $("#f-room").value.trim().replace(/\s+/g, "").slice(0, 24);
-    write((db) => db.doc("config/room").set({ code: c }), () => {}).then((ok) => { if (ok) { S.roomCode = c; showRoom(); toast(c ? "Guests can join with " + c : "Guest joining is off"); } });
+  $("#f-roomOpen").addEventListener("change", (e) => {
+    const o = e.target.checked;
+    write((db) => db.doc("config/room").set({ open: o }, { merge: true }), () => {}).then((ok) => { if (ok) { S.roomOpen = o; showRoom(); toast(o ? "Guests can join" : "Guest betting is closed"); } else e.target.checked = !o; });
   });
+  setTimeout(() => { if (S.roomOpen === null && !GUEST) { S.roomOpen = true; showRoom(); } }, 4000);   // no word from the account (offline): open
   $("#roomCopy").addEventListener("click", () => { try { navigator.clipboard.writeText(roomUrl()); toast("Guest link copied"); } catch (e) {} });
   $("#roomTv").addEventListener("change", (e) => { try { localStorage.setItem("sb-roomtv", e.target.checked ? "on" : "off"); } catch (err) {} showRoom(); });
   $("#charSave").addEventListener("click", () => {
@@ -10373,14 +10372,13 @@ body.tv .rb-pcol.pr .rb-hs-side.r .rb-st { justify-self: start; }
 
   // ---------- sign in + connect ----------
   let GB_READY = false;
-  // the guest page: join (name + room code), then just their own bets
+  // the guest page: join (just a name), then just their own bets
   function wireGuest(auth, db) {
-    $("#gu-name").value = GUEST.name; $("#gu-code").value = GUEST.code; $("#gu-codeF").hidden = !!GUEST.code;
+    $("#gu-name").value = GUEST.name;
     const go = (signIn) => {
-      const nm = $("#gu-name").value.trim().slice(0, 20), cd = ($("#gu-code").value || GUEST.code).trim();
+      const nm = $("#gu-name").value.trim().slice(0, 20);
       if (!nm) { $("#gate-err").textContent = "Put your name in so the board knows whose bets these are."; return; }
-      if (!cd) { $("#gate-err").textContent = "You need the room code from the host (it's in the link the TV shows)."; return; }
-      GUEST.name = nm; GUEST.code = cd; try { localStorage.setItem("sb-guest-name", nm); localStorage.setItem("sb-guest-code", cd); } catch (e) {}
+      GUEST.name = nm; try { localStorage.setItem("sb-guest-name", nm); } catch (e) {}
       $("#gate-err").textContent = "";
       signIn().catch((e) => { $("#gate-err").textContent = e && e.code === "auth/operation-not-allowed" ? "Guest sign-in isn't switched on yet. Tap \"Join with Google instead\", or ask the host." : "Couldn't join (" + ((e && e.code) || "error") + ")."; });
     };
@@ -10388,10 +10386,10 @@ body.tv .rb-pcol.pr .rb-hs-side.r .rb-st { justify-self: start; }
     $("#guGoogle").addEventListener("click", () => go(() => auth.signInWithPopup(new firebase.auth.GoogleAuthProvider())));
   }
   function guestAuth(u, auth, db, unsub) {
-    if (!u || !GUEST.name || !GUEST.code) { S.db = null; S.canWrite = false; S.ready = true; render(); gate("guest"); return; }
+    if (!u || !GUEST.name) { S.db = null; S.canWrite = false; S.ready = true; render(); gate("guest"); return; }
     GUEST.uid = u.uid;
-    // checking in with the room: the rules only take the right code
-    db.doc("members/" + u.uid).set({ name: GUEST.name, code: GUEST.code, at: Date.now() }).then(() => {
+    // checking in with the room (refused only if the host has closed it)
+    db.doc("members/" + u.uid).set({ name: GUEST.name, at: Date.now() }).then(() => {
       gate(null); S.db = db; S.canWrite = true; S.ready = false; S.bets = new Map(); render();
       unsub.push(db.collection("guestBets").where("uid", "==", u.uid).onSnapshot((snap) => {
         const first = !S.ready;
@@ -10407,7 +10405,7 @@ body.tv .rb-pcol.pr .rb-hs-side.r .rb-st { justify-self: start; }
       }, () => toast("Lost the connection to your bets. Reload to reconnect.")));
     }).catch((e) => {
       auth.signOut();
-      S.ready = true; render(); gate("guest", e && e.code === "permission-denied" ? "That room code didn't work. Check it with the host." : "Couldn't reach the board. Check your connection.");
+      S.ready = true; render(); gate("guest", e && e.code === "permission-denied" ? "The host has guest betting closed right now." : "Couldn't reach the board. Check your connection.");
     });
   }
   const gate = (which, msg) => {
@@ -10490,7 +10488,7 @@ body.tv .rb-pcol.pr .rb-hs-side.r .rb-st { justify-self: start; }
         }
         GB_READY = true; render(); autoReact(); autoSettle();
       }, () => {}));
-      unsub.push(db.doc("config/room").onSnapshot((r) => { const c = r.exists ? r.data().code || "" : ""; if (c !== S.roomCode) { S.roomCode = c; $("#f-room").value = c; showRoom(); } }, () => {}));
+      unsub.push(db.doc("config/room").onSnapshot((r) => { const o = !(r.exists && r.data().open === false); if (o !== S.roomOpen) { S.roomOpen = o; $("#f-roomOpen").checked = o; showRoom(); } }, () => {}));
       unsub.push(db.doc("config/settings").onSnapshot((s) => {
         const v = s.exists ? Number(s.data().unitSize) : NaN;
         if (v > 0 && v !== S.unit) { S.unit = v; render(); }
