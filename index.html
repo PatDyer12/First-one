@@ -2344,6 +2344,7 @@ body.tv .rb-pcol.pr .rb-hs-side.r .rb-st { justify-self: start; }
 .jumbo.lux .jb-tag { background: transparent; color: var(--lx-g2); border: 1px solid rgba(201,164,92,.7); border-radius: 999px; font: 600 1.55vh/1 var(--f-body); letter-spacing: .34em; padding: .95vh 1.1vw .95vh 1.45vw; }
 .jumbo.lux .jb-head > b { font: italic 600 4.6vh/1.05 "Cormorant Garamond", Georgia, "Times New Roman", serif; text-transform: none; letter-spacing: .005em; color: var(--lx-iv); }
 .jumbo.lux .jb-x { color: rgba(232,211,162,.55); }
+.jumbo.lux .jb-head > b { display: none; }   /* house: no title over the picture */
 .jumbo.lux .jb-screen { border: 1px solid rgba(232,211,162,.85); outline: 1px solid rgba(201,164,92,.38); outline-offset: 10px; border-radius: 2px; background: #050505; box-shadow: 0 40px 100px rgba(0,0,0,.75); }
 .jumbo.lux .jb-screen #jbBg { filter: blur(40px) brightness(.26) saturate(.5) sepia(.4); }
 .jumbo.lux #pipVid { filter: contrast(1.05) saturate(.92) sepia(.06); }
@@ -4893,7 +4894,7 @@ body.tv .rb-pcol.pr .rb-hs-side.r .rb-st { justify-self: start; }
   // ---------- sheets ----------
   function openSheet(id) { $(id).hidden = false; }
   // keep every open screen current: when a new version is up, reload it (never mid-form or mid-animation)
-  const BUILD = "20261015182658";
+  const BUILD = "20261015183840";
   function checkBuild() {
     if (BUILD === "dev") return;
     fetch("version.json?t=" + Date.now(), { cache: "no-store" }).then((r) => (r.ok ? r.json() : null)).then((j) => {
@@ -6597,6 +6598,37 @@ body.tv .rb-pcol.pr .rb-hs-side.r .rb-st { justify-self: start; }
     }
     return clipBufs.get(base);
   }
+  // the sound for a clip: on (the Sound button), woken up if the TV let it doze
+  function clipCtx() {
+    if (PHONE() || !SND.on) return null;
+    const x = audio(); if (!x) return null;
+    if (x.state !== "running") x.resume().catch(() => {});
+    return x;
+  }
+  let wakeHintAt = 0;
+  const ctxAwake = (x) => !x || x.state === "running" ? Promise.resolve(true) : new Promise((ok) => {
+    const t0 = Date.now(), iv = setInterval(() => {
+      if (x.state === "running") { clearInterval(iv); ok(true); return; }
+      if (Date.now() - t0 > 1500) {
+        clearInterval(iv); ok(false);
+        if (document.body.classList.contains("tv") && Date.now() - wakeHintAt > 5 * 60e3) { wakeHintAt = Date.now(); toast("The sound's asleep: tap the screen (or any remote button) once to bring it back."); }
+      }
+    }, 100);
+  });
+  // Spotify said yes: make sure something's actually playing here, or use the clip's own song
+  function spGuard(sp, go, P, c) {
+    setTimeout(() => {
+      if (go !== pipGo || !SP.player || SP.seq !== sp.seq || typeof SP.player.getCurrentState !== "function") return;
+      SP.player.getCurrentState().then((st) => {
+        if (go !== pipGo || SP.seq !== sp.seq) return;
+        if (st && (st.loading || (!st.paused && st.track_window && st.track_window.current_track))) return;
+        spStop();
+        SP.err = "Spotify didn't play on this screen, so that one used the built-in song."; spShow();
+        if (!c || P.ext || !P.base) return;
+        (P.lib ? clipBuf(P.base) : loadBuf(P.base)).then((buf) => { if (!buf || go !== pipGo) return; statusSrc = playBuf(c, buf, 0.95); clearTimeout(pipT); pipT = setTimeout(() => { if (go === pipGo) stopStatus(); }, Math.min(P.ms, buf.duration * 1000)); });
+      }).catch(() => {});
+    }, 4000);
+  }
   const vidReady = (v) => new Promise((ok) => {
     if (v.readyState >= 3) return ok();
     const f = () => { v.removeEventListener("canplay", f); ok(); };
@@ -6630,7 +6662,7 @@ body.tv .rb-pcol.pr .rb-hs-side.r .rb-st { justify-self: start; }
   let npT = 0;
   function showPip(b, P, mood, why, pre) {
     if (PHONE()) return;
-    const jb = $("#jumbo"), v = $("#pipVid"), bg = $("#jbBg"), c = ready(), go = ++pipGo, betId = b.id, team = pipTeam;
+    const jb = $("#jumbo"), v = $("#pipVid"), bg = $("#jbBg"), c = clipCtx(), go = ++pipGo, betId = b.id, team = pipTeam;
     pipTeam = null;
     const hz = !!(P.dj && P.bpm) && !pre && houseDj(P); SP.useHouse = hz;
     if (hz && /^DJ /.test(why || "")) why = "House · " + why;
@@ -6648,7 +6680,7 @@ body.tv .rb-pcol.pr .rb-hs-side.r .rb-st { justify-self: start; }
     const own = () => (pre || !c || P.ext ? null : swap ? clipBuf(swap.base).then((x) => x || mine()) : mine());
     if (dj && !pre && !spUsable()) spWhy();
     const sound = (dj || scene) && !pre && spUsable() && !(P.house && !SP.hlist.length) ? spPlay().then((t) => { if (!t && dj) spWhy(); return t || own(); }) : own();
-    Promise.all([sound, vidReady(v)]).then(([buf]) => {
+    Promise.all([sound, vidReady(v), ctxAwake(c)]).then(([buf]) => {
       const sp = buf && buf.sp ? buf : null, ms = sp && dj ? sp.ms : P.ms, r = sp ? 1 : rate;
       if (go !== pipGo || statusBet !== betId) { if (sp && SP.seq === sp.seq) spStop(); return; }
       clearTimeout(hideT);
@@ -6675,11 +6707,11 @@ body.tv .rb-pcol.pr .rb-hs-side.r .rb-st { justify-self: start; }
       for (const x of [v, bg]) { try { x.playbackRate = r; x.currentTime = vt; x.play().catch(() => {}); } catch (e) {} }
       const bar = $("#jbProg"); bar.style.transition = "none"; bar.style.width = (100 * off) / ms + "%"; void bar.offsetWidth; bar.style.transition = `width ${ms - off}ms linear`; bar.style.width = "100%";
       if (P.ext) { if (c) { v.muted = false; v.volume = 1; } statusSrc = { stop: () => { try { v.muted = true; } catch (e) {} } }; }
-      else if (sp) statusSrc = { stop: () => { if (SP.seq === sp.seq) spStop(); } };
+      else if (sp) { statusSrc = { stop: () => { if (SP.seq === sp.seq) spStop(); } }; spGuard(sp, go, P, c); }
       else if (buf) statusSrc = playBuf(c, buf, 0.95);
       // keep Goldie on the beat: the song clock is the audio context; nudge the loop back if it drifts (a Spotify song has no tempo to go by)
       clearInterval(djT);
-      if (dj && c && !sp) { const t0 = c.currentTime - off / 1000; djT = setInterval(() => { if (go !== pipGo) { clearInterval(djT); return; } const want = djPos(P, c.currentTime - t0), d = Math.abs(want - v.currentTime); if (Math.min(d, DJ_LOOP - d) > 0.12) { try { v.currentTime = want; bg.currentTime = want; } catch (e) {} } }, 1500); }
+      if (dj && c && !sp) { const t0 = c.currentTime - off / 1000; djT = setInterval(() => { if (go !== pipGo) { clearInterval(djT); return; } if (c.state !== "running") return; const want = djPos(P, c.currentTime - t0), d = Math.abs(want - v.currentTime); if (Math.min(d, DJ_LOOP - d) > 0.12) { try { v.currentTime = want; bg.currentTime = want; } catch (e) {} } }, 1500); }
       jumboBets(); clearInterval(jbTick); jbTick = setInterval(() => { jumboBets(); jbBug(b); }, 5000);
       pipT = setTimeout(() => { if (statusBet === betId) stopStatus(); }, ms - off);
     });
