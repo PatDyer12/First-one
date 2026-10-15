@@ -2346,7 +2346,7 @@ body.tv .rb-pcol.pr .rb-hs-side.r .rb-st { justify-self: start; }
 .jumbo.lux .jb-x { color: rgba(232,211,162,.55); }
 .jumbo.lux .jb-head > b { display: none; }   /* house: no title over the picture */
 .jumbo.lux .jb-screen { border: 1px solid rgba(232,211,162,.85); outline: 1px solid rgba(201,164,92,.38); outline-offset: 10px; border-radius: 2px; background: #050505; box-shadow: 0 40px 100px rgba(0,0,0,.75); }
-.jumbo.lux .jb-screen #jbBg { filter: blur(40px) brightness(.26) saturate(.5) sepia(.4); }
+.jumbo.lux .jb-screen #jbBg { filter: blur(36px) brightness(.5) saturate(.85) sepia(.2); }
 .jumbo.lux #pipVid { filter: contrast(1.05) saturate(.92) sepia(.06); transition: opacity .25s ease; }
 .jumbo.lux .jb-screen::after { content: ""; position: absolute; inset: 0; z-index: 2; pointer-events: none; background: radial-gradient(130% 110% at 50% 50%, transparent 60%, rgba(0,0,0,.42) 100%); }
 .jumbo.lux .jb-screen::before { content: ""; position: absolute; inset: 16px; z-index: 3; pointer-events: none; opacity: .8;
@@ -2371,6 +2371,9 @@ body.tv .rb-pcol.pr .rb-hs-side.r .rb-st { justify-self: start; }
 .jumbo.lux .jb-side .dot { background: var(--lx-g); box-shadow: 0 0 10px rgba(201,164,92,.8); }
 .jumbo.lux .jb-bet.on { border-color: rgba(201,164,92,.75); background: rgba(201,164,92,.07); box-shadow: none; }
 .jumbo.lux.teamed .jb-head { box-shadow: inset 0 -1px 0 var(--jt2), 0 14px 40px rgba(0,0,0,.55); }
+#avDot { position: fixed; left: 50%; top: 50%; width: 22vh; height: 22vh; margin: -11vh 0 0 -11vh; border-radius: 50%; background: #fff; z-index: 400; opacity: 0; pointer-events: none; box-shadow: 0 0 60px #fff; }
+#avDot.on { animation: avFlash .16s linear; }
+@keyframes avFlash { 0% { opacity: 1; } 100% { opacity: 0; } }
 </style>
 </head>
 <body>
@@ -2715,6 +2718,11 @@ body.tv .rb-pcol.pr .rb-hs-side.r .rb-st { justify-self: start; }
       <label class="togrow"><input type="checkbox" id="f-roomOpen" checked> Guests can join (on unless you switch it off)</label>
       <div class="room-link" id="roomLink" hidden><canvas id="roomQr" width="132" height="132" aria-label="QR code for the guest link"></canvas><div><code id="roomUrl"></code><button type="button" class="btn sm" id="roomCopy">Copy link</button><label class="togrow"><input type="checkbox" id="roomTv"> Show the QR on the TV</label></div></div>
       <span class="hint">Always open: guests open the link (or scan the QR on the TV), put their name in and add bets from their own phones. They only see and change their own bets; the board settles them. Needs Anonymous sign-in on in Firebase (Authentication → Sign-in method) and the guest rules in Firestore.</span>
+    </div>
+    <div class="field" id="avField">
+      <span class="lbl">Speaker delay (Bluetooth)</span>
+      <div class="linein"><label for="f-avd">Delay</label><input type="range" id="f-avd" min="0" max="500" step="10"><b id="avdVal" style="min-width:4.5em;text-align:right"></b><button type="button" class="btn sm" id="avdTest">Test sync</button></div>
+      <span class="hint">Bluetooth speakers play a beat late. On this screen the clips' pictures wait this long so they land on the sound. Hit Test sync on the TV: the dot should flash right on each beep; slide until it does.</span>
     </div>
     <div class="field" id="spField">
       <span class="lbl">Spotify for the DJ breaks</span>
@@ -4894,7 +4902,7 @@ body.tv .rb-pcol.pr .rb-hs-side.r .rb-st { justify-self: start; }
   // ---------- sheets ----------
   function openSheet(id) { $(id).hidden = false; }
   // keep every open screen current: when a new version is up, reload it (never mid-form or mid-animation)
-  const BUILD = "20261015190024";
+  const BUILD = "20261015204633";
   function checkBuild() {
     if (BUILD === "dev") return;
     fetch("version.json?t=" + Date.now(), { cache: "no-store" }).then((r) => (r.ok ? r.json() : null)).then((j) => {
@@ -6411,26 +6419,30 @@ body.tv .rb-pcol.pr .rb-hs-side.r .rb-st { justify-self: start; }
     clip("aura/hero", "Goldie: hero landing", "up win", 17.0, { songId: "bp2" }),
     clip("aura/paid", "Goldie: paid", "up win", 17.0, { songId: "p01" }),
     clip("aura/lock", "Goldie: locked in", "up win", 17.0, { songId: "p01" }),
-    clip("house/hs01", "Fairway money", "up win vibe", 13.05, { house: 1, lux: 1, music: true, songId: "hs01" }),
-    clip("house/hs02", "Get after it", "up win vibe", 19.55, { house: 1, lux: 1, music: true, songId: "hs02" }),
-    clip("house/hs03", "The good life", "up win vibe", 21.35, { house: 1, lux: 1, music: true, songId: "hs03" }),
-    clip("house/hs04", "Ari energy", "up win vibe", 19.35, { house: 1, lux: 1, music: true, songId: "hs04" }),
-    clip("house/hs05", "The world is yours", "up win vibe", 26.25, { house: 1, lux: 1, music: true, songId: "hs05" }),
-    clip("house/hs06", "Free fall", "up win vibe", 39.65, { house: 1, lux: 1, music: true, songId: "hs06" }),
-    clip("house/hs07", "The next two years", "up win vibe", 15.05, { house: 1, lux: 1, music: true, songId: "hs07" }),
-    clip("house/hs08", "Champions only", "up win vibe", 21.65, { house: 1, lux: 1, music: true, songId: "hs08" }),
-    clip("house/hs09", "Being rich", "up win vibe", 17.65, { house: 1, lux: 1, music: true, songId: "hs09" }),
-    clip("house/hs10", "Wolfpack", "up win vibe", 16.35, { house: 1, lux: 1, music: true, songId: "hs10" }),
-    clip("house/hs11", "Harvey mode", "up win vibe", 12.65, { house: 1, lux: 1, music: true, songId: "hs11" }),
-    clip("house/hs12", "Victory lap", "up win vibe", 36.35, { house: 1, lux: 1, music: true, songId: "hs12" }),
-    clip("house/hs13", "Endgame", "up win vibe", 31.65, { house: 1, lux: 1, music: true, songId: "hs13" }),
-    clip("house/hs14", "Wolf mode", "up win vibe", 21.05, { house: 1, lux: 1, music: true, songId: "hs14" }),
-    clip("house/hs15", "Big wave", "up win vibe", 21.85, { house: 1, lux: 1, music: true, songId: "hs15" }),
-    clip("house/hs12", "House: Victory lap", "vibe", 36.35, { dj: 1, bpm: 127.99, b0: 0.275, house: 1, lux: 1, music: true, songId: "hs12" }),
-    clip("house/hs04", "House: Ari energy", "vibe", 19.35, { dj: 1, bpm: 132.01, b0: 0.331, house: 1, lux: 1, music: true, songId: "hs04" }),
-    clip("house/hs14", "House: Wolf mode", "vibe", 21.05, { dj: 1, bpm: 132.01, b0: 0.187, house: 1, lux: 1, music: true, songId: "hs14" }),
-    clip("house/hs10", "House: Wolfpack", "vibe", 16.35, { dj: 1, bpm: 132.07, b0: 0.45, house: 1, lux: 1, music: true, songId: "hs10" }),
-    clip("house/hs03", "House: The good life", "vibe", 21.35, { dj: 1, bpm: 130.0, b0: 0.03, house: 1, lux: 1, music: true, songId: "hs03" }),
+    clip("house/hs01", "Fairway money", "up win vibe", 12.73, { house: 1, lux: 1, music: true, songId: "hs01" }),
+    clip("house/hs02", "Get after it", "up win vibe", 19.0, { house: 1, lux: 1, music: true, songId: "hs02" }),
+    clip("house/hs03", "The good life", "up win vibe", 21.5, { house: 1, lux: 1, music: true, songId: "hs03" }),
+    clip("house/hs04", "Ari energy", "up win vibe", 19.5, { house: 1, lux: 1, music: true, songId: "hs04" }),
+    clip("house/hs05", "The world is yours", "up win vibe", 25.5, { house: 1, lux: 1, music: true, songId: "hs05" }),
+    clip("house/hs06", "Free fall", "up win vibe", 39.23, { house: 1, lux: 1, music: true, songId: "hs06" }),
+    clip("house/hs07", "The next two years", "up win vibe", 14.73, { house: 1, lux: 1, music: true, songId: "hs07" }),
+    clip("house/hs08", "Champions only", "up win vibe", 21.23, { house: 1, lux: 1, music: true, songId: "hs08" }),
+    clip("house/hs09", "Being rich", "up win vibe", 17.6, { house: 1, lux: 1, music: true, songId: "hs09" }),
+    clip("house/hs10", "Wolfpack", "up win vibe", 16.0, { house: 1, lux: 1, music: true, songId: "hs10" }),
+    clip("house/hs11", "Harvey mode", "up win vibe", 12.23, { house: 1, lux: 1, music: true, songId: "hs11" }),
+    clip("house/hs12", "Victory lap", "up win vibe", 36.37, { house: 1, lux: 1, music: true, songId: "hs12" }),
+    clip("house/hs13", "Endgame", "up win vibe", 31.73, { house: 1, lux: 1, music: true, songId: "hs13" }),
+    clip("house/hs14", "Wolf mode", "up win vibe", 21.1, { house: 1, lux: 1, music: true, songId: "hs14" }),
+    clip("house/hs15", "Big wave", "up win vibe", 21.6, { house: 1, lux: 1, music: true, songId: "hs15" }),
+    clip("house/hs16", "Augusta money", "up win vibe", 57.6, { house: 1, lux: 1, music: true, songId: "hs16" }),
+    clip("house/hs17", "Studio to supercar", "up win vibe", 16.73, { house: 1, lux: 1, music: true, songId: "hs17" }),
+    clip("house/hs18", "You're the guy", "up win vibe", 42.6, { house: 1, lux: 1, music: true, songId: "hs18" }),
+    clip("house/hs19", "Cheers to that", "up win vibe", 17.0, { house: 1, lux: 1, music: true, songId: "hs19" }),
+    clip("house/hs20", "After hours", "up win vibe", 44.13, { house: 1, lux: 1, music: true, songId: "hs20" }),
+    clip("house/hs21", "Tee box talk", "up win vibe", 34.87, { house: 1, lux: 1, music: true, songId: "hs21" }),
+    clip("house/hs22", "Legends only", "up win vibe", 12.5, { house: 1, lux: 1, music: true, songId: "hs22" }),
+    clip("house/hs23", "Jets and yachts", "up win vibe", 28.23, { house: 1, lux: 1, music: true, songId: "hs23" }),
+    clip("house/hs36", "Tour life", "up win vibe", 23.87, { house: 1, lux: 1, music: true, songId: "hs36" }),
     clip("clips/w02", "Car ride laughs", "up win", 22.45),
     clip("clips/w03", "Tiger: Pure.", "up win", 30),
     clip("clips/w04", "Migos carpool", "up win vibe", 30, { song: "Walk It Talk It", artist: "Migos ft. Drake" }),
@@ -6494,6 +6506,18 @@ body.tv .rb-pcol.pr .rb-hs-side.r .rb-st { justify-self: start; }
     clip("mlb/mlb05", "Three-peat rolls on", "up hype", 30, MLB),
     clip("mlb/mlb06", "Next opponent: Ohtani", "up hype", 15.25, MLB),
     clip("mlb/mlb07", "Three-peat, part 2", "up hype", 8.6, MLB),
+    clip("mlb/mlb08", "Brewers: streetlight people", "up hype", 64.0, { sport: "MLB", fan: "MIL", songId: "mlb08" }),
+    clip("mlb/mlb09", "Brewers: October heat", "up hype", 18.0, { sport: "MLB", fan: "MIL", songId: "mlb09" }),
+    clip("mlb/mlb10", "Brewers vs the Dodgers", "up hype", 57.5, { sport: "MLB", fan: "MIL", songId: "mlb10" }),
+    clip("mlb/mlb11", "Dodgers: one more win", "up hype", 37.83, { sport: "MLB", fan: "LAD", songId: "mlb11" }),
+    clip("mlb/mlb12", "Brewers: classic, expensive", "up hype", 24.5, { sport: "MLB", fan: "MIL", songId: "mlb12" }),
+    clip("mlb/mlb13", "October baseball", "up hype", 69.5, { sport: "MLB", songId: "mlb13" }),
+    clip("mlb/mlb14", "Rays: the run", "up hype", 14.1, { sport: "MLB", fan: "TB", songId: "mlb14" }),
+    clip("mlb/mlb15", "Rays: my mind", "up hype", 29.0, { sport: "MLB", fan: "TB", songId: "mlb15" }),
+    clip("mlb/mlb16", "Rays: Devil Rays", "up hype", 13.5, { sport: "MLB", fan: "TB", songId: "mlb16" }),
+    clip("mlb/mlb17", "Rays: street lights", "up hype", 16.73, { sport: "MLB", fan: "TB", songId: "mlb17" }),
+    clip("mlb/mlb18", "Rays: Tampa Bay", "up hype", 20.5, { sport: "MLB", fan: "TB", songId: "mlb18" }),
+    clip("mlb/mlb19", "Rays: Rays up", "up hype", 44.73, { sport: "MLB", fan: "TB", songId: "mlb19" }),
     clip("cfb/cfb16", "365 days, part 2", "hype up", 31.2, UGA),
     clip("cfb/cfb19", "Dawgs going crazy, part 2", "hype up", 14.6, UGA),
     clip("cfb/cfb17", "I don't lose, part 2", "down comeback", 32),
@@ -6530,6 +6554,7 @@ body.tv .rb-pcol.pr .rb-hs-side.r .rb-st { justify-self: start; }
     clip("cfb/cfb45", "Dread it, run from it", "hype up", 31.4, ALA),
     clip("cfb/cfb46", "We Bama, part 3", "hype up", 31.0, ALA),
     clip("cfb/cfb47", "Brady to Ty Simpson", "hype up", 13.2, { ...ALA, pl: "simpson" }),
+    clip("cfb/cfb48", "Beavs: start paying attention", "hype up", 22.23, cfbTeam("ORST")),
     // NFL edits: highlight reels also play right after a touchdown for you; team reels never when you're against that team
     clip("nfl/nfl01", "Olave highlight reel", "hype up td", 16.6, nflTeam("NO")),
     clip("nfl/nfl02", "Panthers x Stitch", "hype up", 16.6, nflTeam("CAR")),
@@ -6629,6 +6654,33 @@ body.tv .rb-pcol.pr .rb-hs-side.r .rb-st { justify-self: start; }
       }).catch(() => {});
     }, 4000);
   }
+  function avDelay() {
+    if (!document.body.classList.contains("tv")) return 0;
+    let v = null; try { v = localStorage.getItem("sb-av-delay"); } catch (e) {}
+    return v == null || v === "" || !Number.isFinite(Number(v)) ? 200 : Math.max(0, Math.min(500, Number(v)));
+  }
+  function avShow() { const v = (() => { try { const x = localStorage.getItem("sb-av-delay"); return x == null ? 200 : Number(x); } catch (e) { return 200; } })(); $("#f-avd").value = v; $("#avdVal").textContent = v + " ms"; }
+  function avTest() {
+    const c = audio(); if (!c) return; if (c.state !== "running") c.resume().catch(() => {});
+    let el = $("#avDot"); if (!el) { el = document.createElement("div"); el.id = "avDot"; document.body.appendChild(el); }
+    const d = (() => { try { const x = localStorage.getItem("sb-av-delay"); return x == null ? 200 : Number(x); } catch (e) { return 200; } })(), t0 = c.currentTime + 0.5;
+    el.hidden = false;
+    for (let i = 0; i < 6; i++) {
+      const at = t0 + i * 0.8, o = c.createOscillator(), g = c.createGain();
+      o.frequency.value = 1200; g.gain.setValueAtTime(0.0001, at); g.gain.exponentialRampToValueAtTime(0.7, at + 0.004); g.gain.exponentialRampToValueAtTime(0.0001, at + 0.12);
+      o.connect(g).connect(c.destination); o.start(at); o.stop(at + 0.15);
+      setTimeout(() => { el.classList.remove("on"); void el.offsetWidth; el.classList.add("on"); }, (0.5 + i * 0.8) * 1000 + d);
+    }
+    setTimeout(() => { el.hidden = true; el.classList.remove("on"); }, (0.5 + 6 * 0.8) * 1000 + d + 400);
+  }
+  $("#f-avd").addEventListener("input", (e) => { try { localStorage.setItem("sb-av-delay", String(e.target.value)); } catch (err) {} $("#avdVal").textContent = e.target.value + " ms"; });
+  $("#avdTest").addEventListener("click", avTest);
+  avShow();
+  // the picture fills the screen when its shape is close to the screen's (a sliver cropped); otherwise it sits whole on its own blurred wash
+  function fitPic(v) {
+    const go = () => { const sa = v.clientWidth / Math.max(1, v.clientHeight), va = v.videoWidth / Math.max(1, v.videoHeight); v.style.objectFit = va > 0 && Math.abs(Math.log(va / sa)) < 0.12 ? "cover" : ""; };
+    if (v.videoWidth) go(); else v.addEventListener("loadedmetadata", go, { once: true });
+  }
   const vidReady = (v) => new Promise((ok) => {
     if (v.readyState >= 3) return ok();
     const f = () => { v.removeEventListener("canplay", f); ok(); };
@@ -6666,15 +6718,15 @@ body.tv .rb-pcol.pr .rb-hs-side.r .rb-st { justify-self: start; }
     pipTeam = null;
     v.onended = null; v.style.opacity = "";
     if (!pre) P = houseTurn(P);
-    const hz = !!(P.dj && P.bpm && P.house) && !pre; SP.useHouse = hz;
-    if (hz && /^DJ /.test(why || "")) why = "House mix";
+    const hz = !!(P.set || P.spSet) && !pre; SP.useHouse = !!P.spSet;
+    if (hz) why = "House set";
     const lux = !!P.lux || hz;
-    const reel = hz ? houseReel(P) : null;
-    const dj = !!(P.dj && P.bpm), vbase = reel ? reel[0].base : dj ? DJ_BASE : P.base, rate = dj && !reel ? djRate(P.bpm) : 1;
+    const loopOne = P.spSet ? pickClip(houseEdits()) : null;   // under a Spotify house song: one edit, looping
+    const dj = !!(P.dj && P.bpm), vbase = loopOne ? loopOne.base : dj ? DJ_BASE : P.base, rate = dj && !loopOne ? djRate(P.bpm) : 1;
     const src = P.ext || vidSrc(vbase);
-    v.muted = true; v.onerror = P.ext ? () => { if (go === pipGo) stopStatus(); } : null;
+    v.muted = true; v.onerror = P.ext ? () => { if (go === pipGo) stopStatus(); } : () => { const s0 = v.getAttribute("src") || ""; if (/\.webm/.test(s0)) { const s1 = s0.replace(".webm", ".mp4"); v.src = s1; bg.src = s1; v.load(); bg.load(); } };
     if (v.dataset.base !== vbase || (!P.ext && v.dataset.src !== src)) { v.dataset.base = vbase; v.dataset.src = src; v.src = src; v.load(); bg.src = src; bg.load(); }
-    for (const x of [v, bg]) { x.loop = dj && !reel; x.defaultPlaybackRate = rate; x.playbackRate = rate; }
+    for (const x of [v, bg]) { x.loop = dj; x.defaultPlaybackRate = rate; x.playbackRate = rate; }
     // a DJ break plays off your Spotify playlist when this screen's connected to it (the built-in song when Spotify can't);
     // so does one of Meegy's scenes, and without Spotify a scene whose song was just on borrows a fresher built-in one
     const scene = !dj && !pre && !P.ext && !P.own && /^sounds\/aura\//.test(P.base || "");
@@ -6684,7 +6736,7 @@ body.tv .rb-pcol.pr .rb-hs-side.r .rb-st { justify-self: start; }
     if (dj && !pre && !spUsable()) spWhy();
     const sound = (dj || scene) && !pre && spUsable() && !(P.house && !SP.hlist.length) ? spPlay().then((t) => { if (!t && dj) spWhy(); return t || own(); }) : own();
     Promise.all([sound, vidReady(v), ctxAwake(c)]).then(([buf]) => {
-      const sp = buf && buf.sp ? buf : null, seg = !!reel && !sp && !!buf && reel[0].base === P.base, ms = sp && dj ? sp.ms : seg ? reel.segMs : P.ms, r = sp || reel ? 1 : rate;
+      const sp = buf && buf.sp ? buf : null, ms = sp && dj ? sp.ms : P.ms, r = sp ? 1 : rate;
       if (go !== pipGo || statusBet !== betId) { if (sp && SP.seq === sp.seq) spStop(); return; }
       clearTimeout(hideT);
       $("#jbLbl").textContent = sp && dj ? sp.name : gLbl(P.label);
@@ -6696,7 +6748,7 @@ body.tv .rb-pcol.pr .rb-hs-side.r .rb-st { justify-self: start; }
       if (song) { $("#npSong").textContent = song; $("#npArtist").textContent = artist || ""; np.hidden = false; npT = setTimeout(() => np.classList.add("on"), 700); } else np.hidden = true;
       $("#jbTag").textContent = why || MOOD_TAG[mood] || "Live";
       jbBug(b);
-      jb.className = "jumbo m-" + mood + (team ? " teamed" : "") + (lux ? " lux" : ""); jb.hidden = false;
+      jb.className = "jumbo m-" + mood + (team ? " teamed" : "") + (lux ? " lux" : ""); jb.hidden = false; fitPic(v);
       const jt = $("#jbTeam");
       if (team) {
         const c1 = hexRgb(team.t.col) || [40, 44, 60], c2 = hexRgb(team.t.alt) || c1;
@@ -6706,18 +6758,18 @@ body.tv .rb-pcol.pr .rb-hs-side.r .rb-st { justify-self: start; }
       } else jt.hidden = true;
       // picking up mid-clip: the video joins the sound where it is
       const off = pre ? Math.max(0, Math.min(P.ms - 800, performance.now() - pre.at)) : 0;
-      const vt = sp || reel ? 0 : dj ? djPos(P, off / 1000 + 0.08) : off / 1000;
-      for (const x of [v, bg]) { try { x.playbackRate = r; x.currentTime = vt; x.play().catch(() => {}); } catch (e) {} }
+      const vt = sp || loopOne ? 0 : dj ? djPos(P, off / 1000 + 0.08) : off / 1000;
+      const avd = sp || P.ext ? 0 : avDelay();   // Bluetooth: the picture waits for the sound to come out of the speaker
+      for (const x of [v, bg]) { try { x.playbackRate = r; x.currentTime = off ? Math.max(0, vt - avd / 1000) : vt; if (avd && !off) { x.pause(); setTimeout(() => { if (go === pipGo) x.play().catch(() => {}); }, avd); } else x.play().catch(() => {}); } catch (e) {} }
       const bar = $("#jbProg"); bar.style.transition = "none"; bar.style.width = (100 * off) / ms + "%"; void bar.offsetWidth; bar.style.transition = `width ${ms - off}ms linear`; bar.style.width = "100%";
       if (P.ext) { if (c) { v.muted = false; v.volume = 1; } statusSrc = { stop: () => { try { v.muted = true; } catch (e) {} } }; }
       else if (sp) { statusSrc = { stop: () => { if (SP.seq === sp.seq) spStop(); } }; spGuard(sp, go, P, c); }
       else if (buf) statusSrc = playBuf(c, buf, 0.95);
       // keep Goldie on the beat: the song clock is the audio context; nudge the loop back if it drifts (a Spotify song has no tempo to go by)
       clearInterval(djT);
-      if (dj && c && !sp && !reel) { const t0 = c.currentTime - off / 1000; djT = setInterval(() => { if (go !== pipGo) { clearInterval(djT); return; } if (c.state !== "running") return; const want = djPos(P, c.currentTime - t0), d = Math.abs(want - v.currentTime); if (Math.min(d, DJ_LOOP - d) > 0.12) { try { v.currentTime = want; bg.currentTime = want; } catch (e) {} } }, 1500); }
+      if (dj && c && !sp && !loopOne) { const t0 = c.currentTime - off / 1000; djT = setInterval(() => { if (go !== pipGo) { clearInterval(djT); return; } if (c.state !== "running") return; const want = djPos(P, c.currentTime - t0 - avDelay() / 1000), d = Math.abs(want - v.currentTime); if (Math.min(d, DJ_LOOP - d) > 0.12) { try { v.currentTime = want; bg.currentTime = want; } catch (e) {} } }, 1500); }
       jumboBets(); clearInterval(jbTick); jbTick = setInterval(() => { jumboBets(); jbBug(b); }, 5000);
       pipT = setTimeout(() => { if (statusBet === betId) stopStatus(); }, ms - off);
-      if (reel) runReel(reel, go, v, bg, c, seg);
     });
   }
   // ---------- Spotify: DJ breaks off your own playlist ----------
@@ -6840,7 +6892,7 @@ body.tv .rb-pcol.pr .rb-hs-side.r .rb-st { justify-self: start; }
     spShow();
   }
   // the house playlist: same rules as the main one (only playlists you made), its own shuffle
-  Object.assign(SP, { house: "", hlist: [], hbag: [], hname: "", hlast: "", hloading: false, herr: "", useHouse: false });
+  Object.assign(SP, { house: "26ZJEm9FQ5xw1ePxSZSRPV", hlist: [], hbag: [], hname: "", hlast: "", hloading: false, herr: "", useHouse: false });
   async function spLoadH() {
     if (!SP.house || !SP.tok || SP.hloading) { spShow(); return; }
     const pid = SP.house; SP.hloading = true; spShow();
@@ -6872,6 +6924,7 @@ body.tv .rb-pcol.pr .rb-hs-side.r .rb-st { justify-self: start; }
     const t = SP.hlist[SP.hbag.pop()]; SP.hlast = t.uri;
     return t;
   }
+  $("#f-sphouse").value = "https://open.spotify.com/playlist/" + SP.house;
   $("#spHouseSave").addEventListener("click", () => {
     const raw = $("#f-sphouse").value.trim(), id = spPid(raw);
     if (raw && !id) { toast("That doesn't look like a Spotify playlist link."); return; }
@@ -8041,50 +8094,20 @@ body.tv .rb-pcol.pr .rb-hs-side.r .rb-st { justify-self: start; }
     if (P === VIBE) vibeAt = Date.now();
     return P;
   }
-  // a DJ break goes house every other time, and every time while somebody in the room is up. It's a mix of Pat's house
-  // edits: back to back with their own songs (a minute or more), or, with a house playlist on Spotify, a house song with the
-  // edits cycling under it till the song's done
+  // a DJ break goes house every other time, and every time while somebody in the room is up: one of Pat's house edits per
+  // set. With a house playlist on Spotify the set is a house song with one edit looping under it; otherwise it's the edit
+  // with its own song
   let hzTurn = 0;
   const roomUp = () => [...lastRes.values()].includes("W");
   function houseTurn(P) {
     if (!P || !P.dj || !P.bpm) return P;
     const sph = spUsable() && SP.hlist.length > 0;
-    if (!(P.house || (sph && !SP.list.length) || roomUp() || hzTurn++ % 2 === 1)) return P;
-    if (!P.house && !sph) P = pickClip(CLIPS.filter((x) => x.dj && x.house)) || P;
-    return Object.assign({}, P, { house: 1, lux: 1 });
+    if (!((sph && !SP.list.length) || roomUp() || hzTurn++ % 2 === 1)) return P;
+    if (sph) return Object.assign({}, P, { house: 1, lux: 1, spSet: 1 });
+    const H = pickClip(houseEdits());
+    return H ? Object.assign({}, H, { house: 1, lux: 1, set: 1 }) : P;
   }
-  // the mix: the edit whose song this is first (a built-in house track), then the rest, least recently seen first
-  function houseReel(P) {
-    const all = houseEdits(); if (!all.length) return null;
-    const first = all.find((e) => e.base === P.base);
-    const rest = all.filter((e) => e !== first).map((e) => [e, Math.random()]).sort((x, y) => lastPlayed(x[0]) - lastPlayed(y[0]) || x[1] - y[1]).map((x) => x[0]);
-    const reel = first ? [first, ...rest] : rest;
-    let n = 0, t = 0; while (n < reel.length && t < 60e3) { t += reel[n].ms; n++; }
-    reel.segs = n; reel.segMs = t;
-    return reel;
-  }
-  // when one edit ends the next comes in (a quick dip); seg: each brings its own song, else they play muted under the song that's on
-  function runReel(reel, go, v, bg, c, seg) {
-    let i = 0;
-    const seen = (e) => { played.set(clipKey(e), Date.now()); if (songKey(e)) played.set(songKey(e), Date.now()); };
-    const warm = (e) => { if (seg) clipBuf(e.base); const pv = document.createElement("video"); pv.muted = true; pv.preload = "auto"; pv.src = vidSrc(e.base); };
-    seen(reel[0]); if (reel.length > 1) warm(reel[1]);
-    v.onended = () => {
-      if (go !== pipGo) return;
-      i++;
-      if (seg && i >= reel.segs) return;   // the mix is done: the clip's timer closes it
-      const e = reel[i % reel.length], src = vidSrc(e.base), nb = seg ? clipBuf(e.base) : Promise.resolve(null);
-      v.style.opacity = "0";
-      v.dataset.base = e.base; v.dataset.src = src; v.src = src; v.load(); bg.src = src; bg.load();
-      Promise.all([vidReady(v), nb]).then(([, buf]) => {
-        if (go !== pipGo) return;
-        for (const x of [v, bg]) { try { x.currentTime = 0; x.play().catch(() => {}); } catch (err) {} }
-        v.style.opacity = "";
-        if (buf && c) { try { if (statusSrc) statusSrc.stop(); } catch (err) {} statusSrc = playBuf(c, buf, 0.95); }
-        seen(e); warm(reel[(i + 1) % reel.length]);
-      });
-    };
-  }
+  { const DUR_FIX = {"sounds/cfb/cfb01":12.0,"sounds/cfb/cfb02":14.6,"sounds/cfb/cfb03":26.8,"sounds/cfb/cfb04":11.5,"sounds/cfb/cfb05":28.0,"sounds/cfb/cfb06":30.0,"sounds/cfb/cfb07":25.8,"sounds/cfb/cfb08":5.7,"sounds/cfb/cfb09":27.93,"sounds/cfb/cfb10":26.93,"sounds/cfb/cfb11":29.9,"sounds/cfb/cfb12":25.93,"sounds/cfb/cfb13":22.03,"sounds/cfb/cfb14":33.4,"sounds/cfb/cfb15":15.0,"sounds/cfb/cfb16":31.2,"sounds/cfb/cfb17":32.0,"sounds/cfb/cfb18":30.2,"sounds/cfb/cfb19":14.63,"sounds/cfb/cfb20":12.8,"sounds/cfb/cfb21":30.5,"sounds/cfb/cfb22":26.93,"sounds/cfb/cfb23":33.5,"sounds/cfb/cfb24":33.5,"sounds/cfb/cfb25":13.0,"sounds/cfb/cfb26":26.0,"sounds/cfb/cfb27":26.0,"sounds/cfb/cfb28":27.0,"sounds/cfb/cfb29":25.8,"sounds/cfb/cfb30":15.07,"sounds/cfb/cfb31":17.0,"sounds/cfb/cfb32":28.03,"sounds/cfb/cfb33":5.5,"sounds/cfb/cfb34":15.5,"sounds/cfb/cfb35":18.0,"sounds/cfb/cfb36":22.2,"sounds/cfb/cfb37":23.03,"sounds/cfb/cfb38":16.07,"sounds/cfb/cfb39":31.0,"sounds/cfb/cfb40":29.2,"sounds/cfb/cfb41":30.0,"sounds/cfb/cfb42":30.5,"sounds/cfb/cfb43":26.0,"sounds/cfb/cfb44":29.6,"sounds/cfb/cfb45":31.4,"sounds/cfb/cfb46":31.0,"sounds/cfb/cfb47":13.2,"sounds/cfb/cfb48":22.23,"sounds/clips/g06":30.0,"sounds/clips/g08":30.07,"sounds/clips/g09":28.93,"sounds/clips/l01":29.5,"sounds/clips/l02":27.8,"sounds/clips/l03":11.27,"sounds/clips/l04":16.57,"sounds/clips/l05":24.87,"sounds/clips/l06":18.87,"sounds/clips/l07":30.0,"sounds/clips/l08":30.0,"sounds/clips/w02":22.47,"sounds/clips/w03":30.0,"sounds/clips/w04":30.0,"sounds/clips/w05":30.0,"sounds/clips/w06":22.07,"sounds/clips/w07":27.97,"sounds/clips/w09":17.87,"sounds/clips/w14":17.07,"sounds/clips/w15":15.07,"sounds/clips/w16":29.87,"sounds/house/hs01":12.73,"sounds/house/hs02":19.0,"sounds/house/hs03":21.5,"sounds/house/hs04":19.5,"sounds/house/hs05":25.5,"sounds/house/hs06":39.23,"sounds/house/hs07":14.73,"sounds/house/hs08":21.23,"sounds/house/hs09":17.6,"sounds/house/hs10":16.0,"sounds/house/hs11":12.23,"sounds/house/hs12":36.37,"sounds/house/hs13":31.73,"sounds/house/hs14":21.1,"sounds/house/hs15":21.6,"sounds/house/hs16":57.6,"sounds/house/hs17":16.73,"sounds/house/hs18":42.6,"sounds/house/hs19":17.0,"sounds/house/hs20":44.13,"sounds/house/hs21":34.87,"sounds/house/hs22":12.5,"sounds/house/hs23":28.23,"sounds/mlb/mlb08":64.0,"sounds/mlb/mlb09":18.0,"sounds/mlb/mlb10":57.5,"sounds/mlb/mlb11":37.83,"sounds/mlb/mlb12":24.5,"sounds/mlb/mlb13":69.5,"sounds/mlb/mlb14":14.1,"sounds/mlb/mlb15":29.0,"sounds/mlb/mlb16":13.5,"sounds/mlb/mlb17":16.73,"sounds/mlb/mlb18":20.5,"sounds/mlb/mlb19":44.73,"sounds/mlb/mlb01":20.8,"sounds/mlb/mlb02":25.47,"sounds/mlb/mlb03":16.3,"sounds/mlb/mlb04":13.77,"sounds/mlb/mlb05":30.0,"sounds/mlb/mlb06":15.27,"sounds/mlb/mlb07":8.6,"sounds/nfl/nfl01":16.0,"sounds/nfl/nfl02":16.6,"sounds/nfl/nfl03":15.37,"sounds/nfl/nfl04":28.2,"sounds/nfl/nfl05":11.27,"sounds/nfl/nfl06":10.7,"sounds/nfl/nfl07":29.1,"sounds/nfl/nfl08":60.6,"sounds/nfl/nfl09":56.2,"sounds/nfl/nfl10":49.5,"sounds/nfl/nfl11":19.5,"sounds/nfl/nfl12":60.6,"sounds/nfl/nfl13":29.7,"sounds/nfl/nfl14":27.8,"sounds/nfl/nfl15":21.7,"sounds/nfl/nfl16":14.0,"sounds/nfl/nfl17":12.4,"sounds/nfl/nfl18":22.1,"sounds/nfl/nfl19":17.6,"sounds/nfl/nfl20":15.8,"sounds/nfl/nfl21":23.9,"sounds/nfl/nfl22":21.0,"sounds/nfl/nfl23":9.9,"sounds/nfl/nfl24":20.6,"sounds/nfl/nfl25":20.1,"sounds/nfl/nfl26":18.6,"sounds/nfl/nfl27":11.4,"sounds/nfl/nfl28":35.1,"sounds/nfl/nfl29":30.3,"sounds/nfl/nfl30":32.1,"sounds/nfl/nfl31":37.2,"sounds/nfl/nfl32":25.1,"sounds/nfl/nfl33":22.93,"sounds/nfl/nfl34":39.3,"sounds/nfl/nfl35":29.3,"sounds/nfl/nfl36":31.0,"sounds/nfl/nfl37":36.3,"sounds/nfl/nfl38":18.63,"sounds/nfl/nfl39":23.6,"sounds/nfl/nfl40":21.7,"sounds/nfl/nfl41":17.3,"sounds/nfl/nfl42":40.9,"sounds/nfl/nfl43":14.5,"sounds/nfl/nfl44":26.1,"sounds/nfl/nfl45":31.3,"sounds/nfl/nfl46":16.07,"sounds/nfl/nfl47":21.3,"sounds/nfl/nfl48":36.0,"sounds/nfl/nfl49":24.1,"sounds/nfl/nfl50":34.2,"sounds/nfl/nfl51":17.5,"sounds/nfl/nfl52":29.5,"sounds/nfl/nfl53":26.2,"sounds/nfl/nfl54":21.7,"sounds/nfl/nfl55":39.1,"sounds/nhlv/hk01":43.43,"sounds/nhlv/hk02":39.57,"sounds/nhlv/hk03":17.2,"sounds/nhlv/hk04":36.0,"sounds/nhlv/hk05":17.43,"sounds/nhlv/hk06":34.3,"sounds/nhlv/hk07":44.7,"sounds/nhlv/hk08":12.43,"sounds/nhlv/hk09":30.1,"sounds/uga/uga01":13.97,"sounds/uga/uga02":30.03,"sounds/uga/uga03":25.77,"sounds/uga/uga04":30.0,"sounds/uga/uga05":16.27,"sounds/win/win09":30.0,"sounds/win/win10":29.77,"sounds/win/win11":36.5,"sounds/win/win12":23.93,"sounds/win/win13":31.77,"sounds/win/win14":17.07,"sounds/win/win15":10.27,"sounds/win/win16":17.57,"sounds/win/win17":30.03,"sounds/win/win18":24.73,"sounds/win/win19":17.1,"sounds/win/win20":15.67,"sounds/win/win21":26.37,"sounds/win/win22":28.57,"sounds/win/win23":30.43,"sounds/house/hs36":23.87}; for (const c of CLIPS) if (c && c.base && DUR_FIX[c.base]) c.ms = DUR_FIX[c.base] * 1000; }
   function teamHype(b, g, e, why) {
     if (!clipsOn() || !g || !e.side) return;
     if (Math.random() < 0.7) { const H = pickClip(houseEdits().filter((c) => fits(c, b))); if (H) { pipTeam = { t: g[e.side], word: PC_TYPE[e.ev] || "Score", pl: "" }; react(b, "good", H, why); return; } }
@@ -9693,7 +9716,7 @@ body.tv .rb-pcol.pr .rb-hs-side.r .rb-st { justify-self: start; }
     const v = $("#inVid"); v.pause(); v.src = edSrc(c); v.currentTime = 0; v.load();
     let started = false;
     const start = () => { if (started) return; started = true; v.play().catch(() => {}); };
-    const snd = snSound(edAud(c), 0.95, 0, start), fallback = setTimeout(start, 1500);
+    const snd = snSound(edAud(c), 0.95, 0, () => setTimeout(start, avDelay())), fallback = setTimeout(start, 1500 + avDelay());
     const shots = [{ at: 0, d: c.len, bars: false, enter: () => inHide(), draw: (ctx, W, H, k, t, s) => {
       ctx.fillStyle = "#000"; ctx.fillRect(0, 0, W, H);
       edDraw(ctx, W, H, v);
