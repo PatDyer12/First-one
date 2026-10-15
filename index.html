@@ -4902,7 +4902,7 @@ body.tv .rb-pcol.pr .rb-hs-side.r .rb-st { justify-self: start; }
   // ---------- sheets ----------
   function openSheet(id) { $(id).hidden = false; }
   // keep every open screen current: when a new version is up, reload it (never mid-form or mid-animation)
-  const BUILD = "20261015204633";
+  const BUILD = "20261015213127";
   function checkBuild() {
     if (BUILD === "dev") return;
     fetch("version.json?t=" + Date.now(), { cache: "no-store" }).then((r) => (r.ok ? r.json() : null)).then((j) => {
@@ -7842,7 +7842,7 @@ body.tv .rb-pcol.pr .rb-hs-side.r .rb-st { justify-self: start; }
     hlSeen.add(v.id); keep("sb-hl", hlSeen);
     const t = who ? (String(g.a.id) === who.tm ? g.a : g.h) : hlTeam(g, v); if (t) pipTeam = { t, word: why || "Highlight", pl: who ? who.nm : "" };
     lastAny = Date.now(); lastKind = "pop";
-    react(b, "mid", { base: "espn/" + v.id, ext: v.src, label: v.hl, mood: "hype", ms: v.ms + 300, hl: true }, why || "ESPN highlight");
+    hlUntil = Date.now() + v.ms; react(b, "mid", { base: "espn/" + v.id, ext: v.src, label: v.hl, mood: "hype", ms: v.ms + 300, hl: true }, why || "ESPN highlight");
     return true;
   }
   // a fresh highlight for the dead air: the queue first (halftime and the final run a reel), then anything new from the last 40 minutes
@@ -7991,8 +7991,8 @@ body.tv .rb-pcol.pr .rb-hs-side.r .rb-st { justify-self: start; }
     const now = Date.now();
     for (let i = HL2Q.length - 1; i >= 0; i--) if (now - HL2Q[i].at > 10 * 60e3 || hlSeen.has(HL2Q[i].v.id)) HL2Q.splice(i, 1);
     while (HL2Q.length > 3) HL2Q.shift();
-    if (!HL2Q.length || !clipsOn() || cardBusy || fxBusy || PHONE()) return;
-    if (statusSrc || !$("#jumbo").hidden) { if (lastKind !== "pop") return; stopStatus(); }   // a filler / DJ break makes way
+    if (!HL2Q.length || !clipsOn() || cardBusy || fxBusy || PHONE() || Date.now() < hlUntil) return;
+    if (statusSrc || !$("#jumbo").hidden) { if (lastKind !== "pop" || Date.now() < hlUntil) return; stopStatus(); }   // a filler / DJ break makes way (not another highlight)
     const j = HL2Q.shift();
     if (!playHL(S.games.get(j.g.id) || j.g, j.v, "Highlight")) HL2Q.unshift(j);
   }
@@ -8108,6 +8108,77 @@ body.tv .rb-pcol.pr .rb-hs-side.r .rb-st { justify-self: start; }
     return H ? Object.assign({}, H, { house: 1, lux: 1, set: 1 }) : P;
   }
   { const DUR_FIX = {"sounds/cfb/cfb01":12.0,"sounds/cfb/cfb02":14.6,"sounds/cfb/cfb03":26.8,"sounds/cfb/cfb04":11.5,"sounds/cfb/cfb05":28.0,"sounds/cfb/cfb06":30.0,"sounds/cfb/cfb07":25.8,"sounds/cfb/cfb08":5.7,"sounds/cfb/cfb09":27.93,"sounds/cfb/cfb10":26.93,"sounds/cfb/cfb11":29.9,"sounds/cfb/cfb12":25.93,"sounds/cfb/cfb13":22.03,"sounds/cfb/cfb14":33.4,"sounds/cfb/cfb15":15.0,"sounds/cfb/cfb16":31.2,"sounds/cfb/cfb17":32.0,"sounds/cfb/cfb18":30.2,"sounds/cfb/cfb19":14.63,"sounds/cfb/cfb20":12.8,"sounds/cfb/cfb21":30.5,"sounds/cfb/cfb22":26.93,"sounds/cfb/cfb23":33.5,"sounds/cfb/cfb24":33.5,"sounds/cfb/cfb25":13.0,"sounds/cfb/cfb26":26.0,"sounds/cfb/cfb27":26.0,"sounds/cfb/cfb28":27.0,"sounds/cfb/cfb29":25.8,"sounds/cfb/cfb30":15.07,"sounds/cfb/cfb31":17.0,"sounds/cfb/cfb32":28.03,"sounds/cfb/cfb33":5.5,"sounds/cfb/cfb34":15.5,"sounds/cfb/cfb35":18.0,"sounds/cfb/cfb36":22.2,"sounds/cfb/cfb37":23.03,"sounds/cfb/cfb38":16.07,"sounds/cfb/cfb39":31.0,"sounds/cfb/cfb40":29.2,"sounds/cfb/cfb41":30.0,"sounds/cfb/cfb42":30.5,"sounds/cfb/cfb43":26.0,"sounds/cfb/cfb44":29.6,"sounds/cfb/cfb45":31.4,"sounds/cfb/cfb46":31.0,"sounds/cfb/cfb47":13.2,"sounds/cfb/cfb48":22.23,"sounds/clips/g06":30.0,"sounds/clips/g08":30.07,"sounds/clips/g09":28.93,"sounds/clips/l01":29.5,"sounds/clips/l02":27.8,"sounds/clips/l03":11.27,"sounds/clips/l04":16.57,"sounds/clips/l05":24.87,"sounds/clips/l06":18.87,"sounds/clips/l07":30.0,"sounds/clips/l08":30.0,"sounds/clips/w02":22.47,"sounds/clips/w03":30.0,"sounds/clips/w04":30.0,"sounds/clips/w05":30.0,"sounds/clips/w06":22.07,"sounds/clips/w07":27.97,"sounds/clips/w09":17.87,"sounds/clips/w14":17.07,"sounds/clips/w15":15.07,"sounds/clips/w16":29.87,"sounds/house/hs01":12.73,"sounds/house/hs02":19.0,"sounds/house/hs03":21.5,"sounds/house/hs04":19.5,"sounds/house/hs05":25.5,"sounds/house/hs06":39.23,"sounds/house/hs07":14.73,"sounds/house/hs08":21.23,"sounds/house/hs09":17.6,"sounds/house/hs10":16.0,"sounds/house/hs11":12.23,"sounds/house/hs12":36.37,"sounds/house/hs13":31.73,"sounds/house/hs14":21.1,"sounds/house/hs15":21.6,"sounds/house/hs16":57.6,"sounds/house/hs17":16.73,"sounds/house/hs18":42.6,"sounds/house/hs19":17.0,"sounds/house/hs20":44.13,"sounds/house/hs21":34.87,"sounds/house/hs22":12.5,"sounds/house/hs23":28.23,"sounds/mlb/mlb08":64.0,"sounds/mlb/mlb09":18.0,"sounds/mlb/mlb10":57.5,"sounds/mlb/mlb11":37.83,"sounds/mlb/mlb12":24.5,"sounds/mlb/mlb13":69.5,"sounds/mlb/mlb14":14.1,"sounds/mlb/mlb15":29.0,"sounds/mlb/mlb16":13.5,"sounds/mlb/mlb17":16.73,"sounds/mlb/mlb18":20.5,"sounds/mlb/mlb19":44.73,"sounds/mlb/mlb01":20.8,"sounds/mlb/mlb02":25.47,"sounds/mlb/mlb03":16.3,"sounds/mlb/mlb04":13.77,"sounds/mlb/mlb05":30.0,"sounds/mlb/mlb06":15.27,"sounds/mlb/mlb07":8.6,"sounds/nfl/nfl01":16.0,"sounds/nfl/nfl02":16.6,"sounds/nfl/nfl03":15.37,"sounds/nfl/nfl04":28.2,"sounds/nfl/nfl05":11.27,"sounds/nfl/nfl06":10.7,"sounds/nfl/nfl07":29.1,"sounds/nfl/nfl08":60.6,"sounds/nfl/nfl09":56.2,"sounds/nfl/nfl10":49.5,"sounds/nfl/nfl11":19.5,"sounds/nfl/nfl12":60.6,"sounds/nfl/nfl13":29.7,"sounds/nfl/nfl14":27.8,"sounds/nfl/nfl15":21.7,"sounds/nfl/nfl16":14.0,"sounds/nfl/nfl17":12.4,"sounds/nfl/nfl18":22.1,"sounds/nfl/nfl19":17.6,"sounds/nfl/nfl20":15.8,"sounds/nfl/nfl21":23.9,"sounds/nfl/nfl22":21.0,"sounds/nfl/nfl23":9.9,"sounds/nfl/nfl24":20.6,"sounds/nfl/nfl25":20.1,"sounds/nfl/nfl26":18.6,"sounds/nfl/nfl27":11.4,"sounds/nfl/nfl28":35.1,"sounds/nfl/nfl29":30.3,"sounds/nfl/nfl30":32.1,"sounds/nfl/nfl31":37.2,"sounds/nfl/nfl32":25.1,"sounds/nfl/nfl33":22.93,"sounds/nfl/nfl34":39.3,"sounds/nfl/nfl35":29.3,"sounds/nfl/nfl36":31.0,"sounds/nfl/nfl37":36.3,"sounds/nfl/nfl38":18.63,"sounds/nfl/nfl39":23.6,"sounds/nfl/nfl40":21.7,"sounds/nfl/nfl41":17.3,"sounds/nfl/nfl42":40.9,"sounds/nfl/nfl43":14.5,"sounds/nfl/nfl44":26.1,"sounds/nfl/nfl45":31.3,"sounds/nfl/nfl46":16.07,"sounds/nfl/nfl47":21.3,"sounds/nfl/nfl48":36.0,"sounds/nfl/nfl49":24.1,"sounds/nfl/nfl50":34.2,"sounds/nfl/nfl51":17.5,"sounds/nfl/nfl52":29.5,"sounds/nfl/nfl53":26.2,"sounds/nfl/nfl54":21.7,"sounds/nfl/nfl55":39.1,"sounds/nhlv/hk01":43.43,"sounds/nhlv/hk02":39.57,"sounds/nhlv/hk03":17.2,"sounds/nhlv/hk04":36.0,"sounds/nhlv/hk05":17.43,"sounds/nhlv/hk06":34.3,"sounds/nhlv/hk07":44.7,"sounds/nhlv/hk08":12.43,"sounds/nhlv/hk09":30.1,"sounds/uga/uga01":13.97,"sounds/uga/uga02":30.03,"sounds/uga/uga03":25.77,"sounds/uga/uga04":30.0,"sounds/uga/uga05":16.27,"sounds/win/win09":30.0,"sounds/win/win10":29.77,"sounds/win/win11":36.5,"sounds/win/win12":23.93,"sounds/win/win13":31.77,"sounds/win/win14":17.07,"sounds/win/win15":10.27,"sounds/win/win16":17.57,"sounds/win/win17":30.03,"sounds/win/win18":24.73,"sounds/win/win19":17.1,"sounds/win/win20":15.67,"sounds/win/win21":26.37,"sounds/win/win22":28.57,"sounds/win/win23":30.43,"sounds/house/hs36":23.87}; for (const c of CLIPS) if (c && c.base && DUR_FIX[c.base]) c.ms = DUR_FIX[c.base] * 1000; }
+  const HLX_LG = [["NFL", "football/nfl", "NFL"], ["College football", "football/college-football", "CFB"], ["NBA", "basketball/nba", "NBA"], ["WNBA", "basketball/wnba", "NBA"],
+    ["College hoops", "basketball/mens-college-basketball", "CBB"], ["MLB", "baseball/mlb", "MLB"], ["NHL", "hockey/nhl", "NHL"], ["Premier League", "soccer/eng.1", "Soccer"],
+    ["MLS", "soccer/usa.1", "Soccer"], ["Champions League", "soccer/uefa.champions", "Soccer"], ["La Liga", "soccer/esp.1", "Soccer"], ["UFC", "mma/ufc", "UFC"],
+    ["PGA Tour", "golf/pga", "Golf"], ["ATP", "tennis/atp", "Tennis"], ["WTA", "tennis/wta", "Tennis"], ["F1", "racing/f1", "Other"]];
+  const HLX = new Map(), HLX_POLL = new Map();
+  const HLX_TALK = /stephen a\b|first take|get up\b|mcafee|\bperk\b|kiper|rapoport|schefter|\bogden\b|\bpti\b|around the horn|the herd|undisputed|nba today|countdown|podcast|mock draft|power rank|ranking|predict|\bpicks?\b|\bodds\b|betting|fantasy|preview|what to (know|watch)|press conference|interview|reacts?\b|debate|explains|breaks down|analysis|takeaways|declares|\bwhy\b|\bshould\b|\bwill\b.*\?|\?$/i;
+  const HLX_PLAY = /highlight|goal|scores?\b|\bko\b|knock|submission|defeat|\bbeats?\b|wins?\b|walk-?off|homer|home run|grand slam|touchdown|\btd\b|dunk|buzzer|game-winn|\bace\b|eagle|hole-in-one|hat trick|save|slam|lead|hold off|rall(y|ies)|comeback|top plays|finish|strike/i;
+  let hlxLast = 0, hlUntil = 0;   // hlUntil: a highlight is on till then (one never cuts off another)
+  const hlxSportBet = (sp) => [...S.bets.values()].some((b) => b.status === "open" && (sportOf(b) === sp || selsOf(b).some((x) => x.sp === sp)));
+  function hlxPoll() {
+    if (PHONE() || document.visibilityState !== "visible" || !document.body.classList.contains("tv") || !clipsOn()) return;
+    const now = Date.now();
+    // the league that's waited longest past its turn: 30 s with a bet in it, 3 min without
+    let pick = null, over = -1;
+    for (const L of HLX_LG) { const d = now - (HLX_POLL.get(L[0]) || 0) - (hlxSportBet(L[2]) ? 30e3 : 180e3); if (d >= 0 && d > over) { over = d; pick = L; } }
+    if (!pick) return;
+    const [lg, path, sp] = pick; HLX_POLL.set(lg, now);
+    fetch(`https://site.api.espn.com/apis/site/v2/sports/${path}/news?limit=40`).then((r) => r.json()).then((j) => {
+      for (const a of (j.articles || [])) {
+        if (a.type !== "Media" || a.premium) continue;
+        const id = String(a.id), at = Date.parse(a.published || a.lastModified || "") || 0, hl = a.headline || "";
+        if (HLX.has(id) || hlSeen.has(id) || Date.now() - at > 3 * 3600e3 || HL_SKIP.test(hl) || HLX_TALK.test(hl)) continue;
+        const self = a.links && a.links.api && a.links.api.self && a.links.api.self.href; if (!self) continue;
+        HLX.set(id, null);
+        fetch(self).then((r) => r.json()).then((c) => {
+          const v = (c.videos || [c])[0] || {}, x = (v.links && v.links.source) || {}, src = (x.HD && x.HD.href) || x.href || "";
+          const head = v.headline || hl, ms = (v.duration || 0) * 1000;
+          if (!src || !/\.mp4(\?|$)/.test(src) || ms < 5000 || ms > 180e3) return;
+          if (!v.gameId && !HLX_PLAY.test(head)) return;   // not a game's highlight
+          const names = (v.categories || []).filter((k) => k.type === "team" || k.type === "athlete").map((k) => String(k.description || "")).filter(Boolean);
+          HLX.set(id, { id, lg, sp, hl: head, src, ms, at, gid: v.gameId ? String(v.gameId) : "", names });
+          hlxTick();
+        }).catch(() => {});
+      }
+    }).catch(() => {});
+  }
+  // whose bet a highlight is about: the game it's from, or (no live game here: soccer, UFC, golf, tennis) a team or player named in the pick
+  function hlxBet(x) {
+    for (const b of S.bets.values()) {
+      if (b.status !== "open" && !(b.settledAt && Date.now() - b.settledAt < 30 * 60e3)) continue;
+      if (x.gid && selsOf(b).some((sl) => String(sl.g) === x.gid)) return b;
+      if (["Soccer", "UFC", "Golf", "Tennis"].includes(x.sp) && sportOf(b) === x.sp) {
+        const pick = String(b.pick || "").toLowerCase();
+        if (x.names.some((n) => { const nm = n.toLowerCase(), last = nm.split(/\s+/).pop(); return pick.includes(nm) || (last.length >= 5 && new RegExp("\\b" + last.replace(/[^a-z0-9]/g, "") + "\\b").test(pick)); })) return b;
+      }
+    }
+    return null;
+  }
+  function hlxPlay(x, b, why) {
+    hlSeen.add(x.id); keep("sb-hl", hlSeen); hlxLast = Date.now(); hlUntil = Date.now() + x.ms;
+    lastAny = Date.now(); lastKind = "pop";
+    const bet = b || { id: "hlx:" + x.id, status: "open", kind: "straight", legs: [], sport: x.sp };
+    react(bet, "mid", { base: "espn/" + x.id, ext: x.src, label: x.hl, mood: "hype", ms: x.ms + 300, hl: true }, why);
+  }
+  function hlxTick() {
+    if (!clipsOn() || PHONE() || cardBusy || fxBusy || trial || !document.body.classList.contains("tv")) return;
+    const now = Date.now(), list = [...HLX.values()].filter((x) => x && !hlSeen.has(x.id) && now - x.at < 3 * 3600e3).sort((p, q) => q.at - p.at);
+    if (!list.length || now < hlUntil) return;   // one's on (or still loading)
+    const mine = list.map((x) => [x, hlxBet(x)]).find(([, b]) => b);
+    if (mine) {
+      if (statusSrc || !$("#jumbo").hidden) { if (lastKind !== "pop" || Date.now() < hlUntil) return; stopStatus(); }
+      hlxPlay(mine[0], mine[1], "Highlight · " + mine[0].lg);
+      return;
+    }
+    // the rest of sports: only in a quiet moment, and not too often
+    if (statusSrc || !$("#jumbo").hidden || now - lastAny < 60e3 || now - hlxLast < 4 * 60e3) return;
+    const x = list.find((y) => y.gid) || list[0];
+    hlxPlay(x, null, x.lg + " highlight");
+  }
+  setInterval(hlxPoll, 6000);
+  setInterval(hlxTick, 5000);
   function teamHype(b, g, e, why) {
     if (!clipsOn() || !g || !e.side) return;
     if (Math.random() < 0.7) { const H = pickClip(houseEdits().filter((c) => fits(c, b))); if (H) { pipTeam = { t: g[e.side], word: PC_TYPE[e.ev] || "Score", pl: "" }; react(b, "good", H, why); return; } }
