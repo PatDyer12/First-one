@@ -4894,7 +4894,7 @@ body.tv .rb-pcol.pr .rb-hs-side.r .rb-st { justify-self: start; }
   // ---------- sheets ----------
   function openSheet(id) { $(id).hidden = false; }
   // keep every open screen current: when a new version is up, reload it (never mid-form or mid-animation)
-  const BUILD = "20261015185018";
+  const BUILD = "20261015190024";
   function checkBuild() {
     if (BUILD === "dev") return;
     fetch("version.json?t=" + Date.now(), { cache: "no-store" }).then((r) => (r.ok ? r.json() : null)).then((j) => {
@@ -7054,6 +7054,7 @@ body.tv .rb-pcol.pr .rb-hs-side.r .rb-st { justify-self: start; }
       if (okPool(cb) && Math.random() < 0.6) return cb;
       k = "hype";
     }
+    if ((k === "good" || k === "rap") && Math.random() < 0.5) { const h = houseEdits().filter((c) => fits(c, b)); if (okPool(h)) return h; }
     if (k === "rap") { const r = rapFor(b); if (okPool(r) && Math.random() < 0.75) return r; k = "good"; }
     if (k === "good") { const r = rapFor(b); if (okPool(r) && Math.random() < 0.4) return r; }
     const fan = me && k !== "bad" ? CLIPS.filter((c) => c.fan === me && (!c.sport || c.sport === sportOf(b) || c.sport === (gameFor(b) || {}).sport)) : [];
@@ -7593,7 +7594,7 @@ body.tv .rb-pcol.pr .rb-hs-side.r .rb-st { justify-self: start; }
     const edits = CLIPS.filter((c) => c.base.startsWith("sounds/aura/") && fits(c, b));
     const songs = musicFor(b).filter((c) => !c.dj && /win|hype/.test(c.mood) && !c.base.startsWith("sounds/aura/"));
     const k = tdPops++ % 3, pool = k === 0 ? edits : k === 1 && songs.length ? songs : CLIPS.filter((c) => c.dj);
-    const P = pickClip(newSong(pool)) || pickClip(newSong(edits));
+    const P = (Math.random() < 0.6 && pickClip(houseEdits())) || pickClip(newSong(pool)) || pickClip(newSong(edits));
     if (P) react(b, "good", P, why);
   }
   // ---------- prime time: ESPN's own highlights, and the players of the quarter, the half and the game ----------
@@ -7944,8 +7945,10 @@ body.tv .rb-pcol.pr .rb-hs-side.r .rb-st { justify-self: start; }
   }
   setInterval(hlPoll, 5000);
   const VIBE = clip("aura/vibe", "Goldie: good vibes", "up win", 16.7, { songId: "sz-rooftop", own: true, lux: true, song: "Rooftop Hours", artist: "Sweat Zone house" });
-  const VB = new Map(), VB_LEAD = { NBA: 4, CBB: 4 }, VB_RUN = { NBA: 10, CBB: 10, NFL: 14, CFB: 14, MLB: 3, NHL: 2 };
+  const VB = new Map(), VBO = new Map(), VB_LEAD = { NBA: 4, CBB: 4 }, VB_RUN = { NBA: 10, CBB: 10, NFL: 14, CFB: 14, MLB: 3, NHL: 2 };
+  const VB_COOL = 10 * 60e3;   // a game gets one of these at most every 10 minutes
   let VQ = null, vbLast = 0;
+  const vbGap = () => (slateMode() === "busy" ? 10 : 4) * 60e3;
   const vbDone = () => { try { const o = JSON.parse(localStorage.getItem("sb-vibed") || "{}"), now = Date.now(); for (const k in o) if (now - o[k] > 20 * 3600e3) delete o[k]; return o; } catch (e) { return {}; } };
   const vbMark = (gid) => { try { const o = vbDone(); o[gid] = Date.now(); localStorage.setItem("sb-vibed", JSON.stringify(o)); } catch (e) {} };
   function vbEarly(g) {
@@ -7955,20 +7958,36 @@ body.tv .rb-pcol.pr .rb-hs-side.r .rb-st { justify-self: start; }
     if (g.sport === "CBB") return pd === 1;
     return pd >= 1 && pd <= 2;   // NFL, CFB, NBA: the first half
   }
+  // momentum, any time in the game: a team somebody's on takes the lead (4+ in hoops), goes on a run (unanswered scoring),
+  // or pulls two scores clear; an over goes from off pace to on pace. Early in the game it's the rooftop scene or a house
+  // edit, after that a house edit
   function vibeScan(now) {
     if (PHONE()) return;
     const done = vbDone();
+    const want = (b, g, why) => {
+      if (g.st !== "in" || (done[g.id] && now - done[g.id] < VB_COOL) || (VQ && VQ.g.id === g.id)) return;
+      // one at a time; a straight bet beats a parlay leg
+      if (!VQ || (b.kind !== "parlay" && VQ.b.kind === "parlay")) VQ = { b, g, why, at: now, early: vbEarly(g) };
+    };
     for (const b of S.bets.values()) {
       if (b.status !== "open") continue;
       const legs = b.kind === "parlay" ? legsOf(b) : null;
       if (legs && legs.some((l) => l.st === "miss")) continue;
       for (const sl of selsOf(b)) {
-        if (!(sl.m === "ml" || sl.m === "sp") || !(sl.s === "a" || sl.s === "h")) continue;
         if (legs && legs.find((l) => l.sel === sl && l.st)) continue;
         const g = gameOf(sl); if (!g || g.a.sc == null || g.h.sc == null) continue;
+        if (sl.m === "tot") {
+          if (sl.s !== "o") continue;
+          const ev = evalSel(sl), k = b.id + ":" + sl.g; if (!ev) continue;
+          const was = VBO.get(k); VBO.set(k, ev.m);
+          if (was != null && was <= 0 && ev.m > 0) want(b, g, Number(g.a.sc) + Number(g.h.sc) > sl.l ? "Over cashing" : "Over on pace");
+          continue;
+        }
+        if (!(sl.m === "ml" || sl.m === "sp") || !(sl.s === "a" || sl.s === "h")) continue;
         const a = Number(g.a.sc), h = Number(g.h.sc);
+        const two = TWO_SCORES[g.sport] || 10;
         let st = VB.get(g.id);
-        if (!st) { VB.set(g.id, { a, h, run: null, down: { a: a - h <= 0, h: h - a <= 0 } }); continue; }   // first look: what already happened is history
+        if (!st) { VB.set(g.id, { a, h, run: null, down: { a: a - h <= 0, h: h - a <= 0 }, two: { a: a - h >= two, h: h - a >= two } }); continue; }   // first look: what already happened is history
         if (st.a !== a || st.h !== h) {
           const da = a - st.a, dh = h - st.h;
           if (da > 0 && dh > 0) st.run = null;
@@ -7976,41 +7995,42 @@ body.tv .rb-pcol.pr .rb-hs-side.r .rb-st { justify-self: start; }
           if (da < 0 || dh < 0) st.run = null;   // a correction: start over
           st.a = a; st.h = h;
         }
-        for (const x of ["a", "h"]) if ((x === "a" ? a - h : h - a) <= 0) st.down[x] = true;
-        if (g.st !== "in" || done[g.id] || (VQ && VQ.g.id === g.id) || !vbEarly(g)) continue;
-        const x = sl.s, o = x === "a" ? "h" : "a", lead = g[x].sc - g[o].sc;
+        for (const x of ["a", "h"]) { const m = x === "a" ? a - h : h - a; if (m <= 0) st.down[x] = true; if (m < two / 2) st.two[x] = false; }
+        const x = sl.s, o = x === "a" ? "h" : "a", lead = g[x].sc - g[o].sc, ab = g[x].ab;
         const took = st.down[x] && lead >= (VB_LEAD[g.sport] || 1);
         const run = st.run && st.run.x === x && st.run.pts >= (VB_RUN[g.sport] || 99) && lead >= 0;
-        if (!took && !run) continue;
-        st.down[x] = false;
-        const ab = g[x].ab;
-        const why = took && !(run && st.run.pts > lead) ? `${ab} takes the lead` : `${ab} · ${st.run.pts} unanswered`;
-        // one at a time; a lead in a game you're on beats one in a parlay leg
-        if (!VQ || (b.kind !== "parlay" && VQ.b.kind === "parlay")) VQ = { b, g, why, at: now };
+        const clear = !st.two[x] && lead >= two;
+        if (!took && !run && !clear) continue;
+        if (took) st.down[x] = false;
+        if (clear) st.two[x] = true;
+        const why = run && (!took || st.run.pts > lead) ? `${ab} · ${st.run.pts} unanswered` : took ? `${ab} takes the lead` : `${ab} up ${lead}`;
+        want(b, g, why);
       }
     }
   }
-  // the scoring play's own clip for a bet in that game becomes the scene
+  const vbClip = (q) => (q.early ? vibePick() : pickClip(houseEdits()) || vibePick());
+  // the scoring play's own clip for a bet in that game becomes the house clip (or already is one)
   function vibeTake(b, kind, P) {
-    if (!VQ || kind !== "good" || P === "lockin" || (P && P.lux)) return null;
-    if (Date.now() - vbLast < (slateMode() === "busy" ? 10 : 5) * 60e3) return null;   // one just played: this play keeps its own clip
+    if (!VQ || kind !== "good" || P === "lockin") return null;
     const q = VQ;
     if (!selsOf(b).some((x) => { const g = gameOf(x); return g && g.id === q.g.id; })) return null;
+    if (P && P.lux) { VQ = null; vbMark(q.g.id); vbLast = Date.now(); return null; }   // the moment already has a house clip
+    if (Date.now() - vbLast < vbGap()) return null;   // one just played: this play keeps its own clip
     VQ = null; vbMark(q.g.id); vbLast = Date.now();
-    return { b: q.b, P: vibePick(), why: q.why };
+    return { b: q.b, P: vbClip(q), why: q.why };
   }
   function vibeTick() {
     if (!VQ) return;
-    const now = Date.now(), g = S.games.get(VQ.g.id) || VQ.g, x = VQ.b.sel && VQ.b.kind !== "parlay" ? VQ.b.sel.s : null;
-    // stale, the lead's gone, or the bet's settled: let it go (it can still come back while the game's early)
+    const now = Date.now(), g = S.games.get(VQ.g.id) || VQ.g, sl = VQ.b.kind !== "parlay" ? VQ.b.sel : null, x = sl && (sl.s === "a" || sl.s === "h") ? sl.s : null;
+    // stale, the lead's gone, or the bet's settled: let it go (it can come back on the next swing)
     if (now - VQ.at > 4 * 60e3 || VQ.b.status !== "open" || g.st !== "in" || (x && g[x].sc - g[x === "a" ? "h" : "a"].sc < 0)) { VQ = null; return; }
     if (!clipsOn() || PHONE() || trial || now - VQ.at < 6e3) return;   // give the play card a moment to claim it
     if (cardBusy || fxBusy) return;
     if (statusSrc || !$("#jumbo").hidden) { if (lastKind !== "pop") return; stopStatus(); }
-    if (now - vbLast < (slateMode() === "busy" ? 10 : 5) * 60e3) { VQ = null; return; }
+    if (now - vbLast < vbGap()) { VQ = null; return; }
     const q = VQ; VQ = null; vbMark(q.g.id); vbLast = now;
     lastAny = now; lastKind = "play";
-    react(q.b, "good", vibePick(), q.why);
+    react(q.b, "good", vbClip(q), q.why);
   }
   setInterval(vibeTick, 2000);
   const houseEdits = () => CLIPS.filter((c) => c.house && !c.dj);
@@ -8067,6 +8087,7 @@ body.tv .rb-pcol.pr .rb-hs-side.r .rb-st { justify-self: start; }
   }
   function teamHype(b, g, e, why) {
     if (!clipsOn() || !g || !e.side) return;
+    if (Math.random() < 0.7) { const H = pickClip(houseEdits().filter((c) => fits(c, b))); if (H) { pipTeam = { t: g[e.side], word: PC_TYPE[e.ev] || "Score", pl: "" }; react(b, "good", H, why); return; } }
     const t = g[e.side], own = CLIPS.filter((c) => c.fan === t.ab && (!c.sport || c.sport === g.sport) && c.pl !== "simpson");
     const scenes = CLIPS.filter((c) => c.base.startsWith("sounds/aura/") && !c.dj && forSport(c, g.sport));
     const sp = own.length ? scorerPool(own, g) : null, P = (own.length && pickClip(sp || own)) || pickClip(newSong(scenes));
@@ -8163,7 +8184,7 @@ body.tv .rb-pcol.pr .rb-hs-side.r .rb-st { justify-self: start; }
         const exact = CLIPS.filter((c) => c.mood.split(" ").includes(e.ev) && forSport(c, top.g.sport) && (!c.teams || isMatchup(c, top.g)));
         const exactMine = exact.filter((c) => fits(c, top.b));
         const pool = exactMine.length ? exactMine : poolFor(top.b, k === "mid" ? "hype" : k);
-        const P = pickClip(pool) || pickClip(libFor(top.b, ["hype", "vibe"]));
+        const P = (!exactMine.length && e.big && top.h > 0 && !["td", "hr", "goal"].includes(e.ev) && Math.random() < 0.7 && pickClip(houseEdits())) || pickClip(pool) || pickClip(libFor(top.b, ["hype", "vibe"]));
         // a team scores for somebody in the room: the play card, then that team's own edit (or him in their colors)
         if (e.ev === "goal" && top.g && top.h > 0 && e.side) { const tb = top.b, tg = top.g; hockeyGoal(tg, e, tb, (why) => teamHype(tb, tg, e, why)); return; }
         if (CARD_EVS.has(e.ev) && top.g && top.h > 0 && e.side && ["td", "hr", "goal"].includes(e.ev)) { const tb = top.b, tg = top.g; showPlayCard(tg, e, tb, (why) => teamHype(tb, tg, e, why)); return; }
