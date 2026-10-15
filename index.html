@@ -4768,7 +4768,7 @@ body.tv .rb-pcol.pr .rb-hs-side.r .rb-st { justify-self: start; }
   // ---------- sheets ----------
   function openSheet(id) { $(id).hidden = false; }
   // keep every open screen current: when a new version is up, reload it (never mid-form or mid-animation)
-  const BUILD = "20261015152337";
+  const BUILD = "20261015152532";
   function checkBuild() {
     if (BUILD === "dev") return;
     fetch("version.json?t=" + Date.now(), { cache: "no-store" }).then((r) => (r.ok ? r.json() : null)).then((j) => {
@@ -7641,6 +7641,49 @@ body.tv .rb-pcol.pr .rb-hs-side.r .rb-st { justify-self: start; }
     }
     return fired;
   }
+  const HL2 = new Map(), HL2Q = [];
+  const HL_SKIP = /preview|what to (know|watch)|betting|\bodds\b|fantasy|predict|\bpicks?\b|injur|press conference|interview|mic'd|podcast|trade|signs\b|contract/i;
+  const hlVids = (j) => (j.videos || []).map((v) => { const x = (v.links && v.links.source) || {}; return { id: String(v.id), hl: v.headline || "", ms: (v.duration || 0) * 1000, src: (x.HD && x.HD.href) || x.href || "", at: Date.parse(v.originalPublishDate || v.lastModified || "") || 0 }; })
+    .filter((v) => v.src && /\.mp4(\?|$)/.test(v.src) && v.ms > 3000 && v.ms <= 150e3).sort((x, y) => x.at - y.at);
+  function hlGames() {
+    const out = new Map(), now = Date.now();
+    for (const b of S.bets.values()) {
+      if (b.status !== "open" && !(b.settledAt && now - b.settledAt < 30 * 60e3)) continue;
+      for (const sl of selsOf(b)) { const g = gameOf(sl); if (g && ESPN[g.sport] && (g.st === "in" || g.st === "post")) out.set(g.id, g); }
+    }
+    return out;
+  }
+  function hlPoll() {
+    if (PHONE() || document.visibilityState !== "visible" || !document.body.classList.contains("tv") || !clipsOn()) return;
+    const now = Date.now();
+    for (const g of hlGames().values()) {
+      const st = HL2.get(g.id) || { at: 0, seen: null, busy: false };
+      if (st.busy || now - st.at < 40e3) continue;
+      st.at = now; st.busy = true; HL2.set(g.id, st);
+      fetch(`https://site.api.espn.com/apis/site/v2/sports/${ESPN[g.sport]}/summary?event=${g.id}`).then((r) => r.json()).then((j) => {
+        const vids = hlVids(j), first = !st.seen;
+        if (first) st.seen = new Set();
+        for (const v of vids) {
+          if (st.seen.has(v.id)) continue; st.seen.add(v.id);
+          // the first look at a game: only what went up in the last 6 minutes is news
+          if ((first && !(v.at && Date.now() - v.at < 6 * 60e3)) || hlSeen.has(v.id) || HL_SKIP.test(v.hl)) continue;
+          HL2Q.push({ g, v, at: Date.now() });
+        }
+        hlNow();
+      }).catch(() => {}).finally(() => { st.busy = false; });
+    }
+    hlNow();
+  }
+  function hlNow() {
+    const now = Date.now();
+    for (let i = HL2Q.length - 1; i >= 0; i--) if (now - HL2Q[i].at > 10 * 60e3 || hlSeen.has(HL2Q[i].v.id)) HL2Q.splice(i, 1);
+    while (HL2Q.length > 3) HL2Q.shift();
+    if (!HL2Q.length || !clipsOn() || cardBusy || fxBusy || PHONE()) return;
+    if (statusSrc || !$("#jumbo").hidden) { if (lastKind !== "pop") return; stopStatus(); }   // a filler / DJ break makes way
+    const j = HL2Q.shift();
+    if (!playHL(S.games.get(j.g.id) || j.g, j.v, "Highlight")) HL2Q.unshift(j);
+  }
+  setInterval(hlPoll, 5000);
   function teamHype(b, g, e, why) {
     if (!clipsOn() || !g || !e.side) return;
     const t = g[e.side], own = CLIPS.filter((c) => c.fan === t.ab && (!c.sport || c.sport === g.sport) && c.pl !== "simpson");
