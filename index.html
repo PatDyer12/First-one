@@ -3496,7 +3496,8 @@ body.tv .rb-pcol.pr .rb-hs-side.r .rb-st { justify-self: start; }
   const PPS = new Map(), goalSeen = new Set();
   function ppRow(d, p) { if (!d || !p) return null; return (p.id && d.by.get(String(p.id))) || d.names.get(normNm(p.nm)) || null; }
   function evalPP(sel, g) {
-    const d = PPS.get(g.id), st = ppStat(sel.m), l = sel.l ?? PP_DEF[st] ?? 0.5, w = PP_WORD[st] || [st, st];
+    if (g.sport !== "NHL" && !BOX.has(g.id) && g.st !== "pre") loadBox(g);
+    const d = (g.sport === "NHL" ? PPS : BOX).get(g.id), st = ppStat(sel.m), l = sel.l ?? PP_DEF[st] ?? 0.5, w = PP_WORD[st] || [st, st];
     const fin = g.st === "post" && !!(d && d.final);
     if (!d) return { m: 0, res: "P", fin: false, txt: "Getting the box score…", g };
     const row = ppRow(d, sel.p);
@@ -3513,6 +3514,60 @@ body.tv .rb-pcol.pr .rb-hs-side.r .rb-st { justify-self: start; }
     }
     return { m, res: m > 0 ? "W" : m < 0 ? "L" : "P", fin: done, txt, g, v };
   }
+  const BOX = new Map();
+  const bxN = (x) => { const m = String(x ?? "").match(/^(-?\d+(?:\.\d+)?)/); return m ? Number(m[1]) : 0; };
+  const BOX_STAT = {
+    MLB: (r) => { const b = (k) => bxN(r["batting." + k]), p = (k) => bxN(r["pitching." + k]), ip = String(r["pitching.fullInnings.partInnings"] || "0").split(".");
+      const h = b("hits"), rr = b("runs"), rbi = b("RBIs");
+      return { mlb_h: h, mlb_hr: b("homeRuns"), mlb_rbi: rbi, mlb_r: rr, mlb_bb: b("walks"), mlb_hrr: h + rr + rbi, mlb_k: p("strikeouts"), mlb_er: p("earnedRuns"), mlb_ha: p("hits"), mlb_outs: Number(ip[0] || 0) * 3 + Number(ip[1] || 0) }; },
+    NBA: (r) => { const x = (k) => bxN(r["*." + k]), pts = x("points"), reb = x("rebounds"), ast = x("assists");
+      return { nba_pts: pts, nba_reb: reb, nba_ast: ast, nba_3pm: x("threePointFieldGoalsMade-threePointFieldGoalsAttempted"), nba_stl: x("steals"), nba_blk: x("blocks"), nba_pra: pts + reb + ast }; },
+    FB: (r) => { const x = (k) => bxN(r[k]), ru = x("rushing.rushingYards"), re = x("receiving.receivingYards");
+      return { fb_pyd: x("passing.passingYards"), fb_ptd: x("passing.passingTouchdowns"), fb_cmp: x("passing.completions/passingAttempts"), fb_int: x("passing.interceptions"), fb_ruyd: ru, fb_rua: x("rushing.rushingAttempts"), fb_ryd: re, fb_rec: x("receiving.receptions"), fb_rry: ru + re }; },
+  };
+  BOX_STAT.CBB = BOX_STAT.NBA; BOX_STAT.NFL = BOX_STAT.FB; BOX_STAT.CFB = BOX_STAT.FB;
+  function boxParse(j, sport) {
+    const raw = new Map(), meta = new Map();
+    for (const t of (j.boxscore && j.boxscore.players) || []) for (const grp of t.statistics || []) {
+      const gn = String(grp.name || grp.type || ""), K = grp.keys || [];
+      for (const a of grp.athletes || []) {
+        if (!a.athlete || !a.stats) continue;
+        const id = String(a.athlete.id), r = raw.get(id) || {};
+        K.forEach((k, i) => { r[gn + "." + k] = a.stats[i]; if (r["*." + k] == null) r["*." + k] = a.stats[i]; });
+        raw.set(id, r); meta.set(id, { nm: a.athlete.displayName || "", tm: String(t.team && t.team.id) });
+      }
+    }
+    const by = new Map(), names = new Map(), fn = BOX_STAT[sport];
+    for (const [id, r] of raw) { const m = meta.get(id), row = { id, nm: m.nm, tm: m.tm, ...(fn ? fn(r) : {}) }; by.set(id, row); names.set(normNm(row.nm), row); }
+    const hd = j.header && j.header.competitions && j.header.competitions[0];
+    return { by, names, final: !!(hd && hd.status && hd.status.type && hd.status.type.completed) };
+  }
+  // games with a non-hockey prop riding on them (open, or settled in the last two hours), live or done
+  function boxGames() {
+    const ids = new Map(), now = Date.now();
+    for (const b of S.bets.values()) {
+      if (b.status !== "open" && !(b.settledAt && now - b.settledAt < 2 * 36e5)) continue;
+      const sels = b.kind === "parlay" ? (Array.isArray(b.legSel) ? b.legSel : []) : [b.sel];
+      for (const sl of sels) { const g = sl && isPP(sl.m) && gameOf(sl); if (g && g.sport !== "NHL" && ESPN[g.sport] && g.st !== "pre") ids.set(g.id, g); }
+    }
+    return ids;
+  }
+  function loadBox(force) {
+    if (document.visibilityState !== "visible") return;
+    const now = Date.now(), list = force ? [force] : [...boxGames().values()];
+    for (const g of list) {
+      let url; try { url = `https://site.api.espn.com/apis/site/v2/sports/${ESPN[g.sport]}/summary?event=${g.id}`; } catch (e) { return; }   // (before the sport table's set up)
+      const c = BOX.get(g.id); if (c && (c.busy || c.final || (!force && now - c.at < 25e3))) continue;
+      const first = !c;
+      BOX.set(g.id, { ...(c || { by: new Map(), names: new Map() }), busy: true, at: now });
+      fetch(url).then((r) => r.json()).then((j) => {
+        const v = boxParse(j, g.sport);
+        const apply = () => { BOX.set(g.id, { ...v, at: Date.now(), busy: false }); render(); autoSettle(); };
+        if (first || v.final) apply(); else setTimeout(apply, tvDelay() * 1000);
+      }).catch(() => { const c2 = BOX.get(g.id); if (c2) c2.busy = false; });
+    }
+  }
+  setInterval(() => loadBox(), 15000);
   function ppsParse(j) {
     const by = new Map(), names = new Map(), tm = {};
     for (const t of (j.boxscore && j.boxscore.players) || []) for (const grp of t.statistics || []) {
@@ -4768,7 +4823,7 @@ body.tv .rb-pcol.pr .rb-hs-side.r .rb-st { justify-self: start; }
   // ---------- sheets ----------
   function openSheet(id) { $(id).hidden = false; }
   // keep every open screen current: when a new version is up, reload it (never mid-form or mid-animation)
-  const BUILD = "20261015152532";
+  const BUILD = "20261015153824";
   function checkBuild() {
     if (BUILD === "dev") return;
     fetch("version.json?t=" + Date.now(), { cache: "no-store" }).then((r) => (r.ok ? r.json() : null)).then((j) => {
@@ -4796,15 +4851,44 @@ body.tv .rb-pcol.pr .rb-hs-side.r .rb-st { justify-self: start; }
   const isTd = (m) => m === "td" || m === "ftd";
   const isPP = (m) => typeof m === "string" && m.startsWith("pp_");
   const ppStat = (m) => String(m).slice(3);
-  const PP_WORD = { g: ["goal", "goals"], a: ["assist", "assists"], pts: ["point", "points"], sog: ["SOG", "SOG"], sv: ["save", "saves"] };
-  const PP_DEF = { g: 0.5, a: 0.5, pts: 0.5, sog: 2.5, sv: 24.5 };
+  const PP_WORD = { g: ["goal", "goals"], a: ["assist", "assists"], pts: ["point", "points"], sog: ["SOG", "SOG"], sv: ["save", "saves"],
+    mlb_h: ["hit", "hits"], mlb_hr: ["home run", "home runs"], mlb_rbi: ["RBI", "RBIs"], mlb_r: ["run", "runs"], mlb_bb: ["walk", "walks"], mlb_hrr: ["H+R+RBI", "H+R+RBI"],
+    mlb_k: ["K", "Ks"], mlb_er: ["earned run", "ER"], mlb_ha: ["hit allowed", "hits allowed"], mlb_outs: ["out", "outs"],
+    nba_pts: ["point", "pts"], nba_reb: ["rebound", "reb"], nba_ast: ["assist", "ast"], nba_3pm: ["three", "threes"], nba_stl: ["steal", "steals"], nba_blk: ["block", "blocks"], nba_pra: ["PRA", "PRA"],
+    fb_pyd: ["pass yd", "pass yds"], fb_ptd: ["pass TD", "pass TDs"], fb_cmp: ["completion", "completions"], fb_int: ["INT", "INTs"], fb_ruyd: ["rush yd", "rush yds"], fb_rua: ["carry", "carries"],
+    fb_ryd: ["rec yd", "rec yds"], fb_rec: ["catch", "catches"], fb_rry: ["rush+rec yd", "rush+rec yds"] };
+  const PP_DEF = { g: 0.5, a: 0.5, pts: 0.5, sog: 2.5, sv: 24.5,
+    mlb_h: 0.5, mlb_hr: 0.5, mlb_rbi: 0.5, mlb_r: 0.5, mlb_bb: 0.5, mlb_hrr: 1.5, mlb_k: 5.5, mlb_er: 2.5, mlb_ha: 5.5, mlb_outs: 17.5,
+    nba_pts: 19.5, nba_reb: 6.5, nba_ast: 4.5, nba_3pm: 2.5, nba_stl: 1.5, nba_blk: 1.5, nba_pra: 29.5,
+    fb_pyd: 224.5, fb_ptd: 1.5, fb_cmp: 19.5, fb_int: 0.5, fb_ruyd: 54.5, fb_rua: 14.5, fb_ryd: 49.5, fb_rec: 4.5, fb_rry: 69.5 };
+  // lines read as over / under (big numbers); the rest read "2+ hits"
+  const PP_OU = new Set(["sog", "sv", "mlb_k", "mlb_ha", "mlb_outs", "nba_pts", "nba_reb", "nba_ast", "nba_pra", "fb_pyd", "fb_cmp", "fb_ruyd", "fb_rua", "fb_ryd", "fb_rec", "fb_rry"]);
+  const FB_MK = [["pp_fb_pyd", "Passing yards"], ["pp_fb_ptd", "Passing TDs"], ["pp_fb_cmp", "Completions"], ["pp_fb_int", "Interceptions"], ["pp_fb_ruyd", "Rushing yards"], ["pp_fb_rua", "Rush attempts"], ["pp_fb_ryd", "Receiving yards"], ["pp_fb_rec", "Receptions"], ["pp_fb_rry", "Rush + rec yards"]];
+  const PP_MKS = { MLB: [["pp_mlb_h", "Hits"], ["pp_mlb_hr", "Home run"], ["pp_mlb_rbi", "RBIs"], ["pp_mlb_r", "Runs"], ["pp_mlb_hrr", "Hits + runs + RBIs"], ["pp_mlb_bb", "Walks"], ["pp_mlb_k", "Pitcher strikeouts"], ["pp_mlb_outs", "Pitcher outs"], ["pp_mlb_ha", "Hits allowed"], ["pp_mlb_er", "Earned runs allowed"]],
+    NBA: [["pp_nba_pts", "Points"], ["pp_nba_reb", "Rebounds"], ["pp_nba_ast", "Assists"], ["pp_nba_3pm", "Threes made"], ["pp_nba_pra", "Pts + reb + ast"], ["pp_nba_stl", "Steals"], ["pp_nba_blk", "Blocks"]],
+    CBB: [["pp_nba_pts", "Points"], ["pp_nba_reb", "Rebounds"], ["pp_nba_ast", "Assists"], ["pp_nba_3pm", "Threes made"], ["pp_nba_pra", "Pts + reb + ast"]],
+    NFL: FB_MK, CFB: FB_MK };
+  // who shows up in the player list for a market
+  const PITCH = ["SP", "RP", "P"];
+  function ppPosOk(m, pos) {
+    if (m === "pp_sv") return pos === "G";
+    if (/^pp_(g|a|pts|sog)$/.test(m)) return pos !== "G";
+    if (/^pp_mlb_(k|er|ha|outs)$/.test(m)) return PITCH.includes(pos);
+    if (/^pp_mlb_/.test(m)) return !PITCH.includes(pos);
+    if (/^pp_fb_(pyd|ptd|cmp|int)$/.test(m)) return pos === "QB";
+    if (/^pp_fb_(ruyd|rua)$/.test(m)) return ["RB", "QB", "WR", "FB"].includes(pos);
+    if (/^pp_fb_(ryd|rec)$/.test(m)) return ["WR", "TE", "RB", "FB"].includes(pos);
+    if (m === "pp_fb_rry") return ["RB", "WR", "TE", "FB"].includes(pos);
+    return true;
+  }
   const PP_MK = [["pp_g", "Goal scorer"], ["pp_a", "Assists"], ["pp_pts", "Points"], ["pp_sog", "Shots on goal"], ["pp_sv", "Goalie saves"]];
   function ppLabel(p, m, s, l) {
     const st = ppStat(m), w = PP_WORD[st] || [st, st], nm = p ? p.nm : "Player";
     if (l == null) l = PP_DEF[st] ?? 0.5;
     if (st === "g" && s !== "u" && l === 0.5) return nm + " anytime goal";
+    if (st === "mlb_hr" && s !== "u" && l === 0.5) return nm + " to homer";
     if (s === "u") return `${nm} u${trimL(l)} ${w[1]}`;
-    if (st === "sog" || st === "sv") return `${nm} o${trimL(l)} ${w[1]}`;
+    if (PP_OU.has(st)) return `${nm} o${trimL(l)} ${w[1]}`;
     const n = Math.floor(l) + 1; return `${nm} ${n}+ ${n === 1 ? w[0] : w[1]}`;
   }
   function mkLabel(g, m, s, l, p) {
@@ -4896,8 +4980,10 @@ body.tv .rb-pcol.pr .rb-hs-side.r .rb-st { justify-self: start; }
         mk = `<div class="mkts">${btn("ml", "a")}${btn("ml", "h")}${btn("sp", "a")}${btn("sp", "h")}${btn("tot", "o")}${btn("tot", "u")}</div>`;
         if (g.sport === "NHL")
           mk += `<div class="tdmk ppmk">${PP_MK.map(([m, l]) => `<button type="button" class="mkt${F.tdG === g.id && F.tdM === m ? " on" : ""}" data-td="${esc(g.id)}|${m}"><span>${l}</span><b>${F.tdG === g.id && F.tdM === m ? "▾" : "›"}</b></button>`).join("")}</div>${F.tdG === g.id && isPP(F.tdM) ? tdPanel(g) : ""}`;
+        const ppRowOf = (list) => `<div class="tdmk ppmk">${list.map(([m, l]) => `<button type="button" class="mkt${F.tdG === g.id && F.tdM === m ? " on" : ""}" data-td="${esc(g.id)}|${m}"><span>${l}</span><b>${F.tdG === g.id && F.tdM === m ? "▾" : "›"}</b></button>`).join("")}</div>`;
         if (g.sport === "CFB" || g.sport === "NFL")
-          mk += `<div class="tdmk">${[["td", "Anytime TD scorer"], ["ftd", "First TD scorer"]].map(([m, l]) => `<button type="button" class="mkt${F.tdG === g.id && F.tdM === m ? " on" : ""}" data-td="${esc(g.id)}|${m}"><span>${l}</span><b>${F.tdG === g.id && F.tdM === m ? "▾" : "›"}</b></button>`).join("")}</div>${F.tdG === g.id ? tdPanel(g) : ""}`;
+          mk += `<div class="tdmk">${[["td", "Anytime TD scorer"], ["ftd", "First TD scorer"]].map(([m, l]) => `<button type="button" class="mkt${F.tdG === g.id && F.tdM === m ? " on" : ""}" data-td="${esc(g.id)}|${m}"><span>${l}</span><b>${F.tdG === g.id && F.tdM === m ? "▾" : "›"}</b></button>`).join("")}</div>` + ppRowOf(PP_MKS[g.sport]) + (F.tdG === g.id ? tdPanel(g) : "");
+        if (g.sport === "MLB" || g.sport === "NBA" || g.sport === "CBB") mk += ppRowOf(PP_MKS[g.sport]) + (F.tdG === g.id && isPP(F.tdM) ? tdPanel(g) : "");
       }
       return `<div class="g${open ? " open" : ""}"><button type="button" class="g-head" data-gopen="${esc(g.id)}" aria-expanded="${open}">
         <span class="g-when">${gWhen(g)}</span><span class="g-teams">${esc(g.a.nm)} <i>@</i> ${esc(g.h.nm)}</span>
@@ -4906,14 +4992,16 @@ body.tv .rb-pcol.pr .rb-hs-side.r .rb-st { justify-self: start; }
   }
   // TD scorer picker: both teams' skill players from ESPN rosters, with headshots
   const ROSTER = new Map(), TD_POS = ["RB", "WR", "TE", "QB", "FB"], NHL_POS = ["C", "LW", "RW", "D", "G"];
+  const MLB_POS = ["C", "1B", "2B", "3B", "SS", "LF", "CF", "RF", "OF", "IF", "DH", "UT", "SP", "RP", "P"], NBA_POS = ["PG", "SG", "G", "SF", "PF", "F", "G-F", "F-G", "F-C", "C-F", "C"];
+  const posOf = (sport) => (sport === "NHL" ? NHL_POS : sport === "MLB" ? MLB_POS : sport === "NBA" || sport === "CBB" ? NBA_POS : TD_POS);
   function loadRoster(sport, tid) {
     const k = sport + "|" + tid; if (ROSTER.has(k)) return ROSTER.get(k);
     const pr = fetch(`https://site.api.espn.com/apis/site/v2/sports/${ESPN[sport]}/teams/${tid}/roster`).then((r) => r.json()).then((j) => {
       const items = []; for (const grp of j.athletes || []) for (const a of grp.items || (grp.displayName ? [grp] : [])) {
-        const pos = (a.position && a.position.abbreviation) || ""; if (!(sport === "NHL" ? NHL_POS : TD_POS).includes(pos)) continue;
+        const pos = (a.position && a.position.abbreviation) || ""; if (!posOf(sport).includes(pos)) continue;
         items.push({ id: String(a.id), nm: a.displayName || a.fullName || "", j: a.jersey || "", pos, hs: (a.headshot && a.headshot.href) || "", tm: String(tid) });
       }
-      const PO = sport === "NHL" ? NHL_POS : TD_POS; items.sort((x, y) => PO.indexOf(x.pos) - PO.indexOf(y.pos) || Number(x.j || 99) - Number(y.j || 99));
+      const PO = posOf(sport); items.sort((x, y) => PO.indexOf(x.pos) - PO.indexOf(y.pos) || Number(x.j || 99) - Number(y.j || 99));
       ROSTER.set(k, items); if (!$("#addSheet").hidden) renderGames(); return items;
     }).catch(() => { ROSTER.delete(k); return []; });
     ROSTER.set(k, pr); return pr;
@@ -4961,16 +5049,16 @@ body.tv .rb-pcol.pr .rb-hs-side.r .rb-st { justify-self: start; }
     const q = (F.tdQ || "").trim().toLowerCase();
     return ["a", "h"].map((side) => {
       const r = rosterOf(g, side); if (!r) return `<div class="tdl-h">${esc(g[side].nm)}</div><div class="gnone">Loading players…</div>`;
-      const list = r.filter((p) => (!q || p.nm.toLowerCase().includes(q) || p.j === q) && (!isPP(F.tdM) || (F.tdM === "pp_sv") === (p.pos === "G"))).map((p) => ({ p, od: propOdds(g, p, F.tdM) }));
+      const list = r.filter((p) => (!q || p.nm.toLowerCase().includes(q) || p.j === q) && (!isPP(F.tdM) || ppPosOk(F.tdM, p.pos))).map((p) => ({ p, od: propOdds(g, p, F.tdM) }));
       if (list.some((x) => x.od)) list.sort((x, y) => (x.od ? dec(x.od.o) : 999) - (y.od ? dec(y.od.o) : 999));
       return `<div class="tdl-h">${esc(g[side].nm)}</div>` + (list.length ? list.slice(0, 40).map(({ p, od }) => `<button type="button" class="tdpl${kindNow() === "parlay" && F.legs.some((x) => x.g === g.id && x.m === F.tdM && x.p && x.p.id === p.id) ? " on" : ""}" data-tdp="${esc(g.id)}|${side}|${esc(p.id)}">${p.hs ? `<img src="${esc(p.hs)}" alt="" loading="lazy">` : '<span class="ph"></span>'}<b>${esc(p.nm)}</b><small>${esc([p.j ? "#" + p.j : "", p.pos].filter(Boolean).join(" · "))}</small>${od ? `<em class="tdodds" title="${od.book === "DK" ? "DraftKings" : "FanDuel"}">${fOdds(od.o)}${od.book !== curBook() ? `<i>${od.book}</i>` : ""}</em>` : ""}</button>`).join("") : '<div class="gnone">No match</div>');
     }).join("");
   }
   function tdPanel(g) {
     for (const side of ["a", "h"]) if (!rosterOf(g, side)) loadRoster(g.sport, g[side].id);
-    if (g.sport !== "NHL") loadProps(g);
-    const v = g.sport === "NHL" ? { map: new Map() } : PROPS.get(g.id);
-    const note = g.sport === "NHL" ? "Pick the player, then set the line and over/under to match your slip." : !S.oddsKey ? "Add your free odds key in Settings to see FanDuel and DraftKings prices here." : v && v.then ? "Getting prices…" : v && v.err === "key" ? "That odds key didn't work. Check it in Settings." : v && v.err ? "Couldn't get prices right now (out of requests?). Type the odds from your slip." : v && v.none ? "No player prop prices posted for this game yet." : "";
+    if (!isPP(F.tdM)) loadProps(g);
+    const v = isPP(F.tdM) ? { map: new Map() } : PROPS.get(g.id);
+    const note = isPP(F.tdM) ? "Pick the player, then set the line and over/under to match your slip." : !S.oddsKey ? "Add your free odds key in Settings to see FanDuel and DraftKings prices here." : v && v.then ? "Getting prices…" : v && v.err === "key" ? "That odds key didn't work. Check it in Settings." : v && v.err ? "Couldn't get prices right now (out of requests?). Type the odds from your slip." : v && v.none ? "No player prop prices posted for this game yet." : "";
     return `<div class="tdp">${note ? `<div class="tdnote">${esc(note)}</div>` : ""}<input type="text" data-tdq autocomplete="off" placeholder="Search a player or number" value="${esc(F.tdQ || "")}" aria-label="Search a player"><div class="tdlist">${tdList(g)}</div></div>`;
   }
   const dec = (o) => (o > 0 ? 1 + o / 100 : 1 + 100 / Math.abs(o));
@@ -10032,8 +10120,8 @@ body.tv .rb-pcol.pr .rb-hs-side.r .rb-st { justify-self: start; }
 
   // ---------- scan a bet slip (Gemini via Firebase AI Logic) ----------
   const SLIP_MODELS = ["gemini-3.5-flash-lite", "gemini-3.8-flash"];
-  const SLIP_PROMPT = "You read screenshots of sportsbook bet slips (usually FanDuel, DraftKings or Polymarket) and extract each bet on them.\nRules:\n- One entry per bet. A parlay is ONE bet with several legs; a straight bet has exactly one leg.\n- odds: the American odds of the whole bet as an integer (e.g. -110, 250). For a parlay, the parlay's total odds.\n- stake: the dollar amount wagered. to_win: the dollar payout profit shown, if any.\n- For each leg: pick = the selection as written (team or player and line); team = the team or player name only;\n  market = \"ml\" (moneyline/to win), \"spread\" (point spread, run line, puck line, alt spread), \"total\" (over/under game total), \"anytime_td\" (anytime touchdown scorer, \"to score a TD\"), \"first_td\" (first touchdown scorer of the game) or \"prop\" (anything else);\n  player = for touchdown scorer bets, the player's full name exactly as written (e.g. \"Bucky Irving\"), else null; for those bets team = the player's team if shown;\n  side = \"over\" or \"under\" for totals, else null; line = the signed number for spreads (e.g. -6.5) or the total number (e.g. 48.5), else null;\n  away and home = the two teams of the game if shown (an \"A @ B\" matchup means A is away, B is home), else null;\n  sport = NFL, CFB, NBA, CBB, MLB, NHL or OTHER, judged from the teams and market.\n- Hockey player props (NHL): market = \"prop\", player = the player's full name, stat = \"goals\", \"assists\", \"points\", \"shots_on_goal\" or \"saves\", side = \"over\" or \"under\", line = the number (\"To score a goal\" / anytime goal scorer = stat goals, side over, line 0.5; \"2+ shots\" = side over, line 1.5; \"1+ point\" = stat points, over 0.5), sport = NHL.\n- book = \"FD\" for FanDuel, \"DK\" for DraftKings, \"PM\" for Polymarket (a prediction market: prices in cents like 62¢, shares, avg price, Buy / Yes / No), null if you can't tell.\n- Polymarket: price = the price paid per share in cents (e.g. 62 for 62¢; the avg price if shown), and odds = null unless American odds are printed; stake = the amount spent (cost / total); to_win = the profit if it pays (payout minus cost) when shown. The pick is the outcome bought: a team for a moneyline market like \"Bills vs. Rams\", \"Rams -3.5\" for \"Spread: Rams (-3.5)\", \"Over 54.5\" for \"O/U 54.5\"; buying \"No\" on one team of a two-team game means the other team. Take market, line and side from the market title.\n- Use null for anything not visible. Never invent numbers.";
-  const SLIP_SCHEMA = {"type": "OBJECT", "properties": {"bets": {"type": "ARRAY", "items": {"type": "OBJECT", "properties": {"book": {"type": "STRING", "enum": ["FD", "DK", "PM"], "nullable": true}, "price": {"type": "NUMBER", "nullable": true}, "kind": {"type": "STRING", "enum": ["straight", "parlay"]}, "odds": {"type": "INTEGER", "nullable": true}, "stake": {"type": "NUMBER", "nullable": true}, "to_win": {"type": "NUMBER", "nullable": true}, "legs": {"type": "ARRAY", "items": {"type": "OBJECT", "properties": {"pick": {"type": "STRING"}, "team": {"type": "STRING", "nullable": true}, "market": {"type": "STRING", "enum": ["ml", "spread", "total", "anytime_td", "first_td", "prop"]}, "player": {"type": "STRING", "nullable": true}, "stat": {"type": "STRING", "enum": ["goals", "assists", "points", "shots_on_goal", "saves"], "nullable": true}, "side": {"type": "STRING", "enum": ["over", "under"], "nullable": true}, "line": {"type": "NUMBER", "nullable": true}, "odds": {"type": "INTEGER", "nullable": true}, "price": {"type": "NUMBER", "nullable": true}, "away": {"type": "STRING", "nullable": true}, "home": {"type": "STRING", "nullable": true}, "sport": {"type": "STRING", "enum": ["NFL", "CFB", "NBA", "CBB", "MLB", "NHL", "OTHER"]}}, "required": ["pick", "market", "sport"]}}}, "required": ["kind", "legs"]}}}, "required": ["bets"]};
+  const SLIP_PROMPT = "You read screenshots of sportsbook bet slips (usually FanDuel, DraftKings or Polymarket) and extract each bet on them.\nRules:\n- One entry per bet. A parlay is ONE bet with several legs; a straight bet has exactly one leg.\n- odds: the American odds of the whole bet as an integer (e.g. -110, 250). For a parlay, the parlay's total odds.\n- stake: the dollar amount wagered. to_win: the dollar payout profit shown, if any.\n- For each leg: pick = the selection as written (team or player and line); team = the team or player name only;\n  market = \"ml\" (moneyline/to win), \"spread\" (point spread, run line, puck line, alt spread), \"total\" (over/under game total), \"anytime_td\" (anytime touchdown scorer, \"to score a TD\"), \"first_td\" (first touchdown scorer of the game) or \"prop\" (anything else);\n  player = for touchdown scorer bets, the player's full name exactly as written (e.g. \"Bucky Irving\"), else null; for those bets team = the player's team if shown;\n  side = \"over\" or \"under\" for totals, else null; line = the signed number for spreads (e.g. -6.5) or the total number (e.g. 48.5), else null;\n  away and home = the two teams of the game if shown (an \"A @ B\" matchup means A is away, B is home), else null;\n  sport = NFL, CFB, NBA, CBB, MLB, NHL or OTHER, judged from the teams and market.\n- Hockey player props (NHL): market = \"prop\", player = the player's full name, stat = \"goals\", \"assists\", \"points\", \"shots_on_goal\" or \"saves\", side = \"over\" or \"under\", line = the number (\"To score a goal\" / anytime goal scorer = stat goals, side over, line 0.5; \"2+ shots\" = side over, line 1.5; \"1+ point\" = stat points, over 0.5), sport = NHL.\n- Other player props: market = \"prop\", player = the player's full name, sport = MLB, NBA, CBB, NFL or CFB, side = \"over\" or \"under\", line = the number (\"2+ hits\" = over 1.5; \"to hit a home run\" = stat home_runs, over 0.5; \"25+ points\" = over 24.5), stat = MLB: \"hits\", \"home_runs\", \"rbis\", \"runs\", \"walks\", \"hits_runs_rbis\", \"strikeouts\" (pitcher), \"earned_runs\", \"hits_allowed\", \"outs\"; NBA / college basketball: \"points\", \"rebounds\", \"assists\", \"threes\", \"steals\", \"blocks\", \"pra\" (points + rebounds + assists); NFL / college football: \"passing_yards\", \"passing_tds\", \"completions\", \"interceptions\", \"rushing_yards\", \"rushing_attempts\", \"receiving_yards\", \"receptions\", \"rush_rec_yards\".\n- book = \"FD\" for FanDuel, \"DK\" for DraftKings, \"PM\" for Polymarket (a prediction market: prices in cents like 62¢, shares, avg price, Buy / Yes / No), null if you can't tell.\n- Polymarket: price = the price paid per share in cents (e.g. 62 for 62¢; the avg price if shown), and odds = null unless American odds are printed; stake = the amount spent (cost / total); to_win = the profit if it pays (payout minus cost) when shown. The pick is the outcome bought: a team for a moneyline market like \"Bills vs. Rams\", \"Rams -3.5\" for \"Spread: Rams (-3.5)\", \"Over 54.5\" for \"O/U 54.5\"; buying \"No\" on one team of a two-team game means the other team. Take market, line and side from the market title.\n- Use null for anything not visible. Never invent numbers.";
+  const SLIP_SCHEMA = {"type": "OBJECT", "properties": {"bets": {"type": "ARRAY", "items": {"type": "OBJECT", "properties": {"book": {"type": "STRING", "enum": ["FD", "DK", "PM"], "nullable": true}, "price": {"type": "NUMBER", "nullable": true}, "kind": {"type": "STRING", "enum": ["straight", "parlay"]}, "odds": {"type": "INTEGER", "nullable": true}, "stake": {"type": "NUMBER", "nullable": true}, "to_win": {"type": "NUMBER", "nullable": true}, "legs": {"type": "ARRAY", "items": {"type": "OBJECT", "properties": {"pick": {"type": "STRING"}, "team": {"type": "STRING", "nullable": true}, "market": {"type": "STRING", "enum": ["ml", "spread", "total", "anytime_td", "first_td", "prop"]}, "player": {"type": "STRING", "nullable": true}, "stat": {"type": "STRING", "enum": ["goals", "assists", "points", "shots_on_goal", "saves", "hits", "home_runs", "rbis", "runs", "walks", "hits_runs_rbis", "strikeouts", "earned_runs", "hits_allowed", "outs", "rebounds", "threes", "steals", "blocks", "pra", "passing_yards", "passing_tds", "completions", "interceptions", "rushing_yards", "rushing_attempts", "receiving_yards", "receptions", "rush_rec_yards"], "nullable": true}, "side": {"type": "STRING", "enum": ["over", "under"], "nullable": true}, "line": {"type": "NUMBER", "nullable": true}, "odds": {"type": "INTEGER", "nullable": true}, "price": {"type": "NUMBER", "nullable": true}, "away": {"type": "STRING", "nullable": true}, "home": {"type": "STRING", "nullable": true}, "sport": {"type": "STRING", "enum": ["NFL", "CFB", "NBA", "CBB", "MLB", "NHL", "OTHER"]}}, "required": ["pick", "market", "sport"]}}}, "required": ["kind", "legs"]}}}, "required": ["bets"]};
   async function shrink(file) {
     const url = URL.createObjectURL(file);
     try {
@@ -10105,20 +10193,32 @@ body.tv .rb-pcol.pr .rb-hs-side.r .rb-st { justify-self: start; }
     const w = (x) => String(x || "").toLowerCase().replace(/\b(jr|sr|ii|iii|iv)\b\.?/g, "").replace(/[^a-z\s.]/g, "").split(/[\s.]+/).filter(Boolean);
     const x = w(a), y = w(b); return x.length > 1 && y.length > 1 && x[x.length - 1] === y[y.length - 1] && x[0][0] === y[0][0];
   };
-  const PP_SLIP = { goals: "pp_g", assists: "pp_a", points: "pp_pts", shots_on_goal: "pp_sog", saves: "pp_sv" };
+  const PP_SLIP = { goals: "pp_g", assists: "pp_a", points: "pp_pts", shots_on_goal: "pp_sog", saves: "pp_sv",
+    hits: "pp_mlb_h", home_runs: "pp_mlb_hr", rbis: "pp_mlb_rbi", runs: "pp_mlb_r", walks: "pp_mlb_bb", hits_runs_rbis: "pp_mlb_hrr", strikeouts: "pp_mlb_k", earned_runs: "pp_mlb_er", hits_allowed: "pp_mlb_ha", outs: "pp_mlb_outs",
+    rebounds: "pp_nba_reb", threes: "pp_nba_3pm", steals: "pp_nba_stl", blocks: "pp_nba_blk", pra: "pp_nba_pra",
+    passing_yards: "pp_fb_pyd", passing_tds: "pp_fb_ptd", completions: "pp_fb_cmp", interceptions: "pp_fb_int", rushing_yards: "pp_fb_ruyd", rushing_attempts: "pp_fb_rua", receiving_yards: "pp_fb_ryd", receptions: "pp_fb_rec", rush_rec_yards: "pp_fb_rry" };
+  // the slip's stat in its sport (points and assists are hockey's or basketball's depending on the sport)
+  function ppSlipMk(leg) {
+    if (!leg || leg.market !== "prop" || !leg.player) return null;
+    const hoops = leg.sport === "NBA" || leg.sport === "CBB";
+    if (hoops && leg.stat === "points") return "pp_nba_pts";
+    if (hoops && leg.stat === "assists") return "pp_nba_ast";
+    return PP_SLIP[leg.stat] || null;
+  }
+  const ppSport = (m, leg) => (/^pp_mlb_/.test(m) ? "MLB" : /^pp_nba_/.test(m) ? (leg.sport === "CBB" ? "CBB" : "NBA") : /^pp_fb_/.test(m) ? (leg.sport === "CFB" ? "CFB" : "NFL") : "NHL");
   async function resolvePPLeg(leg) {
-    const m = PP_SLIP[leg.stat], base = matchLeg({ ...leg, market: "ml", team: leg.team || leg.away || leg.home });
-    const games = base ? [S.games.get(base.g)] : pickable().filter((g) => g.sport === "NHL");
+    const m = ppSlipMk(leg), sp = ppSport(m, leg), base = matchLeg({ ...leg, market: "ml", team: leg.team || leg.away || leg.home });
+    const games = base ? [S.games.get(base.g)] : pickable().filter((g) => g.sport === sp);
     const side = leg.side === "under" ? "u" : "o", l = leg.line == null ? PP_DEF[ppStat(m)] : Math.abs(leg.line);
     for (const g of games) {
       if (!g) continue;
-      const rs = await Promise.all(["a", "h"].map((sd) => loadRoster("NHL", g[sd].id)));
-      for (const r of rs) { const pl = (Array.isArray(r) ? r : []).find((x) => sameName(x.nm, leg.player)); if (pl) { leg._td = { g: g.id, m, s: side, l, o: leg.odds, sport: "NHL", p: pl }; return; } }
+      const rs = await Promise.all(["a", "h"].map((sd) => loadRoster(g.sport, g[sd].id)));
+      for (const r of rs) { const pl = (Array.isArray(r) ? r : []).find((x) => sameName(x.nm, leg.player)); if (pl) { leg._td = { g: g.id, m, s: side, l, o: leg.odds, sport: g.sport, p: pl }; return; } }
     }
   }
   async function resolveTdLegs(bets) {
     for (const pb of bets) for (const leg of pb.legs || []) {
-      if (leg && leg.market === "prop" && (leg.sport === "NHL" || !leg.sport || leg.sport === "OTHER") && PP_SLIP[leg.stat] && leg.player) { await resolvePPLeg(leg); continue; }
+      if (ppSlipMk(leg)) { await resolvePPLeg(leg); continue; }
       if (!leg || (leg.market !== "anytime_td" && leg.market !== "first_td")) continue;
       const m = leg.market === "first_td" ? "ftd" : "td", who = leg.player || String(leg.pick || "").replace(/\b(anytime|first|td|touchdown|scorer|to score|a)\b/gi, "").trim();
       const base = matchLeg({ ...leg, market: "ml", team: leg.team || leg.away || leg.home });
@@ -10190,7 +10290,7 @@ body.tv .rb-pcol.pr .rb-hs-side.r .rb-st { justify-self: start; }
       const c2o = (c) => (c > 0 && c < 100 ? pmAm(c / 100) : null);
       for (const b of bets) { if (!b.odds && c2o(b.price)) b.odds = c2o(b.price); for (const l of b.legs) if (l && !l.odds && c2o(l.price)) l.odds = c2o(l.price); if (!b.odds && b.legs.length === 1 && b.legs[0].odds) b.odds = b.legs[0].odds; if (b.price && !b.book) b.book = "PM"; }
       if (!bets.length) { scanNote("Couldn't find a bet on that image. Try a screenshot of the slip or the bet in My Bets."); return; }
-      if (bets.some((b) => b.legs.some((l) => l && (l.market === "anytime_td" || l.market === "first_td" || (l.market === "prop" && PP_SLIP[l.stat]))))) { $("#scanLbl").textContent = "Finding the players…"; await resolveTdLegs(bets); }
+      if (bets.some((b) => b.legs.some((l) => l && (l.market === "anytime_td" || l.market === "first_td" || ppSlipMk(l))))) { $("#scanLbl").textContent = "Finding the players…"; await resolveTdLegs(bets); }
       slipBets = bets;
       fillFromSlip(bets[0]);
       const missing = [];
