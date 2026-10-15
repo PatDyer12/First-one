@@ -2347,7 +2347,7 @@ body.tv .rb-pcol.pr .rb-hs-side.r .rb-st { justify-self: start; }
 .jumbo.lux .jb-head > b { display: none; }   /* house: no title over the picture */
 .jumbo.lux .jb-screen { border: 1px solid rgba(232,211,162,.85); outline: 1px solid rgba(201,164,92,.38); outline-offset: 10px; border-radius: 2px; background: #050505; box-shadow: 0 40px 100px rgba(0,0,0,.75); }
 .jumbo.lux .jb-screen #jbBg { filter: blur(40px) brightness(.26) saturate(.5) sepia(.4); }
-.jumbo.lux #pipVid { filter: contrast(1.05) saturate(.92) sepia(.06); }
+.jumbo.lux #pipVid { filter: contrast(1.05) saturate(.92) sepia(.06); transition: opacity .25s ease; }
 .jumbo.lux .jb-screen::after { content: ""; position: absolute; inset: 0; z-index: 2; pointer-events: none; background: radial-gradient(130% 110% at 50% 50%, transparent 60%, rgba(0,0,0,.42) 100%); }
 .jumbo.lux .jb-screen::before { content: ""; position: absolute; inset: 16px; z-index: 3; pointer-events: none; opacity: .8;
   background: linear-gradient(var(--lx-g2), var(--lx-g2)) left top / 38px 1px no-repeat, linear-gradient(var(--lx-g2), var(--lx-g2)) left top / 1px 38px no-repeat,
@@ -4894,7 +4894,7 @@ body.tv .rb-pcol.pr .rb-hs-side.r .rb-st { justify-self: start; }
   // ---------- sheets ----------
   function openSheet(id) { $(id).hidden = false; }
   // keep every open screen current: when a new version is up, reload it (never mid-form or mid-animation)
-  const BUILD = "20261015183840";
+  const BUILD = "20261015185018";
   function checkBuild() {
     if (BUILD === "dev") return;
     fetch("version.json?t=" + Date.now(), { cache: "no-store" }).then((r) => (r.ok ? r.json() : null)).then((j) => {
@@ -6664,14 +6664,17 @@ body.tv .rb-pcol.pr .rb-hs-side.r .rb-st { justify-self: start; }
     if (PHONE()) return;
     const jb = $("#jumbo"), v = $("#pipVid"), bg = $("#jbBg"), c = clipCtx(), go = ++pipGo, betId = b.id, team = pipTeam;
     pipTeam = null;
-    const hz = !!(P.dj && P.bpm) && !pre && houseDj(P); SP.useHouse = hz;
-    if (hz && /^DJ /.test(why || "")) why = "House · " + why;
+    v.onended = null; v.style.opacity = "";
+    if (!pre) P = houseTurn(P);
+    const hz = !!(P.dj && P.bpm && P.house) && !pre; SP.useHouse = hz;
+    if (hz && /^DJ /.test(why || "")) why = "House mix";
     const lux = !!P.lux || hz;
-    const dj = !!(P.dj && P.bpm), vbase = dj ? (hz ? HOUSE_DJ : DJ_BASE) : P.base, rate = dj ? djRate(P.bpm) : 1;
+    const reel = hz ? houseReel(P) : null;
+    const dj = !!(P.dj && P.bpm), vbase = reel ? reel[0].base : dj ? DJ_BASE : P.base, rate = dj && !reel ? djRate(P.bpm) : 1;
     const src = P.ext || vidSrc(vbase);
     v.muted = true; v.onerror = P.ext ? () => { if (go === pipGo) stopStatus(); } : null;
     if (v.dataset.base !== vbase || (!P.ext && v.dataset.src !== src)) { v.dataset.base = vbase; v.dataset.src = src; v.src = src; v.load(); bg.src = src; bg.load(); }
-    for (const x of [v, bg]) { x.loop = dj; x.defaultPlaybackRate = rate; x.playbackRate = rate; }
+    for (const x of [v, bg]) { x.loop = dj && !reel; x.defaultPlaybackRate = rate; x.playbackRate = rate; }
     // a DJ break plays off your Spotify playlist when this screen's connected to it (the built-in song when Spotify can't);
     // so does one of Meegy's scenes, and without Spotify a scene whose song was just on borrows a fresher built-in one
     const scene = !dj && !pre && !P.ext && !P.own && /^sounds\/aura\//.test(P.base || "");
@@ -6681,7 +6684,7 @@ body.tv .rb-pcol.pr .rb-hs-side.r .rb-st { justify-self: start; }
     if (dj && !pre && !spUsable()) spWhy();
     const sound = (dj || scene) && !pre && spUsable() && !(P.house && !SP.hlist.length) ? spPlay().then((t) => { if (!t && dj) spWhy(); return t || own(); }) : own();
     Promise.all([sound, vidReady(v), ctxAwake(c)]).then(([buf]) => {
-      const sp = buf && buf.sp ? buf : null, ms = sp && dj ? sp.ms : P.ms, r = sp ? 1 : rate;
+      const sp = buf && buf.sp ? buf : null, seg = !!reel && !sp && !!buf && reel[0].base === P.base, ms = sp && dj ? sp.ms : seg ? reel.segMs : P.ms, r = sp || reel ? 1 : rate;
       if (go !== pipGo || statusBet !== betId) { if (sp && SP.seq === sp.seq) spStop(); return; }
       clearTimeout(hideT);
       $("#jbLbl").textContent = sp && dj ? sp.name : gLbl(P.label);
@@ -6703,7 +6706,7 @@ body.tv .rb-pcol.pr .rb-hs-side.r .rb-st { justify-self: start; }
       } else jt.hidden = true;
       // picking up mid-clip: the video joins the sound where it is
       const off = pre ? Math.max(0, Math.min(P.ms - 800, performance.now() - pre.at)) : 0;
-      const vt = sp ? 0 : dj ? djPos(P, off / 1000 + 0.08) : off / 1000;
+      const vt = sp || reel ? 0 : dj ? djPos(P, off / 1000 + 0.08) : off / 1000;
       for (const x of [v, bg]) { try { x.playbackRate = r; x.currentTime = vt; x.play().catch(() => {}); } catch (e) {} }
       const bar = $("#jbProg"); bar.style.transition = "none"; bar.style.width = (100 * off) / ms + "%"; void bar.offsetWidth; bar.style.transition = `width ${ms - off}ms linear`; bar.style.width = "100%";
       if (P.ext) { if (c) { v.muted = false; v.volume = 1; } statusSrc = { stop: () => { try { v.muted = true; } catch (e) {} } }; }
@@ -6711,9 +6714,10 @@ body.tv .rb-pcol.pr .rb-hs-side.r .rb-st { justify-self: start; }
       else if (buf) statusSrc = playBuf(c, buf, 0.95);
       // keep Goldie on the beat: the song clock is the audio context; nudge the loop back if it drifts (a Spotify song has no tempo to go by)
       clearInterval(djT);
-      if (dj && c && !sp) { const t0 = c.currentTime - off / 1000; djT = setInterval(() => { if (go !== pipGo) { clearInterval(djT); return; } if (c.state !== "running") return; const want = djPos(P, c.currentTime - t0), d = Math.abs(want - v.currentTime); if (Math.min(d, DJ_LOOP - d) > 0.12) { try { v.currentTime = want; bg.currentTime = want; } catch (e) {} } }, 1500); }
+      if (dj && c && !sp && !reel) { const t0 = c.currentTime - off / 1000; djT = setInterval(() => { if (go !== pipGo) { clearInterval(djT); return; } if (c.state !== "running") return; const want = djPos(P, c.currentTime - t0), d = Math.abs(want - v.currentTime); if (Math.min(d, DJ_LOOP - d) > 0.12) { try { v.currentTime = want; bg.currentTime = want; } catch (e) {} } }, 1500); }
       jumboBets(); clearInterval(jbTick); jbTick = setInterval(() => { jumboBets(); jbBug(b); }, 5000);
       pipT = setTimeout(() => { if (statusBet === betId) stopStatus(); }, ms - off);
+      if (reel) runReel(reel, go, v, bg, c, seg);
     });
   }
   // ---------- Spotify: DJ breaks off your own playlist ----------
@@ -8009,7 +8013,6 @@ body.tv .rb-pcol.pr .rb-hs-side.r .rb-st { justify-self: start; }
     react(q.b, "good", vibePick(), q.why);
   }
   setInterval(vibeTick, 2000);
-  const HOUSE_DJ = "sounds/house/dj";
   const houseEdits = () => CLIPS.filter((c) => c.house && !c.dj);
   let vibeAt = 0;
   function vibePick() {
@@ -8018,14 +8021,49 @@ body.tv .rb-pcol.pr .rb-hs-side.r .rb-st { justify-self: start; }
     if (P === VIBE) vibeAt = Date.now();
     return P;
   }
-  // a DJ break goes house: a built-in house track, or (Spotify) every other break and every one while the room's up
+  // a DJ break goes house every other time, and every time while somebody in the room is up. It's a mix of Pat's house
+  // edits: back to back with their own songs (a minute or more), or, with a house playlist on Spotify, a house song with the
+  // edits cycling under it till the song's done
   let hzTurn = 0;
   const roomUp = () => [...lastRes.values()].includes("W");
-  function houseDj(P) {
-    if (P.house) return true;
-    if (!spUsable() || !SP.hlist.length) return false;
-    if (!SP.list.length) return true;
-    return roomUp() || hzTurn++ % 2 === 1;
+  function houseTurn(P) {
+    if (!P || !P.dj || !P.bpm) return P;
+    const sph = spUsable() && SP.hlist.length > 0;
+    if (!(P.house || (sph && !SP.list.length) || roomUp() || hzTurn++ % 2 === 1)) return P;
+    if (!P.house && !sph) P = pickClip(CLIPS.filter((x) => x.dj && x.house)) || P;
+    return Object.assign({}, P, { house: 1, lux: 1 });
+  }
+  // the mix: the edit whose song this is first (a built-in house track), then the rest, least recently seen first
+  function houseReel(P) {
+    const all = houseEdits(); if (!all.length) return null;
+    const first = all.find((e) => e.base === P.base);
+    const rest = all.filter((e) => e !== first).map((e) => [e, Math.random()]).sort((x, y) => lastPlayed(x[0]) - lastPlayed(y[0]) || x[1] - y[1]).map((x) => x[0]);
+    const reel = first ? [first, ...rest] : rest;
+    let n = 0, t = 0; while (n < reel.length && t < 60e3) { t += reel[n].ms; n++; }
+    reel.segs = n; reel.segMs = t;
+    return reel;
+  }
+  // when one edit ends the next comes in (a quick dip); seg: each brings its own song, else they play muted under the song that's on
+  function runReel(reel, go, v, bg, c, seg) {
+    let i = 0;
+    const seen = (e) => { played.set(clipKey(e), Date.now()); if (songKey(e)) played.set(songKey(e), Date.now()); };
+    const warm = (e) => { if (seg) clipBuf(e.base); const pv = document.createElement("video"); pv.muted = true; pv.preload = "auto"; pv.src = vidSrc(e.base); };
+    seen(reel[0]); if (reel.length > 1) warm(reel[1]);
+    v.onended = () => {
+      if (go !== pipGo) return;
+      i++;
+      if (seg && i >= reel.segs) return;   // the mix is done: the clip's timer closes it
+      const e = reel[i % reel.length], src = vidSrc(e.base), nb = seg ? clipBuf(e.base) : Promise.resolve(null);
+      v.style.opacity = "0";
+      v.dataset.base = e.base; v.dataset.src = src; v.src = src; v.load(); bg.src = src; bg.load();
+      Promise.all([vidReady(v), nb]).then(([, buf]) => {
+        if (go !== pipGo) return;
+        for (const x of [v, bg]) { try { x.currentTime = 0; x.play().catch(() => {}); } catch (err) {} }
+        v.style.opacity = "";
+        if (buf && c) { try { if (statusSrc) statusSrc.stop(); } catch (err) {} statusSrc = playBuf(c, buf, 0.95); }
+        seen(e); warm(reel[(i + 1) % reel.length]);
+      });
+    };
   }
   function teamHype(b, g, e, why) {
     if (!clipsOn() || !g || !e.side) return;
