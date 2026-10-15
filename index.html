@@ -2297,8 +2297,10 @@ body.tv.baseball .rb-g, body.tv.baseball .rb-sec, body.tv.baseball .rb-card { ba
 .room-link > div { display: grid; gap: 8px; min-width: 0; }
 .room-link code { font-size: 12px; word-break: break-all; opacity: .8; }
 .roomtv { display: none; }
-body.tv .roomtv:not([hidden]) { display: grid; justify-items: center; gap: 4px; position: fixed; right: 18px; bottom: 64px; z-index: 40; padding: 10px 10px 8px; border-radius: 14px; background: rgba(8,12,18,.9); box-shadow: 0 10px 30px rgba(0,0,0,.45), inset 0 0 0 1px rgba(255,255,255,.1); }
-.roomtv canvas { width: 116px; height: 116px; border-radius: 6px; }
+/* kept inside the TV's safe area: the overscan inset, plus a margin TVs don't crop, above the ticker */
+body.tv .roomtv:not([hidden]) { display: grid; justify-items: center; gap: 4px; position: fixed; right: calc(var(--sx, 0px) + max(2.6vw, 30px)); bottom: calc(var(--sy, 0px) + max(3vh, 22px)); z-index: 40; padding: 10px 10px 8px; border-radius: 14px; background: rgba(8,12,18,.9); box-shadow: 0 10px 30px rgba(0,0,0,.45), inset 0 0 0 1px rgba(255,255,255,.1); }
+body.tv.has-ticker .roomtv:not([hidden]) { bottom: calc(var(--sy, 0px) + clamp(40px, 4.6vh, 58px) + max(2.4vh, 18px)); }
+.roomtv canvas { width: clamp(96px, 10.5vh, 124px); height: clamp(96px, 10.5vh, 124px); border-radius: 6px; }
 .roomtv b { font: 900 14px/1 var(--f-display); text-transform: uppercase; letter-spacing: .06em; color: #fff; }
 .roomtv span { font: 700 10px/1 var(--f-num); letter-spacing: .14em; text-transform: uppercase; color: rgba(255,255,255,.6); }
 /* home run banner and fireworks */
@@ -4855,7 +4857,7 @@ body.tv .rb-pcol.pr .rb-hs-side.r .rb-st { justify-self: start; }
   // ---------- sheets ----------
   function openSheet(id) { $(id).hidden = false; }
   // keep every open screen current: when a new version is up, reload it (never mid-form or mid-animation)
-  const BUILD = "20261015160944";
+  const BUILD = "20261015162002";
   function checkBuild() {
     if (BUILD === "dev") return;
     fetch("version.json?t=" + Date.now(), { cache: "no-store" }).then((r) => (r.ok ? r.json() : null)).then((j) => {
