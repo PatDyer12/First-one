@@ -4857,7 +4857,7 @@ body.tv .rb-pcol.pr .rb-hs-side.r .rb-st { justify-self: start; }
   // ---------- sheets ----------
   function openSheet(id) { $(id).hidden = false; }
   // keep every open screen current: when a new version is up, reload it (never mid-form or mid-animation)
-  const BUILD = "20261015162002";
+  const BUILD = "20261015180132";
   function checkBuild() {
     if (BUILD === "dev") return;
     fetch("version.json?t=" + Date.now(), { cache: "no-store" }).then((r) => (r.ok ? r.json() : null)).then((j) => {
@@ -6583,7 +6583,7 @@ body.tv .rb-pcol.pr .rb-hs-side.r .rb-st { justify-self: start; }
     for (const x of [v, bg]) { x.loop = dj; x.defaultPlaybackRate = rate; x.playbackRate = rate; }
     // a DJ break plays off your Spotify playlist when this screen's connected to it (the built-in song when Spotify can't);
     // so does one of Meegy's scenes, and without Spotify a scene whose song was just on borrows a fresher built-in one
-    const scene = !dj && !pre && !P.ext && /^sounds\/aura\//.test(P.base || "");
+    const scene = !dj && !pre && !P.ext && !P.own && /^sounds\/aura\//.test(P.base || "");
     const swap = scene && !spUsable() ? sceneSong(P) : null;
     const mine = () => (P.lib ? clipBuf(P.base) : loadBuf(P.base));
     const own = () => (pre || !c || P.ext ? null : swap ? clipBuf(swap.base).then((x) => x || mine()) : mine());
@@ -6954,6 +6954,7 @@ body.tv .rb-pcol.pr .rb-hs-side.r .rb-st { justify-self: start; }
   function reactPre(b, kind, P, why, pre) { glow(b.id, kind); render(); statusBet = b.id; showPip(b, P, moodOf(kind, P), why, pre); }
   function react(b, kind, P, why) {
     if (PHONE()) { render(); return; }
+    { const v = vibeTake(b, kind, P); if (v) { b = v.b; P = v.P; why = v.why; } }
     { const spx = (gameFor(b) || {}).sport || sportOf(b); if (spx && !sset(spx, "clips")) { render(); return; } }
     glow(b.id, kind);
     render();
@@ -7806,6 +7807,76 @@ body.tv .rb-pcol.pr .rb-hs-side.r .rb-st { justify-self: start; }
     if (!playHL(S.games.get(j.g.id) || j.g, j.v, "Highlight")) HL2Q.unshift(j);
   }
   setInterval(hlPoll, 5000);
+  const VIBE = clip("aura/vibe", "Goldie: good vibes", "up win", 16.7, { songId: "sz-rooftop", own: true, song: "Rooftop Hours", artist: "Sweat Zone house" });
+  const VB = new Map(), VB_LEAD = { NBA: 4, CBB: 4 }, VB_RUN = { NBA: 10, CBB: 10, NFL: 14, CFB: 14, MLB: 3, NHL: 2 };
+  let VQ = null, vbLast = 0;
+  const vbDone = () => { try { const o = JSON.parse(localStorage.getItem("sb-vibed") || "{}"), now = Date.now(); for (const k in o) if (now - o[k] > 20 * 3600e3) delete o[k]; return o; } catch (e) { return {}; } };
+  const vbMark = (gid) => { try { const o = vbDone(); o[gid] = Date.now(); localStorage.setItem("sb-vibed", JSON.stringify(o)); } catch (e) {} };
+  function vbEarly(g) {
+    const pd = g.pd || 0, clk = g.clk ?? 0;
+    if (g.sport === "MLB") return pd >= 1 && pd <= 4;
+    if (g.sport === "NHL") return pd === 1 || (pd === 2 && clk > 600);
+    if (g.sport === "CBB") return pd === 1;
+    return pd >= 1 && pd <= 2;   // NFL, CFB, NBA: the first half
+  }
+  function vibeScan(now) {
+    if (PHONE()) return;
+    const done = vbDone();
+    for (const b of S.bets.values()) {
+      if (b.status !== "open") continue;
+      const legs = b.kind === "parlay" ? legsOf(b) : null;
+      if (legs && legs.some((l) => l.st === "miss")) continue;
+      for (const sl of selsOf(b)) {
+        if (!(sl.m === "ml" || sl.m === "sp") || !(sl.s === "a" || sl.s === "h")) continue;
+        if (legs && legs.find((l) => l.sel === sl && l.st)) continue;
+        const g = gameOf(sl); if (!g || g.a.sc == null || g.h.sc == null) continue;
+        const a = Number(g.a.sc), h = Number(g.h.sc);
+        let st = VB.get(g.id);
+        if (!st) { VB.set(g.id, { a, h, run: null, down: { a: a - h <= 0, h: h - a <= 0 } }); continue; }   // first look: what already happened is history
+        if (st.a !== a || st.h !== h) {
+          const da = a - st.a, dh = h - st.h;
+          if (da > 0 && dh > 0) st.run = null;
+          else for (const [x, d] of [["a", da], ["h", dh]]) if (d > 0) st.run = st.run && st.run.x === x ? { x, pts: st.run.pts + d } : { x, pts: d };
+          if (da < 0 || dh < 0) st.run = null;   // a correction: start over
+          st.a = a; st.h = h;
+        }
+        for (const x of ["a", "h"]) if ((x === "a" ? a - h : h - a) <= 0) st.down[x] = true;
+        if (g.st !== "in" || done[g.id] || (VQ && VQ.g.id === g.id) || !vbEarly(g)) continue;
+        const x = sl.s, o = x === "a" ? "h" : "a", lead = g[x].sc - g[o].sc;
+        const took = st.down[x] && lead >= (VB_LEAD[g.sport] || 1);
+        const run = st.run && st.run.x === x && st.run.pts >= (VB_RUN[g.sport] || 99) && lead >= 0;
+        if (!took && !run) continue;
+        st.down[x] = false;
+        const ab = g[x].ab;
+        const why = took && !(run && st.run.pts > lead) ? `${ab} takes the lead` : `${ab} · ${st.run.pts} unanswered`;
+        // one at a time; a lead in a game you're on beats one in a parlay leg
+        if (!VQ || (b.kind !== "parlay" && VQ.b.kind === "parlay")) VQ = { b, g, why, at: now };
+      }
+    }
+  }
+  // the scoring play's own clip for a bet in that game becomes the scene
+  function vibeTake(b, kind, P) {
+    if (!VQ || kind !== "good" || P === VIBE || P === "lockin") return null;
+    if (Date.now() - vbLast < (slateMode() === "busy" ? 10 : 5) * 60e3) return null;   // one just played: this play keeps its own clip
+    const q = VQ;
+    if (!selsOf(b).some((x) => { const g = gameOf(x); return g && g.id === q.g.id; })) return null;
+    VQ = null; vbMark(q.g.id); vbLast = Date.now();
+    return { b: q.b, P: VIBE, why: q.why };
+  }
+  function vibeTick() {
+    if (!VQ) return;
+    const now = Date.now(), g = S.games.get(VQ.g.id) || VQ.g, x = VQ.b.sel && VQ.b.kind !== "parlay" ? VQ.b.sel.s : null;
+    // stale, the lead's gone, or the bet's settled: let it go (it can still come back while the game's early)
+    if (now - VQ.at > 4 * 60e3 || VQ.b.status !== "open" || g.st !== "in" || (x && g[x].sc - g[x === "a" ? "h" : "a"].sc < 0)) { VQ = null; return; }
+    if (!clipsOn() || PHONE() || trial || now - VQ.at < 6e3) return;   // give the play card a moment to claim it
+    if (cardBusy || fxBusy) return;
+    if (statusSrc || !$("#jumbo").hidden) { if (lastKind !== "pop") return; stopStatus(); }
+    if (now - vbLast < (slateMode() === "busy" ? 10 : 5) * 60e3) { VQ = null; return; }
+    const q = VQ; VQ = null; vbMark(q.g.id); vbLast = now;
+    lastAny = now; lastKind = "play";
+    react(q.b, "good", VIBE, q.why);
+  }
+  setInterval(vibeTick, 2000);
   function teamHype(b, g, e, why) {
     if (!clipsOn() || !g || !e.side) return;
     const t = g[e.side], own = CLIPS.filter((c) => c.fan === t.ab && (!c.sport || c.sport === g.sport) && c.pl !== "simpson");
@@ -7838,6 +7909,7 @@ body.tv .rb-pcol.pr .rb-hs-side.r .rb-st { justify-self: start; }
   }
   function autoReact() {
     if (!S.ready) return;
+    try { vibeScan(Date.now()); } catch (e) {}
     const now = Date.now(), swings = [], seenG = new Set(), mode = slateMode(), busy = mode === "busy";
     showMode();
     if (playWatch()) { render(); return; }
