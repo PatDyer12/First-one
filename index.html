@@ -2286,6 +2286,21 @@ body.tv.baseball #bfield { display: block; position: fixed; inset: 0; z-index: 0
 body.tv.baseball #bfield svg { display: block; width: 100%; height: 100%; }
 body.tv.baseball #bfield::after { content: ""; position: absolute; inset: 0; background: radial-gradient(1200px 700px at 50% 45%, rgba(4,8,12,.15), rgba(4,8,12,.55) 100%); }
 body.tv.baseball .rb-g, body.tv.baseball .rb-sec, body.tv.baseball .rb-card { background: linear-gradient(180deg, rgba(10,20,26,.84), rgba(6,12,16,.9)) !important; }
+/* the guest page: just their own bets */
+.guestmode #tvBtn, .guestmode #phUnit, .guestmode #whoRadios, .guestmode .who-hint, .guestmode [data-pa="won"], .guestmode [data-pa="lost"], .guestmode [data-pa="push"], .guestmode [data-pa="cash"], .guestmode [data-pa="reopen"], .guestmode #setSheet, .guestmode .ph-who, .guestmode .ph-chips { display: none !important; }
+.guestmode .field:has(> #whoRadios) { display: none !important; }
+#gate-guest .field { display: grid; gap: 6px; margin: 10px 0; text-align: left; }
+#gate-guest input { font-size: 18px; padding: 12px 14px; border-radius: 10px; border: 1px solid var(--line, rgba(255,255,255,.18)); background: rgba(255,255,255,.06); color: inherit; }
+#gate-guest .btn { width: 100%; margin-top: 8px; }
+.room-link { display: flex; gap: 14px; align-items: center; margin: 10px 0; }
+.room-link canvas { border-radius: 8px; flex: none; }
+.room-link > div { display: grid; gap: 8px; min-width: 0; }
+.room-link code { font-size: 12px; word-break: break-all; opacity: .8; }
+.roomtv { display: none; }
+body.tv .roomtv:not([hidden]) { display: grid; justify-items: center; gap: 4px; position: fixed; right: 18px; bottom: 64px; z-index: 40; padding: 10px 10px 8px; border-radius: 14px; background: rgba(8,12,18,.9); box-shadow: 0 10px 30px rgba(0,0,0,.45), inset 0 0 0 1px rgba(255,255,255,.1); }
+.roomtv canvas { width: 116px; height: 116px; border-radius: 6px; }
+.roomtv b { font: 900 14px/1 var(--f-display); text-transform: uppercase; letter-spacing: .06em; color: #fff; }
+.roomtv span { font: 700 10px/1 var(--f-num); letter-spacing: .14em; text-transform: uppercase; color: rgba(255,255,255,.6); }
 /* home run banner and fireworks */
 .hrban { position: fixed; left: 50%; top: 86px; z-index: 130; transform: translate(-50%, -140%); pointer-events: none; }
 .hrban.hb-on { animation: hbIn .55s cubic-bezier(.2,1.2,.3,1) forwards; }
@@ -2346,7 +2361,7 @@ body.tv .rb-pcol.pr .rb-hs-side.r .rb-st { justify-self: start; }
 <g stroke="#f4f1ea" stroke-width="5" stroke-linecap="round"><line x1="800" y1="880" x2="-140" y2="262"/><line x1="800" y1="880" x2="1740" y2="262"/></g>
 <rect x="1137" y="642.85" width="26" height="14.3" fill="#f4f1ea"/><rect x="787" y="507.85" width="26" height="14.3" fill="#f4f1ea"/><rect x="437" y="642.85" width="26" height="14.3" fill="#f4f1ea"/>
 <rect width="1600" height="900" fill="url(#bfL1)"/><rect width="1600" height="900" fill="url(#bfL2)"/>
-</svg></div><div class="hrban" id="hrBan" hidden><div class="hb-in"><div class="hb-word">Home run</div><img class="hb-lg" alt="" referrerpolicy="no-referrer"><div class="hb-who"><b></b><span></span></div><div class="hb-sc"></div></div></div><div class="hrfx" id="hrFx" aria-hidden="true"></div><div class="rinkice" id="ice" aria-hidden="true"><i class="ice-ln c"></i><i class="ice-ln b1"></i><i class="ice-ln b2"></i><i class="ice-ci"></i></div>
+</svg></div><div class="roomtv" id="roomTvQr" hidden><canvas id="roomTvCv" width="150" height="150" aria-hidden="true"></canvas><b>Add your bets</b><span>Scan with your phone</span></div><div class="hrban" id="hrBan" hidden><div class="hb-in"><div class="hb-word">Home run</div><img class="hb-lg" alt="" referrerpolicy="no-referrer"><div class="hb-who"><b></b><span></span></div><div class="hb-sc"></div></div></div><div class="hrfx" id="hrFx" aria-hidden="true"></div><div class="rinkice" id="ice" aria-hidden="true"><i class="ice-ln c"></i><i class="ice-ln b1"></i><i class="ice-ln b2"></i><i class="ice-ci"></i></div>
 <div class="zam" id="zam" hidden aria-hidden="true"><div class="zam-car"><div class="zam-trail"></div><svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" viewBox="0 0 360 180" width="360" height="180" fill="none" stroke-linejoin="round" stroke-linecap="round"> <defs> <linearGradient id="zgB" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#fff"/><stop offset=".55" stop-color="#e3eef9"/><stop offset="1" stop-color="#b3cae3"/></linearGradient> <linearGradient id="zgT" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#fbfdff"/><stop offset=".6" stop-color="#dae8f6"/><stop offset="1" stop-color="#abc4df"/></linearGradient> <linearGradient id="zgN" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#26487f"/><stop offset="1" stop-color="#0d1f42"/></linearGradient> <linearGradient id="zgM" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#9fb1c6"/><stop offset="1" stop-color="#4d5e75"/></linearGradient> <linearGradient id="zgJ" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#3d6fbd"/><stop offset="1" stop-color="#22457f"/></linearGradient> <linearGradient id="zgA" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#8adcff"/><stop offset="1" stop-color="#1f74c9"/></linearGradient> <linearGradient id="zgS" x1="0" y1="0" x2="1" y2="0"><stop offset="0" stop-color="#bfe9ff" stop-opacity="0"/><stop offset=".65" stop-color="#dff4ff" stop-opacity=".55"/><stop offset="1" stop-color="#fff" stop-opacity=".95"/></linearGradient> <radialGradient id="zgW"><stop offset=".55" stop-color="#2e3540"/><stop offset=".9" stop-color="#181c23"/><stop offset="1" stop-color="#0c0f14"/></radialGradient> <radialGradient id="zgH" cx=".4" cy=".35" r=".7"><stop offset="0" stop-color="#fff"/><stop offset=".6" stop-color="#c6d2df"/><stop offset="1" stop-color="#7c8ca1"/></radialGradient> <radialGradient id="zgL" cx=".45" cy=".35" r=".75"><stop offset="0" stop-color="#fff6d0"/><stop offset=".45" stop-color="#ffb52e"/><stop offset="1" stop-color="#d96a00"/></radialGradient> <radialGradient id="zgG"><stop offset="0" stop-color="#ffc24a" stop-opacity=".75"/><stop offset="1" stop-color="#ffb020" stop-opacity="0"/></radialGradient> <path id="zpB" d="M56 90H274L282 80Q284 78 288 78H304C318 78 330 92 336 108L340 126Q342 136 333 137H299A25 25 0 0 0 249 137H137A25 25 0 0 0 87 137H62Q56 137 56 131Z"/> <path id="zpT" d="M62 90L58 42Q58 36 64 36H198Q204 36 206.5 41.5L229 90Z"/> <clipPath id="zcB"><use xlink:href="#zpB"/></clipPath> <clipPath id="zcT"><use xlink:href="#zpT"/></clipPath> <g id="zwh"> <circle r="21" fill="url(#zgW)" stroke="#05080c" stroke-width="1.5"/> <circle r="18.6" stroke="#47505e" stroke-width="2.4" stroke-dasharray="3.2 3.29"/> <circle r="11" fill="url(#zgH)" stroke="#0a1626" stroke-width="1.2"/> <circle r="7.2" stroke="#8a99ab" stroke-width=".8"/> <g fill="#4a5a70"><circle cy="-5" r="1.3"/><circle cx="4.76" cy="-1.55" r="1.3"/><circle cx="2.94" cy="4.05" r="1.3"/><circle cx="-2.94" cy="4.05" r="1.3"/><circle cx="-4.76" cy="-1.55" r="1.3"/></g> <circle r="2.4" fill="#1d2d46"/> </g> </defs>  <ellipse cx="186" cy="162.5" rx="156" ry="3.6" fill="#000" opacity=".45"/> <rect class="zsheen" x="0" y="158.4" width="14" height="4" rx="2" fill="url(#zgS)"/>  <g id="zbody" stroke="#0a1626" stroke-width="1.5"> <!-- conditioner linkage --> <path d="M80 102L40 130M76 120L54 133" stroke-width="5"/> <path d="M80 102L40 130M76 120L54 133" stroke="#8fa3ba" stroke-width="2.6"/> <path d="M78 112L56 128" stroke-width="3.6"/><path d="M78 112L56 128" stroke="#e6eef6" stroke-width="1.4"/> <rect x="82" y="108" width="222" height="29" fill="#0f1726" stroke="none"/>  <!-- snow tank --> <use xlink:href="#zpT" fill="url(#zgT)"/> <g clip-path="url(#zcT)" stroke="none"> <path d="M50 90V80L232 50V66L50 92z" fill="url(#zgN)"/> <path d="M50 94L232 69.5V72L50 96.5z" fill="#d62839"/> <path d="M84 36h12l-14 54H70z" fill="#fff" opacity=".35"/> <path d="M60 40.5H204" stroke="#fff" stroke-width="1.4"/> </g> <rect x="55" y="31" width="153" height="7" rx="3" fill="url(#zgB)"/> <path d="M58 33H205" stroke="#fff" stroke-width="1.2"/>  <!-- seat + driver --> <path d="M232 90V64Q232 58 238 58H242Q246 58 246 64V84H264Q268 84 268 88V90Z" fill="#3a4a66"/> <path d="M235 62V86" stroke="#6f84a6" stroke-width="1.2"/> <path d="M252 85L279 82" stroke="#1a2a45" stroke-width="8"/> <path d="M246 87C244 74 248 64 258 62C266 61 270 68 270 76L268 87Z" fill="url(#zgJ)"/> <path d="M256 63.5L254 86" stroke="#d62839" stroke-width="1.4"/> <circle cx="259" cy="52" r="7.5" fill="#efc7a0"/> <path d="M251.4 51.5A7.6 7.6 0 0 1 266.6 51.5Z" fill="url(#zgN)"/> <circle cx="259" cy="43" r="2.2" fill="#d62839" stroke-width="1"/>  <!-- main body --> <use xlink:href="#zpB" fill="url(#zgB)"/> <g clip-path="url(#zcB)" stroke="none"> <path d="M40 97H340V108H40z" fill="url(#zgN)"/> <path d="M40 111H340V113.2H40z" fill="#d62839"/> <path d="M60 92.6H272M290 80.6H304" stroke="#fff" stroke-width="1.4"/> </g> <!-- water tank sight glass --> <rect x="148" y="118" width="92" height="12" rx="6" fill="#0c1a2e"/> <rect x="150.5" y="122.5" width="87" height="5.5" rx="2.75" fill="url(#zgA)" stroke="none"/> <path d="M155 121.2H233" stroke="#bfeaff" stroke-width=".9" stroke-dasharray="1 7" opacity=".9"/> <rect x="57.5" y="115.5" width="4" height="8" rx="1.5" fill="#e0283a" stroke-width="1"/> <!-- headlight + bumper --> <circle cx="335" cy="114" r="9" fill="url(#zgG)" stroke="none"/> <ellipse cx="335.2" cy="114" rx="2.6" ry="4.4" fill="#fffbe3" stroke-width="1.1"/> <rect x="303" y="129" width="40" height="9" rx="3.5" fill="#1b2433"/>  <!-- steering + arm --> <path d="M297 80L286 69" stroke-width="4"/><path d="M297 80L286 69" stroke="#9fb1c6" stroke-width="1.8"/> <ellipse cx="284" cy="68" rx="2.6" ry="8.5" transform="rotate(-25 284 68)" stroke-width="4"/><ellipse cx="284" cy="68" rx="2.6" ry="8.5" transform="rotate(-25 284 68)" stroke="#7d8fa8" stroke-width="1.6"/> <path d="M262 66Q265 77 272 77L284 71" stroke="#0a1626" stroke-width="7.5"/> <path d="M262 66Q265 77 272 77L284 71" stroke="#3563ad" stroke-width="5"/> <circle cx="285.5" cy="70.5" r="2.6" fill="#efc7a0" stroke-width="1"/>  <!-- mirror --> <path d="M309 79Q318 68 321 52" stroke-width="3.6"/><path d="M309 79Q318 68 321 52" stroke="#a9bacd" stroke-width="1.6"/> <rect x="317" y="40" width="9" height="13" rx="3" fill="#1b2a44"/> <path d="M320 43.5V49.5" stroke="#9fd3ff" stroke-width="1.6"/>  <!-- beacon --> <rect x="186" y="27" width="12" height="4.5" rx="1" fill="#1b2433"/> <g class="zb"> <circle cx="192" cy="21" r="12" fill="url(#zgG)" stroke="none"/> <path d="M187 27.5V22A5 5 0 0 1 197 22V27.5Z" fill="url(#zgL)" stroke="#5a2c00" stroke-width="1"/> <path d="M189.2 25V22.4A2.6 2.6 0 0 1 191 19.6" stroke="#fff" stroke-width="1.1" opacity=".9"/> </g>  <!-- conditioner --> <path d="M16 152V134Q16 130 20 130H62Q66 130 66 134V152Z" fill="url(#zgM)"/> <path d="M26 134V149M36 134V149M46 134V149M56 134V149" stroke="#3b4a5f" stroke-width="1"/> <rect x="15" y="126" width="52" height="6" rx="2" fill="url(#zgN)"/> <path d="M18 132.2H64" stroke="#d62839" stroke-width="1.2"/> <rect x="14" y="152" width="54" height="5" rx="1.5" fill="#1a2230"/> <path d="M14 157H64L62 161.6H7Q9 158.6 14 157Z" fill="#eaf6ff" stroke-width="1"/>  <!-- wheels --> <g class="zw"><use xlink:href="#zwh" x="112" y="141"/></g> <g class="zw"><use xlink:href="#zwh" x="274" y="141"/></g> </g> </svg> </div></div>
 <div class="app">
   <section class="ph" id="ph" aria-label="Sweat Board">
@@ -2657,6 +2672,12 @@ body.tv .rb-pcol.pr .rb-hs-side.r .rb-st { justify-self: start; }
       <div class="linein"><label for="f-char">Name</label><input type="text" id="f-char" maxlength="16" autocomplete="off" placeholder="Goldie"><button type="button" class="btn sm" id="charSave">Save</button></div>
       <span class="hint">What the gold guy goes by on screen: the DJ breaks, his scenes and the intros list. Saved to your account, so every screen gets it.</span>
     </div>
+    <div class="field" id="roomField">
+      <span class="lbl">Guests add their own bets</span>
+      <div class="linein"><label for="f-room">Room code</label><input type="text" id="f-room" maxlength="24" autocomplete="off" spellcheck="false" placeholder="Any word, like sweat24"><button type="button" class="btn sm" id="roomSave">Save</button></div>
+      <div class="room-link" id="roomLink" hidden><canvas id="roomQr" width="132" height="132" aria-label="QR code for the guest link"></canvas><div><code id="roomUrl"></code><button type="button" class="btn sm" id="roomCopy">Copy link</button><label class="togrow"><input type="checkbox" id="roomTv"> Show the QR on the TV</label></div></div>
+      <span class="hint">Guests open the link (or scan the QR on the TV), put their name in and add bets from their own phones. They only see and change their own bets; the board settles them. Turn on Anonymous sign-in in Firebase (Authentication → Sign-in method) and paste the guest rules into Firestore.</span>
+    </div>
     <div class="field" id="spField">
       <span class="lbl">Spotify for the DJ breaks</span>
       <div class="linein"><label for="f-spclient">Client ID</label><input type="text" class="wide" id="f-spclient" autocomplete="off" spellcheck="false" placeholder="From your Spotify app's settings"><button type="button" class="btn sm" id="spClientSave">Save</button></div>
@@ -2714,6 +2735,13 @@ body.tv .rb-pcol.pr .rb-hs-side.r .rb-st { justify-self: start; }
       <p>Connect your Firebase project. In Firebase, open Project settings → Your apps, copy the <code>firebaseConfig</code> block and paste it here.</p>
       <textarea id="cfgIn" rows="7" placeholder="const firebaseConfig = { apiKey: &quot;…&quot;, … };" aria-label="Firebase config"></textarea>
       <button type="button" class="btn primary" id="cfgSave">Save and connect</button>
+    </div>
+    <div id="gate-guest" hidden>
+      <p>Join the room to add your bets. They show up on the big screen with everyone else's, and settle themselves.</p>
+      <div class="field"><label class="lbl" for="gu-name">Your name</label><input type="text" id="gu-name" maxlength="20" autocomplete="nickname" placeholder="Name on the board"></div>
+      <div class="field" id="gu-codeF"><label class="lbl" for="gu-code">Room code</label><input type="text" id="gu-code" maxlength="24" autocomplete="off" spellcheck="false" placeholder="From the host"></div>
+      <button type="button" class="btn primary" id="guJoin">Join</button>
+      <button type="button" class="btn ghost" id="guGoogle">Join with Google instead</button>
     </div>
     <div id="gate-denied" hidden>
       <p>This Google account doesn't have access to the bets. Sign in with the account named in your Firestore rules.</p>
@@ -2897,7 +2925,11 @@ body.tv .rb-pcol.pr .rb-hs-side.r .rb-st { justify-self: start; }
   function showGName() { document.querySelectorAll(".gnm").forEach((el) => (el.textContent = gName())); renderLib(); }
   // ---------- render ----------
   // bets you log for other people (Julian, a guest) live in their own section and never count toward yours
-  const isMe = (b) => !b || !b.who || b.who === "me";
+  const GUEST = (() => { try { const q = new URLSearchParams(location.search); if (!q.has("guest")) return null;
+    const c = q.get("guest") || localStorage.getItem("sb-guest-code") || ""; if (c) localStorage.setItem("sb-guest-code", c);
+    return { code: c, name: localStorage.getItem("sb-guest-name") || "", uid: null }; } catch (e) { return null; } })();
+  if (GUEST) document.documentElement.classList.add("guestmode");
+  const isMe = (b) => (GUEST ? !!b && !!GUEST.uid && b.uid === GUEST.uid : !b || !b.who || b.who === "me");
   const whoName = (b) => (b.whoName || (b.who === "julian" ? "Julian" : S.guestName || "Guest"));
   const WHO_COL = { julian: "#36d6ff", guest: "#ff9f43" };
   // guest profiles: the saved list (Settings), or until one's saved, everybody who's had a guest bet. Each gets a color
@@ -4516,15 +4548,17 @@ body.tv .rb-pcol.pr .rb-hs-side.r .rb-st { justify-self: start; }
       return false;
     }
   }
-  const putBet = (id, data) => write((db) => db.collection("bets").doc(id).set(data), () => S.bets.set(id, { id, ...data }));
-  const patchBet = (id, patch) => write((db) => db.doc("bets/" + id).update(patch), () => {
+  const colOf = (id) => (GUEST || (S.bets.get(id) || {})._col === "guestBets" ? "guestBets" : "bets");
+  const guestStamp = (data) => (GUEST ? { ...data, who: "guest", whoName: GUEST.name || "Guest", uid: GUEST.uid, code: GUEST.code, status: data.status || "open" } : data);
+  const putBet = (id, data0) => { const data = guestStamp(data0); return write((db) => db.collection(GUEST ? "guestBets" : "bets").doc(id).set(data), () => S.bets.set(id, { id, ...data })); };
+  const patchBet = (id, patch) => write((db) => db.doc(colOf(id) + "/" + id).update(patch), () => {
     const b = S.bets.get(id), prev = b && b.status;
     if (b) {
       S.bets.set(id, { ...b, ...patch });
       if (prev === "open" && patch.status && patch.status !== "open") celebrate(S.bets.get(id));
     }
   });
-  const delBet = (id) => write((db) => db.doc("bets/" + id).delete(), () => S.bets.delete(id));
+  const delBet = (id) => write((db) => db.doc(colOf(id) + "/" + id).delete(), () => S.bets.delete(id));
 
   function settle(id, status, net) {
     const b = S.bets.get(id); if (!b) return;
@@ -4823,7 +4857,7 @@ body.tv .rb-pcol.pr .rb-hs-side.r .rb-st { justify-self: start; }
   // ---------- sheets ----------
   function openSheet(id) { $(id).hidden = false; }
   // keep every open screen current: when a new version is up, reload it (never mid-form or mid-animation)
-  const BUILD = "20261015153824";
+  const BUILD = "20261015154641";
   function checkBuild() {
     if (BUILD === "dev") return;
     fetch("version.json?t=" + Date.now(), { cache: "no-store" }).then((r) => (r.ok ? r.json() : null)).then((j) => {
@@ -8146,6 +8180,31 @@ body.tv .rb-pcol.pr .rb-hs-side.r .rb-st { justify-self: start; }
   showSlate();
   $("#slateRadios").addEventListener("change", (e) => { try { localStorage.setItem("sb-slate", e.target.value); } catch (err) {} showMode(); });
   $("#f-char").value = S.charName || "";
+  // the room code and the guest link + QR
+  S.roomCode = "";
+  const roomUrl = () => location.origin + location.pathname + "?guest=" + encodeURIComponent(S.roomCode);
+  const roomTvOn = () => { try { return localStorage.getItem("sb-roomtv") !== "off"; } catch (e) { return true; } };
+  function qrDraw(cv, text) {
+    const draw = () => { try { const q = window.qrcode(0, "M"); q.addData(text); q.make(); const n = q.getModuleCount(), c = cv.getContext("2d"), k = cv.width / (n + 4);
+      c.fillStyle = "#fff"; c.fillRect(0, 0, cv.width, cv.height); c.fillStyle = "#0b0f17";
+      for (let r = 0; r < n; r++) for (let col = 0; col < n; col++) if (q.isDark(r, col)) c.fillRect(Math.floor((col + 2) * k), Math.floor((r + 2) * k), Math.ceil(k), Math.ceil(k)); } catch (e) {} };
+    if (window.qrcode) return draw();
+    if (!qrDraw.ld) { qrDraw.ld = new Promise((ok) => { const sc = document.createElement("script"); sc.src = "https://cdnjs.cloudflare.com/ajax/libs/qrcode-generator/1.4.4/qrcode.min.js"; sc.onload = ok; sc.onerror = ok; document.head.appendChild(sc); }); }
+    qrDraw.ld.then(draw);
+  }
+  function showRoom() {
+    const on = !!S.roomCode && !GUEST;
+    $("#roomLink").hidden = !on; $("#roomTv").checked = roomTvOn();
+    if (on) { $("#roomUrl").textContent = roomUrl(); qrDraw($("#roomQr"), roomUrl()); }
+    const tvq = $("#roomTvQr"); tvq.hidden = !(on && roomTvOn());
+    if (!tvq.hidden) qrDraw($("#roomTvCv"), roomUrl());
+  }
+  $("#roomSave").addEventListener("click", () => {
+    const c = $("#f-room").value.trim().replace(/\s+/g, "").slice(0, 24);
+    write((db) => db.doc("config/room").set({ code: c }), () => {}).then((ok) => { if (ok) { S.roomCode = c; showRoom(); toast(c ? "Guests can join with " + c : "Guest joining is off"); } });
+  });
+  $("#roomCopy").addEventListener("click", () => { try { navigator.clipboard.writeText(roomUrl()); toast("Guest link copied"); } catch (e) {} });
+  $("#roomTv").addEventListener("change", (e) => { try { localStorage.setItem("sb-roomtv", e.target.checked ? "on" : "off"); } catch (err) {} showRoom(); });
   $("#charSave").addEventListener("click", () => {
     const v = $("#f-char").value.trim().slice(0, 16); $("#f-char").value = v; S.charName = v; showGName();
     write((db) => db.doc("config/settings").set({ charName: v }, { merge: true }), () => {}).then((ok) => ok && toast(v ? `He's ${v} now, on every screen` : "He's Goldie again"));
@@ -10098,7 +10157,7 @@ body.tv .rb-pcol.pr .rb-hs-side.r .rb-st { justify-self: start; }
   // ---------- auto-settle bets once their games are final ----------
   const settling = new Set();
   function autoSettle() {
-    if (!S.db || !S.canWrite || !S.ready) return;
+    if (!S.db || !S.canWrite || !S.ready || GUEST) return;
     for (const b of S.bets.values()) {
       if (b.status !== "open" || b.noAuto || b.trial || settling.has(b.id) || tdHold.has(b.id)) continue;
       if (cardBusy && b.sel && isTd(b.sel.m)) continue; // let his touchdown card play first
@@ -10313,9 +10372,47 @@ body.tv .rb-pcol.pr .rb-hs-side.r .rb-st { justify-self: start; }
   });
 
   // ---------- sign in + connect ----------
+  let GB_READY = false;
+  // the guest page: join (name + room code), then just their own bets
+  function wireGuest(auth, db) {
+    $("#gu-name").value = GUEST.name; $("#gu-code").value = GUEST.code; $("#gu-codeF").hidden = !!GUEST.code;
+    const go = (signIn) => {
+      const nm = $("#gu-name").value.trim().slice(0, 20), cd = ($("#gu-code").value || GUEST.code).trim();
+      if (!nm) { $("#gate-err").textContent = "Put your name in so the board knows whose bets these are."; return; }
+      if (!cd) { $("#gate-err").textContent = "You need the room code from the host (it's in the link the TV shows)."; return; }
+      GUEST.name = nm; GUEST.code = cd; try { localStorage.setItem("sb-guest-name", nm); localStorage.setItem("sb-guest-code", cd); } catch (e) {}
+      $("#gate-err").textContent = "";
+      signIn().catch((e) => { $("#gate-err").textContent = e && e.code === "auth/operation-not-allowed" ? "Guest sign-in isn't switched on yet. Tap \"Join with Google instead\", or ask the host." : "Couldn't join (" + ((e && e.code) || "error") + ")."; });
+    };
+    $("#guJoin").addEventListener("click", () => go(() => auth.signInAnonymously()));
+    $("#guGoogle").addEventListener("click", () => go(() => auth.signInWithPopup(new firebase.auth.GoogleAuthProvider())));
+  }
+  function guestAuth(u, auth, db, unsub) {
+    if (!u || !GUEST.name || !GUEST.code) { S.db = null; S.canWrite = false; S.ready = true; render(); gate("guest"); return; }
+    GUEST.uid = u.uid;
+    // checking in with the room: the rules only take the right code
+    db.doc("members/" + u.uid).set({ name: GUEST.name, code: GUEST.code, at: Date.now() }).then(() => {
+      gate(null); S.db = db; S.canWrite = true; S.ready = false; S.bets = new Map(); render();
+      unsub.push(db.collection("guestBets").where("uid", "==", u.uid).onSnapshot((snap) => {
+        const first = !S.ready;
+        for (const ch of snap.docChanges()) {
+          const prev = S.bets.get(ch.doc.id);
+          if (ch.type === "removed") { S.bets.delete(ch.doc.id); continue; }
+          const d = { id: ch.doc.id, ...ch.doc.data(), _col: "guestBets" };
+          if (typeof d.odds !== "number" || typeof d.units !== "number") continue;
+          S.bets.set(ch.doc.id, d);
+          if (!first && prev && prev.status === "open" && d.status !== "open") toast(d.status === "won" ? `✅ ${d.pick} cashed` : d.status === "lost" ? `❌ ${d.pick} lost` : `${d.pick} · ${d.status}`);
+        }
+        S.ready = true; render(); if (!LINES.size) loadLines(); else renderLines();
+      }, () => toast("Lost the connection to your bets. Reload to reconnect.")));
+    }).catch((e) => {
+      auth.signOut();
+      S.ready = true; render(); gate("guest", e && e.code === "permission-denied" ? "That room code didn't work. Check it with the host." : "Couldn't reach the board. Check your connection.");
+    });
+  }
   const gate = (which, msg) => {
     $("#gate").hidden = !which;
-    ["setup", "signin", "denied"].forEach((k) => ($("#gate-" + k).hidden = k !== which));
+    ["setup", "signin", "denied", "guest"].forEach((k) => ($("#gate-" + k).hidden = k !== which));
     $("#gate-err").textContent = msg || "";
   };
   function readCfg() {
@@ -10351,8 +10448,10 @@ body.tv .rb-pcol.pr .rb-hs-side.r .rb-st { justify-self: start; }
     $("#signOut").addEventListener("click", out);
     $("#signOut2").addEventListener("click", out);
     let unsub = [];
+    if (GUEST) wireGuest(auth, db);
     auth.onAuthStateChanged((u) => {
       unsub.forEach((f) => f()); unsub = [];
+      if (GUEST) { guestAuth(u, auth, db, unsub); return; }
       if (!u) { S.db = null; S.canWrite = false; S.ready = true; render(); gate("signin"); return; }
       gate(null); S.db = db; S.canWrite = true; S.ready = false; S.bets = new Map(); render();
       $("#who").textContent = u.email || "";
@@ -10377,6 +10476,21 @@ body.tv .rb-pcol.pr .rb-hs-side.r .rb-st { justify-self: start; }
         S.ready = true; render(); autoReact(); autoSettle(); if (!LINES.size) loadLines(); else renderLines();
         if (!wasReady) { const k = liveKeys(); if (k.length) loadBoards(k); }
       }, onErr));
+      unsub.push(db.collection("guestBets").onSnapshot((snap) => {
+        const first = !GB_READY;
+        for (const ch of snap.docChanges()) {
+          const prev = S.bets.get(ch.doc.id);
+          if (ch.type === "removed") { S.bets.delete(ch.doc.id); continue; }
+          const d = { id: ch.doc.id, ...ch.doc.data(), _col: "guestBets" };
+          if (typeof d.odds !== "number" || typeof d.units !== "number") continue;
+          S.bets.set(ch.doc.id, d);
+          if (first) continue;
+          if (prev && prev.status === "open" && d.status !== "open") celebrate(d);
+          else if (!prev && d.status === "open") announce(d);
+        }
+        GB_READY = true; render(); autoReact(); autoSettle();
+      }, () => {}));
+      unsub.push(db.doc("config/room").onSnapshot((r) => { const c = r.exists ? r.data().code || "" : ""; if (c !== S.roomCode) { S.roomCode = c; $("#f-room").value = c; showRoom(); } }, () => {}));
       unsub.push(db.doc("config/settings").onSnapshot((s) => {
         const v = s.exists ? Number(s.data().unitSize) : NaN;
         if (v > 0 && v !== S.unit) { S.unit = v; render(); }
