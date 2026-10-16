@@ -5074,7 +5074,7 @@ body.tv:has(#roomTvQr:not([hidden])) .rb-rail { padding-bottom: calc((clamp(96px
   // ---------- sheets ----------
   function openSheet(id) { $(id).hidden = false; }
   // keep every open screen current: when a new version is up, reload it (never mid-form or mid-animation)
-  const BUILD = "20261016173603";
+  const BUILD = "20261016174653";
   function checkBuild() {
     if (BUILD === "dev") return;
     fetch("version.json?t=" + Date.now(), { cache: "no-store" }).then((r) => (r.ok ? r.json() : null)).then((j) => {
@@ -8378,6 +8378,12 @@ body.tv:has(#roomTvQr:not([hidden])) .rb-rail { padding-bottom: calc((clamp(96px
   const OA_PRI = { NFL: 0, "College football": 1, MLB: 2, NHL: 3, NBA: 4, "College hoops": 5, WNBA: 6 };
   const AIR = { on: false, seg: null, items: [], idx: 0, next: 0, turn: 0, rest: false, pool: new Map(), polled: new Map(), shown: new Map(), bumpUntil: 0 };
   try { for (const [k, t] of JSON.parse(localStorage.getItem("sb-oa-shown") || "[]")) if (Date.now() - t < 20 * 3600e3) AIR.shown.set(k, t); } catch (e) {}
+  // what airs: highlights and plays, not talk. "X vs. Y: Game Highlights" always; otherwise a headline about something that
+  // happened (scores, walk-offs, sweeps, rallies...) that isn't somebody talking about it ("Saban: ...", "happy with", "why")
+  const AIR_HL = /highlights?|top plays|best plays/i;
+  const AIR_PLAY = /\bscores?\b|goal|walk-?off|walks? it off|walked it off|homer|home run|grand slam|touchdown|\btd\b|dunk|buzzer|game-winn|winner\b|knock(s|ed)? out|\bko\b|submission|sweep|clinch|\bbeats?\b|rall(y|ies)|holds? off|\bwins?\b|takes? .{0,20}lead|advance|champagne|celebrat|overtime|\bot\b|stuns?|upset|comeback|hat trick|no-hitter|shutout/i;
+  const AIR_TALK = /^[^:]{2,32}:\s|\b(says?|said|happy|confirms?|stressed|believes?|thinks?|explains?|reacts?|discuss\w*|ailment|injur\w*|ban|suspen\w*|charges?|rumou?rs?|reports?|why|how|could|should|would|will)\b|\?/i;
+  const airOk = (h) => AIR_HL.test(h) || (AIR_PLAY.test(h) && !AIR_TALK.test(h));
   const oaMode = () => { try { return localStorage.getItem("sb-offair") || "mix"; } catch (e) { return "mix"; } };
   const oaBet = (sp) => ({ id: "oa", status: "open", kind: "straight", legs: [], sport: sp || "Other" });
   // nothing's on: no game live on the board or the ticker, and no bet in a live game
@@ -8401,13 +8407,13 @@ body.tv:has(#roomTvQr:not([hidden])) .rb-rail { padding-bottom: calc((clamp(96px
       for (const a of j.articles || []) {
         if (a.type !== "Media" || a.premium || n >= 6) continue;
         const id = String(a.id), at = Date.parse(a.published || a.lastModified || "") || 0, hl = a.headline || "";
-        if (AIR.pool.has(id) || now - at > 30 * 3600e3 || HL_SKIP.test(hl) || HLX_TALK.test(hl)) continue;
+        if (AIR.pool.has(id) || now - at > 30 * 3600e3 || HL_SKIP.test(hl) || !airOk(hl)) continue;
         const self = a.links && a.links.api && a.links.api.self && a.links.api.self.href; if (!self) continue;
         n++; AIR.pool.set(id, null);
         fetch(self).then((r) => r.json()).then((c) => {
           const v = (c.videos || [c])[0] || {}, x = (v.links && v.links.source) || {}, src = (x.HD && x.HD.href) || x.href || "";
           const head = v.headline || hl, ms = (v.duration || 0) * 1000;
-          if (!src || !/\.mp4(\?|$)/.test(src) || ms < 8000 || ms > 150e3 || (!v.gameId && !HLX_PLAY.test(head))) { AIR.pool.set(id, false); return; }
+          if (!src || !/\.mp4(\?|$)/.test(src) || ms < 8000 || ms > 150e3 || !airOk(head)) { AIR.pool.set(id, false); return; }
           AIR.pool.set(id, { id, lg, sp, hl: head, src, ms, at, gid: v.gameId ? String(v.gameId) : "" });
         }).catch(() => AIR.pool.delete(id));
       }
