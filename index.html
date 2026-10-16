@@ -2799,12 +2799,7 @@ body.tv:has(#roomTvQr:not([hidden])) .rb-rail { padding-bottom: calc((clamp(96px
     <div class="field">
       <span class="lbl">Reaction clips</span>
       <label class="togrow"><input type="checkbox" id="clipsOn"> Pop clips up on this screen</label>
-      <div class="sp-row oa-row"><span>When nothing's on</span><div class="radios" id="oaRadios">
-        <label><input type="radio" name="oa" value="mix"><span>Show + DJ</span></label>
-        <label><input type="radio" name="oa" value="center"><span>Highlights show</span></label>
-        <label><input type="radio" name="oa" value="dj"><span>DJ sets</span></label>
-        <label><input type="radio" name="oa" value="off"><span>Off</span></label></div></div>
-      <span class="hint">With no game live and nobody in one, this screen runs its own channel: Sweat Center (the latest highlights from every league, back to back) and DJ sets, taking turns. A game or a bet going live takes over.</span>
+      <span class="hint">When nothing's on, this screen runs its own channel by itself: Sweat Center (the latest highlights from every league, back to back) and DJ sets, more music overnight. A game or a bet going live takes over.</span>
       <span class="hint">Only the good stuff, and only for your side. Your team's touchdowns, field goals, turnovers, red-zone trips, home runs and goals get a clip, with your team's own clips first. While you're winning, your winning clips play every 2½ minutes. When it's close, a music break or some hype plays every 3 minutes. Music breaks are songs only, with a card showing the song and artist. With only 1 or 2 bets out, there's more dead air, so a clip comes every 2 minutes. When you're down but within two scores, comeback clips play. When you're getting blown out, it stays quiet. Overs and unders are judged on pace, and stay quiet whenever they're off pace. Tap the screen to close a clip. Turn this off on your phone and leave it on for the monitor.</span>
       <div style="display:flex;gap:8px;flex-wrap:wrap"><button type="button" class="btn sm primary" id="trialBtn">Run a trial</button><button type="button" class="btn sm" id="pcTest">Preview a touchdown alert</button></div>
       <span class="hint">The trial replays the latest finished NFL game play by play with a pretend bet on the winner: play alerts and clips when your side scores, quiet when they don't, then the win. Nothing gets saved and it doesn't touch your numbers.</span>
@@ -2815,13 +2810,8 @@ body.tv:has(#roomTvQr:not([hidden])) .rb-rail { padding-bottom: calc((clamp(96px
       <div class="cliplib" id="clipLib"></div>
     </div>
     <div class="field">
-      <span class="lbl">Main sport</span>
-      <div class="radios" id="focusRadios">
-        <label><input type="radio" name="focus" value="auto"><span>Auto</span></label>
-        <label><input type="radio" name="focus" value="CFB"><span>College football</span></label>
-        <label><input type="radio" name="focus" value="NFL"><span>NFL</span></label>
-      </div>
-      <span class="hint">What the ticker follows (every score, spreads and totals before kickoff, upset watch, injury news) and which league the bet form opens to. Auto runs college Tuesday through Saturday and the NFL on Sunday, Monday and Thursday. Applies to every screen.</span>
+      <span class="lbl">Ticker</span>
+      <span class="hint">The ticker follows what the room is on (or, with no bets, what's live, else what starts next): every score, spreads and totals before the start, upset watch and injury news. Automatic.</span>
       <label class="togrow"><input type="checkbox" id="tickerOn"> Show the ticker on this screen</label>
     </div>
     <div class="field sp-set" id="spSet">
@@ -2829,37 +2819,17 @@ body.tv:has(#roomTvQr:not([hidden])) .rb-rail { padding-bottom: calc((clamp(96px
       <div class="seg sp-tabs" id="spTabs" role="group" aria-label="Sport"><button type="button" data-spt="FB" aria-pressed="true">Football</button><button type="button" data-spt="NHL" aria-pressed="false">Hockey</button><button type="button" data-spt="MLB" aria-pressed="false">Baseball</button><button type="button" data-spt="BB" aria-pressed="false">Basketball</button></div>
       <div class="sp-panel" data-spp="FB"><label class="togrow"><input type="checkbox" data-ss="FB.cards"> Touchdown, turnover and field goal cards</label><label class="togrow"><input type="checkbox" data-ss="FB.clips"> Clips and edits when your side scores</label><label class="togrow"><input type="checkbox" data-ss="FB.tracker"> Field and drive tracker on the big game</label></div>
       <div class="sp-panel" data-spp="NHL" hidden>
-        <div class="sp-row"><span>Hockey mode</span><div class="radios" id="hockeyRadios">
-          <label><input type="radio" name="hockey" value="auto"><span>Auto</span></label>
-          <label><input type="radio" name="hockey" value="on"><span>On</span></label>
-          <label><input type="radio" name="hockey" value="off"><span>Off</span></label>
-        </div></div>
         <div class="sp-row"><span>Goal horn</span><div class="radios" id="hornRadios">
           <label><input type="radio" name="ss-horn" value="loud"><span>Loud</span></label>
           <label><input type="radio" name="ss-horn" value="normal"><span>Normal</span></label>
           <label><input type="radio" name="ss-horn" value="soft"><span>Soft</span></label>
           <label><input type="radio" name="ss-horn" value="off"><span>Off</span></label>
         </div></div><label class="togrow"><input type="checkbox" data-ss="NHL.teamhorn"> Each team's own horn (off: one horn for everybody)</label><label class="togrow"><input type="checkbox" data-ss="NHL.cards"> GOAL card with the red lamp</label><label class="togrow"><input type="checkbox" data-ss="NHL.zamboni"> Zamboni between periods</label><label class="togrow"><input type="checkbox" data-ss="NHL.tracker"> Rink with the shot map on the big game</label><label class="togrow"><input type="checkbox" data-ss="NHL.sog"> A note on every shot for shots-on-goal props</label><label class="togrow"><input type="checkbox" data-ss="NHL.clips"> Clips and edits after a goal</label><label class="togrow"><input type="checkbox" data-ss="NHL.replay"> The goal's replay once ESPN posts it (about 5 min later)</label>
-        <span class="hint">Hockey mode Auto turns on when most of the room's bets are hockey: ice, the Zamboni, the horn and the rink.</span>
+        <span class="hint">Hockey night comes on by itself when the room is on hockey (or hockey is what's on): ice, the Zamboni, the horn and the rink.</span>
       </div>
-      <div class="sp-panel" data-spp="MLB" hidden>
-        <div class="sp-row"><span>Baseball mode</span><div class="radios" id="ballRadios">
-          <label><input type="radio" name="baseball" value="auto"><span>Auto</span></label>
-          <label><input type="radio" name="baseball" value="on"><span>On</span></label>
-          <label><input type="radio" name="baseball" value="off"><span>Off</span></label>
-        </div></div><label class="togrow"><input type="checkbox" data-ss="MLB.tracker"> Field with the spray chart on the big game</label><label class="togrow"><input type="checkbox" data-ss="MLB.cards"> Home run and run cards</label><label class="togrow"><input type="checkbox" data-ss="MLB.hrall"> A banner for every home run in baseball (off: just the games the room's on)</label><label class="togrow"><input type="checkbox" data-ss="MLB.clips"> Clips and edits when your side scores</label></div>
+      <div class="sp-panel" data-spp="MLB" hidden><label class="togrow"><input type="checkbox" data-ss="MLB.tracker"> Field with the spray chart on the big game</label><label class="togrow"><input type="checkbox" data-ss="MLB.cards"> Home run and run cards</label><label class="togrow"><input type="checkbox" data-ss="MLB.hrall"> A banner for every home run in baseball (off: just the games the room's on)</label><label class="togrow"><input type="checkbox" data-ss="MLB.clips"> Clips and edits when your side scores</label></div>
       <div class="sp-panel" data-spp="BB" hidden><label class="togrow"><input type="checkbox" data-ss="BB.clips"> Clips and edits on big swings</label></div>
       <span class="hint">These are for this screen. Set the TV and your phone separately.</span>
-    </div>
-    <div class="field">
-      <span class="lbl">Slate mode</span>
-      <div class="radios" id="slateRadios">
-        <label><input type="radio" name="slate" value="auto"><span>Auto</span></label>
-        <label><input type="radio" name="slate" value="busy"><span>1 PM · busy</span></label>
-        <label><input type="radio" name="slate" value="feature"><span>4 PM</span></label>
-        <label><input type="radio" name="slate" value="prime"><span>Prime time</span></label>
-      </div>
-      <span class="hint">Auto goes by how many games are on. 1 PM mode (5+ games): touchdown and turnover alerts on your games, and every touchdown for your side gets a music edit after its alert (a <span class="gnm">Goldie</span> edit, a hype song or DJ <span class="gnm">Goldie</span>); in between it's DJ <span class="gnm">Goldie</span> and music every couple of minutes, no other clips. 4 PM mode (2 to 4 games) and prime time (one game): the full show, plus something every couple of minutes (every minute in prime time, mostly his scenes), taking turns: DJ <span class="gnm">Goldie</span> (off your Spotify playlist when it's connected), a football edit and one of his scenes. Each screen keeps its own setting.</span>
     </div>
     <div class="field">
       <span class="lbl">His name</span>
@@ -3357,16 +3327,12 @@ body.tv:has(#roomTvQr:not([hidden])) .rb-rail { padding-bottom: calc((clamp(96px
     const live = (b) => { const g = b.status === "open" && gameFor(b); return !!(g && g.st === "in"); };
     return tally(live) || tally((b) => b.status === "open") || tally((b) => b.settledAt && now - b.settledAt < 2 * 36e5);
   }
-  function hockeyWant() {
-    const pin = hockeyPin(); if (pin === "on") return true; if (pin === "off") return false;
-    return nightSport() === "NHL";
-  }
+  function hockeyWant() { return (DIR && DIR.sport ? DIR.sport : nightSport()) === "NHL"; }
   // baseball night: the ballpark look, and Neegy in his cap and pinstripes
   function ballPin() { try { return localStorage.getItem("sb-baseball") || "auto"; } catch (e) { return "auto"; } }
   function ballWant() {
     if (document.body.classList.contains("hockey")) return false;
-    const pin = ballPin(); if (pin === "on") return true; if (pin === "off") return false;
-    return nightSport() === "MLB";
+    return (DIR && DIR.sport ? DIR.sport : nightSport()) === "MLB";
   }
   function syncBall() {
     const on = !PHONE() && ballWant();
@@ -3398,8 +3364,6 @@ body.tv:has(#roomTvQr:not([hidden])) .rb-rail { padding-bottom: calc((clamp(96px
     if (Date.now() - zamAt > 25 * 60e3 && !cardBusy && $("#jumbo").hidden) zamboni();
   }
   setInterval(zamWatch, 20000);
-  $("#hockeyRadios").addEventListener("change", (e) => { try { localStorage.setItem("sb-hockey", e.target.value); } catch (err) {} render(); showMode(); });
-  $("#ballRadios").addEventListener("change", (e) => { try { localStorage.setItem("sb-baseball", e.target.value); } catch (err) {} render(); showMode(); });
   // the big game on a rink: every shot and goal where it came from (each team shooting at the far net), and the team stat bars
   function rinkHtml(g) {
     const d = PPS.get(g.id); if (!d) { setTimeout(() => loadPPS(), 0); return ""; }
@@ -3463,7 +3427,7 @@ body.tv:has(#roomTvQr:not([hidden])) .rb-rail { padding-bottom: calc((clamp(96px
     document.querySelectorAll("#spSet [data-spp]").forEach((p) => (p.hidden = p.dataset.spp !== b.dataset.spt));
   });
   function render() {
-    syncPhone(); syncHockey(); syncBall(); { const hr = document.querySelector(`input[name="hockey"][value="${hockeyPin()}"]`); if (hr) hr.checked = true; const br = document.querySelector(`input[name="baseball"][value="${ballPin()}"]`); if (br) br.checked = true; }
+    syncPhone(); syncHockey(); syncBall();
     const everyone = [...S.bets.values()], all = everyone.filter(isMe);
     const start = rangeStart(S.range);
     const settled = all.filter((b) => b.status !== "open" && b.settledAt && b.settledAt >= start).sort((a, b) => a.settledAt - b.settledAt);
@@ -5074,7 +5038,7 @@ body.tv:has(#roomTvQr:not([hidden])) .rb-rail { padding-bottom: calc((clamp(96px
   // ---------- sheets ----------
   function openSheet(id) { $(id).hidden = false; }
   // keep every open screen current: when a new version is up, reload it (never mid-form or mid-animation)
-  const BUILD = "20261016174653";
+  const BUILD = "20261016194307";
   function checkBuild() {
     if (BUILD === "dev") return;
     fetch("version.json?t=" + Date.now(), { cache: "no-store" }).then((r) => (r.ok ? r.json() : null)).then((j) => {
@@ -6869,7 +6833,7 @@ body.tv:has(#roomTvQr:not([hidden])) .rb-rail { padding-bottom: calc((clamp(96px
     if (typeof AIR !== "undefined" && AIR.on && AIR.seg === "center" && AIR.items.length) { $("#jbSideH").textContent = "Sweat Center"; $("#jbBets").innerHTML = oaRundown(); return; }
     // a DJ set with nothing open: what's coming up on Sweat Center instead of an empty list
     if (typeof AIR !== "undefined" && AIR.on && AIR.seg === "dj" && ![...S.bets.values()].some((b) => b.status === "open")) {
-      const nx = oaMode() !== "dj" ? oaCenter() : null;
+      const nx = oaCenter();
       if (nx) { $("#jbSideH").textContent = "Next on Sweat Center"; $("#jbBets").innerHTML = `<div class="oa-run">${nx.slice(0, 5).map((x) => `<div class="oa-it"><em>${esc(x.lg)}</em><b>${esc(x.hl)}</b></div>`).join("")}</div>`; return; }
     }
     $("#jbSideH").textContent = "The room's bets";
@@ -8384,11 +8348,11 @@ body.tv:has(#roomTvQr:not([hidden])) .rb-rail { padding-bottom: calc((clamp(96px
   const AIR_PLAY = /\bscores?\b|goal|walk-?off|walks? it off|walked it off|homer|home run|grand slam|touchdown|\btd\b|dunk|buzzer|game-winn|winner\b|knock(s|ed)? out|\bko\b|submission|sweep|clinch|\bbeats?\b|rall(y|ies)|holds? off|\bwins?\b|takes? .{0,20}lead|advance|champagne|celebrat|overtime|\bot\b|stuns?|upset|comeback|hat trick|no-hitter|shutout/i;
   const AIR_TALK = /^[^:]{2,32}:\s|\b(says?|said|happy|confirms?|stressed|believes?|thinks?|explains?|reacts?|discuss\w*|ailment|injur\w*|ban|suspen\w*|charges?|rumou?rs?|reports?|why|how|could|should|would|will)\b|\?/i;
   const airOk = (h) => AIR_HL.test(h) || (AIR_PLAY.test(h) && !AIR_TALK.test(h));
-  const oaMode = () => { try { return localStorage.getItem("sb-offair") || "mix"; } catch (e) { return "mix"; } };
+  const oaMode = () => "auto";
   const oaBet = (sp) => ({ id: "oa", status: "open", kind: "straight", legs: [], sport: sp || "Other" });
   // nothing's on: no game live on the board or the ticker, and no bet in a live game
   function offAir() {
-    if (PHONE() || !S.ready || document.visibilityState !== "visible" || !document.body.classList.contains("tv") || !clipsOn() || trial || oaMode() === "off") return false;
+    if (PHONE() || !S.ready || document.visibilityState !== "visible" || !document.body.classList.contains("tv") || !clipsOn() || trial) return false;
     if ([...S.bets.values()].some((b) => b.status === "open" && phase(b) === "live")) return false;
     if ([...S.games.values()].some((g) => g.st === "in")) return false;
     if ((TK.games || []).some((g) => g.st === "in")) return false;
@@ -8449,10 +8413,9 @@ body.tv:has(#roomTvQr:not([hidden])) .rb-rail { padding-bottom: calc((clamp(96px
   function oaNextSeg(now) {
     if (AIR.seg && !AIR.rest) { AIR.rest = true; AIR.next = now + 20e3; return; }   // the board gets 20 s between blocks
     AIR.rest = false;
-    const m = oaMode(), ctr = m !== "dj" ? oaCenter() : null;
-    const seg = (m === "center" || (m === "mix" && AIR.turn % 2 === 0)) && ctr ? "center" : m === "center" ? null : "dj";
-    if (m === "mix") AIR.turn++;
-    if (!seg) { AIR.seg = null; AIR.next = now + 30e3; return; }   // highlights only, and none in yet: look again shortly
+    const hr = Number(new Intl.DateTimeFormat("en-US", { timeZone: "America/New_York", hour: "numeric", hourCycle: "h23" }).format(new Date()));
+    const plan = hr < 9 ? ["dj", "dj", "center"] : ["center", "dj"], ctr = oaCenter();
+    const seg = plan[AIR.turn++ % plan.length] === "center" && ctr ? "center" : "dj";
     AIR.seg = seg; AIR.idx = 0;
     AIR.items = seg === "center" ? ctr : Array(spUsable() ? 3 : 2).fill("dj");
     oaBump(seg); AIR.bumpUntil = now + 3000;
@@ -8479,10 +8442,52 @@ body.tv:has(#roomTvQr:not([hidden])) .rb-rail { padding-bottom: calc((clamp(96px
   }
   // down the side during Sweat Center: the rundown, what's on now and what's next
   const oaRundown = () => `<div class="oa-run">${AIR.items.map((x, i) => `<div class="oa-it${i === AIR.idx - 1 ? " on" : i < AIR.idx - 1 ? " done" : ""}"><em>${i === AIR.idx - 1 ? "Now · " : i === AIR.idx ? "Up next · " : ""}${esc(x.lg)}</em><b>${esc(x.hl)}</b></div>`).join("")}</div>`;
-  { const r = document.querySelector(`input[name="oa"][value="${oaMode()}"]`); if (r) r.checked = true;
-    $("#oaRadios").addEventListener("change", (e) => { if (e.target.name !== "oa") return; try { localStorage.setItem("sb-offair", e.target.value); } catch (x) {} if (e.target.value === "off" && AIR.on) { AIR.on = false; AIR.seg = null; oaBump(null); } }); }
   setInterval(oaTick, 2000);
   setInterval(oaPoll, 4000);
+  var DIR = { slate: new Map(), at: new Map(), sport: null, cand: null, candN: 0 };
+  const DIR_LG = ["NFL", "CFB", "MLB", "NHL", "NBA", "CBB"], DIR_TIER = { NFL: 0, CFB: 0, MLB: 1, NHL: 2, NBA: 3, CBB: 4 };
+  // each league's day: how many games are live and when the next one starts (every 10 minutes, every 3 with games live)
+  function dirPoll() {
+    if (document.visibilityState !== "visible") return;
+    const now = Date.now(), lg = DIR_LG.find((l) => now - (DIR.at.get(l) || 0) > ((DIR.slate.get(l) || {}).live ? 3 : 10) * 60e3);
+    if (!lg) return; DIR.at.set(lg, now);
+    fetch(`https://site.api.espn.com/apis/site/v2/sports/${ESPN[lg]}/scoreboard?limit=300${lg === "CFB" ? "&groups=80" : ""}`).then((r) => r.json()).then((j) => {
+      let live = 0, next = Infinity, today = 0;
+      for (const e of j.events || []) {
+        const st = e.status && e.status.type && e.status.type.state, t = Date.parse(e.date) || 0;
+        if (st === "in") live++;
+        else if (st === "pre" && t - Date.now() < 14 * 3600e3 && t > Date.now() - 3600e3) { today++; next = Math.min(next, t); }
+      }
+      DIR.slate.set(lg, { live, next, today });
+      dirTick();
+    }).catch(() => {});
+  }
+  // what's on with nobody betting: the top tier with something live (more live games break a tie), else the next start today
+  function dirOnNow() {
+    let best = null;
+    for (const lg of DIR_LG) { const x = DIR.slate.get(lg); if (!x || !x.live) continue; if (!best || DIR_TIER[lg] < DIR_TIER[best] || (DIR_TIER[lg] === DIR_TIER[best] && x.live > DIR.slate.get(best).live)) best = lg; }
+    if (best) return best;
+    let soon = null;
+    for (const lg of DIR_LG) { const x = DIR.slate.get(lg); if (x && x.next < Infinity && (!soon || x.next < DIR.slate.get(soon).next)) soon = lg; }
+    return soon;
+  }
+  function dirWant() {
+    const b = nightSport();
+    if (b && ESPN[b]) return b;
+    return dirOnNow() || b || ([0, 1, 4].includes(etDow()) ? "NFL" : "CFB");
+  }
+  function dirTick() {
+    const want = dirWant();
+    if (!DIR.sport) { DIR.sport = want; dirApply(); return; }
+    if (want === DIR.sport) { DIR.cand = null; DIR.candN = 0; return; }
+    // a bet going live is enough on its own; anything else has to hold for two looks (a minute)
+    const liveBet = [...S.bets.values()].some((x) => x.status === "open" && phase(x) === "live" && ((x.sel && x.sel.sp) || x.sport) === want);
+    if (DIR.cand === want) DIR.candN++; else { DIR.cand = want; DIR.candN = 1; }
+    if (liveBet || DIR.candN >= 2) { DIR.sport = want; DIR.cand = null; DIR.candN = 0; dirApply(); }
+  }
+  function dirApply() { try { syncHockey(); syncBall(); showMode(); if (typeof TK !== "undefined" && TK.lg !== focusLeague()) loadTicker(); } catch (e) {} }
+  setInterval(dirPoll, 20e3); setTimeout(dirPoll, 1500);
+  setInterval(dirTick, 30e3);
   function teamHype(b, g, e, why) {
     if (!clipsOn() || !g || !e.side) return;
     if (Math.random() < 0.7) { const H = pickClip(houseEdits().filter((c) => fits(c, b))); if (H) { pipTeam = { t: g[e.side], word: PC_TYPE[e.ev] || "Score", pl: "" }; react(b, "good", H, why); return; } }
@@ -8493,7 +8498,7 @@ body.tv:has(#roomTvQr:not([hidden])) .rb-rail { padding-bottom: calc((clamp(96px
     pipTeam = { t, word: PC_TYPE[e.ev] || "Score", pl: sp && sp.includes(P) && PL_NAMES[P.pl] ? PL_NAMES[P.pl] : "" };
     react(b, "good", P, why);
   }
-  function slatePin() { try { return localStorage.getItem("sb-slate") || "auto"; } catch (e) { return "auto"; } }
+  function slatePin() { return "auto"; }
   function slateGames() {
     const lg = focusLeague(), now = Date.now(), seen = new Set(); let n = 0;
     const look = (g) => { const id = String(g.id); if (seen.has(id)) return; seen.add(id); if (g.st === "in" || (g.st === "pre" && g.t - now < 15 * 60e3 && now - g.t < 4 * 3600e3)) n++; };
@@ -8512,7 +8517,7 @@ body.tv:has(#roomTvQr:not([hidden])) .rb-rail { padding-bottom: calc((clamp(96px
     const m = slateMode(), n = slateGames();
     el.hidden = !n && slatePin() === "auto";
     el.className = "chip modechip " + m;
-    el.textContent = (document.body.classList.contains("hockey") ? "Hockey night" : document.body.classList.contains("baseball") ? "Ballpark" : MODE_LABEL[m]) + (n ? ` · ${n} game${n > 1 ? "s" : ""}` : "");
+    el.textContent = (document.body.classList.contains("hockey") ? "Hockey night" : document.body.classList.contains("baseball") ? "Ballpark" : DIR && (DIR.sport === "NBA" || DIR.sport === "CBB") ? "Hoops night" : MODE_LABEL[m]) + (n ? ` · ${n} game${n > 1 ? "s" : ""}` : "");
   }
   function autoReact() {
     if (!S.ready) return;
@@ -8675,7 +8680,7 @@ body.tv:has(#roomTvQr:not([hidden])) .rb-rail { padding-bottom: calc((clamp(96px
   // main sport: CFB, NFL, or auto (NFL on Sunday, Monday and Thursday, college the rest of the week)
   S.focus = S.focus || "auto";
   const etDow = () => ({ Sun: 0, Mon: 1, Tue: 2, Wed: 3, Thu: 4, Fri: 5, Sat: 6 })[new Intl.DateTimeFormat("en-US", { timeZone: "America/New_York", weekday: "short" }).format(new Date())];
-  const focusLeague = () => (document.body.classList.contains("hockey") ? "NHL" : document.body.classList.contains("baseball") ? "MLB" : S.focus === "CFB" || S.focus === "NFL" ? S.focus : [0, 1, 4].includes(etDow()) ? "NFL" : "CFB");
+  const focusLeague = () => (document.body.classList.contains("hockey") ? "NHL" : document.body.classList.contains("baseball") ? "MLB" : DIR && DIR.sport && ESPN[DIR.sport] ? DIR.sport : [0, 1, 4].includes(etDow()) ? "NFL" : "CFB");
   function showFocus() { const r = document.querySelector(`input[name="focus"][value="${S.focus}"]`); if (r) r.checked = true; }
   function setFocus(v) { if (v === S.focus) return; S.focus = v; showFocus(); loadTicker(); }
   function tickerOn() { try { return localStorage.getItem("sb-ticker") !== "off"; } catch (e) { return true; } }
@@ -8854,10 +8859,9 @@ body.tv:has(#roomTvQr:not([hidden])) .rb-rail { padding-bottom: calc((clamp(96px
   $("#tickerOn").checked = tickerOn();
   $("#tickerOn").addEventListener("change", (e) => { try { localStorage.setItem("sb-ticker", e.target.checked ? "on" : "off"); } catch (err) {} if (e.target.checked) loadTicker(); else renderTicker(); });
   showFocus();
-  $("#focusRadios").addEventListener("change", (e) => { const v = e.target.value; setFocus(v); write((db) => db.doc("config/settings").set({ focus: v }, { merge: true }), () => {}); });
+
   const showSlate = () => { const r = document.querySelector(`input[name="slate"][value="${slatePin()}"]`); if (r) r.checked = true; };
   showSlate();
-  $("#slateRadios").addEventListener("change", (e) => { try { localStorage.setItem("sb-slate", e.target.value); } catch (err) {} showMode(); });
   $("#f-char").value = S.charName || "";
   // the guest link + QR, and the off switch
   S.roomOpen = null;
