@@ -2627,6 +2627,28 @@ body.tv:has(#roomTvQr:not([hidden])) .rb-rail { padding-bottom: calc((clamp(96px
 .oa-x i b { color: #e8d3a2; font-weight: 700; }
 .oa-x i.pv { color: #b8b0a2; font-style: italic; }
 .oa-it small { display: block; margin-top: .5vh; font: 600 1.4vh/1.1 var(--f-num); color: #e8d3a2; }
+/* the compact field: every live football card on a busy board, and a live football bet on the phone */
+.rb-fld.mini { padding: 2px 0 12px; gap: 7px; margin-left: clamp(12px, 2.4cqw, 18px); margin-right: clamp(12px, 2.4cqw, 18px); }
+.rb-fld.mini .fld { height: 30px; border-radius: 6px; grid-template-columns: 6% 1fr 6%; }
+.rb-fld.mini .ez span { font-size: 9px; letter-spacing: .08em; writing-mode: horizontal-tb; transform: none; }
+.rb-fld.mini .ez:last-child span { transform: none; }
+.rb-fld.mini .los b { width: 13px; height: 8px; margin-top: -4px; }
+.rb-fld.mini .los.ra b { left: 4px; } .rb-fld.mini .los.la b { left: -15px; }
+.rb-fld.mini .fi { gap: 12px; font-size: 12px; }
+.rb-fld.mini .ddx { font-size: 14px; }
+.rb-fld .rzt { padding: 3px 7px; border-radius: 4px; background: rgba(255,77,94,.16); color: #ff8a96; font-size: 11px; letter-spacing: .12em; }
+.rb-fld .wpx { margin-left: auto; color: var(--ink-2); }
+.rb-ldr { display: flex; flex-wrap: wrap; gap: 6px 14px; font: 600 13px/1.2 var(--f-ui); color: var(--ink-2); }
+.rb-ldr span { display: inline-flex; align-items: baseline; gap: 6px; min-width: 0; }
+.rb-ldr em { font: 800 10px/1 var(--f-num); font-style: normal; letter-spacing: .16em; text-transform: uppercase; color: var(--c); }
+.rb-ldr b { font-weight: 700; color: #fff; white-space: nowrap; }
+.rb-ldr i { font-style: normal; color: var(--ink-2); white-space: nowrap; }
+.rb-fld.mini .rb-ldr { font-size: 12px; gap: 4px 12px; }
+.rb-fld.mini.ph { margin: 8px 0 2px; padding: 0; }
+.rb-fld.mini.ph .fld { height: 22px; grid-template-columns: 4% 1fr 4%; }
+.rb-fld.mini.ph .ez span { display: none; }
+.rb-fld.mini.ph .fi { font-size: 11px; }
+.rb-fld.mini.ph .ddx { font-size: 12px; color: var(--ink-1, #fff); }
 </style>
 </head>
 <body>
@@ -3261,8 +3283,14 @@ body.tv:has(#roomTvQr:not([hidden])) .rb-rail { padding-bottom: calc((clamp(96px
     const right = open ? `<b class="num">${fU(b.units)}</b><small class="num">to win ${fU(b.units * ppu(b.odds))}</small>`
       : `<b class="num ${o === "W" ? "pos" : o === "L" ? "neg" : ""}">${o === "P" ? "Push" : fU(net, true)}</b><small>${b.status === "cashout" ? "Cashed out" : o === "W" ? "Won" : o === "L" ? "Lost" : ""}</small>`;
     return `<button type="button" class="ph-bet${open ? "" : " done"} st-${st.c || "n"}" data-phbet="${esc(b.id)}" style="--c:${personCol(b)}">
-      ${avHtml(b)}<div class="t"><b>${esc(b.pick)}${par ? ` <em class="num">${fOdds(b.odds)}</em>` : ""}</b><small>${meta}</small>${line}${lg}</div>
+      ${avHtml(b)}<div class="t"><b>${esc(b.pick)}${par ? ` <em class="num">${fOdds(b.odds)}</em>` : ""}</b><small>${meta}</small>${line}${phFld(b)}${lg}</div>
       <div class="r">${right}</div></button>`;
+  }
+  function phFld(b) {
+    if (b.status !== "open" || b.kind === "parlay" || !b.sel) return "";
+    const g = gameOf(b.sel);
+    if (!g || g.st !== "in" || !(g.sport === "NFL" || g.sport === "CFB") || !g.sit || g.sit.yl == null) return "";
+    return `<div class="rb-fld mini ph">${fldStrip(g, false)}<div class="fi"><span class="ddx">${esc(g.sit.dd || "")}</span>${g.sit.rz ? '<span class="rzt">Red zone</span>' : ""}</div></div>`;
   }
   function phBets(rows) {
     const start = rangeStart(S.range), all = [...S.bets.values()];
@@ -4491,7 +4519,35 @@ body.tv:has(#roomTvQr:not([hidden])) .rb-rail { padding-bottom: calc((clamp(96px
     const wpH = wp == null ? "" : `<div class="wp"><b class="${wp < 50 ? "up" : ""}">${esc(g.a.ab)} ${100 - wp}%</b><div class="bar"><i style="width:${100 - wp}%;background:${col(g.a)}"></i><i style="width:${wp}%;background:${col(g.h)}"></i></div><b class="${wp > 50 ? "up" : ""}">${wp}% ${esc(g.h.ab)}</b><em>Win probability</em></div>`;
     return `<div class="rb-fld">
       <div class="fld"><div class="ez" style="--c:${esc(g.a.col || "#445")}"><span>${esc(g.a.ab)}</span></div><div class="pf"><div class="yd">${nums}</div>${fld}</div><div class="ez" style="--c:${esc(g.h.col || "#445")}"><span>${esc(g.h.ab)}</span></div></div>
-      <div class="fi">${tos("a")}<span class="ddx">${esc(sit.dd || g.d || "")}</span>${sit.dr && sit.dr.t ? `<span class="drt">Drive · ${esc(sit.dr.t)}</span>` : ""}${tos("h")}</div>${wpH}</div>`;
+      <div class="fi">${tos("a")}<span class="ddx">${esc(sit.dd || g.d || "")}</span>${sit.dr && sit.dr.t ? `<span class="drt">Drive · ${esc(sit.dr.t)}</span>` : ""}${tos("h")}</div>${wpH}${ldrHtml(g)}</div>`;
+  }
+  // the field strip: the ball on its yard line, the drive so far, the line to gain, the red zone, each end zone in its team's color
+  function fldStrip(g, nums) {
+    const sit = g.sit || {}, yl = sit.yl, hasBall = yl != null && sit.pos, awayBall = hasBall && String(sit.pos) === String(g.a.id);
+    const col = (t) => esc(bright(t)), x = (v) => Math.max(0, Math.min(100, 100 - v));
+    let fld = "";
+    if (hasBall) {
+      const tgt = sit.ds != null ? Math.max(0, Math.min(100, awayBall ? yl - sit.ds : yl + sit.ds)) : null;
+      const ds = sit.dr && sit.dr.s != null ? sit.dr.s : null, tm = awayBall ? g.a : g.h;
+      const drive = ds != null ? `<i class="drv" style="left:${Math.min(x(ds), x(yl))}%;width:${Math.abs(x(ds) - x(yl))}%;--c:${col(tm)}"></i>` : "";
+      fld = `${sit.rz ? `<i class="rzn ${awayBall ? "r" : "l"}"></i>` : ""}${drive}${tgt != null && tgt !== 0 && tgt !== 100 ? `<i class="fd" style="left:${x(tgt)}%"></i>` : ""}<i class="los${awayBall ? " ra" : " la"}" style="left:${x(yl)}%;--c:${col(tm)}"><b></b></i>`;
+    }
+    const yd = nums ? [10, 20, 30, 40, 50, 40, 30, 20, 10].map((n, i) => `<span style="left:${(i + 1) * 10}%">${n}</span>`).join("") : "";
+    return `<div class="fld"><div class="ez" style="--c:${esc(g.a.col || "#445")}"><span>${esc(g.a.ab)}</span></div><div class="pf"><div class="yd">${yd}</div>${fld}</div><div class="ez" style="--c:${esc(g.h.col || "#445")}"><span>${esc(g.h.ab)}</span></div></div>`;
+  }
+  // the game's passing, rushing and receiving leaders, each in their team's color
+  function ldrHtml(g) {
+    const L = (g.ldr || []).filter((x) => /^(passing|rushing|receiving)Yards$/.test(x.n));
+    if (!L.length) return "";
+    const tmOf = (id) => (String(g.a.id) === id ? g.a : String(g.h.id) === id ? g.h : null), word = { passingYards: "Pass", rushingYards: "Rush", receivingYards: "Rec" };
+    return `<div class="rb-ldr">${L.map((x) => { const t = tmOf(x.tm); return `<span style="--c:${esc(t ? bright(t) : "#8a94a8")}"><em>${word[x.n]}</em><b>${esc(x.p)}</b><i class="num">${esc(x.v.replace(/^\d+\/\d+, /, "").replace(/ (CAR|REC),/, " $1 ·"))}</i></span>`; }).join("")}</div>`;
+  }
+  // a busy board's live football card: the strip, down and distance, who's winning on the numbers, the leaders
+  function miniFld(g) {
+    if (!g || g.st !== "in" || !(g.sport === "NFL" || g.sport === "CFB") || !g.sit || !sset(g.sport, "tracker")) return "";
+    const sit = g.sit, wp = sit.wp != null ? Math.round(sit.wp * 100) : null;
+    const fav = wp == null ? "" : wp >= 50 ? `${esc(g.h.ab)} ${wp}%` : `${esc(g.a.ab)} ${100 - wp}%`;
+    return `<div class="rb-fld mini">${fldStrip(g, false)}<div class="fi"><span class="ddx">${esc(sit.dd || g.d || "")}</span>${sit.rz ? '<span class="rzt">Red zone</span>' : ""}${fav ? `<span class="wpx">Win prob ${fav}</span>` : ""}</div>${ldrHtml(g)}</div>`;
   }
   function gameCard(G, hero, bare) {
     if (!hero && !G.entries.length) return "";
@@ -4505,7 +4561,7 @@ body.tv:has(#roomTvQr:not([hidden])) .rb-rail { padding-bottom: calc((clamp(96px
     const tm = (t, s) => `<div class="tm ${s}${lead === s ? " lead" : ""}">${logo(t, "tl")}<span class="ab">${esc(t.ab)}</span>${pos(t)}${sc(t)}</div>`;
     const mid = `<div class="mid"><span class="clk${live ? " on" : ""}">${esc(clk)}</span>${dd}${rz}</div>`;
     return `<article class="rb-g ${g.st}${hero ? " hero" : ""}" style="--ca:${esc(g.a.col || "#445")};--ch:${esc(g.h.col || "#445")}">
-      ${hero ? `<header class="rb-gh">${tm(g.a, "a")}${mid}${tm(g.h, "h")}</header>${fieldHtml(g)}` : `<header class="rb-gs"><div class="tms">${tm(g.a, "a")}${tm(g.h, "h")}</div>${mid}</header>`}
+      ${hero ? `<header class="rb-gh">${tm(g.a, "a")}${mid}${tm(g.h, "h")}</header>${fieldHtml(g)}` : `<header class="rb-gs"><div class="tms">${tm(g.a, "a")}${tm(g.h, "h")}</div>${mid}</header>${miniFld(g)}`}
       ${bare ? "" : `<div class="rb-rows">${rows.map((r) => (r.h2h ? h2hRow(r.h2h[0], r.h2h[1], g) : posRow(r.p, g))).join("")}${inParlays(G)}</div>`}${hero ? scoringHtml(g) : ""}</article>`;
   }
   // the sportsbook number for a leg right now (a parlay logged before leg odds were saved)
@@ -4707,7 +4763,7 @@ body.tv:has(#roomTvQr:not([hidden])) .rb-rail { padding-bottom: calc((clamp(96px
     heroIds = new Set();
     // trackers for: any hockey / baseball night, or a football window of 2 to 4 games (a full Sunday stays the rolling board)
     const fb = (G) => G.g.sport === "NFL" || G.g.sport === "CFB";
-    let heroes = prime ? [prime] : tv && (act.some((G) => G.g.sport === "NHL" || G.g.sport === "MLB") || (act.length >= 2 && act.length <= 4 && act.every(fb))) ? act : [];
+    let heroes = prime ? [prime] : tv && (act.some((G) => G.g.sport === "NHL" || G.g.sport === "MLB") || (act.length >= 2 && act.length <= 4 && act.every(fb)) || (act.length === 1 && fb(act[0]) && act[0].g.st === "in")) ? act : [];
     heroIds = new Set(heroes.map((G) => G.g.id));
     const body = document.body;
     if (prime) {
@@ -4718,7 +4774,7 @@ body.tv:has(#roomTvQr:not([hidden])) .rb-rail { padding-bottom: calc((clamp(96px
       rbPrime = th.t.ab;
     } else if (rbPrime) { body.classList.remove("prime"); $("#rbMark").innerHTML = ""; rbPrime = null; }
     // one football game keeps its bets in the big card (the MNF look); everything else puts the bets in their own rolling column
-    const split = heroes.length > 0 && !(prime && (prime.g.sport === "NFL" || prime.g.sport === "CFB"));
+    const split = heroes.length > 0 && !((prime || heroes.length === 1) && fb(heroes[0]));
     const rest = (split ? heroes.map((G) => gameCard(G, false)).join("") : "") + list.filter((G) => !heroes.includes(G)).map((G) => gameCard(G, false)).join("") + parlayCard(parlays) + otherCard(other);
     const fol = followCards();
     $("#rbGames").classList.toggle("primeg", heroes.length > 0); $("#rbGames").classList.toggle("solo", heroes.length > 0 && !rest);
@@ -5156,7 +5212,7 @@ body.tv:has(#roomTvQr:not([hidden])) .rb-rail { padding-bottom: calc((clamp(96px
   // ---------- sheets ----------
   function openSheet(id) { $(id).hidden = false; }
   // keep every open screen current: when a new version is up, reload it (never mid-form or mid-animation)
-  const BUILD = "20261016222219";
+  const BUILD = "20261016235528";
   function checkBuild() {
     if (BUILD === "dev") return;
     fetch("version.json?t=" + Date.now(), { cache: "no-store" }).then((r) => (r.ok ? r.json() : null)).then((j) => {
@@ -5716,6 +5772,7 @@ body.tv:has(#roomTvQr:not([hidden])) .rb-rail { padding-bottom: calc((clamp(96px
       to: { a: si.awayTimeouts ?? null, h: si.homeTimeouts ?? null }, wp: lp && lp.probability && typeof lp.probability.homeWinPercentage === "number" ? lp.probability.homeWinPercentage : null,
       dr: lp && lp.drive ? { t: lp.drive.description || "", s: lp.drive.start && typeof lp.drive.start.yardLine === "number" ? lp.drive.start.yardLine : null } : null, lp: lp ? { id: String(lp.id), type: (lp.type && lp.type.text) || "", text: lp.text || "", team: lp.team && lp.team.id, st: lp.start && lp.start.team ? lp.start.team.id : null, yd: typeof lp.statYardage === "number" ? lp.statYardage : null,
       ath: (lp.athletesInvolved || []).slice(0, 3).map((a) => ({ nm: a.displayName || a.fullName || "", sh: a.shortName || "", hs: a.headshot || "", j: a.jersey || "", pos: a.position || "", tm: a.team && a.team.id })) } : null };
+    if (sport === "NFL" || sport === "CFB") g.ldr = (c.leaders || []).map((L) => { const y = (L.leaders || [])[0] || {}, a = y.athlete || {}; return { n: L.name, v: y.displayValue || "", p: a.shortName || a.displayName || "", tm: a.team && a.team.id != null ? String(a.team.id) : "" }; }).filter((x) => x.v && x.p);
     if (sport === "MLB") { try { g.mlb = mlbOf(c, si); } catch (err) {} try { hrScan(g, lp, "bets"); } catch (err) {} }
     const o = (c.odds || [])[0];
     if (o) {
