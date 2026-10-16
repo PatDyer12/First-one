@@ -5041,7 +5041,7 @@ body.tv:has(#roomTvQr:not([hidden])) .rb-rail { padding-bottom: calc((clamp(96px
   // ---------- sheets ----------
   function openSheet(id) { $(id).hidden = false; }
   // keep every open screen current: when a new version is up, reload it (never mid-form or mid-animation)
-  const BUILD = "20261016041244";
+  const BUILD = "20261016151435";
   function checkBuild() {
     if (BUILD === "dev") return;
     fetch("version.json?t=" + Date.now(), { cache: "no-store" }).then((r) => (r.ok ? r.json() : null)).then((j) => {
@@ -6846,10 +6846,12 @@ body.tv:has(#roomTvQr:not([hidden])) .rb-rail { padding-bottom: calc((clamp(96px
   // music breaks: Goldie DJing, a 32 s loop at 120 BPM with the downbeat at 0. playbackRate = song BPM / 120 keeps every move on
   // the song's beat; djPos is where the loop should be `t` seconds into the song (the song's first downbeat lands on the loop's)
   const DJ_BASE = "sounds/aura/dj", DJ_LOOP = 32, DJ_BPM = 120;
-  // the two tracks: tempo and first downbeat keep DJ Goldie on the beat; hit = where the drop lands
+  // the two tracks, extended: the "Really high" song (the coke one) looped on its own 2-bar groove to ~48 s, and the
+  // "Sent it" song (the flips one) as the whole song from Pat's clip, ~46 s. Tempo and a beat keep DJ Goldie on the beat;
+  // hit = where the drop the scene was cut to lands
   const DJ_TRACKS = [
-    { base: "sounds/aura/smoke", bed: "../aura/smoke", label: "Really High", song: "Really High", artist: "Sweat Zone", bpm: 74.5, b0: 2.786, ms: 16900, hit: 13.0 },
-    { base: "sounds/aura/sky", bed: "../aura/sky", label: "Sent It", song: "Sent It", artist: "Sweat Zone", bpm: 103.9, b0: 0.255, ms: 17000, hit: 14.6 },
+    { base: "sounds/dj/coke", bed: "../dj/coke", label: "Really High", song: "Really High", artist: "Sweat Zone", bpm: 73.86, b0: 0.616, ms: 48150, hit: 13.0 },
+    { base: "sounds/dj/flips", bed: "../dj/flips", label: "Sent It", song: "Sent It", artist: "Sweat Zone", bpm: 132.0, b0: 0.676, ms: 46100, hit: 20.72 },
   ];
   let djTurn = Math.floor(Math.random() * 2), bedTurn = Math.floor(Math.random() * 2);
   // a DJ break's own sound (what plays when Spotify doesn't): one of the two tracks, in turn, never a song borrowed from a video
