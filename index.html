@@ -2550,9 +2550,6 @@ body.tv:has(#roomTvQr:not([hidden])) .rb-rail { padding-bottom: calc((clamp(96px
 .wk-line span { font: 600 1.3vh/1 var(--f-ui); letter-spacing: .28em; text-transform: uppercase; color: #c9a45c; }
 .wk-line b { font: 700 2.6vh/1 var(--f-num); color: #f3ead6; white-space: nowrap; }
 .wk-line i { font: 500 1.5vh/1 var(--f-ui); font-style: normal; color: #8f8778; white-space: nowrap; }
-.wk-key { display: flex; flex-direction: column; align-items: center; gap: 1vh; text-align: center; padding: .4vh 4vw 0; }
-.wk-key span { font: 600 1.3vh/1 var(--f-ui); letter-spacing: .34em; text-transform: uppercase; color: #c9a45c; }
-.wk-key p { margin: 0; font: italic 500 3.3vh/1.2 var(--f-serif, Georgia, serif); color: #fff; text-wrap: balance; }
 .wk-tape { flex: 1; min-height: 0; display: flex; flex-direction: column; justify-content: center; overflow: hidden; }
 .wk-r { display: grid; grid-template-columns: minmax(0, 1fr) minmax(15vw, auto) minmax(0, 1fr); align-items: center; column-gap: 1.6vw; padding: .75vh 0; border-bottom: 1px solid rgba(255,246,230,.07); flex: none; }
 .wk-r:last-child { border-bottom: 0; }
@@ -2584,6 +2581,33 @@ body.tv:has(#roomTvQr:not([hidden])) .rb-rail { padding-bottom: calc((clamp(96px
 .wk-rc b { font: italic 600 2.9vh/1.05 var(--f-serif, Georgia, serif); color: #fff; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
 .wk-rc b small { font-size: .62em; color: #8f8778; }
 .wk-rc i { font: 500 1.75vh/1.3 var(--f-ui); font-style: normal; color: #d8cfbd; }
+.wk-body { flex: 1; min-height: 0; display: grid; grid-template-columns: minmax(0, 1.45fr) minmax(0, 1fr); gap: 2.4vw; }
+.wk-body .wk-r { grid-template-columns: minmax(0, 1fr) minmax(10vw, auto) minmax(0, 1fr); column-gap: 1vw; }
+.wk-body .wk-r > span { font-size: 1.25vh; letter-spacing: .16em; white-space: normal; text-align: center; }
+.wk-body .wk-r em { font-size: 1.6vh; white-space: normal; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; }
+.wk-lean { display: flex; flex-direction: column; justify-content: center; gap: 1.6vh; padding: 2vh 1.6vw; border: 1px solid rgba(232,211,162,.35); background: linear-gradient(180deg, rgba(201,164,92,.1), rgba(201,164,92,.02)); min-width: 0; }
+.wk-lean h4 { margin: 0; text-align: center; font: 600 1.35vh/1 var(--f-ui); letter-spacing: .3em; text-transform: uppercase; color: #c9a45c; }
+.wk-m { display: flex; flex-direction: column; gap: .8vh; }
+.wk-m p { margin: 0; text-align: center; font: italic 500 2.5vh/1.1 var(--f-serif, Georgia, serif); color: #8f8778; }
+.wk-m p.on { color: #fff; }
+.wk-gauge { display: grid; grid-template-columns: 4.6vw 1fr 4.6vw; align-items: center; gap: .6vw; }
+.wk-gauge > span { font: 700 1.6vh/1 var(--f-num); letter-spacing: .08em; text-transform: uppercase; color: #6f6a60; text-align: center; }
+.wk-gauge > span.on { color: #e8d3a2; }
+.wk-gauge .trk { position: relative; height: 1.2vh; border-radius: 99px; background: rgba(255,255,255,.07); }
+.wk-gauge .mid { position: absolute; left: 50%; top: -.6vh; bottom: -.6vh; width: 2px; margin-left: -1px; background: rgba(255,246,230,.25); }
+.wk-gauge .fill { position: absolute; top: 0; bottom: 0; border-radius: 99px; background: linear-gradient(90deg, rgba(232,211,162,.55), #e8d3a2); }
+.wk-gauge b { position: absolute; top: 50%; width: 2.6vh; height: 2.6vh; margin: -1.3vh 0 0 -1.3vh; border-radius: 50%; background: #f3ead6; box-shadow: 0 0 0 .35vh rgba(201,164,92,.45), 0 .4vh 1.2vh rgba(0,0,0,.5); }
+.wk-why { list-style: none; margin: .4vh 0 0; padding: 1.4vh 0 0; border-top: 1px solid rgba(201,164,92,.2); display: flex; flex-direction: column; gap: 1.1vh; }
+.wk-why li { display: grid; grid-template-columns: auto 1fr; gap: .8vw; align-items: baseline; font: 500 1.75vh/1.3 var(--f-ui); color: #e3dac6; }
+.wk-why u { text-decoration: none; padding: .35vh .5vw; border-radius: 3px; font: 700 1.15vh/1 var(--f-num); letter-spacing: .1em; text-transform: uppercase; color: #0b0b0a; background: #e8d3a2; }
+.wk-why u.s { background: rgba(232,211,162,.25); color: #e8d3a2; }
+.wk-why li.vs { color: #a39a8a; }
+.wk-why li.vs u { background: transparent; color: #a39a8a; border: 1px solid rgba(163,154,138,.5); }
+.wk-even { margin: 0; text-align: center; font: italic 500 2.2vh/1.2 var(--f-serif, Georgia, serif); color: #b8b0a2; }
+.wk-rc li { grid-template-columns: 13vw minmax(0, 1fr) auto; }
+.wk-rc em { grid-row: 1 / 3; }
+.wk-rc strong { font: 700 1.9vh/1 var(--f-ui); color: #e8d3a2; text-align: right; white-space: nowrap; }
+.wk-rc i { grid-column: 2 / 4; }
 /* a highlight's lower third */
 .oa-chy { position: absolute; left: 3%; right: 3%; bottom: 5%; z-index: 6; display: flex; gap: 2.2vw; align-items: center; padding: 1.4vh 1.6vw; background: linear-gradient(90deg, rgba(9,8,7,.94), rgba(9,8,7,.8)); border-left: 3px solid #e8d3a2; box-shadow: 0 1.4vh 4vh rgba(0,0,0,.55); cursor: default; }
 .oa-chy[hidden] { display: none; }
@@ -2599,7 +2623,8 @@ body.tv:has(#roomTvQr:not([hidden])) .rb-rail { padding-bottom: calc((clamp(96px
 .oa-x span { display: block; font: 600 1.15vh/1 var(--f-ui); letter-spacing: .28em; text-transform: uppercase; color: #c9a45c; margin-bottom: .5vh; }
 .oa-x p { margin: 0; font: 600 1.75vh/1.25 var(--f-ui); color: #f3ead6; }
 .oa-x small { display: block; margin-top: .4vh; font: 600 1.4vh/1.2 var(--f-num); color: #b8b0a2; }
-.oa-x i { display: block; margin-top: .5vh; font: 500 1.4vh/1.3 var(--f-ui); font-style: normal; color: #e8d3a2; }
+.oa-x i { display: block; margin-top: .5vh; font: 500 1.4vh/1.3 var(--f-ui); font-style: normal; color: #d8cfbd; }
+.oa-x i b { color: #e8d3a2; font-weight: 700; }
 .oa-x i.pv { color: #b8b0a2; font-style: italic; }
 .oa-it small { display: block; margin-top: .5vh; font: 600 1.4vh/1.1 var(--f-num); color: #e8d3a2; }
 </style>
@@ -2883,7 +2908,7 @@ body.tv:has(#roomTvQr:not([hidden])) .rb-rail { padding-bottom: calc((clamp(96px
     <div class="field">
       <span class="lbl">Reaction clips</span>
       <label class="togrow"><input type="checkbox" id="clipsOn"> Pop clips up on this screen</label>
-      <span class="hint">When nothing's on, this screen runs its own channel by itself: Sweat Center (the latest highlights from every league, each with its game's stat and the team's next game), The Week Ahead (every big game this week, by the numbers: records, form, scoring, trends, ESPN's win chances, who's out, and a stat to know) and DJ sets, more music overnight. A game or a bet going live takes over.</span>
+      <span class="hint">When nothing's on, this screen runs its own channel by itself: Sweat Center (the latest highlights from every league, each with its game's stat and the team's next game), The Week Ahead (every big game this week, by the numbers: records, form, scoring, trends, ESPN's win chances, who's out, and where the trends lean) and DJ sets, more music overnight. A game or a bet going live takes over.</span>
       <span class="hint">Only the good stuff, and only for your side. Your team's touchdowns, field goals, turnovers, red-zone trips, home runs and goals get a clip, with your team's own clips first. While you're winning, your winning clips play every 2½ minutes. When it's close, a music break or some hype plays every 3 minutes. Music breaks are songs only, with a card showing the song and artist. With only 1 or 2 bets out, there's more dead air, so a clip comes every 2 minutes. When you're down but within two scores, comeback clips play. When you're getting blown out, it stays quiet. Overs and unders are judged on pace, and stay quiet whenever they're off pace. Tap the screen to close a clip. Turn this off on your phone and leave it on for the monitor.</span>
       <div style="display:flex;gap:8px;flex-wrap:wrap"><button type="button" class="btn sm primary" id="trialBtn">Run a trial</button><button type="button" class="btn sm" id="pcTest">Preview a touchdown alert</button></div>
       <span class="hint">The trial replays the latest finished NFL game play by play with a pretend bet on the winner: play alerts and clips when your side scores, quiet when they don't, then the win. Nothing gets saved and it doesn't touch your numbers.</span>
@@ -5131,7 +5156,7 @@ body.tv:has(#roomTvQr:not([hidden])) .rb-rail { padding-bottom: calc((clamp(96px
   // ---------- sheets ----------
   function openSheet(id) { $(id).hidden = false; }
   // keep every open screen current: when a new version is up, reload it (never mid-form or mid-animation)
-  const BUILD = "20261016220752";
+  const BUILD = "20261016222219";
   function checkBuild() {
     if (BUILD === "dev") return;
     fetch("version.json?t=" + Date.now(), { cache: "no-store" }).then((r) => (r.ok ? r.json() : null)).then((j) => {
@@ -8504,7 +8529,7 @@ body.tv:has(#roomTvQr:not([hidden])) .rb-rail { padding-bottom: calc((clamp(96px
     $("#oaE").textContent = seg === "center" ? `${AIR.items.length} plays · ${lgs.slice(0, 4).join(" · ")}` : spUsable() ? "Off your Spotify" + (SP.hlist.length ? " · house in the mix" : "") : gName() + " on the decks";
     if (seg === "week") {
       const ls = [...new Set(WK.block.map((g) => WK_NAME[g.lg]))];
-      $("#oaK").textContent = "Nothing live · this week"; $("#oaB").textContent = "The Week Ahead"; $("#oaE").textContent = `${WK.block.length} games · ${ls.slice(0, 3).join(" · ")} · matchups by the numbers`;
+      $("#oaK").textContent = "Nothing live · this week"; $("#oaB").textContent = "The Week Ahead"; $("#oaE").textContent = `${WK.block.length} games · ${ls.slice(0, 3).join(" · ")} · the numbers and where they lean`;
     }
     el.hidden = false; el.classList.remove("on"); void el.offsetWidth; el.classList.add("on");
     try { snSound("whoosh", 0.5, 150); } catch (e) {}
@@ -8701,7 +8726,7 @@ body.tv:has(#roomTvQr:not([hidden])) .rb-rail { padding-bottom: calc((clamp(96px
         const L = (t.leaders || []).find((y) => y.name === cat), y = L && (L.leaders || [])[0];
         if (!y || !y.athlete) continue;
         let v = String(y.displayValue || "");
-        v = cat === "passingYards" ? v.split(", ").slice(1, 3).join(", ") : v + ({ points: g.lg === "NHL" ? " pts" : " ppg", homeRuns: " HR", avg: " avg" }[cat] || "");
+        v = cat === "passingYards" ? v.split(", ").slice(1, 2).join(", ").replace(" YDS", " yds") : v + ({ points: g.lg === "NHL" ? " pts" : " ppg", homeRuns: " HR", avg: " avg" }[cat] || "");
         x.top[id] = `${y.athlete.shortName || y.athlete.displayName} ${v}`.trim(); break;
       }
     }
@@ -8735,13 +8760,15 @@ body.tv:has(#roomTvQr:not([hidden])) .rb-rail { padding-bottom: calc((clamp(96px
     let f = 0, a = 0; for (const e of L) { const home = e.hId === tid; f += home ? e.hs : e.as; a += home ? e.as : e.hs; }
     return [f / L.length, a / L.length];
   }
-  // the numbers, and nothing about what to bet: a tale of the tape (record, form, scoring, how they've done against the
-  // spread and the total, ESPN's win chances, top players, who's out), the line as it stands, and the one stat to know
+  // the numbers: a tale of the tape (record, form, scoring, how they've done against the spread and the total, ESPN's
+  // win chances, top players, who's out), the line as it stands, and where the trends lean. Every stat that points
+  // somewhere says which way (a team, or a higher or lower scoring game); the lean is where they add up. It reads as
+  // trends ("leans Jacksonville", "leans lower-scoring"), never as a bet
   function wkTrends(g, x) {
     const A = g.a, H = g.h, T = { a: A, h: H }, other = { a: "h", h: "a" }, ln = x.ln || {}, lg = g.lg;
     const fb = lg === "NFL" || lg === "CFB", hoop = lg === "NBA" || lg === "CBB", ml = lg === "NHL" || lg === "MLB";
     const same = A.loc === H.loc, who = (k) => (same ? T[k].nm : T[k].loc), r1 = (v) => +v.toFixed(1);
-    const facts = [], tape = [], fact = (sv, txt) => facts.push({ s: sv, txt });
+    const facts = [], tape = [], fact = (sv, txt, k) => facts.push({ s: sv, txt, k: k || null });
     const unit = fb || hoop ? "points" : lg === "NHL" ? "goals" : "runs", f1 = (v) => (fb || hoop ? v.toFixed(1) : v.toFixed(2));
     // the line, as it stands and where it opened
     const fav = (v) => (v == null ? "" : v === 0 ? "Pick'em" : v < 0 ? `${H.ab} ${wkSp(v)}` : `${A.ab} ${wkSp(-v)}`);
@@ -8751,17 +8778,17 @@ body.tv:has(#roomTvQr:not([hidden])) .rb-rail { padding-bottom: calc((clamp(96px
     if (ln.mlH != null && ln.mlA != null) { const a = wkIp(ln.mlH), b = wkIp(ln.mlA); qh = a / (a + b); }
     if (!ml && ln.sp != null && ln.oSp != null) {
       const d = r1(ln.sp - ln.oSp), k = d < 0 ? "h" : "a";
-      if (Math.abs(d) >= (fb ? 1 : 1.5)) fact(Math.min(1.2, Math.abs(d) / (fb ? 4 : 5)) + 0.2, `The spread has moved ${Math.abs(d)} point${Math.abs(d) === 1 ? "" : "s"} toward ${who(k)} since it opened`);
+      if (Math.abs(d) >= (fb ? 1 : 1.5)) fact(Math.min(1.2, Math.abs(d) / (fb ? 4 : 5)) + 0.2, `The spread has moved ${Math.abs(d)} point${Math.abs(d) === 1 ? "" : "s"} toward ${who(k)} since it opened`, k);
     } else if (qh != null && ln.oMlH != null && ln.oMlA != null) {
       const a = wkIp(ln.oMlH), b = wkIp(ln.oMlA), d = qh - a / (a + b), k = d > 0 ? "h" : "a";
-      if (Math.abs(d) >= 0.01) line.oMl = ln.mlH <= ln.mlA ? `${H.ab} ${wkMl(ln.oMlH)}` : `${A.ab} ${wkMl(ln.oMlA)}`;
-      if (Math.abs(d) >= 0.04) fact(Math.min(1.2, Math.abs(d) / 0.1) + 0.15, `${who(k)} has gone from ${wkMl(k === "h" ? ln.oMlH : ln.oMlA)} to ${wkMl(k === "h" ? ln.mlH : ln.mlA)} since the line opened`);
+      if (Math.abs(d) >= 0.01) line.oMl = `${H.ab} ${wkMl(ln.oMlH)}`;
+      if (Math.abs(d) >= 0.04) fact(Math.min(1.2, Math.abs(d) / 0.1) + 0.15, `${who(k)} has gone from ${wkMl(k === "h" ? ln.oMlH : ln.oMlA)} to ${wkMl(k === "h" ? ln.mlH : ln.mlA)} since the line opened`, k);
     }
-    if (ln.ou != null && ln.oOu != null) { const d = r1(ln.ou - ln.oOu); if (Math.abs(d) >= (fb ? 1.5 : hoop ? 2 : 0.5)) fact(Math.min(1.1, Math.abs(d) / (fb ? 5 : hoop ? 7 : 1)) + 0.1, `The total has ${d > 0 ? "climbed" : "dropped"} from ${ln.oOu} to ${ln.ou} since it opened`); }
+    if (ln.ou != null && ln.oOu != null) { const d = r1(ln.ou - ln.oOu); if (Math.abs(d) >= (fb ? 1.5 : hoop ? 2 : 0.5)) fact(Math.min(1.1, Math.abs(d) / (fb ? 5 : hoop ? 7 : 1)) + 0.1, `The total has ${d > 0 ? "climbed" : "dropped"} from ${ln.oOu} to ${ln.ou} since it opened`, d > 0 ? "o" : "u"); }
     // the tape
     const pct = (rec) => { const n = String(rec || "").split("-").map((v) => parseInt(v, 10) || 0); const gp = n.reduce((a, v) => a + v, 0); return gp ? n[0] / gp : null; };
     const better = (a, b, hi) => (a == null || b == null || a === b ? "" : (hi ? a > b : a < b) ? "a" : "h");
-    if (pct(A.rec) != null || pct(H.rec) != null) tape.push({ l: "Record", a: A.rec || "–", h: H.rec || "–", b: better(pct(A.rec), pct(H.rec), true) });
+    if (A.rec || H.rec) tape.push({ l: "Record", a: A.rec || "–", h: H.rec || "–", b: better(pct(A.rec), pct(H.rec), true) });
     const L5 = { a: x.l5[A.id] || [], h: x.l5[H.id] || [] };
     if (L5.a.length || L5.h.length) tape.push({ l: "Last " + Math.max(L5.a.length, L5.h.length), t: "form", a: L5.a.map((e) => e.r), h: L5.h.map((e) => e.r) });
     let pf = { a: wkPF(lg, x.st[A.id]), h: wkPF(lg, x.st[H.id]) }, src = "season";
@@ -8772,9 +8799,12 @@ body.tv:has(#roomTvQr:not([hidden])) .rb-rail { padding-bottom: calc((clamp(96px
       tape.push({ l: `Allowed a game${tag}`, a: f1(pf.a[1]), h: f1(pf.h[1]), b: better(pf.a[1], pf.h[1], false) });
       const hfa = g.ns ? 0 : { NFL: 1.5, CFB: 2.5, NBA: 2.5, CBB: 3, NHL: 0.15, MLB: 0.15 }[lg] || 0;
       const ph = (pf.h[0] + pf.a[1]) / 2 + hfa / 2, pa = (pf.a[0] + pf.h[1]) / 2 - hfa / 2, pm = ph - pa, pt = ph + pa, cut = src === "season" ? 0 : 0.15, k = pm >= 0 ? "h" : "a";
-      if (!ml && ln.sp != null && Math.abs(pm + ln.sp) >= (fb ? 3 : 4)) fact(Math.min(1.1, Math.abs(pm + ln.sp) / (fb ? 9 : 12)) + 0.2 - cut, `${src === "season" ? "Season" : "Recent"} scoring averages project ${who(k)} by ${f1(Math.abs(pm))}`);
-      if (ln.ou != null && Math.abs(pt - ln.ou) >= (fb ? 3.5 : hoop ? 6 : lg === "NHL" ? 0.5 : 0.7)) fact(Math.min(1.1, Math.abs(pt - ln.ou) / (fb ? 10 : hoop ? 14 : lg === "NHL" ? 1.4 : 2)) + 0.15 - cut, `Their ${src === "season" ? "season" : "recent"} scoring averages add up to ${f1(pt)} ${unit}, with the total at ${ln.ou}`);
-      for (const q of ["a", "h"]) { const m = pf[q][0] - pf[q][1]; if (src === "season" && Math.abs(m) >= (fb || hoop ? 10 : lg === "NHL" ? 1.2 : 1)) fact(0.5, `${who(q)} is ${m > 0 ? "outscoring" : "being outscored by"} opponents by ${f1(Math.abs(m))} ${unit} a game`); }
+      if (!ml && ln.sp != null && Math.abs(pm + ln.sp) >= (fb ? 3 : 4)) {
+        const e = pm + ln.sp, lk = e > 0 ? "h" : "a", favK = ln.sp < 0 ? "h" : "a", lbl = src === "season" ? "Season" : "Recent";
+        fact(Math.min(1.1, Math.abs(e) / (fb ? 9 : 12)) + 0.2 - cut, lk !== k ? `${lbl} scoring averages project only a ${f1(Math.abs(pm))}-point edge for ${who(k)}, less than the spread` : lk === favK ? `${lbl} scoring averages project ${who(k)} by ${f1(Math.abs(pm))}, more than the spread` : `${lbl} scoring averages project ${who(k)} to win outright, by ${f1(Math.abs(pm))}`, lk);
+      }
+      if (ln.ou != null && Math.abs(pt - ln.ou) >= (fb ? 3.5 : hoop ? 6 : lg === "NHL" ? 0.5 : 0.7)) fact(Math.min(1.1, Math.abs(pt - ln.ou) / (fb ? 10 : hoop ? 14 : lg === "NHL" ? 1.4 : 2)) + 0.15 - cut, `Their ${src === "season" ? "season" : "recent"} scoring averages add up to ${f1(pt)} ${unit}, with the total at ${ln.ou}`, pt > ln.ou ? "o" : "u");
+      for (const q of ["a", "h"]) { const m = pf[q][0] - pf[q][1]; if (src === "season" && Math.abs(m) >= (fb || hoop ? 10 : lg === "NHL" ? 1.2 : 1)) fact(0.5, `${who(q)} is ${m > 0 ? "outscoring" : "being outscored by"} opponents by ${f1(Math.abs(m))} ${unit} a game`, m > 0 ? q : other[q]); }
     }
     const word = lg === "NHL" ? "Puck line" : lg === "MLB" ? "Run line" : "Against the spread", R = { a: wkRec(A.id, L5.a), h: wkRec(H.id, L5.h) };
     const rs = (r) => `${r.w}-${r.l}${r.p ? "-" + r.p : ""}`;
@@ -8782,31 +8812,41 @@ body.tv:has(#roomTvQr:not([hidden])) .rb-rail { padding-bottom: calc((clamp(96px
     for (const k of ["a", "h"]) {
       const r = R[k], rl = ml ? 0.15 : 0, on = ml ? ` on the ${word.toLowerCase()}` : "";
       if (r.n < 4) continue;
-      if (r.w >= Math.max(4, r.n - 1)) fact(0.5 + 0.08 * (r.w - 3) + (r.l ? 0 : 0.1) - rl, `${who(k)} has covered${on} in ${r.w} of its last ${r.n}`);
-      else if (r.l >= Math.max(4, r.n - 1)) fact(0.5 + 0.08 * (r.l - 3) + (r.w ? 0 : 0.1) - rl, `${who(k)} has covered${on} in just ${r.w} of its last ${r.n}`);
+      if (r.w >= Math.max(4, r.n - 1)) fact(0.5 + 0.08 * (r.w - 3) + (r.l ? 0 : 0.1) - rl, `${who(k)} has covered${on} in ${r.w} of its last ${r.n}`, k);
+      else if (r.l >= Math.max(4, r.n - 1)) fact(0.5 + 0.08 * (r.l - 3) + (r.w ? 0 : 0.1) - rl, `${who(k)} has covered${on} in just ${r.w} of its last ${r.n}`, other[k]);
     }
     if (R.a.o + R.a.u >= 3 && R.h.o + R.h.u >= 3) tape.push({ l: `Over / under · last ${Math.max(R.a.o + R.a.u + R.a.q, R.h.o + R.h.u + R.h.q)}`, a: `${R.a.o}-${R.a.u}`, h: `${R.h.o}-${R.h.u}` });
     const ov = R.a.o + R.h.o, un = R.a.u + R.h.u;
-    if (ov + un >= 7) { const f = ov / (ov + un); if (f >= 0.75 || f <= 0.25) fact(0.45 + (Math.abs(f - 0.5) - 0.25) * 2.4, `${Math.max(ov, un)} of these teams' last ${ov + un} games went ${f > 0.5 ? "over" : "under"} the total`); }
+    if (ov + un >= 7) { const f = ov / (ov + un); if (f >= 0.75 || f <= 0.25) fact(0.45 + (Math.abs(f - 0.5) - 0.25) * 2.4, `${Math.max(ov, un)} of these teams' last ${ov + un} games went ${f > 0.5 ? "over" : "under"} the total`, f > 0.5 ? "o" : "u"); }
     if (x.prd) {
       tape.push({ l: "Win chance · ESPN", t: "bar", a: x.prd.a, h: x.prd.h });
       const k = x.prd.h >= x.prd.a ? "h" : "a", e = qh == null ? 0 : x.prd.h - qh, ek = e > 0 ? "h" : "a";
-      if (Math.abs(e) >= 0.05) fact(Math.min(1.2, Math.abs(e) / 0.1) + 0.1, `ESPN's model gives ${who(ek)} a ${wkPct(x.prd[ek])} chance to win; the odds imply ${wkPct(ek === "h" ? qh : 1 - qh)}`);
-      else if (x.prd[k] >= 0.75) fact(0.45, `ESPN's model gives ${who(k)} a ${wkPct(x.prd[k])} chance to win`);
+      if (Math.abs(e) >= 0.05) fact(Math.min(1.2, Math.abs(e) / 0.1) + 0.1, `ESPN's model gives ${who(ek)} a ${wkPct(x.prd[ek])} chance to win; the odds imply ${wkPct(ek === "h" ? qh : 1 - qh)}`, ek);
+      else if (x.prd[k] >= 0.75) fact(0.45, `ESPN's model gives ${who(k)} a ${wkPct(x.prd[k])} chance to win`, k);
     }
     // form, streaks, the series
     const F = { a: { w: L5.a.filter((e) => e.r === "W").length, n: L5.a.length }, h: { w: L5.h.filter((e) => e.r === "W").length, n: L5.h.length } };
-    if (F.a.n >= 4 && F.h.n >= 4) for (const k of ["a", "h"]) { const me = F[k], op = F[other[k]]; if (me.w >= 4 && op.w <= 1) fact(0.42, `${who(k)} has won ${me.w} of its last ${me.n}; ${who(other[k])} ${op.w} of ${op.n}`); }
+    if (F.a.n >= 4 && F.h.n >= 4) for (const k of ["a", "h"]) { const me = F[k], op = F[other[k]]; if (me.w >= 4 && op.w <= 1) fact(0.42, `${who(k)} has won ${me.w} of its last ${me.n}; ${who(other[k])} ${op.w} of ${op.n}`, k); }
     for (const k of ["a", "h"]) {
       const n = String(T[k].rec || "").split("-").map((v) => parseInt(v, 10) || 0), gp = n.reduce((a, v) => a + v, 0);
-      if (gp >= 3 && n[0] === gp) fact(0.62, `${who(k)} is unbeaten at ${T[k].rec}`);
-      else if (gp >= 3 && n[0] === 0) fact(0.6, `${who(k)} is still looking for its first win (${T[k].rec})`);
+      if (gp >= 3 && n[0] === gp) fact(0.62, `${who(k)} is unbeaten at ${T[k].rec}`, k);
+      else if (gp >= 3 && n[0] === 0) fact(0.6, `${who(k)} is still looking for its first win (${T[k].rec})`, other[k]);
     }
     if (x.ser) fact(/game\s*\d/i.test(g.note) ? 0.9 : 0.3, x.ser.replace(/^(\w+) (leads|wins)/, (m0, ab, v) => (ab === A.ab ? who("a") : ab === H.ab ? who("h") : ab) + " " + v));
     if (x.top[A.id] || x.top[H.id]) tape.push({ l: "Top player", t: "txt", a: x.top[A.id] || "–", h: x.top[H.id] || "–" });
     if ((x.inj[A.id] || []).length || (x.inj[H.id] || []).length) tape.push({ l: "Out", t: "txt", a: (x.inj[A.id] || []).join(", ") || "–", h: (x.inj[H.id] || []).join(", ") || "–" });
     facts.sort((p, q) => q.s - p.s);
-    return { key: facts[0] || null, facts, tape, line };
+    // where it all leans: -1 (away / lower scoring) to 1 (home / higher scoring)
+    const sc = { a: 0, h: 0, o: 0, u: 0 }; for (const f of facts) if (f.k) sc[f.k] += f.s;
+    const side = Math.tanh((sc.h - sc.a) / 1.5), tot = Math.tanh((sc.o - sc.u) / 1.2);
+    const how = (v) => (Math.abs(v) < 0.5 ? "Slight lean" : Math.abs(v) < 0.8 ? "Leans" : "Strong lean");
+    const sideK = Math.abs(side) >= 0.2 ? (side > 0 ? "h" : "a") : null, totK = Math.abs(tot) >= 0.2 ? (tot > 0 ? "o" : "u") : null;
+    const scoring = (k) => (k === "o" ? "higher-scoring" : "lower-scoring");
+    const why = facts.filter((f) => f.k && (f.k === sideK || f.k === totK)).slice(0, 3), opp = { a: "h", h: "a", o: "u", u: "o" };
+    const vs = facts.find((f) => f.k && ((sideK && f.k === opp[sideK]) || (totK && f.k === opp[totK]))) || null;
+    const head = sideK && Math.abs(side) >= Math.abs(tot) ? `Trends lean ${who(sideK)}` : totK ? `Trends lean ${scoring(totK)}` : sideK ? `Trends lean ${who(sideK)}` : "";
+    const lean = { side, tot, sideK, totK, head, why, vs, sideTxt: sideK ? `${how(side)} ${who(sideK)}` : "Even", totTxt: totK ? `${how(tot)} ${scoring(totK)}` : "Even" };
+    return { key: why[0] || facts[0] || null, facts, tape, line, lean };
   }
   // the game page and the closing lines it needs, one game at a time
   function wkPvLoad(g) {
@@ -8878,12 +8918,12 @@ body.tv:has(#roomTvQr:not([hidden])) .rb-rail { padding-bottom: calc((clamp(96px
     if (!g) { if (!x.wkAsk) { x.wkAsk = 1; wkDay(lg, wkYmd(x.at), 3 * 3600e3); wkDay(lg, wkYmd(x.at - 864e5), 3 * 3600e3); } return null; }
     const nx = wkNext(g); if (nx && !WK.pv.has(nx.id) && Date.now() - (WK.fail.get(nx.id) || 0) > 10 * 60e3) wkPvLoad(nx);
     const pv = nx && WK.pv.get(nx.id);
-    return { g, st: wkStat(g), nx, key: pv && pv.tr ? pv.tr.key : null, art: pv ? pv.art : "" };
+    return { g, st: wkStat(g), nx, key: pv && pv.tr ? pv.tr.key : null, lean: pv && pv.tr ? pv.tr.lean : null, art: pv ? pv.art : "" };
   }
   function wkHlHtml(w) {
     let h = "";
     if (w.st && (w.st.st || w.st.score)) h += `<div class="oa-x"><span>The stat</span>${w.st.st ? `<p>${esc(w.st.st)}</p>` : ""}<small>${esc(w.st.score)}${w.st.ser ? " · " + esc(w.st.ser) : ""}</small></div>`;
-    if (w.nx) { const n = w.nx, o = n.o; h += `<div class="oa-x"><span>Next up</span><p>${esc(n.a.ab)} at ${esc(n.h.ab)} · ${esc(wkWhen(n.t, n.tba))}</p>${o ? `<small>${esc(o.d)}${o.ou != null ? " · O/U " + o.ou : ""}</small>` : ""}${w.key ? `<i>${esc(w.key.txt)}</i>` : ""}${w.art ? `<i class="pv">${esc(w.art)}</i>` : ""}</div>`; }
+    if (w.nx) { const n = w.nx, o = n.o; h += `<div class="oa-x"><span>Next up</span><p>${esc(n.a.ab)} at ${esc(n.h.ab)} · ${esc(wkWhen(n.t, n.tba))}</p>${o ? `<small>${esc(o.d)}${o.ou != null ? " · O/U " + o.ou : ""}</small>` : ""}${w.lean && w.lean.head ? `<i><b>${esc(w.lean.head)}</b>${w.key ? ": " + esc(w.key.txt) : ""}</i>` : w.key ? `<i>${esc(w.key.txt)}</i>` : ""}${w.art ? `<i class="pv">${esc(w.art)}</i>` : ""}</div>`; }
     return h;
   }
   // the lower third: partway into a highlight, its stat and the next game slide in for 10 seconds
@@ -8897,14 +8937,19 @@ body.tv:has(#roomTvQr:not([hidden])) .rb-rail { padding-bottom: calc((clamp(96px
       const w = wkHl(x); if (!w || (!(w.st && w.st.st) && !w.nx)) return;
       const n = w.nx;
       el.innerHTML = (w.st && w.st.st ? `<div><span>The stat</span><b>${esc(w.st.st)}</b></div>` : "") +
-        (n ? `<div><span>Next up</span><b>${esc(n.a.ab)} at ${esc(n.h.ab)} · ${esc(wkWhen(n.t, n.tba))}${n.o ? " · " + esc(n.o.d) : ""}</b>${w.key ? `<em>${esc(w.key.txt)}</em>` : ""}</div>` : "");
+        (n ? `<div><span>Next up</span><b>${esc(n.a.ab)} at ${esc(n.h.ab)} · ${esc(wkWhen(n.t, n.tba))}${n.o ? " · " + esc(n.o.d) : ""}</b>${w.lean && w.lean.head ? `<em>${esc(w.lean.head)}</em>` : w.key ? `<em>${esc(w.key.txt)}</em>` : ""}</div>` : "");
       el.hidden = false; el.classList.remove("chyin"); void el.offsetWidth; el.classList.add("chyin");
       wkChyH = setTimeout(() => { el.hidden = true; }, 10e3);
     }, Math.max(4000, Math.min(x.ms * 0.3, 14e3)));
   }
   // ---------- the cards ----------
+  // a meter: the marker sits toward the side the trends lean, the fill runs out to it from the middle
+  function wkGauge(v, l, r, lOn, rOn) {
+    const p = Math.max(-1, Math.min(1, v || 0)), left = 50 + Math.min(0, p) * 50, w = Math.abs(p) * 50;
+    return `<div class="wk-gauge"><span class="${lOn ? "on" : ""}">${esc(l)}</span><div class="trk"><i class="mid"></i><i class="fill" style="left:${left.toFixed(1)}%;width:${w.toFixed(1)}%"></i><b style="left:${(50 + p * 50).toFixed(1)}%"></b></div><span class="${rOn ? "on" : ""}">${esc(r)}</span></div>`;
+  }
   function wkCard(g, x, i, n) {
-    const tr = x.tr || {}, L = tr.line || {}, key = tr.key;
+    const tr = x.tr || {}, L = tr.line || {}, lean = tr.lean;
     const tm = (k) => { const t = g[k]; return `<div class="wk-tm ${k}" style="--tc:${esc(t.col)}"><div class="wk-lg">${t.lg ? `<img src="${esc(t.lg)}" alt="" referrerpolicy="no-referrer">` : ""}</div><div class="wk-nm"><b>${esc(t.nm)}</b><em>${t.rk ? "No. " + t.rk + " · " : ""}${esc(t.rec || t.ab)}</em></div></div>`; };
     const head = [WK_NAME[g.lg], g.note, wkWhen(g.t, g.tba), g.tv].filter(Boolean).map(esc).join(" · ");
     const cell = (lbl, v, was) => (v != null && v !== "" ? `<div><span>${lbl}</span><b>${esc(String(v))}</b>${was != null && was !== "" ? `<i>opened ${esc(String(was))}</i>` : ""}</div>` : "");
@@ -8917,17 +8962,22 @@ body.tv:has(#roomTvQr:not([hidden])) .rb-rail { padding-bottom: calc((clamp(96px
     const row = (r) => (r.t === "bar"
       ? `<div class="wk-r wkbar"><b>${wkPct(r.a)}</b><div><span>${esc(r.l)}</span><p><i style="width:${(r.a * 100).toFixed(1)}%;--tc:${esc(g.a.col)}"></i><i style="width:${(r.h * 100).toFixed(1)}%;--tc:${esc(g.h.col)}"></i></p></div><b>${wkPct(r.h)}</b></div>`
       : `<div class="wk-r${r.t ? " wk" + r.t : ""}"><div class="a">${val(r, "a")}</div><span>${esc(r.l)}</span><div class="h">${val(r, "h")}</div></div>`);
+    const tag = (k) => (k === "o" ? "Higher" : k === "u" ? "Lower" : g[k].ab);
+    const panel = lean ? `<div class="wk-lean"><h4>Where the trends lean</h4>
+        <div class="wk-m">${wkGauge(lean.side, g.a.ab, g.h.ab, lean.sideK === "a", lean.sideK === "h")}<p class="${lean.sideK ? "on" : ""}">${esc(lean.sideTxt)}</p></div>
+        <div class="wk-m">${wkGauge(lean.tot, "Lower", "Higher", lean.totK === "u", lean.totK === "o")}<p class="${lean.totK ? "on" : ""}">Scoring: ${esc(lean.totTxt.replace(/ (higher|lower)-scoring$/, " $1"))}</p></div>
+        ${lean.why.length ? `<ul class="wk-why">${lean.why.map((f) => `<li><u class="${f.k === "o" || f.k === "u" ? "s" : ""}">${esc(tag(f.k))}</u><span>${esc(f.txt)}</span></li>`).join("")}${lean.vs ? `<li class="vs"><u>Other side</u><span>${esc(lean.vs.txt)}</span></li>` : ""}</ul>`
+          : tr.key ? `<ul class="wk-why"><li><u>Stat</u><span>${esc(tr.key.txt)}</span></li></ul>` : `<p class="wk-even">Even by the numbers.</p>`}</div>` : "";
     return `<div class="wk-top"><span>${head}</span><em>${i + 1} / ${n}</em></div>
       <div class="wk-mu">${tm("a")}<div class="wk-mid">${g.ns ? "vs" : "at"}</div>${tm("h")}</div>
       ${line ? `<div class="wk-line">${line}</div>` : ""}
-      ${key ? `<div class="wk-key"><span>Stat to know</span><p>${esc(key.txt)}</p></div>` : ""}
-      <div class="wk-tape">${(tr.tape || []).slice(0, 9).map(row).join("")}</div>
+      <div class="wk-body"><div class="wk-tape">${(tr.tape || []).slice(0, 9).map(row).join("")}</div>${panel}</div>
       ${x.art ? `<div class="wk-pv"><span>Preview</span><p>${esc(x.art)}</p></div>` : ""}`;
   }
   function wkRecap(block) {
-    const rows = block.map((g) => { const x = WK.pv.get(g.id), k = x && x.tr && x.tr.key;
-      return `<li><em>${esc(WK_NAME[g.lg])}<br>${esc(wkWhen(g.t, g.tba))}</em><b>${esc(g.a.nm)} <small>at</small> ${esc(g.h.nm)}</b><i>${k ? esc(k.txt) : ""}</i></li>`; }).join("");
-    return `<div class="wk-top"><span>The Week Ahead · coming up</span><em>${block.length} games</em></div><ul class="wk-rc">${rows}</ul>`;
+    const rows = block.map((g) => { const x = WK.pv.get(g.id), tr = x && x.tr, ln = tr && tr.lean, k = tr && tr.key;
+      return `<li><em>${esc(WK_NAME[g.lg])}<br>${esc(wkWhen(g.t, g.tba))}</em><b>${esc(g.a.nm)} <small>at</small> ${esc(g.h.nm)}</b><strong>${ln && ln.head ? esc(ln.head) : "Even by the numbers"}</strong><i>${k ? esc(k.txt) : ""}</i></li>`; }).join("");
+    return `<div class="wk-top"><span>The Week Ahead · where the trends lean</span><em>${block.length} games</em></div><ul class="wk-rc">${rows}</ul>`;
   }
   const WK_CARD = 12e3;
   function wkShow() {
@@ -8947,7 +8997,7 @@ body.tv:has(#roomTvQr:not([hidden])) .rb-rail { padding-bottom: calc((clamp(96px
     if (WK.bi < 0 || now - WK.cardAt >= WK_CARD) { if (WK.bi < WK.block.length) WK.bi++; WK.cardAt = now; wkShow(); }
     else if (el.hidden) wkShow();
   }
-  const wkRundown = () => `<div class="oa-run">${WK.block.map((g, i) => `<div class="oa-it${i === WK.bi ? " on" : i < WK.bi ? " done" : ""}"><em>${i === WK.bi ? "Now · " : i === WK.bi + 1 ? "Up next · " : ""}${esc(WK_NAME[g.lg])} · ${esc(wkWhen(g.t, g.tba))}</em><b>${esc(g.a.nm)} at ${esc(g.h.nm)}</b></div>`).join("")}</div>`;
+  const wkRundown = () => `<div class="oa-run">${WK.block.map((g, i) => `<div class="oa-it${i === WK.bi ? " on" : i < WK.bi ? " done" : ""}"><em>${i === WK.bi ? "Now · " : i === WK.bi + 1 ? "Up next · " : ""}${esc(WK_NAME[g.lg])} · ${esc(wkWhen(g.t, g.tba))}</em><b>${esc(g.a.nm)} at ${esc(g.h.nm)}</b>${(() => { const x = WK.pv.get(g.id), l = x && x.tr && x.tr.lean; return l && l.head ? `<small>${esc(l.head)}</small>` : ""; })()}</div>`).join("")}</div>`;
   setInterval(wkPoll, 5000); setInterval(wkPrefetch, 4000); setInterval(wkTick, 1000);
   function teamHype(b, g, e, why) {
     if (!clipsOn() || !g || !e.side) return;
