@@ -5041,7 +5041,7 @@ body.tv:has(#roomTvQr:not([hidden])) .rb-rail { padding-bottom: calc((clamp(96px
   // ---------- sheets ----------
   function openSheet(id) { $(id).hidden = false; }
   // keep every open screen current: when a new version is up, reload it (never mid-form or mid-animation)
-  const BUILD = "20261015234849";
+  const BUILD = "20261016041244";
   function checkBuild() {
     if (BUILD === "dev") return;
     fetch("version.json?t=" + Date.now(), { cache: "no-store" }).then((r) => (r.ok ? r.json() : null)).then((j) => {
@@ -6787,7 +6787,7 @@ body.tv:has(#roomTvQr:not([hidden])) .rb-rail { padding-bottom: calc((clamp(96px
         if (go !== pipGo || SP.seq !== sp.seq) return;
         if (st && (st.loading || (!st.paused && st.track_window && st.track_window.current_track))) return;
         spStop();
-        SP.err = "Spotify didn't play on this screen, so that one used the built-in song."; spShow();
+        SP.err = "Spotify didn't play on this screen, so that one used a backup track."; spShow();
         if (!c || P.ext || !P.base) return;
         (P.lib ? clipBuf(P.base) : loadBuf(P.base)).then((buf) => { if (!buf || go !== pipGo) return; statusSrc = playBuf(c, buf, 0.95); clearTimeout(pipT); pipT = setTimeout(() => { if (go === pipGo) stopStatus(); }, Math.min(P.ms, buf.duration * 1000)); });
       }).catch(() => {});
@@ -6846,6 +6846,14 @@ body.tv:has(#roomTvQr:not([hidden])) .rb-rail { padding-bottom: calc((clamp(96px
   // music breaks: Goldie DJing, a 32 s loop at 120 BPM with the downbeat at 0. playbackRate = song BPM / 120 keeps every move on
   // the song's beat; djPos is where the loop should be `t` seconds into the song (the song's first downbeat lands on the loop's)
   const DJ_BASE = "sounds/aura/dj", DJ_LOOP = 32, DJ_BPM = 120;
+  // the two tracks: tempo and first downbeat keep DJ Goldie on the beat; hit = where the drop lands
+  const DJ_TRACKS = [
+    { base: "sounds/aura/smoke", bed: "../aura/smoke", label: "Really High", song: "Really High", artist: "Sweat Zone", bpm: 74.5, b0: 2.786, ms: 16900, hit: 13.0 },
+    { base: "sounds/aura/sky", bed: "../aura/sky", label: "Sent It", song: "Sent It", artist: "Sweat Zone", bpm: 103.9, b0: 0.255, ms: 17000, hit: 14.6 },
+  ];
+  let djTurn = Math.floor(Math.random() * 2), bedTurn = Math.floor(Math.random() * 2);
+  // a DJ break's own sound (what plays when Spotify doesn't): one of the two tracks, in turn, never a song borrowed from a video
+  const djTrack = (P) => (P && P !== "lockin" && P.dj && P.bpm && !P.house ? Object.assign({}, P, DJ_TRACKS[djTurn++ % 2], { lib: true, music: true, songId: undefined }) : P);
   const djRate = (bpm) => { let r = bpm / DJ_BPM; while (r < 0.72) r *= 2; while (r > 1.44) r /= 2; return r; };
   const djPos = (P, t) => { const x = ((t - (P.b0 || 0)) * djRate(P.bpm)) % DJ_LOOP; return x < 0 ? x + DJ_LOOP : x; };
   let djT = 0;
@@ -6856,11 +6864,11 @@ body.tv:has(#roomTvQr:not([hidden])) .rb-rail { padding-bottom: calc((clamp(96px
     const jb = $("#jumbo"), v = $("#pipVid"), bg = $("#jbBg"), c = clipCtx(), go = ++pipGo, betId = b.id, team = pipTeam;
     pipTeam = null;
     v.onended = null; v.style.opacity = "";
-    if (!pre) P = houseTurn(P);
+    if (!pre) P = houseTurn(djTrack(P));
     const hz = !!(P.set || P.spSet) && !pre; SP.useHouse = !!P.spSet;
     if (hz) why = "House set";
     const lux = !!P.lux || hz;
-    const loopOne = P.spSet ? pickClip(houseEdits()) : null;   // under a Spotify house song: one edit, looping
+    const loopOne = null;   // a Spotify house song gets DJ Goldie, never one of the edits with its sound off
     const dj = !!(P.dj && P.bpm), vbase = loopOne ? loopOne.base : dj ? DJ_BASE : P.base, rate = dj && !loopOne ? djRate(P.bpm) : 1;
     const src = P.ext || vidSrc(vbase);
     v.muted = true; v.onerror = P.ext ? () => { if (go === pipGo) stopStatus(); } : () => { const s0 = v.getAttribute("src") || ""; if (/\.webm/.test(s0)) { const s1 = s0.replace(".webm", ".mp4"); v.src = s1; bg.src = s1; v.load(); bg.load(); } };
@@ -6868,7 +6876,7 @@ body.tv:has(#roomTvQr:not([hidden])) .rb-rail { padding-bottom: calc((clamp(96px
     for (const x of [v, bg]) { x.loop = dj; x.defaultPlaybackRate = rate; x.playbackRate = rate; }
     // a DJ break plays off your Spotify playlist when this screen's connected to it (the built-in song when Spotify can't);
     // so does one of Meegy's scenes, and without Spotify a scene whose song was just on borrows a fresher built-in one
-    const scene = !dj && !pre && !P.ext && !P.own && /^sounds\/aura\//.test(P.base || "");
+    const scene = false;   // a scene always plays its own song
     const swap = scene && !spUsable() ? sceneSong(P) : null;
     const mine = () => (P.lib ? clipBuf(P.base) : loadBuf(P.base));
     const own = () => (pre || !c || P.ext ? null : swap ? clipBuf(swap.base).then((x) => x || mine()) : mine());
@@ -6991,7 +6999,7 @@ body.tv:has(#roomTvQr:not([hidden])) .rb-rail { padding-bottom: calc((clamp(96px
       p.addListener("playback_error", ({ message }) => say(`Spotify couldn't play that one (${message}).`));
       p.addListener("autoplay_failed", () => say("The browser stopped Spotify from starting. Click anywhere on the board once."));
       SP.player = p; p.connect();
-      clearTimeout(SP.bootT); SP.bootT = setTimeout(() => { if (!SP.dev && SP.player === p) say("Spotify's player didn't start on this screen, so the DJ breaks are using the built-in songs. Try Reconnect."); }, 25e3);
+      clearTimeout(SP.bootT); SP.bootT = setTimeout(() => { if (!SP.dev && SP.player === p) say("Spotify's player didn't start on this screen, so the DJ breaks are using the backup tracks. Try Reconnect."); }, 25e3);
       spShow();
     };
     if (window.Spotify && window.Spotify.Player) { make(); return; }
@@ -7108,7 +7116,7 @@ body.tv:has(#roomTvQr:not([hidden])) .rb-rail { padding-bottom: calc((clamp(96px
       } catch (e) {
         if (e.status === 404 && k === 0) { await spApi("/me/player", "PUT", { device_ids: [SP.dev], play: false }).catch(() => {}); continue; } // wake the player up, then try again
         if ((e.status === 400 || e.status === 403) && k < 2) continue; // that song won't play here: the next one
-        SP.err = `Spotify wouldn't start (${e.message}), so that break used the built-in songs.`; spShow(); return null;
+        SP.err = `Spotify wouldn't start (${e.message}), so that break used a backup track.`; spShow(); return null;
       }
     }
     return null;
@@ -7120,7 +7128,7 @@ body.tv:has(#roomTvQr:not([hidden])) .rb-rail { padding-bottom: calc((clamp(96px
     if (!SP.playlist && !SP.client) return;   // Spotify was never set up: the built-in songs are the plan
     spWhyAt = Date.now();
     const why = SP.err ? SP.err : !SP.tok ? "Spotify isn't connected on this screen" : !SP.player || !SP.dev ? "Spotify's player hasn't started on this screen" : SP.loading ? "the playlist is still loading" : !SP.list.length ? "the playlist didn't load" : "the sound isn't on yet (click the board once)";
-    toast(`DJ is on the built-in songs: ${why}. Settings → Spotify to fix it.`);
+    toast(`DJ is on the backup tracks: ${why}. Settings → Spotify to fix it.`);
   }
   function spStop() {
     if (!SP.on || !SP.player) return;
@@ -7275,7 +7283,7 @@ body.tv:has(#roomTvQr:not([hidden])) .rb-rail { padding-bottom: calc((clamp(96px
   const moodOf = (kind, P) => (kind === "good" || kind === "first" ? "up" : kind === "bad" ? "down" : P.mood.includes("game") || P.mood.includes("hype") ? "hype" : P.mood.includes("vibe") ? "vibe" : P.mood.split(" ")[0]);
   // the play card starts the clip's sound under it; when the card leaves, the video comes in at that same moment
   function preAudio(b, P) {
-    const c = ready(); if (!c || !P || P === "lockin" || !P.base) return null;
+    const c = ready(); if (!c || !P || P === "lockin" || !P.base || P.dj) return null;
     stopStatus(); statusBet = b.id;
     const pre = { at: 0, src: null, dead: false };
     (P.lib ? clipBuf(P.base) : loadBuf(P.base)).then((buf) => { if (!buf || pre.dead || statusBet !== b.id) return; pre.at = performance.now(); pre.src = statusSrc = playBuf(c, buf, 0.95); });
@@ -8745,14 +8753,14 @@ body.tv:has(#roomTvQr:not([hidden])) .rb-rail { padding-bottom: calc((clamp(96px
     return { k: 1, name: "Sniper", sub: "Squirrel down", range: 820, wind: 3, rap: "rap1" };
   }
   // a sound with a handle so it can fade out
-  function snSound(name, vol, at, onGo) {
+  function snSound(name, vol, at, onGo, off) {
     const h = { dead: false, stop() { h.dead = true; } };
     const c = ready(); if (!c) { if (onGo) setTimeout(onGo, at || 0); return h; }
     loadBuf("sounds/sniper/" + name).then((buf) => {
       if (!buf || h.dead) { if (onGo && !h.dead) onGo(); return; }
       const go = () => {
         if (h.dead) return;
-        const s = c.createBufferSource(), g = c.createGain(); g.gain.value = vol; s.buffer = buf; s.connect(g).connect(c.destination); s.start(); if (onGo) onGo();
+        const s = c.createBufferSource(), g = c.createGain(); g.gain.value = vol; s.buffer = buf; s.connect(g).connect(c.destination); s.start(0, Math.min(off || 0, Math.max(0, buf.duration - 0.5))); if (onGo) onGo();
         h.stop = (fade = 0.8) => { h.dead = true; try { g.gain.setTargetAtTime(0, c.currentTime, fade / 4); s.stop(c.currentTime + fade + 0.2); } catch (e) {} };
       };
       if (at) setTimeout(go, at); else go();
@@ -9354,7 +9362,7 @@ body.tv:has(#roomTvQr:not([hidden])) .rb-rail { padding-bottom: calc((clamp(96px
     if (!place) {
       sounds.push(snSound("shot", 1, T_SHOT * 1000));
       if (T.cam) sounds.push(snSound("whoosh", 0.8, CAM0 * 1000), snSound("whoosh", 0.55, (CAM0 + 0.9) * 1000));
-      sounds.push(snSound("shatter", 0.95, T_HIT * 1000), snSound("slam", 0.8, (T_HIT + 0.05) * 1000), snSound(T.rap, 0.9, (T_HIT - 0.05) * 1000));
+      sounds.push(snSound("shatter", 0.95, T_HIT * 1000), snSound("slam", 0.8, (T_HIT + 0.05) * 1000), bedSound(0.9, T_HIT, END));
     }
     if (DRIVE) {
       loadMe();
@@ -9576,6 +9584,21 @@ body.tv:has(#roomTvQr:not([hidden])) .rb-rail { padding-bottom: calc((clamp(96px
     inSay(ctx, head[0], head[1], s.line, k - at, H, W, side);
   }
   // the runner: plays a list of shots, cuts land on the beat, titles in the DOM
+  // one of the two tracks under an animation H seconds into it (the payout), L long: the drop lands on H when the track
+  // can still cover the rest of it, otherwise the track starts earlier so the music doesn't run out before the end
+  function bedSound(vol, H, L) {
+    const t = DJ_TRACKS[bedTurn++ % 2], tl = t.ms / 1000;
+    let off = t.hit - H, at = 0;
+    if (off < 0) { at = -off; off = 0; }
+    off = Math.max(0, Math.min(off, tl - (L - at)));
+    return snSound(t.bed, vol, at * 1000, null, off);
+  }
+  // an animation's payout: its loudest slam (the later one on a tie)
+  function inHit(spec) {
+    let h = null;
+    for (const [n, v, at] of spec.sounds || []) if (/^(slam|shatter|bolt)$/.test(n) && (!h || v >= h.v)) h = { v, at };
+    return h ? h.at : spec.len * 0.6;
+  }
   function inRun(spec) {
     const ov = $("#intro"), cv = $("#inCv"), ctx = cv.getContext("2d"), dpr = Math.min(2, devicePixelRatio || 1);
     const W = innerWidth, H = innerHeight; cv.width = W * dpr; cv.height = H * dpr; ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
@@ -9583,7 +9606,8 @@ body.tv:has(#roomTvQr:not([hidden])) .rb-rail { padding-bottom: calc((clamp(96px
     loadMe();
     ov.className = "in" + (spec.cls ? " " + spec.cls : ""); ov.hidden = false;
     for (const id of ["inKick", "inBig", "inMid", "inSub", "inCap"]) $("#" + id).textContent = "";
-    const sounds = (spec.sounds || []).map(([n, v, at]) => snSound(n, v, at * 1000));
+    const hitAt = inHit(spec);
+    const sounds = (spec.sounds || []).map(([n, v, at]) => (/^\.\.\/intro\//.test(n) ? bedSound(v, hitAt, spec.len) : snSound(n, v, at * 1000)));
     const st = {}; let raf = 0, cutAt = -1, idx = -1;
     const t0 = performance.now(), END = spec.len;
     const tick = (now) => {
@@ -10449,7 +10473,7 @@ body.tv:has(#roomTvQr:not([hidden])) .rb-rail { padding-bottom: calc((clamp(96px
     if (bag[bag.length - 1] === quickLast) bag.unshift(bag.pop());
     quickBag = bag;
   }
-  function quickPre() { if (!quickBag.length) quickFill(); const q = QUICK[quickBag[quickBag.length - 1]]; if (q.pre) q.pre(); else loadBuf("sounds/sniper/../intro/" + q.mus); }
+  function quickPre() { if (!quickBag.length) quickFill(); const q = QUICK[quickBag[quickBag.length - 1]]; if (q.pre) q.pre(); else DJ_TRACKS.forEach((t) => loadBuf("sounds/sniper/" + t.bed)); }
   function quickWin(b, n, tag) {
     if (!quickBag.length) quickFill();
     let j = quickBag.length - 1; while (j > 0 && QUICK[quickBag[j]].fits && !QUICK[quickBag[j]].fits(b)) j--;
