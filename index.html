@@ -2526,53 +2526,64 @@ body.tv:has(#roomTvQr:not([hidden])) .rb-rail { padding-bottom: calc((clamp(96px
 .astag b { color: var(--c, #e2c17e); font-weight: 700; }
 .brand .astag { margin-left: 4px; }
 /* the week ahead: a card per game over the music */
-.wk-card { position: absolute; inset: 0; z-index: 5; display: flex; flex-direction: column; gap: 1.5vh; padding: 3vh 2.4vw 2.6vh; background: radial-gradient(130% 90% at 50% 0%, rgba(32,26,15,.985), rgba(9,9,8,.99) 62%); color: #f3ead6; overflow: hidden; cursor: default; }
+.wk-card { position: absolute; inset: 0; z-index: 5; display: flex; flex-direction: column; gap: 1.5vh; padding: 3vh 2.6vw 2.6vh; background: radial-gradient(130% 90% at 50% 0%, rgba(32,26,15,.985), rgba(9,9,8,.99) 62%); color: #f3ead6; overflow: hidden; cursor: default; }
 .wk-card[hidden] { display: none; }
 .jb-screen:has(.wk-card:not([hidden])) .jb-np { display: none; }
 .wk-card.wkin > * { animation: wkIn .6s cubic-bezier(.2, .8, .2, 1) both; }
 .wk-card.wkin > :nth-child(2) { animation-delay: .07s; } .wk-card.wkin > :nth-child(3) { animation-delay: .14s; } .wk-card.wkin > :nth-child(4) { animation-delay: .21s; } .wk-card.wkin > :nth-child(5) { animation-delay: .28s; } .wk-card.wkin > :nth-child(6) { animation-delay: .35s; }
 @keyframes wkIn { from { opacity: 0; transform: translateY(1.2vh); } to { opacity: 1; transform: none; } }
-.wk-top { display: flex; justify-content: space-between; align-items: baseline; gap: 1vw; font: 600 1.45vh/1.2 var(--f-ui); letter-spacing: .26em; text-transform: uppercase; color: #c9a45c; }
+.wk-top { display: flex; justify-content: space-between; align-items: baseline; gap: 1vw; font: 600 1.5vh/1.2 var(--f-ui); letter-spacing: .26em; text-transform: uppercase; color: #c9a45c; }
 .wk-top span { min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 .wk-top em { flex: none; font-style: normal; color: #8f8778; letter-spacing: .18em; }
-.wk-mu { display: grid; grid-template-columns: minmax(0, 1fr) auto minmax(0, 1fr); align-items: center; gap: 1.4vw; }
-.wk-tm { display: flex; align-items: center; gap: 1vw; min-width: 0; }
+.wk-mu { display: grid; grid-template-columns: minmax(0, 1fr) auto minmax(0, 1fr); align-items: center; gap: 1.6vw; }
+.wk-tm { display: flex; align-items: center; gap: 1.1vw; min-width: 0; }
 .wk-tm.h { flex-direction: row-reverse; text-align: right; }
-.wk-lg { width: 9.5vh; height: 9.5vh; flex: none; display: grid; place-items: center; border-radius: 50%; background: radial-gradient(circle, color-mix(in srgb, var(--tc) 45%, transparent), transparent 70%); }
-.wk-lg img { width: 7.6vh; height: 7.6vh; object-fit: contain; filter: drop-shadow(0 .6vh 1.2vh rgba(0,0,0,.6)); }
-.wk-nm { min-width: 0; display: flex; flex-direction: column; gap: .6vh; }
-.wk-nm em { font: 600 1.4vh/1 var(--f-num); font-style: normal; letter-spacing: .12em; color: #b8b0a2; }
-.wk-nm b { font: italic 600 4.8vh/1.05 var(--f-serif, Georgia, serif); color: #fff; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-.wk-f { display: flex; gap: .3vw; } .wk-tm.h .wk-f { justify-content: flex-end; }
-.wk-f u { text-decoration: none; min-width: 2.2vh; height: 2.2vh; padding: 0 .2vh; display: grid; place-items: center; border-radius: 3px; font: 700 1.15vh/1 var(--f-num); background: rgba(255,255,255,.08); color: #b8b0a2; }
-.wk-f u.rW { background: rgba(61,220,151,.18); color: #5fe0a6; } .wk-f u.rL { background: rgba(240,96,96,.16); color: #f07f7f; }
-.wk-mid { display: flex; flex-direction: column; align-items: center; gap: .7vh; text-align: center; }
-.wk-mid span { font: italic 500 2.1vh/1 var(--f-serif, Georgia, serif); color: #8f8778; }
-.wk-mid b { font: 700 3.3vh/1 var(--f-num); color: #e8d3a2; white-space: nowrap; }
-.wk-mid em { font: 600 1.75vh/1 var(--f-num); font-style: normal; color: #b8b0a2; letter-spacing: .06em; white-space: nowrap; }
-.wk-wp { display: grid; grid-template-columns: auto 1fr auto; align-items: center; column-gap: .8vw; row-gap: .5vh; font: 600 1.45vh/1 var(--f-num); color: #d8cfbd; }
-.wk-wp > div { display: flex; height: .8vh; border-radius: 99px; overflow: hidden; background: rgba(255,255,255,.06); }
-.wk-wp i { display: block; height: 100%; background: linear-gradient(90deg, var(--tc), color-mix(in srgb, var(--tc) 55%, #fff)); }
-.wk-wp em { grid-column: 1 / -1; text-align: center; font: 600 1.1vh/1 var(--f-ui); font-style: normal; letter-spacing: .3em; text-transform: uppercase; color: #6f6a60; }
-.wk-lean { display: grid; grid-template-columns: auto auto 1fr; align-items: center; column-gap: 1.4vw; padding: 1.5vh 1.5vw; border: 1px solid rgba(232,211,162,.55); background: linear-gradient(90deg, rgba(201,164,92,.17), rgba(201,164,92,.03)); }
-.wk-lean span { font: 600 1.3vh/1.2 var(--f-ui); letter-spacing: .3em; text-transform: uppercase; color: #c9a45c; }
-.wk-lean b { font: 700 3.8vh/1 var(--f-num); color: #fff; white-space: nowrap; }
-.wk-lean p { margin: 0; font: 500 2.1vh/1.3 var(--f-ui); color: #e9dfca; }
-.wk-lean p em { color: #c9a45c; font-style: normal; }
-.wk-lean.none b { color: #b8b0a2; }
-.wk-cols { display: grid; grid-template-columns: 1fr 1fr; gap: 2vw; flex: 1; min-height: 0; overflow: hidden; }
-.wk-cols h4 { margin: .4vh 0 1.4vh; font: 600 1.4vh/1 var(--f-ui); letter-spacing: .3em; text-transform: uppercase; color: #c9a45c; }
-.wk-cols ul { margin: 0; padding: 0; list-style: none; display: flex; flex-direction: column; gap: 1.25vh; }
-.wk-cols li { font: 500 2vh/1.3 var(--f-ui); color: #e3dac6; padding-left: .8vw; border-left: 2px solid rgba(201,164,92,.3); }
-.wk-pv { display: flex; gap: 1.2vw; align-items: baseline; padding-top: 1.1vh; border-top: 1px solid rgba(201,164,92,.22); }
-.wk-pv span { flex: none; font: 600 1.25vh/1 var(--f-ui); letter-spacing: .3em; text-transform: uppercase; color: #c9a45c; }
-.wk-pv p { margin: 0; font: italic 500 2.4vh/1.25 var(--f-serif, Georgia, serif); color: #f3ead6; }
-.wk-rc { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; flex: 1; min-height: 0; overflow: hidden; }
-.wk-rc li { display: grid; grid-template-columns: 14vw minmax(0, 1fr) auto; column-gap: 1.3vw; row-gap: .45vh; align-items: baseline; padding: 1.05vh 0; border-bottom: 1px solid rgba(201,164,92,.14); }
-.wk-rc em { font: 600 1.2vh/1.2 var(--f-ui); font-style: normal; letter-spacing: .18em; text-transform: uppercase; color: #8f8778; }
-.wk-rc b { font: italic 600 2.5vh/1.05 var(--f-serif, Georgia, serif); color: #fff; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-.wk-rc span { font: 700 2.3vh/1 var(--f-num); color: #e8d3a2; text-align: right; white-space: nowrap; }
-.wk-rc i { grid-column: 2 / 4; font: 500 1.45vh/1.25 var(--f-ui); font-style: normal; color: #b8b0a2; }
+.wk-lg { width: 9vh; height: 9vh; flex: none; display: grid; place-items: center; border-radius: 50%; background: radial-gradient(circle, color-mix(in srgb, var(--tc) 50%, transparent), transparent 70%); }
+.wk-lg img { width: 7.4vh; height: 7.4vh; object-fit: contain; filter: drop-shadow(0 .6vh 1.2vh rgba(0,0,0,.6)); }
+.wk-nm { min-width: 0; display: flex; flex-direction: column; gap: .8vh; }
+.wk-nm b { font: italic 600 5.4vh/1 var(--f-serif, Georgia, serif); color: #fff; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.wk-nm em { font: 600 1.8vh/1 var(--f-num); font-style: normal; letter-spacing: .1em; color: #c9bfae; }
+.wk-mid { font: italic 500 2.6vh/1 var(--f-serif, Georgia, serif); color: #8f8778; }
+.wk-line { display: flex; justify-content: center; border-top: 1px solid rgba(201,164,92,.2); border-bottom: 1px solid rgba(201,164,92,.2); }
+.wk-line > div { display: flex; align-items: baseline; gap: .9vw; padding: 1.1vh 2.4vw; }
+.wk-line > div + div { border-left: 1px solid rgba(201,164,92,.2); }
+.wk-line span { font: 600 1.3vh/1 var(--f-ui); letter-spacing: .28em; text-transform: uppercase; color: #c9a45c; }
+.wk-line b { font: 700 2.6vh/1 var(--f-num); color: #f3ead6; white-space: nowrap; }
+.wk-line i { font: 500 1.5vh/1 var(--f-ui); font-style: normal; color: #8f8778; white-space: nowrap; }
+.wk-key { display: flex; flex-direction: column; align-items: center; gap: 1vh; text-align: center; padding: .4vh 4vw 0; }
+.wk-key span { font: 600 1.3vh/1 var(--f-ui); letter-spacing: .34em; text-transform: uppercase; color: #c9a45c; }
+.wk-key p { margin: 0; font: italic 500 3.3vh/1.2 var(--f-serif, Georgia, serif); color: #fff; text-wrap: balance; }
+.wk-tape { flex: 1; min-height: 0; display: flex; flex-direction: column; justify-content: center; overflow: hidden; }
+.wk-r { display: grid; grid-template-columns: minmax(0, 1fr) minmax(15vw, auto) minmax(0, 1fr); align-items: center; column-gap: 1.6vw; padding: .75vh 0; border-bottom: 1px solid rgba(255,246,230,.07); flex: none; }
+.wk-r:last-child { border-bottom: 0; }
+.wk-r > span { text-align: center; font: 600 1.4vh/1.2 var(--f-ui); letter-spacing: .22em; text-transform: uppercase; color: #a39a8a; white-space: nowrap; }
+.wk-r .a, .wk-r .h { display: flex; justify-content: center; min-width: 0; }
+.wk-r b { position: relative; font: 700 2.9vh/1 var(--f-num); color: #e9e1d2; }
+.wk-r b.wkhi { color: #fff; text-shadow: 0 0 2.2vh rgba(232,211,162,.35); }
+.wk-r b.wkhi::after { content: ""; position: absolute; left: -12%; right: -12%; bottom: -.75vh; height: .3vh; border-radius: 9px; background: linear-gradient(90deg, transparent, #e8d3a2, transparent); }
+.wk-r b.wklo { color: #8f8778; }
+.wk-r em { font: 600 1.9vh/1.25 var(--f-ui); font-style: normal; color: #e3dac6; text-align: center; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.wk-f { display: flex; gap: .45vw; }
+.wk-f u { text-decoration: none; width: 2.8vh; height: 2.8vh; display: grid; place-items: center; border-radius: 4px; font: 800 1.45vh/1 var(--f-num); background: rgba(255,255,255,.08); color: #b8b0a2; }
+.wk-f u.rW { background: rgba(61,220,151,.2); color: #6ee7b1; } .wk-f u.rL { background: rgba(240,96,96,.18); color: #f49393; }
+.wk-r.wkbar { grid-template-columns: auto 1fr auto; }
+.wk-r.wkbar > b { min-width: 8vw; text-align: center; }
+.wk-r.wkbar { padding: 1vh 0; }
+.wk-r.wkbar > div { display: flex; flex-direction: column; align-items: center; gap: .8vh; min-width: 0; }
+.wk-r.wkbar > div > span { font: 600 1.4vh/1.2 var(--f-ui); letter-spacing: .22em; text-transform: uppercase; color: #a39a8a; }
+.wk-r.wkbar p { display: flex; width: 100%; height: 1.1vh; margin: 0; border-radius: 99px; overflow: hidden; background: rgba(255,255,255,.06); }
+.wk-r.wkbar i { display: block; height: 100%; background: linear-gradient(90deg, var(--tc), color-mix(in srgb, var(--tc) 55%, #fff)); }
+.wk-r.wkbar i + i { border-left: 2px solid #0b0b0a; }
+.wk-pv { display: flex; gap: 1.2vw; align-items: baseline; justify-content: center; padding-top: 1.2vh; border-top: 1px solid rgba(201,164,92,.22); }
+.wk-pv span { flex: none; font: 600 1.3vh/1 var(--f-ui); letter-spacing: .3em; text-transform: uppercase; color: #c9a45c; }
+.wk-pv p { margin: 0; font: italic 500 2.3vh/1.25 var(--f-serif, Georgia, serif); color: #e9dfca; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.wk-rc { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; justify-content: center; flex: 1; min-height: 0; overflow: hidden; }
+.wk-rc li { display: grid; grid-template-columns: 13vw minmax(0, 1fr); column-gap: 1.6vw; row-gap: .6vh; align-items: baseline; padding: 1.2vh 0; border-bottom: 1px solid rgba(201,164,92,.14); }
+.wk-rc li:last-child { border-bottom: 0; }
+.wk-rc em { grid-row: 1 / 3; font: 600 1.3vh/1.5 var(--f-ui); font-style: normal; letter-spacing: .18em; text-transform: uppercase; color: #a39a8a; }
+.wk-rc b { font: italic 600 2.9vh/1.05 var(--f-serif, Georgia, serif); color: #fff; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.wk-rc b small { font-size: .62em; color: #8f8778; }
+.wk-rc i { font: 500 1.75vh/1.3 var(--f-ui); font-style: normal; color: #d8cfbd; }
 /* a highlight's lower third */
 .oa-chy { position: absolute; left: 3%; right: 3%; bottom: 5%; z-index: 6; display: flex; gap: 2.2vw; align-items: center; padding: 1.4vh 1.6vw; background: linear-gradient(90deg, rgba(9,8,7,.94), rgba(9,8,7,.8)); border-left: 3px solid #e8d3a2; box-shadow: 0 1.4vh 4vh rgba(0,0,0,.55); cursor: default; }
 .oa-chy[hidden] { display: none; }
@@ -2872,7 +2883,7 @@ body.tv:has(#roomTvQr:not([hidden])) .rb-rail { padding-bottom: calc((clamp(96px
     <div class="field">
       <span class="lbl">Reaction clips</span>
       <label class="togrow"><input type="checkbox" id="clipsOn"> Pop clips up on this screen</label>
-      <span class="hint">When nothing's on, this screen runs its own channel by itself: Sweat Center (the latest highlights from every league, each with its game's stat and the team's next game), The Week Ahead (every big game this week: the line and its moves, trends against the number and the total, the matchup, and the stat that leans a side) and DJ sets, more music overnight. A game or a bet going live takes over.</span>
+      <span class="hint">When nothing's on, this screen runs its own channel by itself: Sweat Center (the latest highlights from every league, each with its game's stat and the team's next game), The Week Ahead (every big game this week, by the numbers: records, form, scoring, trends, ESPN's win chances, who's out, and a stat to know) and DJ sets, more music overnight. A game or a bet going live takes over.</span>
       <span class="hint">Only the good stuff, and only for your side. Your team's touchdowns, field goals, turnovers, red-zone trips, home runs and goals get a clip, with your team's own clips first. While you're winning, your winning clips play every 2½ minutes. When it's close, a music break or some hype plays every 3 minutes. Music breaks are songs only, with a card showing the song and artist. With only 1 or 2 bets out, there's more dead air, so a clip comes every 2 minutes. When you're down but within two scores, comeback clips play. When you're getting blown out, it stays quiet. Overs and unders are judged on pace, and stay quiet whenever they're off pace. Tap the screen to close a clip. Turn this off on your phone and leave it on for the monitor.</span>
       <div style="display:flex;gap:8px;flex-wrap:wrap"><button type="button" class="btn sm primary" id="trialBtn">Run a trial</button><button type="button" class="btn sm" id="pcTest">Preview a touchdown alert</button></div>
       <span class="hint">The trial replays the latest finished NFL game play by play with a pretend bet on the winner: play alerts and clips when your side scores, quiet when they don't, then the win. Nothing gets saved and it doesn't touch your numbers.</span>
@@ -5120,7 +5131,7 @@ body.tv:has(#roomTvQr:not([hidden])) .rb-rail { padding-bottom: calc((clamp(96px
   // ---------- sheets ----------
   function openSheet(id) { $(id).hidden = false; }
   // keep every open screen current: when a new version is up, reload it (never mid-form or mid-animation)
-  const BUILD = "20261016210412";
+  const BUILD = "20261016220752";
   function checkBuild() {
     if (BUILD === "dev") return;
     fetch("version.json?t=" + Date.now(), { cache: "no-store" }).then((r) => (r.ok ? r.json() : null)).then((j) => {
@@ -8493,7 +8504,7 @@ body.tv:has(#roomTvQr:not([hidden])) .rb-rail { padding-bottom: calc((clamp(96px
     $("#oaE").textContent = seg === "center" ? `${AIR.items.length} plays · ${lgs.slice(0, 4).join(" · ")}` : spUsable() ? "Off your Spotify" + (SP.hlist.length ? " · house in the mix" : "") : gName() + " on the decks";
     if (seg === "week") {
       const ls = [...new Set(WK.block.map((g) => WK_NAME[g.lg]))];
-      $("#oaK").textContent = "Nothing live · this week"; $("#oaB").textContent = "The Week Ahead"; $("#oaE").textContent = `${WK.block.length} games · ${ls.slice(0, 3).join(" · ")} · lines, trends, the lean`;
+      $("#oaK").textContent = "Nothing live · this week"; $("#oaB").textContent = "The Week Ahead"; $("#oaE").textContent = `${WK.block.length} games · ${ls.slice(0, 3).join(" · ")} · matchups by the numbers`;
     }
     el.hidden = false; el.classList.remove("on"); void el.offsetWidth; el.classList.add("on");
     try { snSound("whoosh", 0.5, 150); } catch (e) {}
@@ -8614,7 +8625,7 @@ body.tv:has(#roomTvQr:not([hidden])) .rb-rail { padding-bottom: calc((clamp(96px
     if (!H || !A) return null;
     const lead = (L) => { const y = (L.leaders || [])[0] || {}, a = y.athlete || {}; return { n: L.name, v: y.displayValue || "", p: a.shortName || a.displayName || "" }; };
     const tm = (x) => { const t = x.team || {}, rk = x.curatedRank && x.curatedRank.current;
-      return { id: String(t.id), ab: t.abbreviation || "", nm: t.shortDisplayName || t.name || t.abbreviation || "", lg: t.logo || "", col: t.color ? "#" + t.color : "#3a3a3a", rec: ((x.records || [])[0] || {}).summary || "", rk: rk && rk <= 25 ? rk : 0, sc: x.score != null && x.score !== "" ? Number(x.score) : null, win: !!x.winner, ldr: (x.leaders || []).map(lead) }; };
+      return { id: String(t.id), ab: t.abbreviation || "", nm: t.shortDisplayName || t.name || t.abbreviation || "", loc: t.location || t.shortDisplayName || t.abbreviation || "", lg: t.logo || "", col: t.color ? "#" + t.color : "#3a3a3a", rec: ((x.records || [])[0] || {}).summary || "", rk: rk && rk <= 25 ? rk : 0, sc: x.score != null && x.score !== "" ? Number(x.score) : null, win: !!x.winner, ldr: (x.leaders || []).map(lead) }; };
     const st = (e.status && e.status.type) || {}, o = (c.odds || [])[0];
     const g = { id: String(e.id), lg, pre: ty === 1, t: Date.parse(e.date) || 0, st: st.state || "pre", fin: st.shortDetail || "", a: tm(A), h: tm(H), ns: !!c.neutralSite,
       tba: c.timeValid === false || e.timeValid === false, tv: ((((c.broadcasts || [])[0] || {}).names) || [])[0] || "", ser: (c.series && c.series.summary) || "", note: ((c.notes || [])[0] || {}).headline || "", ldr: (c.leaders || []).map(lead) };
@@ -8724,73 +8735,78 @@ body.tv:has(#roomTvQr:not([hidden])) .rb-rail { padding-bottom: calc((clamp(96px
     let f = 0, a = 0; for (const e of L) { const home = e.hId === tid; f += home ? e.hs : e.as; a += home ? e.as : e.hs; }
     return [f / L.length, a / L.length];
   }
-  // the trends, the matchup and the lean: every signal gets a strength, the strongest is the lean
+  // the numbers, and nothing about what to bet: a tale of the tape (record, form, scoring, how they've done against the
+  // spread and the total, ESPN's win chances, top players, who's out), the line as it stands, and the one stat to know
   function wkTrends(g, x) {
     const A = g.a, H = g.h, T = { a: A, h: H }, other = { a: "h", h: "a" }, ln = x.ln || {}, lg = g.lg;
     const fb = lg === "NFL" || lg === "CFB", hoop = lg === "NBA" || lg === "CBB", ml = lg === "NHL" || lg === "MLB";
-    const sig = [], bet = [], mu = [], r1 = (v) => +v.toFixed(1);
-    const pickSide = (k) => (ml || ln.sp == null ? `${T[k].ab} ML ${wkMl(k === "h" ? ln.mlH : ln.mlA)}`.trim() : `${T[k].ab} ${wkSp(k === "h" ? ln.sp : -ln.sp)}`);
-    const add = (sv, k, txt, kind) => { const pick = k === "o" || k === "u" ? (ln.ou != null ? (k === "o" ? "Over " : "Under ") + ln.ou : "") : pickSide(k); if (pick) sig.push({ s: sv, k, txt, kind, pick }); };
+    const same = A.loc === H.loc, who = (k) => (same ? T[k].nm : T[k].loc), r1 = (v) => +v.toFixed(1);
+    const facts = [], tape = [], fact = (sv, txt) => facts.push({ s: sv, txt });
+    const unit = fb || hoop ? "points" : lg === "NHL" ? "goals" : "runs", f1 = (v) => (fb || hoop ? v.toFixed(1) : v.toFixed(2));
+    // the line, as it stands and where it opened
+    const fav = (v) => (v == null ? "" : v === 0 ? "Pick'em" : v < 0 ? `${H.ab} ${wkSp(v)}` : `${A.ab} ${wkSp(-v)}`);
+    const line = { sp: !ml && ln.sp != null ? fav(ln.sp) : "", oSp: !ml && ln.oSp != null && ln.oSp !== ln.sp ? fav(ln.oSp) : "", ou: ln.ou, oOu: ln.oOu != null && ln.oOu !== ln.ou ? ln.oOu : null,
+      ml: ml ? String(ln.d || "").replace(/-/g, "−") : "", oMl: "" };
     let qh = null;
     if (ln.mlH != null && ln.mlA != null) { const a = wkIp(ln.mlH), b = wkIp(ln.mlA); qh = a / (a + b); }
-    // where the line's gone since it opened
     if (!ml && ln.sp != null && ln.oSp != null) {
-      const d = r1(ln.sp - ln.oSp);
-      bet.push(d ? `Spread: ${H.ab} opened ${wkSp(ln.oSp)}, now ${wkSp(ln.sp)}` : `Spread: ${H.ab} ${wkSp(ln.sp)}, hasn't moved since the open`);
-      if (Math.abs(d) >= (fb ? 1 : 1.5)) { const k = d < 0 ? "h" : "a"; add(Math.min(1.2, Math.abs(d) / (fb ? 4 : 5)) + 0.2, k, `The money's on ${T[k].ab}: they opened ${wkSp(k === "h" ? ln.oSp : -ln.oSp)}, now ${wkSp(k === "h" ? ln.sp : -ln.sp)}`, "move"); }
+      const d = r1(ln.sp - ln.oSp), k = d < 0 ? "h" : "a";
+      if (Math.abs(d) >= (fb ? 1 : 1.5)) fact(Math.min(1.2, Math.abs(d) / (fb ? 4 : 5)) + 0.2, `The spread has moved ${Math.abs(d)} point${Math.abs(d) === 1 ? "" : "s"} toward ${who(k)} since it opened`);
     } else if (qh != null && ln.oMlH != null && ln.oMlA != null) {
-      const a = wkIp(ln.oMlH), b = wkIp(ln.oMlA), d = qh - a / (a + b);
-      bet.push(Math.abs(d) >= 0.01 ? `Moneyline: ${H.ab} opened ${wkMl(ln.oMlH)}, now ${wkMl(ln.mlH)}` : `Moneyline: ${A.ab} ${wkMl(ln.mlA)}, ${H.ab} ${wkMl(ln.mlH)}, steady since the open`);
-      if (Math.abs(d) >= 0.04) { const k = d > 0 ? "h" : "a"; add(Math.min(1.2, Math.abs(d) / 0.1) + 0.15, k, `The money's on ${T[k].ab}: they opened ${wkMl(k === "h" ? ln.oMlH : ln.oMlA)}, now ${wkMl(k === "h" ? ln.mlH : ln.mlA)}`, "move"); }
-    } else if (ln.d) bet.push("Line: " + ln.d);
-    if (ln.ou != null && ln.oOu != null) {
-      const d = r1(ln.ou - ln.oOu);
-      bet.push(d ? `Total: opened ${ln.oOu}, now ${ln.ou}` : `Total: ${ln.ou}, steady since the open`);
-      if (Math.abs(d) >= (fb ? 1.5 : hoop ? 2 : 0.5)) add(Math.min(1.1, Math.abs(d) / (fb ? 5 : hoop ? 7 : 1)) + 0.1, d > 0 ? "o" : "u", `The total's ${d > 0 ? "up" : "down"} ${Math.abs(d)} since it opened (${ln.oOu} to ${ln.ou})`, "tmove");
-    } else if (ln.ou != null) bet.push(`Total: ${ln.ou}`);
-    // ESPN's model against the price
-    if (x.prd && qh != null) {
-      const e = x.prd.h - qh, k = e > 0 ? "h" : "a";
-      bet.push(`ESPN's model: ${H.ab} ${wkPct(x.prd.h)} to win; the price says ${wkPct(qh)}`);
-      if (Math.abs(e) >= 0.05) sig.push({ s: Math.min(1.2, Math.abs(e) / 0.1) + 0.1, k, kind: "model", pick: `${T[k].ab} ML ${wkMl(k === "h" ? ln.mlH : ln.mlA)}`.trim(), txt: `ESPN's model gives ${T[k].ab} ${wkPct(k === "h" ? x.prd.h : x.prd.a)} to win; the price only implies ${wkPct(k === "h" ? qh : 1 - qh)}` });
+      const a = wkIp(ln.oMlH), b = wkIp(ln.oMlA), d = qh - a / (a + b), k = d > 0 ? "h" : "a";
+      if (Math.abs(d) >= 0.01) line.oMl = ln.mlH <= ln.mlA ? `${H.ab} ${wkMl(ln.oMlH)}` : `${A.ab} ${wkMl(ln.oMlA)}`;
+      if (Math.abs(d) >= 0.04) fact(Math.min(1.2, Math.abs(d) / 0.1) + 0.15, `${who(k)} has gone from ${wkMl(k === "h" ? ln.oMlH : ln.oMlA)} to ${wkMl(k === "h" ? ln.mlH : ln.mlA)} since the line opened`);
     }
-    // against the number and the total, last five
-    const word = lg === "NHL" ? "on the puck line" : lg === "MLB" ? "on the run line" : "ATS", R = { a: wkRec(A.id, x.l5[A.id]), h: wkRec(H.id, x.l5[H.id]) };
-    const rs = (r) => `${r.w}-${r.l}${r.p ? "-" + r.p : ""}`;
-    if (R.a.n >= 3 && R.h.n >= 3) bet.push(`Last ${Math.max(R.a.n, R.h.n)} ${word}: ${A.ab} ${rs(R.a)}, ${H.ab} ${rs(R.h)}`);
-    for (const k of ["a", "h"]) {
-      const r = R[k]; if (r.n < 4) continue;
-      const rl = ml ? 0.15 : 0;
-      if (r.w >= Math.max(4, r.n - 1)) add(0.5 + 0.08 * (r.w - 3) + (r.l ? 0 : 0.1) - rl, k, `${T[k].ab} are ${rs(r)} ${word} in their last ${r.n}`, "ats");
-      else if (r.l >= Math.max(4, r.n - 1)) add(0.5 + 0.08 * (r.l - 3) + (r.w ? 0 : 0.1) - rl, other[k], `${T[k].ab} are ${rs(r)} ${word} in their last ${r.n}`, "ats");
-    }
-    const ov = R.a.o + R.h.o, un = R.a.u + R.h.u;
-    if (R.a.o + R.a.u >= 3 && R.h.o + R.h.u >= 3) bet.push(`Over/under lately: ${A.ab} ${R.a.o}-${R.a.u}, ${H.ab} ${R.h.o}-${R.h.u}`);
-    if (ov + un >= 7) { const f = ov / (ov + un); if (f >= 0.75 || f <= 0.25) add(0.45 + (Math.abs(f - 0.5) - 0.25) * 2.4, f > 0.5 ? "o" : "u", `${f > 0.5 ? "Overs" : "Unders"} are ${Math.max(ov, un)}-${Math.min(ov, un)} in these two teams' last ${ov + un} games`, "ou"); }
-    // the matchup: scoring for and against, and what it projects to
+    if (ln.ou != null && ln.oOu != null) { const d = r1(ln.ou - ln.oOu); if (Math.abs(d) >= (fb ? 1.5 : hoop ? 2 : 0.5)) fact(Math.min(1.1, Math.abs(d) / (fb ? 5 : hoop ? 7 : 1)) + 0.1, `The total has ${d > 0 ? "climbed" : "dropped"} from ${ln.oOu} to ${ln.ou} since it opened`); }
+    // the tape
+    const pct = (rec) => { const n = String(rec || "").split("-").map((v) => parseInt(v, 10) || 0); const gp = n.reduce((a, v) => a + v, 0); return gp ? n[0] / gp : null; };
+    const better = (a, b, hi) => (a == null || b == null || a === b ? "" : (hi ? a > b : a < b) ? "a" : "h");
+    if (pct(A.rec) != null || pct(H.rec) != null) tape.push({ l: "Record", a: A.rec || "–", h: H.rec || "–", b: better(pct(A.rec), pct(H.rec), true) });
+    const L5 = { a: x.l5[A.id] || [], h: x.l5[H.id] || [] };
+    if (L5.a.length || L5.h.length) tape.push({ l: "Last " + Math.max(L5.a.length, L5.h.length), t: "form", a: L5.a.map((e) => e.r), h: L5.h.map((e) => e.r) });
     let pf = { a: wkPF(lg, x.st[A.id]), h: wkPF(lg, x.st[H.id]) }, src = "season";
-    if (!pf.a || !pf.h) { pf = { a: wkL5PF(A.id, x.l5[A.id]), h: wkL5PF(H.id, x.l5[H.id]) }; src = "last-5"; }
+    if (!pf.a || !pf.h) { pf = { a: wkL5PF(A.id, L5.a), h: wkL5PF(H.id, L5.h) }; src = "last 5"; }
     if (pf.a && pf.h) {
-      const f1 = (v) => (fb || hoop ? v.toFixed(1) : v.toFixed(2)), unit = fb || hoop ? "" : lg === "NHL" ? " goals" : " runs";
-      mu.push(`${src === "season" ? "Season" : "Last 5"}: ${A.ab} score ${f1(pf.a[0])}${unit}, allow ${f1(pf.a[1])} · ${H.ab} ${f1(pf.h[0])}, ${f1(pf.h[1])}`);
+      const tag = src === "season" ? "" : " · last 5";
+      tape.push({ l: `${unit[0].toUpperCase() + unit.slice(1)} a game${tag}`, a: f1(pf.a[0]), h: f1(pf.h[0]), b: better(pf.a[0], pf.h[0], true) });
+      tape.push({ l: `Allowed a game${tag}`, a: f1(pf.a[1]), h: f1(pf.h[1]), b: better(pf.a[1], pf.h[1], false) });
       const hfa = g.ns ? 0 : { NFL: 1.5, CFB: 2.5, NBA: 2.5, CBB: 3, NHL: 0.15, MLB: 0.15 }[lg] || 0;
-      const ph = (pf.h[0] + pf.a[1]) / 2 + hfa / 2, pa = (pf.a[0] + pf.h[1]) / 2 - hfa / 2, pm = ph - pa, pt = ph + pa, cut = src === "season" ? 0 : 0.15;
-      mu.push(`Those numbers project ${pm >= 0 ? H.ab : A.ab} by ${f1(Math.abs(pm))}, ${f1(pt)} total`);
-      if (!ml && ln.sp != null) { const e = pm + ln.sp; if (Math.abs(e) >= (fb ? 3 : 4)) { const k = e > 0 ? "h" : "a"; add(Math.min(1.1, Math.abs(e) / (fb ? 9 : 12)) + 0.2 - cut, k, `${src === "season" ? "Season" : "Recent"} scoring makes it ${pm >= 0 ? H.ab : A.ab} by ${f1(Math.abs(pm))}; the line's ${H.ab} ${wkSp(ln.sp)}`, "proj"); } }
-      if (ln.ou != null) { const e = pt - ln.ou; if (Math.abs(e) >= (fb ? 3.5 : hoop ? 6 : lg === "NHL" ? 0.5 : 0.7)) add(Math.min(1.1, Math.abs(e) / (fb ? 10 : hoop ? 14 : lg === "NHL" ? 1.4 : 2)) + 0.15 - cut, e > 0 ? "o" : "u", `${src === "season" ? "Season" : "Recent"} scoring adds up to ${f1(pt)}; the total's ${ln.ou}`, "proj"); }
+      const ph = (pf.h[0] + pf.a[1]) / 2 + hfa / 2, pa = (pf.a[0] + pf.h[1]) / 2 - hfa / 2, pm = ph - pa, pt = ph + pa, cut = src === "season" ? 0 : 0.15, k = pm >= 0 ? "h" : "a";
+      if (!ml && ln.sp != null && Math.abs(pm + ln.sp) >= (fb ? 3 : 4)) fact(Math.min(1.1, Math.abs(pm + ln.sp) / (fb ? 9 : 12)) + 0.2 - cut, `${src === "season" ? "Season" : "Recent"} scoring averages project ${who(k)} by ${f1(Math.abs(pm))}`);
+      if (ln.ou != null && Math.abs(pt - ln.ou) >= (fb ? 3.5 : hoop ? 6 : lg === "NHL" ? 0.5 : 0.7)) fact(Math.min(1.1, Math.abs(pt - ln.ou) / (fb ? 10 : hoop ? 14 : lg === "NHL" ? 1.4 : 2)) + 0.15 - cut, `Their ${src === "season" ? "season" : "recent"} scoring averages add up to ${f1(pt)} ${unit}, with the total at ${ln.ou}`);
+      for (const q of ["a", "h"]) { const m = pf[q][0] - pf[q][1]; if (src === "season" && Math.abs(m) >= (fb || hoop ? 10 : lg === "NHL" ? 1.2 : 1)) fact(0.5, `${who(q)} is ${m > 0 ? "outscoring" : "being outscored by"} opponents by ${f1(Math.abs(m))} ${unit} a game`); }
     }
-    // form
-    const fm = (id) => { const L = x.l5[id] || []; return { w: L.filter((e) => e.r === "W").length, n: L.length }; }, F = { a: fm(A.id), h: fm(H.id) };
-    if (F.a.n >= 4 && F.h.n >= 4) for (const k of ["a", "h"]) { const me = F[k], op = F[other[k]]; if (me.w >= 4 && op.w <= 1) add(0.42, k, `${T[k].ab} have won ${me.w} of their last ${me.n}; ${T[other[k]].ab} ${op.w} of ${op.n}`, "form"); }
-    if (x.prd && qh == null) mu.push(`ESPN's model: ${A.ab} ${wkPct(x.prd.a)}, ${H.ab} ${wkPct(x.prd.h)}`);
-    if (x.ser) mu.push(x.ser);
-    const tops = ["a", "h"].map((k) => (x.top[T[k].id] ? `${T[k].ab}: ${x.top[T[k].id]}` : "")).filter(Boolean);
-    if (tops.length) mu.push("Top guns: " + tops.join(" · "));
-    const outs = ["a", "h"].flatMap((k) => (x.inj[T[k].id] || []).map((n) => `${n} (${T[k].ab})`));
-    if (outs.length) mu.push("Out: " + outs.slice(0, 4).join(", "));
-    sig.sort((p, q) => q.s - p.s);
-    const lean = sig[0] || null;
-    return { lean, agree: lean ? sig.filter((y) => y.k === lean.k).length : 0, bet, mu, sig };
+    const word = lg === "NHL" ? "Puck line" : lg === "MLB" ? "Run line" : "Against the spread", R = { a: wkRec(A.id, L5.a), h: wkRec(H.id, L5.h) };
+    const rs = (r) => `${r.w}-${r.l}${r.p ? "-" + r.p : ""}`;
+    if (R.a.n >= 3 && R.h.n >= 3) tape.push({ l: `${word} · last ${Math.max(R.a.n, R.h.n)}`, a: rs(R.a), h: rs(R.h), b: better(R.a.w - R.a.l, R.h.w - R.h.l, true) });
+    for (const k of ["a", "h"]) {
+      const r = R[k], rl = ml ? 0.15 : 0, on = ml ? ` on the ${word.toLowerCase()}` : "";
+      if (r.n < 4) continue;
+      if (r.w >= Math.max(4, r.n - 1)) fact(0.5 + 0.08 * (r.w - 3) + (r.l ? 0 : 0.1) - rl, `${who(k)} has covered${on} in ${r.w} of its last ${r.n}`);
+      else if (r.l >= Math.max(4, r.n - 1)) fact(0.5 + 0.08 * (r.l - 3) + (r.w ? 0 : 0.1) - rl, `${who(k)} has covered${on} in just ${r.w} of its last ${r.n}`);
+    }
+    if (R.a.o + R.a.u >= 3 && R.h.o + R.h.u >= 3) tape.push({ l: `Over / under · last ${Math.max(R.a.o + R.a.u + R.a.q, R.h.o + R.h.u + R.h.q)}`, a: `${R.a.o}-${R.a.u}`, h: `${R.h.o}-${R.h.u}` });
+    const ov = R.a.o + R.h.o, un = R.a.u + R.h.u;
+    if (ov + un >= 7) { const f = ov / (ov + un); if (f >= 0.75 || f <= 0.25) fact(0.45 + (Math.abs(f - 0.5) - 0.25) * 2.4, `${Math.max(ov, un)} of these teams' last ${ov + un} games went ${f > 0.5 ? "over" : "under"} the total`); }
+    if (x.prd) {
+      tape.push({ l: "Win chance · ESPN", t: "bar", a: x.prd.a, h: x.prd.h });
+      const k = x.prd.h >= x.prd.a ? "h" : "a", e = qh == null ? 0 : x.prd.h - qh, ek = e > 0 ? "h" : "a";
+      if (Math.abs(e) >= 0.05) fact(Math.min(1.2, Math.abs(e) / 0.1) + 0.1, `ESPN's model gives ${who(ek)} a ${wkPct(x.prd[ek])} chance to win; the odds imply ${wkPct(ek === "h" ? qh : 1 - qh)}`);
+      else if (x.prd[k] >= 0.75) fact(0.45, `ESPN's model gives ${who(k)} a ${wkPct(x.prd[k])} chance to win`);
+    }
+    // form, streaks, the series
+    const F = { a: { w: L5.a.filter((e) => e.r === "W").length, n: L5.a.length }, h: { w: L5.h.filter((e) => e.r === "W").length, n: L5.h.length } };
+    if (F.a.n >= 4 && F.h.n >= 4) for (const k of ["a", "h"]) { const me = F[k], op = F[other[k]]; if (me.w >= 4 && op.w <= 1) fact(0.42, `${who(k)} has won ${me.w} of its last ${me.n}; ${who(other[k])} ${op.w} of ${op.n}`); }
+    for (const k of ["a", "h"]) {
+      const n = String(T[k].rec || "").split("-").map((v) => parseInt(v, 10) || 0), gp = n.reduce((a, v) => a + v, 0);
+      if (gp >= 3 && n[0] === gp) fact(0.62, `${who(k)} is unbeaten at ${T[k].rec}`);
+      else if (gp >= 3 && n[0] === 0) fact(0.6, `${who(k)} is still looking for its first win (${T[k].rec})`);
+    }
+    if (x.ser) fact(/game\s*\d/i.test(g.note) ? 0.9 : 0.3, x.ser.replace(/^(\w+) (leads|wins)/, (m0, ab, v) => (ab === A.ab ? who("a") : ab === H.ab ? who("h") : ab) + " " + v));
+    if (x.top[A.id] || x.top[H.id]) tape.push({ l: "Top player", t: "txt", a: x.top[A.id] || "–", h: x.top[H.id] || "–" });
+    if ((x.inj[A.id] || []).length || (x.inj[H.id] || []).length) tape.push({ l: "Out", t: "txt", a: (x.inj[A.id] || []).join(", ") || "–", h: (x.inj[H.id] || []).join(", ") || "–" });
+    facts.sort((p, q) => q.s - p.s);
+    return { key: facts[0] || null, facts, tape, line };
   }
   // the game page and the closing lines it needs, one game at a time
   function wkPvLoad(g) {
@@ -8862,12 +8878,12 @@ body.tv:has(#roomTvQr:not([hidden])) .rb-rail { padding-bottom: calc((clamp(96px
     if (!g) { if (!x.wkAsk) { x.wkAsk = 1; wkDay(lg, wkYmd(x.at), 3 * 3600e3); wkDay(lg, wkYmd(x.at - 864e5), 3 * 3600e3); } return null; }
     const nx = wkNext(g); if (nx && !WK.pv.has(nx.id) && Date.now() - (WK.fail.get(nx.id) || 0) > 10 * 60e3) wkPvLoad(nx);
     const pv = nx && WK.pv.get(nx.id);
-    return { g, st: wkStat(g), nx, lean: pv && pv.tr ? pv.tr.lean : null, art: pv ? pv.art : "" };
+    return { g, st: wkStat(g), nx, key: pv && pv.tr ? pv.tr.key : null, art: pv ? pv.art : "" };
   }
   function wkHlHtml(w) {
     let h = "";
     if (w.st && (w.st.st || w.st.score)) h += `<div class="oa-x"><span>The stat</span>${w.st.st ? `<p>${esc(w.st.st)}</p>` : ""}<small>${esc(w.st.score)}${w.st.ser ? " · " + esc(w.st.ser) : ""}</small></div>`;
-    if (w.nx) { const n = w.nx, o = n.o; h += `<div class="oa-x"><span>Next up</span><p>${esc(n.a.ab)} at ${esc(n.h.ab)} · ${esc(wkWhen(n.t, n.tba))}</p>${o ? `<small>${esc(o.d)}${o.ou != null ? " · O/U " + o.ou : ""}</small>` : ""}${w.lean ? `<i>Lean ${esc(w.lean.pick)}: ${esc(w.lean.txt)}</i>` : ""}${w.art ? `<i class="pv">${esc(w.art)}</i>` : ""}</div>`; }
+    if (w.nx) { const n = w.nx, o = n.o; h += `<div class="oa-x"><span>Next up</span><p>${esc(n.a.ab)} at ${esc(n.h.ab)} · ${esc(wkWhen(n.t, n.tba))}</p>${o ? `<small>${esc(o.d)}${o.ou != null ? " · O/U " + o.ou : ""}</small>` : ""}${w.key ? `<i>${esc(w.key.txt)}</i>` : ""}${w.art ? `<i class="pv">${esc(w.art)}</i>` : ""}</div>`; }
     return h;
   }
   // the lower third: partway into a highlight, its stat and the next game slide in for 10 seconds
@@ -8881,31 +8897,37 @@ body.tv:has(#roomTvQr:not([hidden])) .rb-rail { padding-bottom: calc((clamp(96px
       const w = wkHl(x); if (!w || (!(w.st && w.st.st) && !w.nx)) return;
       const n = w.nx;
       el.innerHTML = (w.st && w.st.st ? `<div><span>The stat</span><b>${esc(w.st.st)}</b></div>` : "") +
-        (n ? `<div><span>Next up</span><b>${esc(n.a.ab)} at ${esc(n.h.ab)} · ${esc(wkWhen(n.t, n.tba))}${n.o ? " · " + esc(n.o.d) : ""}</b>${w.lean ? `<em>Lean: ${esc(w.lean.pick)}</em>` : ""}</div>` : "");
+        (n ? `<div><span>Next up</span><b>${esc(n.a.ab)} at ${esc(n.h.ab)} · ${esc(wkWhen(n.t, n.tba))}${n.o ? " · " + esc(n.o.d) : ""}</b>${w.key ? `<em>${esc(w.key.txt)}</em>` : ""}</div>` : "");
       el.hidden = false; el.classList.remove("chyin"); void el.offsetWidth; el.classList.add("chyin");
       wkChyH = setTimeout(() => { el.hidden = true; }, 10e3);
     }, Math.max(4000, Math.min(x.ms * 0.3, 14e3)));
   }
   // ---------- the cards ----------
   function wkCard(g, x, i, n) {
-    const tr = x.tr || {}, L = tr.lean, ln = x.ln || {};
-    const form = (id) => (x.l5[id] || []).slice(-5).map((e) => `<u class="r${esc(e.r)}">${esc(e.r)}</u>`).join("");
-    const tm = (k) => { const t = g[k]; return `<div class="wk-tm ${k}" style="--tc:${esc(t.col)}"><div class="wk-lg">${t.lg ? `<img src="${esc(t.lg)}" alt="" referrerpolicy="no-referrer">` : ""}</div><div class="wk-nm"><em>${t.rk ? "#" + t.rk + " · " : ""}${esc(t.ab)}${t.rec ? " · " + esc(t.rec) : ""}</em><b>${esc(t.nm)}</b><i class="wk-f">${form(t.id)}</i></div></div>`; };
-    const wp = x.prd ? `<div class="wk-wp"><span>${esc(g.a.ab)} ${wkPct(x.prd.a)}</span><div><i style="width:${(x.prd.a * 100).toFixed(1)}%;--tc:${esc(g.a.col)}"></i><i style="width:${(x.prd.h * 100).toFixed(1)}%;--tc:${esc(g.h.col)}"></i></div><span>${wkPct(x.prd.h)} ${esc(g.h.ab)}</span><em>ESPN win probability</em></div>` : "";
+    const tr = x.tr || {}, L = tr.line || {}, key = tr.key;
+    const tm = (k) => { const t = g[k]; return `<div class="wk-tm ${k}" style="--tc:${esc(t.col)}"><div class="wk-lg">${t.lg ? `<img src="${esc(t.lg)}" alt="" referrerpolicy="no-referrer">` : ""}</div><div class="wk-nm"><b>${esc(t.nm)}</b><em>${t.rk ? "No. " + t.rk + " · " : ""}${esc(t.rec || t.ab)}</em></div></div>`; };
     const head = [WK_NAME[g.lg], g.note, wkWhen(g.t, g.tba), g.tv].filter(Boolean).map(esc).join(" · ");
-    const lean = L ? `<div class="wk-lean"><span>The lean</span><b>${esc(L.pick)}</b><p>${esc(L.txt)}${tr.agree > 1 ? ` <em>· ${tr.agree} signs point this way</em>` : ""}</p></div>`
-      : `<div class="wk-lean none"><span>The lean</span><b>No edge</b><p>Nothing in the numbers leans hard either way.</p></div>`;
-    const li = (a) => a.map((t) => `<li>${esc(t)}</li>`).join("");
+    const cell = (lbl, v, was) => (v != null && v !== "" ? `<div><span>${lbl}</span><b>${esc(String(v))}</b>${was != null && was !== "" ? `<i>opened ${esc(String(was))}</i>` : ""}</div>` : "");
+    const line = cell(L.ml ? "Moneyline" : "Spread", L.ml || L.sp, L.ml ? L.oMl : L.oSp) + cell("Total", L.ou, L.oOu);
+    const val = (r, k) => {
+      if (r.t === "form") return `<i class="wk-f">${(r[k] || []).map((v) => `<u class="r${esc(v)}">${esc(v)}</u>`).join("") || "–"}</i>`;
+      if (r.t === "txt") return `<em>${esc(r[k])}</em>`;
+      return `<b class="${r.b ? (r.b === k ? "wkhi" : "wklo") : ""}">${esc(String(r[k]))}</b>`;
+    };
+    const row = (r) => (r.t === "bar"
+      ? `<div class="wk-r wkbar"><b>${wkPct(r.a)}</b><div><span>${esc(r.l)}</span><p><i style="width:${(r.a * 100).toFixed(1)}%;--tc:${esc(g.a.col)}"></i><i style="width:${(r.h * 100).toFixed(1)}%;--tc:${esc(g.h.col)}"></i></p></div><b>${wkPct(r.h)}</b></div>`
+      : `<div class="wk-r${r.t ? " wk" + r.t : ""}"><div class="a">${val(r, "a")}</div><span>${esc(r.l)}</span><div class="h">${val(r, "h")}</div></div>`);
     return `<div class="wk-top"><span>${head}</span><em>${i + 1} / ${n}</em></div>
-      <div class="wk-mu">${tm("a")}<div class="wk-mid"><span>${g.ns ? "vs" : "at"}</span>${ln.d ? `<b>${esc(ln.d)}</b>` : ""}${ln.ou != null ? `<em>O/U ${esc(String(ln.ou))}</em>` : ""}</div>${tm("h")}</div>
-      ${wp}${lean}
-      <div class="wk-cols"><div><h4>Betting trends</h4><ul>${li(tr.bet || [])}</ul></div><div><h4>Matchup</h4><ul>${li(tr.mu || [])}</ul></div></div>
-      <div class="wk-pv"><span>Preview</span><p>${esc(x.art || `${g.a.nm}${g.a.rec ? " (" + g.a.rec + ")" : ""} ${g.ns ? "and" : "visit"} ${g.h.nm}${g.h.rec ? " (" + g.h.rec + ")" : ""}${g.note ? ", " + g.note : ""}${g.tv ? ". On " + g.tv : ""}.`)}</p></div>`;
+      <div class="wk-mu">${tm("a")}<div class="wk-mid">${g.ns ? "vs" : "at"}</div>${tm("h")}</div>
+      ${line ? `<div class="wk-line">${line}</div>` : ""}
+      ${key ? `<div class="wk-key"><span>Stat to know</span><p>${esc(key.txt)}</p></div>` : ""}
+      <div class="wk-tape">${(tr.tape || []).slice(0, 9).map(row).join("")}</div>
+      ${x.art ? `<div class="wk-pv"><span>Preview</span><p>${esc(x.art)}</p></div>` : ""}`;
   }
   function wkRecap(block) {
-    const rows = block.map((g) => { const x = WK.pv.get(g.id), L = x && x.tr && x.tr.lean;
-      return `<li><em>${esc(WK_NAME[g.lg])} · ${esc(wkWhen(g.t, g.tba))}</em><b>${esc(g.a.nm)} at ${esc(g.h.nm)}</b><span>${L ? esc(L.pick) : "No edge"}</span><i>${L ? esc(L.txt) : ""}</i></li>`; }).join("");
-    return `<div class="wk-top"><span>The Week Ahead · the leans</span><em>Stats, not locks</em></div><ul class="wk-rc">${rows}</ul>`;
+    const rows = block.map((g) => { const x = WK.pv.get(g.id), k = x && x.tr && x.tr.key;
+      return `<li><em>${esc(WK_NAME[g.lg])}<br>${esc(wkWhen(g.t, g.tba))}</em><b>${esc(g.a.nm)} <small>at</small> ${esc(g.h.nm)}</b><i>${k ? esc(k.txt) : ""}</i></li>`; }).join("");
+    return `<div class="wk-top"><span>The Week Ahead · coming up</span><em>${block.length} games</em></div><ul class="wk-rc">${rows}</ul>`;
   }
   const WK_CARD = 12e3;
   function wkShow() {
@@ -8925,8 +8947,7 @@ body.tv:has(#roomTvQr:not([hidden])) .rb-rail { padding-bottom: calc((clamp(96px
     if (WK.bi < 0 || now - WK.cardAt >= WK_CARD) { if (WK.bi < WK.block.length) WK.bi++; WK.cardAt = now; wkShow(); }
     else if (el.hidden) wkShow();
   }
-  const wkRundown = () => `<div class="oa-run">${WK.block.map((g, i) => { const x = WK.pv.get(g.id), L = x && x.tr && x.tr.lean;
-    return `<div class="oa-it${i === WK.bi ? " on" : i < WK.bi ? " done" : ""}"><em>${i === WK.bi ? "Now · " : i === WK.bi + 1 ? "Up next · " : ""}${esc(WK_NAME[g.lg])} · ${esc(wkWhen(g.t, g.tba))}</em><b>${esc(g.a.nm)} at ${esc(g.h.nm)}</b>${L ? `<small>Lean: ${esc(L.pick)}</small>` : ""}</div>`; }).join("")}</div>`;
+  const wkRundown = () => `<div class="oa-run">${WK.block.map((g, i) => `<div class="oa-it${i === WK.bi ? " on" : i < WK.bi ? " done" : ""}"><em>${i === WK.bi ? "Now · " : i === WK.bi + 1 ? "Up next · " : ""}${esc(WK_NAME[g.lg])} · ${esc(wkWhen(g.t, g.tba))}</em><b>${esc(g.a.nm)} at ${esc(g.h.nm)}</b></div>`).join("")}</div>`;
   setInterval(wkPoll, 5000); setInterval(wkPrefetch, 4000); setInterval(wkTick, 1000);
   function teamHype(b, g, e, why) {
     if (!clipsOn() || !g || !e.side) return;
