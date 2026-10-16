@@ -2520,6 +2520,11 @@ body.tv:has(#roomTvQr:not([hidden])) .rb-rail { padding-bottom: calc((clamp(96px
 .oa-it.on b { font: italic 600 2.6vh/1.15 var(--f-serif, "Cormorant Garamond", Georgia, serif); }
 .oa-it.done { opacity: .38; }
 .oa-row { margin-top: 6px; }
+.astag { display: inline-flex; align-items: center; gap: 7px; padding: 4px 11px 4px 4px; border-radius: 999px; background: color-mix(in srgb, var(--c, #e2c17e) 14%, transparent); border: 1px solid color-mix(in srgb, var(--c, #e2c17e) 45%, transparent); font: 700 13px/1 var(--f-ui, system-ui); color: #fff; letter-spacing: .01em; }
+.astag[hidden] { display: none; }
+.astag i { display: grid; place-items: center; width: 22px; height: 22px; border-radius: 50%; background: var(--c, #e2c17e); color: #0b0b0c; font: 800 12px/1 var(--f-ui, system-ui); font-style: normal; }
+.astag b { color: var(--c, #e2c17e); font-weight: 700; }
+.brand .astag { margin-left: 4px; }
 </style>
 </head>
 <body>
@@ -2555,6 +2560,7 @@ body.tv:has(#roomTvQr:not([hidden])) .rb-rail { padding-bottom: calc((clamp(96px
     <header class="ph-top">
       <div class="ph-brand"><b>Sweat</b><span>Board</span><i class="ph-dot" id="phDot"></i></div>
       <button type="button" class="ph-unit num" id="phUnit">1u = $15</button>
+      <span class="astag" hidden></span>
     </header>
     <div class="ph-range" id="phRange" role="group" aria-label="Time range"><button type="button" data-r="day">Today</button><button type="button" data-r="week">7D</button><button type="button" data-r="month">30D</button><button type="button" data-r="all">All</button></div>
     <div class="ph-body" id="phBody"></div>
@@ -2571,6 +2577,7 @@ body.tv:has(#roomTvQr:not([hidden])) .rb-rail { padding-bottom: calc((clamp(96px
       <span class="status" id="status"><i></i><span>Connecting</span></span>
       <span class="chip modechip" id="modeChip" hidden></span>
       <span class="chip modechip pulse" id="pulseChip" hidden></span>
+      <span class="astag" hidden></span>
     </div>
     <div class="seg" role="group" aria-label="Time range" id="range">
       <button type="button" data-r="day" aria-pressed="true">Today</button>
@@ -3103,10 +3110,12 @@ body.tv:has(#roomTvQr:not([hidden])) .rb-rail { padding-bottom: calc((clamp(96px
   const WHO_COL = { julian: "#6cc4f5", guest: "#f2a65a" };
   // guest profiles: the saved list (Settings), or until one's saved, everybody who's had a guest bet. Each gets a color
   const guestKey = (n) => String(n || "").trim().toLowerCase();
+  const isJul = (n) => guestKey(n) === "julian";
+  const oneJulian = (d) => (d && d.who === "guest" && isJul(d.whoName) ? { ...d, who: "julian", whoName: "Julian" } : d);
   function guestList() {
-    if (Array.isArray(S.guests)) return S.guests.slice();
+    if (Array.isArray(S.guests)) return S.guests.filter((n) => !isJul(n));
     const seen = new Map();
-    for (const n of [S.guestName, ...[...S.bets.values()].filter((b) => b.who === "guest").sort((a, b) => a.placedAt - b.placedAt).map((b) => b.whoName)]) if (guestKey(n) && n !== "Guest" && !seen.has(guestKey(n))) seen.set(guestKey(n), String(n).trim());
+    for (const n of [S.guestName, ...[...S.bets.values()].filter((b) => b.who === "guest").sort((a, b) => a.placedAt - b.placedAt).map((b) => b.whoName)]) if (guestKey(n) && n !== "Guest" && !isJul(n) && !seen.has(guestKey(n))) seen.set(guestKey(n), String(n).trim());
     return [...seen.values()];
   }
   const GUEST_COLS = ["#f2a65a", "#ef8fb4", "#b49cf2", "#5fd0a2", "#9fb4ff", "#f07f7f", "#68cfd6", "#d9a3ef"];
@@ -3181,7 +3190,7 @@ body.tv:has(#roomTvQr:not([hidden])) .rb-rail { padding-bottom: calc((clamp(96px
   }
   function phStats(rows) {
     const lbl = RANGE_LABEL[S.range];
-    const me = rows.find((p) => p.me) || { k: "me", name: S.hostName || "You", col: "#e2c17e", net: 0, w: 0, l: 0, p: 0, open: [], done: [], toWin: 0, last5: [], roi: null, hit: null, st: 0, sd: "" };
+    const me = rows.find((p) => p.me) || { k: "me", name: meName(), col: meCol(), net: 0, w: 0, l: 0, p: 0, open: [], done: [], toWin: 0, last5: [], roi: null, hit: null, st: 0, sd: "" };
     const rk = rows.indexOf(me) + 1, risk = me.open.reduce((a, x) => a + (Number(x.units) || 0), 0);
     const best = me.done.filter((b) => outcome(b) === "W").sort((x, y) => netOf(y) - netOf(x))[0];
     const kp = (v, k, c) => `<div><b class="num${c ? " " + c : ""}">${v}</b><span>${k}</span></div>`;
@@ -4058,7 +4067,7 @@ body.tv:has(#roomTvQr:not([hidden])) .rb-rail { padding-bottom: calc((clamp(96px
     const panel = $("#crewPanel"), wrap = $("#crew");
     const people = new Map();
     for (const b of bets) {
-      const k = (b.who || "guest") + ":" + whoName(b).toLowerCase();
+      const k = (b.who || "guest") + ":" + guestKey(whoName(b));
       if (!people.has(k)) people.set(k, { name: whoName(b), who: b.who || "guest", open: [], done: [] });
       (b.status === "open" ? people.get(k).open : people.get(k).done).push(b);
     }
@@ -4096,9 +4105,16 @@ body.tv:has(#roomTvQr:not([hidden])) .rb-rail { padding-bottom: calc((clamp(96px
   }
   // ---------- the room: everybody's bets on one screen ----------
   // a group ride is the same pick from two or more people; a head to head is somebody on the other side of yours
-  const personKey = (b) => (isMe(b) ? "me" : (b.who || "guest") + ":" + whoName(b).toLowerCase());
-  const personName = (b) => (isMe(b) ? S.hostName || "You" : whoName(b));
-  const personCol = (b) => (isMe(b) ? "#e2c17e" : b.who === "guest" ? guestCol(whoName(b)) : WHO_COL[b.who] || "#ff9f43");
+  const personKey = (b) => (isMe(b) ? "me" : (b.who || "guest") + ":" + guestKey(whoName(b)));
+  const meName = () => (GUEST ? (isJul(GUEST.name) ? "Julian" : GUEST.name) || "You" : S.hostName || "You");
+  const meCol = () => (GUEST ? (isJul(GUEST.name) ? WHO_COL.julian : guestCol(GUEST.name)) : "#e2c17e");
+  function guestTag() {
+    if (!GUEST) return;
+    document.querySelectorAll(".astag").forEach((el) => { el.hidden = !GUEST.name; el.style.setProperty("--c", meCol()); el.title = "Betting as " + meName();
+      el.innerHTML = `<i>${esc(meName().slice(0, 1).toUpperCase())}</i><b>${esc(meName())}</b>`; });
+  }
+  const personName = (b) => (isMe(b) ? meName() : whoName(b));
+  const personCol = (b) => (isMe(b) ? meCol() : b.who === "guest" ? guestCol(whoName(b)) : WHO_COL[b.who] || "#ff9f43");
   const normPick = (s) => String(s || "").toLowerCase().replace(/[−–—]/g, "-").replace(/[^a-z0-9.+\-/ ]/g, "").replace(/\s+/g, " ").trim();
   const selKey = (s) => (s && s.g != null ? [s.g, s.m, s.s, isTd(s.m) ? normNm(s.p && s.p.nm) : isPP(s.m) ? normNm(s.p && s.p.nm) + "@" + Number(s.l) : s.m === "sp" || s.m === "tot" ? (s.l == null ? "" : Number(s.l)) : ""].join("|") : null);
   function rideKey(b) {
@@ -4184,7 +4200,7 @@ body.tv:has(#roomTvQr:not([hidden])) .rb-rail { padding-bottom: calc((clamp(96px
       const p = ppl.get(k);
       if (b.status === "open") p.open++; else if (b.settledAt && b.settledAt >= start) p.done.push(b);
     }
-    if (!ppl.has("me")) ppl.set("me", { k: "me", name: S.hostName || "You", col: "#e2c17e", me: true, done: [], open: 0 });
+    if (!ppl.has("me")) ppl.set("me", { k: "me", name: meName(), col: meCol(), me: true, done: [], open: 0 });
     const rows = [...ppl.values()].filter((p) => p.me || p.open || p.done.length);
     panel.hidden = rows.length < 2;
     if (rows.length < 2) { box.innerHTML = ""; roomPrev = null; return; }
@@ -4731,11 +4747,11 @@ body.tv:has(#roomTvQr:not([hidden])) .rb-rail { padding-bottom: calc((clamp(96px
   }
   const colOf = (id) => (GUEST || (S.bets.get(id) || {})._col === "guestBets" ? "guestBets" : "bets");
   const guestStamp = (data) => (GUEST ? { ...data, who: "guest", whoName: GUEST.name || "Guest", uid: GUEST.uid, status: data.status || "open" } : data);
-  const putBet = (id, data0) => { const data = guestStamp(data0); return write((db) => db.collection(GUEST ? "guestBets" : "bets").doc(id).set(data), () => S.bets.set(id, { id, ...data })); };
+  const putBet = (id, data0) => { const data = guestStamp(data0); return write((db) => db.collection(GUEST ? "guestBets" : "bets").doc(id).set(data), () => S.bets.set(id, oneJulian({ id, ...data }))); };
   const patchBet = (id, patch) => write((db) => db.doc(colOf(id) + "/" + id).update(patch), () => {
     const b = S.bets.get(id), prev = b && b.status;
     if (b) {
-      S.bets.set(id, { ...b, ...patch });
+      S.bets.set(id, oneJulian({ ...b, ...patch }));
       if (prev === "open" && patch.status && patch.status !== "open") celebrate(S.bets.get(id));
     }
   });
@@ -5038,7 +5054,7 @@ body.tv:has(#roomTvQr:not([hidden])) .rb-rail { padding-bottom: calc((clamp(96px
   // ---------- sheets ----------
   function openSheet(id) { $(id).hidden = false; }
   // keep every open screen current: when a new version is up, reload it (never mid-form or mid-animation)
-  const BUILD = "20261016194307";
+  const BUILD = "20261016202145";
   function checkBuild() {
     if (BUILD === "dev") return;
     fetch("version.json?t=" + Date.now(), { cache: "no-store" }).then((r) => (r.ok ? r.json() : null)).then((j) => {
@@ -5400,13 +5416,15 @@ body.tv:has(#roomTvQr:not([hidden])) .rb-rail { padding-bottom: calc((clamp(96px
     if (w === "me") return {};
     if (w === "julian") return { who: "julian", whoName: "Julian" };
     if (w.startsWith("g:")) return { who: "guest", whoName: guestList().find((n) => guestKey(n) === w.slice(2)) || w.slice(2) };
-    const typed = $("#f-guest").value.trim().slice(0, 20) || "Guest", name = guestList().find((n) => guestKey(n) === guestKey(typed)) || typed;
+    const typed = $("#f-guest").value.trim().slice(0, 20) || "Guest";
+    if (isJul(typed)) return { who: "julian", whoName: "Julian" };
+    const name = guestList().find((n) => guestKey(n) === guestKey(typed)) || typed;
     addGuest(name);
     return { who: "guest", whoName: name };
   }
   // the saved guests, saved to the account
   function saveGuests(l) { S.guests = l; write((db) => db.doc("config/settings").set({ guests: l }, { merge: true }), () => {}); renderGuests(); render(); }
-  function addGuest(name) { const l = guestList(); if (name && name !== "Guest" && !l.some((n) => guestKey(n) === guestKey(name))) saveGuests([...l, name]); }
+  function addGuest(name) { const l = guestList(); if (name && name !== "Guest" && !isJul(name) && !l.some((n) => guestKey(n) === guestKey(name))) saveGuests([...l, name]); }
   function renderGuests() {
     const cur = (document.querySelector('input[name="who"]:checked') || {}).value;
     $("#guestRadios").innerHTML = guestList().map((n) => `<label><input type="radio" name="who" value="g:${esc(guestKey(n))}"${cur === "g:" + guestKey(n) ? " checked" : ""}><span><i style="background:${guestCol(n)}"></i>${esc(n)}</span></label>`).join("");
@@ -11088,7 +11106,7 @@ body.tv:has(#roomTvQr:not([hidden])) .rb-rail { padding-bottom: calc((clamp(96px
   }
   function guestAuth(u, auth, db, unsub) {
     if (!u || !GUEST.name) { S.db = null; S.canWrite = false; S.ready = true; render(); gate("guest"); return; }
-    GUEST.uid = u.uid;
+    GUEST.uid = u.uid; guestTag();
     // checking in with the room (refused only if the host has closed it)
     db.doc("members/" + u.uid).set({ name: GUEST.name, at: Date.now() }).then(() => {
       gate(null); S.db = db; S.canWrite = true; S.ready = false; S.bets = new Map(); render();
@@ -11097,7 +11115,7 @@ body.tv:has(#roomTvQr:not([hidden])) .rb-rail { padding-bottom: calc((clamp(96px
         for (const ch of snap.docChanges()) {
           const prev = S.bets.get(ch.doc.id);
           if (ch.type === "removed") { S.bets.delete(ch.doc.id); continue; }
-          const d = { id: ch.doc.id, ...ch.doc.data(), _col: "guestBets" };
+          const d = oneJulian({ id: ch.doc.id, ...ch.doc.data(), _col: "guestBets" });
           if (typeof d.odds !== "number" || typeof d.units !== "number") continue;
           S.bets.set(ch.doc.id, d);
           if (!first && prev && prev.status === "open" && d.status !== "open") toast(d.status === "won" ? `✅ ${d.pick} cashed` : d.status === "lost" ? `❌ ${d.pick} lost` : `${d.pick} · ${d.status}`);
@@ -11163,7 +11181,7 @@ body.tv:has(#roomTvQr:not([hidden])) .rb-rail { padding-bottom: calc((clamp(96px
         for (const ch of snap.docChanges()) {
           const prev = S.bets.get(ch.doc.id);
           if (ch.type === "removed") { S.bets.delete(ch.doc.id); continue; }
-          const d = { id: ch.doc.id, ...ch.doc.data() };
+          const d = oneJulian({ id: ch.doc.id, ...ch.doc.data() });
           if (typeof d.odds !== "number" || typeof d.units !== "number") continue;
           S.bets.set(ch.doc.id, d);
           if (first) continue;
@@ -11180,7 +11198,7 @@ body.tv:has(#roomTvQr:not([hidden])) .rb-rail { padding-bottom: calc((clamp(96px
         for (const ch of snap.docChanges()) {
           const prev = S.bets.get(ch.doc.id);
           if (ch.type === "removed") { S.bets.delete(ch.doc.id); continue; }
-          const d = { id: ch.doc.id, ...ch.doc.data(), _col: "guestBets" };
+          const d = oneJulian({ id: ch.doc.id, ...ch.doc.data(), _col: "guestBets" });
           if (typeof d.odds !== "number" || typeof d.units !== "number") continue;
           S.bets.set(ch.doc.id, d);
           if (first) continue;
