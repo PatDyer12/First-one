@@ -5290,7 +5290,7 @@ body.tv.cfb .st-n { padding: 7px 2px; font-size: 13px; }
   // ---------- sheets ----------
   function openSheet(id) { $(id).hidden = false; }
   // keep every open screen current: when a new version is up, reload it (never mid-form or mid-animation)
-  const BUILD = "20261017204724";
+  const BUILD = "20261017205859";
   function checkBuild() {
     if (BUILD === "dev") return;
     fetch("version.json?t=" + Date.now(), { cache: "no-store" }).then((r) => (r.ok ? r.json() : null)).then((j) => {
@@ -8403,14 +8403,28 @@ body.tv.cfb .st-n { padding: 7px 2px; font-size: 13px; }
     }
     hlNow();
   }
+  const HL_BRK = { NFL: /halftime/i, CFB: /halftime/i, NBA: /halftime/i, CBB: /halftime/i, WNBA: /halftime/i, NHL: /\bend (of )?(the )?(1st|2nd)\b|intermission/i, MLB: /\b(mid(dle)?|end) (of )?(the )?7th\b/i };
+  const HL_LATE = { NFL: (g) => (g.pd || 0) >= 4, CFB: (g) => (g.pd || 0) >= 4, NBA: (g) => (g.pd || 0) >= 4, CBB: (g) => (g.pd || 0) >= 2, NHL: (g) => (g.pd || 0) >= 3, MLB: (g) => (g.pd || 0) >= 8 };
+  const hlBrkName = (g) => (!g ? "" : g.sport === "NHL" ? "Intermission" : g.sport === "MLB" ? "7th-inning stretch" : "Halftime");
+  // a break to fill: the room's game at the half (g), or none of the room's games live (g null); null while they're playing
+  function hlBreak() {
+    const live = [...hlGames().values()].filter((g) => g.st === "in");
+    if (!live.length) return { g: null };
+    const g = live.find((x) => HL_BRK[x.sport] && HL_BRK[x.sport].test(x.d || ""));
+    if (!g) return null;
+    if (live.some((x) => x !== g && !(HL_BRK[x.sport] && HL_BRK[x.sport].test(x.d || "")) && HL_LATE[x.sport] && HL_LATE[x.sport](x))) return null;   // another game's crunch time
+    return { g };
+  }
   function hlNow() {
     const now = Date.now();
-    for (let i = HL2Q.length - 1; i >= 0; i--) if (now - HL2Q[i].at > 10 * 60e3 || hlSeen.has(HL2Q[i].v.id)) HL2Q.splice(i, 1);
-    while (HL2Q.length > 3) HL2Q.shift();
-    if (!HL2Q.length || !clipsOn() || cardBusy || fxBusy || PHONE() || Date.now() < hlUntil) return;
+    for (let i = HL2Q.length - 1; i >= 0; i--) if (now - HL2Q[i].at > 50 * 60e3 || hlSeen.has(HL2Q[i].v.id)) HL2Q.splice(i, 1);
+    while (HL2Q.length > 8) HL2Q.shift();
+    const br = hlBreak();
+    if (!br || !HL2Q.length || !clipsOn() || cardBusy || fxBusy || PHONE() || Date.now() < hlUntil) return;
+    if (br.g) HL2Q.sort((p, q) => (q.g.id === br.g.id) - (p.g.id === br.g.id));   // the game at the half first
     if (statusSrc || !$("#jumbo").hidden) { if (lastKind !== "pop" || Date.now() < hlUntil) return; stopStatus(); }   // a filler / DJ break makes way (not another highlight)
     const j = HL2Q.shift();
-    if (!playHL(S.games.get(j.g.id) || j.g, j.v, "Highlight")) HL2Q.unshift(j);
+    if (!playHL(S.games.get(j.g.id) || j.g, j.v, br.g ? hlBrkName(br.g) + (br.g.sport === "MLB" ? "" : " highlights") : "Highlight")) HL2Q.unshift(j);
   }
   setInterval(hlPoll, 5000);
   const VIBE = clip("aura/vibe", "Goldie: good vibes", "up win", 16.7, { songId: "sz-rooftop", own: true, lux: true, song: "Rooftop Hours", artist: "Sweat Zone house" });
@@ -8582,16 +8596,18 @@ body.tv.cfb .st-n { padding: 7px 2px; font-size: 13px; }
     if (!clipsOn() || PHONE() || cardBusy || fxBusy || trial || !document.body.classList.contains("tv")) return;
     const now = Date.now(), list = [...HLX.values()].filter((x) => x && !hlSeen.has(x.id) && now - x.at < 3 * 3600e3).sort((p, q) => q.at - p.at);
     if (!list.length || now < hlUntil) return;   // one's on (or still loading)
+    const br = hlBreak(); if (!br) return;   // the room's games are on: it waits for the half
+    if (br.g && HL2Q.length) return;          // the game at the half gets its own highlights first
     const mine = list.map((x) => [x, hlxBet(x)]).find(([, b]) => b);
     if (mine) {
       if (statusSrc || !$("#jumbo").hidden) { if (lastKind !== "pop" || Date.now() < hlUntil) return; stopStatus(); }
-      hlxPlay(mine[0], mine[1], "Highlight · " + mine[0].lg);
+      hlxPlay(mine[0], mine[1], (br.g ? hlBrkName(br.g) + " · " : "Highlight · ") + mine[0].lg);
       return;
     }
     // the rest of sports: only in a quiet moment, and not too often
-    if (AIR.on || statusSrc || !$("#jumbo").hidden || now - lastAny < 60e3 || now - hlxLast < 4 * 60e3) return;
+    if (AIR.on || statusSrc || !$("#jumbo").hidden || now - lastAny < (br.g ? 6e3 : 60e3) || now - hlxLast < (br.g ? 10e3 : 4 * 60e3)) return;   // at the half: back to back
     const x = list.find((y) => y.gid) || list[0];
-    hlxPlay(x, null, x.lg + " highlight");
+    hlxPlay(x, null, br.g ? hlBrkName(br.g) + " · " + x.lg : x.lg + " highlight");
   }
   setInterval(hlxPoll, 6000);
   setInterval(hlxTick, 5000);
