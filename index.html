@@ -2901,6 +2901,9 @@ em, i { font-style: normal; }
 .wk-even { font: 500 2vh/1.25 var(--f-ui); }
 /* the blocks: cool navy glass */
 .rb-g, .rb-sec { background: linear-gradient(180deg, #111720 0%, #0c1016 100%); border-color: rgba(255,255,255,.07); }
+/* the stadium behind the board: a rendered night game, not flat shapes */
+body.tv.cfb #cfield svg { display: none; }
+body.tv.cfb #cfield { background: #05070b url(img/field.jpg) center bottom / cover no-repeat; opacity: .62; }
 /* rank: a white chip, the way the broadcast does it */
 .gx-tm .rk, .rb-gh .rk { background: #e9eef5; color: #0a0d12; }
 </style>
@@ -5628,7 +5631,7 @@ em, i { font-style: normal; }
   // ---------- sheets ----------
   function openSheet(id) { $(id).hidden = false; }
   // keep every open screen current: when a new version is up, reload it (never mid-form or mid-animation)
-  const BUILD = "20261017224007";
+  const BUILD = "20261017225846";
   function checkBuild() {
     if (BUILD === "dev") return;
     fetch("version.json?t=" + Date.now(), { cache: "no-store" }).then((r) => (r.ok ? r.json() : null)).then((j) => {
