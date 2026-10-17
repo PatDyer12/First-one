@@ -2723,6 +2723,150 @@ body.tv.cfb .st-n { padding: 7px 2px; font-size: 13px; }
 .upban .ub-s em { font: 800 .55em/1 var(--f-num, Inter, sans-serif); font-style: normal; color: #5c0b12; background: #ffe2b8; border-radius: 4px; padding: 3px 5px 2px; margin-right: 6px; vertical-align: .3em; }
 .upban .ub-s span { color: rgba(255,255,255,.4); margin: 0 6px; }
 .upban .ub-d { font: 700 13px/1 var(--f-num, Inter, sans-serif); font-style: normal; letter-spacing: .16em; text-transform: uppercase; color: rgba(255,255,255,.7); }
+/* ---------- the game block ---------- */
+.rb-g { border-radius: 20px; border: 1px solid rgba(255,255,255,.065); background: linear-gradient(180deg, #121316 0%, #0d0e10 100%); box-shadow: inset 0 1px 0 rgba(255,255,255,.04), 0 2px 6px rgba(0,0,0,.35), 0 28px 60px -18px rgba(0,0,0,.7); }
+.rb-g::before { height: 6px !important; background: linear-gradient(90deg, var(--ra, var(--ca)) 0 calc(50% - 1.5px), transparent calc(50% - 1.5px) calc(50% + 1.5px), var(--rh, var(--ch)) calc(50% + 1.5px) 100%) !important; z-index: 2; }
+.rb-g.hero::before { height: 8px !important; }
+body.tv .rb-games:not(.primeg) { column-width: auto; columns: auto; display: grid; grid-template-columns: repeat(auto-fill, minmax(440px, 1fr)); gap: 24px; align-items: start; padding: 2px 2px 0; }
+body.tv .rb-games:not(.primeg) > * { margin: 0 !important; }
+body.tv .rb-games.one:not(.primeg) { grid-template-columns: minmax(0, 1fr); }
+body.tv .rb-main > .loopclone { margin-top: 24px; }
+body.tv .rb-main { -webkit-mask-image: linear-gradient(180deg, transparent 0, #000 14px, #000 calc(100% - 56px), transparent 100%); mask-image: linear-gradient(180deg, transparent 0, #000 14px, #000 calc(100% - 56px), transparent 100%); }
+/* the scoreboard */
+.gx-hd { display: flex; flex-direction: column; gap: 4px; padding: 20px 20px 12px; }
+.gx-meta { display: flex; align-items: center; gap: 10px; min-height: 22px; margin-bottom: 6px; font: 700 12px/1 var(--f-ui); letter-spacing: .14em; text-transform: uppercase; color: #8b8f98; }
+.gx-meta .net { padding-left: 10px; border-left: 1px solid rgba(255,255,255,.14); color: #a9adb6; }
+.gx-meta .ups { padding: 5px 8px; border-radius: 6px; color: #fff; background: linear-gradient(90deg, #b3121f, #e23b3b); letter-spacing: .12em; animation: upsPulse 1.6s ease-in-out infinite; }
+.gx-meta .ups.fin { background: #7a1520; animation: none; }
+.gx-meta .st { margin-left: auto; display: inline-flex; align-items: center; gap: 8px; padding: 6px 10px; border-radius: 8px; font: 700 15px/1 var(--f-num); letter-spacing: .08em; color: #f3ead6; background: rgba(255,255,255,.06); }
+.gx-meta .st.s-live::before { content: ""; width: 8px; height: 8px; border-radius: 50%; background: #ff4d5e; box-shadow: 0 0 0 0 rgba(255,77,94,.6); animation: gxPing 1.8s infinite; }
+@keyframes gxPing { 0% { box-shadow: 0 0 0 0 rgba(255,77,94,.55); } 70%, 100% { box-shadow: 0 0 0 7px rgba(255,77,94,0); } }
+.gx-meta .st.s-pre { color: #e8d3a2; background: rgba(201,164,92,.12); }
+.gx-meta .st.s-fin { color: #c9c4ba; }
+.gx-tm { display: grid; grid-template-columns: 34px auto minmax(0, max-content) auto auto 1fr auto; align-items: center; column-gap: 10px; min-height: 44px; }
+.gx-tm .tl { width: 34px; height: 34px; object-fit: contain; grid-column: 1; filter: drop-shadow(0 2px 4px rgba(0,0,0,.45)); }
+.gx-tm .rk { grid-column: 2; font: 800 13px/1 var(--f-num); font-style: normal; color: #0b0b0a; background: #e8d3a2; border-radius: 5px; padding: 4px 6px 3px; }
+.gx-tm:not(:has(.rk)) .nm { grid-column: 2 / 4; }
+.gx-tm .nm { grid-column: 3; font: 700 23px/1.1 var(--f-ui); letter-spacing: -.01em; color: #a7a39b; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.gx-tm .rec { grid-column: 4; font: 600 15px/1 var(--f-num); letter-spacing: .04em; color: #6e727b; }
+.gx-tm .ball { grid-column: 5; width: 22px; height: 13px; filter: drop-shadow(0 1px 2px rgba(0,0,0,.6)); }
+.gx-tm .to { grid-column: 6; justify-self: end; display: inline-flex; gap: 4px; margin-right: 6px; }
+.gx-tm .to i, .rb-gh .to i { width: 14px; height: 4px; border-radius: 2px; background: rgba(255,255,255,.13); }
+.gx-tm .to i.on, .rb-gh .to i.on { background: #ffd447; }
+.gx-tm .sc { grid-column: 7; min-width: 1.6ch; text-align: right; font: 800 38px/1 var(--f-num); color: #8e8a83; font-variant-numeric: tabular-nums; }
+.gx-tm.lead .nm, .gx-tm.lead .sc { color: #fbf6ea; }
+.rb-g.pre .gx-tm .nm { color: #ece6d8; }
+/* before kickoff: the line */
+.gx-line { display: flex; flex-wrap: wrap; gap: 8px; padding: 0 20px 16px; }
+.gx-line span { display: inline-flex; align-items: baseline; gap: 8px; padding: 8px 12px; border-radius: 10px; background: rgba(255,255,255,.04); border: 1px solid rgba(255,255,255,.05); }
+.gx-line em { font: 700 11px/1 var(--f-ui); font-style: normal; letter-spacing: .14em; text-transform: uppercase; color: #8b8f98; }
+.gx-line b { font: 700 17px/1 var(--f-num); letter-spacing: .03em; color: #f3ead6; }
+/* the field */
+.gx-play { display: flex; flex-direction: column; gap: 10px; padding: 2px 20px 16px; }
+.rb-g.hero .gx-play { gap: 14px; padding: 4px clamp(14px, 3cqw, 30px) 18px; }
+.gx-fld { position: relative; border-radius: 12px; overflow: hidden; box-shadow: 0 0 0 1px rgba(255,255,255,.08), 0 10px 24px -8px rgba(0,0,0,.7); background: #173d25; }
+.gx-fld svg { display: block; width: 100%; height: auto; }
+.gx-fld .tf { fill: #1b4a2c; }
+.gx-fld .mw { fill: #ffffff; fill-opacity: .035; }
+.gx-fld .ezs { fill: rgba(0,0,0,.16); }
+.gx-fld .ezt { font: 800 34px var(--f-num); letter-spacing: 3px; fill: rgba(255,255,255,.85); text-anchor: middle; dominant-baseline: central; }
+.gx-fld .rz { fill: #ff3b4e; fill-opacity: .16; }
+.gx-fld path, .gx-fld line { vector-effect: non-scaling-stroke; fill: none; }
+.gx-fld .yl { stroke: rgba(255,255,255,.26); stroke-width: 1; }
+.gx-fld .y50 { stroke: rgba(255,255,255,.5); stroke-width: 1.5; }
+.gx-fld .gl { stroke: rgba(255,255,255,.9); stroke-width: 2; }
+.gx-fld .hm { stroke: rgba(255,255,255,.2); stroke-width: 1; }
+.gx-fld .yn { font: 700 26px var(--f-num); letter-spacing: 2px; fill: rgba(255,255,255,.4); text-anchor: middle; }
+.gx-fld.z-big .yn { font-size: 24px; }
+.gx-fld .drv { fill-opacity: .42; }
+.gx-fld .fdg { stroke: rgba(255,212,71,.35); stroke-width: 7; }
+.gx-fld .fd { stroke: #ffd447; stroke-width: 2.5; }
+.gx-fld .losg { stroke: rgba(89,180,255,.35); stroke-width: 7; }
+.gx-fld .los { stroke: #59b4ff; stroke-width: 2.5; }
+.gx-fld .bsh { fill: rgba(0,0,0,.38); }
+.gx-fld .bl ellipse { fill: #8e4b1e; stroke: #2a1405; stroke-width: 1.5; vector-effect: non-scaling-stroke; }
+.gx-fld .bl path { stroke: #fff; stroke-width: 1.4; stroke-linecap: round; }
+.gx-fld .dir { stroke: #fff; stroke-width: 2.2; stroke-linecap: round; stroke-linejoin: round; opacity: .9; }
+.gx-cap { position: absolute; left: 50%; top: 50%; transform: translate(-50%, -50%); padding: 7px 14px; border-radius: 999px; font: 700 13px/1 var(--f-ui); letter-spacing: .18em; text-transform: uppercase; color: #fbf6ea; background: rgba(8,10,12,.72); box-shadow: 0 0 0 1px rgba(255,255,255,.12); }
+/* under the field */
+.gx-inf { display: flex; align-items: baseline; gap: 10px; min-width: 0; }
+.rb-g .gx-inf .dd { font: 700 19px/1.1 var(--f-ui); color: #fbf6ea; white-space: nowrap; }
+.gx-inf .spot { font: 600 16px/1.1 var(--f-ui); color: #a7a39b; white-space: nowrap; }
+.gx-inf .rz, .ph-dd .rz { align-self: center; padding: 4px 8px; border-radius: 6px; font: 800 11px/1 var(--f-ui); letter-spacing: .12em; text-transform: uppercase; color: #fff; background: #d9283d; }
+.gx-inf .drv { margin-left: auto; font: 600 14px/1.1 var(--f-ui); color: #8b8f98; white-space: nowrap; }
+.gx-inf .drv em, .gx-lp em, .gx-wp .lab, .gx-ldr em { font: 700 11px/1 var(--f-ui); font-style: normal; letter-spacing: .14em; text-transform: uppercase; color: #6e727b; }
+.gx-inf .drv em { margin-right: 8px; }
+.gx-lp { margin: -2px 0 0; font: 500 15px/1.35 var(--f-ui); color: #b9b5ad; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.gx-lp.z-big { white-space: normal; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; font-size: 17px; }
+.gx-lp em { margin-right: 8px; }
+.gx-wp { display: grid; grid-template-columns: auto auto 1fr auto; align-items: center; column-gap: 10px; }
+.gx-wp .tv { font: 600 15px/1 var(--f-num); letter-spacing: .05em; color: #8b8f98; white-space: nowrap; }
+.gx-wp .tv b { font-weight: 800; color: #fbf6ea; font-size: 17px; }
+.gx-wp .wpb { display: flex; gap: 3px; height: 8px; }
+.gx-wp .wpb i { display: block; min-width: 4px; border-radius: 99px; background: var(--c); }
+.gx-ldr { display: flex; flex-wrap: wrap; gap: 6px 18px; padding-top: 10px; border-top: 1px solid rgba(255,255,255,.06); }
+.gx-ldr span { display: inline-flex; align-items: center; gap: 7px; min-width: 0; font: 600 15px/1.2 var(--f-ui); }
+.gx-ldr img { width: 18px; height: 18px; object-fit: contain; }
+.gx-ldr b { font-weight: 700; color: #ece6d8; white-space: nowrap; }
+.gx-ldr i { font-style: normal; color: #9a968f; white-space: nowrap; }
+/* the hero's scoreboard: record and timeouts under each team */
+.rb-gh .ab { display: inline-flex; flex-direction: column; gap: 6px; }
+.rb-gh .tm.h .ab { align-items: flex-end; }
+.rb-gh .sub { display: inline-flex; align-items: center; gap: 10px; }
+.rb-gh .sub em { font: 600 .5em/1 var(--f-num); font-style: normal; letter-spacing: .06em; color: #8b8f98; }
+.rb-gh .to { display: inline-flex; gap: 4px; }
+.rb-gh .nmx { display: inline-flex; align-items: center; white-space: nowrap; }
+/* the bets in a block: each its own clear row, the status in its color */
+.rb-g .rb-rows { padding: 4px 16px 16px; gap: 10px; }
+.rb-g .rb-pos { border-radius: 12px; background: rgba(255,255,255,.035); border: 1px solid rgba(255,255,255,.06); }
+.rb-g .rb-pos:not(.squad):not(.duo) { box-shadow: inset 4px 0 0 var(--acc, rgba(255,255,255,.16)); padding-left: 18px; }
+.rb-g .rb-pos.st-w { --acc: #2ee89a; background: linear-gradient(90deg, rgba(46,232,154,.11), rgba(46,232,154,.025)); border-color: rgba(46,232,154,.24); }
+.rb-g .rb-pos.st-l { --acc: #ff4d6a; background: linear-gradient(90deg, rgba(255,77,106,.11), rgba(255,77,106,.025)); border-color: rgba(255,77,106,.22); }
+.rb-g .rb-pos .rb-st { font: 700 15px/1 var(--f-ui); padding: 8px 11px; border-radius: 8px; }
+.rb-g .rb-pos.st-w .rb-st { color: #74f0b9; background: rgba(46,232,154,.14); }
+.rb-g .rb-pos.st-l .rb-st { color: #ff94a6; background: rgba(255,77,106,.14); }
+.rb-g .meter { height: 6px; margin-top: 12px; border-radius: 99px; background: rgba(255,255,255,.08); overflow: visible; }
+.rb-g .meter i { border-radius: 99px; box-shadow: none; }
+.rb-g .meter::before { top: -4px; bottom: -4px; width: 2px; background: rgba(255,255,255,.55); border-radius: 2px; }
+.rb-g .rb-pk > b .t { flex: 0 1 auto; min-width: min(8ch, 55%); }
+.rb-g .rb-pk > b .hasball, .rb-g .rb-pk > b .rb-hs { flex: none; }
+body.tv .rb-g .rb-pk > b { flex-wrap: wrap; row-gap: 6px; }
+body.tv .rb-g .rb-pk .hasball em { display: none; }   /* the block says red zone itself */
+/* the hero in a half-width column: team against team on one line, scores meeting in the middle, the clock under them,
+   abbreviations. Full width keeps the clock between the scores and the full names */
+.rb-gh .nmx .na { display: none; }
+@container (max-width: 1000px) {   /* (600px and under has its own sizes, more specific) */
+  .rb-g.hero .rb-gh { grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); column-gap: clamp(28px, 6cqw, 56px); row-gap: 10px; }
+  .rb-g.hero .rb-gh .mid { grid-column: 1 / -1; grid-row: 2; flex-direction: row; justify-content: center; gap: 14px; }
+  .rb-g.hero .rb-gh .tm.a .sc { margin-left: auto; }
+  .rb-g.hero .rb-gh .tm.h .sc { margin-right: auto; }
+  .rb-g.hero .sc { font-size: clamp(36px, 8cqw, 84px); }
+  .rb-g.hero .tl { width: clamp(34px, 7cqw, 76px); height: clamp(34px, 7cqw, 76px); }
+  .rb-g.hero .ab { font-size: clamp(17px, 3.4cqw, 34px); }
+  .rb-g.hero .clk { font-size: clamp(12px, 2.3cqw, 22px); }
+  .rb-gh .nmx .nf { display: none; }
+  .rb-gh .nmx .na { display: inline; }
+}
+/* a narrow block (the side column next to a big game): the pick gets the whole line, who and how it's going under it */
+.rb-g.gx { container-type: inline-size; }
+@container (max-width: 470px) {
+  .rb-g.gx .rb-pos { row-gap: 6px; }
+  .rb-g.gx .rb-pos > .rb-pk { display: contents; }
+  .rb-g.gx .rb-pos > .rb-avs { grid-column: 1; grid-row: 1 / span 2; }
+  .rb-g.gx .rb-pos > .rb-pk > b { grid-column: 2 / -1; grid-row: 1; min-width: 0; }
+  .rb-g.gx .rb-pos > .rb-pk > .rb-wls { grid-column: 2; grid-row: 2; margin-top: 0; min-width: 0; }
+  .rb-g.gx .rb-pos > .rb-st { grid-column: 3; grid-row: 2; }
+  .rb-g.gx .rb-pos > .meter { grid-row: 3; }
+}
+/* the jumbo's side list: the scoreboard and down and distance, no field */
+#jbBets .gx-fld, #jbBets .gx-ldr, #jbBets .gx-lp, #jbBets .gx-wp { display: none; }
+#jbBets .gx-hd { padding: 16px 16px 8px; } #jbBets .gx-play { padding: 0 16px 10px; } #jbBets .gx-tm .nm { font-size: 19px; } #jbBets .gx-tm .sc { font-size: 30px; }
+/* the phone */
+.ph-play { margin: 10px 0 2px; display: flex; flex-direction: column; gap: 6px; }
+.ph-play .gx-fld { border-radius: 8px; }
+.ph-dd { display: flex; align-items: center; gap: 8px; }
+.ph-play .ph-dd b { font: 700 13px/1.2 var(--f-ui); color: var(--ink, #f4f6fa); }
+.ph-dd .rz { padding: 3px 6px; font-size: 10px; }
 </style>
 </head>
 <body>
@@ -3367,7 +3511,8 @@ body.tv.cfb .st-n { padding: 7px 2px; font-size: 13px; }
     if (b.status !== "open" || b.kind === "parlay" || !b.sel) return "";
     const g = gameOf(b.sel);
     if (!g || g.st !== "in" || !(g.sport === "NFL" || g.sport === "CFB") || !g.sit || g.sit.yl == null) return "";
-    return `<div class="rb-fld mini ph">${fldStrip(g, false)}<div class="fi"><span class="ddx">${esc(g.sit.dd || "")}</span>${g.sit.rz ? '<span class="rzt">Red zone</span>' : ""}</div></div>`;
+    const on = g.sit.pos && g.sit.dd && !/halftime|^end of/i.test(g.d || "");
+    return `<div class="ph-play">${gxField(g, "ph")}${on ? `<div class="ph-dd"><b>${esc(String(g.sit.dd).replace(/\s+at\s+/i, " · "))}</b>${g.sit.rz ? '<span class="rz">Red zone</span>' : ""}</div>` : ""}</div>`;
   }
   function phBets(rows) {
     const start = rangeStart(S.range), all = [...S.bets.values()];
@@ -3727,6 +3872,11 @@ body.tv.cfb .st-n { padding: 7px 2px; font-size: 13px; }
     el.appendChild(c); st.clone = c;
     st.period = c.offsetTop - kids[0].offsetTop;
     st.stops = kids.slice(1).map((k) => k.offsetTop - kids[0].offsetTop).filter((v) => v > 0 && v < st.period);
+    if (el.id === "rbMain") {   // the board's blocks sit in rows: hold on each row, a little air above it
+      const grid = el.querySelector("#rbGames"), top0 = el.getBoundingClientRect().top - el.scrollTop;
+      if (grid) st.stops = [...new Set([...grid.children].map((k) => Math.round(k.getBoundingClientRect().top - top0 - 16)))].filter((v) => v > 0 && v < st.period).sort((p, q) => p - q);
+      st.dwell = 9000; st.speed = 70;
+    }
     if (st.period > 0) st.pos %= st.period;
   }
   const loopSyncEl = (el) => loopSync(ASC.find((s) => s.el === el));
@@ -3742,8 +3892,8 @@ body.tv.cfb .st-n { padding: 7px 2px; font-size: 13px; }
       st.pos += st.speed * dt;
       // a card reaching the top holds there a moment; so does the top of the list coming back around
       const stop = st.stops && st.stops.find((v) => v > was + 0.5 && v <= st.pos);
-      if (stop != null) { st.pos = stop; st.hold = now + DWELL; }
-      if (st.pos >= st.period) { st.pos -= st.period; st.hold = now + DWELL; }
+      if (stop != null) { st.pos = stop; st.hold = now + (st.dwell || DWELL); }
+      if (st.pos >= st.period) { st.pos -= st.period; st.hold = now + (st.dwell || DWELL); }
       el.scrollTop = st.pos;
     }
     requestAnimationFrame(ascTick);
@@ -4084,6 +4234,11 @@ body.tv.cfb .st-n { padding: 7px 2px; font-size: 13px; }
     if (fin) txt = "Final · " + (res === "W" ? "winner" : res === "L" ? "loser" : "push");
     return { m, res, fin, txt, g };
   }
+  function dkLg(u) { return String(u || "").replace(/\/i\/teamlogos\/([a-z]+)\/500\//, "/i/teamlogos/$1/500-dark/"); }
+  document.addEventListener("error", (e) => {
+    const el = e.target, a = el && el.tagName === "IMG" ? "src" : el && el.tagName === "image" ? "href" : "", u = a ? el.getAttribute(a) || "" : "";
+    if (u.includes("/500-dark/")) { e.stopPropagation(); el.setAttribute(a, u.replace("/500-dark/", "/500/")); }   // before its own onerror drops it
+  }, true);
   const logo = (t, cls) => (t && t.lg ? `<img class="${cls || "lgo"}" src="${esc(t.lg)}" alt="" loading="lazy" referrerpolicy="no-referrer" onerror="this.remove()">` : "");
   // a little football: shows next to your bet when your side has the ball (ML and spread), and on the scorebug for whoever has it
   const BALL = '<svg class="ball" viewBox="0 0 26 15" aria-label="has the ball"><ellipse cx="13" cy="7.5" rx="12" ry="6.6" fill="#9a5424" stroke="#3a1c08" stroke-width="1.2"/><path d="M8 7.5h10M10 5.7v3.6M12.3 5.4v4.2M14.6 5.4v4.2M17 5.7v3.6" stroke="#fff" stroke-width="1.2" stroke-linecap="round"/><path d="M3.4 4.6c1.6-.4 2.7-.2 2.7 2.9s-1.1 3.3-2.7 2.9M22.6 4.6c-1.6-.4-2.7-.2-2.7 2.9s1.1 3.3 2.7 2.9" stroke="#fff" stroke-width="1" fill="none"/></svg>';
@@ -4097,7 +4252,7 @@ body.tv.cfb .st-n { padding: 7px 2px; font-size: 13px; }
     const g = gameOf(sel); if (!g) return "";
     const me = (side) => (sel.m !== "tot" && sel.s === side ? " me" : "");
     const pre = g.st === "pre", sc = (t) => (pre || t.sc == null ? "" : `<b>${t.sc}</b>`);
-    const clk = pre ? startLabel(g.t) : g.st === "post" ? "Final" : g.d;
+    const clk = pre ? startLabel(g.t) : gxStatus(g).t;
     const pos = (t) => (g.st === "in" && g.sit && g.sit.pos && String(t.id) === String(g.sit.pos) ? BALL : "");
     return `<div class="bug"><span class="tm${me("a")}">${logo(g.a)}${esc(g.a.ab)} ${sc(g.a)}${pos(g.a)}</span><span class="tm${me("h")}">${logo(g.h)}${esc(g.h.ab)} ${sc(g.h)}${pos(g.h)}</span><span class="clk${g.st === "in" ? " on" : ""}">${esc(clk)}</span></div>`;
   }
@@ -4626,20 +4781,134 @@ body.tv.cfb .st-n { padding: 7px 2px; font-size: 13px; }
     const fav = wp == null ? "" : wp >= 50 ? `${esc(g.h.ab)} ${wp}%` : `${esc(g.a.ab)} ${100 - wp}%`;
     return `<div class="rb-fld mini">${fldStrip(g, false)}<div class="fi"><span class="ddx">${esc(sit.dd || g.d || "")}</span>${sit.rz ? '<span class="rzt">Red zone</span>' : ""}${fav ? `<span class="wpx">Win prob ${fav}</span>` : ""}</div>${ldrHtml(g)}</div>`;
   }
+  const GX_LG = { NFL: "NFL", CFB: "College football", NBA: "NBA", CBB: "College hoops", MLB: "MLB", NHL: "NHL", WNBA: "WNBA" };
+  const gxHex = (h) => { const m = /^#?([0-9a-f]{6})$/i.exec(h || ""); if (!m) return null; const n = parseInt(m[1], 16); return [n >> 16, (n >> 8) & 255, n & 255]; };
+  const gxLum = (h) => { const c = gxHex(h); return c ? (0.299 * c[0] + 0.587 * c[1] + 0.114 * c[2]) / 255 : 0; };
+  const gxShade = (h, k) => { const c = gxHex(h); return c ? `rgb(${c.map((v) => Math.round(v * (1 - k))).join(",")})` : "#232831"; };
+  const gxFoot = (g) => g.sport === "NFL" || g.sport === "CFB";
+  // the clock the way a broadcast says it: "2nd · 1:20", "Halftime", "Final · OT", or the kickoff time
+  function gxStatus(g) {
+    if (g.st === "pre") return { cls: "s-pre", t: startLabel(g.t).replace(/^Starts /, "") };
+    const d = String(g.d || "");
+    if (g.st === "post") { const x = d.split("/")[1]; return { cls: "s-fin", t: x ? `Final · ${/^\d+$/.test(x) ? x + " inn" : x}` : "Final" }; }
+    const m = d.match(/^(\d{1,2}:\d{2}|\d+\.\d)\s*-\s*(.+)$/);
+    return { cls: "s-live", t: m ? `${m[2]} · ${m[1]}` : d.replace(/^End of /i, "End of ") };
+  }
+  const gxName = (g, t) => (g.sport === "CFB" ? t.nm || t.ab : t.nm && t.nm.length <= 13 ? t.nm : t.ab);
+  // one team's row: logo, rank, name, record, timeouts, the ball, the score
+  function gxTeam(g, k) {
+    const t = g[k], o = g[k === "a" ? "h" : "a"], live = g.st === "in", sit = live && gxFoot(g) ? g.sit || {} : {};
+    const lead = g.st !== "pre" && t.sc != null && o.sc != null && t.sc > o.sc, pos = !!sit.pos && String(sit.pos) === String(t.id);
+    const to = sit.to && sit.to[k] != null ? `<span class="to" aria-label="${sit.to[k]} timeouts left">${[0, 1, 2].map((i) => `<i class="${i < sit.to[k] ? "on" : ""}"></i>`).join("")}</span>` : "";
+    return `<div class="gx-tm ${k}${lead ? " lead" : ""}${pos ? " hasb" : ""}">${logo(t, "tl")}${t.rk ? `<i class="rk">${t.rk}</i>` : ""}<b class="nm">${esc(gxName(g, t))}</b>${t.rec && g.st !== "post" ? `<span class="rec">${esc(t.rec)}</span>` : ""}${pos ? BALL : ""}${to}<span class="sc">${g.st === "pre" || t.sc == null ? "" : t.sc}</span></div>`;
+  }
+  function gxHead(g) {
+    const s = gxStatus(g), up = g.sport === "CFB" && typeof upsetOf === "function" ? upsetOf(g) : null;
+    return `<header class="gx-hd"><div class="gx-meta"><span class="lg">${esc(GX_LG[g.sport] || g.sport || "")}</span>${g.net ? `<span class="net">${esc(g.net)}</span>` : ""}${up ? `<span class="ups${up.k === "final" ? " fin" : ""}">${up.k === "final" ? "Upset" : "Upset alert"}</span>` : ""}<span class="st ${s.cls}">${esc(s.t)}</span></div>${gxTeam(g, "a")}${gxTeam(g, "h")}</header>`;
+  }
+  // before kickoff: the line
+  function gxLine(g) {
+    if (g.st !== "pre") return "";
+    const c = [];
+    if (g.sp && g.sp.h && g.sp.h.l != null) { const l = g.sp.h.l; c.push(["Spread", l === 0 ? "Pick'em" : l < 0 ? `${g.h.ab} ${fLine(l)}` : `${g.a.ab} ${fLine(-l)}`]); }
+    if (g.tot && g.tot.l != null) c.push(["Total", String(g.tot.l)]);
+    if (g.ml && g.ml.a != null && g.ml.h != null) c.push(["Moneyline", `${g.a.ab} ${fOdds(g.ml.a)} · ${g.h.ab} ${fOdds(g.ml.h)}`]);
+    return c.length ? `<div class="gx-line">${c.map(([k, v]) => `<span><em>${k}</em><b>${esc(v)}</b></span>`).join("")}</div>` : "";
+  }
+  // the field. 1200 across: an end zone each side (the away team's on the left, so the team on the left goes right),
+  // 10 units a yard. Lines keep their width however big the field is drawn
+  // the drive so far, only when it's the drive of the team with the ball: after a punt or a pick the last drive was the other side's
+  function gxDrv(g) {
+    const sit = g.sit || {}, dr = sit.dr, yl = sit.yl;
+    if (!dr || dr.s == null || yl == null || !sit.pos) return null;
+    const P = String(sit.pos), lp = sit.lp;
+    if (lp && lp.team != null && String(lp.team) !== P && lp.st != null && String(lp.st) !== P) return null;
+    return (P === String(g.a.id) ? dr.s >= yl : dr.s <= yl) ? dr : null;
+  }
+  function gxEz(t) { const c = gxLum(t.col) >= 0.07 ? t.col : t.alt && gxLum(t.alt) >= 0.07 ? t.alt : t.col; return gxShade(c, 0.3); }
+  function gxField(g, size) {
+    const big = size === "big", ph = size === "ph", W = 1200, H = big ? 176 : ph ? 150 : 116, EZ = 100, sit = g.sit || {}, yl = sit.yl, has = g.st === "in" && yl != null && !!sit.pos;
+    const X = (v) => EZ + 10 * (100 - v), o = [];
+    o.push(`<rect width="${W}" height="${H}" class="tf"/>`);
+    for (let i = 0; i < 20; i += 2) o.push(`<rect x="${EZ + i * 50}" y="0" width="50" height="${H}" class="mw"/>`);
+    for (const [k, x0] of [["a", 0], ["h", W - EZ]]) {
+      const t = g[k], z = Math.min(EZ, H) * (big ? 0.66 : 0.7);
+      o.push(`<rect x="${x0}" y="0" width="${EZ}" height="${H}" fill="${gxEz(t)}"/><rect x="${x0}" y="0" width="${EZ}" height="${H}" class="ezs"/>`);
+      o.push(t.lg ? `<image href="${esc(t.lg)}" x="${x0 + (EZ - z) / 2}" y="${(H - z) / 2}" width="${z}" height="${z}" preserveAspectRatio="xMidYMid meet"/>`
+        : `<text class="ezt" x="${x0 + EZ / 2}" y="${H / 2}" transform="rotate(${k === "a" ? -90 : 90} ${x0 + EZ / 2} ${H / 2})">${esc(t.ab)}</text>`);
+    }
+    if (has && sit.rz) { const att = String(sit.pos) === String(g.a.id) ? "a" : "h"; o.push(`<rect x="${att === "a" ? W - EZ - 200 : EZ}" y="0" width="200" height="${H}" class="rz"/>`); }
+    let d = "";
+    for (let y = 5; y < 100; y += 5) if (y !== 50) d += `M${EZ + y * 10} 0V${H}`;
+    o.push(`<path d="${d}" class="yl"/><path d="M${EZ + 500} 0V${H}" class="y50"/><path d="M${EZ} 0V${H}M${W - EZ} 0V${H}" class="gl"/>`);
+    if (!ph) {
+      let hm = ""; const h1 = H * (big ? 0.34 : 0.3), h2 = H * (big ? 0.66 : 0.7), hl = big ? 5 : 4;
+      for (let y = 1; y < 100; y++) if (y % 5) { const x = EZ + y * 10; hm += `M${x} ${h1 - hl}v${hl * 2}M${x} ${h2 - hl}v${hl * 2}`; }
+      o.push(`<path d="${hm}" class="hm"/>`);
+      [10, 20, 30, 40, 50, 40, 30, 20, 10].forEach((n, i) => o.push(`<text class="yn" x="${EZ + (i + 1) * 100}" y="${H - (big ? 14 : 10)}">${n}</text>`));
+    }
+    let lbl = "";
+    if (has) {
+      const off = String(sit.pos) === String(g.a.id) ? "a" : "h", dir = off === "a" ? 1 : -1, xs = X(yl), tc = esc(bright(g[off]));
+      const tgt = sit.ds != null ? (off === "a" ? yl - sit.ds : yl + sit.ds) : null, xt = tgt != null && tgt > 0 && tgt < 100 ? X(tgt) : null;
+      if (gxDrv(g)) {
+        const x0 = X(sit.dr.s), w = Math.abs(xs - x0), bh = H * (big ? 0.24 : 0.3);
+        if (w > 8) o.push(`<rect x="${Math.min(x0, xs)}" y="${(H - bh) / 2}" width="${w}" height="${bh}" rx="${bh / 2}" fill="${tc}" class="drv"/>`);
+      }
+      if (xt != null) o.push(`<path d="M${xt} 0V${H}" class="fdg"/><path d="M${xt} 0V${H}" class="fd"/>`);
+      o.push(`<path d="M${xs} 0V${H}" class="losg"/><path d="M${xs} 0V${H}" class="los"/>`);
+      const r = big ? 21 : ph ? 30 : 27, bx = xs - dir * r * 1.05, cy = H / 2;
+      o.push(`<ellipse cx="${bx}" cy="${cy + r * 0.32}" rx="${r * 1.02}" ry="${r * 0.5}" class="bsh"/>`);
+      o.push(`<g transform="translate(${bx} ${cy})" class="bl"><ellipse rx="${r}" ry="${r * 0.6}"/><path d="M${-r * 0.48} 0H${r * 0.48}M${-r * 0.3} ${-r * 0.17}V${r * 0.17}M${-r * 0.1} ${-r * 0.17}V${r * 0.17}M${r * 0.1} ${-r * 0.17}V${r * 0.17}M${r * 0.3} ${-r * 0.17}V${r * 0.17}"/></g>`);
+      o.push(`<path d="M${xs + dir * r * 0.35} ${cy - r * 0.42}l${dir * r * 0.42} ${r * 0.42}l${-dir * r * 0.42} ${r * 0.42}" class="dir"/>`);
+      lbl = `${g[off].nm || g[off].ab} ball${sit.dd ? ", " + sit.dd : ""}`;
+    }
+    const cap = has ? "" : /halftime/i.test(g.d || "") ? "Halftime" : /^end of/i.test(g.d || "") ? g.d : "";
+    return `<div class="gx-fld z-${size}"><svg viewBox="0 0 ${W} ${H}" role="img" aria-label="${esc(lbl || "Field")}">${o.join("")}</svg>${cap ? `<span class="gx-cap">${esc(cap)}</span>` : ""}</div>`;
+  }
+  // under the field: down and distance, the spot, the drive, the last play
+  function gxInfo(g, big) {
+    const sit = g.sit || {}, dd = String(sit.dd || ""), m = dd.match(/^(.*?)\s+at\s+(.+)$/i);
+    const ball = !!sit.pos && !/halftime|^end of/i.test(g.d || "");
+    const down = ball ? (m ? m[1] : dd) : "", spot = ball && m ? m[2] : "", D = ball ? gxDrv(g) : null, drv = D && D.t ? D.t.replace(/,\s*/g, " · ").replace(/\byards\b/, "yds").replace(/\byard\b/, "yd") : "";
+    const lp = sit.lp && sit.lp.text && !/timeout|end (of )?(period|quarter|half|game)/i.test(sit.lp.type || "") && !/^(timeout|end of)\b/i.test(sit.lp.text) ? sit.lp.text.replace(/^\(\d{1,2}:\d{2}\)\s*/, "").replace(/^\((?:no huddle|shotgun|pistol)(?:[\s,-]+(?:no huddle|shotgun|pistol))*\)\s*/i, "").replace(/^(?:no huddle|shotgun|pistol)(?:[\s-]+(?:no huddle|shotgun|pistol))*[\s-]+/i, "").replace(/#\d+\s*/g, "").replace(/\b([A-Z]{2,5})00\b/g, "$1 goal line").replace(/\s+/g, " ").trim() : "";
+    if (!down && !drv && !lp) return "";
+    return `<div class="gx-inf">${down ? `<b class="dd">${esc(down)}</b>` : ""}${spot ? `<span class="spot">at ${esc(spot)}</span>` : ""}${ball && sit.rz ? '<span class="rz">Red zone</span>' : ""}${drv ? `<span class="drv"><em>Drive</em>${esc(drv)}</span>` : ""}</div>${lp ? `<p class="gx-lp${big ? " z-big" : ""}"><em>Last play</em>${esc(lp)}</p>` : ""}`;
+  }
+  // win probability: the two teams' shares, a gap between them, the favorite named
+  function gxWp(g) {
+    const wp = g.sit && g.sit.wp; if (wp == null || g.st !== "in") return "";
+    const h = Math.round(wp * 100), a = 100 - h, k = h >= a ? "h" : "a";
+    return `<div class="gx-wp"><span class="lab">Win prob</span><span class="tv a">${esc(g.a.ab)} <b>${a}%</b></span><div class="wpb"><i style="flex:${Math.max(a, 1)};--c:${esc(bright(g.a))}"></i><i style="flex:${Math.max(h, 1)};--c:${esc(bright(g.h))}"></i></div><span class="tv h"><b>${h}%</b> ${esc(g.h.ab)}</span></div>`;
+  }
+  // the leaders: each with his team's logo, the stat in plain words
+  function gxLdr(g) {
+    const L = (g.ldr || []).filter((x) => /^(passing|rushing|receiving)Yards$/.test(x.n)); if (!L.length) return "";
+    const tm = (id) => (String(g.a.id) === id ? g.a : String(g.h.id) === id ? g.h : null), word = { passingYards: "Pass", rushingYards: "Rush", receivingYards: "Rec" };
+    const fmt = (v) => v.replace(/^\d+\/\d+,\s*/, "").replace(/\b(YDS|CAR|REC)\b/g, (u) => u.toLowerCase()).replace(/,\s*/g, " · ");
+    return `<div class="gx-ldr">${L.map((x) => { const t = tm(x.tm); return `<span><em>${word[x.n]}</em>${t && t.lg ? `<img src="${esc(t.lg)}" alt="" referrerpolicy="no-referrer">` : ""}<b>${esc(x.p)}</b><i>${esc(fmt(x.v))}</i></span>`; }).join("")}</div>`;
+  }
+  // a live football game's whole show under the scoreboard
+  function gxPlay(g, size) {
+    if (!gxFoot(g) || g.st !== "in" || !sset(g.sport, "tracker")) return "";
+    return `<div class="gx-play">${gxField(g, size)}${gxInfo(g, size === "big")}${gxWp(g)}${gxLdr(g)}</div>`;
+  }
   function gameCard(G, hero, bare) {
     if (!hero && !G.entries.length) return "";
     const g = G.g, rows = gamePositions(G.entries);
     const live = g.st === "in", pos = (t) => (live && g.sit && g.sit.pos && String(t.id) === String(g.sit.pos) ? BALL : "");
     const sc = (t) => (g.st === "pre" || t.sc == null ? "" : `<span class="sc num">${t.sc}</span>`);
-    const clk = g.st === "pre" ? startLabel(g.t) : g.st === "post" ? "Final" : g.d;
-    const dd = live && g.sit && g.sit.dd ? `<span class="dd">${esc(g.sit.dd)}</span>` : "";
-    const rz = live && g.sit && g.sit.rz ? '<span class="rz">Red zone</span>' : "";
+    const clk = g.st === "pre" ? startLabel(g.t) : gxStatus(g).t;
+    const gxBig = live && gxFoot(g) && sset(g.sport, "tracker"), onBall = live && g.sit && g.sit.pos && !/halftime|^end of/i.test(g.d || "");
+    const dd = !gxBig && onBall && g.sit.dd ? `<span class="dd">${esc(g.sit.dd)}</span>` : "";
+    const rz = !gxBig && onBall && g.sit.rz ? '<span class="rz">Red zone</span>' : "";
     const lead = g.st !== "pre" && g.a.sc != null && g.h.sc != null ? (g.a.sc > g.h.sc ? "a" : g.h.sc > g.a.sc ? "h" : "") : "";
     const cfb = g.sport === "CFB", up = cfb ? upsetOf(g) : null;
-    const tm = (t, s) => `<div class="tm ${s}${lead === s ? " lead" : ""}" style="--tcol:${esc(t.col || "#445")}">${logo(t, "tl")}<span class="ab">${cfb && t.rk ? `<i class="rk">${t.rk}</i>` : ""}${esc(cfb && document.body.classList.contains("cfb") ? t.nm || t.ab : t.ab)}</span>${pos(t)}${sc(t)}</div>`;
+    const subOf = (t, s) => { const to = live && gxFoot(g) && g.sit && g.sit.to && g.sit.to[s] != null ? `<span class="to">${[0, 1, 2].map((i) => `<i class="${i < g.sit.to[s] ? "on" : ""}"></i>`).join("")}</span>` : ""; return t.rec || to ? `<span class="sub">${t.rec ? `<em>${esc(t.rec)}</em>` : ""}${to}</span>` : ""; };
+    const tm = (t, s) => `<div class="tm ${s}${lead === s ? " lead" : ""}" style="--tcol:${esc(t.col || "#445")}">${logo(t, "tl")}<span class="ab"><span class="nmx">${cfb && t.rk ? `<i class="rk">${t.rk}</i>` : ""}${((nf) => (nf !== t.ab ? `<span class="nf">${esc(nf)}</span><span class="na">${esc(t.ab)}</span>` : esc(nf)))(cfb && document.body.classList.contains("cfb") ? t.nm || t.ab : t.ab)}</span>${hero ? subOf(t, s) : ""}</span>${pos(t)}${sc(t)}</div>`;
     const mid = `<div class="mid"><span class="clk${live ? " on" : ""}">${esc(clk)}</span>${dd}${rz}${up ? `<span class="ups${up.k === "final" ? " fin" : ""}">${up.k === "final" ? "Upset" : "Upset alert"}</span>` : ""}${cfb && g.net && g.st !== "post" ? `<span class="net">${esc(g.net)}</span>` : ""}</div>`;
-    return `<article class="rb-g ${g.st}${hero ? " hero" : ""}" style="--ca:${esc(g.a.col || "#445")};--ch:${esc(g.h.col || "#445")}">
-      ${hero ? `<header class="rb-gh">${tm(g.a, "a")}${mid}${tm(g.h, "h")}</header>${fieldHtml(g)}` : `<header class="rb-gs"><div class="tms">${tm(g.a, "a")}${tm(g.h, "h")}</div>${mid}</header>${miniFld(g)}`}
+    return `<article class="rb-g ${g.st}${hero ? " hero" : " gx"}" style="--ca:${esc(g.a.col || "#445")};--ch:${esc(g.h.col || "#445")};--ra:${esc(bright(g.a))};--rh:${esc(bright(g.h))}">
+      ${hero ? `<header class="rb-gh">${tm(g.a, "a")}${mid}${tm(g.h, "h")}</header>${gxFoot(g) && g.st === "in" && sset(g.sport, "tracker") ? gxPlay(g, "big") : fieldHtml(g)}` : `${gxHead(g)}${gxLine(g)}${heroIds.has(g.id) ? "" : gxPlay(g, "card")}`}
       ${bare ? "" : `<div class="rb-rows">${rows.map((r) => (r.h2h ? h2hRow(r.h2h[0], r.h2h[1], g) : posRow(r.p, g))).join("")}${inParlays(G)}</div>`}${hero ? scoringHtml(g) : ""}</article>`;
   }
   // the sportsbook number for a leg right now (a parlay logged before leg odds were saved)
@@ -5290,7 +5559,7 @@ body.tv.cfb .st-n { padding: 7px 2px; font-size: 13px; }
   // ---------- sheets ----------
   function openSheet(id) { $(id).hidden = false; }
   // keep every open screen current: when a new version is up, reload it (never mid-form or mid-animation)
-  const BUILD = "20261017205859";
+  const BUILD = "20261017214353";
   function checkBuild() {
     if (BUILD === "dev") return;
     fetch("version.json?t=" + Date.now(), { cache: "no-store" }).then((r) => (r.ok ? r.json() : null)).then((j) => {
@@ -5843,7 +6112,7 @@ body.tv.cfb .st-n { padding: 7px 2px; font-size: 13px; }
     const c = e.competitions[0], t = {};
     for (const x of c.competitors) t[x.homeAway] = x;
     const st = e.status.type;
-    const team = (k) => { const x = t[k], tm = x.team; return { id: tm.id, rk: x.curatedRank && x.curatedRank.current <= 25 ? x.curatedRank.current : 0, ab: tm.abbreviation || "", nm: tm.shortDisplayName || tm.name || "", fn: tm.displayName || "", lg: tm.logo || "", col: tm.color ? "#" + tm.color : "", alt: tm.alternateColor ? "#" + tm.alternateColor : "", sc: /^\d+$/.test(String(x.score)) ? Number(x.score) : null }; };
+    const team = (k) => { const x = t[k], tm = x.team; return { id: tm.id, rec: ((x.records || [])[0] || {}).summary || "", rk: x.curatedRank && x.curatedRank.current <= 25 ? x.curatedRank.current : 0, ab: tm.abbreviation || "", nm: tm.shortDisplayName || tm.name || "", fn: tm.displayName || "", lg: dkLg(tm.logo), col: tm.color ? "#" + tm.color : "", alt: tm.alternateColor ? "#" + tm.alternateColor : "", sc: /^\d+$/.test(String(x.score)) ? Number(x.score) : null }; };
     const g = { id: String(e.id), sport, t: Date.parse(e.date), st: st.state || "pre", d: st.shortDetail || "", a: team("away"), h: team("home"), pd: e.status.period || 0, clk: e.status.clock };
     g.net = ((((c.broadcasts || [])[0] || {}).names) || [])[0] || "";
     const si = c.situation, lp = si && si.lastPlay;
@@ -8412,7 +8681,7 @@ body.tv.cfb .st-n { padding: 7px 2px; font-size: 13px; }
     if (!live.length) return { g: null };
     const g = live.find((x) => HL_BRK[x.sport] && HL_BRK[x.sport].test(x.d || ""));
     if (!g) return null;
-    if (live.some((x) => x !== g && !(HL_BRK[x.sport] && HL_BRK[x.sport].test(x.d || "")) && HL_LATE[x.sport] && HL_LATE[x.sport](x))) return null;   // another game's crunch time
+    if (live.some((x) => !(HL_BRK[x.sport] && HL_BRK[x.sport].test(x.d || "")))) return null;   // another of the room's games is being played: no highlights over it
     return { g };
   }
   function hlNow() {
@@ -8792,7 +9061,7 @@ body.tv.cfb .st-n { padding: 7px 2px; font-size: 13px; }
     const rk = (t) => (t.rank && t.rank <= 25 ? t.rank : 0), ranked = (g) => rk(g.a) || rk(g.h), mine = new Set();
     for (const b of S.bets.values()) if (b.status === "open") for (const x of selsOf(b)) mine.add(String(x.g));
     const tm = (t, lead) => `<span class="st-t${lead ? " lead" : ""}">${t.lg ? `<img src="${esc(t.lg)}" alt="" referrerpolicy="no-referrer">` : "<i></i>"}${rk(t) ? `<em>${rk(t)}</em>` : ""}<b>${esc(t.nm || t.ab)}</b><u class="num">${t.sc}</u></span>`;
-    const row = (g) => { const up = upsetOf(g); return `<div class="st-g${up ? " up" : ""}${mine.has(g.id) ? " mine" : ""}">${tm(g.a, g.a.sc > g.h.sc)}${tm(g.h, g.h.sc > g.a.sc)}<span class="st-m">${esc(g.st === "post" ? "Final" : g.d)}${g.net && g.st !== "post" ? " · " + esc(g.net) : ""}${up ? `<strong>${up.k === "final" ? "Upset" : "Upset alert"}</strong>` : ""}</span></div>`; };
+    const row = (g) => { const up = upsetOf(g); return `<div class="st-g${up ? " up" : ""}${mine.has(g.id) ? " mine" : ""}">${tm(g.a, g.a.sc > g.h.sc)}${tm(g.h, g.h.sc > g.a.sc)}<span class="st-m">${esc(g.st === "pre" ? g.d : gxStatus(g).t)}${g.net && g.st !== "post" ? " · " + esc(g.net) : ""}${up ? `<strong>${up.k === "final" ? "Upset" : "Upset alert"}</strong>` : ""}</span></div>`; };
     const live = TK.games.filter((g) => g.st === "in" && ranked(g)).sort((p, q) => Math.min(rk(p.a) || 99, rk(p.h) || 99) - Math.min(rk(q.a) || 99, rk(q.h) || 99));
     const ups = TK.games.filter((g) => g.st === "post" && upsetOf(g)).sort((p, q) => q.t - p.t);
     const now = Date.now(), soon = TK.games.filter((g) => g.st === "pre" && ranked(g) && g.t - now < 14 * 3600e3).sort((p, q) => p.t - q.t).slice(0, 6);
@@ -8858,7 +9127,7 @@ body.tv.cfb .st-n { padding: 7px 2px; font-size: 13px; }
     if (!H || !A) return null;
     const lead = (L) => { const y = (L.leaders || [])[0] || {}, a = y.athlete || {}; return { n: L.name, v: y.displayValue || "", p: a.shortName || a.displayName || "" }; };
     const tm = (x) => { const t = x.team || {}, rk = x.curatedRank && x.curatedRank.current;
-      return { id: String(t.id), ab: t.abbreviation || "", nm: t.shortDisplayName || t.name || t.abbreviation || "", loc: t.location || t.shortDisplayName || t.abbreviation || "", lg: t.logo || "", col: t.color ? "#" + t.color : "#3a3a3a", rec: ((x.records || [])[0] || {}).summary || "", rk: rk && rk <= 25 ? rk : 0, sc: x.score != null && x.score !== "" ? Number(x.score) : null, win: !!x.winner, ldr: (x.leaders || []).map(lead) }; };
+      return { id: String(t.id), ab: t.abbreviation || "", nm: t.shortDisplayName || t.name || t.abbreviation || "", loc: t.location || t.shortDisplayName || t.abbreviation || "", lg: dkLg(t.logo), col: t.color ? "#" + t.color : "#3a3a3a", rec: ((x.records || [])[0] || {}).summary || "", rk: rk && rk <= 25 ? rk : 0, sc: x.score != null && x.score !== "" ? Number(x.score) : null, win: !!x.winner, ldr: (x.leaders || []).map(lead) }; };
     const st = (e.status && e.status.type) || {}, o = (c.odds || [])[0];
     const g = { id: String(e.id), lg, pre: ty === 1, t: Date.parse(e.date) || 0, st: st.state || "pre", fin: st.shortDetail || "", a: tm(A), h: tm(H), ns: !!c.neutralSite,
       tba: c.timeValid === false || e.timeValid === false, tv: ((((c.broadcasts || [])[0] || {}).names) || [])[0] || "", ser: (c.series && c.series.summary) || "", note: ((c.notes || [])[0] || {}).headline || "", ldr: (c.leaders || []).map(lead) };
@@ -9422,7 +9691,7 @@ body.tv.cfb .st-n { padding: 7px 2px; font-size: 13px; }
         const c = e.competitions && e.competitions[0]; if (!c) continue;
         const t = {}; for (const x of c.competitors || []) t[x.homeAway] = x;
         if (!t.home || !t.away) continue;
-        const team = (x) => ({ id: x.team.id, ab: x.team.abbreviation || x.team.shortDisplayName, nm: x.team.shortDisplayName || x.team.abbreviation, lg: x.team.logo || "", col: x.team.color ? "#" + x.team.color : "", rank: (x.curatedRank && x.curatedRank.current) || 99, sc: Number(x.score) || 0 });
+        const team = (x) => ({ id: x.team.id, ab: x.team.abbreviation || x.team.shortDisplayName, nm: x.team.shortDisplayName || x.team.abbreviation, lg: dkLg(x.team.logo), col: x.team.color ? "#" + x.team.color : "", rank: (x.curatedRank && x.curatedRank.current) || 99, sc: Number(x.score) || 0 });
         const st = e.status.type, sit = c.situation || {}, lp = sit.lastPlay || null;
         const od = (c.odds || [])[0] || null, det = od && od.details ? String(od.details) : "", fm = det.match(/^([A-Z0-9&]{2,5})\s+-?([\d.]+)/);
         const g = { id: String(e.id), st: st.state, d: st.shortDetail || "", period: e.status.period || 0, a: team(t.away), h: team(t.home), t: Date.parse(e.date), net: ((((c.broadcasts || [])[0] || {}).names) || [])[0] || "", rz: !!sit.isRedZone, pos: sit.possession || null, lp,
@@ -9543,12 +9812,12 @@ body.tv.cfb .st-n { padding: 7px 2px; font-size: 13px; }
       const dog = fav === "a" ? "h" : "a", lead = g[dog].sc - g[fav].sc;
       const favP = g.hp == null ? null : fav === "h" ? g.hp : 1 - g.hp;
       if (g.st === "in" && (lead > 0 || (favP != null && favP < 0.4)))
-        items.push(`<span class="tk-a up"><u>Upset watch</u>${tkTeam(g[dog])} ${g[dog].sc} ${tkTeam(g[fav])} ${g[fav].sc} <em>${esc(g.d)}</em>${favP != null ? ` <small>${Math.round(favP * 100)}% for ${esc(g[fav].ab)}</small>` : ""}</span>`);
+        items.push(`<span class="tk-a up"><u>Upset watch</u>${tkTeam(g[dog])} ${g[dog].sc} ${tkTeam(g[fav])} ${g[fav].sc} <em>${esc(gxStatus(g).t)}</em>${favP != null ? ` <small>${Math.round(favP * 100)}% for ${esc(g[fav].ab)}</small>` : ""}</span>`);
       else if (g.st === "post" && lead > 0)
         items.push(`<span class="tk-a up"><u>Upset</u>${tkTeam(g[dog], true)} ${g[dog].sc} def. ${tkTeam(g[fav])} ${g[fav].sc}</span>`);
     }
     for (const g of today) if (g.st === "in" && g.period >= 4 && Math.abs(g.a.sc - g.h.sc) <= 8)
-      items.push(`<span class="tk-a ct"><u>Crunch time</u>${tkTeam(g.a)} ${g.a.sc} ${tkTeam(g.h)} ${g.h.sc} <em>${esc(g.d)}</em></span>`);
+      items.push(`<span class="tk-a ct"><u>Crunch time</u>${tkTeam(g.a)} ${g.a.sc} ${tkTeam(g.h)} ${g.h.sc} <em>${esc(gxStatus(g).t)}</em></span>`);
     for (const h of TK.news) items.push(`<span class="tk-a inj"><u>Injury</u>${esc(h)}</span>`);
     // weather watch: rain, snow, wind or freezing at a game that hasn't finished; flag your total on it
     const myTot = (g) => { for (const b of S.bets.values()) if (b.status === "open" && isMe(b)) for (const s of selsOf(b)) if (String(s.g) === g.id && s.m === "tot") return ` <b class="yt">your ${s.s === "o" ? "over" : "under"} ${s.l}</b>`; return ""; };
@@ -9559,7 +9828,7 @@ body.tv.cfb .st-n { padding: 7px 2px; font-size: 13px; }
     const ord = (g) => (mine.has(g.id) ? 0 : 3) + ({ in: 0, post: 1, pre: 2 }[g.st] ?? 2);
     for (const g of today.slice().sort((x, y) => ord(x) - ord(y) || x.t - y.t)) {
       const wonA = g.st === "post" && g.a.sc > g.h.sc, wonH = g.st === "post" && g.h.sc > g.a.sc;
-      const when = g.st === "pre" ? (g.t - now > 20 * 3600e3 ? new Date(g.t).toLocaleDateString("en-US", { weekday: "short" }) + " " : "") + tm(g.t) + (g.line ? ` · ${g.line}${g.ou ? ` · O/U ${g.ou}` : ""}` : "") : g.st === "post" ? "Final" : g.d;
+      const when = g.st === "pre" ? (g.t - now > 20 * 3600e3 ? new Date(g.t).toLocaleDateString("en-US", { weekday: "short" }) + " " : "") + tm(g.t) + (g.line ? ` · ${g.line}${g.ou ? ` · O/U ${g.ou}` : ""}` : "") : gxStatus(g).t;
       const pos = (x) => (g.st === "in" && g.pos === x.id ? '<span class="ball"></span>' : "");
       items.push(`<span class="tk-g${mine.has(g.id) ? " mine" : ""}${g.st === "in" ? " live" : ""}">${pos(g.a)}${tkTeam(g.a, wonA)} ${g.st === "pre" ? "" : g.a.sc} ${pos(g.h)}${tkTeam(g.h, wonH)} ${g.st === "pre" ? "" : g.h.sc} <em>${esc(when)}</em>${g.st !== "post" ? wxTag(g) : ""}${g.rz ? '<span class="rz">Red zone</span>' : ""}</span>`);
     }
