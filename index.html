@@ -5560,7 +5560,7 @@ body.tv .rb-g .rb-pk .hasball em { display: none; }   /* the block says red zone
   // ---------- sheets ----------
   function openSheet(id) { $(id).hidden = false; }
   // keep every open screen current: when a new version is up, reload it (never mid-form or mid-animation)
-  const BUILD = "20261017214738";
+  const BUILD = "20261017221244";
   function checkBuild() {
     if (BUILD === "dev") return;
     fetch("version.json?t=" + Date.now(), { cache: "no-store" }).then((r) => (r.ok ? r.json() : null)).then((j) => {
@@ -8533,9 +8533,14 @@ body.tv .rb-g .rb-pk .hasball em { display: none; }   /* the block says red zone
   }
   // a fresh highlight for the dead air: the queue first (halftime and the final run a reel), then anything new from the last 40 minutes
   function nextHL() {
-    while (HLQ.length) { const j = HLQ.shift(); if (!hlSeen.has(j.v.id)) return j; }
+    const br = hlBreak(), ok = (g) => !!g && (!!br || hlLiveBet(g.id));
+    for (let i = 0; i < HLQ.length; i++) {
+      const j = HLQ[i];
+      if (hlSeen.has(j.v.id) || Date.now() - (j.at || 0) > 50 * 60e3) { HLQ.splice(i--, 1); continue; }
+      if (ok(S.games.get(j.g.id) || j.g)) { HLQ.splice(i, 1); return j; }
+    }
     for (const [gid, sum] of SUMM) {
-      const g = S.games.get(gid); if (!g || !sum || !sum.vids) continue;
+      const g = S.games.get(gid); if (!ok(g) || !sum || !sum.vids) continue;
       const v = sum.vids.find((x) => !hlSeen.has(x.id) && x.at > Math.min(hlOpen, Date.now()) - 40 * 60e3); if (v) return { g, v, why: "ESPN highlight" };
     }
     return null;
@@ -8574,8 +8579,8 @@ body.tv .rb-g .rb-pk .hasball em { display: none; }   /* the block says red zone
         // his clip if ESPN has one, then (half and final) the reel of the rest
         const vids = (sum.vids || []).filter((v) => !hlSeen.has(v.id)), last = (x) => bcName(x.who.nm).l.toLowerCase();
         const mine = list.map((x) => ({ x, v: vids.find((v) => v.hl.toLowerCase().includes(last(x))) })).find((m) => m.v), his = mine && mine.v;
-        if (job.seg === "h1" || job.seg === "game") for (const v of vids.filter((v) => v !== his).slice(-5)) HLQ.push({ g: job.g, v, why: job.seg === "h1" ? "First half highlights" : "Game highlights" });
-        if (his) playHL(job.g, his, (mine.x.side === "o" ? "Player of the " : "Defensive player of the ") + SEG[job.seg].word.toLowerCase(), { nm: mine.x.who.nm, tm: mine.x.tm });
+        if (job.seg === "h1" || job.seg === "game") for (const v of vids.filter((v) => v !== his).slice(-5)) HLQ.push({ g: job.g, v, why: job.seg === "h1" ? "First half highlights" : "Game highlights", at: Date.now() });
+        if (his && (hlBreak() || hlLiveBet(job.g.id))) playHL(job.g, his, (mine.x.side === "o" ? "Player of the " : "Defensive player of the ") + SEG[job.seg].word.toLowerCase(), { nm: mine.x.who.nm, tm: mine.x.tm });
         awT = setTimeout(awRun, 1000);
         return;
       }
@@ -8674,27 +8679,32 @@ body.tv .rb-g .rb-pk .hasball em { display: none; }   /* the block says red zone
     hlNow();
   }
   const HL_BRK = { NFL: /halftime/i, CFB: /halftime/i, NBA: /halftime/i, CBB: /halftime/i, WNBA: /halftime/i, NHL: /\bend (of )?(the )?(1st|2nd)\b|intermission/i, MLB: /\b(mid(dle)?|end) (of )?(the )?7th\b/i };
-  const HL_LATE = { NFL: (g) => (g.pd || 0) >= 4, CFB: (g) => (g.pd || 0) >= 4, NBA: (g) => (g.pd || 0) >= 4, CBB: (g) => (g.pd || 0) >= 2, NHL: (g) => (g.pd || 0) >= 3, MLB: (g) => (g.pd || 0) >= 8 };
+  function hlAtBrk(g) { return !!(g && HL_BRK[g.sport] && HL_BRK[g.sport].test(g.d || "")); }
   const hlBrkName = (g) => (!g ? "" : g.sport === "NHL" ? "Intermission" : g.sport === "MLB" ? "7th-inning stretch" : "Halftime");
-  // a break to fill: the room's game at the half (g), or none of the room's games live (g null); null while they're playing
+  // the room's games being played right now (a bet on each)
+  function hlLive() { return [...hlGames().values()].filter((g) => g.st === "in"); }
+  function hlLiveBet(gid) { return gid != null && gid !== "" && hlLive().some((g) => g.id === String(gid)); }
+  // when anything else may come on: none of the room's games on ({ g: null }), or the room's one game at its break ({ g });
+  // more than one of the room's games on: never (null)
   function hlBreak() {
-    const live = [...hlGames().values()].filter((g) => g.st === "in");
+    const live = hlLive();
     if (!live.length) return { g: null };
-    const g = live.find((x) => HL_BRK[x.sport] && HL_BRK[x.sport].test(x.d || ""));
-    if (!g) return null;
-    if (live.some((x) => !(HL_BRK[x.sport] && HL_BRK[x.sport].test(x.d || "")))) return null;   // another of the room's games is being played: no highlights over it
-    return { g };
+    return live.length === 1 && hlAtBrk(live[0]) ? { g: live[0] } : null;
   }
+  let hlLiveAt = 0;
+  const HL_GAP = 75e3;   // while games are being played: a breath between highlights
   function hlNow() {
     const now = Date.now();
     for (let i = HL2Q.length - 1; i >= 0; i--) if (now - HL2Q[i].at > 50 * 60e3 || hlSeen.has(HL2Q[i].v.id)) HL2Q.splice(i, 1);
     while (HL2Q.length > 8) HL2Q.shift();
-    const br = hlBreak();
-    if (!br || !HL2Q.length || !clipsOn() || cardBusy || fxBusy || PHONE() || Date.now() < hlUntil) return;
-    if (br.g) HL2Q.sort((p, q) => (q.g.id === br.g.id) - (p.g.id === br.g.id));   // the game at the half first
+    if (!HL2Q.length || !clipsOn() || cardBusy || fxBusy || PHONE() || Date.now() < hlUntil) return;
+    // a live game's own clip comes on now; a game that's over waits for a break
+    const br = hlBreak(), k = HL2Q.findIndex((j) => hlLiveBet(j.g.id)), i = k >= 0 ? k : br ? 0 : -1;
+    if (i < 0 || (!br && now - hlLiveAt < HL_GAP)) return;
     if (statusSrc || !$("#jumbo").hidden) { if (lastKind !== "pop" || Date.now() < hlUntil) return; stopStatus(); }   // a filler / DJ break makes way (not another highlight)
-    const j = HL2Q.shift();
-    if (!playHL(S.games.get(j.g.id) || j.g, j.v, br.g ? hlBrkName(br.g) + (br.g.sport === "MLB" ? "" : " highlights") : "Highlight")) HL2Q.unshift(j);
+    const [j] = HL2Q.splice(i, 1), g = S.games.get(j.g.id) || j.g, at = g.st === "in" && hlAtBrk(g) ? g : br && br.g;
+    if (!playHL(g, j.v, at ? hlBrkName(at) + (at.sport === "MLB" ? "" : " highlights") : "Highlight")) { HL2Q.splice(i, 0, j); return; }
+    if (!br) hlLiveAt = Date.now();
   }
   setInterval(hlPoll, 5000);
   const VIBE = clip("aura/vibe", "Goldie: good vibes", "up win", 16.7, { songId: "sz-rooftop", own: true, lux: true, song: "Rooftop Hours", artist: "Sweat Zone house" });
@@ -8866,15 +8876,17 @@ body.tv .rb-g .rb-pk .hasball em { display: none; }   /* the block says red zone
     if (!clipsOn() || PHONE() || cardBusy || fxBusy || trial || !document.body.classList.contains("tv")) return;
     const now = Date.now(), list = [...HLX.values()].filter((x) => x && !hlSeen.has(x.id) && now - x.at < 3 * 3600e3).sort((p, q) => q.at - p.at);
     if (!list.length || now < hlUntil) return;   // one's on (or still loading)
-    const br = hlBreak(); if (!br) return;   // the room's games are on: it waits for the half
-    if (br.g && HL2Q.length) return;          // the game at the half gets its own highlights first
-    const mine = list.map((x) => [x, hlxBet(x)]).find(([, b]) => b);
+    const br = hlBreak();
+    const mine = list.map((x) => [x, hlxBet(x)]).find(([x, b]) => b && (br || (x.gid ? hlLiveBet(x.gid) : phase(b) === "live")));
     if (mine) {
+      if (!br && now - hlLiveAt < HL_GAP) return;
       if (statusSrc || !$("#jumbo").hidden) { if (lastKind !== "pop" || Date.now() < hlUntil) return; stopStatus(); }
-      hlxPlay(mine[0], mine[1], (br.g ? hlBrkName(br.g) + " · " : "Highlight · ") + mine[0].lg);
+      hlxPlay(mine[0], mine[1], (br && br.g ? hlBrkName(br.g) + " · " : "Highlight · ") + mine[0].lg);
+      if (!br) hlLiveAt = now;
       return;
     }
     // the rest of sports: only in a quiet moment, and not too often
+    if (!br || (br.g && HL2Q.length)) return;   // the room's games are on (or the game at the half has its own clips waiting)
     if (AIR.on || statusSrc || !$("#jumbo").hidden || now - lastAny < (br.g ? 6e3 : 60e3) || now - hlxLast < (br.g ? 10e3 : 4 * 60e3)) return;   // at the half: back to back
     const x = list.find((y) => y.gid) || list[0];
     hlxPlay(x, null, br.g ? hlBrkName(br.g) + " · " + x.lg : x.lg + " highlight");
