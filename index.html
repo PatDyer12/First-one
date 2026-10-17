@@ -2908,6 +2908,10 @@ body.tv.cfb #cfield { background: #05070b url(img/field.jpg) center bottom / cov
 .gx-tm .rk, .rb-gh .rk { background: #e9eef5; color: #0a0d12; }
 #cfCrowd { display: none; }
 body.tv.cfb #cfCrowd { display: block; position: absolute; inset: 0; width: 100%; height: 100%; }
+/* the TV board: two columns rolling on their own */
+body.tv .rb-games.primeg.mason { grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); gap: 24px; }
+.rb-games.primeg.mason > .rb-pcol, .rb-games.primeg.mason > .rb-pcol > .loopclone { gap: 24px; }
+body.tv .rb-games.primeg.mason > .rb-pcol { padding-top: 16px; -webkit-mask-image: linear-gradient(180deg, transparent 0, #000 16px, #000 calc(100% - 28px), transparent 100%); mask-image: linear-gradient(180deg, transparent 0, #000 16px, #000 calc(100% - 28px), transparent 100%); }
 </style>
 </head>
 <body>
@@ -3921,6 +3925,7 @@ body.tv.cfb #cfCrowd { display: block; position: absolute; inset: 0; width: 100%
       }
       st.dwell = 7000; st.speed = 20;
     }
+    if (el.classList.contains("mc")) st.dwell = 7000;
     if (st.period > 0) st.pos %= st.period;
   }
   const loopSyncEl = (el) => loopSync(ASC.find((s) => s.el === el));
@@ -5172,6 +5177,34 @@ body.tv.cfb #cfCrowd { display: block; position: absolute; inset: 0; width: 100%
     }
   }
   let heroIds = new Set();   // the games on the big cards right now (a followed team's card steps aside for them)
+  let boardOrd = new Map(), boardOrdAt = 0, boardTop = "";
+  function boardShuffle(keys) {
+    const now = Date.now();
+    if (!boardOrdAt || now - boardOrdAt > 5 * 60e3) {
+      boardOrdAt = now; boardOrd = new Map(keys.map((k) => [k, Math.random()]));
+      const first = [...keys].sort((a, b) => boardOrd.get(a) - boardOrd.get(b))[0];
+      if (keys.length > 1 && first === boardTop) { const other = keys.find((k) => k !== first); const t = boardOrd.get(first); boardOrd.set(first, boardOrd.get(other)); boardOrd.set(other, t); }
+    }
+    for (const k of keys) if (!boardOrd.has(k)) boardOrd.set(k, Math.random());
+    const out = [...keys].sort((a, b) => boardOrd.get(a) - boardOrd.get(b));
+    boardTop = out[0];
+    return out;
+  }
+  function masonBoard(parts) {
+    const G = $("#rbGames"); G.classList.add("primeg", "mason");
+    let A = $("#rbM1"), B = $("#rbM2");
+    if (!A || A.parentNode !== G) {
+      G.innerHTML = '<div class="rb-pcol mc" id="rbM1"></div><div class="rb-pcol mc" id="rbM2"></div>';
+      A = $("#rbM1"); B = $("#rbM2");
+      for (let i = ASC.length - 1; i >= 0; i--) if (!ASC[i].el.isConnected) ASC.splice(i, 1);
+      autoScroll(A, 14); autoScroll(B, 15);
+    }
+    const by = new Map(parts), keys = boardShuffle(parts.map((x) => x[0]));
+    A.innerHTML = keys.map((k) => by.get(k)).join(""); B.innerHTML = "";
+    let ha = 0, hb = 0;
+    for (const k of [...A.children]) { const h = k.offsetHeight + 24; if (ha <= hb) { A.appendChild(k); ha += h; } else { B.appendChild(k); hb += h; } }
+    loopSyncEl(A); loopSyncEl(B);
+  }
   function renderRB() {
     if (!S.ready) return;
     const tv = document.body.classList.contains("tv"), { list, other, parlays } = boardGroups();
@@ -5195,7 +5228,8 @@ body.tv.cfb #cfCrowd { display: block; position: absolute; inset: 0; width: 100%
     // one football game keeps its bets in the big card (the MNF look); everything else puts the bets in their own rolling column
     const split = heroes.length > 0 && !((prime || heroes.length === 1) && fb(heroes[0]));
     const roomLive = list.filter((G) => G.g.st === "in" && (G.entries.length || (G.legs && G.legs.length))).length;
-    const nowG = !tv ? [] : heroes.length ? onNowGames(list, heroes.length === 1 ? 2 : 0) : onNowGames(list, 4 - roomLive);
+    const roomN = list.filter((G) => G.entries.length || (G.legs && G.legs.length && G.g.st === "in")).length + (parlays.length ? 1 : 0) + (other.length ? 1 : 0);
+    const nowG = !tv ? [] : heroes.length ? onNowGames(list, heroes.length === 1 ? 2 : 0) : onNowGames(list, Math.max(4 - roomLive, 7 - roomN));
     const rest = (split ? heroes.map((G) => gameCard(G, false)).join("") : "") + list.filter((G) => !heroes.includes(G)).map((G) => gameCard(G, false)).join("") + parlayCard(parlays) + otherCard(other) + (heroes.length ? nowG.map(onNowCard).join("") : "");
     const fol = followCards();
     $("#rbGames").classList.toggle("primeg", heroes.length > 0); $("#rbGames").classList.toggle("solo", heroes.length > 0 && !rest);
@@ -5210,8 +5244,12 @@ body.tv.cfb #cfCrowd { display: block; position: absolute; inset: 0; width: 100%
       L.dataset.n = String(heroes.length); L.innerHTML = heroes.map((G) => gameCard(G, true, split)).join("") + fol; R.innerHTML = rest; R.hidden = !rest;
       primeFit(); loopSyncEl(L); loopSyncEl(R);
     } else {
-    const html = list.map((G) => gameCard(G, false)).join("") + parlayCard(parlays) + otherCard(other) + fol + nowG.map(onNowCard).join("");
+    const parts = [...list.map((G) => ["g" + G.g.id, gameCard(G, false)]), ["pl", parlayCard(parlays)], ["ot", otherCard(other)], ["fo", fol], ...nowG.map((g) => ["n" + g.id, onNowCard(g)])].filter((x) => x[1]);
+    if (tv && parts.length > 1) masonBoard(parts); else {
+    $("#rbGames").classList.remove("mason");
+    const html = parts.map((x) => x[1]).join("");
     $("#rbGames").innerHTML = html || `<div class="rb-empty"><b>No bets on the board</b>${tv ? "Log a bet from your phone and it shows up here with everybody's." : "Hit + Bet when you place one. Everybody's bets show up here, game by game."}</div>`;
+    }
     }
     $("#rbGames").classList.toggle("one", $("#rbGames").children.length <= 1);
     const [lbH, restH] = rail();
@@ -5634,7 +5672,7 @@ body.tv.cfb #cfCrowd { display: block; position: absolute; inset: 0; width: 100%
   // ---------- sheets ----------
   function openSheet(id) { $(id).hidden = false; }
   // keep every open screen current: when a new version is up, reload it (never mid-form or mid-animation)
-  const BUILD = "20261017230146";
+  const BUILD = "20261017231110";
   function checkBuild() {
     if (BUILD === "dev") return;
     fetch("version.json?t=" + Date.now(), { cache: "no-store" }).then((r) => (r.ok ? r.json() : null)).then((j) => {
