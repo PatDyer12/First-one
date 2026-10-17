@@ -4871,7 +4871,8 @@ body.tv .rb-g .rb-pk .hasball em { display: none; }   /* the block says red zone
     const sit = g.sit || {}, dd = String(sit.dd || ""), m = dd.match(/^(.*?)\s+at\s+(.+)$/i);
     const ball = !!sit.pos && !/halftime|^end of/i.test(g.d || "");
     const down = ball ? (m ? m[1] : dd) : "", spot = ball && m ? m[2] : "", D = ball ? gxDrv(g) : null, drv = D && D.t ? D.t.replace(/,\s*/g, " · ").replace(/\byards\b/, "yds").replace(/\byard\b/, "yd") : "";
-    const lp = sit.lp && sit.lp.text && !/timeout|end (of )?(period|quarter|half|game)/i.test(sit.lp.type || "") && !/^(timeout|end of)\b/i.test(sit.lp.text) ? sit.lp.text.replace(/^\(\d{1,2}:\d{2}\)\s*/, "").replace(/^\((?:no huddle|shotgun|pistol)(?:[\s,-]+(?:no huddle|shotgun|pistol))*\)\s*/i, "").replace(/^(?:no huddle|shotgun|pistol)(?:[\s-]+(?:no huddle|shotgun|pistol))*[\s-]+/i, "").replace(/#\d+\s*/g, "").replace(/\b([A-Z]{2,5})00\b/g, "$1 goal line").replace(/\s+/g, " ").trim() : "";
+    let lp = sit.lp && sit.lp.text && !/timeout|end (of )?(period|quarter|half|game)/i.test(sit.lp.type || "") && !/^(timeout|end of)\b/i.test(sit.lp.text) ? sit.lp.text.replace(/^\(\d{1,2}:\d{2}\)\s*/, "").replace(/^\((?:no huddle|shotgun|pistol)(?:[\s,-]+(?:no huddle|shotgun|pistol))*\)\s*/i, "").replace(/^(?:no huddle|shotgun|pistol)(?:[\s-]+(?:no huddle|shotgun|pistol))*[\s-]+/i, "").replace(/#\d+\s*/g, "").replace(/\b([A-Z]{2,5})00\b/g, "$1 goal line").replace(/\s+/g, " ").trim() : "";
+    if (/^\(.*\)$/.test(lp) && sit.lp.type) lp = `${sit.lp.type} · ${lp.slice(1, -1).replace(/\s+(kick|pat)$/i, "")}`;   // an extra point is just "(A. McPherson KICK)"
     if (!down && !drv && !lp) return "";
     return `<div class="gx-inf">${down ? `<b class="dd">${esc(down)}</b>` : ""}${spot ? `<span class="spot">at ${esc(spot)}</span>` : ""}${ball && sit.rz ? '<span class="rz">Red zone</span>' : ""}${drv ? `<span class="drv"><em>Drive</em>${esc(drv)}</span>` : ""}</div>${lp ? `<p class="gx-lp${big ? " z-big" : ""}"><em>Last play</em>${esc(lp)}</p>` : ""}`;
   }
@@ -5559,7 +5560,7 @@ body.tv .rb-g .rb-pk .hasball em { display: none; }   /* the block says red zone
   // ---------- sheets ----------
   function openSheet(id) { $(id).hidden = false; }
   // keep every open screen current: when a new version is up, reload it (never mid-form or mid-animation)
-  const BUILD = "20261017214353";
+  const BUILD = "20261017214738";
   function checkBuild() {
     if (BUILD === "dev") return;
     fetch("version.json?t=" + Date.now(), { cache: "no-store" }).then((r) => (r.ok ? r.json() : null)).then((j) => {
