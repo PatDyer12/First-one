@@ -3802,10 +3802,22 @@ body.tv .rb-games.primeg.mason > .rb-pcol { padding-top: 16px; -webkit-mask-imag
     return { name: localStorage.getItem("sb-guest-name") || "", uid: null }; } catch (e) { return null; } })();
   if (GUEST) document.documentElement.classList.add("guestmode");
   const isMe = (b) => (GUEST ? !!b && !!GUEST.uid && b.uid === GUEST.uid : !b || !b.who || b.who === "me");
-  const whoName = (b) => (b.whoName || (b.who === "julian" ? "Julian" : S.guestName || "Guest"));
+  const whoName = (b) => (b.whoName ? guestCanon(b.whoName) : b.who === "julian" ? "Julian" : S.guestName || "Guest");
   const WHO_COL = { julian: "#6cc4f5", guest: "#f2a65a" };
   // guest profiles: the saved list (Settings), or until one's saved, everybody who's had a guest bet. Each gets a color
-  const guestKey = (n) => String(n || "").trim().toLowerCase();
+  const guestKey = (n) => { const t = String(n || "").trim().toLowerCase(), k = t.normalize("NFKD").replace(/[̀-ͯ]/g, "").replace(/[^a-z0-9]/g, ""); return k || t; };
+  // one spelling for each name: the saved profile's, else the first bet's
+  let canonG = null, canonN = -1, canonM = new Map();
+  function guestCanon(n) {
+    const k = guestKey(n); if (!k) return n;
+    const all = S.bets ? [...S.bets.values(), ...(S.goneBets ? S.goneBets.values() : [])] : [];
+    if (canonG !== S.guests || canonN !== all.length) {
+      canonG = S.guests; canonN = all.length; canonM = new Map();
+      for (const g of Array.isArray(S.guests) ? S.guests : []) if (guestKey(g) && !canonM.has(guestKey(g))) canonM.set(guestKey(g), String(g).trim());
+      for (const b of all.filter((x) => x.whoName).sort((x, y) => (x.placedAt || 0) - (y.placedAt || 0))) if (!canonM.has(guestKey(b.whoName))) canonM.set(guestKey(b.whoName), String(b.whoName).trim());
+    }
+    return canonM.get(k) || n;
+  }
   const isJul = (n) => guestKey(n) === "julian";
   const oneJulian = (d) => (d && d.who === "guest" && isJul(d.whoName) ? { ...d, who: "julian", whoName: "Julian" } : d);
   function guestList() {
@@ -6215,7 +6227,7 @@ body.tv .rb-games.primeg.mason > .rb-pcol { padding-top: 16px; -webkit-mask-imag
   // ---------- sheets ----------
   function openSheet(id) { $(id).hidden = false; }
   // keep every open screen current: when a new version is up, reload it (never mid-form or mid-animation)
-  const BUILD = "20261018203631";
+  const BUILD = "20261018204320";
   function checkBuild() {
     if (BUILD === "dev") return;
     fetch("version.json?t=" + Date.now(), { cache: "no-store" }).then((r) => (r.ok ? r.json() : null)).then((j) => {
@@ -13021,15 +13033,16 @@ body.tv .rb-games.primeg.mason > .rb-pcol { padding-top: 16px; -webkit-mask-imag
 
   // ---------- auto-settle bets once their games are final ----------
   const settling = new Set();
-  const GONE_SEED = { id: "1018", day: "2026-10-18", add: ["~farb", "~lucas"] };
+  const GONE_SEEDS = [{ id: "1018", day: "2026-10-18", add: ["~farb", "~lucas"] }, { id: "1018b", day: "2026-10-18", add: ["^brad"] }];
   S.gone = S.gone || new Set(); S.goneBets = S.goneBets || new Map();
   const goneNm = (b) => String(personName(b) || "").toLowerCase().replace(/[^a-z0-9]/g, "");
+  const goneW1 = (b) => String(personName(b) || "").toLowerCase().normalize("NFKD").replace(/[̀-ͯ]/g, "").split(/[^a-z0-9]+/).filter(Boolean)[0] || "";
   const etToday = () => new Intl.DateTimeFormat("en-CA", { timeZone: "America/New_York" }).format(new Date());
   function isGone(b) {
     if (!b || isMe(b) || !S.gone.size) return false;
     if (S.gone.has(personKey(b))) return true;
     const n = goneNm(b);
-    for (const g of S.gone) if (g[0] === "~" && g.length > 1 && n.startsWith(g.slice(1))) return true;
+    for (const g of S.gone) if (g.length > 1 && ((g[0] === "~" && n.startsWith(g.slice(1))) || (g[0] === "^" && goneW1(b) === g.slice(1)))) return true;
     return false;
   }
   // a bet in from the database: onto the board, or into the left-the-room pile
@@ -13048,14 +13061,14 @@ body.tv .rb-games.primeg.mason > .rb-pcol { padding-top: 16px; -webkit-mask-imag
   }
   // the settings doc came in: its list (today's seed goes on once, from a host screen)
   function goneCfg(d) {
-    const l = Array.isArray(d.gone) ? d.gone.map(String) : [], seeded = d.goneSeed === GONE_SEED.id, today = etToday() === GONE_SEED.day;
-    const want = seeded || !today ? l : [...new Set([...l, ...GONE_SEED.add])];
-    if (!seeded && today && !GUEST && S.canWrite && S.db) S.db.doc("config/settings").set({ gone: want, goneSeed: GONE_SEED.id }, { merge: true }).catch(() => {});
+    const l = Array.isArray(d.gone) ? d.gone.map(String) : [], done = new Set([...(Array.isArray(d.goneSeeds) ? d.goneSeeds : []), ...(d.goneSeed ? [d.goneSeed] : [])]);
+    const due = GONE_SEEDS.filter((x) => x.day === etToday() && !done.has(x.id)), want = due.length ? [...new Set([...l, ...due.flatMap((x) => x.add)])] : l;
+    if (due.length && !GUEST && S.canWrite && S.db) S.db.doc("config/settings").set({ gone: want, goneSeeds: [...done, ...due.map((x) => x.id)] }, { merge: true }).catch(() => {});
     setGone(want);
   }
   function saveGone(list) {
     setGone(list);
-    write((db) => db.doc("config/settings").set({ gone: [...S.gone], goneSeed: GONE_SEED.id }, { merge: true }), () => {});
+    write((db) => db.doc("config/settings").set({ gone: [...S.gone], goneSeeds: GONE_SEEDS.map((x) => x.id) }, { merge: true }), () => {});
   }
   // settings: everybody with bets, on the board or not, a tap to move them
   function renderGone() {
@@ -13070,8 +13083,8 @@ body.tv .rb-games.primeg.mason > .rb-pcol { padding-top: 16px; -webkit-mask-imag
     const g = e.target.closest("#goneList [data-gone]"), bk = e.target.closest("#goneList [data-back]");
     if (g) { saveGone([...S.gone, g.dataset.gone]); toast("Off the board. Their bets still settle."); }
     else if (bk) {
-      const k = bk.dataset.back, b = [...S.goneBets.values()].find((x) => personKey(x) === k), n = b ? goneNm(b) : "";
-      saveGone([...S.gone].filter((x) => x !== k && !(x[0] === "~" && n.startsWith(x.slice(1)))));
+      const k = bk.dataset.back, b = [...S.goneBets.values()].find((x) => personKey(x) === k), n = b ? goneNm(b) : "", w1 = b ? goneW1(b) : "";
+      saveGone([...S.gone].filter((x) => x !== k && !(x[0] === "~" && n.startsWith(x.slice(1))) && !(x[0] === "^" && x.slice(1) === w1)));
       toast("Back on the board");
     }
   });
