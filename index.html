@@ -2350,6 +2350,28 @@ body.tv .rb-pcol.pr .rb-hs-side.r .rb-st { justify-self: start; }
 .jumbo.hz .jb-screen #jbBg { filter: blur(36px) brightness(.5) saturate(.85) sepia(.2); }
 .jumbo.lux #pipVid { transition: opacity .25s ease; }
 .dj-cv { position: absolute; inset: 0; width: 100%; height: 100%; pointer-events: none; }
+.rb-card.later .lt-list { display: flex; flex-direction: column; padding: 0 14px 12px; }
+.lt-g { display: grid; grid-template-columns: 88px auto minmax(0, 1fr) auto; align-items: center; column-gap: 14px; padding: 9px 4px; border-top: 1px solid rgba(255,255,255,.06); font: 700 16px/1.2 Inter, sans-serif; color: #dfe5ee; }
+.lt-g:first-child { border-top: 0; }
+.lt-t { font-weight: 800; color: #a9b2c1; }
+.lt-m { display: inline-flex; align-items: center; gap: 7px; white-space: nowrap; }
+.lt-m b { font-weight: 800; color: #eef2f7; letter-spacing: .04em; }
+.lt-m i { font-style: normal; color: #6f7a8b; }
+.lt-m .ob-lg { width: 22px; height: 22px; object-fit: contain; }
+.lt-g em { font: 600 14px/1.2 Inter, sans-serif; font-style: normal; color: #8d97a8; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.lt-n { font: 800 13px/1 Inter, sans-serif; color: #06080c; background: #e6ebf2; border-radius: 99px; padding: 4px 9px; }
+.lt-g.mine .lt-t { color: #eef2f7; }
+/* four or five on the leaderboard: two lines a row, the money and its dollars side by side */
+body.tv .rb-sec.lb.many .rb-lr { grid-template-areas: "rk av nm net" "ft ft ft ft"; padding: 9px 12px 9px; row-gap: 5px; }
+body.tv .rb-sec.lb.many .rb-lr .ln { display: none; }
+body.tv .rb-sec.lb.many .rb-lr .net { font-size: 22px; display: flex; align-items: baseline; gap: 8px; }
+body.tv .rb-sec.lb.many .rb-lr .net small { display: none; }
+body.tv .rb-sec.lb.many .rb-lr .ft { margin-top: 0; }
+body.tv .rb-sec.lb.many .rb-lr > .rb-av { width: 40px; height: 40px; font-size: 18px; }
+body.tv .rb-games.primeg:not(.mason):not(.solo) { grid-template-columns: minmax(0, 1.35fr) minmax(0, 1fr); }
+body.tv .rb-games.primeg.h1:not(.mason):not(.solo) { grid-template-columns: minmax(0, 1.1fr) minmax(0, 1fr); }
+body.tv .rb-games.mason .rb-g.gx .gx-ldr, body.tv .rb-games.mason .rb-g.gx .gx-lp { display: none; }
+.ob-who .nms { display: inline-flex; align-items: center; gap: 4px 8px; min-width: 0; overflow: hidden; white-space: nowrap; }
 /* the open bets, as tickets */
 .ob-hd { display: flex; align-items: center; gap: 12px; padding: 2px 4px 12px; }
 .ob-hd b { font: 600 14px/1 Inter, sans-serif; letter-spacing: .3em; text-transform: uppercase; color: #e6ebf2; }
@@ -2389,7 +2411,19 @@ body.tv .rb-pcol.pr .rb-hs-side.r .rb-st { justify-self: start; }
 .ob-pick .ob-odds { flex: none; color: #8fc0ff; font-weight: 800; }
 .ob-pick .hasball { margin-left: 0; }
 .ob-hs { width: 34px; height: 34px; border-radius: 50%; object-fit: cover; background: #161b23; flex: none; }
-.ob-meta { margin-top: 5px; font: 600 14px/1.25 Inter, sans-serif; color: #8d97a8; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.ob-meta { margin-top: 5px; font: 600 14px/1.25 Inter, sans-serif; color: #8d97a8; overflow: hidden; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; }
+.ob-list { container-type: inline-size; }
+@container (max-width: 560px) {
+  .ob-bet { column-gap: 11px; padding: 11px 11px 11px 16px; }
+  .ob-avs .rb-av { width: 36px; height: 36px; font-size: 16px; }
+  .ob-avs .rb-av + .rb-av { margin-left: -14px; }
+  .ob-pick { font-size: 22px; }
+  .ob-who { font-size: 13px; }
+  .ob-meta { font-size: 13px; }
+  .ob-st { min-width: 92px; padding: 7px 9px; }
+  .ob-st b { font-size: 15px; }
+  .ob-legs li { font-size: 15px; }
+}
 .ob-st { align-self: center; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 4px; min-width: 116px; padding: 9px 12px; border-radius: 11px; background: rgba(255,255,255,.06); border: 1px solid rgba(255,255,255,.1); text-align: center; }
 .ob-st em { font: 800 11px/1 Inter, sans-serif; font-style: normal; letter-spacing: .16em; text-transform: uppercase; color: #a9b2c1; }
 .ob-st b { font: 800 17px/1.1 Inter, sans-serif; color: #eef2f7; white-space: nowrap; }
@@ -4007,6 +4041,7 @@ body.tv .rb-games.primeg.mason > .rb-pcol { padding-top: 16px; -webkit-mask-imag
       st.dwell = 7000; st.speed = 20;
     }
     if (el.classList.contains("mc")) st.dwell = 7000;
+    if (el.classList.contains("mc") || el.classList.contains("pr")) st.speed = Math.max(el.classList.contains("mc") ? 14 : 13, Math.min(26, st.period / 420));
     if (st.period > 0) st.pos %= st.period;
   }
   const loopSyncEl = (el) => loopSync(ASC.find((s) => s.el === el));
@@ -5218,7 +5253,7 @@ body.tv .rb-games.primeg.mason > .rb-pcol { padding-top: 16px; -webkit-mask-imag
     const start = rangeStart(S.range);
     const res = [...S.bets.values()].filter((b) => b.status !== "open" && b.settledAt >= start).sort((x, y) => y.settledAt - x.settledAt).slice(0, document.body.classList.contains("tv") ? 6 : 25);
     const resHtml = res.length ? `<section class="rb-sec"><h3>Results</h3>${res.map((b) => { const o = outcome(b); return `<div class="rb-res ${o === "W" ? "w" : o === "L" ? "l" : "p"}"${tapAttrs([b.id], b.pick)}>${avHtml(b)}<span class="pk">${esc(b.kind === "parlay" ? (b.legs || []).length + "-leg parlay" : b.pick)}</span><span class="num v">${o === "W" ? "✓" : o === "L" ? "✕" : "–"} ${fU(netOf(b), true)}</span></div>`; }).join("")}</section>` : "";
-    return [`<section class="rb-sec lb"><h3>Leaderboard <span>${esc(lbl)}</span></h3>${lb}</section>`, awHtml + hhHtml + resHtml];
+    return [`<section class="rb-sec lb${rows.length >= 4 ? " many" : ""}"><h3>Leaderboard <span>${esc(lbl)}</span></h3>${lb}</section>`, awHtml + hhHtml + resHtml];
   }
   const mktName = (s) => {
     if (!s || !s.m) return "";
@@ -5260,8 +5295,8 @@ body.tv .rb-games.primeg.mason > .rb-pcol { padding-top: 16px; -webkit-mask-imag
     const names = people.map((b) => `<b style="--c:${personCol(b)}">${esc(personName(b))}</b>`).join('<i class="pl">+</i>');
     return `<div class="ob-bet k-${st.cls}${n > 1 ? " ob-ride" : ""}${p.entries ? popCls(p) + onAir(idsOf(p)) : ""}" style="--c:${personCol(people[0])}"${tapAttrs(idsOf(p), p.pick)}>
       <div class="ob-avs">${people.map((b) => avHtml(b)).join("")}</div>
-      <div class="ob-main"><div class="ob-who">${names}${tag ? `<span class="ob-tag">${esc(tag)}</span>` : n > 1 ? `<span class="ob-tag">${n >= 3 ? `Squad ride ×${n}` : "Ride"}</span>` : ""}</div>
-        <div class="ob-pick">${hs}<span class="t">${esc(p.pick)}</span>${ballTag(hb)}</div>
+      <div class="ob-main"><div class="ob-who"><span class="nms">${names}</span>${tag ? `<span class="ob-tag">${esc(tag)}</span>` : n > 1 ? `<span class="ob-tag">${n >= 3 ? `Squad ×${n}` : "Ride"}</span>` : ""}</div>
+        <div class="ob-pick">${hs}<span class="t">${esc(p.sel && isTd(p.sel.m) && p.sel.p && p.sel.p.nm ? p.sel.p.nm : p.pick)}</span>${ballTag(hb)}</div>
         <div class="ob-meta">${meta != null ? meta : [mktName(p.sel), obPrice(p)].filter(Boolean).join(" · ")}</div></div>
       ${obPill(st, p.sel && (isTd(p.sel.m) || isPP(p.sel.m)))}${meter}</div>`;
   }
@@ -5373,6 +5408,32 @@ body.tv .rb-games.primeg.mason > .rb-pcol { padding-top: 16px; -webkit-mask-imag
     boardTop = out[0];
     return out;
   }
+  function laterCard(k) {
+    if (focusLeague() !== "NFL") return "";
+    const now = Date.now(), on = new Map();
+    for (const b of S.bets.values()) if (b.status === "open") for (const x of selsOf(b)) { const id = String(x.g); if (!on.has(id)) on.set(id, new Set()); on.get(id).add(personKey(b)); }
+    const gs = [...S.games.values()].filter((g) => g.sport === "NFL" && g.st === "pre" && g.t > now - 15 * 60e3 && g.t - now < 14 * 3600e3).sort((a, b) => a.t - b.t).slice(0, k);
+    if (!gs.length) return "";
+    const line = (g) => [g.sp && g.sp.h && g.sp.h.l != null ? (g.sp.h.l === 0 ? "Pick'em" : g.sp.h.l < 0 ? `${g.h.ab} ${fLine(g.sp.h.l)}` : `${g.a.ab} ${fLine(-g.sp.h.l)}`) : "", g.tot && g.tot.l != null ? `O/U ${g.tot.l}` : ""].filter(Boolean).join(" · ");
+    const row = (g) => { const n = on.has(g.id) ? on.get(g.id).size : 0; return `<div class="lt-g${n ? " mine" : ""}"><span class="lt-t num">${esc(tm2(g.t))}</span><span class="lt-m">${logo(g.a, "ob-lg")}<b>${esc(g.a.ab)}</b><i>@</i>${logo(g.h, "ob-lg")}<b>${esc(g.h.ab)}</b></span><em>${esc([g.net, line(g)].filter(Boolean).join(" · "))}</em>${n ? `<span class="lt-n" title="people on it">${n}</span>` : ""}</div>`; };
+    return `<article class="rb-g rb-card later"><header class="rb-ch"><h3>Later today</h3><span>${gs.length === k ? "next " + k : gs.length + (gs.length > 1 ? " games" : " game")}</span></header><div class="lt-list">${gs.map(row).join("")}</div></article>`;
+  }
+  // as many of them as fit under the big cards (none if they don't)
+  function laterFit(L) {
+    for (let k = 8; k >= 2; k--) {
+      const h = laterCard(k); if (!h) return;
+      const box = document.createElement("div"); box.innerHTML = h; const el = box.firstElementChild;
+      L.appendChild(el);
+      if (L.scrollHeight <= L.clientHeight + 2) return;
+      el.remove();
+    }
+  }
+  function masonOrder(keys) {
+    const gm = (k) => (k[0] === "g" ? S.games.get(k.slice(1)) || null : null);
+    const tier = (k) => { const g = gm(k); if (!g) return k === "pl" || k === "ot" ? 1 : k[0] === "n" ? 2 : 4; return g.st === "in" ? 0 : g.st === "pre" ? 3 : 5; };
+    const live = keys.filter((k) => tier(k) === 0);
+    return (live.length > 1 ? boardShuffle(live) : live).concat(keys.filter((k) => tier(k) !== 0).sort((a, b) => tier(a) - tier(b) || (tier(a) === 3 ? gm(a).t - gm(b).t : 0)));
+  }
   function masonBoard(parts) {
     const G = $("#rbGames"); G.classList.add("primeg", "mason");
     let A = $("#rbM1"), B = $("#rbM2");
@@ -5382,7 +5443,7 @@ body.tv .rb-games.primeg.mason > .rb-pcol { padding-top: 16px; -webkit-mask-imag
       for (let i = ASC.length - 1; i >= 0; i--) if (!ASC[i].el.isConnected) ASC.splice(i, 1);
       autoScroll(A, 14); autoScroll(B, 15);
     }
-    const by = new Map(parts), keys = boardShuffle(parts.map((x) => x[0]));
+    const by = new Map(parts), keys = masonOrder(parts.map((x) => x[0]));
     A.innerHTML = keys.map((k) => by.get(k)).join(""); B.innerHTML = "";
     let ha = 0, hb = 0;
     for (const k of [...A.children]) { const h = k.offsetHeight + 24; if (ha <= hb) { A.appendChild(k); ha += h; } else { B.appendChild(k); hb += h; } }
@@ -5398,7 +5459,8 @@ body.tv .rb-games.primeg.mason > .rb-pcol { padding-top: 16px; -webkit-mask-imag
     heroIds = new Set();
     // trackers for: any hockey / baseball night, or a football window of 2 to 4 games (a full Sunday stays the rolling board)
     const fb = (G) => G.g.sport === "NFL" || G.g.sport === "CFB";
-    let heroes = prime ? [prime] : tv && (act.some((G) => G.g.sport === "NHL" || G.g.sport === "MLB") || (act.length >= 2 && act.length <= 4 && act.every(fb)) || (act.length === 1 && fb(act[0]) && act[0].g.st === "in")) ? act : [];
+    const liveFb = act.filter((G) => G.g.st === "in" && fb(G));
+    let heroes = prime ? [prime] : !tv ? [] : act.some((G) => G.g.sport === "NHL" || G.g.sport === "MLB") ? act : act.every(fb) && liveFb.length >= 1 && liveFb.length <= 4 ? liveFb : (act.length >= 2 && act.length <= 4 && act.every(fb)) || (act.length === 1 && fb(act[0]) && act[0].g.st === "in") ? act : [];
     heroIds = new Set(heroes.map((G) => G.g.id));
     const body = document.body;
     if (prime) {
@@ -5409,13 +5471,13 @@ body.tv .rb-games.primeg.mason > .rb-pcol { padding-top: 16px; -webkit-mask-imag
       rbPrime = th.t.ab;
     } else if (rbPrime) { body.classList.remove("prime"); $("#rbMark").innerHTML = ""; rbPrime = null; }
     // one football game keeps its bets in the big card (the MNF look); everything else puts the bets in their own rolling column
-    const split = heroes.length > 0 && !((prime || heroes.length === 1) && fb(heroes[0]));
+    const split = heroes.length > 0;
     const roomLive = list.filter((G) => G.g.st === "in" && (G.entries.length || (G.legs && G.legs.length))).length;
     const roomN = list.filter((G) => G.entries.length || (G.legs && G.legs.length && G.g.st === "in")).length + (parlays.length ? 1 : 0) + (other.length ? 1 : 0);
     const nowG = !tv ? [] : heroes.length ? onNowGames(list, heroes.length === 1 ? 2 : 0) : onNowGames(list, Math.max(4 - roomLive, 7 - roomN));
     const rest = heroes.length ? obColumn((split ? list : list.filter((G) => !heroes.includes(G))).map(openOnly), parlays, other.filter((e) => e.b.status === "open")) : "";
     const fol = followCards();
-    $("#rbGames").classList.toggle("primeg", heroes.length > 0); $("#rbGames").classList.toggle("solo", heroes.length > 0 && !rest);
+    $("#rbGames").classList.toggle("primeg", heroes.length > 0); $("#rbGames").classList.toggle("h1", heroes.length === 1); $("#rbGames").classList.toggle("solo", heroes.length > 0 && !rest);
     if (heroes.length) {
       let L = $("#rbColL"), R = $("#rbColR");
       if (!L || L.parentNode !== $("#rbGames")) {
@@ -5425,7 +5487,9 @@ body.tv .rb-games.primeg.mason > .rb-pcol { padding-top: 16px; -webkit-mask-imag
         autoScroll(L, 13); autoScroll(R, 14);
       }
       L.dataset.n = String(heroes.length); L.innerHTML = heroes.map((G) => gameCard(G, true, split)).join("") + fol; R.innerHTML = rest; R.hidden = !rest;
-      primeFit(); loopSyncEl(L); loopSyncEl(R);
+      primeFit();
+      if (heroes.length <= 2) laterFit(L);
+      loopSyncEl(L); loopSyncEl(R);
     } else {
     const oth = tv ? other.filter((e) => e.b.status === "open") : other;
     const parts = [...list.map((G) => ["g" + G.g.id, gameCard(tv ? openOnly(G) : G, false)]), ["pl", tv ? obCard("Parlays", parlays.length, parlays.map(obParlay).join("")) : parlayCard(parlays)], ["ot", tv ? obCard("Other bets", oth.length, oth.map(obOther).join("")) : otherCard(other)], ["fo", fol], ...nowG.map((g) => ["n" + g.id, onNowCard(g)])].filter((x) => x[1]);
@@ -5585,6 +5649,11 @@ body.tv .rb-games.primeg.mason > .rb-pcol { padding-top: 16px; -webkit-mask-imag
   // the crew's wins get the same Goldie intros as yours with their name on top. Not when they're fading you, and a group
   // ride only plays once: if you're riding it your win covers it
   const rideFx = new Map();
+  const fxLog = [];
+  const fxRush = () => { const t = Date.now(); while (fxLog.length && t - fxLog[0] > 120e3) fxLog.shift(); return fxLog.length >= 2 || fxQ.length >= 2; };
+  const flQ = []; let flT = 0;
+  function qFlash(...a) { flQ.push(a); if (!flT) flStep(); }
+  function flStep() { const a = flQ.shift(); if (!a) { flT = 0; return; } flash(...a); flT = setTimeout(flStep, 2900); }
   function celebrate(b) {
     try { if (window.sbCrowd) window.sbCrowd.pop(); } catch (e) {}
     const o = outcome(b), n = netOf(b), k = rideKey(b);
@@ -5595,22 +5664,33 @@ body.tv .rb-games.primeg.mason > .rb-pcol { padding-top: 16px; -webkit-mask-imag
         rideFx.set(k, Date.now());
         const names = [personName(b), ...mates], td = b.kind !== "parlay" && b.sel && isTd(b.sel.m);
         const tag = { name: names.length > 1 ? names.join(" + ") : names[0], sub: td ? "TD scorer cashed" : names.length > 1 ? "group ride hit" : "hit", col: personCol(b) };
-        if (td && !isMoney(b, n)) edShow(b, n, tag); else winFx(b, n, tag);
+        const big = isMoney(b, n) || b.kind === "parlay" || isNuke(b) || isWhale(b);
+        if (td && !isMoney(b, n) && (tdEdit(b, b.sel, `${tag.name} · TD scorer cashed`, tag) || (!fbDay() && !fxRush() && (fxLog.push(Date.now()), edShow(b, n, tag), true)))) return;
+        if (big || (!td && !fxRush())) { fxLog.push(Date.now()); winFx(b, n, tag); return; }
+        playWin();
+        qFlash("W", `${tag.name.toUpperCase()} HIT`, b.pick, `${fOdds(b.odds)} · ${fU(n, true)} (${fUSD(n * S.unit, true)})`);
         return;
       }
       if (o === "W" && !fade && !withMe && !dup) playWin();
-      flash(o, `${personName(b).toUpperCase()} ${o === "W" ? (withMe ? "HIT TOO" : "HIT") : o === "L" ? "LOST" : b.status === "cashout" ? "CASHED" : "PUSH"}`, b.pick, `${fOdds(b.odds)} · ${fU(n, true)} (${fUSD(n * S.unit, true)})`);
+      qFlash(o, `${personName(b).toUpperCase()} ${o === "W" ? (withMe ? "HIT TOO" : "HIT") : o === "L" ? "LOST" : b.status === "cashout" ? "CASHED" : "PUSH"}`, b.pick, `${fOdds(b.odds)} · ${fU(n, true)} (${fUSD(n * S.unit, true)})`);
       return;
     }
     if (o === "W") {
       rideFx.set(k, Date.now());
       const mates = rideMates(b);
-      winFx(b, n, mates.length ? { name: [personName(b), ...mates].join(" + "), sub: "group ride hit", col: "#e2c17e" } : null);
+      const tag = mates.length ? { name: [personName(b), ...mates].join(" + "), sub: "group ride hit", col: "#e2c17e" } : null, td = b.kind !== "parlay" && b.sel && isTd(b.sel.m);
+      const big = isMoney(b, n) || b.kind === "parlay" || isNuke(b) || isWhale(b);
+      if (td && !big) {   // your touchdown scorer: its edit, or (between edits, on a football day) the banner
+        if (tdEdit(b, b.sel, "Touchdown · " + ((b.sel.p && b.sel.p.nm) || b.pick), tag)) return;
+        if (fbDay()) { playWin(); qFlash("W", "WINNER", b.pick, `${BOOK[bookKey(b)]} · ${fOdds(b.odds)} · ${fU(n, true)} (${fUSD(n * S.unit, true)})`); return; }
+      }
+      if (big || !fxRush()) { fxLog.push(Date.now()); winFx(b, n, tag); return; }
+      playWin(); qFlash("W", "WINNER", b.pick, `${BOOK[bookKey(b)]} · ${fOdds(b.odds)} · ${fU(n, true)} (${fUSD(n * S.unit, true)})`);
       return;
     }
-    if (o === "L") { playLoss(); lossReact(b, n); }
+    if (o === "L") { playLoss(); if (!fxRush()) { fxLog.push(Date.now()); lossReact(b, n); } }
     const word = b.status === "cashout" ? "CASHED" : o === "W" ? "WINNER" : o === "L" ? "LOSS" : "PUSH";
-    flash(o, word, b.pick, `${BOOK[bookKey(b)]} · ${fOdds(b.odds)} · ${fU(n, true)} (${fUSD(n * S.unit, true)})`);
+    qFlash(o, word, b.pick, `${BOOK[bookKey(b)]} · ${fOdds(b.odds)} · ${fU(n, true)} (${fUSD(n * S.unit, true)})`);
   }
   // $100+ gets the blockbuster, parlays get theirs, long-shot straights get the sniper; whale or nuke sized bets get that right after
   function winFx(b, n, tag) {
@@ -5856,7 +5936,7 @@ body.tv .rb-games.primeg.mason > .rb-pcol { padding-top: 16px; -webkit-mask-imag
   // ---------- sheets ----------
   function openSheet(id) { $(id).hidden = false; }
   // keep every open screen current: when a new version is up, reload it (never mid-form or mid-animation)
-  const BUILD = "20261018071056";
+  const BUILD = "20261018075552";
   function checkBuild() {
     if (BUILD === "dev") return;
     fetch("version.json?t=" + Date.now(), { cache: "no-store" }).then((r) => (r.ok ? r.json() : null)).then((j) => {
@@ -6412,6 +6492,7 @@ body.tv .rb-games.primeg.mason > .rb-pcol { padding-top: 16px; -webkit-mask-imag
     const team = (k) => { const x = t[k], tm = x.team; return { id: tm.id, rec: ((x.records || [])[0] || {}).summary || "", rk: x.curatedRank && x.curatedRank.current <= 25 ? x.curatedRank.current : 0, ab: tm.abbreviation || "", nm: tm.shortDisplayName || tm.name || "", fn: tm.displayName || "", lg: dkLg(tm.logo), col: tm.color ? "#" + tm.color : "", alt: tm.alternateColor ? "#" + tm.alternateColor : "", sc: /^\d+$/.test(String(x.score)) ? Number(x.score) : null }; };
     const g = { id: String(e.id), sport, t: Date.parse(e.date), st: st.state || "pre", d: st.shortDetail || "", a: team("away"), h: team("home"), pd: e.status.period || 0, clk: e.status.clock };
     g.net = ((((c.broadcasts || [])[0] || {}).names) || [])[0] || "";
+    g.city = (c.venue && c.venue.address && c.venue.address.city) || ""; g.abroad = !!(c.venue && c.venue.address && c.venue.address.country && c.venue.address.country !== "USA");
     const si = c.situation, lp = si && si.lastPlay;
     if (si) g.sit = { rz: !!si.isRedZone, pos: si.possession || null, dd: si.downDistanceText || si.shortDownDistanceText || "", yl: typeof si.yardLine === "number" ? si.yardLine : null, dn: si.down || null, ds: si.distance ?? null,
       to: { a: si.awayTimeouts ?? null, h: si.homeTimeouts ?? null }, wp: lp && lp.probability && typeof lp.probability.homeWinPercentage === "number" ? lp.probability.homeWinPercentage : null,
@@ -8629,6 +8710,8 @@ body.tv .rb-games.primeg.mason > .rb-pcol { padding-top: 16px; -webkit-mask-imag
     const go = () => {
       const cur = S.bets.get(b.id); if (!cur || cur.status !== "open" || !clipsOn()) return;
       if (fxBusy || cardBusy) { if (Date.now() - t0 < 30e3) setTimeout(go, 1000); return; }
+      if (tdEdit({ ...cur, pick: who + " · " + cur.pick }, (legsOf(cur).find((l) => l.sel && isTd(l.sel.m) && normNm(l.sel.p && l.sel.p.nm) === normNm(player)) || {}).sel || null, `${who} · ${player} scored`, { name: who, sub: "TD scorer leg hit", col: personCol(cur) })) return;
+      if (fbDay()) return;
       const P = pickClip(newSong(CLIPS.filter((c) => c.base.startsWith("sounds/aura/") && fits(c, cur)))); if (!P) return;
       lastAny = Date.now(); lastKind = "pop"; // anything of yours can still cut in
       react({ ...cur, pick: who + " · " + cur.pick }, "good", P, `${who} · ${player} scored`);
@@ -8731,12 +8814,19 @@ body.tv .rb-games.primeg.mason > .rb-pcol { padding-top: 16px; -webkit-mask-imag
   // songs that fit a bet's sport (no anthems), and the 1 PM touchdown edit: a Goldie edit, a hype song or DJ Goldie, in turn
   const musicFor = (b) => { const sp = (gameFor(b) || {}).sport || sportOf(b); return CLIPS.filter((c) => (c.song || c.music || c.dj) && !/anthem/i.test(c.artist || "") && forSport(c, sp) && fits(c, b)); };
   let busyPops = 0, tdPops = 0, lastSong = "", showPops = 0;
-  const SHOW_EVERY = 2 * 60e3; // 4 PM: a DJ break, a clip or one of his scenes after 2 minutes without anything
-  const PRIME_EVERY = 60e3;    // prime time: every minute of dead air, his scenes twice for every clip (DJ still every 4 minutes)
+  let SHOW_EVERY = 2 * 60e3; // 4 PM: a DJ break, a clip or one of his scenes after 2 minutes without anything
+  let PRIME_EVERY = 60e3;    // prime time: every minute of dead air, his scenes twice for every clip (DJ still every 4 minutes)
   const PRIME_TURNS = [2, 1, 2];
   // the DJ gets his turn every 4 minutes however busy the games are: plays keep coming on a full slate, so waiting for a
   // quiet 2 minutes meant he hardly ever came on. A big play (a touchdown, a turnover) still comes first and cuts him off
-  const DJ_DUE = 4 * 60e3;
+  let DJ_DUE = 4 * 60e3;
+  const fbDay = () => { const lg = focusLeague(); return lg === "NFL" || lg === "CFB"; };
+  function paceClips() {
+    const fb = fbDay(), open = [...S.bets.values()].filter((b) => b.status === "open").length;
+    DJ_DUE = fb ? 20 * 60e3 : 4 * 60e3;
+    SHOW_EVERY = fb ? (open >= 15 ? 6 : 4) * 60e3 : 2 * 60e3;
+    PRIME_EVERY = fb ? (open >= 15 ? 4 : 3) * 60e3 : 60e3;
+  }
   let lastDj = Date.now() - 3 * 60e3; // first one about a minute after the board opens
   function djBreak(now) {
     if (PHONE()) return false;
@@ -8748,10 +8838,29 @@ body.tv .rb-games.primeg.mason > .rb-pcol { padding-top: 16px; -webkit-mask-imag
     return true;
   }
   const newSong = (l) => { const f = l.filter((c) => !c.song || c.song !== lastSong); return f.length ? f : l; };
+  const TD_EDIT_MS = 12e3, TD_EDIT_GAP = 4 * 60e3; let tdEditAt = 0;
+  function tdEditPick(sel) {
+    const g = sel ? gameOf(sel) : null, t = g && (sel.s === "a" || sel.s === "h") ? g[sel.s] : null, nm = normNm(sel && sel.p && sel.p.nm);
+    const nfl = CLIPS.filter((c) => (c.sport === "NFL" || /^sounds\/nfl\//.test(c.base)) && c.pl !== "simpson");
+    const own = nm ? nfl.filter((c) => c.pl && PL_NAMES[c.pl] && normNm(PL_NAMES[c.pl]) === nm) : [];
+    const team = t ? nfl.filter((c) => c.fan === t.ab && /\btd\b|hype/.test(c.mood)) : [];
+    const P = pickClip(own.length ? own : team.length ? team : nfl.filter((c) => !c.fan && /\btd\b/.test(c.mood)));
+    return P ? Object.assign({}, P, { ms: Math.min(P.ms || TD_EDIT_MS, TD_EDIT_MS) }) : null;
+  }
+  function tdEdit(b, sel, why, tag) {
+    const now = Date.now();
+    if (!clipsOn() || PHONE() || now - tdEditAt < TD_EDIT_GAP || fxRush()) return false;
+    const P = tdEditPick(sel); if (!P) return false;
+    tdEditAt = now; lastAny = now; lastKind = "pop"; fxLog.push(now);
+    react(b, "good", P, why);
+    if (tag) whoTag(tag, P.ms, true);
+    return true;
+  }
   function tdHype(b, why) {
     if (!clipsOn()) return;
     const edits = CLIPS.filter((c) => c.base.startsWith("sounds/aura/") && fits(c, b));
     const songs = musicFor(b).filter((c) => !c.dj && /win|hype/.test(c.mood) && !c.base.startsWith("sounds/aura/"));
+    if (fbDay()) { const sel = b.sel || (selsOf(b)[0] || null), now = Date.now(); if (now - tdEditAt < TD_EDIT_GAP / 2 || fxRush()) return; const E = tdEditPick(sel); if (E) { tdEditAt = now; react(b, "good", E, why); } return; }
     const k = tdPops++ % 3, pool = k === 0 ? edits : k === 1 && songs.length ? songs : CLIPS.filter((c) => c.dj);
     const P = (Math.random() < 0.6 && pickClip(houseEdits())) || pickClip(newSong(pool)) || pickClip(newSong(edits));
     if (P) react(b, "good", P, why);
@@ -9920,6 +10029,21 @@ body.tv .rb-games.primeg.mason > .rb-pcol { padding-top: 16px; -webkit-mask-imag
     react(b, "good", P, why);
   }
   function slatePin() { return "auto"; }
+  function nflWindow() {
+    if (focusLeague() !== "NFL") return "";
+    const now = Date.now(), seen = new Set(), on = [];
+    for (const g of [...[...S.games.values()].filter((x) => x.sport === "NFL"), ...(TK.lg === "NFL" ? TK.games : [])]) {
+      if (!g || seen.has(String(g.id))) continue; seen.add(String(g.id));
+      if (g.st === "in" || (g.st === "pre" && g.t - now < 15 * 60e3 && now - g.t < 4 * 3600e3)) on.push(g);
+    }
+    if (!on.length) return "";
+    const hr = (t) => Number(new Intl.DateTimeFormat("en-US", { timeZone: "America/New_York", hour: "numeric", hourCycle: "h23" }).format(new Date(t)));
+    const last = on.reduce((x, g) => (g.t > x.t ? g : x)), h = hr(last.t), d = etDow();
+    if (h < 12 && on.length <= 2) return last.abroad && last.city ? `${last.city} game` : "Morning game";
+    if (h < 16 || (h < 12 && on.length > 2)) return d === 0 ? "Early window" : "Afternoon";
+    if (h < 19) return d === 0 ? "Late window" : "Afternoon";
+    return { 0: "Sunday Night Football", 1: "Monday Night Football", 4: "Thursday Night Football" }[d] || "Prime time";
+  }
   function slateGames() {
     const lg = focusLeague(), now = Date.now(), seen = new Set(); let n = 0;
     const look = (g) => { const id = String(g.id); if (seen.has(id)) return; seen.add(id); if (g.st === "in" || (g.st === "pre" && g.t - now < 15 * 60e3 && now - g.t < 4 * 3600e3)) n++; };
@@ -9938,13 +10062,13 @@ body.tv .rb-games.primeg.mason > .rb-pcol { padding-top: 16px; -webkit-mask-imag
     const m = slateMode(), n = slateGames();
     el.hidden = !n && slatePin() === "auto";
     el.className = "chip modechip " + m;
-    el.textContent = (document.body.classList.contains("cfb") ? (etDow() === 6 ? "College Saturday" : "College football") : document.body.classList.contains("hockey") ? "Hockey night" : document.body.classList.contains("baseball") ? "Ballpark" : DIR && (DIR.sport === "NBA" || DIR.sport === "CBB") ? "Hoops night" : MODE_LABEL[m]) + (n ? ` · ${n} game${n > 1 ? "s" : ""}` : "");
+    el.textContent = (document.body.classList.contains("cfb") ? (etDow() === 6 ? "College Saturday" : "College football") : document.body.classList.contains("hockey") ? "Hockey night" : document.body.classList.contains("baseball") ? "Ballpark" : DIR && (DIR.sport === "NBA" || DIR.sport === "CBB") ? "Hoops night" : nflWindow() || MODE_LABEL[m]) + (n ? ` · ${n} game${n > 1 ? "s" : ""}` : "");
   }
   function autoReact() {
     if (!S.ready) return;
     try { vibeScan(Date.now()); } catch (e) {}
     const now = Date.now(), swings = [], seenG = new Set(), mode = slateMode(), busy = mode === "busy";
-    showMode();
+    showMode(); paceClips();
     if (playWatch()) { render(); return; }
     if (HLQ.length && hlTurn()) { render(); return; }
     for (const b of S.bets.values()) {
@@ -10032,7 +10156,7 @@ body.tv .rb-games.primeg.mason > .rb-pcol { padding-top: 16px; -webkit-mask-imag
     if (busy) {
       // busy slate: DJ Goldie, now and then, over whichever of your bets is live
       const due = now - lastDj >= DJ_DUE && now - lastAny >= 20e3;
-      if (now - lastAny < DJ_EVERY && !due) return;
+      if ((fbDay() || now - lastAny < DJ_EVERY) && !due) return;
       const mine = [...S.bets.values()].filter((b) => b.status === "open"), b = mine.find((x) => phase(x) === "live") || mine[0];
       if (!b) return;
       const other = musicFor(b).filter((c) => !c.dj), P = pickClip(newSong(!due && busyPops++ % 3 === 2 && other.length ? other : CLIPS.filter((c) => c.dj)));
@@ -10052,7 +10176,8 @@ body.tv .rb-games.primeg.mason > .rb-pcol { padding-top: 16px; -webkit-mask-imag
     const winning = live.filter((x) => x.state === "W");
     if (winning.length) live = winning;
     if (prime && hlTurn()) return;
-    const turn = djDue ? 0 : prime ? PRIME_TURNS[showPops++ % PRIME_TURNS.length] : showPops++ % 3;
+    const fbd = fbDay(), turn = djDue ? 0 : fbd ? [1, 1, 2][showPops++ % 3] : prime ? PRIME_TURNS[showPops++ % PRIME_TURNS.length] : showPops++ % 3;
+    if (fbd && turn !== 0 && !live.length) return;   // a football day with nothing of yours live: the board stays up
     if (turn === 0 || (!live.length && !(prime && turn === 2))) {
       const b = (live[0] && live[0].b) || mine.find((x) => phase(x) === "live") || mine[0], P = pickClip(newSong(CLIPS.filter((c) => c.dj)));
       if (!P) return;
