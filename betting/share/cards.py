@@ -415,9 +415,88 @@ def footer():
             f"results. For entertainment only · 21+ · 1-800-GAMBLER. Generated {datetime.now(ET):%b %-d, %Y %-I:%M %p ET}.</div>"]
 
 
+PROP_CSS = """
+.glog { display:flex; gap:4px; flex-wrap:wrap; margin:6px 0 2px; align-items:center; }
+.glog span { min-width:26px; text-align:center; font:700 8pt var(--mono, ui-monospace); border-radius:5px; padding:2px 4px; }
+.glog .hit { background:#dcf3e6; color:#13804d; } .glog .miss { background:#fbe3e3; color:#b42318; }
+.glog .lbl { min-width:0; font:600 6.8pt Inter, sans-serif; color:var(--ink2); letter-spacing:.06em; text-transform:uppercase; }
+.pbar { position:relative; height:6px; background:#eef0f4; border-radius:3px; margin:6px 0 2px; }
+.pbar i { position:absolute; top:-3px; width:2px; height:12px; background:#0b1b33; }
+.pbar b { position:absolute; top:-3px; width:10px; height:12px; margin-left:-5px; border-radius:3px; background:#e0a526; }
+.propnote { font-size:8pt; color:var(--ink2); background:#f6f7f9; border-radius:10px; padding:8px 12px; margin:0 0 10px; }
+"""
+
+
+def props_block(S):
+    """Player props from props.py: projection vs line, the player's game log against the line, and the backup."""
+    path = os.path.join(BET, "data", "props.json")
+    if not os.path.exists(path):
+        return ["<p class='empty'>Props not run this week (python3 betting/props.py).</p>"]
+    P = json.load(open(path))
+    ev = P.get("summary", {})
+    under = ", ".join(f"{LBL} {ev[k]['under_own_avg%']:g}%" for k, LBL in (("rec_yds", "receiving yards"),
+                                                                         ("rush_yds", "rushing yards"),
+                                                                         ("receptions", "receptions")) if k in ev)
+    h = [f"<style>{PROP_CSS}</style>",
+         f"<div class='propnote'><b>How these are picked.</b> Each player's projection comes from his own games, usage, "
+         f"the defense he faces, his team's expected points and the weather, tested on {sum(v['games'] for v in ev.values()):,} "
+         f"player-games from 2022–26 it never saw. There's no free history of prop lines, so props can't be backtested for "
+         f"profit like sides: the book's price gets 60% of the say, and a prop only plays when the player's own season agrees "
+         f"and there's no injury, role change or QB question. <b>0.5u max.</b> The pattern behind the unders: players finish "
+         f"under their own season average more often than over ({under} of games since 2022), because a few big games pull "
+         f"the average up.</div>"]
+    picks = []
+    for p in P.get("picks", []):
+        parts = p["game_id"].split("_")
+        p["game"] = f"{parts[2]} @ {parts[3]}"
+        if S.upcoming(p["game"]):
+            picks.append(p)
+    if not picks:
+        return h + ["<p class='empty'>No prop cleared the bar this week.</p>"]
+    for p in picks:
+        c1, c2 = team_colors(S, p["game"])
+        unit = "" if p["market"] == "receptions" else " yds"
+        log = "".join(f"<span class='{'hit' if (v < p['line'] if p['side'] == 'under' else v > p['line']) else 'miss'}'>{v}</span>"
+                      for v in p["games"])
+        lo, hi = min([p["line"], p["proj"]] + p["games"]), max([p["line"], p["proj"]] + p["games"])
+        pos = lambda v: 100 * (v - lo) / max(hi - lo, 1e-9)  # noqa: E731
+        opp = ""
+        if p.get("opp_factor"):
+            d = round(100 * (p["opp_factor"] - 1))
+            opp = (f" {E(p['opp'])} has allowed {abs(d)}% {'more' if d > 0 else 'fewer'} {p['label'].lower()} than an "
+                   f"average defense this season." if abs(d) >= 5 else f" {E(p['opp'])}'s defense is about average here.")
+        wind = f" Wind {p['wind']:.0f} mph." if p.get("wind", 0) >= 12 else ""
+        why = (f"<ul class='wl'><li><b class='l'>Projection:</b> {p['proj']:g}{unit} against a line of {p['line']:g}. "
+               f"Season average {p['season_avg']:g}, last 3 games {p['last3']:g}.{opp}{wind}</li>"
+               f"<li><b class='l'>His games vs this line:</b> {p['side']} in {p['hits']} of {p['n']} this season."
+               f"<div class='glog'><span class='lbl'>Game log</span>{log}</div></li>"
+               f"<li><b class='l'>The price:</b> our model {p['model_prob']:g}% {p['side']}, {E(p['book'])}'s price implies "
+               f"{p['book_prob']:g}%. Blended {p['prob']:g}%, worth {p['ev']:+.1f}% at {W.fmt_odds(p['odds'])}."
+               f"<div class='pbar'><i style='left:{pos(p['line']):.0f}%'></i><b style='left:{pos(p['proj']):.0f}%'></b></div>"
+               f"<span class='meta'>gold = projection · line = book</span></li></ul>")
+        h.append(f"<div class='slip' style='--c1:{c1};--c2:{c2}'><div class='stripe'></div><div class='main'>"
+                 f"<div class='top'><div class='lg'>{S.logos(p['game'], 26)}</div><div>"
+                 f"<div class='pk'>{E(p['player'])} {p['side'].title()} {p['line']:g} {E(p['label'])}"
+                 f"<span class='odds'>{W.fmt_odds(p['odds'])}</span></div>"
+                 f"<div class='meta'>{E(p['team'])} {E(p['pos'])} vs {E(p['opp'])} · {S.when(p['game'])}</div></div></div>"
+                 f"<div class='chips'><span class='chip model'>Prop model</span></div>{why}</div>"
+                 f"<div class='stub'><div class='units'>{p['units']:g}U</div><div class='usd'>{money(p['units'])}</div>"
+                 f"<div class='bk'>{E(p['book'])}</div><div class='tier play'>Prop</div></div></div>")
+    return h
+
+
 def render_nfl():
     S, F = W.Sport("nfl"), load_final("nfl")
     plays = [p for p in F["plays"] if S.upcoming(p["game"])]
+    flagged = {x["team"]: x for x in W.nfl_qb_watch(S) if x["cls"] in ("avoid", "watch")}
+    for p in plays:  # a total doesn't take a side, so the QB veto doesn't remove it: say what to check instead
+        teams = p["game"].split(" @ ")
+        for t in teams:
+            if p["market"] == "total" and t in flagged:
+                q = flagged[t]
+                p["backup"] = [{"title": "QB check", "text": f"{q['qb']} ({t}) is {q['status'].lower()}. If he's ruled out at "
+                                "inactives (90 minutes before kickoff), this total drops: skip the bet unless you still get "
+                                "this number."}] + p["backup"]
     best = [p for p in plays if p["units"] >= 1]
     rest = [p for p in plays if p["units"] < 1]
     totals = [p for p in rest if p["market"] == "total"]
@@ -432,6 +511,7 @@ def render_nfl():
     h += ["<h2>Sides</h2>", "<div class='note'>Spread or moneyline, one per team: situational spots and road-team systems, "
           "half units unless stacked.</div>"]
     h += [play_card(S, p) for p in sides] or ["<p class='empty'>No side plays.</p>"]
+    h += ["<h2>Player Props</h2>"] + props_block(S)
     h += ["<h2>QB Watch · Injury Report</h2>", "<div class='note'>Starters on the injury report or already replaced. "
           "<b>Avoid</b>: don't bet on that team. <b>Bet against</b>: the line hasn't caught up to the drop-off.</div>"]
     qb = W.nfl_qb_watch(S)

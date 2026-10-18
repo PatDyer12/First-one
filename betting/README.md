@@ -29,6 +29,7 @@ then graded against the result and the **closing line** (CLV). Set `placed` to `
 python3 betting/fetch.py && python3 betting/model.py --week
 python3 betting/cfb_fetch.py && python3 betting/cfb_rankings.py && python3 betting/cfb_weather.py && python3 betting/cfb_model.py --week
 python3 betting/final.py            # decision layer -> data/final_nfl.json, data/cfb/final_cfb.json (+ tracker)
+python3 betting/props.py            # NFL player props (after final.py; ~4 Odds API requests per game)
 python3 betting/share/cards.py      # -> betting/share/nfl_week<N>.pdf, cfb_week<N>.pdf
 ```
 `angles.py` has separate NFL and college angle books, each defined up front with a reason and graded on 2011–2026
@@ -71,6 +72,21 @@ Run the models first. Each card has these sections:
   line has already moved as much as we think the drop-off is worth. College: passer changes from play-by-play.
 - **Streaks & Trends**: straight-up, against-the-spread and over/under streaks.
 - **Oddball Matchup of the Week**: write it each week in `betting/share/oddball_nfl.json` / `oddball_cfb.json`.
+
+## NFL player props (`props.py`)
+Passing yards, rushing yards, receiving yards and receptions, priced against FanDuel/DraftKings prop lines.
+- **Projection:** a gradient-boosted model per market on the player's own averages (season, last 3, last season),
+  usage (attempts, carries, targets, target share), what the defense has allowed vs the league, his team's implied
+  points, home, dome and wind. Walk-forward tested on 2022–2026 (~24,000 player-games it never saw): a little more
+  accurate than the player's season average alone.
+- **Probabilities:** out-of-sample misses turn the projection into P(over), then calibrated (the raw model was too
+  sure of itself at the extremes) and blended 40/60 with the book's no-vig price.
+- **Filters:** no injury-report players, no team with a QB question, the line within 30% of his season average (a
+  bigger gap means the book knows about a role change), his own games have to agree (60%+ on our side), no collapsed
+  or doubled recent usage, no prop that bets against one of our game totals, 55%+ blended win chance, 3%+ EV.
+- **Honest limit:** there's no free history of prop lines, so props can't be backtested for ROI. 0.5u max.
+- **The pattern behind the unders:** receivers and running backs finish under their own season average 57–58% of the
+  time (2022–26), because a few big games pull the average up.
 
 ## The strategy search: what actually made money (`systems.py`)
 `python3 betting/systems.py` tests every market/side crossed with one or two situational filters, plus the model at
