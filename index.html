@@ -2407,6 +2407,92 @@ body.tv .rb-sec.lb.many .rb-lr > .rb-av { width: 40px; height: 40px; font-size: 
 body.tv .rb-games.primeg:not(.mason):not(.solo) { grid-template-columns: minmax(0, 1.35fr) minmax(0, 1fr); }
 body.tv .rb-games.primeg.h1:not(.mason):not(.solo) { grid-template-columns: minmax(0, 1.1fr) minmax(0, 1fr); }
 body.tv .rb-games.mason .rb-g.gx .gx-ldr, body.tv .rb-games.mason .rb-g.gx .gx-lp { display: none; }
+/* the people board: the scores in a strip, a column per person */
+body.tv .rb.people { grid-template-columns: minmax(0, 1fr); }
+body.tv .rb.people > .rb-rail { display: none; }
+body.tv .rb.people .rb-main { -webkit-mask-image: none; mask-image: none; }
+body.tv #rbGames.people { height: 100%; display: grid; grid-template-rows: auto minmax(0, 1fr); gap: 12px; column-count: auto; padding: 4px 0 0; }
+body.tv #rbGames.people > * { margin: 0 !important; }
+body.tv.pplb .roomtv:not([hidden]) { top: calc(var(--sy, 0px) + 86px); bottom: auto; right: calc(var(--sx, 0px) + 22px); grid-template-columns: auto auto; align-items: center; column-gap: 10px; padding: 7px 10px; }
+body.tv.pplb .roomtv:not([hidden]) canvas { width: 76px; height: 76px; grid-row: span 2; }
+.pp-scores { display: flex; flex-wrap: wrap; gap: 8px; max-height: 92px; overflow: hidden; padding-right: 210px; }
+.sc-chip { display: inline-flex; align-items: center; gap: 10px; padding: 6px 12px; border-radius: 10px; background: rgba(10,14,20,.86); border: 1px solid rgba(190,210,240,.12); }
+.sc-chip.bet { border-color: rgba(90,160,255,.5); }
+.sc-chip.g-post { opacity: .6; }
+.sc-tm { display: inline-flex; align-items: center; gap: 5px; position: relative; }
+.sc-tm b { font: 800 14px/1 Inter, sans-serif; letter-spacing: .04em; color: #a9b2c1; }
+.sc-tm .num { font: 800 19px/1 Inter, sans-serif; color: #fff; min-width: 1.15em; text-align: right; }
+.sc-tm.win b { color: #eef2f7; }
+.sc-chip.g-post .sc-tm:not(.win) .num { color: #8d97a8; }
+.sc-lg { width: 22px; height: 22px; object-fit: contain; }
+.sc-ball { width: 7px; height: 7px; border-radius: 50%; background: #ffb020; box-shadow: 0 0 8px rgba(255,176,32,.8); }
+.sc-clk { font: 700 12px/1 Inter, sans-serif; letter-spacing: .08em; text-transform: uppercase; color: #8d97a8; white-space: nowrap; }
+.sc-clk.s-live { color: #fff; }
+.pp-cols { display: grid; grid-template-columns: repeat(var(--n), minmax(0, 1fr)); gap: 14px; min-height: 0; }
+.pp-col { display: flex; flex-direction: column; min-height: 0; min-width: 0; border-radius: 18px; overflow: hidden; background: linear-gradient(180deg, rgba(12,16,22,.92), rgba(7,10,14,.95)); border: 1px solid rgba(190,210,240,.12); border-top: 4px solid var(--c); box-shadow: 0 18px 40px rgba(0,0,0,.45); }
+.pp-h { flex: none; padding: 13px 15px 11px; border-bottom: 1px solid rgba(190,210,240,.1); background: linear-gradient(180deg, color-mix(in srgb, var(--c) 18%, transparent), transparent 85%); }
+.pp-id { display: grid; grid-template-columns: auto minmax(0, 1fr) auto; align-items: center; gap: 11px; }
+.pp-id > .rb-av { width: 46px; height: 46px; font-size: 21px; }
+.pp-nm { min-width: 0; }
+.pp-nm b { display: block; font: 800 24px/1.05 Inter, sans-serif; color: #fff; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.pp-nm small { display: block; margin-top: 5px; text-overflow: ellipsis; font: 700 12px/1 Inter, sans-serif; letter-spacing: .1em; text-transform: uppercase; color: #8d97a8; white-space: nowrap; overflow: hidden; }
+.pp-nm small > span { flex: none; }
+.pp-nm .rb-heat { flex: none; font-size: 11px; padding: 2px 6px; letter-spacing: .04em; }
+.pp-net { font: 800 26px/1 Inter, sans-serif; text-align: right; color: #eef2f7; white-space: nowrap; }
+.pp-net small { display: block; margin-top: 4px; font: 700 12px/1 Inter, sans-serif; color: #8d97a8; }
+.pp-net.w { color: var(--win); } .pp-net.l { color: var(--loss); }
+.pp-avw { position: relative; display: inline-flex; flex: none; }
+.pp-avw > i { position: absolute; left: -8px; top: -9px; font-style: normal; font-size: 18px; line-height: 1; filter: drop-shadow(0 1px 2px rgba(0,0,0,.7)); }
+.pp-tiles { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 6px; margin-top: 11px; }
+.pp-tiles > div { min-width: 0; padding: 7px 6px 6px; border-radius: 10px; background: rgba(255,255,255,.045); border: 1px solid rgba(255,255,255,.05); text-align: center; }
+.pp-tiles b { display: block; font: 800 17.5px/1.1 Inter, sans-serif; letter-spacing: -.01em; color: #eef2f7; white-space: nowrap; overflow: hidden; text-overflow: clip; }
+.pp-tiles b i { font-style: normal; }
+.pp-tiles b s { text-decoration: none; font-size: .62em; margin-left: 1px; vertical-align: .15em; }
+.pp-tiles em { display: block; margin-top: 4px; font: 800 9.5px/1 Inter, sans-serif; font-style: normal; letter-spacing: .1em; text-transform: uppercase; color: #8d97a8; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.pp-tiles .w { color: var(--win); } .pp-tiles .l { color: var(--loss); }
+.pp-foot1 { margin-top: 9px; font: 600 13.5px/1.2 Inter, sans-serif; color: #a9b2c1; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.pp-stats { display: grid; grid-template-columns: auto minmax(0, 1fr); align-items: baseline; gap: 6px 12px; margin: 11px 0 0; padding: 9px 11px; border-radius: 11px; background: rgba(255,255,255,.04); border: 1px solid rgba(255,255,255,.05); }
+.pp-stats dt { font: 800 10px/1 Inter, sans-serif; letter-spacing: .14em; text-transform: uppercase; color: #8d97a8; white-space: nowrap; }
+.pp-stats dd { margin: 0; min-width: 0; font: 600 14px/1.22 Inter, sans-serif; color: #a9b2c1; display: -webkit-box; -webkit-box-orient: vertical; -webkit-line-clamp: 2; overflow: hidden; }
+.pp-stats dd b { font-weight: 800; color: #eef2f7; }
+.pp-stats .w { color: var(--win); } .pp-stats .l { color: var(--loss); }
+.pp-foot { display: flex; align-items: center; gap: 10px; margin-top: 9px; min-width: 0; font: 600 13px/1.2 Inter, sans-serif; color: #a9b2c1; }
+.pp-foot .l5 { display: inline-flex; gap: 4px; flex: none; }
+.pp-foot .l5 i { width: 9px; height: 9px; border-radius: 50%; background: var(--loss); }
+.pp-foot .l5 i.w { background: var(--win); }
+.pp-best { min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.pp-best .w { color: var(--win); }
+.pp-list { flex: 1 1 auto; min-height: 0; overflow: hidden; display: flex; flex-direction: column; gap: 10px; padding: 12px 11px 0; scrollbar-width: none; -webkit-mask-image: linear-gradient(180deg, transparent 0, #000 10px, #000 calc(100% - 26px), transparent 100%); mask-image: linear-gradient(180deg, transparent 0, #000 10px, #000 calc(100% - 26px), transparent 100%); }
+.pp-list::-webkit-scrollbar { display: none; }
+.pp-list > .loopclone { display: flex; flex-direction: column; gap: 10px; }
+.pp-none { padding: 16px 6px; font: 600 15px/1.3 Inter, sans-serif; color: #8d97a8; text-align: center; }
+.pp-bet { position: relative; flex: none; display: grid; gap: 6px; padding: 10px 12px 11px 13px; border-radius: 12px; background: rgba(255,255,255,.035); border: 1px solid rgba(190,210,240,.1); border-left: 5px solid rgba(190,210,240,.28); }
+.pp-bet.k-w { border-left-color: var(--win); background: linear-gradient(90deg, rgba(61,220,151,.13), rgba(255,255,255,.03) 65%); }
+.pp-bet.k-l { border-left-color: var(--loss); background: linear-gradient(90deg, rgba(255,97,112,.13), rgba(255,255,255,.03) 65%); }
+.pp-bet.k-e { border-left-color: #f2c94c; }
+.pp-bet.k-won { border-left-color: var(--win); }
+.pp-bet.k-lost { border-left-color: var(--loss); opacity: .7; }
+.pp-bet.on { box-shadow: 0 0 0 2px rgba(90,160,255,.7); }
+.pp-top { display: flex; align-items: baseline; gap: 10px; min-width: 0; }
+.pp-pick { flex: 1 1 auto; min-width: 0; display: flex; align-items: center; gap: 8px; font: 800 22px/1.1 Inter, sans-serif; color: #fff; }
+.pp-pick .t { min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.pp-pick .ob-hs { width: 30px; height: 30px; border-radius: 50%; object-fit: cover; object-position: top; flex: none; background: rgba(255,255,255,.08); }
+.pp-pick .hasball { flex: none; }
+.pp-odds { flex: none; font: 800 16px/1 Inter, sans-serif; color: #a9b2c1; }
+.pp-bet .ob-strip { padding: 0; font-size: 12.5px; gap: 10px; letter-spacing: .03em; }
+.pp-bet .ob-strip .ob-tm { gap: 5px; }
+.pp-bet .ob-strip .ob-lg { width: 18px; height: 18px; }
+.pp-bet .ob-strip .sc { font-size: 16px; }
+.pp-bet .ob-strip .ob-clk { flex: none; font-size: 11.5px; letter-spacing: .06em; }
+.pp-bet .ob-strip .ob-clk.s-live::before { width: 7px; height: 7px; margin-right: 5px; }
+.pp-mid .ob-st { flex-direction: row; justify-content: flex-start; align-items: baseline; flex-wrap: wrap; gap: 2px 9px; min-width: 0; padding: 0; border: 0; border-radius: 0; background: none; }
+.pp-mid .ob-st em { font-size: 11px; }
+.pp-mid .ob-st b { font-size: 19px; white-space: normal; }
+.pp-mid .ob-st small { font-size: 12px; }
+.pp-meta { font: 600 13px/1.25 Inter, sans-serif; color: #8d97a8; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.pp-bet > .meter { height: 7px; margin: 0; }
+.pp-par .ob-legs li { font-size: 15px; padding: 6px 0; grid-template-columns: 24px minmax(0, 1fr); }
+.pp-par .ob-legs li em { grid-column: 2; font-size: 12px; white-space: normal; }
 .ob-who .nms { display: inline-flex; align-items: center; gap: 4px 8px; min-width: 0; overflow: hidden; white-space: nowrap; }
 /* the open bets, as tickets */
 .ob-hd { display: flex; align-items: center; gap: 12px; padding: 2px 4px 12px; }
@@ -4077,6 +4163,7 @@ body.tv .rb-games.primeg.mason > .rb-pcol { padding-top: 16px; -webkit-mask-imag
       st.dwell = 7000; st.speed = 20;
     }
     if (el.classList.contains("mc")) st.dwell = 7000;
+    if (el.classList.contains("pp-list")) { st.dwell = 3600; st.speed = 16; }
     if (el.classList.contains("mc") || el.classList.contains("pr")) st.speed = Math.max(el.classList.contains("mc") ? 14 : 13, Math.min(26, st.period / 420));
     if (st.period > 0) st.pos %= st.period;
   }
@@ -5485,6 +5572,83 @@ body.tv .rb-games.primeg.mason > .rb-pcol { padding-top: 16px; -webkit-mask-imag
     for (const k of [...A.children]) { const h = k.offsetHeight + 24; if (ha <= hb) { A.appendChild(k); ha += h; } else { B.appendChild(k); hb += h; } }
     loopSyncEl(A); loopSyncEl(B);
   }
+  const pplWant = () => document.body.classList.contains("tv") && document.body.classList.contains("nflday");
+  // the scores, small: every game on now, the ones about to start, the ones just finished; a game the room's on is outlined
+  function ppScores() {
+    const lg = focusLeague(), now = Date.now(), rank = (g) => (g.st === "in" ? 0 : g.st === "pre" ? 1 : 2);
+    const gs = [...S.games.values()].filter((g) => g.sport === lg && (g.st === "in" || (g.st === "pre" && g.t - now < 90 * 60e3) || (g.st === "post" && now - g.t < 5 * 3600e3)));
+    gs.sort((x, y) => rank(x) - rank(y) || x.t - y.t);
+    const mine = new Set(); for (const b of S.bets.values()) if (b.status === "open") for (const x of selsOf(b)) mine.add(String(x.g));
+    return gs.slice(0, 16).map((g) => {
+      const s = gxStatus(g), pos = g.sit && g.sit.pos ? String(g.sit.pos) : "";
+      const t = (x, y) => `<span class="sc-tm${g.st === "post" && x.sc > y.sc ? " win" : ""}">${logo(x, "sc-lg")}<b>${esc(x.ab)}</b>${g.st === "pre" || x.sc == null ? "" : `<span class="num">${x.sc}</span>`}${g.st === "in" && pos === String(x.id) ? '<i class="sc-ball"></i>' : ""}</span>`;
+      return `<div class="sc-chip g-${g.st}${mine.has(String(g.id)) ? " bet" : ""}">${t(g.a, g.h)}${t(g.h, g.a)}<span class="sc-clk ${s.cls}">${esc(s.t)}</span></div>`;
+    }).join("");
+  }
+  // one straight bet in someone's column: the pick with its line, the price, the game, where it stands
+  function ppTicket(b) {
+    const sel = b.sel || null, g = sel ? gameOf(sel) : null, p = { entries: [{ b, leg: null, sel, pick: b.pick }], pick: b.pick, sel };
+    const st = g ? posState(p, g) : phase(b) === "pre" ? { cls: "pre", txt: startLabel(startOf(b)) } : { cls: "e", txt: "Open" };
+    const prop = !!sel && (isTd(sel.m) || isPP(sel.m)), hb = sel && g ? hasBall(sel) : null;
+    const meter = st.ev && !st.ev.fin && g && g.st === "in" && sel && !prop ? meterHtml(sel, st.ev) : "";
+    const hs = sel && sel.p && sel.p.hs ? `<img class="ob-hs" src="${esc(sel.p.hs)}" alt="" loading="lazy" referrerpolicy="no-referrer" onerror="this.remove()">` : "";
+    // riding the same pick with somebody
+    const k = sideKey(b), ride = !k ? [] : [...S.bets.values()].filter((x) => x !== b && x.status === "open" && personKey(x) !== personKey(b) && sideKey(x) && sideKey(x).g === k.g && sideKey(x).k === k.k && sideKey(x).s === k.s && x.sel.l === b.sel.l).map(personName);
+    const meta = [mktName(sel), `${fU(b.units)} to win ${fU(b.units * ppu(b.odds))}`, b.tail ? `${b.tail.kind === "fade" ? "fading" : "tailing"} ${b.tail.name}` : "", ride.length ? "with " + [...new Set(ride)].join(", ") : ""].filter(Boolean).join(" · ");
+    return `<div class="pp-bet k-${st.cls}${popCls(p)}${onAir([b.id])}"${tapAttrs([b.id], b.pick)}>
+      <div class="pp-top"><span class="pp-pick">${hs}<span class="t">${esc(b.pick)}</span>${ballTag(hb)}</span><span class="pp-odds num">${fOdds(b.odds)}</span></div>
+      ${g ? obStrip(g) : ""}<div class="pp-mid">${obPill(st, prop)}</div><div class="pp-meta">${esc(meta)}</div>${meter}</div>`;
+  }
+  // a parlay in someone's column: legs hit so far and every leg with its game and where it stands
+  function ppParlay(b) {
+    const legs = legsOf(b), n = legs.length, hit = legs.filter((l) => l.st === "hit").length, dead = legs.some((l) => l.st === "miss"), all = n && hit === n;
+    const live = legs.filter((l) => !l.st && l.ev && !l.ev.fin), down = live.some((l) => l.ev.res === "L");
+    const c = dead ? "lost" : all ? "won" : down ? "l" : live.length && live.every((l) => l.ev.res === "W") ? "w" : hit ? "e" : "pre";
+    const lis = legs.map((l, i) => { const x = obLegTxt(l), lc = l.st === "hit" ? "hit" : l.st === "miss" ? "miss" : x.cls; return `<li class="${lc}"><i>${l.st === "hit" ? "✓" : l.st === "miss" ? "✕" : i + 1}</i><span class="t">${esc(l.t)}</span>${x.txt ? `<em>${esc(x.txt)}</em>` : ""}</li>`; }).join("");
+    return `<div class="pp-bet pp-par k-${c}${onAir([b.id])}"${tapAttrs([b.id], personName(b) + "'s parlay")}>
+      <div class="pp-top"><span class="pp-pick"><span class="t">${n}-leg parlay</span></span><span class="pp-odds num">${fOdds(b.odds)}</span></div>
+      <div class="pp-mid"><div class="ob-st k-${c}"><em>${dead ? "Dead" : all ? "All hit" : "Legs hit"}</em><b class="num">${hit} of ${n}</b>${live.length ? `<small>${live.length} live${down ? " · one's losing" : ""}</small>` : ""}</div></div>
+      <div class="pp-meta">${esc(`Parlay · ${fU(b.units)} to win ${fU(b.units * ppu(b.odds))}`)}</div><ol class="ob-legs">${lis}</ol></div>`;
+  }
+  // the top of someone's column: who, where they rank, today in units and dollars, then the detail
+  function ppHead(p, rank, wk, lead) {
+    const later = p.open.filter((b) => phase(b) === "pre").length, risk = p.open.reduce((a, b) => a + b.units, 0), hold = p.net + p.hold.v;
+    const best = p.done.filter((b) => outcome(b) === "W").sort((x, y) => netOf(y) - netOf(x))[0];
+    const rec = (q) => `${q.w}-${q.l}${q.p ? "-" + q.p : ""}`, sign = (v) => (v > 0.004 ? "w" : v < -0.004 ? "l" : "");
+    const ic = p.heat === "fire" ? "🔥" : p.heat === "ice" ? "🧊" : "";
+    const tile = (v, l, c) => `<div><b class="num ${c || ""}">${v}</b><em>${l}</em></div>`;
+    return `<div class="pp-id"><span class="pp-avw">${avHtml(p.b)}${ic ? `<i>${ic}</i>` : ""}</span><div class="pp-nm"><b>${esc(p.name)}</b><small>#${rank} today${lead ? " 👑" : ""}</small></div><div class="pp-net num ${sign(p.net)}">${fU(p.net, true)}<small>${fUSD(p.net * S.unit, true)}</small></div></div>
+      <div class="pp-tiles">${tile(rec(p), p.st >= 2 ? `Record · ${p.sd}${p.st}` : "Record")}${tile(p.w + p.l ? pct(p.hit) : "–", "Hit rate")}${tile(p.roi == null ? "–" : (p.roi > 0 ? "+" : "") + Math.round(p.roi * 100) + "%", "ROI", p.roi == null ? "" : sign(p.roi))}${tile(p.hold.n ? `<i class="w">${p.hold.up}<s>▲</s></i> <i class="l">${p.hold.dn}<s>▼</s></i>` : String(p.open.length - later), p.hold.n ? "Up / down" : "Live now")}${tile(fU(hold, true), "If it holds", sign(hold))}${tile(wk ? fU(wk.net, true) : "–", wk ? `Week ${rec(wk)}` : "This week", wk ? sign(wk.net) : "")}</div>
+      <div class="pp-foot1">${p.open.length} open${later ? ` · ${later} later` : ""} · ${fU(risk)} to win ${fU(p.toWin)}</div>
+      <div class="pp-foot"><span class="l5">${p.last5.map((o) => `<i class="${o === "W" ? "w" : "l"}"></i>`).join("")}</span><span class="pp-best">${best ? `Best hit: ${esc(best.kind === "parlay" ? (best.legs || []).length + "-leg parlay" : best.pick)} <b class="w num">${fU(netOf(best), true)}</b>` : p.done.length ? `${rec(p)} so far today` : "No results yet today"}</span></div>`;
+  }
+  function peopleBoard() {
+    const G = $("#rbGames"); G.classList.remove("mason", "primeg", "h1", "solo");
+    const rows = standings("day"), wk = new Map(standings("week").map((p) => [p.k, p]));
+    const lead = rows[0] && rows[0].net > 0.004 && (!rows[1] || rows[0].net - rows[1].net > 0.004) ? rows[0].k : null, rank = new Map(rows.map((p, i) => [p.k, i + 1]));
+    const first = (p) => Math.min(Infinity, ...[...p.open, ...p.done].map((b) => b.placedAt || Infinity));
+    const ppl = rows.filter((p) => p.open.length || p.done.length).sort((x, y) => Number(y.me) - Number(x.me) || first(x) - first(y) || (x.k < y.k ? -1 : 1));
+    const keys = ppl.map((p) => p.k).join("|");
+    let SC = $("#ppScores"), C = $("#ppCols");
+    if (!SC || SC.parentNode !== G || !C || C.dataset.keys !== keys) {
+      G.innerHTML = `<div class="pp-scores" id="ppScores"></div><div class="pp-cols" id="ppCols" style="--n:${Math.max(1, ppl.length)}"></div>`;
+      SC = $("#ppScores"); C = $("#ppCols"); C.dataset.keys = keys;
+      C.innerHTML = ppl.length ? ppl.map((p) => `<section class="pp-col" data-k="${esc(p.k)}" style="--c:${p.col}"><header class="pp-h"></header><div class="pp-list"></div></section>`).join("") : `<div class="rb-empty"><b>No bets on the board</b>Log a bet from your phone and it shows up here with everybody's.</div>`;
+      for (let i = ASC.length - 1; i >= 0; i--) if (!ASC[i].el.isConnected) ASC.splice(i, 1);
+      // each starts rolling a beat after the one before it, so the columns don't move in step
+      C.querySelectorAll(".pp-list").forEach((el, i) => { const st = autoScroll(el, 16); if (st) st.hold = performance.now() + 4000 + i * 1900; });
+    }
+    SC.innerHTML = ppScores();
+    // live first, then the ones still to start (by kickoff); straight bets ahead of parlays in each
+    const ord = (b) => (phase(b) === "pre" ? 2 : 0) + (b.kind === "parlay" ? 1 : 0);
+    for (const p of ppl) {
+      const col = [...C.querySelectorAll(".pp-col")].find((x) => x.dataset.k === p.k); if (!col) continue;
+      col.querySelector(".pp-h").innerHTML = ppHead(p, rank.get(p.k), wk.get(p.k), p.k === lead);
+      const open = p.open.slice().sort((x, y) => ord(x) - ord(y) || (startOf(x) || 0) - (startOf(y) || 0) || x.placedAt - y.placedAt), L = col.querySelector(".pp-list");
+      L.innerHTML = open.length ? open.map((b) => (b.kind === "parlay" ? ppParlay(b) : ppTicket(b))).join("") : `<div class="pp-none">No open bets${p.done.length ? ` · ${p.w}-${p.l}${p.p ? "-" + p.p : ""} today` : ""}</div>`;
+      loopSyncEl(L);
+    }
+  }
   function renderRB() {
     if (!S.ready) return;
     const tv = document.body.classList.contains("tv"), { list, other, parlays } = boardGroups();
@@ -5508,6 +5672,8 @@ body.tv .rb-games.primeg.mason > .rb-pcol { padding-top: 16px; -webkit-mask-imag
     } else if (rbPrime) { body.classList.remove("prime"); $("#rbMark").innerHTML = ""; rbPrime = null; }
     // one football game keeps its bets in the big card (the MNF look); everything else puts the bets in their own rolling column
     const split = heroes.length > 0;
+    const pplOn = !heroes.length && pplWant();
+    $("#rb").classList.toggle("people", pplOn); $("#rbGames").classList.toggle("people", pplOn); body.classList.toggle("pplb", pplOn);
     const roomLive = list.filter((G) => G.g.st === "in" && (G.entries.length || (G.legs && G.legs.length))).length;
     const roomN = list.filter((G) => G.entries.length || (G.legs && G.legs.length && G.g.st === "in")).length + (parlays.length ? 1 : 0) + (other.length ? 1 : 0);
     const nowG = !tv ? [] : heroes.length ? onNowGames(list, heroes.length === 1 ? 2 : 0) : onNowGames(list, Math.max(4 - roomLive, 7 - roomN));
@@ -5529,7 +5695,7 @@ body.tv .rb-games.primeg.mason > .rb-pcol { padding-top: 16px; -webkit-mask-imag
     } else {
     const oth = tv ? other.filter((e) => e.b.status === "open") : other;
     const parts = [...list.map((G) => ["g" + G.g.id, gameCard(tv ? openOnly(G) : G, false)]), ["pl", tv ? obCard("Parlays", parlays.length, parlays.map(obParlay).join("")) : parlayCard(parlays)], ["ot", tv ? obCard("Other bets", oth.length, oth.map(obOther).join("")) : otherCard(other)], ["fo", fol], ...nowG.map((g) => ["n" + g.id, onNowCard(g)])].filter((x) => x[1]);
-    if (tv && parts.length > 1) masonBoard(parts); else {
+    if (pplOn) peopleBoard(); else if (tv && parts.length > 1) masonBoard(parts); else {
     $("#rbGames").classList.remove("mason");
     const html = parts.map((x) => x[1]).join("");
     $("#rbGames").innerHTML = html || `<div class="rb-empty"><b>No bets on the board</b>${tv ? "Log a bet from your phone and it shows up here with everybody's." : "Hit + Bet when you place one. Everybody's bets show up here, game by game."}</div>`;
@@ -5972,7 +6138,7 @@ body.tv .rb-games.primeg.mason > .rb-pcol { padding-top: 16px; -webkit-mask-imag
   // ---------- sheets ----------
   function openSheet(id) { $(id).hidden = false; }
   // keep every open screen current: when a new version is up, reload it (never mid-form or mid-animation)
-  const BUILD = "20261018163348";
+  const BUILD = "20261018165006";
   function checkBuild() {
     if (BUILD === "dev") return;
     fetch("version.json?t=" + Date.now(), { cache: "no-store" }).then((r) => (r.ok ? r.json() : null)).then((j) => {
