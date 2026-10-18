@@ -2404,6 +2404,13 @@ body.tv .rb-sec.lb.many .rb-lr .net { font-size: 22px; display: flex; align-item
 body.tv .rb-sec.lb.many .rb-lr .net small { display: none; }
 body.tv .rb-sec.lb.many .rb-lr .ft { margin-top: 0; }
 body.tv .rb-sec.lb.many .rb-lr > .rb-av { width: 40px; height: 40px; font-size: 18px; }
+body.tv .rb-sec.lb.six .rb-lr { padding: 6px 12px 7px; row-gap: 3px; column-gap: 10px; }
+body.tv .rb-sec.lb.six .rb-lr > .rb-av { width: 34px; height: 34px; font-size: 16px; }
+body.tv .rb-sec.lb.six .rb-lr .rk { font-size: 16px; }
+body.tv .rb-sec.lb.six .rb-lr .nm b { font-size: 19px; }
+body.tv .rb-sec.lb.six .rb-lr .net { font-size: 20px; }
+body.tv .rb-sec.lb.six .rb-lr .op { font-size: 11.5px; }
+body.tv .rb-sec.lb.six .rb-lr .l5 i { width: 14px; height: 5px; }
 body.tv .rb-games.primeg:not(.mason):not(.solo) { grid-template-columns: minmax(0, 1.35fr) minmax(0, 1fr); }
 body.tv .rb-games.primeg.h1:not(.mason):not(.solo) { grid-template-columns: minmax(0, 1.1fr) minmax(0, 1fr); }
 body.tv .rb-games.mason .rb-g.gx .gx-ldr, body.tv .rb-games.mason .rb-g.gx .gx-lp { display: none; }
@@ -2493,6 +2500,54 @@ body.tv.pplb .roomtv:not([hidden]) canvas { width: 76px; height: 76px; grid-row:
 .pp-bet > .meter { height: 7px; margin: 0; }
 .pp-par .ob-legs li { font-size: 15px; padding: 6px 0; grid-template-columns: 24px minmax(0, 1fr); }
 .pp-par .ob-legs li em { grid-column: 2; font-size: 12px; white-space: normal; }
+/* six people (or more): every column narrower, everything in it scaled to fit (the widths are the board's own,
+   before it's scaled up to the screen: five columns are about 280 wide, six about 230) */
+.pp-col { container-type: inline-size; }
+@container (max-width: 260px) {
+  .pp-h { padding: 11px 11px 9px; }
+  .pp-id { gap: 9px; }
+  .pp-id .rb-av { width: 38px; height: 38px; font-size: 18px; }
+  .pp-avw > i { font-size: 15px; left: -7px; top: -8px; }
+  .pp-nm b { font-size: 20px; }
+  .pp-nm small { font-size: 10.5px; letter-spacing: .08em; margin-top: 4px; }
+  .pp-net { font-size: 21px; }
+  .pp-net small { font-size: 11px; }
+  .pp-tiles { gap: 5px; margin-top: 9px; }
+  .pp-tiles > div { padding: 6px 3px 5px; border-radius: 9px; }
+  .pp-tiles b { font-size: 15px; }
+  .pp-tiles em { font-size: 8.5px; letter-spacing: .06em; margin-top: 3px; }
+  .pp-foot1 { font-size: 12px; margin-top: 8px; }
+  .pp-foot { font-size: 12px; margin-top: 7px; gap: 8px; }
+  .pp-list { padding: 10px 8px 0; gap: 8px; }
+  .pp-list > .loopclone { gap: 8px; }
+  .pp-bet { padding: 9px 9px 10px 10px; gap: 5px; border-left-width: 4px; }
+  .pp-pick { font-size: 19px; gap: 6px; }
+  .pp-pick .ob-hs { width: 26px; height: 26px; }
+  .pp-odds { font-size: 14px; }
+  .pp-bet .ob-strip { font-size: 11px; gap: 7px; letter-spacing: .02em; }
+  .pp-bet .ob-strip .ob-tm { gap: 4px; }
+  .pp-bet .ob-strip .ob-lg { width: 15px; height: 15px; }
+  .pp-bet .ob-strip .sc { font-size: 14px; }
+  .pp-bet .ob-strip .ob-clk { font-size: 10.5px; letter-spacing: .04em; }
+  .pp-bet .ob-strip .ob-clk.s-live::before { width: 6px; height: 6px; margin-right: 4px; }
+  .pp-mid .ob-st em { font-size: 10px; }
+  .pp-mid .ob-st b { font-size: 16.5px; }
+  .pp-mid .ob-st small { font-size: 11px; }
+  .pp-meta { font-size: 12px; }
+  .pp-par .ob-legs li { font-size: 13.5px; grid-template-columns: 20px minmax(0, 1fr); gap: 7px; }
+  .pp-par .ob-legs li > i { width: 19px; height: 19px; font-size: 10px; }
+  .pp-par .ob-legs li em { font-size: 11px; }
+}
+/* (and the score line drops its logos to fit) */
+@container (max-width: 260px) {
+  .pp-nm b { font-size: 18px; }
+  .pp-net { font-size: 19px; }
+  .pp-tiles b { font-size: 13.5px; }
+  .pp-tiles em { font-size: 8px; letter-spacing: .04em; }
+  .pp-pick { font-size: 17px; }
+  .pp-bet .ob-strip .ob-lg { display: none; }
+  .pp-mid .ob-st b { font-size: 15px; }
+}
 .ob-who .nms { display: inline-flex; align-items: center; gap: 4px 8px; min-width: 0; overflow: hidden; white-space: nowrap; }
 /* the open bets, as tickets */
 .ob-hd { display: flex; align-items: center; gap: 12px; padding: 2px 4px 12px; }
@@ -5376,7 +5431,7 @@ body.tv .rb-games.primeg.mason > .rb-pcol { padding-top: 16px; -webkit-mask-imag
     const start = rangeStart(S.range);
     const res = [...S.bets.values()].filter((b) => b.status !== "open" && b.settledAt >= start).sort((x, y) => y.settledAt - x.settledAt).slice(0, document.body.classList.contains("tv") ? 6 : 25);
     const resHtml = res.length ? `<section class="rb-sec"><h3>Results</h3>${res.map((b) => { const o = outcome(b); return `<div class="rb-res ${o === "W" ? "w" : o === "L" ? "l" : "p"}"${tapAttrs([b.id], b.pick)}>${avHtml(b)}<span class="pk">${esc(b.kind === "parlay" ? (b.legs || []).length + "-leg parlay" : b.pick)}</span><span class="num v">${o === "W" ? "✓" : o === "L" ? "✕" : "–"} ${fU(netOf(b), true)}</span></div>`; }).join("")}</section>` : "";
-    return [`<section class="rb-sec lb${rows.length >= 4 ? " many" : ""}"><h3>Leaderboard <span>${esc(lbl)}</span></h3>${lb}</section>`, awHtml + hhHtml + resHtml];
+    return [`<section class="rb-sec lb${rows.length >= 4 ? " many" : ""}${rows.length >= 6 ? " six" : ""}"><h3>Leaderboard <span>${esc(lbl)}</span></h3>${lb}</section>`, awHtml + hhHtml + resHtml];
   }
   const mktName = (s) => {
     if (!s || !s.m) return "";
@@ -6138,7 +6193,7 @@ body.tv .rb-games.primeg.mason > .rb-pcol { padding-top: 16px; -webkit-mask-imag
   // ---------- sheets ----------
   function openSheet(id) { $(id).hidden = false; }
   // keep every open screen current: when a new version is up, reload it (never mid-form or mid-animation)
-  const BUILD = "20261018165006";
+  const BUILD = "20261018170146";
   function checkBuild() {
     if (BUILD === "dev") return;
     fetch("version.json?t=" + Date.now(), { cache: "no-store" }).then((r) => (r.ok ? r.json() : null)).then((j) => {
