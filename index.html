@@ -2477,6 +2477,11 @@ body.tv.pplb .roomtv:not([hidden]) canvas { width: 76px; height: 76px; grid-row:
 .pp-list { flex: 1 1 auto; min-height: 0; overflow: hidden; display: flex; flex-direction: column; gap: 10px; padding: 12px 11px 0; scrollbar-width: none; -webkit-mask-image: linear-gradient(180deg, transparent 0, #000 10px, #000 calc(100% - 26px), transparent 100%); mask-image: linear-gradient(180deg, transparent 0, #000 10px, #000 calc(100% - 26px), transparent 100%); }
 .pp-list::-webkit-scrollbar { display: none; }
 .pp-list > .loopclone { display: flex; flex-direction: column; gap: 10px; }
+.pp-div { flex: none; display: flex; align-items: center; gap: 8px; padding: 4px 3px 0; font: 800 11px/1 Inter, sans-serif; letter-spacing: .16em; text-transform: uppercase; color: #8d97a8; }
+.pp-div b { color: #eef2f7; letter-spacing: 0; }
+.pp-div::after { content: ""; flex: 1; height: 1px; background: rgba(190,210,240,.16); }
+.sc-dd { font: 700 12px/1 Inter, sans-serif; color: #a9b2c1; white-space: nowrap; padding-left: 10px; border-left: 1px solid rgba(190,210,240,.18); }
+.sc-dd.rz { color: #ff8a95; }
 .pp-none { padding: 16px 6px; font: 600 15px/1.3 Inter, sans-serif; color: #8d97a8; text-align: center; }
 .pp-bet { position: relative; flex: none; display: grid; gap: 6px; padding: 10px 12px 11px 13px; border-radius: 12px; background: rgba(255,255,255,.035); border: 1px solid rgba(190,210,240,.1); border-left: 5px solid rgba(190,210,240,.28); }
 .pp-bet.k-w { border-left-color: var(--win); background: linear-gradient(90deg, rgba(61,220,151,.13), rgba(255,255,255,.03) 65%); }
@@ -4218,7 +4223,7 @@ body.tv .rb-games.primeg.mason > .rb-pcol { padding-top: 16px; -webkit-mask-imag
     for (const k of [...el.children]) c.appendChild(k.cloneNode(true));
     el.appendChild(c); st.clone = c;
     st.period = c.offsetTop - kids[0].offsetTop;
-    st.stops = kids.slice(1).map((k) => k.offsetTop - kids[0].offsetTop).filter((v) => v > 0 && v < st.period);
+    st.stops = kids.slice(1).filter((k) => !(k.previousElementSibling && k.previousElementSibling.classList.contains("pp-div"))).map((k) => k.offsetTop - kids[0].offsetTop).filter((v) => v > 0 && v < st.period);
     if (el.id === "rbMain") {   // the board: a slow roll that holds as each block comes up, a little air above it
       const grid = el.querySelector("#rbGames"), R = el.getBoundingClientRect(), z = R.height / (el.offsetHeight || 1) || 1;
       if (grid) {
@@ -5644,10 +5649,12 @@ body.tv .rb-games.primeg.mason > .rb-pcol { padding-top: 16px; -webkit-mask-imag
     const gs = [...S.games.values()].filter((g) => g.sport === lg && (g.st === "in" || (g.st === "pre" && g.t - now < 90 * 60e3) || (g.st === "post" && now - g.t < 5 * 3600e3)));
     gs.sort((x, y) => rank(x) - rank(y) || x.t - y.t);
     const mine = new Set(); for (const b of S.bets.values()) if (b.status === "open") for (const x of selsOf(b)) mine.add(String(x.g));
+    const few = gs.filter((g) => g.st === "in").length <= 4;
     return gs.slice(0, 16).map((g) => {
       const s = gxStatus(g), pos = g.sit && g.sit.pos ? String(g.sit.pos) : "";
       const t = (x, y) => `<span class="sc-tm${g.st === "post" && x.sc > y.sc ? " win" : ""}">${logo(x, "sc-lg")}<b>${esc(x.ab)}</b>${g.st === "pre" || x.sc == null ? "" : `<span class="num">${x.sc}</span>`}${g.st === "in" && pos === String(x.id) ? '<i class="sc-ball"></i>' : ""}</span>`;
-      return `<div class="sc-chip g-${g.st}${mine.has(String(g.id)) ? " bet" : ""}">${t(g.a, g.h)}${t(g.h, g.a)}<span class="sc-clk ${s.cls}">${esc(s.t)}</span></div>`;
+      const dd = few && g.st === "in" && g.sit && g.sit.dd ? `<span class="sc-dd${g.sit.rz ? " rz" : ""}">${esc(g.sit.dd)}</span>` : "";
+      return `<div class="sc-chip g-${g.st}${mine.has(String(g.id)) ? " bet" : ""}">${t(g.a, g.h)}${t(g.h, g.a)}<span class="sc-clk ${s.cls}">${esc(s.t)}</span>${dd}</div>`;
     }).join("");
   }
   // one straight bet in someone's column: the pick with its line, the price, the game, where it stands
@@ -5661,7 +5668,7 @@ body.tv .rb-games.primeg.mason > .rb-pcol { padding-top: 16px; -webkit-mask-imag
     const k = sideKey(b), ride = !k ? [] : [...S.bets.values()].filter((x) => x !== b && x.status === "open" && personKey(x) !== personKey(b) && sideKey(x) && sideKey(x).g === k.g && sideKey(x).k === k.k && sideKey(x).s === k.s && x.sel.l === b.sel.l).map(personName);
     const meta = [mktName(sel), `${fU(b.units)} to win ${fU(b.units * ppu(b.odds))}`, b.tail ? `${b.tail.kind === "fade" ? "fading" : "tailing"} ${b.tail.name}` : "", ride.length ? "with " + [...new Set(ride)].join(", ") : ""].filter(Boolean).join(" · ");
     return `<div class="pp-bet k-${st.cls}${popCls(p)}${onAir([b.id])}"${tapAttrs([b.id], b.pick)}>
-      <div class="pp-top"><span class="pp-pick">${hs}<span class="t">${esc(b.pick)}</span>${ballTag(hb)}</span><span class="pp-odds num">${fOdds(b.odds)}</span></div>
+      <div class="pp-top"><span class="pp-pick">${hs}<span class="t">${esc(sel && isTd(sel.m) && sel.p && sel.p.nm ? sel.p.nm : b.pick)}</span>${ballTag(hb)}</span><span class="pp-odds num">${fOdds(b.odds)}</span></div>
       ${g ? obStrip(g) : ""}<div class="pp-mid">${obPill(st, prop)}</div><div class="pp-meta">${esc(meta)}</div>${meter}</div>`;
   }
   // a parlay in someone's column: legs hit so far and every leg with its game and where it stands
@@ -5704,13 +5711,17 @@ body.tv .rb-games.primeg.mason > .rb-pcol { padding-top: 16px; -webkit-mask-imag
       C.querySelectorAll(".pp-list").forEach((el, i) => { const st = autoScroll(el, 16); if (st) st.hold = performance.now() + 4000 + i * 1900; });
     }
     SC.innerHTML = ppScores();
-    // live first, then the ones still to start (by kickoff); straight bets ahead of parlays in each
-    const ord = (b) => (phase(b) === "pre" ? 2 : 0) + (b.kind === "parlay" ? 1 : 0);
+    // in sections: live now (game by game, in kickoff order), the parlays, the ones that start later
+    const t0 = (b) => startOf(b) || 0, gid = (b) => (b.sel && b.sel.g != null ? String(b.sel.g) : "");
+    const byGame = (x, y) => t0(x) - t0(y) || (gid(x) < gid(y) ? -1 : gid(x) > gid(y) ? 1 : 0) || x.placedAt - y.placedAt;
     for (const p of ppl) {
       const col = [...C.querySelectorAll(".pp-col")].find((x) => x.dataset.k === p.k); if (!col) continue;
       col.querySelector(".pp-h").innerHTML = ppHead(p, rank.get(p.k), wk.get(p.k), p.k === lead);
-      const open = p.open.slice().sort((x, y) => ord(x) - ord(y) || (startOf(x) || 0) - (startOf(y) || 0) || x.placedAt - y.placedAt), L = col.querySelector(".pp-list");
-      L.innerHTML = open.length ? open.map((b) => (b.kind === "parlay" ? ppParlay(b) : ppTicket(b))).join("") : `<div class="pp-none">No open bets${p.done.length ? ` · ${p.w}-${p.l}${p.p ? "-" + p.p : ""} today` : ""}</div>`;
+      const by = { live: [], par: [], pre: [] }, L = col.querySelector(".pp-list");
+      for (const b of p.open) by[b.kind === "parlay" ? "par" : phase(b) === "pre" ? "pre" : "live"].push(b);
+      by.live.sort(byGame); by.pre.sort(byGame); by.par.sort((x, y) => x.placedAt - y.placedAt);
+      const secs = [["live", "Live now"], ["par", "Parlays"], ["pre", "Later"]].filter(([k]) => by[k].length);
+      L.innerHTML = secs.map(([k, t]) => (secs.length > 1 ? `<div class="pp-div">${t}<b>${by[k].length}</b></div>` : "") + by[k].map((b) => (k === "par" ? ppParlay(b) : ppTicket(b))).join("")).join("") || `<div class="pp-none">No open bets${p.done.length ? ` · ${p.w}-${p.l}${p.p ? "-" + p.p : ""} today` : ""}</div>`;
       loopSyncEl(L);
     }
   }
@@ -5737,7 +5748,8 @@ body.tv .rb-games.primeg.mason > .rb-pcol { padding-top: 16px; -webkit-mask-imag
     } else if (rbPrime) { body.classList.remove("prime"); $("#rbMark").innerHTML = ""; rbPrime = null; }
     // one football game keeps its bets in the big card (the MNF look); everything else puts the bets in their own rolling column
     const split = heroes.length > 0;
-    const pplOn = !heroes.length && pplWant();
+    const pplOn = pplWant() && heroes.length !== 1;
+    if (pplOn && heroes.length) { heroes = []; heroIds = new Set(); }
     $("#rb").classList.toggle("people", pplOn); $("#rbGames").classList.toggle("people", pplOn); body.classList.toggle("pplb", pplOn);
     const roomLive = list.filter((G) => G.g.st === "in" && (G.entries.length || (G.legs && G.legs.length))).length;
     const roomN = list.filter((G) => G.entries.length || (G.legs && G.legs.length && G.g.st === "in")).length + (parlays.length ? 1 : 0) + (other.length ? 1 : 0);
@@ -6203,7 +6215,7 @@ body.tv .rb-games.primeg.mason > .rb-pcol { padding-top: 16px; -webkit-mask-imag
   // ---------- sheets ----------
   function openSheet(id) { $(id).hidden = false; }
   // keep every open screen current: when a new version is up, reload it (never mid-form or mid-animation)
-  const BUILD = "20261018201128";
+  const BUILD = "20261018203631";
   function checkBuild() {
     if (BUILD === "dev") return;
     fetch("version.json?t=" + Date.now(), { cache: "no-store" }).then((r) => (r.ok ? r.json() : null)).then((j) => {
