@@ -940,6 +940,7 @@ body.tv .strip .chart { height: 96px; }
 
 /* TD scorer picker */
 .tdmk { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; padding: 0 12px 10px; }
+.tdmk .mkt[data-td$="|ntd"] { grid-column: 1 / -1; }
 .tdp { padding: 0 12px 12px; display: grid; gap: 8px; }
 .tdlist { display: grid; gap: 6px; max-height: 340px; overflow-y: auto; padding-right: 4px; }
 .tdl-h { font: 700 12px var(--f-ui); letter-spacing: .12em; text-transform: uppercase; color: var(--ink-2); margin: 6px 0 0; }
@@ -2577,11 +2578,11 @@ body.tv.pplb .roomtv:not([hidden]) canvas { width: 76px; height: 76px; grid-row:
 @container (max-width: 260px) { .fx-chip { font-size: 9.5px; padding: 2px 7px; letter-spacing: .08em; } .fx-pay { font-size: 9.5px; } .fx-pay b { font-size: 14.5px; } }
 /* ---------- bet types: each its own frame, colors, texture and motion ---------- */
 .bt-nuke { --fxk: #ffb020; --fxb: repeating-linear-gradient(45deg, #ffb020 0 10px, #120c04 10px 20px); --fxbs: 300% 100%; --fxg: rgba(255,80,20,.5); --fxr: 0 0 0 2px rgba(255,120,40,.7);
-  --fxi: radial-gradient(120% 140% at 50% 125%, rgba(255,90,20,.34), transparent 60%), linear-gradient(180deg, #2c1006, #120604); animation: fxFoil 10s linear infinite, fxNuke 1.6s ease-in-out infinite; }
+  --fxi: radial-gradient(120% 140% at 50% 125%, rgba(255,90,20,.34), transparent 60%), linear-gradient(180deg, #2c1006, #120604); animation: fxFoil 10s linear infinite, fxNuke 2s ease-in-out infinite; }
 .bt-botd { --fxk: #ffd86b; --fxb: linear-gradient(115deg, #7a5410, #ffd86b 12%, #fff4c2 18%, #e0a92e 30%, #8a5f12 45%, #ffd86b 60%, #fff4c2 66%, #b07d1c 80%, #7a5410); --fxbs: 300% 100%; --fxg: rgba(255,196,64,.5); --fxr: 0 0 0 2px rgba(255,216,107,.45);
   --fxi: radial-gradient(90% 70% at 50% -10%, rgba(255,215,100,.3), transparent 60%), linear-gradient(180deg, #30230a, #140f04); animation: fxFoil 6s linear infinite; }
 .bt-whale { --fxk: #7fd8ff; --fxb: linear-gradient(135deg, #33e0ff, #0a4fd6 45%, #1fb6ff 70%, #0a3aa6); --fxbs: 300% 100%; --fxg: rgba(40,150,255,.45); --fxr: 0 0 0 2px rgba(51,180,255,.55);
-  --fxi: radial-gradient(80% 60% at 30% 125%, rgba(60,170,255,.32), transparent 70%), linear-gradient(180deg, #06233f, #041021); animation: fxFoil 9s linear infinite; }
+  --fxi: radial-gradient(80% 60% at 30% 125%, rgba(60,170,255,.32), transparent 70%), linear-gradient(180deg, #06233f, #041021); animation: fxFoil 10s linear infinite; }
 .bt-opal { --fxk: #e3d6ff; --fxb: linear-gradient(120deg, #f5f0ff, #9ef0ff 14%, #ffd1f2 28%, #fff7c2 40%, #b6ffd9 52%, #c9b8ff 66%, #ffffff 76%, #9ef0ff 88%, #f5f0ff); --fxbs: 300% 100%; --fxg: rgba(190,160,255,.45);
   --fxi: radial-gradient(circle at 20% 30%, rgba(255,255,255,.85) 0 1px, transparent 1.6px) 0 0 / 43px 39px, radial-gradient(circle at 70% 65%, rgba(200,220,255,.6) 0 1px, transparent 1.6px) 0 0 / 59px 47px, radial-gradient(circle at 40% 80%, rgba(255,210,250,.7) 0 1px, transparent 1.4px) 0 0 / 31px 27px, radial-gradient(55% 75% at 84% 16%, rgba(160,90,255,.55), transparent 70%), radial-gradient(60% 70% at 10% 95%, rgba(40,200,255,.4), transparent 70%), radial-gradient(40% 50% at 50% 50%, rgba(255,120,220,.16), transparent 70%), linear-gradient(180deg, #170d36, #080518); animation: fxFoil 5s linear infinite; }
 .bt-lotto { --fxk: #ffd23f; --fxb: repeating-linear-gradient(45deg, #ff4f6d 0 9px, #ffd23f 9px 18px, #3bd16f 18px 27px, #3fa9ff 27px 36px, #b06bff 36px 45px); --fxbs: 300% 100%; --fxg: rgba(255,210,63,.38);
@@ -2589,7 +2590,7 @@ body.tv.pplb .roomtv:not([hidden]) canvas { width: 76px; height: 76px; grid-row:
 .bt-snipe { --fxk: #ff4a58; --fxb: linear-gradient(135deg, #ff2d3d, #4a080e 30%, #ff2d3d 50%, #4a080e 70%, #ff2d3d); --fxg: rgba(255,45,61,.35);
   --fxi: linear-gradient(rgba(255,45,61,.07) 1px, transparent 1px) 0 0 / 100% 14px, linear-gradient(90deg, rgba(255,45,61,.07) 1px, transparent 1px) 0 0 / 14px 100%, linear-gradient(180deg, #1d0a0d, #0d0507); }
 .bt-long { --fxk: #4ff0d8; --fxb: linear-gradient(120deg, #19e3c6, #0a6b8a 40%, #7cf5ff 60%, #0a6b8a); --fxbs: 300% 100%; --fxg: rgba(25,227,198,.32);
-  --fxi: linear-gradient(105deg, transparent 38%, rgba(25,227,198,.1) 50%, transparent 62%), linear-gradient(180deg, #06231f, #04120f); animation: fxFoil 7s linear infinite; }
+  --fxi: linear-gradient(180deg, #06231f, #04120f); animation: fxFoil 8s linear infinite; }
 .bt-pink { --fxk: #ff8fc8; --fxb: conic-gradient(from 20deg, #ff6fb5, #ffd1ea, #ff3d9a, #ffb3dc, #ff6fb5); --fxg: rgba(255,111,181,.45);
   --fxi: radial-gradient(70% 60% at 82% 8%, rgba(255,111,181,.32), transparent 70%), linear-gradient(180deg, #2b0b1e, #14050e); }
 .bt-prime { --fxk: #ffb547; --fxb: linear-gradient(120deg, #7b3cff, #ffb547 30%, #7b3cff 60%, #ffb547); --fxbs: 300% 100%; --fxg: rgba(123,60,255,.42);
@@ -2602,9 +2603,9 @@ body.tv.pplb .roomtv:not([hidden]) canvas { width: 76px; height: 76px; grid-row:
 .fx.bt-nuke, .fx.bt-botd, .fx.bt-whale, .fx.bt-opal, .fx.bt-lotto { border-width: 3px; }
 /* a light sweep across the precious ones; water light on the whale */
 .bt-botd::after, .bt-opal::after, .bt-pink::after, .bt-gold::after, .bt-prime::after { content: ""; position: absolute; inset: 0; border-radius: inherit; pointer-events: none; z-index: 2;
-  background: linear-gradient(105deg, transparent 38%, rgba(255,255,255,.16) 48%, rgba(255,255,255,.04) 54%, transparent 62%) -160% 0 / 260% 100% no-repeat; animation: fxSheen 6.5s ease-in-out infinite; }
+  background: linear-gradient(105deg, transparent 38%, rgba(255,255,255,.16) 48%, rgba(255,255,255,.04) 54%, transparent 62%) -160% 0 / 260% 100% no-repeat; animation: fxSheen 6s ease-in-out var(--d, 0s) infinite; }
 .bt-whale::after { content: ""; position: absolute; inset: 0; border-radius: inherit; pointer-events: none; z-index: 2;
-  background: radial-gradient(60% 40% at 20% 120%, rgba(90,190,255,.18), transparent 70%), linear-gradient(100deg, transparent 36%, rgba(120,210,255,.16) 48%, transparent 60%) -160% 0 / 260% 100% no-repeat; animation: fxSheen 5s ease-in-out infinite; }
+  background: radial-gradient(60% 40% at 20% 120%, rgba(90,190,255,.18), transparent 70%), linear-gradient(100deg, transparent 36%, rgba(120,210,255,.16) 48%, transparent 60%) -160% 0 / 260% 100% no-repeat; animation: fxSheen 5s ease-in-out var(--d, 0s) infinite; }
 /* each type's marks in the corners and its own glints */
 .bt .fx-glint::before, .bt .fx-glint::after { content: "✦"; }
 .bt-nuke .fx-glint::before, .bt-nuke .fx-glint::after { content: "☢"; }
@@ -2682,6 +2683,113 @@ body.tv.pplb .roomtv:not([hidden]) canvas { width: 76px; height: 76px; grid-row:
 @keyframes btShake { 25% { transform: translate(-3px, 2px) rotate(-.4deg); } 50% { transform: translate(3px, -2px) rotate(.4deg); } 75% { transform: translate(-2px, -1px); } }
 @keyframes btPop { 0% { transform: scale(.3) rotate(-8deg); opacity: 0; } 100% { transform: none; opacity: 1; } }
 @keyframes btLock { 0% { transform: scale(1.6); opacity: 0; } 100% { transform: none; opacity: .95; } }
+/* ---------- the art under each type (2K card style), all of it moving, locked to the clock (--d) ---------- */
+.fx.bt { animation-delay: var(--d, 0s); }
+.bt-art { position: absolute; inset: 0; z-index: -1; overflow: hidden; pointer-events: none; }
+.bt-art::before, .bt-art::after, .bt-art > b, .bt-art > b::before, .bt-art > b::after { content: ""; position: absolute; pointer-events: none; }
+.bt-art > b { inset: 0; overflow: hidden; }
+.slip.bt .sl-card { isolation: isolate; }
+@keyframes btSlideX { to { translate: -50% 0; } }
+@keyframes btSlideXr { to { translate: 50% 0; } }
+@keyframes btTileX { to { translate: -180px 0; } }
+@keyframes btTw { from { opacity: .35; } to { opacity: 1; } }
+@keyframes btTw2 { from { opacity: 1; } to { opacity: .25; } }
+@keyframes btSweepX { 0% { translate: -100% 0; } 55%, 100% { translate: 100% 0; } }
+@keyframes btSpin { to { rotate: 360deg; } }
+@keyframes btPulse { from { opacity: .45; scale: .92; } to { opacity: 1; scale: 1.06; } }
+@keyframes btDrop { from { translate: 0 -100%; } to { translate: 0 100%; } }
+
+/* galaxy opal: deep space, two nebulas drifting past each other, stars that twinkle, an opal rainbow sweeping through */
+.bt-opal { --fxk: #f0e6ff; --fxb: linear-gradient(120deg, #ffffff, #9ef0ff 10%, #ffc8ee 20%, #fff3b8 30%, #b6ffd9 40%, #c9b8ff 50%, #ffffff 58%, #9ef0ff 68%, #ffc8ee 78%, #fff3b8 88%, #ffffff); --fxbs: 300% 100%; --fxg: rgba(200,150,255,.55); --fxr: 0 0 0 2px rgba(230,210,255,.35);
+  --fxi: radial-gradient(50% 80% at 92% -10%, rgba(255,200,250,.12), transparent 70%), linear-gradient(160deg, #10062e, #07041a 55%, #12072a); }
+.bt-opal .bt-art::before { inset: 0 -100% 0 0; animation: btSlideX 60s linear var(--d, 0s) infinite;
+  background: radial-gradient(34% 62% at 26% 38%, rgba(225,40,190,.42), transparent 70%) 0 0 / 50% 100% repeat-x, radial-gradient(30% 58% at 72% 70%, rgba(95,40,235,.55), transparent 70%) 0 0 / 50% 100% repeat-x, radial-gradient(24% 46% at 58% 16%, rgba(40,150,255,.38), transparent 70%) 0 0 / 50% 100% repeat-x; }
+.bt-opal .bt-art > b::after { inset: 0 0 0 -100%; animation: btSlideXr 40s linear var(--d, 0s) infinite;
+  background: radial-gradient(30% 56% at 40% 78%, rgba(20,200,220,.28), transparent 70%) 0 0 / 50% 100% repeat-x, radial-gradient(26% 52% at 78% 28%, rgba(240,80,200,.3), transparent 70%) 0 0 / 50% 100% repeat-x, radial-gradient(22% 44% at 18% 22%, rgba(140,80,255,.36), transparent 70%) 0 0 / 50% 100% repeat-x; }
+.bt-opal .bt-art::after { inset: 0; z-index: 1; animation: btTw 2s ease-in-out var(--d, 0s) infinite alternate;
+  background: radial-gradient(circle at 20% 30%, #fff 0 1.1px, transparent 1.9px) 0 0 / 53px 47px, radial-gradient(circle at 70% 60%, rgba(220,235,255,.95) 0 .9px, transparent 1.6px) 0 0 / 71px 59px, radial-gradient(circle at 45% 80%, rgba(255,210,250,.9) 0 1.2px, transparent 2px) 0 0 / 97px 83px, url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' viewBox='0 0 16 16'%3E%3Cpath d='M8 0 C8.6 5.6 10.4 7.4 16 8 C10.4 8.6 8.6 10.4 8 16 C7.4 10.4 5.6 8.6 0 8 C5.6 7.4 7.4 5.6 8 0 Z' fill='white'/%3E%3C/svg%3E") 78% 22% / 13px 13px no-repeat, url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' viewBox='0 0 16 16'%3E%3Cpath d='M8 0 C8.6 5.6 10.4 7.4 16 8 C10.4 8.6 8.6 10.4 8 16 C7.4 10.4 5.6 8.6 0 8 C5.6 7.4 7.4 5.6 8 0 Z' fill='white'/%3E%3C/svg%3E") 12% 70% / 9px 9px no-repeat; }
+.bt-opal .bt-art > b::before { inset: 0; z-index: 2; mix-blend-mode: screen; animation: btSweepX 6s ease-in-out var(--d, 0s) infinite;
+  background: linear-gradient(105deg, transparent 36%, rgba(255,120,210,.16) 41%, rgba(120,230,255,.2) 45%, rgba(255,245,170,.16) 49%, rgba(170,140,255,.14) 53%, transparent 58%); }
+.bt-opal::after { content: none; }
+
+/* pink diamond: a cut-crystal surface drifting under a sweep of light, so the facets catch it; sparkles */
+.bt-pink { --fxk: #ff8fc8; --fxb: linear-gradient(115deg, #ff3d9a 0 7%, #ffd1ea 7% 11%, #ff6fb5 11% 19%, #b8125f 19% 26%, #ffc2e0 26% 31%, #ff3d9a 31% 40%, #fff0f7 40% 43%, #e0479a 43% 52%, #ff8cc6 52% 60%, #b8125f 60% 66%, #ffd1ea 66% 70%, #ff3d9a 70% 80%, #fff0f7 80% 83%, #ff6fb5 83% 100%); --fxbs: 300% 100%; --fxg: rgba(255,80,170,.55); --fxr: 0 0 0 2px rgba(255,140,200,.4);
+  --fxi: linear-gradient(160deg, #3d0c29, #24061a 60%, #33092a); animation: fxFoil 6s linear infinite; }
+.fx.bt-pink { border-width: 3px; }
+.bt-pink .bt-art::before { inset: 0 -180px 0 0; background: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='180' height='120' viewBox='0 0 180 120'%3E%3Cpath d='M-25.5 -35.4 L-5.3 -28.2 L-8.0 5.0 Z' fill='%23ffe0ef' fill-opacity='0.16' stroke='%23ffd6ea' stroke-opacity='.2' stroke-width='.7'/%3E%3Cpath d='M-25.5 -35.4 L-8.0 5.0 L-25.2 -8.2 Z' fill='%23ff8cc6' fill-opacity='0.17' stroke='%23ffd6ea' stroke-opacity='.2' stroke-width='.7'/%3E%3Cpath d='M-25.2 -8.2 L-8.0 5.0 L-31.6 36.2 Z' fill='%23b3125f' fill-opacity='0.18' stroke='%23ffd6ea' stroke-opacity='.2' stroke-width='.7'/%3E%3Cpath d='M-8.0 5.0 L8.2 38.8 L-31.6 36.2 Z' fill='%23b3125f' fill-opacity='0.05' stroke='%23ffd6ea' stroke-opacity='.2' stroke-width='.7'/%3E%3Cpath d='M-31.6 36.2 L8.2 38.8 L7.9 55.0 Z' fill='%23b3125f' fill-opacity='0.19' stroke='%23ffd6ea' stroke-opacity='.2' stroke-width='.7'/%3E%3Cpath d='M-31.6 36.2 L7.9 55.0 L-36.7 61.8 Z' fill='%23d81b78' fill-opacity='0.11' stroke='%23ffd6ea' stroke-opacity='.2' stroke-width='.7'/%3E%3Cpath d='M-36.7 61.8 L7.9 55.0 L-25.5 84.6 Z' fill='%23b3125f' fill-opacity='0.16' stroke='%23ffd6ea' stroke-opacity='.2' stroke-width='.7'/%3E%3Cpath d='M7.9 55.0 L-5.3 91.8 L-25.5 84.6 Z' fill='%23ff5fae' fill-opacity='0.23' stroke='%23ffd6ea' stroke-opacity='.2' stroke-width='.7'/%3E%3Cpath d='M-25.5 84.6 L-5.3 91.8 L-8.0 125.0 Z' fill='%23ffe0ef' fill-opacity='0.16' stroke='%23ffd6ea' stroke-opacity='.2' stroke-width='.7'/%3E%3Cpath d='M-25.5 84.6 L-8.0 125.0 L-25.2 111.8 Z' fill='%23ff8cc6' fill-opacity='0.17' stroke='%23ffd6ea' stroke-opacity='.2' stroke-width='.7'/%3E%3Cpath d='M-25.2 111.8 L-8.0 125.0 L-31.6 156.2 Z' fill='%23b3125f' fill-opacity='0.18' stroke='%23ffd6ea' stroke-opacity='.2' stroke-width='.7'/%3E%3Cpath d='M-8.0 125.0 L8.2 158.8 L-31.6 156.2 Z' fill='%23b3125f' fill-opacity='0.05' stroke='%23ffd6ea' stroke-opacity='.2' stroke-width='.7'/%3E%3Cpath d='M-5.3 -28.2 L26.3 -29.2 L-8.0 5.0 Z' fill='%23ff5fae' fill-opacity='0.13' stroke='%23ffd6ea' stroke-opacity='.2' stroke-width='.7'/%3E%3Cpath d='M26.3 -29.2 L23.2 -8.2 L-8.0 5.0 Z' fill='%23ffe0ef' fill-opacity='0.15' stroke='%23ffd6ea' stroke-opacity='.2' stroke-width='.7'/%3E%3Cpath d='M-8.0 5.0 L23.2 -8.2 L35.7 36.3 Z' fill='%23d81b78' fill-opacity='0.13' stroke='%23ffd6ea' stroke-opacity='.2' stroke-width='.7'/%3E%3Cpath d='M-8.0 5.0 L35.7 36.3 L8.2 38.8 Z' fill='%23ffe0ef' fill-opacity='0.08' stroke='%23ffd6ea' stroke-opacity='.2' stroke-width='.7'/%3E%3Cpath d='M8.2 38.8 L35.7 36.3 L7.9 55.0 Z' fill='%23ff3d9a' fill-opacity='0.12' stroke='%23ffd6ea' stroke-opacity='.2' stroke-width='.7'/%3E%3Cpath d='M35.7 36.3 L36.9 55.5 L7.9 55.0 Z' fill='%23d81b78' fill-opacity='0.16' stroke='%23ffd6ea' stroke-opacity='.2' stroke-width='.7'/%3E%3Cpath d='M7.9 55.0 L36.9 55.5 L26.3 90.8 Z' fill='%23ff8cc6' fill-opacity='0.05' stroke='%23ffd6ea' stroke-opacity='.2' stroke-width='.7'/%3E%3Cpath d='M7.9 55.0 L26.3 90.8 L-5.3 91.8 Z' fill='%23ff5fae' fill-opacity='0.07' stroke='%23ffd6ea' stroke-opacity='.2' stroke-width='.7'/%3E%3Cpath d='M-5.3 91.8 L26.3 90.8 L-8.0 125.0 Z' fill='%23ff5fae' fill-opacity='0.13' stroke='%23ffd6ea' stroke-opacity='.2' stroke-width='.7'/%3E%3Cpath d='M26.3 90.8 L23.2 111.8 L-8.0 125.0 Z' fill='%23ffe0ef' fill-opacity='0.15' stroke='%23ffd6ea' stroke-opacity='.2' stroke-width='.7'/%3E%3Cpath d='M-8.0 125.0 L23.2 111.8 L35.7 156.3 Z' fill='%23d81b78' fill-opacity='0.13' stroke='%23ffd6ea' stroke-opacity='.2' stroke-width='.7'/%3E%3Cpath d='M-8.0 125.0 L35.7 156.3 L8.2 158.8 Z' fill='%23ffe0ef' fill-opacity='0.08' stroke='%23ffd6ea' stroke-opacity='.2' stroke-width='.7'/%3E%3Cpath d='M26.3 -29.2 L60.9 -25.0 L51.8 -5.1 Z' fill='%23ff3d9a' fill-opacity='0.2' stroke='%23ffd6ea' stroke-opacity='.2' stroke-width='.7'/%3E%3Cpath d='M26.3 -29.2 L51.8 -5.1 L23.2 -8.2 Z' fill='%23ff5fae' fill-opacity='0.21' stroke='%23ffd6ea' stroke-opacity='.2' stroke-width='.7'/%3E%3Cpath d='M23.2 -8.2 L51.8 -5.1 L35.7 36.3 Z' fill='%23ff5fae' fill-opacity='0.23' stroke='%23ffd6ea' stroke-opacity='.2' stroke-width='.7'/%3E%3Cpath d='M51.8 -5.1 L56.9 28.3 L35.7 36.3 Z' fill='%23ffe0ef' fill-opacity='0.13' stroke='%23ffd6ea' stroke-opacity='.2' stroke-width='.7'/%3E%3Cpath d='M35.7 36.3 L56.9 28.3 L52.3 57.3 Z' fill='%23ffe0ef' fill-opacity='0.09' stroke='%23ffd6ea' stroke-opacity='.2' stroke-width='.7'/%3E%3Cpath d='M35.7 36.3 L52.3 57.3 L36.9 55.5 Z' fill='%23ff5fae' fill-opacity='0.23' stroke='%23ffd6ea' stroke-opacity='.2' stroke-width='.7'/%3E%3Cpath d='M36.9 55.5 L52.3 57.3 L26.3 90.8 Z' fill='%23ffe0ef' fill-opacity='0.23' stroke='%23ffd6ea' stroke-opacity='.2' stroke-width='.7'/%3E%3Cpath d='M52.3 57.3 L60.9 95.0 L26.3 90.8 Z' fill='%23ffc1df' fill-opacity='0.22' stroke='%23ffd6ea' stroke-opacity='.2' stroke-width='.7'/%3E%3Cpath d='M26.3 90.8 L60.9 95.0 L51.8 114.9 Z' fill='%23ff3d9a' fill-opacity='0.2' stroke='%23ffd6ea' stroke-opacity='.2' stroke-width='.7'/%3E%3Cpath d='M26.3 90.8 L51.8 114.9 L23.2 111.8 Z' fill='%23ff5fae' fill-opacity='0.21' stroke='%23ffd6ea' stroke-opacity='.2' stroke-width='.7'/%3E%3Cpath d='M23.2 111.8 L51.8 114.9 L35.7 156.3 Z' fill='%23ff5fae' fill-opacity='0.23' stroke='%23ffd6ea' stroke-opacity='.2' stroke-width='.7'/%3E%3Cpath d='M51.8 114.9 L56.9 148.3 L35.7 156.3 Z' fill='%23ffe0ef' fill-opacity='0.13' stroke='%23ffd6ea' stroke-opacity='.2' stroke-width='.7'/%3E%3Cpath d='M60.9 -25.0 L95.5 -28.1 L51.8 -5.1 Z' fill='%23d81b78' fill-opacity='0.11' stroke='%23ffd6ea' stroke-opacity='.2' stroke-width='.7'/%3E%3Cpath d='M95.5 -28.1 L98.3 3.3 L51.8 -5.1 Z' fill='%23d81b78' fill-opacity='0.16' stroke='%23ffd6ea' stroke-opacity='.2' stroke-width='.7'/%3E%3Cpath d='M51.8 -5.1 L98.3 3.3 L93.8 38.4 Z' fill='%23ff8cc6' fill-opacity='0.15' stroke='%23ffd6ea' stroke-opacity='.2' stroke-width='.7'/%3E%3Cpath d='M51.8 -5.1 L93.8 38.4 L56.9 28.3 Z' fill='%23ff3d9a' fill-opacity='0.06' stroke='%23ffd6ea' stroke-opacity='.2' stroke-width='.7'/%3E%3Cpath d='M56.9 28.3 L93.8 38.4 L52.3 57.3 Z' fill='%23ffe0ef' fill-opacity='0.14' stroke='%23ffd6ea' stroke-opacity='.2' stroke-width='.7'/%3E%3Cpath d='M93.8 38.4 L98.3 68.0 L52.3 57.3 Z' fill='%23ff3d9a' fill-opacity='0.08' stroke='%23ffd6ea' stroke-opacity='.2' stroke-width='.7'/%3E%3Cpath d='M52.3 57.3 L98.3 68.0 L95.5 91.9 Z' fill='%23ff3d9a' fill-opacity='0.05' stroke='%23ffd6ea' stroke-opacity='.2' stroke-width='.7'/%3E%3Cpath d='M52.3 57.3 L95.5 91.9 L60.9 95.0 Z' fill='%23ff5fae' fill-opacity='0.2' stroke='%23ffd6ea' stroke-opacity='.2' stroke-width='.7'/%3E%3Cpath d='M60.9 95.0 L95.5 91.9 L51.8 114.9 Z' fill='%23d81b78' fill-opacity='0.11' stroke='%23ffd6ea' stroke-opacity='.2' stroke-width='.7'/%3E%3Cpath d='M95.5 91.9 L98.3 123.3 L51.8 114.9 Z' fill='%23d81b78' fill-opacity='0.16' stroke='%23ffd6ea' stroke-opacity='.2' stroke-width='.7'/%3E%3Cpath d='M51.8 114.9 L98.3 123.3 L93.8 158.4 Z' fill='%23ff8cc6' fill-opacity='0.15' stroke='%23ffd6ea' stroke-opacity='.2' stroke-width='.7'/%3E%3Cpath d='M51.8 114.9 L93.8 158.4 L56.9 148.3 Z' fill='%23ff3d9a' fill-opacity='0.06' stroke='%23ffd6ea' stroke-opacity='.2' stroke-width='.7'/%3E%3Cpath d='M95.5 -28.1 L111.9 -21.5 L113.9 -3.7 Z' fill='%23ff5fae' fill-opacity='0.05' stroke='%23ffd6ea' stroke-opacity='.2' stroke-width='.7'/%3E%3Cpath d='M95.5 -28.1 L113.9 -3.7 L98.3 3.3 Z' fill='%23b3125f' fill-opacity='0.05' stroke='%23ffd6ea' stroke-opacity='.2' stroke-width='.7'/%3E%3Cpath d='M98.3 3.3 L113.9 -3.7 L93.8 38.4 Z' fill='%23d81b78' fill-opacity='0.15' stroke='%23ffd6ea' stroke-opacity='.2' stroke-width='.7'/%3E%3Cpath d='M113.9 -3.7 L111.4 33.3 L93.8 38.4 Z' fill='%23b3125f' fill-opacity='0.23' stroke='%23ffd6ea' stroke-opacity='.2' stroke-width='.7'/%3E%3Cpath d='M93.8 38.4 L111.4 33.3 L119.8 67.9 Z' fill='%23ffe0ef' fill-opacity='0.17' stroke='%23ffd6ea' stroke-opacity='.2' stroke-width='.7'/%3E%3Cpath d='M93.8 38.4 L119.8 67.9 L98.3 68.0 Z' fill='%23ffe0ef' fill-opacity='0.12' stroke='%23ffd6ea' stroke-opacity='.2' stroke-width='.7'/%3E%3Cpath d='M98.3 68.0 L119.8 67.9 L95.5 91.9 Z' fill='%23ff5fae' fill-opacity='0.06' stroke='%23ffd6ea' stroke-opacity='.2' stroke-width='.7'/%3E%3Cpath d='M119.8 67.9 L111.9 98.5 L95.5 91.9 Z' fill='%23ff8cc6' fill-opacity='0.13' stroke='%23ffd6ea' stroke-opacity='.2' stroke-width='.7'/%3E%3Cpath d='M95.5 91.9 L111.9 98.5 L113.9 116.3 Z' fill='%23ff5fae' fill-opacity='0.05' stroke='%23ffd6ea' stroke-opacity='.2' stroke-width='.7'/%3E%3Cpath d='M95.5 91.9 L113.9 116.3 L98.3 123.3 Z' fill='%23b3125f' fill-opacity='0.05' stroke='%23ffd6ea' stroke-opacity='.2' stroke-width='.7'/%3E%3Cpath d='M98.3 123.3 L113.9 116.3 L93.8 158.4 Z' fill='%23d81b78' fill-opacity='0.15' stroke='%23ffd6ea' stroke-opacity='.2' stroke-width='.7'/%3E%3Cpath d='M113.9 116.3 L111.4 153.3 L93.8 158.4 Z' fill='%23b3125f' fill-opacity='0.23' stroke='%23ffd6ea' stroke-opacity='.2' stroke-width='.7'/%3E%3Cpath d='M111.9 -21.5 L154.5 -35.4 L113.9 -3.7 Z' fill='%23ffc1df' fill-opacity='0.09' stroke='%23ffd6ea' stroke-opacity='.2' stroke-width='.7'/%3E%3Cpath d='M154.5 -35.4 L154.8 -8.2 L113.9 -3.7 Z' fill='%23b3125f' fill-opacity='0.16' stroke='%23ffd6ea' stroke-opacity='.2' stroke-width='.7'/%3E%3Cpath d='M113.9 -3.7 L154.8 -8.2 L148.4 36.2 Z' fill='%23d81b78' fill-opacity='0.12' stroke='%23ffd6ea' stroke-opacity='.2' stroke-width='.7'/%3E%3Cpath d='M113.9 -3.7 L148.4 36.2 L111.4 33.3 Z' fill='%23b3125f' fill-opacity='0.1' stroke='%23ffd6ea' stroke-opacity='.2' stroke-width='.7'/%3E%3Cpath d='M111.4 33.3 L148.4 36.2 L119.8 67.9 Z' fill='%23ff5fae' fill-opacity='0.14' stroke='%23ffd6ea' stroke-opacity='.2' stroke-width='.7'/%3E%3Cpath d='M148.4 36.2 L143.3 61.8 L119.8 67.9 Z' fill='%23ffe0ef' fill-opacity='0.05' stroke='%23ffd6ea' stroke-opacity='.2' stroke-width='.7'/%3E%3Cpath d='M119.8 67.9 L143.3 61.8 L154.5 84.6 Z' fill='%23ff8cc6' fill-opacity='0.23' stroke='%23ffd6ea' stroke-opacity='.2' stroke-width='.7'/%3E%3Cpath d='M119.8 67.9 L154.5 84.6 L111.9 98.5 Z' fill='%23ff5fae' fill-opacity='0.04' stroke='%23ffd6ea' stroke-opacity='.2' stroke-width='.7'/%3E%3Cpath d='M111.9 98.5 L154.5 84.6 L113.9 116.3 Z' fill='%23ffc1df' fill-opacity='0.09' stroke='%23ffd6ea' stroke-opacity='.2' stroke-width='.7'/%3E%3Cpath d='M154.5 84.6 L154.8 111.8 L113.9 116.3 Z' fill='%23b3125f' fill-opacity='0.16' stroke='%23ffd6ea' stroke-opacity='.2' stroke-width='.7'/%3E%3Cpath d='M113.9 116.3 L154.8 111.8 L148.4 156.2 Z' fill='%23d81b78' fill-opacity='0.12' stroke='%23ffd6ea' stroke-opacity='.2' stroke-width='.7'/%3E%3Cpath d='M113.9 116.3 L148.4 156.2 L111.4 153.3 Z' fill='%23b3125f' fill-opacity='0.1' stroke='%23ffd6ea' stroke-opacity='.2' stroke-width='.7'/%3E%3Cpath d='M154.5 -35.4 L174.7 -28.2 L172.0 5.0 Z' fill='%23ffe0ef' fill-opacity='0.16' stroke='%23ffd6ea' stroke-opacity='.2' stroke-width='.7'/%3E%3Cpath d='M154.5 -35.4 L172.0 5.0 L154.8 -8.2 Z' fill='%23ff8cc6' fill-opacity='0.17' stroke='%23ffd6ea' stroke-opacity='.2' stroke-width='.7'/%3E%3Cpath d='M154.8 -8.2 L172.0 5.0 L148.4 36.2 Z' fill='%23b3125f' fill-opacity='0.18' stroke='%23ffd6ea' stroke-opacity='.2' stroke-width='.7'/%3E%3Cpath d='M172.0 5.0 L188.2 38.8 L148.4 36.2 Z' fill='%23b3125f' fill-opacity='0.05' stroke='%23ffd6ea' stroke-opacity='.2' stroke-width='.7'/%3E%3Cpath d='M148.4 36.2 L188.2 38.8 L187.9 55.0 Z' fill='%23b3125f' fill-opacity='0.19' stroke='%23ffd6ea' stroke-opacity='.2' stroke-width='.7'/%3E%3Cpath d='M148.4 36.2 L187.9 55.0 L143.3 61.8 Z' fill='%23d81b78' fill-opacity='0.11' stroke='%23ffd6ea' stroke-opacity='.2' stroke-width='.7'/%3E%3Cpath d='M143.3 61.8 L187.9 55.0 L154.5 84.6 Z' fill='%23b3125f' fill-opacity='0.16' stroke='%23ffd6ea' stroke-opacity='.2' stroke-width='.7'/%3E%3Cpath d='M187.9 55.0 L174.7 91.8 L154.5 84.6 Z' fill='%23ff5fae' fill-opacity='0.23' stroke='%23ffd6ea' stroke-opacity='.2' stroke-width='.7'/%3E%3Cpath d='M154.5 84.6 L174.7 91.8 L172.0 125.0 Z' fill='%23ffe0ef' fill-opacity='0.16' stroke='%23ffd6ea' stroke-opacity='.2' stroke-width='.7'/%3E%3Cpath d='M154.5 84.6 L172.0 125.0 L154.8 111.8 Z' fill='%23ff8cc6' fill-opacity='0.17' stroke='%23ffd6ea' stroke-opacity='.2' stroke-width='.7'/%3E%3Cpath d='M154.8 111.8 L172.0 125.0 L148.4 156.2 Z' fill='%23b3125f' fill-opacity='0.18' stroke='%23ffd6ea' stroke-opacity='.2' stroke-width='.7'/%3E%3Cpath d='M172.0 125.0 L188.2 158.8 L148.4 156.2 Z' fill='%23b3125f' fill-opacity='0.05' stroke='%23ffd6ea' stroke-opacity='.2' stroke-width='.7'/%3E%3Cpath d='M174.7 -28.2 L206.3 -29.2 L172.0 5.0 Z' fill='%23ff5fae' fill-opacity='0.13' stroke='%23ffd6ea' stroke-opacity='.2' stroke-width='.7'/%3E%3Cpath d='M206.3 -29.2 L203.2 -8.2 L172.0 5.0 Z' fill='%23ffe0ef' fill-opacity='0.15' stroke='%23ffd6ea' stroke-opacity='.2' stroke-width='.7'/%3E%3Cpath d='M172.0 5.0 L203.2 -8.2 L215.7 36.3 Z' fill='%23d81b78' fill-opacity='0.13' stroke='%23ffd6ea' stroke-opacity='.2' stroke-width='.7'/%3E%3Cpath d='M172.0 5.0 L215.7 36.3 L188.2 38.8 Z' fill='%23ffe0ef' fill-opacity='0.08' stroke='%23ffd6ea' stroke-opacity='.2' stroke-width='.7'/%3E%3Cpath d='M188.2 38.8 L215.7 36.3 L187.9 55.0 Z' fill='%23ff3d9a' fill-opacity='0.12' stroke='%23ffd6ea' stroke-opacity='.2' stroke-width='.7'/%3E%3Cpath d='M215.7 36.3 L216.9 55.5 L187.9 55.0 Z' fill='%23d81b78' fill-opacity='0.16' stroke='%23ffd6ea' stroke-opacity='.2' stroke-width='.7'/%3E%3Cpath d='M187.9 55.0 L216.9 55.5 L206.3 90.8 Z' fill='%23ff8cc6' fill-opacity='0.05' stroke='%23ffd6ea' stroke-opacity='.2' stroke-width='.7'/%3E%3Cpath d='M187.9 55.0 L206.3 90.8 L174.7 91.8 Z' fill='%23ff5fae' fill-opacity='0.07' stroke='%23ffd6ea' stroke-opacity='.2' stroke-width='.7'/%3E%3Cpath d='M174.7 91.8 L206.3 90.8 L172.0 125.0 Z' fill='%23ff5fae' fill-opacity='0.13' stroke='%23ffd6ea' stroke-opacity='.2' stroke-width='.7'/%3E%3Cpath d='M206.3 90.8 L203.2 111.8 L172.0 125.0 Z' fill='%23ffe0ef' fill-opacity='0.15' stroke='%23ffd6ea' stroke-opacity='.2' stroke-width='.7'/%3E%3Cpath d='M172.0 125.0 L203.2 111.8 L215.7 156.3 Z' fill='%23d81b78' fill-opacity='0.13' stroke='%23ffd6ea' stroke-opacity='.2' stroke-width='.7'/%3E%3Cpath d='M172.0 125.0 L215.7 156.3 L188.2 158.8 Z' fill='%23ffe0ef' fill-opacity='0.08' stroke='%23ffd6ea' stroke-opacity='.2' stroke-width='.7'/%3E%3C/svg%3E") 0 0 / 180px 120px; animation: btTileX 30s linear var(--d, 0s) infinite; }
+.bt-pink .bt-art > b::before { inset: 0; mix-blend-mode: overlay; animation: btSweepX 5s ease-in-out var(--d, 0s) infinite;
+  background: linear-gradient(110deg, transparent 34%, rgba(255,255,255,.4) 46%, rgba(255,230,245,.18) 52%, transparent 62%); }
+.bt-pink .bt-art::after { inset: 0; z-index: 1; animation: btTw 1.5s ease-in-out var(--d, 0s) infinite alternate;
+  background: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' viewBox='0 0 16 16'%3E%3Cpath d='M8 0 C8.6 5.6 10.4 7.4 16 8 C10.4 8.6 8.6 10.4 8 16 C7.4 10.4 5.6 8.6 0 8 C5.6 7.4 7.4 5.6 8 0 Z' fill='white'/%3E%3C/svg%3E") 84% 18% / 14px 14px no-repeat, url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' viewBox='0 0 16 16'%3E%3Cpath d='M8 0 C8.6 5.6 10.4 7.4 16 8 C10.4 8.6 8.6 10.4 8 16 C7.4 10.4 5.6 8.6 0 8 C5.6 7.4 7.4 5.6 8 0 Z' fill='white'/%3E%3C/svg%3E") 30% 82% / 10px 10px no-repeat, url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' viewBox='0 0 16 16'%3E%3Cpath d='M8 0 C8.6 5.6 10.4 7.4 16 8 C10.4 8.6 8.6 10.4 8 16 C7.4 10.4 5.6 8.6 0 8 C5.6 7.4 7.4 5.6 8 0 Z' fill='white'/%3E%3C/svg%3E") 62% 46% / 8px 8px no-repeat; }
+.bt-pink .bt-art > b::after { inset: 0; z-index: 1; animation: btTw2 1.5s ease-in-out var(--d, 0s) infinite alternate;
+  background: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' viewBox='0 0 16 16'%3E%3Cpath d='M8 0 C8.6 5.6 10.4 7.4 16 8 C10.4 8.6 8.6 10.4 8 16 C7.4 10.4 5.6 8.6 0 8 C5.6 7.4 7.4 5.6 8 0 Z' fill='white'/%3E%3C/svg%3E") 12% 24% / 11px 11px no-repeat, url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' viewBox='0 0 16 16'%3E%3Cpath d='M8 0 C8.6 5.6 10.4 7.4 16 8 C10.4 8.6 8.6 10.4 8 16 C7.4 10.4 5.6 8.6 0 8 C5.6 7.4 7.4 5.6 8 0 Z' fill='white'/%3E%3C/svg%3E") 92% 74% / 12px 12px no-repeat, url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' viewBox='0 0 16 16'%3E%3Cpath d='M8 0 C8.6 5.6 10.4 7.4 16 8 C10.4 8.6 8.6 10.4 8 16 C7.4 10.4 5.6 8.6 0 8 C5.6 7.4 7.4 5.6 8 0 Z' fill='white'/%3E%3C/svg%3E") 50% 12% / 7px 7px no-repeat; }
+.bt-pink::after { content: none; }
+.bt-pink .fx-glint::before, .bt-pink .fx-glint::after { content: "✦"; }
+
+/* the dart: a dartboard at the side, a dart flies in and sticks in the bull, a ring where it lands */
+.bt-dart { --fxk: #ff5a4f; --db: 104px; --fxb: repeating-conic-gradient(from 0deg at 50% 50%, #d8232f 0 9deg, #149a4b 9deg 18deg); --fxg: rgba(216,35,47,.38); --fxr: 0 0 0 2px rgba(216,35,47,.35);
+  --fxi: radial-gradient(60% 80% at 100% 50%, rgba(255,230,180,.08), transparent 70%), linear-gradient(180deg, #171a18, #0c0e0d); }
+.fx.bt-dart { border-width: 3px; }
+.bt-dart .bt-art::before { width: var(--db); aspect-ratio: 1; right: calc(var(--db) * -.3); bottom: calc(var(--db) * -.3); background: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='216' height='216' viewBox='0 0 216 216'%3E%3Ccircle cx='108' cy='108' r='108' fill='%230d0d0d'/%3E%3Cpath d='M92.36 9.23 A100 100 0 0 1 123.64 9.23 L122.70 15.16 A94 94 0 0 0 93.30 15.16 Z' fill='%23d8232f'/%3E%3Cpath d='M93.30 15.16 A94 94 0 0 1 122.70 15.16 L117.70 46.76 A62 62 0 0 0 98.30 46.76 Z' fill='%23161616'/%3E%3Cpath d='M98.30 46.76 A62 62 0 0 1 117.70 46.76 L116.76 52.69 A56 56 0 0 0 99.24 52.69 Z' fill='%23d8232f'/%3E%3Cpath d='M99.24 52.69 A56 56 0 0 1 116.76 52.69 L109.56 98.12 A10 10 0 0 0 106.44 98.12 Z' fill='%23161616'/%3E%3Cpath d='M123.64 9.23 A100 100 0 0 1 153.40 18.90 L150.68 24.25 A94 94 0 0 0 122.70 15.16 Z' fill='%23149a4b'/%3E%3Cpath d='M122.70 15.16 A94 94 0 0 1 150.68 24.25 L136.15 52.76 A62 62 0 0 0 117.70 46.76 Z' fill='%23efe2c2'/%3E%3Cpath d='M117.70 46.76 A62 62 0 0 1 136.15 52.76 L133.42 58.10 A56 56 0 0 0 116.76 52.69 Z' fill='%23149a4b'/%3E%3Cpath d='M116.76 52.69 A56 56 0 0 1 133.42 58.10 L112.54 99.09 A10 10 0 0 0 109.56 98.12 Z' fill='%23efe2c2'/%3E%3Cpath d='M153.40 18.90 A100 100 0 0 1 178.71 37.29 L174.47 41.53 A94 94 0 0 0 150.68 24.25 Z' fill='%23d8232f'/%3E%3Cpath d='M150.68 24.25 A94 94 0 0 1 174.47 41.53 L151.84 64.16 A62 62 0 0 0 136.15 52.76 Z' fill='%23161616'/%3E%3Cpath d='M136.15 52.76 A62 62 0 0 1 151.84 64.16 L147.60 68.40 A56 56 0 0 0 133.42 58.10 Z' fill='%23d8232f'/%3E%3Cpath d='M133.42 58.10 A56 56 0 0 1 147.60 68.40 L115.07 100.93 A10 10 0 0 0 112.54 99.09 Z' fill='%23161616'/%3E%3Cpath d='M178.71 37.29 A100 100 0 0 1 197.10 62.60 L191.75 65.32 A94 94 0 0 0 174.47 41.53 Z' fill='%23149a4b'/%3E%3Cpath d='M174.47 41.53 A94 94 0 0 1 191.75 65.32 L163.24 79.85 A62 62 0 0 0 151.84 64.16 Z' fill='%23efe2c2'/%3E%3Cpath d='M151.84 64.16 A62 62 0 0 1 163.24 79.85 L157.90 82.58 A56 56 0 0 0 147.60 68.40 Z' fill='%23149a4b'/%3E%3Cpath d='M147.60 68.40 A56 56 0 0 1 157.90 82.58 L116.91 103.46 A10 10 0 0 0 115.07 100.93 Z' fill='%23efe2c2'/%3E%3Cpath d='M197.10 62.60 A100 100 0 0 1 206.77 92.36 L200.84 93.30 A94 94 0 0 0 191.75 65.32 Z' fill='%23d8232f'/%3E%3Cpath d='M191.75 65.32 A94 94 0 0 1 200.84 93.30 L169.24 98.30 A62 62 0 0 0 163.24 79.85 Z' fill='%23161616'/%3E%3Cpath d='M163.24 79.85 A62 62 0 0 1 169.24 98.30 L163.31 99.24 A56 56 0 0 0 157.90 82.58 Z' fill='%23d8232f'/%3E%3Cpath d='M157.90 82.58 A56 56 0 0 1 163.31 99.24 L117.88 106.44 A10 10 0 0 0 116.91 103.46 Z' fill='%23161616'/%3E%3Cpath d='M206.77 92.36 A100 100 0 0 1 206.77 123.64 L200.84 122.70 A94 94 0 0 0 200.84 93.30 Z' fill='%23149a4b'/%3E%3Cpath d='M200.84 93.30 A94 94 0 0 1 200.84 122.70 L169.24 117.70 A62 62 0 0 0 169.24 98.30 Z' fill='%23efe2c2'/%3E%3Cpath d='M169.24 98.30 A62 62 0 0 1 169.24 117.70 L163.31 116.76 A56 56 0 0 0 163.31 99.24 Z' fill='%23149a4b'/%3E%3Cpath d='M163.31 99.24 A56 56 0 0 1 163.31 116.76 L117.88 109.56 A10 10 0 0 0 117.88 106.44 Z' fill='%23efe2c2'/%3E%3Cpath d='M206.77 123.64 A100 100 0 0 1 197.10 153.40 L191.75 150.68 A94 94 0 0 0 200.84 122.70 Z' fill='%23d8232f'/%3E%3Cpath d='M200.84 122.70 A94 94 0 0 1 191.75 150.68 L163.24 136.15 A62 62 0 0 0 169.24 117.70 Z' fill='%23161616'/%3E%3Cpath d='M169.24 117.70 A62 62 0 0 1 163.24 136.15 L157.90 133.42 A56 56 0 0 0 163.31 116.76 Z' fill='%23d8232f'/%3E%3Cpath d='M163.31 116.76 A56 56 0 0 1 157.90 133.42 L116.91 112.54 A10 10 0 0 0 117.88 109.56 Z' fill='%23161616'/%3E%3Cpath d='M197.10 153.40 A100 100 0 0 1 178.71 178.71 L174.47 174.47 A94 94 0 0 0 191.75 150.68 Z' fill='%23149a4b'/%3E%3Cpath d='M191.75 150.68 A94 94 0 0 1 174.47 174.47 L151.84 151.84 A62 62 0 0 0 163.24 136.15 Z' fill='%23efe2c2'/%3E%3Cpath d='M163.24 136.15 A62 62 0 0 1 151.84 151.84 L147.60 147.60 A56 56 0 0 0 157.90 133.42 Z' fill='%23149a4b'/%3E%3Cpath d='M157.90 133.42 A56 56 0 0 1 147.60 147.60 L115.07 115.07 A10 10 0 0 0 116.91 112.54 Z' fill='%23efe2c2'/%3E%3Cpath d='M178.71 178.71 A100 100 0 0 1 153.40 197.10 L150.68 191.75 A94 94 0 0 0 174.47 174.47 Z' fill='%23d8232f'/%3E%3Cpath d='M174.47 174.47 A94 94 0 0 1 150.68 191.75 L136.15 163.24 A62 62 0 0 0 151.84 151.84 Z' fill='%23161616'/%3E%3Cpath d='M151.84 151.84 A62 62 0 0 1 136.15 163.24 L133.42 157.90 A56 56 0 0 0 147.60 147.60 Z' fill='%23d8232f'/%3E%3Cpath d='M147.60 147.60 A56 56 0 0 1 133.42 157.90 L112.54 116.91 A10 10 0 0 0 115.07 115.07 Z' fill='%23161616'/%3E%3Cpath d='M153.40 197.10 A100 100 0 0 1 123.64 206.77 L122.70 200.84 A94 94 0 0 0 150.68 191.75 Z' fill='%23149a4b'/%3E%3Cpath d='M150.68 191.75 A94 94 0 0 1 122.70 200.84 L117.70 169.24 A62 62 0 0 0 136.15 163.24 Z' fill='%23efe2c2'/%3E%3Cpath d='M136.15 163.24 A62 62 0 0 1 117.70 169.24 L116.76 163.31 A56 56 0 0 0 133.42 157.90 Z' fill='%23149a4b'/%3E%3Cpath d='M133.42 157.90 A56 56 0 0 1 116.76 163.31 L109.56 117.88 A10 10 0 0 0 112.54 116.91 Z' fill='%23efe2c2'/%3E%3Cpath d='M123.64 206.77 A100 100 0 0 1 92.36 206.77 L93.30 200.84 A94 94 0 0 0 122.70 200.84 Z' fill='%23d8232f'/%3E%3Cpath d='M122.70 200.84 A94 94 0 0 1 93.30 200.84 L98.30 169.24 A62 62 0 0 0 117.70 169.24 Z' fill='%23161616'/%3E%3Cpath d='M117.70 169.24 A62 62 0 0 1 98.30 169.24 L99.24 163.31 A56 56 0 0 0 116.76 163.31 Z' fill='%23d8232f'/%3E%3Cpath d='M116.76 163.31 A56 56 0 0 1 99.24 163.31 L106.44 117.88 A10 10 0 0 0 109.56 117.88 Z' fill='%23161616'/%3E%3Cpath d='M92.36 206.77 A100 100 0 0 1 62.60 197.10 L65.32 191.75 A94 94 0 0 0 93.30 200.84 Z' fill='%23149a4b'/%3E%3Cpath d='M93.30 200.84 A94 94 0 0 1 65.32 191.75 L79.85 163.24 A62 62 0 0 0 98.30 169.24 Z' fill='%23efe2c2'/%3E%3Cpath d='M98.30 169.24 A62 62 0 0 1 79.85 163.24 L82.58 157.90 A56 56 0 0 0 99.24 163.31 Z' fill='%23149a4b'/%3E%3Cpath d='M99.24 163.31 A56 56 0 0 1 82.58 157.90 L103.46 116.91 A10 10 0 0 0 106.44 117.88 Z' fill='%23efe2c2'/%3E%3Cpath d='M62.60 197.10 A100 100 0 0 1 37.29 178.71 L41.53 174.47 A94 94 0 0 0 65.32 191.75 Z' fill='%23d8232f'/%3E%3Cpath d='M65.32 191.75 A94 94 0 0 1 41.53 174.47 L64.16 151.84 A62 62 0 0 0 79.85 163.24 Z' fill='%23161616'/%3E%3Cpath d='M79.85 163.24 A62 62 0 0 1 64.16 151.84 L68.40 147.60 A56 56 0 0 0 82.58 157.90 Z' fill='%23d8232f'/%3E%3Cpath d='M82.58 157.90 A56 56 0 0 1 68.40 147.60 L100.93 115.07 A10 10 0 0 0 103.46 116.91 Z' fill='%23161616'/%3E%3Cpath d='M37.29 178.71 A100 100 0 0 1 18.90 153.40 L24.25 150.68 A94 94 0 0 0 41.53 174.47 Z' fill='%23149a4b'/%3E%3Cpath d='M41.53 174.47 A94 94 0 0 1 24.25 150.68 L52.76 136.15 A62 62 0 0 0 64.16 151.84 Z' fill='%23efe2c2'/%3E%3Cpath d='M64.16 151.84 A62 62 0 0 1 52.76 136.15 L58.10 133.42 A56 56 0 0 0 68.40 147.60 Z' fill='%23149a4b'/%3E%3Cpath d='M68.40 147.60 A56 56 0 0 1 58.10 133.42 L99.09 112.54 A10 10 0 0 0 100.93 115.07 Z' fill='%23efe2c2'/%3E%3Cpath d='M18.90 153.40 A100 100 0 0 1 9.23 123.64 L15.16 122.70 A94 94 0 0 0 24.25 150.68 Z' fill='%23d8232f'/%3E%3Cpath d='M24.25 150.68 A94 94 0 0 1 15.16 122.70 L46.76 117.70 A62 62 0 0 0 52.76 136.15 Z' fill='%23161616'/%3E%3Cpath d='M52.76 136.15 A62 62 0 0 1 46.76 117.70 L52.69 116.76 A56 56 0 0 0 58.10 133.42 Z' fill='%23d8232f'/%3E%3Cpath d='M58.10 133.42 A56 56 0 0 1 52.69 116.76 L98.12 109.56 A10 10 0 0 0 99.09 112.54 Z' fill='%23161616'/%3E%3Cpath d='M9.23 123.64 A100 100 0 0 1 9.23 92.36 L15.16 93.30 A94 94 0 0 0 15.16 122.70 Z' fill='%23149a4b'/%3E%3Cpath d='M15.16 122.70 A94 94 0 0 1 15.16 93.30 L46.76 98.30 A62 62 0 0 0 46.76 117.70 Z' fill='%23efe2c2'/%3E%3Cpath d='M46.76 117.70 A62 62 0 0 1 46.76 98.30 L52.69 99.24 A56 56 0 0 0 52.69 116.76 Z' fill='%23149a4b'/%3E%3Cpath d='M52.69 116.76 A56 56 0 0 1 52.69 99.24 L98.12 106.44 A10 10 0 0 0 98.12 109.56 Z' fill='%23efe2c2'/%3E%3Cpath d='M9.23 92.36 A100 100 0 0 1 18.90 62.60 L24.25 65.32 A94 94 0 0 0 15.16 93.30 Z' fill='%23d8232f'/%3E%3Cpath d='M15.16 93.30 A94 94 0 0 1 24.25 65.32 L52.76 79.85 A62 62 0 0 0 46.76 98.30 Z' fill='%23161616'/%3E%3Cpath d='M46.76 98.30 A62 62 0 0 1 52.76 79.85 L58.10 82.58 A56 56 0 0 0 52.69 99.24 Z' fill='%23d8232f'/%3E%3Cpath d='M52.69 99.24 A56 56 0 0 1 58.10 82.58 L99.09 103.46 A10 10 0 0 0 98.12 106.44 Z' fill='%23161616'/%3E%3Cpath d='M18.90 62.60 A100 100 0 0 1 37.29 37.29 L41.53 41.53 A94 94 0 0 0 24.25 65.32 Z' fill='%23149a4b'/%3E%3Cpath d='M24.25 65.32 A94 94 0 0 1 41.53 41.53 L64.16 64.16 A62 62 0 0 0 52.76 79.85 Z' fill='%23efe2c2'/%3E%3Cpath d='M52.76 79.85 A62 62 0 0 1 64.16 64.16 L68.40 68.40 A56 56 0 0 0 58.10 82.58 Z' fill='%23149a4b'/%3E%3Cpath d='M58.10 82.58 A56 56 0 0 1 68.40 68.40 L100.93 100.93 A10 10 0 0 0 99.09 103.46 Z' fill='%23efe2c2'/%3E%3Cpath d='M37.29 37.29 A100 100 0 0 1 62.60 18.90 L65.32 24.25 A94 94 0 0 0 41.53 41.53 Z' fill='%23d8232f'/%3E%3Cpath d='M41.53 41.53 A94 94 0 0 1 65.32 24.25 L79.85 52.76 A62 62 0 0 0 64.16 64.16 Z' fill='%23161616'/%3E%3Cpath d='M64.16 64.16 A62 62 0 0 1 79.85 52.76 L82.58 58.10 A56 56 0 0 0 68.40 68.40 Z' fill='%23d8232f'/%3E%3Cpath d='M68.40 68.40 A56 56 0 0 1 82.58 58.10 L103.46 99.09 A10 10 0 0 0 100.93 100.93 Z' fill='%23161616'/%3E%3Cpath d='M62.60 18.90 A100 100 0 0 1 92.36 9.23 L93.30 15.16 A94 94 0 0 0 65.32 24.25 Z' fill='%23149a4b'/%3E%3Cpath d='M65.32 24.25 A94 94 0 0 1 93.30 15.16 L98.30 46.76 A62 62 0 0 0 79.85 52.76 Z' fill='%23efe2c2'/%3E%3Cpath d='M79.85 52.76 A62 62 0 0 1 98.30 46.76 L99.24 52.69 A56 56 0 0 0 82.58 58.10 Z' fill='%23149a4b'/%3E%3Cpath d='M82.58 58.10 A56 56 0 0 1 99.24 52.69 L106.44 98.12 A10 10 0 0 0 103.46 99.09 Z' fill='%23efe2c2'/%3E%3Ccircle cx='108' cy='108' r='10' fill='%23149a4b'/%3E%3Ccircle cx='108' cy='108' r='4.4' fill='%23d8232f'/%3E%3Ccircle cx='108' cy='108' r='100' fill='none' stroke='%23c9ccd2' stroke-opacity='.45' stroke-width='.8'/%3E%3Ccircle cx='108' cy='108' r='94' fill='none' stroke='%23c9ccd2' stroke-opacity='.45' stroke-width='.8'/%3E%3Ccircle cx='108' cy='108' r='62' fill='none' stroke='%23c9ccd2' stroke-opacity='.45' stroke-width='.8'/%3E%3Ccircle cx='108' cy='108' r='56' fill='none' stroke='%23c9ccd2' stroke-opacity='.45' stroke-width='.8'/%3E%3Ccircle cx='108' cy='108' r='10' fill='none' stroke='%23c9ccd2' stroke-opacity='.45' stroke-width='.8'/%3E%3C/svg%3E") center / contain no-repeat; opacity: .45; }
+.bt-dart .bt-art > b { overflow: visible; }
+.bt-dart .bt-art > b::before { width: 74px; height: 18px; right: calc(var(--db) * .2 - 1px); bottom: calc(var(--db) * .2 - 9px); transform-origin: 100% 50%; background: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='100' height='24' viewBox='0 0 100 24'%3E%3Cdefs%3E%3ClinearGradient id='g' x1='0' y1='0' x2='0' y2='1'%3E%3Cstop offset='0' stop-color='%23fff3c4'/%3E%3Cstop offset='.5' stop-color='%23d9a733'/%3E%3Cstop offset='1' stop-color='%237a5410'/%3E%3C/linearGradient%3E%3C/defs%3E%3Cpath d='M1 2 L24 10.4 L24 13.6 L1 22 L7 12 Z' fill='%23d8232f' stroke='%235a0a10' stroke-width='.8'/%3E%3Cpath d='M4 6 L24 11.2 L24 12.8 L4 18 L9 12 Z' fill='%23149a4b' opacity='.9'/%3E%3Crect x='22' y='10.6' width='24' height='2.8' rx='1' fill='%23222'/%3E%3Crect x='44' y='8.4' width='30' height='7.2' rx='2.4' fill='url(%23g)'/%3E%3Cpath d='M50 8.6v6.8M54 8.6v6.8M58 8.6v6.8M62 8.6v6.8M66 8.6v6.8' stroke='%236b4a0c' stroke-opacity='.55' stroke-width='.9'/%3E%3Cpath d='M74 10 L99 12 L74 14 Z' fill='%23e4e8ee' stroke='%238d939c' stroke-width='.5'/%3E%3C/svg%3E") center / contain no-repeat;
+  animation: btDart 10s cubic-bezier(.2,.7,.2,1) var(--d, 0s) infinite; }
+.bt-dart .bt-art > b::after { width: 40px; height: 40px; right: calc(var(--db) * .2 - 20px); bottom: calc(var(--db) * .2 - 20px); border-radius: 50%; border: 2px solid #ffd23f; box-shadow: 0 0 14px #ffd23f; opacity: 0;
+  animation: btHit 10s ease-out var(--d, 0s) infinite; }
+@keyframes btDart { 0% { transform: rotate(18deg) translateX(-260px); opacity: 0; } 2% { opacity: 1; } 5% { transform: rotate(18deg) translateX(0); } 6.5% { transform: rotate(25deg) translateX(0); } 8% { transform: rotate(13deg) translateX(0); }
+  9.5% { transform: rotate(21deg) translateX(0); } 11% { transform: rotate(16.5deg) translateX(0); } 12.5%, 90% { transform: rotate(18deg) translateX(0); opacity: 1; } 96%, 100% { transform: rotate(18deg) translateX(0); opacity: 0; } }
+@keyframes btHit { 0%, 4.9% { opacity: 0; scale: .2; } 5% { opacity: 1; scale: .2; } 16%, 100% { opacity: 0; scale: 1.8; } }
+.bt-dart :is(.pp-pick, .ob-pick) .t, .slip.bt-dart .sl-pick { color: #fff4e0; text-shadow: 0 0 12px rgba(216,35,47,.6); }
+.bt-dart .fx-glint::before, .bt-dart .fx-glint::after { content: "◎"; }
+.bt-chip.bt-c-dart { color: #fff; background: linear-gradient(90deg, #d8232f, #a1141e 50%, #149a4b); }
+.bt-c-dart { --fxk: #ff5a4f; }
+.slip.bt-dart { --db: 300px; }
+.slip.big.bt-dart .bt-art > b::before { width: 170px; height: 41px; bottom: calc(var(--db) * .2 - 20px); }
+
+/* the nuke glows hot from below */
+.bt-nuke .bt-art::before { left: 10%; right: 10%; bottom: -60%; height: 120%; border-radius: 50%; background: radial-gradient(closest-side, rgba(255,110,30,.4), transparent); animation: btPulse 1s ease-in-out var(--d, 0s) infinite alternate; }
+/* the bet of the day: slow gold rays from the crown's corner */
+.bt-botd .bt-art::before { width: 460px; aspect-ratio: 1; right: -230px; top: -230px; border-radius: 50%; background: repeating-conic-gradient(rgba(255,216,107,.16) 0 4deg, transparent 4deg 16deg);
+  -webkit-mask-image: radial-gradient(closest-side, #000 20%, transparent); mask-image: radial-gradient(closest-side, #000 20%, transparent); animation: btSpin 40s linear var(--d, 0s) infinite; }
+/* the whale: light moving through water */
+.bt-whale .bt-art::before { inset: 0 -100% 0 0; animation: btSlideX 20s linear var(--d, 0s) infinite;
+  background: radial-gradient(18% 30% at 20% 30%, rgba(120,210,255,.16), transparent 70%) 0 0 / 50% 100% repeat-x, radial-gradient(14% 26% at 64% 70%, rgba(120,210,255,.14), transparent 70%) 0 0 / 50% 100% repeat-x; }
+.bt-whale .bt-art > b::after { inset: 0 0 0 -100%; animation: btSlideXr 30s linear var(--d, 0s) infinite; background: radial-gradient(16% 28% at 40% 55%, rgba(90,190,255,.14), transparent 70%) 0 0 / 50% 100% repeat-x, radial-gradient(12% 22% at 84% 20%, rgba(160,230,255,.12), transparent 70%) 0 0 / 50% 100% repeat-x; }
+/* the lotto: marquee bulbs chasing */
+.bt-lotto { --fxi: linear-gradient(180deg, #1f1033, #0d0718); }
+.bt-lotto .bt-art::before, .bt-lotto .bt-art::after { inset: 0; background: radial-gradient(circle, rgba(255,210,63,.32) 0 2.5px, transparent 3.5px) 0 0 / 24px 24px; animation: btTw 1s steps(2, jump-none) var(--d, 0s) infinite alternate; }
+.bt-lotto .bt-art::after { background-position: 12px 12px; background-image: radial-gradient(circle, rgba(255,111,170,.3) 0 2.5px, transparent 3.5px); animation-name: btTw2; }
+/* the snipe: a scan line sweeping down, a scope turning at the side */
+.bt-snipe .bt-art::before { inset: 0; background: linear-gradient(transparent calc(50% - 10px), rgba(255,45,61,.1) calc(50% - 4px), rgba(255,80,90,.55) 50%, rgba(255,45,61,.1) calc(50% + 4px), transparent calc(50% + 10px)); animation: btDrop 3s linear var(--d, 0s) infinite; }
+.bt-snipe .bt-art::after { width: 120px; aspect-ratio: 1; right: -30px; top: 50%; margin-top: -60px; border-radius: 50%; border: 2px solid rgba(255,74,88,.28); background: repeating-conic-gradient(rgba(255,74,88,.32) 0 2deg, transparent 2deg 45deg);
+  -webkit-mask-image: radial-gradient(closest-side, transparent 62%, #000 64%); mask-image: radial-gradient(closest-side, transparent 62%, #000 64%); animation: btSpin 12s linear var(--d, 0s) infinite; }
+/* the long shot: an arrow's streak across */
+.bt-long .bt-art::before { inset: 0; background: linear-gradient(90deg, transparent 20%, rgba(25,227,198,.05) 40%, rgba(124,245,255,.35) 49%, rgba(255,255,255,.7) 50%, transparent 50.5%) 0 40% / 100% 3px no-repeat, linear-gradient(105deg, transparent 38%, rgba(25,227,198,.12) 50%, transparent 62%);
+  animation: btSweepX 4s cubic-bezier(.5,0,.3,1) var(--d, 0s) infinite; }
+/* primetime: the night sky's stars twinkle */
+.bt-prime { --fxi: radial-gradient(circle at 90% 16%, rgba(255,240,200,.9) 0 6px, rgba(255,240,200,.22) 7px, transparent 20px), linear-gradient(180deg, #170d36, #08051a); }
+.bt-prime .bt-art::before { inset: 0; background: radial-gradient(circle at 20% 30%, rgba(255,255,255,.85) 0 1px, transparent 1.6px) 0 0 / 47px 41px; animation: btTw 2s ease-in-out var(--d, 0s) infinite alternate; }
+.bt-prime .bt-art::after { inset: 0; background: radial-gradient(circle at 60% 70%, rgba(255,230,190,.8) 0 1px, transparent 1.6px) 0 0 / 61px 53px; animation: btTw2 2s ease-in-out var(--d, 0s) infinite alternate; }
+/* the dawg: paw prints trotting by */
+.bt-dawg { --fxi: linear-gradient(180deg, #2b1306, #140803); }
+.bt-dawg .bt-art::before { inset: 0 -92px 0 0; background: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='92' height='60'%3E%3Cg fill='%23ff9a3d' fill-opacity='.13'%3E%3Cg transform='translate(10 30) rotate(-20)'%3E%3Cellipse cx='9' cy='12' rx='6' ry='5'/%3E%3Ccircle cx='2' cy='4' r='2.4'/%3E%3Ccircle cx='7' cy='0' r='2.4'/%3E%3Ccircle cx='13' cy='0' r='2.4'/%3E%3Ccircle cx='17' cy='5' r='2.4'/%3E%3C/g%3E%3Cg transform='translate(52 8) rotate(-20)'%3E%3Cellipse cx='9' cy='12' rx='6' ry='5'/%3E%3Ccircle cx='2' cy='4' r='2.4'/%3E%3Ccircle cx='7' cy='0' r='2.4'/%3E%3Ccircle cx='13' cy='0' r='2.4'/%3E%3Ccircle cx='17' cy='5' r='2.4'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E") 0 0 / 92px 60px; animation: btPaw 12s linear var(--d, 0s) infinite; }
+@keyframes btPaw { to { translate: -92px 0; } }
+/* gold, silver, bronze: a glint across the metal */
+.bt-gold .bt-art > b::before, .bt-silver .bt-art > b::before, .bt-bronze .bt-art > b::before { inset: 0; background: linear-gradient(105deg, transparent 38%, rgba(255,255,255,.16) 48%, rgba(255,255,255,.04) 54%, transparent 62%); animation: btSweepX 6s ease-in-out var(--d, 0s) infinite; }
+.bt-gold::after { content: none; }
+
+/* the chips and the badges for the opal, the pink and the dart move too */
+.bt-chip.bt-c-opal { background: linear-gradient(120deg, #c8f6ff, #ffd7f3 20%, #fff6c8 40%, #d9fff0 60%, #e6dcff 80%, #c8f6ff) 0 0 / 300% 100%; animation: btChip 4s linear infinite; }
+.bt-chip.bt-c-pink { background: linear-gradient(115deg, #ffd1ea, #ff6fb5 25%, #ffe6f2 40%, #ff3d9a 60%, #ffc2e0 80%, #ffd1ea) 0 0 / 300% 100%; animation: btChip 4s linear infinite; }
+@keyframes btChip { to { background-position: 300% 0; } }
+.bt-bdg.bt-c-opal, .bt-bdg.bt-c-pink, .bt-bdg.bt-c-dart { isolation: isolate; }
+.bt-bdg.bt-c-opal::before, .bt-bdg.bt-c-pink::before, .bt-bdg.bt-c-dart::before { content: ""; position: absolute; inset: -2px; z-index: -1; border-radius: 50%; animation: btSpin 4s linear infinite;
+  -webkit-mask-image: radial-gradient(closest-side, transparent calc(100% - 3px), #000 calc(100% - 2.5px)); mask-image: radial-gradient(closest-side, transparent calc(100% - 3px), #000 calc(100% - 2.5px)); }
+.bt-bdg.bt-c-opal::before { background: conic-gradient(#9ef0ff, #ffc8ee, #fff3b8, #b6ffd9, #c9b8ff, #9ef0ff); }
+.bt-bdg.bt-c-pink::before { background: conic-gradient(#ff3d9a, #ffe6f2, #ff6fb5, #b8125f, #ffd1ea, #ff3d9a); }
+.bt-bdg.bt-c-dart::before { background: repeating-conic-gradient(#d8232f 0 30deg, #149a4b 30deg 60deg); }
+.bt-ico { width: 1em; height: 1em; vertical-align: -.14em; flex: none; }
+.bt-bdg .bt-ico, .bt-mini .bt-ico { color: var(--fxk); }
 .pp-none { padding: 16px 6px; font: 600 15px/1.3 Inter, sans-serif; color: #8d97a8; text-align: center; }
 .pp-bet { position: relative; flex: none; display: grid; gap: 6px; padding: 10px 12px 11px 13px; border-radius: 12px; background: rgba(255,255,255,.035); border: 1px solid rgba(190,210,240,.1); border-left: 5px solid rgba(190,210,240,.28); }
 .pp-bet.k-w { border-left-color: var(--win); background: linear-gradient(90deg, rgba(61,220,151,.13), rgba(255,255,255,.03) 65%); }
@@ -4772,11 +4880,18 @@ body.tv .rb-games.primeg.mason > .rb-pcol { padding-top: 16px; -webkit-mask-imag
       const l = sl.l ?? 2.5; toast(`🏒 ${sl.p.nm} shot on goal · ${now.sog} SOG${sl.s !== "u" && now.sog <= l ? ` · ${Math.floor(l) + 1 - now.sog} to go` : ""}`);
     }
   }
+  // a next-TD bet counts the touchdowns after it went in (one placed before kickoff counts them all)
+  const tdAfter = (p, sel) => !sel.pd0 || p.pd == null || p.pd > sel.pd0 || (p.pd === sel.pd0 && p.c < sel.c0);
   function evalTd(sel, g) {
     const d = TDP.get(g.id), tds = d ? d.plays : [], me = normNm(sel.p && sel.p.nm), fin = g.st === "post" && !!(d && d.final);
     if (sel.m === "td") {
       if (tds.some((p) => p.who === me)) return { m: 1, res: "W", fin: true, txt: "Scored a TD", g };
       return { m: fin ? -1 : 0, res: fin ? "L" : "P", fin, txt: fin ? "Final · no TD" : tds.length ? `Needs a TD · ${tds.length} scored so far` : "Needs a TD", g };
+    }
+    if (sel.m === "ntd") {
+      const aft = tds.filter((p) => tdAfter(p, sel));
+      if (aft.length) { const won = aft[0].who === me; return { m: won ? 1 : -1, res: won ? "W" : "L", fin: true, txt: won ? "Scored the next TD" : `Next TD: ${aft[0].name}`, g }; }
+      return { m: fin ? -1 : 0, res: fin ? "L" : "P", fin, txt: fin ? "Final · no TD" : "Waiting on the next TD", g };
     }
     if (tds.length) { const won = tds[0].who === me; return { m: won ? 1 : -1, res: won ? "W" : "L", fin: true, txt: won ? "Scored the first TD" : `First TD: ${tds[0].name}`, g }; }
     return { m: fin ? -1 : 0, res: fin ? "L" : "P", fin, txt: fin ? "Final · no TD" : "Waiting on the first TD", g };
@@ -4883,7 +4998,7 @@ body.tv .rb-games.primeg.mason > .rb-pcol { padding-top: 16px; -webkit-mask-imag
     const risk = tot.reduce((a, b) => a + b.units, 0);
     const win = tot.reduce((a, b) => a + b.units * ppu(b.odds), 0);
     const linked = tot.some((b) => linkedGames(b).length);
-    $("#a-sum").textContent = tot.length ? `${nLive ? nLive + " live · " : ""}${fU(risk)} risk · to win ${fU(win)} (${fUSD(win * S.unit)})${linked && S.slateAt ? " · scores " + tm(S.slateAt) : ""}` : "";
+    $("#a-sum").textContent = tot.length ? `${nLive ? nLive + " live · " : ""}${fU(risk)} risk · to win ${fU(win)}${linked && S.slateAt ? " · scores " + tm(S.slateAt) : ""}` : "";
     }
     const box = $(boxSel || "#active");
     if (!S.ready) { box.innerHTML = '<div class="empty"><b>Loading your bets…</b></div>'; return; }
@@ -5663,7 +5778,7 @@ body.tv .rb-games.primeg.mason > .rb-pcol { padding-top: 16px; -webkit-mask-imag
   const mktName = (s) => {
     if (!s || !s.m) return "";
     if (s.m === "ml") return "Moneyline"; if (s.m === "sp") return "Spread"; if (s.m === "tot") return "Total";
-    if (s.m === "td") return "Anytime TD"; if (s.m === "ftd") return "First TD";
+    if (s.m === "td") return "Anytime TD"; if (s.m === "ftd") return "First TD"; if (s.m === "ntd") return "Next TD";
     if (isPP(s.m)) { const f = [...PP_MK, ...FB_MK, ...Object.values(PP_MKS).flat()].find((x) => x[0] === s.m); return f ? f[1] : "Player prop"; }
     return "";
   };
@@ -5699,7 +5814,7 @@ body.tv .rb-games.primeg.mason > .rb-pcol { padding-top: 16px; -webkit-mask-imag
     const hs = p.sel && p.sel.p && p.sel.p.hs ? `<img class="ob-hs" src="${esc(p.sel.p.hs)}" alt="" loading="lazy" referrerpolicy="no-referrer" onerror="this.remove()">` : "";
     const names = people.map((b) => `<b style="--c:${personCol(b)}">${esc(personName(b))}</b>`).join('<i class="pl">+</i>');
     const st0 = (p.entries || []).filter((e) => e.leg == null), F = st0.length ? flexOf(st0[0].b, Math.max(...st0.map((e) => Number(e.b.units) || 0))) : null;
-    return `<div class="ob-bet k-${st.cls}${F ? F.cls : ""}${n > 1 ? " ob-ride" : ""}${p.entries ? popCls(p) + onAir(idsOf(p)) : ""}" style="--c:${personCol(people[0])}"${tapAttrs(idsOf(p), p.pick)}>${fxRow(F)}
+    return `<div class="ob-bet k-${st.cls}${F ? F.cls : ""}${n > 1 ? " ob-ride" : ""}${p.entries ? popCls(p) + onAir(idsOf(p)) : ""}" style="--c:${personCol(people[0])}${F && F.k ? ";--d:" + btT() : ""}"${tapAttrs(idsOf(p), p.pick)}>${fxRow(F)}
       <div class="ob-avs">${people.map((b) => avHtml(b)).join("")}</div>
       <div class="ob-main"><div class="ob-who"><span class="nms">${names}</span>${tag ? `<span class="ob-tag">${esc(tag)}</span>` : n > 1 ? `<span class="ob-tag">${n >= 3 ? `Squad ×${n}` : "Ride"}</span>` : ""}</div>
         <div class="ob-pick">${hs}<span class="t">${esc(p.sel && isTd(p.sel.m) && p.sel.p && p.sel.p.nm ? p.sel.p.nm : p.pick)}</span>${ballTag(hb)}</div>
@@ -5717,7 +5832,7 @@ body.tv .rb-games.primeg.mason > .rb-pcol { padding-top: 16px; -webkit-mask-imag
     const cls = dead ? "lost" : all ? "won" : down ? "l" : live.length && live.every((l) => l.ev.res === "W") ? "w" : hit ? "e" : "pre";
     const lis = legs.map((l, i) => { const x = obLegTxt(l), c = l.st === "hit" ? "hit" : l.st === "miss" ? "miss" : x.cls; return `<li class="${c}"><i>${l.st === "hit" ? "✓" : l.st === "miss" ? "✕" : i + 1}</i><span class="t">${esc(l.t)}</span>${x.txt ? `<em>${esc(x.txt)}</em>` : ""}</li>`; }).join("");
     const F = flexOf(b);
-    return `<div class="ob-bet ob-par k-${cls}${F.cls}${onAir([b.id])}" style="--c:${personCol(b)}"${tapAttrs([b.id], personName(b) + "'s parlay")}>${fxRow(F)}
+    return `<div class="ob-bet ob-par k-${cls}${F.cls}${onAir([b.id])}" style="--c:${personCol(b)}${F.k ? ";--d:" + btT() : ""}"${tapAttrs([b.id], personName(b) + "'s parlay")}>${fxRow(F)}
       <div class="ob-avs">${avHtml(b)}</div>
       <div class="ob-main"><div class="ob-who"><b style="--c:${personCol(b)}">${esc(personName(b))}</b><span class="ob-tag">Parlay</span></div>
         <div class="ob-pick"><span class="t">${n}-leg parlay</span><span class="ob-odds num">${fOdds(b.odds)}</span></div>
@@ -5872,7 +5987,7 @@ body.tv .rb-games.primeg.mason > .rb-pcol { padding-top: 16px; -webkit-mask-imag
     }).join("");
   }
   // one straight bet in someone's column: the pick with its line, the price, the game, where it stands
-  const BT_DEF = { nuke: ["💣", "Nuke"], botd: ["👑", "Bet of the day"], whale: ["🐋", "Whale"], opal: ["🌌", "Galaxy opal"], lotto: ["🎰", "Lotto"], snipe: ["🎯", "Snipe"], long: ["🏹", "Long shot"], pink: ["💗", "Pink diamond"], prime: ["🌙", "Primetime"], dawg: ["🐶", "Dawg"], gold: ["🥇", "Gold"], silver: ["🥈", "Silver"], bronze: ["🥉", "Bronze"] };
+  const BT_DEF = { nuke: ["💣", "Nuke"], botd: ["👑", "Bet of the day"], whale: ["🐋", "Whale"], dart: ["🎯", "Dart"], opal: ["🌌", "Galaxy opal"], lotto: ["🎰", "Lotto"], snipe: ["<svg class=\"bt-ico\" viewBox=\"0 0 24 24\" aria-hidden=\"true\"><circle cx=\"12\" cy=\"12\" r=\"7.5\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2.2\"/><circle cx=\"12\" cy=\"12\" r=\"1.8\" fill=\"currentColor\"/><path d=\"M12 1.5v6M12 16.5v6M1.5 12h6M16.5 12h6\" stroke=\"currentColor\" stroke-width=\"2.2\" stroke-linecap=\"round\"/></svg>", "Snipe"], long: ["🏹", "Long shot"], pink: ["💗", "Pink diamond"], prime: ["🌙", "Primetime"], dawg: ["🐶", "Dawg"], gold: ["🥇", "Gold"], silver: ["🥈", "Silver"], bronze: ["🥉", "Bronze"] };
   const fxUSD = (v) => "$" + (Math.abs(v - Math.round(v)) < 0.005 ? Math.round(v).toLocaleString() : v.toFixed(2));
   const etDayOf = (t) => new Intl.DateTimeFormat("en-CA", { timeZone: "America/New_York" }).format(new Date(t));
   const etHr = (t) => Number(new Intl.DateTimeFormat("en-US", { timeZone: "America/New_York", hour: "numeric", hourCycle: "h23" }).format(new Date(t)));
@@ -5891,6 +6006,13 @@ body.tv .rb-games.primeg.mason > .rb-pcol { padding-top: 16px; -webkit-mask-imag
     }
     return (btDay = { key, botd: botd && botd.id, dawg: dawg && dawg.id });
   }
+  // a dart: a first or next TD scorer, or an exact bet (exact score, winning margin, next score / drive / play)
+  const BT_EXACT = /\b(exact(ly)?|correct score|winning margin)\b/i, BT_NEXT = /\b(first|1st|next)\s+(td|touchdown|scorer|goal ?scorer|goal|basket|field goal|score|scoring play|drive|play)\b/i;
+  const btDm = (x) => !!x && (x.m === "ftd" || x.m === "ntd");
+  function btDart(b) {
+    if (b.kind === "parlay") return !!(b.legSel && b.legSel.length && b.legSel.every(btDm));
+    return btDm(b.sel) || BT_EXACT.test(b.pick || "") || BT_NEXT.test(b.pick || "");
+  }
   // every type a bet fits, its look first
   function betTypes(b, units) {
     const o = Number(b.odds) || 0, par = b.kind === "parlay", n = par ? (b.legs || []).length : 1, u = units != null ? units : Number(b.units) || 0, usd = u * S.unit, m = b.sel && b.sel.m, d = btDaily();
@@ -5899,6 +6021,7 @@ body.tv .rb-games.primeg.mason > .rb-pcol { padding-top: 16px; -webkit-mask-imag
     if (usd >= NUKE_USD - 0.005) k.push("nuke");
     if (d.botd === b.id) k.push("botd");
     else if (usd >= WHALE_USD - 0.005 && usd < NUKE_USD - 0.005) k.push("whale");
+    if (btDart(b)) k.push("dart");
     if (!par && o > 100 && usd >= 40 - 0.005) k.push("opal");
     if (par && o >= 1000) k.push("lotto");
     if (!par && o >= SNIPER_ODDS) k.push("snipe");
@@ -5914,11 +6037,12 @@ body.tv .rb-games.primeg.mason > .rb-pcol { padding-top: 16px; -webkit-mask-imag
     const ks = betTypes(b, units), k = ks[0] || null, usd = (units != null ? units : Number(b.units) || 0) * S.unit;
     const name = k === "dawg" && btDaily().dawg === b.id ? "Dawg of the day" : k ? BT_DEF[k][1] : "";
     const side = ["bronze", "silver", "prime"].includes(k) || (k === "dawg" && name === "Dawg");
-    return { k, odds: k, more: ks.slice(1, 4), name, usd, win: usd * ppu(Number(b.odds) || 0), cls: k ? " fx bt bt-" + k : "", big: !!k && !side };
+    return { k, odds: k, more: ks.slice(1, 4), name, usd, win: usd * ppu(Number(b.odds) || 0), winU: (usd / S.unit) * ppu(Number(b.odds) || 0), cls: k ? " fx bt bt-" + k : "", big: !!k && !side };
   }
+  const btT = () => "-" + ((Date.now() / 1000) % 120).toFixed(2) + "s";
   function fxRow(f) {
     if (!f || !f.k) return "";
-    return `<div class="fx-row"><i class="fx-glint" aria-hidden="true"></i><span class="bt-chip bt-c-${f.k}">${BT_DEF[f.k][0]} ${esc(f.name)}</span>${f.more.map((x) => `<span class="bt-mini bt-c-${x}" title="${BT_DEF[x][1]}">${BT_DEF[x][0]}</span>`).join("")}<span class="fx-pay">To win <b>${fxUSD(f.win)}</b></span></div>`;
+    return `<div class="fx-row"><i class="fx-glint" aria-hidden="true"></i><i class="bt-art" aria-hidden="true"><b></b></i><span class="bt-chip bt-c-${f.k}">${BT_DEF[f.k][0]} ${esc(f.name)}</span>${f.more.map((x) => `<span class="bt-mini bt-c-${x}" title="${BT_DEF[x][1]}">${BT_DEF[x][0]}</span>`).join("")}<span class="fx-pay">To win <b>${fU(f.winU)}</b></span></div>`;
   }
   // next to a name: a badge for each kind of bet they've hit (the count when it's more than one)
   function btBadges(done, max) {
@@ -5939,7 +6063,7 @@ body.tv .rb-games.primeg.mason > .rb-pcol { padding-top: 16px; -webkit-mask-imag
     const k = sideKey(b), ride = !k ? [] : [...S.bets.values()].filter((x) => x !== b && x.status === "open" && personKey(x) !== personKey(b) && sideKey(x) && sideKey(x).g === k.g && sideKey(x).k === k.k && sideKey(x).s === k.s && x.sel.l === b.sel.l).map(personName);
     const meta = [mktName(sel), `${fU(b.units)} to win ${fU(b.units * ppu(b.odds))}`, b.tail ? `${b.tail.kind === "fade" ? "fading" : "tailing"} ${b.tail.name}` : "", ride.length ? "with " + [...new Set(ride)].join(", ") : ""].filter(Boolean).join(" · ");
     const F = flexOf(b);
-    return `<div class="pp-bet k-${st.cls}${F.cls}${popCls(p)}${onAir([b.id])}"${tapAttrs([b.id], b.pick)}>${fxRow(F)}
+    return `<div class="pp-bet k-${st.cls}${F.cls}${popCls(p)}${onAir([b.id])}"${F.k ? ` style="--d:${btT()}"` : ""}${tapAttrs([b.id], b.pick)}>${fxRow(F)}
       <div class="pp-top"><span class="pp-pick">${hs}<span class="t">${esc(sel && isTd(sel.m) && sel.p && sel.p.nm ? sel.p.nm : b.pick)}</span>${ballTag(hb)}</span><span class="pp-odds num">${fOdds(b.odds)}</span></div>
       ${g ? obStrip(g) : ""}<div class="pp-mid">${obPill(st, prop)}</div><div class="pp-meta">${esc(meta)}</div>${meter}</div>`;
   }
@@ -5950,7 +6074,7 @@ body.tv .rb-games.primeg.mason > .rb-pcol { padding-top: 16px; -webkit-mask-imag
     const c = dead ? "lost" : all ? "won" : down ? "l" : live.length && live.every((l) => l.ev.res === "W") ? "w" : hit ? "e" : "pre";
     const lis = legs.map((l, i) => { const x = obLegTxt(l), lc = l.st === "hit" ? "hit" : l.st === "miss" ? "miss" : x.cls; return `<li class="${lc}"><i>${l.st === "hit" ? "✓" : l.st === "miss" ? "✕" : i + 1}</i><span class="t">${esc(l.t)}</span>${x.txt ? `<em>${esc(x.txt)}</em>` : ""}</li>`; }).join("");
     const F = flexOf(b);
-    return `<div class="pp-bet pp-par k-${c}${F.cls}${onAir([b.id])}"${tapAttrs([b.id], personName(b) + "'s parlay")}>${fxRow(F)}
+    return `<div class="pp-bet pp-par k-${c}${F.cls}${onAir([b.id])}"${F.k ? ` style="--d:${btT()}"` : ""}${tapAttrs([b.id], personName(b) + "'s parlay")}>${fxRow(F)}
       <div class="pp-top"><span class="pp-pick"><span class="t">${n}-leg parlay</span></span><span class="pp-odds num">${fOdds(b.odds)}</span></div>
       <div class="pp-mid"><div class="ob-st k-${c}"><em>${dead ? "Dead" : all ? "All hit" : "Legs hit"}</em><b class="num">${hit} of ${n}</b>${live.length ? `<small>${live.length} live${down ? " · one's losing" : ""}</small>` : ""}</div></div>
       <div class="pp-meta">${esc(`Parlay · ${fU(b.units)} to win ${fU(b.units * ppu(b.odds))}`)}</div><ol class="ob-legs">${lis}</ol></div>`;
@@ -6304,13 +6428,13 @@ body.tv .rb-games.primeg.mason > .rb-pcol { padding-top: 16px; -webkit-mask-imag
     const F = flexOf(b), big = F.big;
     $("#slFx").innerHTML = F.k ? fxRow(F) : "";
     $("#slLegs").innerHTML = big && b.kind === "parlay" ? legsOf(b).map((l, i) => `<li style="--i:${i}"><i>${i + 1}</i><span>${esc(l.t)}</span><em>${esc(obLegTxt(l).txt)}</em></li>`).join("") : "";
-    $("#slWin").innerHTML = big ? `<em>To win</em><b>$0</b>` : "";
+    $("#slWin").innerHTML = big ? `<em>To win</em><b>0u</b>` : "";
     el.className = "slip" + (ride ? " ride" : vs ? " vs" : "") + (squad ? " squad" : "") + (big ? " big" : "") + F.cls; el.hidden = false; void el.offsetWidth; el.classList.add("on");
     if (big) {
       if ($("#slSub").textContent.trim().toLowerCase() === String(b.pick || "").trim().toLowerCase()) $("#slSub").textContent = "";   // "4-leg parlay" twice
       snSound("bc_sting", 0.9, 0);
       const w = $("#slWin b"), t0 = performance.now() + 1300;
-      const step = (t) => { const k = Math.min(1, Math.max(0, (t - t0) / 1400)); w.textContent = fxUSD(F.win * (1 - Math.pow(1 - k, 3))); if (k < 1 && !el.hidden) requestAnimationFrame(step); };
+      const step = (t) => { const k = Math.min(1, Math.max(0, (t - t0) / 1400)); w.textContent = fU(F.winU * (1 - Math.pow(1 - k, 3))); if (k < 1 && !el.hidden) requestAnimationFrame(step); };
       requestAnimationFrame(step);
     }
     if (squad) snSound("bc_sting", 0.85, 0);
@@ -6500,7 +6624,7 @@ body.tv .rb-games.primeg.mason > .rb-pcol { padding-top: 16px; -webkit-mask-imag
   // ---------- sheets ----------
   function openSheet(id) { $(id).hidden = false; }
   // keep every open screen current: when a new version is up, reload it (never mid-form or mid-animation)
-  const BUILD = "20261018222000";
+  const BUILD = "20261018224129";
   function checkBuild() {
     if (BUILD === "dev") return;
     fetch("version.json?t=" + Date.now(), { cache: "no-store" }).then((r) => (r.ok ? r.json() : null)).then((j) => {
@@ -6525,7 +6649,7 @@ body.tv .rb-games.primeg.mason > .rb-pcol { padding-top: 16px; -webkit-mask-imag
   // ----- game picker -----
   const F = { sel: null, legs: [], sport: "All", q: "", openG: null, custom: false, oddsTouched: false };
   const kindNow = () => document.querySelector('input[name="kind"]:checked').value;
-  const isTd = (m) => m === "td" || m === "ftd";
+  const isTd = (m) => m === "td" || m === "ftd" || m === "ntd";
   const isPP = (m) => typeof m === "string" && m.startsWith("pp_");
   const ppStat = (m) => String(m).slice(3);
   const PP_WORD = { g: ["goal", "goals"], a: ["assist", "assists"], pts: ["point", "points"], sog: ["SOG", "SOG"], sv: ["save", "saves"],
@@ -6570,7 +6694,7 @@ body.tv .rb-games.primeg.mason > .rb-pcol { padding-top: 16px; -webkit-mask-imag
   }
   function mkLabel(g, m, s, l, p) {
     if (isPP(m)) return ppLabel(p, m, s, l);
-    if (isTd(m)) return (p ? p.nm : "Player") + (m === "ftd" ? " first TD" : " anytime TD");
+    if (isTd(m)) return (p ? p.nm : "Player") + (m === "ftd" ? " first TD" : m === "ntd" ? " next TD" : " anytime TD");
     if (m === "ml") return (s === "a" ? g.a : g.h).nm + " ML";
     if (m === "sp") return (s === "a" ? g.a : g.h).nm + " " + (l == null ? "spread" : fLine(l));
     return (s === "o" ? "Over " : "Under ") + (l == null ? "" : trimL(l) + " ") + "· " + g.a.ab + "/" + g.h.ab;
@@ -6659,7 +6783,7 @@ body.tv .rb-games.primeg.mason > .rb-pcol { padding-top: 16px; -webkit-mask-imag
           mk += `<div class="tdmk ppmk">${PP_MK.map(([m, l]) => `<button type="button" class="mkt${F.tdG === g.id && F.tdM === m ? " on" : ""}" data-td="${esc(g.id)}|${m}"><span>${l}</span><b>${F.tdG === g.id && F.tdM === m ? "▾" : "›"}</b></button>`).join("")}</div>${F.tdG === g.id && isPP(F.tdM) ? tdPanel(g) : ""}`;
         const ppRowOf = (list) => `<div class="tdmk ppmk">${list.map(([m, l]) => `<button type="button" class="mkt${F.tdG === g.id && F.tdM === m ? " on" : ""}" data-td="${esc(g.id)}|${m}"><span>${l}</span><b>${F.tdG === g.id && F.tdM === m ? "▾" : "›"}</b></button>`).join("")}</div>`;
         if (g.sport === "CFB" || g.sport === "NFL")
-          mk += `<div class="tdmk">${[["td", "Anytime TD scorer"], ["ftd", "First TD scorer"]].map(([m, l]) => `<button type="button" class="mkt${F.tdG === g.id && F.tdM === m ? " on" : ""}" data-td="${esc(g.id)}|${m}"><span>${l}</span><b>${F.tdG === g.id && F.tdM === m ? "▾" : "›"}</b></button>`).join("")}</div>` + ppRowOf(PP_MKS[g.sport]) + (F.tdG === g.id ? tdPanel(g) : "");
+          mk += `<div class="tdmk">${[["td", "Anytime TD scorer"], ["ftd", "First TD scorer"], ...(g.st === "in" ? [["ntd", "Next TD scorer"]] : [])].map(([m, l]) => `<button type="button" class="mkt${F.tdG === g.id && F.tdM === m ? " on" : ""}" data-td="${esc(g.id)}|${m}"><span>${l}</span><b>${F.tdG === g.id && F.tdM === m ? "▾" : "›"}</b></button>`).join("")}</div>` + ppRowOf(PP_MKS[g.sport]) + (F.tdG === g.id ? tdPanel(g) : "");
         if (g.sport === "MLB" || g.sport === "NBA" || g.sport === "CBB") mk += ppRowOf(PP_MKS[g.sport]) + (F.tdG === g.id && isPP(F.tdM) ? tdPanel(g) : "");
       }
       return `<div class="g${open ? " open" : ""}"><button type="button" class="g-head" data-gopen="${esc(g.id)}" aria-expanded="${open}">
@@ -7147,6 +7271,7 @@ body.tv .rb-games.primeg.mason > .rb-pcol { padding-top: 16px; -webkit-mask-imag
         data.pick = mkLabel(g, F.sel.m, F.sel.s, F.sel.l, F.sel.p); data.sport = g.sport;
         data.sel = { g: g.id, m: F.sel.m, s: F.sel.s, l: F.sel.l, sp: g.sport, t: g.t }; starts.push(g.t);
         if (isTd(F.sel.m) || isPP(F.sel.m)) data.sel.p = F.sel.p;
+        if (F.sel.m === "ntd") { data.sel.pd0 = g.pd || 0; data.sel.c0 = Number(g.clk) || 0; }
       } else if (F.custom) {
         data.pick = $("#f-pick").value.trim().slice(0, 80);
         if (!data.pick) { err.textContent = "Add the pick, like “Judge 1+ HR”."; return; }
@@ -7156,7 +7281,7 @@ body.tv .rb-games.primeg.mason > .rb-pcol { padding-top: 16px; -webkit-mask-imag
       if (F.legs.length < 2) { err.textContent = "A parlay needs at least two legs."; return; }
       if (F.legs.some((x) => x.g && x.m !== "ml" && !isTd(x.m) && x.l == null)) { err.textContent = "One of your legs is missing its line."; return; }
       data.legs = F.legs.map(legText);
-      data.legSel = F.legs.map((x) => { const g = x.g && S.games.get(x.g); if (!x.g) return null; const o = { g: x.g, m: x.m, s: x.s, l: x.l, sp: x.sport, t: g ? g.t : null }; if (x.p) o.p = x.p; if (x.o) o.o = x.o; return o; });
+      data.legSel = F.legs.map((x) => { const g = x.g && S.games.get(x.g); if (!x.g) return null; const o = { g: x.g, m: x.m, s: x.s, l: x.l, sp: x.sport, t: g ? g.t : null }; if (x.p) o.p = x.p; if (x.o) o.o = x.o; if (x.m === "ntd" && g) { o.pd0 = g.pd || 0; o.c0 = Number(g.clk) || 0; } return o; });
       F.legs.forEach((x) => { const g = x.g && S.games.get(x.g); if (g) starts.push(g.t); });
       const sp = [...new Set(F.legs.map((x) => x.sport).filter(Boolean))];
       data.sport = sp.length === 1 ? sp[0] : sp.length ? "Mixed" : "";
@@ -7762,7 +7887,7 @@ body.tv .rb-games.primeg.mason > .rb-pcol { padding-top: 16px; -webkit-mask-imag
       $("#nkWarnTitle").textContent = "Nuke Inbound";
       $("#nkWarnSub").textContent = `Tactical nuke armed · ${fU(b.units)} on the line`;
       $("#nkWarnPick").textContent = b.pick;
-      $("#nkWarnAmt").textContent = `${fUSD(b.units * S.unit)} to win ${fUSD(b.units * ppu(b.odds) * S.unit)}  ·  ${fOdds(b.odds)}`;
+      $("#nkWarnAmt").textContent = `${fU(b.units)} (${fUSD(b.units * S.unit)}) to win ${fU(b.units * ppu(b.odds))}  ·  ${fOdds(b.odds)}`;
       ov.classList.remove("out"); ov.hidden = false;
       playSfx("nukeplace", 0.95);
       const stop = reduced ? null : mushroom($("#nkWarnCv"), { scale: 0.85, hot: 0.8, dur: 9500 });
@@ -7883,7 +8008,7 @@ body.tv .rb-games.primeg.mason > .rb-pcol { padding-top: 16px; -webkit-mask-imag
       $("#whTitle").textContent = kind === "win" ? "Whale Hit" : "Whale Alert";
       $("#whSub").textContent = kind === "win" ? "The whale ate" : `${fU(b.units)} on the line`;
       $("#whPick").textContent = b.pick;
-      $("#whAmt").textContent = kind === "win" ? `${fUSD(n * S.unit, true)}  ·  ${fU(n, true)}` : `${fUSD(b.units * S.unit)} to win ${fUSD(b.units * ppu(b.odds) * S.unit)}  ·  ${fOdds(b.odds)}`;
+      $("#whAmt").textContent = kind === "win" ? `${fUSD(n * S.unit, true)}  ·  ${fU(n, true)}` : `${fU(b.units)} (${fUSD(b.units * S.unit)}) to win ${fU(b.units * ppu(b.odds))}  ·  ${fOdds(b.odds)}`;
       ov.classList.remove("go", "out"); ov.hidden = false; void ov.offsetWidth; ov.classList.add("go");
       playSfx("whale", 1);
       const stopWaves = reduced ? null : waves($("#whBack"), $("#whFront"), dur);
@@ -9393,7 +9518,7 @@ body.tv .rb-games.primeg.mason > .rb-pcol { padding-top: 16px; -webkit-mask-imag
     for (const g of want.values()) {
       try {
         const j = await fetch(`https://site.api.espn.com/apis/site/v2/sports/${ESPN[g.sport]}/summary?event=${g.eid || g.id}`).then((r) => r.json());
-        const plays = (j.scoringPlays || []).filter((p) => /touchdown/i.test((p.type && p.type.text) || "")).map((p) => { const nm = scorerOf(p.text); return { who: normNm(nm), name: nm, text: p.text || "", type: (p.type && p.type.text) || "", team: p.team && String(p.team.id) }; });
+        const plays = (j.scoringPlays || []).filter((p) => /touchdown/i.test((p.type && p.type.text) || "")).map((p) => { const nm = scorerOf(p.text); return { who: normNm(nm), name: nm, text: p.text || "", type: (p.type && p.type.text) || "", team: p.team && String(p.team.id), pd: p.period ? p.period.number : null, c: p.clock ? clockSec(p.clock.displayValue) : null }; });
         const c = j.header && j.header.competitions && j.header.competitions[0], final = !!(c && c.status && c.status.type && c.status.type.completed);
         const apply = () => { const prev = TDP.get(g.id); TDP.set(g.id, { plays, final, at: Date.now() }); tdCheck(g, prev ? prev.plays : null, plays); render(); if (!cardBusy) autoSettle(); };
         if (final || g.id.startsWith("trial-")) apply(); else setTimeout(apply, tvDelay() * 1000);
@@ -9406,10 +9531,11 @@ body.tv .rb-games.primeg.mason > .rb-pcol { padding-top: 16px; -webkit-mask-imag
   const tdHold = new Set(), tdCard = new Set(), crewTdQ = []; let crewTdT = 0;
   function tdHit(sel, before, now) {
     const me = normNm(sel.p && sel.p.nm), had = before.filter((p) => p.who === me).length, has = now.filter((p) => p.who === me);
+    if (sel.m === "ntd") { const b4 = before.filter((p) => tdAfter(p, sel)), nw = now.filter((p) => tdAfter(p, sel)); return !b4.length && nw.length && nw[0].who === me ? nw[0] : null; }
     return sel.m === "td" ? (has.length > had ? has[has.length - 1] : null) : !before.length && now.length && now[0].who === me ? now[0] : null;
   }
   const tdPeople = (sel, hit) => { const p = sel.p || {}; return [{ nm: p.nm || hit.name, hs: p.hs || "", j: p.j || "", pos: p.pos || "", sh: p.nm }]; };
-  const tdType = (sel, hit, b) => (sel.m === "ftd" ? "First TD · " : "") + hit.type + (b.kind === "parlay" ? " · parlay leg" : "");
+  const tdType = (sel, hit, b) => (sel.m === "ftd" ? "First TD · " : sel.m === "ntd" ? "Next TD · " : "") + hit.type + (b.kind === "parlay" ? " · parlay leg" : "");
   function tdCheck(g, before, now) {
     if (!before || !clipsOn()) return; // first look: no fireworks for touchdowns that already happened
     let mine = null; const crew = [];
