@@ -2926,6 +2926,134 @@ body.tv.pplb .roomtv:not([hidden]) canvas { width: 76px; height: 76px; grid-row:
 .ob-bet .ob-st > .tl { position: absolute; top: -6px; right: -6px; width: 15px; height: 15px; margin: 0; }
 .pp-mid .ob-st > .tl { margin-right: 2px; }
 .rb-st > .tl { width: 11px; height: 11px; margin-right: 7px; }
+/* ---------- motion by size: every type card gets a loop of reflected light; +1000 or $50+ (hype) gets the wild stuff ---------- */
+.bt-art > u, .bt-art > s, .bt-art > em { position: absolute; inset: 0; pointer-events: none; text-decoration: none; font-style: normal; }
+.bt-art > u { z-index: 3; animation: btSweepX 5s ease-in-out var(--d, 0s) infinite;
+  background: linear-gradient(115deg, transparent 38%, color-mix(in srgb, var(--fxk) 18%, transparent) 45%, rgba(255,255,255,.2) 49%, color-mix(in srgb, var(--fxk) 12%, transparent) 53%, transparent 60%); }
+.bt-metal .bt-art > u { mix-blend-mode: overlay; animation-duration: 4s; background: linear-gradient(115deg, transparent 30%, rgba(255,255,255,.25) 40%, rgba(255,255,255,.95) 47%, rgba(255,255,255,.35) 51%, transparent 60%); }
+.bt-metal .bt-art > b::before { display: none; }
+.bt-botd::after, .bt-prime::after { content: none; }
+/* small cards hold still apart from the reflection */
+.bt:not(.bt-hype) .bt-art::before, .bt:not(.bt-hype) .bt-art::after, .bt:not(.bt-hype) .bt-art > b::before, .bt:not(.bt-hype) .bt-art > b::after { animation: none; }
+.bt-snipe:not(.bt-hype) .bt-art::before, .bt-long:not(.bt-hype) .bt-art::before, .bt-opal:not(.bt-hype) .bt-art > b::before { display: none; }
+.bt-dart .bt-art > b::before { transform: rotate(18deg); }
+.bt-art > s, .bt-art > em { display: none; }
+/* hype: a light running round the edge, sparks rising, a stronger glow; the words get a hard shadow so they still read */
+.bt-hype { --fxg: color-mix(in srgb, var(--fxk) 60%, transparent); }
+.bt-hype .bt-art > s { display: block; z-index: 4; padding: 3px; container-type: size; overflow: hidden;
+  -webkit-mask: linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0); -webkit-mask-composite: xor; mask: linear-gradient(#000 0 0) content-box exclude, linear-gradient(#000 0 0); }
+.bt-hype .bt-art > s::before { content: ""; position: absolute; left: 50%; top: 50%; width: 150cqmax; aspect-ratio: 1; translate: -50% -50%;
+  background: conic-gradient(from 0deg, transparent 0 58%, var(--fxk) 72%, #fff 79%, var(--fxk) 86%, transparent 97%); animation: btSpin 3s linear var(--d, 0s) infinite; }
+.bt-hype .bt-art > em { display: block; z-index: 2; overflow: hidden; -webkit-mask-image: linear-gradient(to top, #000, rgba(0,0,0,.55) 55%, transparent); mask-image: linear-gradient(to top, #000, rgba(0,0,0,.55) 55%, transparent); }
+.bt-hype .bt-art > em::before { content: ""; position: absolute; left: 0; right: 0; top: 0; bottom: -120px; opacity: .85; animation: btRise 5s linear var(--d, 0s) infinite;
+  background: radial-gradient(circle, var(--fxk) 0 1.7px, transparent 2.5px) 0 0 / 46px 40px, radial-gradient(circle, rgba(255,255,255,.95) 0 1.2px, transparent 2px) 23px 17px / 70px 60px, radial-gradient(circle, color-mix(in srgb, var(--fxk) 60%, #fff) 0 1px, transparent 1.8px) 9px 11px / 31px 30px; }
+@keyframes btRise { to { translate: 0 -120px; } }
+.bt-hype :is(.pp-pick, .ob-pick) .t, .slip.bt-hype .sl-pick { filter: drop-shadow(0 2px 5px rgba(0,0,0,.95)) drop-shadow(0 0 1px rgba(0,0,0,.9)); }
+.bt-hype :is(.pp-meta, .ob-meta, .ob-strip, .pp-top, .fx-pay, .ob-who, .ob-legs) { text-shadow: 0 1px 3px rgba(0,0,0,.95); }
+.bt-hype:not(.bt-metal) .pp-mid, .bt-hype:not(.bt-metal) .ob-st { background-color: rgba(4,6,10,.55); border-radius: 9px; }
+.bt-hype:not(.bt-metal) .pp-mid { padding: 5px 8px; }
+.bt-hype .bt-chip { animation: btChipPulse 1.6s ease-in-out infinite; }
+@keyframes btChipPulse { 50% { box-shadow: 0 0 0 2px #fff, 0 0 22px var(--fxk); } }
+/* the team's logo, faint at the side (not where a type has its own emblem) */
+.bt-tlg { position: absolute; right: -14px; top: 50%; height: 118%; max-height: 150px; width: auto; translate: 0 -50%; opacity: .15; z-index: 0; pointer-events: none; }
+:is(.bt-metal, .bt-dart, .bt-snipe, .bt-lockdown, .bt-punchout, .bt-dinger, .bt-chains) .bt-tlg { display: none; }
+
+/* six: the anytime TD. Striped turf, the yard lines, the end zone in the scorer's team colors and its pylon; hype: the pylon flashes, confetti */
+.bt-six { --fxk: #7dffb0; --fxb: linear-gradient(135deg, #f4f7f2, #1f8a4c 22%, #0e4d2a 40%, #f4f7f2 50%, #1f8a4c 62%, #0e4d2a 80%, #f4f7f2); --fxbs: 300% 100%; --fxg: rgba(60,220,130,.3);
+  --fxi: linear-gradient(180deg, rgba(0,0,0,.38), rgba(0,0,0,.62)), repeating-linear-gradient(90deg, rgba(255,255,255,.1) 0 2px, transparent 2px 52px), repeating-linear-gradient(90deg, #12502b 0 26px, #155c32 26px 52px); animation: fxFoil 8s linear infinite; }
+.bt-six .bt-art::before { top: 0; bottom: 0; right: 0; width: 19%; opacity: .9; box-shadow: inset 3px 0 0 rgba(255,255,255,.6);
+  background: repeating-linear-gradient(135deg, rgba(255,255,255,.09) 0 3px, transparent 3px 12px), linear-gradient(90deg, color-mix(in srgb, var(--tc1, #1f8a4c) 72%, #000), color-mix(in srgb, var(--tc1, #1f8a4c) 50%, #000)); }
+.bt-six .bt-art::after { width: 7px; height: 22px; right: calc(19% - 4px); bottom: 8px; border-radius: 2px; background: linear-gradient(#ffa040, #ff5a00); box-shadow: 0 0 10px rgba(255,120,20,.7); }
+.bt-six.bt-hype .bt-art::after { animation: btPylon .5s steps(2, jump-none) var(--d, 0s) infinite alternate; }
+@keyframes btPylon { from { box-shadow: 0 0 6px rgba(255,120,20,.5); } to { box-shadow: 0 0 26px 6px rgba(255,140,30,.95); } }
+.bt-six.bt-hype .bt-art > b::after { inset: -120px 0 0 0; animation: btFall 4s linear var(--d, 0s) infinite;
+  background: radial-gradient(circle, var(--tc1, #ffffff) 0 2.2px, transparent 2.8px) 0 0 / 40px 40px, radial-gradient(circle, #ffd23f 0 1.8px, transparent 2.4px) 17px 9px / 60px 60px, radial-gradient(circle, #ffffff 0 1.5px, transparent 2.1px) 31px 21px / 24px 30px, radial-gradient(circle, var(--tc2, #7dffb0) 0 1.8px, transparent 2.4px) 7px 33px / 52px 40px; }
+@keyframes btFall { to { translate: 0 120px; } }
+.bt-c-six { --fxk: #7dffb0; } .bt-chip.bt-c-six { background: linear-gradient(135deg, #f4f7f2, #2fbf6a); }
+.bt-six :is(.pp-pick, .ob-pick) .t, .slip.bt-six .sl-pick { color: #ffffff; text-shadow: 0 0 12px rgba(60,220,130,.45); }
+
+/* move the chains: a yardage over. The field at night, the chain along the bottom, the first-down marker; hype: the chain runs */
+.bt-chains { --fxk: #ff9f1a; --fxb: linear-gradient(135deg, #ff9f1a, #0f2a1a 22%, #ffd08a 44%, #ff9f1a 50%, #0f2a1a 72%, #ff9f1a); --fxbs: 300% 100%; --fxg: rgba(255,159,26,.28);
+  --fxi: linear-gradient(180deg, rgba(0,0,0,.45), rgba(0,0,0,.64)), repeating-linear-gradient(90deg, rgba(255,255,255,.09) 0 2px, transparent 2px 46px), linear-gradient(180deg, #13402a, #0f3320); animation: fxFoil 8s linear infinite; }
+.bt-chains .bt-art::before { left: 0; right: -24px; bottom: 1px; height: 10px; background: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='24' height='12' viewBox='0 0 24 12'%3E%3Crect x='2' y='2' width='16' height='8' rx='4' fill='none' stroke='%23d9dde3' stroke-width='2'/%3E%3Crect x='14' y='4.5' width='10' height='3' rx='1.5' fill='%23d9dde3'/%3E%3C/svg%3E") 0 50% / 20px 10px repeat-x; opacity: .42; }
+.bt-chains .bt-art::after { right: 9px; top: 0; bottom: 0; width: 4px; background: linear-gradient(rgba(255,179,64,.75), rgba(196,106,0,.5)); box-shadow: 0 0 10px rgba(255,159,26,.4); }
+.bt-chains.bt-hype .bt-art::before { animation: btLink .6s linear var(--d, 0s) infinite; }
+@keyframes btLink { to { translate: -20px 0; } }
+.bt-c-chains { --fxk: #ff9f1a; } .bt-chip.bt-c-chains { background: linear-gradient(135deg, #ffd08a, #ff9f1a); }
+
+/* dinger: a home run. A ballpark at night, the light towers, the wall, a ball's seams; hype: fireworks */
+.bt-dinger { --fxk: #ffd23f; --fxb: linear-gradient(135deg, #ffffff, #c8102e 20%, #0b2a5b 40%, #ffffff 50%, #c8102e 66%, #0b2a5b 82%, #ffffff); --fxbs: 300% 100%; --fxg: rgba(255,210,63,.3);
+  --fxi: radial-gradient(40% 60% at 6% -10%, rgba(255,250,220,.26), transparent 70%), radial-gradient(40% 60% at 94% -10%, rgba(255,250,220,.26), transparent 70%), linear-gradient(transparent 84%, rgba(255,210,63,.32) 84% 84.7%, transparent 84.7%), linear-gradient(180deg, #091331 0%, #0c1c40 62%, #0c2b19 77%, #0a2214 100%); animation: fxFoil 8s linear infinite; }
+.bt-dinger .bt-art::before { width: 118px; aspect-ratio: 1; right: -16px; top: 50%; margin-top: -59px; background: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='120' height='120' viewBox='0 0 120 120'%3E%3Ccircle cx='60' cy='60' r='54' fill='none' stroke='white' stroke-opacity='.5' stroke-width='2'/%3E%3Cpath d='M28 14 C50 40 50 80 28 106' fill='none' stroke='%23e0303a' stroke-width='2'/%3E%3Cpath d='M92 14 C70 40 70 80 92 106' fill='none' stroke='%23e0303a' stroke-width='2'/%3E%3Cpath d='M28 14 C50 40 50 80 28 106' fill='none' stroke='%23e0303a' stroke-width='8' stroke-dasharray='1.6 5'/%3E%3Cpath d='M92 14 C70 40 70 80 92 106' fill='none' stroke='%23e0303a' stroke-width='8' stroke-dasharray='1.6 5'/%3E%3C/svg%3E") center / contain no-repeat; opacity: .32; }
+.bt-dinger.bt-hype .bt-art > b::before, .bt-dinger.bt-hype .bt-art > b::after { width: 110px; aspect-ratio: 1; border-radius: 50%; opacity: 0; background: repeating-conic-gradient(var(--fwc, #ffd23f) 0 3deg, transparent 3deg 20deg);
+  -webkit-mask-image: radial-gradient(closest-side, transparent 34%, #000 37% 70%, transparent 73%); mask-image: radial-gradient(closest-side, transparent 34%, #000 37% 70%, transparent 73%); animation: btBurst 2.4s ease-out var(--d, 0s) infinite; }
+.bt-dinger.bt-hype .bt-art > b::before { right: 12%; top: -14px; }
+.bt-dinger.bt-hype .bt-art > b::after { --fwc: #ff5a7a; right: 40%; top: 18%; width: 84px; animation-delay: calc(var(--d, 0s) + 1.2s); }
+@keyframes btBurst { 0% { scale: .15; opacity: 0; } 8% { opacity: 1; } 70% { opacity: .75; } 100% { scale: 1.35; opacity: 0; } }
+.bt-c-dinger { --fxk: #ffd23f; } .bt-chip.bt-c-dinger { color: #fff; background: linear-gradient(135deg, #c8102e, #0b2a5b); }
+.bt-dinger :is(.pp-pick, .ob-pick) .t, .slip.bt-dinger .sl-pick { color: #fff6d6; text-shadow: 0 0 12px rgba(255,210,63,.4); }
+
+/* punchout: a strikeout over. Slate with the strike zone chalked at the side and a K; hype: the zone and the K flash */
+.bt-punchout { --fxk: #ff5d5d; --fxb: linear-gradient(135deg, #ffffff, #1b2a44 25%, #ff5d5d 45%, #ffffff 52%, #1b2a44 75%, #ffffff); --fxbs: 300% 100%; --fxg: rgba(255,93,93,.28);
+  --fxi: radial-gradient(circle, rgba(255,255,255,.05) 0 1px, transparent 1.4px) 0 0 / 6px 6px, linear-gradient(180deg, #151b24, #0c1017); animation: fxFoil 8s linear infinite; }
+.bt-punchout .bt-art::before { width: 54px; height: 68px; right: 14px; bottom: 12px; border: 2px solid rgba(255,255,255,.26);
+  background: linear-gradient(90deg, transparent 32.5%, rgba(255,255,255,.22) 32.5% 34.5%, transparent 34.5% 65.5%, rgba(255,255,255,.22) 65.5% 67.5%, transparent 67.5%), linear-gradient(transparent 32.5%, rgba(255,255,255,.22) 32.5% 34.5%, transparent 34.5% 65.5%, rgba(255,255,255,.22) 65.5% 67.5%, transparent 67.5%); }
+.bt-punchout .bt-art::after { content: "K"; right: 27px; bottom: 26px; font: 900 38px/1 Inter, sans-serif; color: rgba(255,93,93,.32); }
+.bt-punchout.bt-hype .bt-art::before { animation: btZone .9s steps(2, jump-none) var(--d, 0s) infinite alternate; }
+.bt-punchout.bt-hype .bt-art::after { animation: btK .9s ease-in-out var(--d, 0s) infinite alternate; }
+@keyframes btZone { from { border-color: rgba(255,255,255,.3); } to { border-color: #ff5d5d; box-shadow: 0 0 18px rgba(255,93,93,.6), inset 0 0 18px rgba(255,93,93,.35); } }
+@keyframes btK { from { color: rgba(255,93,93,.35); text-shadow: none; } to { color: #ff7070; text-shadow: 0 0 18px #ff3d3d; } }
+.bt-c-punchout { --fxk: #ff5d5d; } .bt-chip.bt-c-punchout { color: #fff; background: linear-gradient(135deg, #ff5d5d, #1b2a44); }
+
+/* light the lamp: an anytime goal. Dark ice, the red and blue lines, skate cuts; hype: the goal light spins */
+.bt-lamp { --fxk: #ff4545; --fxb: linear-gradient(135deg, #e8f7ff, #7fd0ff 25%, #ffffff 45%, #ff4545 52%, #ffffff 60%, #7fd0ff 80%, #e8f7ff); --fxbs: 300% 100%; --fxg: rgba(140,210,255,.3);
+  --fxi: linear-gradient(90deg, transparent calc(50% - 2px), rgba(255,60,60,.32) calc(50% - 2px) calc(50% + 2px), transparent calc(50% + 2px)), linear-gradient(90deg, transparent 22%, rgba(70,140,255,.28) 22% 23.2%, transparent 23.2% 76.8%, rgba(70,140,255,.28) 76.8% 78%, transparent 78%),
+    radial-gradient(circle, rgba(255,255,255,.07) 0 1px, transparent 1.5px) 0 0 / 9px 11px, linear-gradient(180deg, #11273a, #0a1825); animation: fxFoil 8s linear infinite; }
+.bt-lamp .bt-art::before { inset: 0; background: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='220' height='120' viewBox='0 0 220 120'%3E%3Cg fill='none' stroke='white' stroke-opacity='.11' stroke-width='1.2'%3E%3Cpath d='M-10 30 C40 10 90 50 150 20 S230 40 240 26'/%3E%3Cpath d='M-10 84 C30 100 80 70 130 92 S200 70 240 88'/%3E%3Cpath d='M20 120 C40 80 80 66 110 60'/%3E%3Cpath d='M120 0 C140 30 170 44 230 50'/%3E%3C/g%3E%3C/svg%3E") 0 0 / 220px 120px; }
+.bt-lamp.bt-hype .bt-art > b::before { width: 520px; aspect-ratio: 1; right: -260px; top: -260px; border-radius: 50%; animation: btSpin 1.5s linear var(--d, 0s) infinite;
+  background: conic-gradient(from 0deg, rgba(255,50,50,.45) 0 18deg, transparent 18deg 180deg, rgba(255,50,50,.45) 180deg 198deg, transparent 198deg);
+  -webkit-mask-image: radial-gradient(closest-side, #000 8%, transparent); mask-image: radial-gradient(closest-side, #000 8%, transparent); }
+.bt-lamp.bt-hype .bt-art > b::after { width: 44px; height: 44px; right: -10px; top: -10px; border-radius: 50%; background: radial-gradient(circle, #fff 0 10%, #ff3030 36%, rgba(255,48,48,0) 70%); animation: btPulse .5s ease-in-out var(--d, 0s) infinite alternate; }
+.bt-c-lamp { --fxk: #ff4545; } .bt-chip.bt-c-lamp { color: #fff; background: linear-gradient(135deg, #ff4545, #b30d0d); }
+.bt-lamp :is(.pp-pick, .ob-pick) .t, .slip.bt-lamp .sl-pick { color: #eaf8ff; text-shadow: 0 0 12px rgba(140,210,255,.5); }
+
+/* bucket: points or threes over. Hardwood, the three-point arc at the side; hype: he's on fire */
+.bt-bucket { --fxk: #ff8a2a; --fxb: linear-gradient(135deg, #ff8a2a, #1a0e05 18%, #ff8a2a 36%, #ffd0a0 50%, #ff8a2a 64%, #1a0e05 82%, #ff8a2a); --fxbs: 300% 100%; --fxg: rgba(255,138,42,.3);
+  --fxi: linear-gradient(180deg, rgba(12,6,2,.6), rgba(12,6,2,.78)), repeating-linear-gradient(90deg, #8a5426 0 17px, #74451f 17px 18px, #94602f 18px 35px, #6b3e1b 35px 36px); animation: fxFoil 8s linear infinite; }
+.bt-bucket .bt-art::before { inset: 0; background: radial-gradient(circle at calc(100% + 40px) 50%, transparent 0 96px, rgba(255,255,255,.24) 96px 99px, transparent 99px), linear-gradient(90deg, transparent calc(100% - 46px), rgba(255,138,42,.16) calc(100% - 46px)); }
+.bt-bucket.bt-hype .bt-art > b::before { left: 0; right: -46px; bottom: -6px; height: 46%; transform-origin: 50% 100%; opacity: .7;
+  background: radial-gradient(45% 100% at 50% 100%, rgba(255,232,130,.95), rgba(255,120,20,.7) 42%, rgba(255,40,0,.28) 66%, transparent 80%) 0 100% / 46px 100% repeat-x;
+  -webkit-mask-image: linear-gradient(to top, #000 35%, transparent); mask-image: linear-gradient(to top, #000 35%, transparent); animation: btFlame .45s ease-in-out var(--d, 0s) infinite alternate, btFlameX 2s linear var(--d, 0s) infinite; }
+@keyframes btFlame { from { scale: 1 .82; } to { scale: 1.04 1.14; } }
+@keyframes btFlameX { to { translate: -46px 0; } }
+.bt-c-bucket { --fxk: #ff8a2a; } .bt-chip.bt-c-bucket { color: #1a0e05; background: linear-gradient(135deg, #ffb066, #ff7a1a); }
+.bt-bucket :is(.pp-pick, .ob-pick) .t, .slip.bt-bucket .sl-pick { color: #fff1e4; text-shadow: 0 0 12px rgba(255,138,42,.5); }
+
+/* shootout: an over on a big total. A scoreboard's amber lamps; hype: the board goes off */
+.bt-shootout { --fxk: #ffb020; --fxb: linear-gradient(135deg, #ffb020, #2a1400 20%, #ffe08a 45%, #ff5a00 55%, #2a1400 80%, #ffb020); --fxbs: 300% 100%; --fxg: rgba(255,160,32,.3);
+  --fxi: radial-gradient(circle, rgba(255,176,32,.1) 0 1.6px, transparent 2.2px) 0 0 / 7px 7px, linear-gradient(180deg, #120c06, #0a0704); animation: fxFoil 6s linear infinite; }
+.bt-shootout .bt-art::before { inset: 0; background: radial-gradient(70% 80% at 100% 100%, rgba(255,90,0,.26), transparent 70%), radial-gradient(60% 70% at 0% 100%, rgba(255,176,32,.16), transparent 70%); }
+.bt-shootout.bt-hype .bt-art::after { inset: 0; background: radial-gradient(circle, rgba(255,200,80,.55) 0 1.7px, transparent 2.3px) 0 0 / 14px 14px; animation: btTw .5s steps(2, jump-none) var(--d, 0s) infinite alternate; }
+.bt-shootout.bt-hype .bt-art > b::before { inset: 0; background: linear-gradient(90deg, transparent 30%, rgba(255,176,32,.28) 50%, transparent 70%); animation: btSweepX 1.5s linear var(--d, 0s) infinite; }
+.bt-c-shootout { --fxk: #ffb020; } .bt-chip.bt-c-shootout { color: #1a0e00; background: linear-gradient(135deg, #ffe08a, #ff8a00); }
+.bt-shootout :is(.pp-pick, .ob-pick) .t, .slip.bt-shootout .sl-pick { color: #fff3dc; text-shadow: 0 0 12px rgba(255,176,32,.55); }
+
+/* lockdown: a 1u+ under. Brushed steel, rivets, a vault dial; hype: the dial spins */
+.bt-lockdown { --fxk: #a9c4dc; --fxb: linear-gradient(135deg, #e8eef4, #4a5562 22%, #1a1f26 40%, #c9d4df 50%, #4a5562 64%, #1a1f26 80%, #e8eef4); --fxbs: 300% 100%; --fxg: rgba(169,196,220,.25);
+  --fxi: radial-gradient(circle at 10px 10px, rgba(255,255,255,.4) 0 2px, rgba(0,0,0,.45) 2.6px, transparent 3.6px), radial-gradient(circle at 10px calc(100% - 10px), rgba(255,255,255,.4) 0 2px, rgba(0,0,0,.45) 2.6px, transparent 3.6px),
+    repeating-linear-gradient(0deg, rgba(255,255,255,.035) 0 1px, rgba(0,0,0,.05) 1px 3px), linear-gradient(160deg, #3a434e, #232a32 50%, #1a1f26); animation: fxFoil 8s linear infinite; }
+.bt-lockdown .bt-art::before { width: 120px; aspect-ratio: 1; right: -14px; top: 50%; margin-top: -60px; background: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='120' height='120' viewBox='0 0 120 120'%3E%3Ccircle cx='60' cy='60' r='56' fill='none' stroke='%23dfe8f1' stroke-opacity='.55' stroke-width='3'/%3E%3Cg stroke='%23dfe8f1' stroke-opacity='.6' stroke-width='1.6'%3E%3Cline x1='60' y1='9' x2='60' y2='17' transform='rotate(0 60 60)'/%3E%3Cline x1='60' y1='9' x2='60' y2='13' transform='rotate(6 60 60)'/%3E%3Cline x1='60' y1='9' x2='60' y2='13' transform='rotate(12 60 60)'/%3E%3Cline x1='60' y1='9' x2='60' y2='13' transform='rotate(18 60 60)'/%3E%3Cline x1='60' y1='9' x2='60' y2='13' transform='rotate(24 60 60)'/%3E%3Cline x1='60' y1='9' x2='60' y2='17' transform='rotate(30 60 60)'/%3E%3Cline x1='60' y1='9' x2='60' y2='13' transform='rotate(36 60 60)'/%3E%3Cline x1='60' y1='9' x2='60' y2='13' transform='rotate(42 60 60)'/%3E%3Cline x1='60' y1='9' x2='60' y2='13' transform='rotate(48 60 60)'/%3E%3Cline x1='60' y1='9' x2='60' y2='13' transform='rotate(54 60 60)'/%3E%3Cline x1='60' y1='9' x2='60' y2='17' transform='rotate(60 60 60)'/%3E%3Cline x1='60' y1='9' x2='60' y2='13' transform='rotate(66 60 60)'/%3E%3Cline x1='60' y1='9' x2='60' y2='13' transform='rotate(72 60 60)'/%3E%3Cline x1='60' y1='9' x2='60' y2='13' transform='rotate(78 60 60)'/%3E%3Cline x1='60' y1='9' x2='60' y2='13' transform='rotate(84 60 60)'/%3E%3Cline x1='60' y1='9' x2='60' y2='17' transform='rotate(90 60 60)'/%3E%3Cline x1='60' y1='9' x2='60' y2='13' transform='rotate(96 60 60)'/%3E%3Cline x1='60' y1='9' x2='60' y2='13' transform='rotate(102 60 60)'/%3E%3Cline x1='60' y1='9' x2='60' y2='13' transform='rotate(108 60 60)'/%3E%3Cline x1='60' y1='9' x2='60' y2='13' transform='rotate(114 60 60)'/%3E%3Cline x1='60' y1='9' x2='60' y2='17' transform='rotate(120 60 60)'/%3E%3Cline x1='60' y1='9' x2='60' y2='13' transform='rotate(126 60 60)'/%3E%3Cline x1='60' y1='9' x2='60' y2='13' transform='rotate(132 60 60)'/%3E%3Cline x1='60' y1='9' x2='60' y2='13' transform='rotate(138 60 60)'/%3E%3Cline x1='60' y1='9' x2='60' y2='13' transform='rotate(144 60 60)'/%3E%3Cline x1='60' y1='9' x2='60' y2='17' transform='rotate(150 60 60)'/%3E%3Cline x1='60' y1='9' x2='60' y2='13' transform='rotate(156 60 60)'/%3E%3Cline x1='60' y1='9' x2='60' y2='13' transform='rotate(162 60 60)'/%3E%3Cline x1='60' y1='9' x2='60' y2='13' transform='rotate(168 60 60)'/%3E%3Cline x1='60' y1='9' x2='60' y2='13' transform='rotate(174 60 60)'/%3E%3Cline x1='60' y1='9' x2='60' y2='17' transform='rotate(180 60 60)'/%3E%3Cline x1='60' y1='9' x2='60' y2='13' transform='rotate(186 60 60)'/%3E%3Cline x1='60' y1='9' x2='60' y2='13' transform='rotate(192 60 60)'/%3E%3Cline x1='60' y1='9' x2='60' y2='13' transform='rotate(198 60 60)'/%3E%3Cline x1='60' y1='9' x2='60' y2='13' transform='rotate(204 60 60)'/%3E%3Cline x1='60' y1='9' x2='60' y2='17' transform='rotate(210 60 60)'/%3E%3Cline x1='60' y1='9' x2='60' y2='13' transform='rotate(216 60 60)'/%3E%3Cline x1='60' y1='9' x2='60' y2='13' transform='rotate(222 60 60)'/%3E%3Cline x1='60' y1='9' x2='60' y2='13' transform='rotate(228 60 60)'/%3E%3Cline x1='60' y1='9' x2='60' y2='13' transform='rotate(234 60 60)'/%3E%3Cline x1='60' y1='9' x2='60' y2='17' transform='rotate(240 60 60)'/%3E%3Cline x1='60' y1='9' x2='60' y2='13' transform='rotate(246 60 60)'/%3E%3Cline x1='60' y1='9' x2='60' y2='13' transform='rotate(252 60 60)'/%3E%3Cline x1='60' y1='9' x2='60' y2='13' transform='rotate(258 60 60)'/%3E%3Cline x1='60' y1='9' x2='60' y2='13' transform='rotate(264 60 60)'/%3E%3Cline x1='60' y1='9' x2='60' y2='17' transform='rotate(270 60 60)'/%3E%3Cline x1='60' y1='9' x2='60' y2='13' transform='rotate(276 60 60)'/%3E%3Cline x1='60' y1='9' x2='60' y2='13' transform='rotate(282 60 60)'/%3E%3Cline x1='60' y1='9' x2='60' y2='13' transform='rotate(288 60 60)'/%3E%3Cline x1='60' y1='9' x2='60' y2='13' transform='rotate(294 60 60)'/%3E%3Cline x1='60' y1='9' x2='60' y2='17' transform='rotate(300 60 60)'/%3E%3Cline x1='60' y1='9' x2='60' y2='13' transform='rotate(306 60 60)'/%3E%3Cline x1='60' y1='9' x2='60' y2='13' transform='rotate(312 60 60)'/%3E%3Cline x1='60' y1='9' x2='60' y2='13' transform='rotate(318 60 60)'/%3E%3Cline x1='60' y1='9' x2='60' y2='13' transform='rotate(324 60 60)'/%3E%3Cline x1='60' y1='9' x2='60' y2='17' transform='rotate(330 60 60)'/%3E%3Cline x1='60' y1='9' x2='60' y2='13' transform='rotate(336 60 60)'/%3E%3Cline x1='60' y1='9' x2='60' y2='13' transform='rotate(342 60 60)'/%3E%3Cline x1='60' y1='9' x2='60' y2='13' transform='rotate(348 60 60)'/%3E%3Cline x1='60' y1='9' x2='60' y2='13' transform='rotate(354 60 60)'/%3E%3C/g%3E%3Ccircle cx='60' cy='60' r='34' fill='none' stroke='%23dfe8f1' stroke-opacity='.45' stroke-width='2'/%3E%3Cg stroke='%23dfe8f1' stroke-opacity='.6' stroke-width='5' stroke-linecap='round'%3E%3Cpath d='M60 60 L60 30'/%3E%3Cpath d='M60 60 L86 75'/%3E%3Cpath d='M60 60 L34 75'/%3E%3C/g%3E%3Ccircle cx='60' cy='60' r='9' fill='%23dfe8f1' fill-opacity='.6'/%3E%3C/svg%3E") center / contain no-repeat; opacity: .5; }
+.bt-lockdown.bt-hype .bt-art::before { animation: btDial 6s cubic-bezier(.6,0,.3,1) var(--d, 0s) infinite; }
+@keyframes btDial { 0%, 100% { rotate: 0deg; } 30% { rotate: 220deg; } 60% { rotate: 90deg; } 80% { rotate: 140deg; } }
+.bt-c-lockdown { --fxk: #a9c4dc; } .bt-chip.bt-c-lockdown { color: #0b0f14; background: linear-gradient(135deg, #e8eef4, #8fa3b8); }
+
+/* rivalry: a division game. The card split in both teams' colors with a bolt down the seam; hype: the bolt crackles */
+.bt-rivalry { --fxk: #ffe14d; --fxb: linear-gradient(115deg, var(--ta, #8892a0), #ffffff 46%, #ffe14d 50%, #ffffff 54%, var(--th, #8892a0)); --fxg: rgba(255,225,77,.25);
+  --fxi: linear-gradient(180deg, rgba(0,0,0,.4), rgba(0,0,0,.62)), linear-gradient(115deg, color-mix(in srgb, var(--ta, #3a4250) 62%, #000) 0 49.6%, rgba(255,225,77,.5) 49.6% 50.4%, color-mix(in srgb, var(--th, #3a4250) 62%, #000) 50.4% 100%); }
+.bt-rivalry .bt-art::after { left: 50%; top: -8%; height: 116%; width: 46px; margin-left: -23px; background: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='60' height='200' viewBox='0 0 60 200' preserveAspectRatio='none'%3E%3Cpath d='M34 0 L18 70 L36 74 L14 140 L32 144 L20 200 L46 130 L28 126 L48 64 L30 60 L44 0 Z' fill='%23ffe14d'/%3E%3C/svg%3E") center / 100% 100% no-repeat; opacity: .4; rotate: 25deg; filter: drop-shadow(0 0 6px rgba(255,225,77,.6)); }
+.bt-rivalry.bt-hype .bt-art::after { animation: btCrackle 1.2s steps(1) var(--d, 0s) infinite; }
+@keyframes btCrackle { 0%, 100% { opacity: .4; } 10% { opacity: 1; } 14% { opacity: .2; } 18% { opacity: .95; } 30% { opacity: .45; } 62% { opacity: .9; } 66% { opacity: .35; } }
+.bt-c-rivalry { --fxk: #ffe14d; } .bt-chip.bt-c-rivalry { color: #111; background: linear-gradient(135deg, #fff3a8, #ffd000); }
 .pp-none { padding: 16px 6px; font: 600 15px/1.3 Inter, sans-serif; color: #8d97a8; text-align: center; }
 .pp-bet { position: relative; flex: none; display: grid; gap: 6px; padding: 10px 12px 11px 13px; border-radius: 12px; background: rgba(255,255,255,.035); border: 1px solid rgba(190,210,240,.1); border-left: 5px solid rgba(190,210,240,.28); }
 .pp-bet.k-lost { opacity: .7; }
@@ -5953,7 +6081,7 @@ body.tv .rb-games.primeg.mason > .rb-pcol { padding-top: 16px; -webkit-mask-imag
     const hs = p.sel && p.sel.p && p.sel.p.hs ? `<img class="ob-hs" src="${esc(p.sel.p.hs)}" alt="" loading="lazy" referrerpolicy="no-referrer" onerror="this.remove()">` : "";
     const names = people.map((b) => `<b style="--c:${personCol(b)}">${esc(personName(b))}</b>`).join('<i class="pl">+</i>');
     const st0 = (p.entries || []).filter((e) => e.leg == null), F = st0.length ? flexOf(st0[0].b, Math.max(...st0.map((e) => Number(e.b.units) || 0))) : null;
-    return `<div class="ob-bet k-${st.cls}${F ? F.cls : ""}${n > 1 ? " ob-ride" : ""}${p.entries ? popCls(p) + onAir(idsOf(p)) : ""}" style="--c:${personCol(people[0])}${F && F.k ? ";--d:" + btT() : ""}"${tapAttrs(idsOf(p), p.pick)}>${fxRow(F)}
+    return `<div class="ob-bet k-${st.cls}${F ? F.cls : ""}${n > 1 ? " ob-ride" : ""}${p.entries ? popCls(p) + onAir(idsOf(p)) : ""}" style="--c:${personCol(people[0])}${F && F.k ? ";" + F.sty : ""}"${tapAttrs(idsOf(p), p.pick)}>${fxRow(F)}
       <div class="ob-avs">${people.map((b) => avHtml(b)).join("")}</div>
       <div class="ob-main"><div class="ob-who"><span class="nms">${names}</span>${tag ? `<span class="ob-tag">${esc(tag)}</span>` : n > 1 ? `<span class="ob-tag">${n >= 3 ? `Squad ×${n}` : "Ride"}</span>` : ""}</div>
         <div class="ob-pick">${hs}<span class="t">${esc(p.sel && isTd(p.sel.m) && p.sel.p && p.sel.p.nm ? p.sel.p.nm : p.pick)}</span>${ballTag(hb)}</div>
@@ -5971,7 +6099,7 @@ body.tv .rb-games.primeg.mason > .rb-pcol { padding-top: 16px; -webkit-mask-imag
     const cls = dead ? "lost" : all ? "won" : down ? "l" : live.length && live.every((l) => l.ev.res === "W") ? "w" : hit ? "e" : "pre";
     const lis = legs.map((l, i) => { const x = obLegTxt(l), c = l.st === "hit" ? "hit" : l.st === "miss" ? "miss" : x.cls; return `<li class="${c}"><i>${l.st === "hit" ? "✓" : l.st === "miss" ? "✕" : i + 1}</i><span class="t">${esc(l.t)}</span>${x.txt ? `<em>${esc(x.txt)}</em>` : ""}</li>`; }).join("");
     const F = flexOf(b);
-    return `<div class="ob-bet ob-par k-${cls}${F.cls}${onAir([b.id])}" style="--c:${personCol(b)}${F.k ? ";--d:" + btT() : ""}"${tapAttrs([b.id], personName(b) + "'s parlay")}>${fxRow(F)}
+    return `<div class="ob-bet ob-par k-${cls}${F.cls}${onAir([b.id])}" style="--c:${personCol(b)}${F.k ? ";" + F.sty : ""}"${tapAttrs([b.id], personName(b) + "'s parlay")}>${fxRow(F)}
       <div class="ob-avs">${avHtml(b)}</div>
       <div class="ob-main"><div class="ob-who"><b style="--c:${personCol(b)}">${esc(personName(b))}</b><span class="ob-tag">Parlay</span></div>
         <div class="ob-pick"><span class="t">${n}-leg parlay</span><span class="ob-odds num">${fOdds(b.odds)}</span></div>
@@ -6126,7 +6254,7 @@ body.tv .rb-games.primeg.mason > .rb-pcol { padding-top: 16px; -webkit-mask-imag
     }).join("");
   }
   // one straight bet in someone's column: the pick with its line, the price, the game, where it stands
-  const BT_DEF = { nuke: ["💣", "Nuke"], botd: ["👑", "Bet of the day"], whale: ["🐋", "Whale"], dart: ["🎯", "Dart"], opal: ["🌌", "Galaxy opal"], lotto: ["🎰", "Lotto"], snipe: ["<svg class=\"bt-ico\" viewBox=\"0 0 24 24\" aria-hidden=\"true\"><circle cx=\"12\" cy=\"12\" r=\"7.5\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2.2\"/><circle cx=\"12\" cy=\"12\" r=\"1.8\" fill=\"currentColor\"/><path d=\"M12 1.5v6M12 16.5v6M1.5 12h6M16.5 12h6\" stroke=\"currentColor\" stroke-width=\"2.2\" stroke-linecap=\"round\"/></svg>", "Snipe"], long: ["🏹", "Long shot"], prime: ["🌙", "Primetime"], dawg: ["🐶", "Dawg"], gold: ["🥇", "Gold"], silver: ["🥈", "Silver"], bronze: ["🥉", "Bronze"] };
+  const BT_DEF = { nuke: ["💣", "Nuke"], botd: ["👑", "Bet of the day"], whale: ["🐋", "Whale"], dart: ["🎯", "Dart"], dinger: ["💥", "Dinger"], lamp: ["🚨", "Light the lamp"], bucket: ["🏀", "Bucket"], punchout: ["⚾", "Punchout"], six: ["🏈", "Six"], chains: ["⛓️", "Move the chains"], opal: ["🌌", "Galaxy opal"], lotto: ["🎰", "Lotto"], snipe: ["<svg class=\"bt-ico\" viewBox=\"0 0 24 24\" aria-hidden=\"true\"><circle cx=\"12\" cy=\"12\" r=\"7.5\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2.2\"/><circle cx=\"12\" cy=\"12\" r=\"1.8\" fill=\"currentColor\"/><path d=\"M12 1.5v6M12 16.5v6M1.5 12h6M16.5 12h6\" stroke=\"currentColor\" stroke-width=\"2.2\" stroke-linecap=\"round\"/></svg>", "Snipe"], long: ["🏹", "Long shot"], rivalry: ["⚔️", "Rivalry"], shootout: ["🎆", "Shootout"], lockdown: ["🔒", "Lockdown"], prime: ["🌙", "Primetime"], dawg: ["🐶", "Dawg"], gold: ["🥇", "Gold"], silver: ["🥈", "Silver"], bronze: ["🥉", "Bronze"] };
   const fxUSD = (v) => "$" + (Math.abs(v - Math.round(v)) < 0.005 ? Math.round(v).toLocaleString() : v.toFixed(2));
   const ET_DAY = new Intl.DateTimeFormat("en-CA", { timeZone: "America/New_York" }), ET_HR = new Intl.DateTimeFormat("en-US", { timeZone: "America/New_York", hour: "numeric", hourCycle: "h23" });
   const etDayOf = (t) => ET_DAY.format(new Date(t)), etHr = (t) => Number(ET_HR.format(new Date(t)));
@@ -6161,6 +6289,18 @@ body.tv .rb-games.primeg.mason > .rb-pcol { padding-top: 16px; -webkit-mask-imag
     const t = b.kind === "parlay" ? Math.min(...(b.legSel || []).map(tOf).filter(Boolean), b.startAt || Infinity) : tOf(b.sel) || b.startAt;
     return !!t && isFinite(t) && pa > t + 60e3;
   }
+  const NFL_DIV = {}; [["BUF", "MIA", "NE", "NYJ"], ["BAL", "CIN", "CLE", "PIT"], ["HOU", "IND", "JAX", "TEN"], ["DEN", "KC", "LV", "LAC"], ["DAL", "NYG", "PHI", "WSH"], ["CHI", "DET", "GB", "MIN"], ["ATL", "CAR", "NO", "TB"], ["ARI", "LAR", "SF", "SEA"]].forEach((d, i) => d.forEach((t) => (NFL_DIV[t] = i + 1)));
+  function btSport(x) {
+    if (!x) return "";
+    if (x.m === "td") return "six";
+    const st = isPP(x.m) ? ppStat(x.m) : "";
+    if (st === "mlb_hr") return "dinger";
+    if (st === "g") return "lamp";
+    if (["nba_pts", "nba_3pm", "nba_pra"].includes(st) && x.s !== "u") return "bucket";
+    if (st === "mlb_k" && x.s !== "u") return "punchout";
+    if (["fb_pyd", "fb_ruyd", "fb_ryd", "fb_rry"].includes(st) && x.s !== "u") return "chains";
+    return "";
+  }
   // every type a bet fits, its look first
   function betTypes(b, units) {
     const o = Number(b.odds) || 0, par = b.kind === "parlay", n = par ? (b.legs || []).length : 1, u = units != null ? units : Number(b.units) || 0, usd = u * S.unit, m = b.sel && b.sel.m, d = btDaily(b.placedAt);
@@ -6170,10 +6310,21 @@ body.tv .rb-games.primeg.mason > .rb-pcol { padding-top: 16px; -webkit-mask-imag
     if (d.botd === b.id) k.push("botd");
     else if (usd >= WHALE_USD - 0.005 && usd < NUKE_USD - 0.005) k.push("whale");
     if (btDart(b)) k.push("dart");
+    // the sport's own: a home run, a goal, a bucket, strikeouts, a TD scorer, yardage (a parlay of all one kind counts)
+    let sk = par ? ((b.legSel || []).length && b.legSel.every((x) => btSport(x) && btSport(x) === btSport(b.legSel[0])) ? btSport(b.legSel[0]) : "") : btSport(b.sel);
+    if (!sk && !par && !b.sel) { const t = b.pick || ""; sk = /\b(hr|home ?runs?|homers?|dingers?)\b/i.test(t) && b.sport !== "NHL" ? "dinger" : /\banytime (td|touchdown)\b/i.test(t) ? "six" : /\b(anytime goal|goal ?scorer)\b/i.test(t) ? "lamp" : ""; }
+    if (sk) k.push(sk);
     if (!par && o > 100 && usd >= 40 - 0.005) k.push("opal");
     if (par && o >= 1000) k.push("lotto");
     if (!par && o >= SNIPER_ODDS) k.push("snipe");
     if (par && o >= 400 && o < 1000) k.push("long");
+    // the game: a side in a division rivalry (1u+), a shootout (an over on a big total), a lockdown (a 1u+ under)
+    if (!par && b.sel && ["ml", "sp"].includes(m) && u >= 1 - 0.005 && (b.sel.sp || b.sport) === "NFL") { const g = gameOf(b.sel); if (g && NFL_DIV[g.a.ab] && NFL_DIV[g.a.ab] === NFL_DIV[g.h.ab]) k.push("rivalry"); }
+    if (!par && m === "tot") {
+      const l = Number(b.sel.l), big = { NFL: 49.5, CFB: 55.5, NBA: 230, CBB: 150, MLB: 9.5, NHL: 6.5 }[b.sel.sp || b.sport];
+      if (b.sel.s === "o" && big && l >= big) k.push("shootout");
+      if (b.sel.s === "u" && u >= 1 - 0.005) k.push("lockdown");
+    }
     if (night && (m === "ml" || m === "sp")) k.push("prime");
     if (!par && m === "ml" && o > 100) k.push("dawg");
     // the medals by stake (a whale or a nuke already says how big it is)
@@ -6183,13 +6334,23 @@ body.tv .rb-games.primeg.mason > .rb-pcol { padding-top: 16px; -webkit-mask-imag
   function flexOf(b, units) {
     const ks = betTypes(b, units), k = ks[0] || null, usd = (units != null ? units : Number(b.units) || 0) * S.unit;
     const name = k === "dawg" && btDaily(b.placedAt).dawg === b.id ? "Dawg of the day" : k ? BT_DEF[k][1] : "";
-    const side = ["bronze", "silver", "prime"].includes(k) || (k === "dawg" && name === "Dawg"), live = !!k && btLive(b);
-    return { k, odds: k, more: ks.slice(1, 4), name, usd, win: usd * ppu(Number(b.odds) || 0), winU: (usd / S.unit) * ppu(Number(b.odds) || 0), cls: k ? " fx bt bt-" + k + (live ? " bt-islive" : "") + (["bronze", "silver", "gold"].includes(k) ? " bt-metal" : "") : "", live, big: !!k && !side };
+    const side = ["bronze", "silver", "prime", "six", "chains", "dinger", "punchout", "lamp", "bucket", "shootout", "lockdown", "rivalry"].includes(k) || (k === "dawg" && name === "Dawg"), live = !!k && btLive(b);
+    const hype = !!k && ((Number(b.odds) || 0) >= 1000 || usd >= 50 - 0.005);
+    // the team: its colors (and both teams' for a rivalry), its logo when the pick is a side or one of its players
+    const vars = {}, g = b.kind !== "parlay" && b.sel ? gameOf(b.sel) : null, hex = (c) => (/^#[0-9a-f]{6}$/i.test(c || "") ? c : "");
+    let tlg = "";
+    if (g && k) {
+      if (hex(g.a.col)) vars["--ta"] = hex(g.a.col); if (hex(g.h.col)) vars["--th"] = hex(g.h.col);
+      const tm = b.sel.s === "a" || b.sel.s === "h" ? g[b.sel.s] : null;
+      if (tm) { if (hex(tm.col)) vars["--tc1"] = hex(tm.col); if (hex(tm.alt)) vars["--tc2"] = hex(tm.alt); if (/^https:\/\/[^\s"'()<>]+$/.test(tm.lg || "")) tlg = tm.lg; }
+    }
+    const sty = "--d:" + btT() + Object.entries(vars).map(([a, v]) => ";" + a + ":" + v).join("");
+    return { k, odds: k, more: ks.slice(1, 4), name, usd, win: usd * ppu(Number(b.odds) || 0), winU: (usd / S.unit) * ppu(Number(b.odds) || 0), cls: k ? " fx bt bt-" + k + (live ? " bt-islive" : "") + (["bronze", "silver", "gold"].includes(k) ? " bt-metal" : "") + (hype ? " bt-hype" : "") : "", live, hype, vars, sty, tlg, big: !!k && (!side || hype) };
   }
   const btT = () => "-" + ((Date.now() / 1000) % 120).toFixed(2) + "s";
   function fxRow(f) {
     if (!f || !f.k) return "";
-    return `<div class="fx-row"><i class="fx-glint" aria-hidden="true"></i><i class="bt-art" aria-hidden="true"><b></b></i><span class="bt-chip bt-c-${f.k}">${BT_DEF[f.k][0]} ${f.live ? '<i class="bt-lv">⚡ Live</i> ' : ""}${esc(f.name)}</span>${f.more.map((x) => `<span class="bt-mini bt-c-${x}" title="${BT_DEF[x][1]}">${BT_DEF[x][0]}</span>`).join("")}<span class="fx-pay">To win <b>${fU(f.winU)}</b></span></div>`;
+    return `<div class="fx-row"><i class="fx-glint" aria-hidden="true"></i><i class="bt-art" aria-hidden="true"><b></b><u></u><s></s><em></em>${f.tlg ? `<img class="bt-tlg" src="${esc(f.tlg)}" alt="" loading="lazy" referrerpolicy="no-referrer" onerror="this.remove()">` : ""}</i><span class="bt-chip bt-c-${f.k}">${BT_DEF[f.k][0]} ${f.live ? '<i class="bt-lv">⚡ Live</i> ' : ""}${esc(f.name)}</span>${f.more.map((x) => `<span class="bt-mini bt-c-${x}" title="${BT_DEF[x][1]}">${BT_DEF[x][0]}</span>`).join("")}<span class="fx-pay">To win <b>${fU(f.winU)}</b></span></div>`;
   }
   // next to a name: a badge for each kind of bet they've hit (the count when it's more than one)
   function btBadges(done, max) {
@@ -6203,7 +6364,8 @@ body.tv .rb-games.primeg.mason > .rb-pcol { padding-top: 16px; -webkit-mask-imag
   // ---------- profiles: everyone's whole record, their achievements (and the live ones), their best and worst ----------
   const PROFILES = [{ id: "me" }, { id: "mindel", nm: "Mindel" }, { id: "brad", nm: "Brad" }, { id: "julian", nm: "Julian" }];
   const BT_HOW = { nuke: "Cash a $100+ bet", botd: "Cash the day's biggest straight", whale: "Cash a $50+ bet", dart: "First or next TD, or an exact bet", opal: "Cash plus money for $40+", lotto: "Cash a +1000 parlay", snipe: "Cash a +250 straight",
-    long: "Cash a +400 parlay", prime: "Night game ML or spread", dawg: "Cash an underdog ML", gold: "Cash a 3u bet", silver: "Cash a 2u bet", bronze: "Cash a 1u parlay" };
+    long: "Cash a +400 parlay", dinger: "Cash a home run", lamp: "Cash an anytime goal", bucket: "Cash a points or threes over", punchout: "Cash a strikeout over",
+    six: "Cash an anytime TD scorer", chains: "Cash a yardage over", rivalry: "Cash a 1u+ side in a division game", shootout: "Cash an over on a big total", lockdown: "Cash a 1u+ under", prime: "Night game ML or spread", dawg: "Cash an underdog ML", gold: "Cash a 3u bet", silver: "Cash a 2u bet", bronze: "Cash a 1u parlay" };
   const pfName = (pr) => (pr.id === "me" ? meName() : pr.nm);
   const pfDate = (t) => (t ? new Date(t).toLocaleDateString("en-US", { month: "short", day: "numeric" }) : "");
   function pfOf(b) {
@@ -6298,7 +6460,7 @@ body.tv .rb-games.primeg.mason > .rb-pcol { padding-top: 16px; -webkit-mask-imag
     const k = sideKey(b), ride = !k ? [] : [...S.bets.values()].filter((x) => x !== b && x.status === "open" && personKey(x) !== personKey(b) && sideKey(x) && sideKey(x).g === k.g && sideKey(x).k === k.k && sideKey(x).s === k.s && x.sel.l === b.sel.l).map(personName);
     const meta = [mktName(sel), `${fU(b.units)} to win ${fU(b.units * ppu(b.odds))}`, b.tail ? `${b.tail.kind === "fade" ? "fading" : "tailing"} ${b.tail.name}` : "", ride.length ? "with " + [...new Set(ride)].join(", ") : ""].filter(Boolean).join(" · ");
     const F = flexOf(b);
-    return `<div class="pp-bet k-${st.cls}${F.cls}${popCls(p)}${onAir([b.id])}"${F.k ? ` style="--d:${btT()}"` : ""}${tapAttrs([b.id], b.pick)}>${fxRow(F)}
+    return `<div class="pp-bet k-${st.cls}${F.cls}${popCls(p)}${onAir([b.id])}"${F.k ? ` style="${F.sty}"` : ""}${tapAttrs([b.id], b.pick)}>${fxRow(F)}
       <div class="pp-top"><span class="pp-pick">${hs}<span class="t">${esc(sel && isTd(sel.m) && sel.p && sel.p.nm ? sel.p.nm : b.pick)}</span>${ballTag(hb)}</span><span class="pp-odds num">${fOdds(b.odds)}</span></div>
       ${g ? obStrip(g) : ""}<div class="pp-mid">${obPill(st, prop)}</div><div class="pp-meta">${esc(meta)}</div>${meter}</div>`;
   }
@@ -6309,7 +6471,7 @@ body.tv .rb-games.primeg.mason > .rb-pcol { padding-top: 16px; -webkit-mask-imag
     const c = dead ? "lost" : all ? "won" : down ? "l" : live.length && live.every((l) => l.ev.res === "W") ? "w" : hit ? "e" : "pre";
     const lis = legs.map((l, i) => { const x = obLegTxt(l), lc = l.st === "hit" ? "hit" : l.st === "miss" ? "miss" : x.cls; return `<li class="${lc}"><i>${l.st === "hit" ? "✓" : l.st === "miss" ? "✕" : i + 1}</i><span class="t">${esc(l.t)}</span>${x.txt ? `<em>${esc(x.txt)}</em>` : ""}</li>`; }).join("");
     const F = flexOf(b);
-    return `<div class="pp-bet pp-par k-${c}${F.cls}${onAir([b.id])}"${F.k ? ` style="--d:${btT()}"` : ""}${tapAttrs([b.id], personName(b) + "'s parlay")}>${fxRow(F)}
+    return `<div class="pp-bet pp-par k-${c}${F.cls}${onAir([b.id])}"${F.k ? ` style="${F.sty}"` : ""}${tapAttrs([b.id], personName(b) + "'s parlay")}>${fxRow(F)}
       <div class="pp-top"><span class="pp-pick"><span class="t">${n}-leg parlay</span></span><span class="pp-odds num">${fOdds(b.odds)}</span></div>
       <div class="pp-mid"><div class="ob-st k-${c}">${tlHtml(tlPar(c, legs))}<em>${dead ? "Dead" : all ? "All hit" : "Legs hit"}</em><b class="num">${hit} of ${n}</b>${live.length ? `<small>${live.length} live${down ? " · one's losing" : ""}</small>` : ""}</div></div>
       <div class="pp-meta">${esc(`Parlay · ${fU(b.units)} to win ${fU(b.units * ppu(b.odds))}`)}</div><ol class="ob-legs">${lis}</ol></div>`;
@@ -6661,6 +6823,8 @@ body.tv .rb-games.primeg.mason > .rb-pcol { padding-top: 16px; -webkit-mask-imag
     $("#slAmt").textContent = `${fU(b.units)} (${fUSD(b.units * S.unit)}) to win ${fU(b.units * ppu(b.odds))}`;
     $("#slSub").textContent = b.tail ? (b.tail.kind === "fade" ? "Fading " : "Tailing ") + b.tail.name : ride ? (viaLeg(b) ? "A leg rides with " : "Riding with ") + others.join(" + ") : vs ? (isMe(b) ? "Against " : "Fading ") + vs.map(personName).join(" + ") : b.kind === "parlay" ? (b.legs || []).length + "-leg parlay" : b.sport || "";
     const F = flexOf(b), big = F.big;
+    for (const v of ["--ta", "--th", "--tc1", "--tc2"]) el.style.removeProperty(v);
+    for (const [v, c] of Object.entries(F.vars || {})) el.style.setProperty(v, c);
     $("#slFx").innerHTML = F.k ? fxRow(F) : "";
     $("#slLegs").innerHTML = big && b.kind === "parlay" ? legsOf(b).map((l, i) => `<li style="--i:${i}"><i>${i + 1}</i><span>${esc(l.t)}</span><em>${esc(obLegTxt(l).txt)}</em></li>`).join("") : "";
     $("#slWin").innerHTML = big ? `<em>To win</em><b>0u</b>` : "";
@@ -6859,7 +7023,7 @@ body.tv .rb-games.primeg.mason > .rb-pcol { padding-top: 16px; -webkit-mask-imag
   // ---------- sheets ----------
   function openSheet(id) { $(id).hidden = false; }
   // keep every open screen current: when a new version is up, reload it (never mid-form or mid-animation)
-  const BUILD = "20261018231244";
+  const BUILD = "20261018232748";
   function checkBuild() {
     if (BUILD === "dev") return;
     fetch("version.json?t=" + Date.now(), { cache: "no-store" }).then((r) => (r.ok ? r.json() : null)).then((j) => {
