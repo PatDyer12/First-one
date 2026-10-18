@@ -2350,6 +2350,17 @@ body.tv .rb-pcol.pr .rb-hs-side.r .rb-st { justify-self: start; }
 .jumbo.hz .jb-screen #jbBg { filter: blur(36px) brightness(.5) saturate(.85) sepia(.2); }
 .jumbo.lux #pipVid { transition: opacity .25s ease; }
 .dj-cv { position: absolute; inset: 0; width: 100%; height: 100%; pointer-events: none; }
+body.tv.nflday #cfield { display: block; position: fixed; inset: 0; z-index: 0; pointer-events: none; background: #05070b url(img/field_nfl.jpg?v=1) center bottom / cover no-repeat; opacity: .62; }
+body.tv.nflday #cfield svg { display: none; }
+body.tv.nflday #cfield::after { content: ""; position: absolute; inset: 0; background: radial-gradient(1300px 760px at 50% 40%, rgba(4,6,10,.1), rgba(4,6,10,.62) 100%); }
+body.tv.nflday #cfCrowd { display: block; position: absolute; inset: 0; width: 100%; height: 100%; }
+body.tv.nflday::before { background: linear-gradient(180deg, #05080d, #0a1a10) !important; }
+body.tv.nflday .rb-g, body.tv.nflday .rb-sec, body.tv.nflday .rb-card { background: linear-gradient(180deg, rgba(12,16,22,.88), rgba(7,10,14,.93)) !important; border-color: rgba(190,210,240,.14); box-shadow: inset 0 1px 0 rgba(255,255,255,.07), 0 18px 40px rgba(0,0,0,.45); }
+body.tv.nflday .modechip { background: rgba(232,25,44,.16) !important; color: #ffe2e4 !important; border-color: rgba(255,150,155,.55) !important; }
+body.tv.nflday #ticker { background: linear-gradient(180deg, rgba(10,20,12,.97), rgba(6,12,8,.99)); border-top-color: rgba(190,210,240,.25); }
+/* the bets column on the stadium: a dark glass panel behind it, each ticket solid enough to read over the turf */
+body.tv.nflday .rb-games.primeg:not(.mason) > .rb-pcol.pr, body.tv.cfb .rb-games.primeg:not(.mason) > .rb-pcol.pr { background: rgba(6,9,13,.74); border-radius: 18px; padding: 12px 12px 0; -webkit-backdrop-filter: blur(6px); backdrop-filter: blur(6px); }
+body.tv.nflday .ob-bet, body.tv.cfb .ob-bet { background-color: rgba(10,13,18,.9); }
 .rb-card.later .lt-list { display: flex; flex-direction: column; padding: 0 14px 12px; }
 .lt-g { display: grid; grid-template-columns: 88px auto minmax(0, 1fr) auto; align-items: center; column-gap: 14px; padding: 9px 4px; border-top: 1px solid rgba(255,255,255,.06); font: 700 16px/1.2 Inter, sans-serif; color: #dfe5ee; }
 .lt-g:first-child { border-top: 0; }
@@ -5936,7 +5947,7 @@ body.tv .rb-games.primeg.mason > .rb-pcol { padding-top: 16px; -webkit-mask-imag
   // ---------- sheets ----------
   function openSheet(id) { $(id).hidden = false; }
   // keep every open screen current: when a new version is up, reload it (never mid-form or mid-animation)
-  const BUILD = "20261018075552";
+  const BUILD = "20261018154030";
   function checkBuild() {
     if (BUILD === "dev") return;
     fetch("version.json?t=" + Date.now(), { cache: "no-store" }).then((r) => (r.ok ? r.json() : null)).then((j) => {
@@ -8856,6 +8867,35 @@ body.tv .rb-games.primeg.mason > .rb-pcol { padding-top: 16px; -webkit-mask-imag
     if (tag) whoTag(tag, P.ms, true);
     return true;
   }
+  const posSeen = new Map(); let driveAt = 0, driveTurn = 0;
+  function driveBreak(now) {
+    if (!fbDay() || !clipsOn() || PHONE() || trial) return false;
+    const mine = new Set(); for (const b of S.bets.values()) if (b.status === "open") for (const x of selsOf(b)) mine.add(String(x.g));
+    let hit = null;
+    for (const g of S.games.values()) {
+      if ((g.sport !== "NFL" && g.sport !== "CFB") || g.st !== "in" || !mine.has(String(g.id))) continue;
+      const pos = g.sit && g.sit.pos ? String(g.sit.pos) : null, was = posSeen.get(g.id);
+      if (!pos) continue;
+      posSeen.set(g.id, pos);
+      if (was && was !== pos && !hit) hit = g;   // the ball changed hands since the last look
+    }
+    if (!hit || now - driveAt < (slateMode() === "busy" ? 8 : 3.5) * 60e3 || now - lastAny < 60e3 || clipBusy()) return false;
+    const b = [...S.bets.values()].find((x) => x.status === "open" && selsOf(x).some((y) => String(y.g) === String(hit.id)));
+    if (!b) return false;
+    const t = String(hit.a.id) === String(hit.sit.pos) ? hit.a : hit.h, dj = now - lastDj >= DJ_DUE;
+    let P = dj ? pickClip(newSong(CLIPS.filter((c) => c.dj))) : null;
+    if (!P) {
+      const nfl = CLIPS.filter((c) => (c.sport === hit.sport || /^sounds\/nfl\//.test(c.base)) && c.pl !== "simpson" && /hype|up|vibe/.test(c.mood));
+      const team = nfl.filter((c) => c.fan === t.ab), any = nfl.filter((c) => !c.fan);
+      const E = pickClip(team.length ? team : any), H = pickClip(houseEdits());
+      P = driveTurn++ % 2 === 0 ? H || E : E || H;
+      if (P) P = Object.assign({}, P, { ms: Math.min(P.ms || 25e3, 25e3) });
+    }
+    if (!P) return false;
+    driveAt = now; lastAny = now; lastKind = "pop"; if (dj) lastDj = now;
+    react(b, "mid", P, `${t.ab} ball · between drives`);
+    return true;
+  }
   function tdHype(b, why) {
     if (!clipsOn()) return;
     const edits = CLIPS.filter((c) => c.base.startsWith("sounds/aura/") && fits(c, b));
@@ -9591,6 +9631,12 @@ body.tv .rb-games.primeg.mason > .rb-pcol { padding-top: 16px; -webkit-mask-imag
     const half = g.st === "post" || (g.pd || g.period || 0) >= 3;
     return half ? { k: g.st === "post" ? "final" : "alert", lose, win, rl, rw } : null;
   }
+  function nflWant() { return !PHONE() && document.body.classList.contains("tv") && (DIR && DIR.sport ? DIR.sport : nightSport()) === "NFL"; }
+  function syncNfl() {
+    const on = nflWant();
+    if (on !== document.body.classList.contains("nflday")) { document.body.classList.toggle("nflday", on); try { render(); } catch (e) {} }
+  }
+  setInterval(syncNfl, 5000);
   function satWant() { return !PHONE() && document.body.classList.contains("tv") && (DIR && DIR.sport ? DIR.sport : nightSport()) === "CFB"; }
   function syncCfb() {
     const on = satWant();
@@ -10119,7 +10165,7 @@ body.tv .rb-games.primeg.mason > .rb-pcol { padding-top: 16px; -webkit-mask-imag
       // one clip at a time, the biggest moment wins
       const top = swings.reduce((x, s) => (s.pri > x.pri ? s : x));
       const big = top.kind === "first" || (top.kind === "ev" && top.e.big) || top.kind === "good" || top.kind === "bad";
-      if (on && !busy && !big && !trial && now - lastDj >= DJ_DUE && now - lastAny >= 20e3 && !clipBusy() && djBreak(now)) return;
+      if (on && !busy && !big && !trial && !fbDay() && now - lastDj >= DJ_DUE && now - lastAny >= 20e3 && !clipBusy() && djBreak(now)) return;
       const gap = busy ? BUSY_GAP : big ? BIG_GAP : TRIGGER_GAP;
       // a real play cuts off a filler pop-up that's playing; otherwise wait out the gap
       const ok = on && (busy ? !cardBusy && !fxBusy && now - lastAny >= gap : top.kind === "first" || (big && lastKind === "pop" && !fxBusy) || (now - lastAny >= gap && !clipBusy()));
@@ -10153,6 +10199,7 @@ body.tv .rb-games.primeg.mason > .rb-pcol { padding-top: 16px; -webkit-mask-imag
     }
     // quiet stretch: pop a clip that fits how one of the live bets is going
     if (!on || clipBusy() || trial) return;
+    if (driveBreak(now) || fbDay()) return;
     if (busy) {
       // busy slate: DJ Goldie, now and then, over whichever of your bets is live
       const due = now - lastDj >= DJ_DUE && now - lastAny >= 20e3;
@@ -12776,7 +12823,8 @@ body.tv .rb-games.primeg.mason > .rb-pcol { padding-top: 16px; -webkit-mask-imag
   const lights = [], towels = [], flashes = [];
   for (let i = 0; i < 520; i++) { const low = i % 3 !== 0, band = low ? LOW : UP; lights.push({ x: R(0, IW), y: R(band[0] + 6, band[1] - 4), r: low ? R(1.6, 2.6) : R(1.1, 1.8), ph: R(0, 6.28), sp: R(0.4, 1.4), sw: R(2, 7), on: Math.random() < 0.55, t: R(2, 14) }); }
   const TC = ["#f4f7fb", "#f4f7fb", "#f4f7fb", "#3b8cff", "#ff7a1a", "#ffd447"];
-  for (let i = 0; i < 70; i++) towels.push({ x: R(20, IW - 20), y: R(LOW[0] + 30, LOW[1] - 20), w: R(7, 11), h: R(9, 14), c: TC[i % TC.length], ph: R(0, 6.28), sp: R(2.2, 4.2) });
+  const TCN = ["#f4f7fb", "#f4f7fb", "#e8192c", "#e8192c", "#1d3f9e", "#f4f7fb"];
+  for (let i = 0; i < 70; i++) towels.push({ x: R(20, IW - 20), y: R(LOW[0] + 30, LOW[1] - 20), w: R(7, 11), h: R(9, 14), c: TC[i % TC.length], cn: TCN[i % TCN.length], ph: R(0, 6.28), sp: R(2.2, 4.2) });
   let boost = 0, last = 0, W = 0, H = 0, s = 1, ox = 0, oy = 0, wave = -1, nextWave = performance.now() + 9000;
   const night = () => { const h = new Date().getHours(); return h >= 18 || h < 5; };
   function size() {
@@ -12787,7 +12835,7 @@ body.tv .rb-games.primeg.mason > .rb-pcol { padding-top: 16px; -webkit-mask-imag
   const P = (x, y) => [ox + x * s, oy + y * s];
   function frame(now) {
     requestAnimationFrame(frame);
-    const on = document.body.classList.contains("tv") && document.body.classList.contains("cfb") && !document.hidden;
+    const on = document.body.classList.contains("tv") && (document.body.classList.contains("cfb") || document.body.classList.contains("nflday")) && !document.hidden, nfl = document.body.classList.contains("nflday");
     if (!on || now - last < 33) return;
     const dt = Math.min(0.1, (now - last) / 1000); last = now; size();
     cx.clearRect(0, 0, W, H);
@@ -12830,7 +12878,7 @@ body.tv .rb-games.primeg.mason > .rb-pcol { padding-top: 16px; -webkit-mask-imag
     for (const T of towels) {
       const [x, y] = P(T.x, T.y), sp = T.sp * (1 + b * 1.6), ang = Math.sin(t * sp + T.ph) * (0.5 + b * 0.5);
       cx.save(); cx.translate(x, y); cx.rotate(ang); cx.globalAlpha = (nt ? 0.5 : 0.62) + b * 0.3;
-      cx.fillStyle = T.c; cx.fillRect(-T.w * s * 0.5, -T.h * s * 1.6, T.w * s, T.h * s);
+      cx.fillStyle = nfl ? T.cn : T.c; cx.fillRect(-T.w * s * 0.5, -T.h * s * 1.6, T.w * s, T.h * s);
       cx.restore();
     }
     cx.globalAlpha = 1;
