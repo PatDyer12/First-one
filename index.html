@@ -1314,11 +1314,8 @@ body.tv .rb { display: grid; flex: 1 1 auto; min-height: 0; grid-template-column
 .rb-wl { font: 500 13px/1.2 Inter, sans-serif; color: var(--ink-3); white-space: nowrap; }
 .rb-wl b { color: var(--c); font-weight: 700; }
 .rb-st { font: 700 14px/1.2 Inter, sans-serif; color: var(--ink-2); text-align: right; white-space: nowrap; padding: 6px 10px; border-radius: 9px; background: rgba(255,255,255,.05); }
-.rb-pos.st-w, .rb-hs-side.ahead { background: rgba(61,220,151,.07); border-color: rgba(61,220,151,.22); }
-.rb-pos.st-l { background: rgba(255,97,112,.06); border-color: rgba(255,97,112,.2); }
-.st-w > .rb-st, .rb-st.st-w, .st-won > .rb-st, .rb-st.st-won { color: var(--win); background: rgba(61,220,151,.12); }
-.st-l > .rb-st, .rb-st.st-l, .st-lost > .rb-st, .rb-st.st-lost { color: var(--loss); background: rgba(255,97,112,.12); }
-.rb-pos.st-won { border-color: rgba(61,220,151,.4); }
+.rb-hs-side.ahead { border-color: rgba(190,210,240,.3); }
+
 .rb-pos.st-lost { opacity: .6; }
 .rb-pos.st-pre > .rb-st { color: var(--ink-3); background: none; }
 .rb-pos[class*="pop-"], .rb-h2h[class*="pop-"] { animation: rbPop 1.2s ease-in-out 2; }
@@ -1436,7 +1433,7 @@ body.tv.prime .rb-g.hero { border-color: color-mix(in srgb, var(--tc) 55%, trans
 .rb-g.hero .rb-wl { font-size: 15px; }
 .rb-g.hero .rb-st { font-size: 17px; }
 .rb-g.hero .rb-av { width: 38px; height: 38px; font-size: 17px; }
-body.tv.prime .rb-pos.st-w, body.tv.prime .rb-hs-side.ahead { border-color: color-mix(in srgb, var(--win) 35%, transparent); }
+
 
 /* ---------- the same board everywhere: desktop and phone (TV has its own fit above) ---------- */
 .tabs { display: none; }
@@ -2516,7 +2513,7 @@ body.tv.pplb .roomtv:not([hidden]) canvas { width: 76px; height: 76px; grid-row:
 .sc-dd { font: 700 12px/1 Inter, sans-serif; color: #a9b2c1; white-space: nowrap; padding-left: 10px; border-left: 1px solid rgba(190,210,240,.18); }
 .sc-dd.rz { color: #ff8a95; }
 /* the frames: a metal (or a stone) for the price, a glow for the stake. The status stays a bar down the left side */
-.pp-bet.k-w { --stc: var(--win); } .pp-bet.k-l { --stc: var(--loss); } .pp-bet.k-e { --stc: #f2c94c; } .pp-bet.k-won { --stc: var(--win); } .pp-bet.k-lost { --stc: var(--loss); }
+
 .pp-bet.fx, .ob-bet.fx { --stc: rgba(190,210,240,.35); border: 2px solid transparent; overflow: hidden; isolation: isolate;
   background: var(--fxi, linear-gradient(180deg, rgba(20,24,31,.96), rgba(12,15,20,.97))) padding-box, var(--fxb, linear-gradient(#2a3140, #2a3140)) border-box; background-size: 100% 100%, var(--fxbs, 100% 100%); }
 .pp-bet.fx { box-shadow: inset 5px 0 0 var(--stc), 0 0 22px var(--fxg, transparent), var(--fxr, 0 0 0 transparent); }
@@ -2917,13 +2914,21 @@ body.tv.pplb .roomtv:not([hidden]) canvas { width: 76px; height: 76px; grid-row:
 .slip.bt-metal .sl-card { text-shadow: 0 1px 2px rgba(0,0,0,.65); }
 .slip.bt-metal :is(.sl-legs em, .sl-amt, #slAmt, .sl-sub, #slSub) { color: rgba(255,255,255,.92); }
 .slip.bt-metal .sl-legs li > i { background: rgba(0,0,0,.35); }
+/* ---------- the trend light ---------- */
+.tl { --tlc: #ffd23f; flex: none; position: relative; display: inline-block; width: 15px; height: 15px; margin-right: 8px; border-radius: 50%; vertical-align: -1px; align-self: center;
+  background: radial-gradient(circle at 35% 30%, #fff 0 14%, var(--tlc) 48%, color-mix(in srgb, var(--tlc) 55%, #000) 100%);
+  box-shadow: 0 0 0 2px rgba(0,0,0,.5), 0 0 10px 2px var(--tlc), 0 0 24px 5px color-mix(in srgb, var(--tlc) 45%, transparent); animation: tlPulse 1.6s ease-in-out infinite; }
+.tl-g { --tlc: #2ee89a; } .tl-y { --tlc: #ffd23f; } .tl-r { --tlc: #ff4d5e; }
+.tl.fin { animation: none; }
+@keyframes tlPulse { 50% { box-shadow: 0 0 0 2px rgba(0,0,0,.5), 0 0 4px 1px var(--tlc), 0 0 12px 2px color-mix(in srgb, var(--tlc) 30%, transparent); filter: brightness(.8); } }
+/* on a game-board ticket the light sits on the status box's corner */
+.ob-bet .ob-st { position: relative; }
+.ob-bet .ob-st > .tl { position: absolute; top: -6px; right: -6px; width: 15px; height: 15px; margin: 0; }
+.pp-mid .ob-st > .tl { margin-right: 2px; }
+.rb-st > .tl { width: 11px; height: 11px; margin-right: 7px; }
 .pp-none { padding: 16px 6px; font: 600 15px/1.3 Inter, sans-serif; color: #8d97a8; text-align: center; }
 .pp-bet { position: relative; flex: none; display: grid; gap: 6px; padding: 10px 12px 11px 13px; border-radius: 12px; background: rgba(255,255,255,.035); border: 1px solid rgba(190,210,240,.1); border-left: 5px solid rgba(190,210,240,.28); }
-.pp-bet.k-w { border-left-color: var(--win); background: linear-gradient(90deg, rgba(61,220,151,.13), rgba(255,255,255,.03) 65%); }
-.pp-bet.k-l { border-left-color: var(--loss); background: linear-gradient(90deg, rgba(255,97,112,.13), rgba(255,255,255,.03) 65%); }
-.pp-bet.k-e { border-left-color: #f2c94c; }
-.pp-bet.k-won { border-left-color: var(--win); }
-.pp-bet.k-lost { border-left-color: var(--loss); opacity: .7; }
+.pp-bet.k-lost { opacity: .7; }
 .pp-bet.on { box-shadow: 0 0 0 2px rgba(90,160,255,.7); }
 .pp-top { display: flex; align-items: baseline; gap: 10px; min-width: 0; }
 .pp-pick { flex: 1 1 auto; min-width: 0; display: flex; align-items: center; gap: 8px; font: 800 22px/1.1 Inter, sans-serif; color: #fff; }
@@ -3014,10 +3019,7 @@ body.tv.pplb .roomtv:not([hidden]) canvas { width: 76px; height: 76px; grid-row:
 .ob-strip.ob-lbl b { color: #e6ebf2; letter-spacing: .24em; font-weight: 600; font-size: 14px; }
 .ob-strip.ob-lbl .num { color: #6f7a8b; letter-spacing: 0; }
 .ob-bet { position: relative; display: grid; grid-template-columns: auto minmax(0, 1fr) auto; align-items: center; column-gap: 14px; row-gap: 10px; padding: 13px 14px 13px 20px; border-radius: 14px; background: linear-gradient(90deg, rgba(255,255,255,.06), rgba(255,255,255,.025)); border: 1px solid rgba(255,255,255,.08); box-shadow: inset 5px 0 0 var(--c); }
-.ob-bet.k-w { background: linear-gradient(90deg, rgba(61,220,151,.13), rgba(61,220,151,.03)); border-color: rgba(61,220,151,.28); }
-.ob-bet.k-l { background: linear-gradient(90deg, rgba(255,97,112,.12), rgba(255,97,112,.03)); border-color: rgba(255,97,112,.26); }
-.ob-bet.k-won { border-color: rgba(61,220,151,.55); }
-.ob-bet.k-lost { border-color: rgba(255,97,112,.5); }
+
 .ob-bet.on { box-shadow: inset 5px 0 0 var(--c), 0 0 0 2px var(--gold), 0 0 22px rgba(79,157,255,.35); }
 .ob-bet[class*="pop-"] { animation: rbPop 1.2s ease-in-out 2; }
 .ob-avs { display: flex; align-self: start; padding-top: 2px; }
@@ -3050,15 +3052,7 @@ body.tv.pplb .roomtv:not([hidden]) canvas { width: 76px; height: 76px; grid-row:
 .ob-st em { font: 800 11px/1 Inter, sans-serif; font-style: normal; letter-spacing: .16em; text-transform: uppercase; color: #a9b2c1; }
 .ob-st b { font: 800 17px/1.1 Inter, sans-serif; color: #eef2f7; white-space: nowrap; }
 .ob-st small { font: 700 12px/1.1 Inter, sans-serif; color: inherit; opacity: .85; white-space: nowrap; }
-.ob-st.k-w small { color: #7ff0bf; } .ob-st.k-l small { color: #ff9aa3; }
-.ob-st.k-w { background: rgba(61,220,151,.16); border-color: rgba(61,220,151,.4); }
-.ob-st.k-w em, .ob-st.k-w b { color: #7ff0bf; }
-.ob-st.k-l { background: rgba(255,97,112,.15); border-color: rgba(255,97,112,.4); }
-.ob-st.k-l em, .ob-st.k-l b { color: #ff9aa3; }
-.ob-st.k-won { background: rgba(61,220,151,.3); border-color: rgba(61,220,151,.6); }
-.ob-st.k-won em, .ob-st.k-won b { color: #b9f8dc; }
-.ob-st.k-lost { background: rgba(255,97,112,.28); border-color: rgba(255,97,112,.6); }
-.ob-st.k-lost em, .ob-st.k-lost b { color: #ffc2c7; }
+
 .ob-st.k-pre { background: none; }
 .ob-st.k-pre b { color: #cdd4df; }
 .ob-bet > .meter { grid-column: 1 / -1; margin: 0 0 2px; height: 8px; }
@@ -3557,11 +3551,9 @@ body.tv .rb-main { -webkit-mask-image: linear-gradient(180deg, transparent 0, #0
 .rb-g .rb-rows { padding: 4px 16px 16px; gap: 10px; }
 .rb-g .rb-pos { border-radius: 12px; background: rgba(255,255,255,.035); border: 1px solid rgba(255,255,255,.06); }
 .rb-g .rb-pos:not(.squad):not(.duo) { box-shadow: inset 4px 0 0 var(--acc, rgba(255,255,255,.16)); padding-left: 18px; }
-.rb-g .rb-pos.st-w { --acc: #2ee89a; background: linear-gradient(90deg, rgba(46,232,154,.11), rgba(46,232,154,.025)); border-color: rgba(46,232,154,.24); }
-.rb-g .rb-pos.st-l { --acc: #ff4d6a; background: linear-gradient(90deg, rgba(255,77,106,.11), rgba(255,77,106,.025)); border-color: rgba(255,77,106,.22); }
+
 .rb-g .rb-pos .rb-st { font: 700 15px/1 var(--f-ui); padding: 8px 11px; border-radius: 8px; }
-.rb-g .rb-pos.st-w .rb-st { color: #74f0b9; background: rgba(46,232,154,.14); }
-.rb-g .rb-pos.st-l .rb-st { color: #ff94a6; background: rgba(255,77,106,.14); }
+
 .rb-g .meter { height: 6px; margin-top: 12px; border-radius: 99px; background: rgba(255,255,255,.08); overflow: visible; }
 .rb-g .meter i { border-radius: 99px; box-shadow: none; }
 .rb-g .meter::before { top: -4px; bottom: -4px; width: 2px; background: rgba(255,255,255,.55); border-radius: 2px; }
@@ -5489,7 +5481,7 @@ body.tv .rb-games.primeg.mason > .rb-pcol { padding-top: 16px; -webkit-mask-imag
     return `<div class="rb-pos st-${st.cls}${crew}${popCls(p)}${onAir(idsOf(p))}"${tapAttrs(idsOf(p), p.pick)}>
       <div class="rb-avs">${avs}</div>
       <div class="rb-pk"><b>${hs}<span class="t">${esc(p.pick)}</span>${ballTag(hb)}${nP >= 3 ? `<span class="rb-squad">Squad ride ×${nP}</span>` : nP === 2 ? '<span class="rb-duo">Ride</span>' : ""}</b><div class="rb-wls">${whoLine(p)}</div></div>
-      <div class="rb-st">${esc(st.txt)}</div>${meter}</div>`;
+      <div class="rb-st">${tlHtml(tlOf(st, p.sel && (isTd(p.sel.m) || isPP(p.sel.m))))}${esc(st.txt)}</div>${meter}</div>`;
   }
   // two people on opposite sides: a tug of war. The marker leans toward whoever's winning, by how much
   function h2hRow(l, r, g) {
@@ -5920,13 +5912,31 @@ body.tv .rb-games.primeg.mason > .rb-pcol { padding-top: 16px; -webkit-mask-imag
     return `<div class="ob-strip g-${g.st}">${t(g.a)}<i class="ob-at">${pre ? "@" : ""}</i>${t(g.h)}<span class="ob-clk ${s.cls}">${esc(s.t)}</span></div>`;
   }
   // where it stands, in a word and a number: the word is what you read from across the room
+  const TL_BAND = { NFL: 3, CFB: 3, NBA: 4, CBB: 4, MLB: 1, NHL: 1 };
+  const tlClose = (ev) => Math.abs(Number(ev.m) || 0) <= (TL_BAND[ev.g && ev.g.sport] ?? 2);
+  function tlOf(st, prop) {
+    if (!st || st.cls === "pre") return "";
+    if (st.cls === "won") return "g fin"; if (st.cls === "lost") return "r fin"; if (st.cls === "push") return "y fin";
+    const ev = st.ev; if (!ev || ev.res === "P") return "y";
+    if (!prop && tlClose(ev)) return "y";
+    return ev.res === "W" ? "g" : "r";
+  }
+  // a parlay: dead or all hit is final; a leg behind by more than a score is red, only close ones yellow
+  function tlPar(c, legs) {
+    if (c === "pre") return ""; if (c === "won") return "g fin"; if (c === "lost") return "r fin";
+    if (c === "w") return "g"; if (c === "e") return "y";
+    const bad = legs.filter((l) => !l.st && l.ev && !l.ev.fin && l.ev.res === "L");
+    return bad.length && bad.every((l) => tlClose(l.ev)) ? "y" : "r";
+  }
+  const TL_SAYS = { g: "Trending up", y: "Close", r: "Trending down" };
+  const tlHtml = (c) => (c ? `<i class="tl tl-${c}" title="${TL_SAYS[c[0] === "g" ? "g" : c[0] === "r" ? "r" : "y"]}" aria-hidden="true"></i>` : "");
   function obPill(st, prop) {
     let k = st.k != null ? st.k : { w: "Winning", l: "Losing", e: prop ? "Live" : "Even", won: "Final", lost: "Final", push: "Final" }[st.cls] || "", v = st.txt || "";
     if (st.cls === "pre" && st.k == null) { const m = /^(\S+)\s+(.+)$/.exec(v); k = m ? m[1] : ""; v = m ? m[2] : v; }
     else if (st.cls === "won" || st.cls === "lost" || st.cls === "push") v = v.replace(/^Final · /, "").replace(/^\w/, (c) => c.toUpperCase());
     else if (st.cls === "e" && !st.ev) { k = ""; }
     const [v1, ...v2] = v.split(" · ");      // "Needs 12 more · off pace": the number big, the rest under it
-    return `<div class="ob-st k-${st.cls}">${k ? `<em>${esc(k)}</em>` : ""}${v1 ? `<b>${esc(v1)}</b>` : ""}${v2.length ? `<small>${esc(v2.join(" · "))}</small>` : ""}</div>`;
+    return `<div class="ob-st k-${st.cls}">${tlHtml(tlOf(st, prop))}${k ? `<em>${esc(k)}</em>` : ""}${v1 ? `<b>${esc(v1)}</b>` : ""}${v2.length ? `<small>${esc(v2.join(" · "))}</small>` : ""}</div>`;
   }
   // the price: the odds, the stake and what it pays (a ride adds everybody's up)
   function obPrice(p) {
@@ -5966,7 +5976,7 @@ body.tv .rb-games.primeg.mason > .rb-pcol { padding-top: 16px; -webkit-mask-imag
       <div class="ob-main"><div class="ob-who"><b style="--c:${personCol(b)}">${esc(personName(b))}</b><span class="ob-tag">Parlay</span></div>
         <div class="ob-pick"><span class="t">${n}-leg parlay</span><span class="ob-odds num">${fOdds(b.odds)}</span></div>
         <div class="ob-meta">${fU(b.units)} to win ${fU(b.units * ppu(b.odds))}</div></div>
-      <div class="ob-st k-${cls}"><em>${dead ? "Dead" : all ? "All hit" : "Legs hit"}</em><b class="num">${hit}/${n}</b></div>
+      <div class="ob-st k-${cls}">${tlHtml(tlPar(cls, legs))}<em>${dead ? "Dead" : all ? "All hit" : "Legs hit"}</em><b class="num">${hit}/${n}</b></div>
       <ol class="ob-legs">${lis}</ol></div>`;
   }
   function obLegTxt(l) {
@@ -6301,7 +6311,7 @@ body.tv .rb-games.primeg.mason > .rb-pcol { padding-top: 16px; -webkit-mask-imag
     const F = flexOf(b);
     return `<div class="pp-bet pp-par k-${c}${F.cls}${onAir([b.id])}"${F.k ? ` style="--d:${btT()}"` : ""}${tapAttrs([b.id], personName(b) + "'s parlay")}>${fxRow(F)}
       <div class="pp-top"><span class="pp-pick"><span class="t">${n}-leg parlay</span></span><span class="pp-odds num">${fOdds(b.odds)}</span></div>
-      <div class="pp-mid"><div class="ob-st k-${c}"><em>${dead ? "Dead" : all ? "All hit" : "Legs hit"}</em><b class="num">${hit} of ${n}</b>${live.length ? `<small>${live.length} live${down ? " · one's losing" : ""}</small>` : ""}</div></div>
+      <div class="pp-mid"><div class="ob-st k-${c}">${tlHtml(tlPar(c, legs))}<em>${dead ? "Dead" : all ? "All hit" : "Legs hit"}</em><b class="num">${hit} of ${n}</b>${live.length ? `<small>${live.length} live${down ? " · one's losing" : ""}</small>` : ""}</div></div>
       <div class="pp-meta">${esc(`Parlay · ${fU(b.units)} to win ${fU(b.units * ppu(b.odds))}`)}</div><ol class="ob-legs">${lis}</ol></div>`;
   }
   // the top of someone's column: who, where they rank, today in units and dollars, then the detail
@@ -6849,7 +6859,7 @@ body.tv .rb-games.primeg.mason > .rb-pcol { padding-top: 16px; -webkit-mask-imag
   // ---------- sheets ----------
   function openSheet(id) { $(id).hidden = false; }
   // keep every open screen current: when a new version is up, reload it (never mid-form or mid-animation)
-  const BUILD = "20261018230539";
+  const BUILD = "20261018231244";
   function checkBuild() {
     if (BUILD === "dev") return;
     fetch("version.json?t=" + Date.now(), { cache: "no-store" }).then((r) => (r.ok ? r.json() : null)).then((j) => {
