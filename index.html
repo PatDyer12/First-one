@@ -2350,6 +2350,78 @@ body.tv .rb-pcol.pr .rb-hs-side.r .rb-st { justify-self: start; }
 .jumbo.hz .jb-screen #jbBg { filter: blur(36px) brightness(.5) saturate(.85) sepia(.2); }
 .jumbo.lux #pipVid { transition: opacity .25s ease; }
 .dj-cv { position: absolute; inset: 0; width: 100%; height: 100%; pointer-events: none; }
+/* the open bets, as tickets */
+.ob-hd { display: flex; align-items: center; gap: 12px; padding: 2px 4px 12px; }
+.ob-hd b { font: 600 14px/1 Inter, sans-serif; letter-spacing: .3em; text-transform: uppercase; color: #e6ebf2; }
+.ob-hd span { font: 800 14px/1 Inter, sans-serif; color: #06080c; background: #e6ebf2; border-radius: 99px; padding: 4px 10px; }
+.ob-g { display: flex; flex-direction: column; flex: none; }
+.ob-list { display: flex; flex-direction: column; gap: 10px; }
+.rb-rows.ob-list { gap: 10px; padding: 4px 14px 14px; }
+.ob-strip { display: flex; align-items: center; gap: 10px; min-width: 0; padding: 0 6px 10px; font: 700 15px/1 Inter, sans-serif; letter-spacing: .06em; text-transform: uppercase; color: #a9b2c1; }
+.ob-strip .ob-tm { display: inline-flex; align-items: center; gap: 7px; white-space: nowrap; }
+.ob-strip .ob-lg { width: 24px; height: 24px; object-fit: contain; }
+.ob-strip .rk { font: 700 11px/1 Inter, sans-serif; font-style: normal; color: #6f7a8b; }
+.ob-strip .ob-tm b { color: #eef2f7; font-weight: 800; }
+.ob-strip .sc { font: 800 19px/1 Inter, sans-serif; color: #fff; letter-spacing: 0; margin-left: 2px; }
+.ob-strip .ob-at { font-style: normal; color: #6f7a8b; margin: 0 2px; }
+.ob-strip .ob-clk { margin-left: auto; font-size: 13px; letter-spacing: .12em; color: #a9b2c1; white-space: nowrap; }
+.ob-strip .ob-clk.s-live { color: #fff; }
+.ob-strip .ob-clk.s-live::before { content: ""; display: inline-block; width: 8px; height: 8px; border-radius: 50%; background: var(--loss); margin-right: 8px; vertical-align: 1px; box-shadow: 0 0 10px var(--loss); }
+.ob-strip.ob-lbl b { color: #e6ebf2; letter-spacing: .24em; font-weight: 600; font-size: 14px; }
+.ob-strip.ob-lbl .num { color: #6f7a8b; letter-spacing: 0; }
+.ob-bet { position: relative; display: grid; grid-template-columns: auto minmax(0, 1fr) auto; align-items: center; column-gap: 14px; row-gap: 10px; padding: 13px 14px 13px 20px; border-radius: 14px; background: linear-gradient(90deg, rgba(255,255,255,.06), rgba(255,255,255,.025)); border: 1px solid rgba(255,255,255,.08); box-shadow: inset 5px 0 0 var(--c); }
+.ob-bet.k-w { background: linear-gradient(90deg, rgba(61,220,151,.13), rgba(61,220,151,.03)); border-color: rgba(61,220,151,.28); }
+.ob-bet.k-l { background: linear-gradient(90deg, rgba(255,97,112,.12), rgba(255,97,112,.03)); border-color: rgba(255,97,112,.26); }
+.ob-bet.k-won { border-color: rgba(61,220,151,.55); }
+.ob-bet.k-lost { border-color: rgba(255,97,112,.5); }
+.ob-bet.on { box-shadow: inset 5px 0 0 var(--c), 0 0 0 2px var(--gold), 0 0 22px rgba(79,157,255,.35); }
+.ob-bet[class*="pop-"] { animation: rbPop 1.2s ease-in-out 2; }
+.ob-avs { display: flex; align-self: start; padding-top: 2px; }
+.ob-avs .rb-av { width: 42px; height: 42px; font-size: 19px; box-shadow: 0 0 0 3px #0d1117; }
+.ob-avs .rb-av + .rb-av { margin-left: -12px; }
+.ob-main { min-width: 0; }
+.ob-who { display: flex; align-items: center; flex-wrap: wrap; gap: 4px 8px; font: 800 14px/1.1 Inter, sans-serif; letter-spacing: .1em; text-transform: uppercase; }
+.ob-who b { color: var(--c); }
+.ob-who .pl { font-style: normal; color: #6f7a8b; }
+.ob-tag { font: 700 11px/1 Inter, sans-serif; letter-spacing: .14em; color: #cfe2ff; background: rgba(79,157,255,.2); border: 1px solid rgba(79,157,255,.45); border-radius: 6px; padding: 4px 7px; }
+.ob-pick { display: flex; align-items: center; gap: 10px; min-width: 0; margin-top: 5px; font: 800 25px/1.15 Inter, sans-serif; letter-spacing: -.01em; color: #fff; }
+.ob-pick .t { min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.ob-pick .ob-odds { flex: none; color: #8fc0ff; font-weight: 800; }
+.ob-pick .hasball { margin-left: 0; }
+.ob-hs { width: 34px; height: 34px; border-radius: 50%; object-fit: cover; background: #161b23; flex: none; }
+.ob-meta { margin-top: 5px; font: 600 14px/1.25 Inter, sans-serif; color: #8d97a8; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.ob-st { align-self: center; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 4px; min-width: 116px; padding: 9px 12px; border-radius: 11px; background: rgba(255,255,255,.06); border: 1px solid rgba(255,255,255,.1); text-align: center; }
+.ob-st em { font: 800 11px/1 Inter, sans-serif; font-style: normal; letter-spacing: .16em; text-transform: uppercase; color: #a9b2c1; }
+.ob-st b { font: 800 17px/1.1 Inter, sans-serif; color: #eef2f7; white-space: nowrap; }
+.ob-st small { font: 700 12px/1.1 Inter, sans-serif; color: inherit; opacity: .85; white-space: nowrap; }
+.ob-st.k-w small { color: #7ff0bf; } .ob-st.k-l small { color: #ff9aa3; }
+.ob-st.k-w { background: rgba(61,220,151,.16); border-color: rgba(61,220,151,.4); }
+.ob-st.k-w em, .ob-st.k-w b { color: #7ff0bf; }
+.ob-st.k-l { background: rgba(255,97,112,.15); border-color: rgba(255,97,112,.4); }
+.ob-st.k-l em, .ob-st.k-l b { color: #ff9aa3; }
+.ob-st.k-won { background: rgba(61,220,151,.3); border-color: rgba(61,220,151,.6); }
+.ob-st.k-won em, .ob-st.k-won b { color: #b9f8dc; }
+.ob-st.k-lost { background: rgba(255,97,112,.28); border-color: rgba(255,97,112,.6); }
+.ob-st.k-lost em, .ob-st.k-lost b { color: #ffc2c7; }
+.ob-st.k-pre { background: none; }
+.ob-st.k-pre b { color: #cdd4df; }
+.ob-bet > .meter { grid-column: 1 / -1; margin: 0 0 2px; height: 8px; }
+.ob-h2h { display: flex; flex-direction: column; gap: 6px; padding: 10px; border-radius: 17px; border: 1px dashed rgba(255,255,255,.16); background: rgba(255,255,255,.015); }
+.ob-vsl { font: 700 11px/1 Inter, sans-serif; letter-spacing: .22em; text-transform: uppercase; color: #6f7a8b; padding: 2px 4px 4px; }
+.ob-vs { align-self: center; font: 900 13px/1 Inter, sans-serif; letter-spacing: .2em; color: #e6ebf2; background: #1a212c; border: 1px solid rgba(255,255,255,.14); border-radius: 99px; padding: 5px 12px; margin: -2px 0; position: relative; z-index: 1; }
+.ob-legs { grid-column: 1 / -1; list-style: none; margin: 2px 0 0; padding: 0; display: flex; flex-direction: column; }
+.ob-legs li { display: grid; grid-template-columns: 26px minmax(0, 1fr) auto; align-items: center; gap: 10px; padding: 7px 2px; border-top: 1px solid rgba(255,255,255,.06); font: 700 16px/1.2 Inter, sans-serif; color: #dfe5ee; }
+.ob-legs li > i { width: 24px; height: 24px; border-radius: 50%; display: grid; place-items: center; font: 800 12px/1 Inter, sans-serif; font-style: normal; color: #a9b2c1; border: 1.5px solid rgba(255,255,255,.22); }
+.ob-legs li .t { min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.ob-legs li em { font: 600 13px/1.2 Inter, sans-serif; font-style: normal; color: #8d97a8; white-space: nowrap; }
+.ob-legs li.hit > i { background: var(--win); border-color: var(--win); color: #06080c; }
+.ob-legs li.hit em { color: #7ff0bf; }
+.ob-legs li.miss { color: #8d97a8; }
+.ob-legs li.miss .t { text-decoration: line-through; }
+.ob-legs li.miss > i { background: var(--loss); border-color: var(--loss); color: #06080c; }
+.ob-legs li.lw em { color: #7ff0bf; } .ob-legs li.ll em { color: #ff9aa3; } .ob-legs li.le em { color: #e6ebf2; }
+.ob-card .rb-ch span { color: #a9b2c1; }
+#jbBets .ob-g + .ob-g, .rb-pcol.pr .ob-g + .ob-g { margin-top: 12px; }
 .jumbo.hz .dj-cv { filter: contrast(1.05) saturate(.92) sepia(.06); }
 .jumbo.hz #pipVid { filter: contrast(1.05) saturate(.92) sepia(.06); }
 .jumbo.lux .jb-screen::after { content: ""; position: absolute; inset: 0; z-index: 2; pointer-events: none; background: radial-gradient(130% 110% at 50% 50%, transparent 60%, rgba(0,0,0,.42) 100%); }
@@ -4995,7 +5067,7 @@ body.tv .rb-games.primeg.mason > .rb-pcol { padding-top: 16px; -webkit-mask-imag
     const mid = `<div class="mid"><span class="clk${live ? " on" : ""}">${esc(clk)}</span>${dd}${rz}${up ? `<span class="ups${up.k === "final" ? " fin" : ""}">${up.k === "final" ? "Upset" : "Upset alert"}</span>` : ""}${cfb && g.net && g.st !== "post" ? `<span class="net">${esc(g.net)}</span>` : ""}</div>`;
     return `<article class="rb-g ${g.st}${hero ? " hero" : " gx"}" style="--ca:${esc(g.a.col || "#445")};--ch:${esc(g.h.col || "#445")};--ra:${esc(bright(g.a))};--rh:${esc(bright(g.h))}">
       ${hero ? `<header class="rb-gh">${tm(g.a, "a")}${mid}${tm(g.h, "h")}</header>${gxFoot(g) && g.st === "in" && sset(g.sport, "tracker") ? gxPlay(g, "big") : fieldHtml(g)}` : `${gxHead(g)}${gxLine(g)}${heroIds.has(g.id) ? "" : gxPlay(g, "card")}`}
-      ${bare ? "" : `<div class="rb-rows">${rows.map((r) => (r.h2h ? h2hRow(r.h2h[0], r.h2h[1], g) : posRow(r.p, g))).join("")}${G.entries.length ? inParlays(G) : legRows(G)}</div>`}${hero ? scoringHtml(g) : ""}</article>`;
+      ${bare ? "" : !hero && document.body.classList.contains("tv") ? `<div class="rb-rows ob-list">${obRows(G)}${G.entries.length ? inParlays(G) : obLegRows(G)}</div>` : `<div class="rb-rows">${rows.map((r) => (r.h2h ? h2hRow(r.h2h[0], r.h2h[1], g) : posRow(r.p, g))).join("")}${G.entries.length ? inParlays(G) : legRows(G)}</div>`}${hero ? scoringHtml(g) : ""}</article>`;
   }
   // the sportsbook number for a leg right now (a parlay logged before leg odds were saved)
   function legNowOdds(sel, g) {
@@ -5148,6 +5220,108 @@ body.tv .rb-games.primeg.mason > .rb-pcol { padding-top: 16px; -webkit-mask-imag
     const resHtml = res.length ? `<section class="rb-sec"><h3>Results</h3>${res.map((b) => { const o = outcome(b); return `<div class="rb-res ${o === "W" ? "w" : o === "L" ? "l" : "p"}"${tapAttrs([b.id], b.pick)}>${avHtml(b)}<span class="pk">${esc(b.kind === "parlay" ? (b.legs || []).length + "-leg parlay" : b.pick)}</span><span class="num v">${o === "W" ? "✓" : o === "L" ? "✕" : "–"} ${fU(netOf(b), true)}</span></div>`; }).join("")}</section>` : "";
     return [`<section class="rb-sec lb"><h3>Leaderboard <span>${esc(lbl)}</span></h3>${lb}</section>`, awHtml + hhHtml + resHtml];
   }
+  const mktName = (s) => {
+    if (!s || !s.m) return "";
+    if (s.m === "ml") return "Moneyline"; if (s.m === "sp") return "Spread"; if (s.m === "tot") return "Total";
+    if (s.m === "td") return "Anytime TD"; if (s.m === "ftd") return "First TD";
+    if (isPP(s.m)) { const f = [...PP_MK, ...FB_MK, ...Object.values(PP_MKS).flat()].find((x) => x[0] === s.m); return f ? f[1] : "Player prop"; }
+    return "";
+  };
+  // a game's group with only the bets still open in it (the TV's rolling lists; results go to the rail)
+  const openOnly = (G) => Object.assign({}, G, { entries: G.entries.filter((e) => e.b.status === "open"), legs: (G.legs || []).filter((e) => e.b.status === "open") });
+  // the game in one line: logos, the score, the clock
+  function obStrip(g) {
+    const s = gxStatus(g), pre = g.st === "pre", cfb = g.sport === "CFB";
+    const t = (x) => `<span class="ob-tm">${logo(x, "ob-lg")}${cfb && x.rk ? `<i class="rk">${x.rk}</i>` : ""}<b>${esc(x.ab)}</b>${pre || x.sc == null ? "" : `<span class="sc num">${x.sc}</span>`}</span>`;
+    return `<div class="ob-strip g-${g.st}">${t(g.a)}<i class="ob-at">${pre ? "@" : ""}</i>${t(g.h)}<span class="ob-clk ${s.cls}">${esc(s.t)}</span></div>`;
+  }
+  // where it stands, in a word and a number: the word is what you read from across the room
+  function obPill(st, prop) {
+    let k = st.k != null ? st.k : { w: "Winning", l: "Losing", e: prop ? "Live" : "Even", won: "Final", lost: "Final", push: "Final" }[st.cls] || "", v = st.txt || "";
+    if (st.cls === "pre" && st.k == null) { const m = /^(\S+)\s+(.+)$/.exec(v); k = m ? m[1] : ""; v = m ? m[2] : v; }
+    else if (st.cls === "won" || st.cls === "lost" || st.cls === "push") v = v.replace(/^Final · /, "").replace(/^\w/, (c) => c.toUpperCase());
+    else if (st.cls === "e" && !st.ev) { k = ""; }
+    const [v1, ...v2] = v.split(" · ");      // "Needs 12 more · off pace": the number big, the rest under it
+    return `<div class="ob-st k-${st.cls}">${k ? `<em>${esc(k)}</em>` : ""}${v1 ? `<b>${esc(v1)}</b>` : ""}${v2.length ? `<small>${esc(v2.join(" · "))}</small>` : ""}</div>`;
+  }
+  // the price: the odds, the stake and what it pays (a ride adds everybody's up)
+  function obPrice(p) {
+    const st = p.entries.filter((e) => e.leg == null); if (!st.length) return "";
+    const odds = [...new Set(st.map((e) => e.b.odds))], u = st.reduce((a, e) => a + e.b.units, 0), w = st.reduce((a, e) => a + e.b.units * ppu(e.b.odds), 0);
+    const tail = st.map((e) => e.b.tail).find(Boolean);
+    return [odds.length === 1 ? fOdds(odds[0]) : "", `${fU(u)}${st.length > 1 ? " total" : ""} to win ${fU(w)}`, tail ? `${tail.kind === "fade" ? "fading" : "tailing"} ${esc(tail.name)}` : ""].filter(Boolean).join(" · ");
+  }
+  function obTicket(p, g, st, meta, tag) {
+    st = st || posState(p, g);
+    const people = [...new Map(p.entries.map((e) => [personKey(e.b), e.b])).values()], n = people.length;
+    const hb = p.sel && g ? hasBall(p.sel) : null;
+    const meter = st.ev && !st.ev.fin && g && g.st === "in" && p.sel && !isTd(p.sel.m) && !isPP(p.sel.m) ? meterHtml(p.sel, st.ev) : "";
+    const hs = p.sel && p.sel.p && p.sel.p.hs ? `<img class="ob-hs" src="${esc(p.sel.p.hs)}" alt="" loading="lazy" referrerpolicy="no-referrer" onerror="this.remove()">` : "";
+    const names = people.map((b) => `<b style="--c:${personCol(b)}">${esc(personName(b))}</b>`).join('<i class="pl">+</i>');
+    return `<div class="ob-bet k-${st.cls}${n > 1 ? " ob-ride" : ""}${p.entries ? popCls(p) + onAir(idsOf(p)) : ""}" style="--c:${personCol(people[0])}"${tapAttrs(idsOf(p), p.pick)}>
+      <div class="ob-avs">${people.map((b) => avHtml(b)).join("")}</div>
+      <div class="ob-main"><div class="ob-who">${names}${tag ? `<span class="ob-tag">${esc(tag)}</span>` : n > 1 ? `<span class="ob-tag">${n >= 3 ? `Squad ride ×${n}` : "Ride"}</span>` : ""}</div>
+        <div class="ob-pick">${hs}<span class="t">${esc(p.pick)}</span>${ballTag(hb)}</div>
+        <div class="ob-meta">${meta != null ? meta : [mktName(p.sel), obPrice(p)].filter(Boolean).join(" · ")}</div></div>
+      ${obPill(st, p.sel && (isTd(p.sel.m) || isPP(p.sel.m)))}${meter}</div>`;
+  }
+  // two people on opposite sides of the same game: both tickets, a VS between them
+  function obH2h(l, r, g) {
+    return `<div class="ob-h2h" style="--lc:${personCol(l.entries[0].b)};--rc:${personCol(r.entries[0].b)}"><span class="ob-vsl">Head to head</span>${obTicket(l, g)}<span class="ob-vs">VS</span>${obTicket(r, g)}</div>`;
+  }
+  // a parlay: whose, how many legs at what price, legs hit so far, and every leg with where it stands
+  function obParlay(b) {
+    const legs = legsOf(b), n = legs.length, hit = legs.filter((l) => l.st === "hit").length, dead = legs.some((l) => l.st === "miss"), all = n && hit === n;
+    const live = legs.filter((l) => !l.st && l.ev && !l.ev.fin), down = live.some((l) => l.ev.res === "L");
+    const cls = dead ? "lost" : all ? "won" : down ? "l" : live.length && live.every((l) => l.ev.res === "W") ? "w" : hit ? "e" : "pre";
+    const lis = legs.map((l, i) => { const x = obLegTxt(l), c = l.st === "hit" ? "hit" : l.st === "miss" ? "miss" : x.cls; return `<li class="${c}"><i>${l.st === "hit" ? "✓" : l.st === "miss" ? "✕" : i + 1}</i><span class="t">${esc(l.t)}</span>${x.txt ? `<em>${esc(x.txt)}</em>` : ""}</li>`; }).join("");
+    return `<div class="ob-bet ob-par k-${cls}${onAir([b.id])}" style="--c:${personCol(b)}"${tapAttrs([b.id], personName(b) + "'s parlay")}>
+      <div class="ob-avs">${avHtml(b)}</div>
+      <div class="ob-main"><div class="ob-who"><b style="--c:${personCol(b)}">${esc(personName(b))}</b><span class="ob-tag">Parlay</span></div>
+        <div class="ob-pick"><span class="t">${n}-leg parlay</span><span class="ob-odds num">${fOdds(b.odds)}</span></div>
+        <div class="ob-meta">${fU(b.units)} to win ${fU(b.units * ppu(b.odds))}</div></div>
+      <div class="ob-st k-${cls}"><em>${dead ? "Dead" : all ? "All hit" : "Legs hit"}</em><b class="num">${hit}/${n}</b></div>
+      <ol class="ob-legs">${lis}</ol></div>`;
+  }
+  function obLegTxt(l) {
+    const s = l.sel, g = s ? gameOf(s) : null;
+    if (!g) return { txt: "", cls: "" };
+    if (g.st === "pre") return { txt: startLabel(g.t), cls: "" };
+    const ev = l.ev, td = isTd(s.m) || isPP(s.m), mine = s.m === "tot" || td ? null : s.s, opp = mine === "a" ? "h" : "a";
+    const sc = td ? "" : mine ? `${g[mine].ab} ${g[mine].sc}–${g[opp].sc}` : `${g.a.sc + g.h.sc}/${s.l}`;
+    const how = l.st ? (l.st === "hit" ? "Hit" : "Missed") : ev ? ev.txt.replace(/^Final · /, "") : "";
+    return { txt: [sc, gxStatus(g).t.replace(" · ", " "), how].filter(Boolean).join(" · "), cls: !l.st && ev ? (ev.res === "W" ? "lw" : ev.res === "L" ? "ll" : "le") : "" };
+  }
+  // a game the room only has parlay legs on: each leg as a ticket of its own
+  function obLegRows(G) {
+    const g = G.g;
+    return (G.legs || []).map((e) => {
+      const b = e.b, L = legsOf(b), l = L[e.leg] || {}, live = l.ev && !l.ev.fin && g.st === "in";
+      const st = l.st === "hit" ? { cls: "won", k: "Leg", txt: "Hit" } : l.st === "miss" ? { cls: "lost", k: "Leg", txt: "Missed" } : live ? { cls: l.ev.res === "W" ? "w" : l.ev.res === "L" ? "l" : "e", txt: l.ev.txt || "", ev: l.ev } : g.st === "pre" ? { cls: "pre", txt: startLabel(g.t) } : { cls: "e", txt: "" };
+      return obTicket({ entries: [e], pick: l.t || (b.legs || [])[e.leg] || "", sel: l.sel || e.sel }, g, st, `Leg ${e.leg + 1} of ${L.length} · ${fOdds(b.odds)} parlay`, "Parlay leg");
+    }).join("");
+  }
+  // a bet with no game we can find: who, what, the price, and whether it's started
+  function obOther(e) {
+    const b = e.b, pre = phase(b) === "pre", p = { entries: [e], pick: e.pick, sel: e.sel };
+    return obTicket(p, null, pre ? { cls: "pre", txt: startLabel(startOf(b)) } : { cls: "e", txt: "Open" });
+  }
+  // one game's open bets as tickets (a ride is one ticket; opposite sides pair up head to head)
+  const obRows = (G) => gamePositions(G.entries).map((r) => (r.h2h ? obH2h(r.h2h[0], r.h2h[1], G.g) : obTicket(r.p, G.g))).join("");
+  // the whole column: how many bets are open, then game by game (live first, then by kickoff), the parlays, the rest.
+  // Each game's block is one piece, so the roll holds as each comes up
+  const obCard = (t, n, body) => (n ? `<article class="rb-g rb-card ob-card"><header class="rb-ch"><h3>${esc(t)}</h3><span>${n} open</span></header><div class="rb-rows ob-list">${body}</div></article>` : "");
+  const obCount = (list, parlays, other) => list.reduce((a, G) => a + G.entries.length, 0) + parlays.length + other.length;
+  function obColumn(list, parlays, other, noHd) {
+    const games = list.filter((G) => G.entries.length), n = obCount(games, parlays, other);
+    if (!n) return "";
+    const hd = noHd ? "" : `<header class="ob-hd"><b>Open bets</b><span class="num">${n}</span></header>`, out = [];
+    const sec = (cls, head, body) => `<section class="ob-g ${cls}">${out.length ? "" : hd}${head}<div class="ob-list">${body}</div></section>`;
+    for (const G of games) out.push(sec("g-" + G.g.st, obStrip(G.g), obRows(G)));
+    if (parlays.length) out.push(sec("g-par", `<div class="ob-strip ob-lbl"><b>Parlays</b><span class="num">${parlays.length}</span></div>`, parlays.map(obParlay).join("")));
+    if (other.length) out.push(sec("g-oth", `<div class="ob-strip ob-lbl"><b>Other bets</b><span class="num">${other.length}</span></div>`, other.map(obOther).join("")));
+    return out.join("");
+  }
   let rbPrime = null;
   function boardGroups() {
     const games = new Map(), other = [], parlays = [];
@@ -5239,7 +5413,7 @@ body.tv .rb-games.primeg.mason > .rb-pcol { padding-top: 16px; -webkit-mask-imag
     const roomLive = list.filter((G) => G.g.st === "in" && (G.entries.length || (G.legs && G.legs.length))).length;
     const roomN = list.filter((G) => G.entries.length || (G.legs && G.legs.length && G.g.st === "in")).length + (parlays.length ? 1 : 0) + (other.length ? 1 : 0);
     const nowG = !tv ? [] : heroes.length ? onNowGames(list, heroes.length === 1 ? 2 : 0) : onNowGames(list, Math.max(4 - roomLive, 7 - roomN));
-    const rest = (split ? heroes.map((G) => gameCard(G, false)).join("") : "") + list.filter((G) => !heroes.includes(G)).map((G) => gameCard(G, false)).join("") + parlayCard(parlays) + otherCard(other) + (heroes.length ? nowG.map(onNowCard).join("") : "");
+    const rest = heroes.length ? obColumn((split ? list : list.filter((G) => !heroes.includes(G))).map(openOnly), parlays, other.filter((e) => e.b.status === "open")) : "";
     const fol = followCards();
     $("#rbGames").classList.toggle("primeg", heroes.length > 0); $("#rbGames").classList.toggle("solo", heroes.length > 0 && !rest);
     if (heroes.length) {
@@ -5253,7 +5427,8 @@ body.tv .rb-games.primeg.mason > .rb-pcol { padding-top: 16px; -webkit-mask-imag
       L.dataset.n = String(heroes.length); L.innerHTML = heroes.map((G) => gameCard(G, true, split)).join("") + fol; R.innerHTML = rest; R.hidden = !rest;
       primeFit(); loopSyncEl(L); loopSyncEl(R);
     } else {
-    const parts = [...list.map((G) => ["g" + G.g.id, gameCard(G, false)]), ["pl", parlayCard(parlays)], ["ot", otherCard(other)], ["fo", fol], ...nowG.map((g) => ["n" + g.id, onNowCard(g)])].filter((x) => x[1]);
+    const oth = tv ? other.filter((e) => e.b.status === "open") : other;
+    const parts = [...list.map((G) => ["g" + G.g.id, gameCard(tv ? openOnly(G) : G, false)]), ["pl", tv ? obCard("Parlays", parlays.length, parlays.map(obParlay).join("")) : parlayCard(parlays)], ["ot", tv ? obCard("Other bets", oth.length, oth.map(obOther).join("")) : otherCard(other)], ["fo", fol], ...nowG.map((g) => ["n" + g.id, onNowCard(g)])].filter((x) => x[1]);
     if (tv && parts.length > 1) masonBoard(parts); else {
     $("#rbGames").classList.remove("mason");
     const html = parts.map((x) => x[1]).join("");
@@ -5681,7 +5856,7 @@ body.tv .rb-games.primeg.mason > .rb-pcol { padding-top: 16px; -webkit-mask-imag
   // ---------- sheets ----------
   function openSheet(id) { $(id).hidden = false; }
   // keep every open screen current: when a new version is up, reload it (never mid-form or mid-animation)
-  const BUILD = "20261018040854";
+  const BUILD = "20261018071056";
   function checkBuild() {
     if (BUILD === "dev") return;
     fetch("version.json?t=" + Date.now(), { cache: "no-store" }).then((r) => (r.ok ? r.json() : null)).then((j) => {
@@ -7484,9 +7659,10 @@ body.tv .rb-games.primeg.mason > .rb-pcol { padding-top: 16px; -webkit-mask-imag
       if (nx) { $("#jbSideH").textContent = "Next on Sweat Center"; $("#jbBets").innerHTML = `<div class="oa-run">${nx.slice(0, 5).map((x) => `<div class="oa-it"><em>${esc(x.lg)}</em><b>${esc(x.hl)}</b></div>`).join("")}</div>`; return; }
     }
     $("#jbSideH").textContent = "The room's bets";
-    const { list, parlays, other } = boardGroups(), live = list.filter((G) => G.g.st !== "post");
-    const html = live.map((G) => gameCard(G, false)).join("") + parlayCard(parlays) + otherCard(other.filter((e) => e.b.status === "open"));
-    $("#jbBets").innerHTML = html || '<div class="jb-none">No open bets</div>';
+    const { list, parlays, other } = boardGroups();
+    const L = list.map(openOnly), O = other.filter((e) => e.b.status === "open"), n = obCount(L, parlays, O);
+    $("#jbSideH").textContent = n ? `Open bets · ${n}` : "Open bets";
+    $("#jbBets").innerHTML = obColumn(L, parlays, O, true) || '<div class="jb-none">No open bets</div>';
     loopSyncEl($("#jbBets"));
   }
   const lg = (x) => (x.lg ? `<img src="${esc(x.lg)}" alt="">` : "");
