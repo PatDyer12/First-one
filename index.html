@@ -2790,6 +2790,84 @@ body.tv.pplb .roomtv:not([hidden]) canvas { width: 76px; height: 76px; grid-row:
 .bt-bdg.bt-c-dart::before { background: repeating-conic-gradient(#d8232f 0 30deg, #149a4b 30deg 60deg); }
 .bt-ico { width: 1em; height: 1em; vertical-align: -.14em; flex: none; }
 .bt-bdg .bt-ico, .bt-mini .bt-ico { color: var(--fxk); }
+/* ---------- live versions: a bolt on the chip, a live hit's badge carries one ---------- */
+.bt-lv { font-style: normal; padding: 0 5px; margin-right: 1px; border-radius: 5px; background: #111; color: #ffe14d; letter-spacing: .06em; }
+.bt-islive .bt-chip { box-shadow: 0 0 0 2px #ffe14d, 0 0 14px rgba(255,225,77,.55); }
+.bt-islive .fx-glint { animation: btZap 4s steps(1) var(--d, 0s) infinite; }
+@keyframes btZap { 0%, 100% { opacity: .95; } 61% { opacity: .3; } 63% { opacity: 1; } 65% { opacity: .4; } 67% { opacity: .95; } }
+.bt-bdg.lv::after { content: "⚡"; position: absolute; left: -6px; top: -7px; font-size: 11px; filter: drop-shadow(0 0 3px rgba(255,225,77,.9)); }
+.guestmode #pfBtn, .guestmode #phPf { display: none; }
+
+/* ---------- profiles ---------- */
+.pf { position: fixed; inset: 0; z-index: 9000; display: grid; place-items: center; padding: 2.5vh 2vw; background: rgba(3,5,9,.74); backdrop-filter: blur(6px); -webkit-backdrop-filter: blur(6px); opacity: 0; transition: opacity .25s; }
+.pf.on { opacity: 1; }
+.pf[hidden] { display: none; }
+.pf-card { position: relative; width: min(1560px, 100%); max-height: 95vh; display: flex; flex-direction: column; border-radius: 22px; overflow: hidden; color: #eef2f7; font-family: Inter, sans-serif;
+  background: radial-gradient(90% 60% at 0% 0%, color-mix(in srgb, var(--c) 26%, transparent), transparent 60%), linear-gradient(180deg, #121722, #090c12); border: 1px solid rgba(190,210,240,.14); box-shadow: 0 40px 120px rgba(0,0,0,.7), 0 0 0 1px color-mix(in srgb, var(--c) 30%, transparent);
+  transform: translateY(14px) scale(.985); transition: transform .3s cubic-bezier(.2,.8,.2,1); }
+.pf.on .pf-card { transform: none; }
+.pf-tabs { flex: none; display: flex; align-items: center; gap: 8px; padding: 14px 16px; border-bottom: 1px solid rgba(190,210,240,.1); overflow-x: auto; }
+.pf-tabs button { flex: none; display: inline-flex; align-items: center; gap: 9px; padding: 7px 14px 7px 7px; border-radius: 999px; border: 1px solid rgba(190,210,240,.16); background: rgba(255,255,255,.04); color: #c9d1dc; font: 800 15px/1 Inter, sans-serif; cursor: pointer; }
+.pf-tabs button i { display: grid; place-items: center; width: 28px; height: 28px; border-radius: 50%; font-style: normal; font-weight: 900; color: #0b0d12; background: var(--c); }
+.pf-tabs button[aria-pressed="true"] { color: #fff; background: color-mix(in srgb, var(--c) 22%, transparent); border-color: var(--c); }
+.pf-tabs .pf-x { margin-left: auto; padding: 0; width: 40px; height: 40px; justify-content: center; font-size: 26px; font-weight: 400; }
+.pf-scroll { overflow: auto; padding: 22px 26px 28px; display: grid; gap: 16px; }
+.pf-h { display: grid; grid-template-columns: auto minmax(0, 1fr) auto; align-items: center; gap: 18px; }
+.pf-av { display: grid; place-items: center; width: 84px; height: 84px; border-radius: 50%; font: 900 40px/1 Inter, sans-serif; color: #0b0d12; background: var(--c); box-shadow: 0 0 0 4px rgba(0,0,0,.4), 0 0 36px color-mix(in srgb, var(--c) 55%, transparent); }
+.pf-id b { display: block; font: 900 clamp(30px, 3vw, 48px)/1 Inter, sans-serif; letter-spacing: -.01em; }
+.pf-id small { display: block; margin-top: 8px; font: 700 13px/1.3 Inter, sans-serif; letter-spacing: .1em; text-transform: uppercase; color: #8d97a8; }
+.pf-net { text-align: right; font: 900 clamp(34px, 3.4vw, 54px)/1 Inter, sans-serif; color: #eef2f7; }
+.pf-net.up { color: #3ddc97; } .pf-net.dn { color: #ff6170; }
+.pf-net small { display: block; margin-top: 6px; font: 700 13px/1 Inter, sans-serif; letter-spacing: .08em; text-transform: uppercase; color: #8d97a8; }
+.pf-stats { display: grid; grid-template-columns: repeat(8, minmax(0, 1fr)); gap: 8px; }
+.pf-stats > div { padding: 12px 10px; border-radius: 12px; background: rgba(255,255,255,.04); border: 1px solid rgba(190,210,240,.08); text-align: center; min-width: 0; }
+.pf-stats b { display: block; font: 900 clamp(18px, 1.6vw, 26px)/1.1 Inter, sans-serif; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.pf-stats em { display: block; margin-top: 5px; font: 800 10.5px/1.2 Inter, sans-serif; font-style: normal; letter-spacing: .12em; text-transform: uppercase; color: #8d97a8; }
+.pf-sec { display: flex; align-items: baseline; gap: 12px; margin: 6px 0 0; font: 900 13px/1 Inter, sans-serif; letter-spacing: .18em; text-transform: uppercase; color: #a9b2c1; }
+.pf-sec small { font: 700 12px/1 Inter, sans-serif; letter-spacing: .04em; text-transform: none; color: #6f7a8b; }
+.pf-sec.lv { color: #ffe14d; }
+.pf-ach { display: grid; grid-template-columns: repeat(auto-fill, minmax(178px, 1fr)); gap: 8px; }
+.pf-a { position: relative; display: flex; align-items: center; gap: 10px; padding: 9px 10px; border-radius: 12px; border: 1px solid rgba(190,210,240,.08); background: rgba(255,255,255,.025); min-width: 0; }
+.pf-a > span { min-width: 0; }
+.pf-a b { display: block; font: 800 14px/1.15 Inter, sans-serif; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.pf-a em { display: block; margin-top: 3px; font: 600 11.5px/1.25 Inter, sans-serif; font-style: normal; color: #8d97a8; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.pf-md { flex: none; position: relative; display: grid; place-items: center; width: 44px; height: 44px; border-radius: 50%; font-size: 21px; font-style: normal; line-height: 1;
+  background: radial-gradient(circle at 35% 30%, color-mix(in srgb, var(--fxk) 40%, #10131a), #0b0d12 75%); box-shadow: 0 0 0 2px var(--fxk), 0 0 16px color-mix(in srgb, var(--fxk) 45%, transparent); }
+.pf-md .bt-ico { color: var(--fxk); }
+.pf-a.got { border-color: color-mix(in srgb, var(--fxk) 45%, transparent); background: linear-gradient(135deg, color-mix(in srgb, var(--fxk) 14%, transparent), rgba(255,255,255,.02)); }
+.pf-a.got em { color: var(--fxk); font-weight: 800; }
+.pf-a:not(.got) { opacity: .45; }
+.pf-a:not(.got) .pf-md { filter: grayscale(1); box-shadow: 0 0 0 2px rgba(190,210,240,.25); }
+.pf-a.lv .pf-md::after { content: "⚡"; position: absolute; right: -5px; top: -6px; font-size: 15px; filter: drop-shadow(0 0 4px rgba(255,225,77,.9)); }
+.pf-a.lv.got { box-shadow: inset 0 0 0 1px rgba(255,225,77,.35), 0 0 18px rgba(255,225,77,.12); }
+.pf-two { display: grid; grid-template-columns: 1fr 1fr; gap: 18px; }
+.pf-two section { display: grid; gap: 8px; align-content: start; min-width: 0; }
+.pf-b { display: grid; grid-template-columns: auto minmax(0, 1fr) auto; align-items: center; gap: 12px; padding: 10px 12px; border-radius: 12px; background: rgba(255,255,255,.035); border-left: 4px solid #3ddc97; }
+.pf-b.l { border-left-color: #ff6170; }
+.pf-bi { display: grid; place-items: center; width: 36px; height: 36px; border-radius: 50%; font-size: 17px; font-style: normal; background: rgba(255,255,255,.06); box-shadow: 0 0 0 1.5px var(--fxk, rgba(190,210,240,.2)); }
+.pf-bi .bt-ico { color: var(--fxk); }
+.pf-bm { min-width: 0; }
+.pf-bm b { display: block; font: 800 16px/1.2 Inter, sans-serif; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.pf-bm small { display: block; margin-top: 3px; font: 600 12px/1.3 Inter, sans-serif; color: #8d97a8; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.pf-bm .pf-legs { color: #6f7a8b; }
+.pf-bn { font: 900 22px/1 Inter, sans-serif; color: #3ddc97; white-space: nowrap; }
+.pf-b.l .pf-bn { color: #ff6170; }
+.pf-none { margin: 0; padding: 14px; border-radius: 12px; background: rgba(255,255,255,.03); color: #8d97a8; font: 600 14px Inter, sans-serif; }
+.pp-h, .rb-lr .nm b { cursor: pointer; }
+@media (max-width: 760px) {
+  .pf { padding: 0; place-items: stretch; }
+  .pf-card { max-height: 100vh; height: 100%; border-radius: 0; }
+  .pf-scroll { padding: 16px 14px 28px; }
+  .pf-h { grid-template-columns: auto minmax(0, 1fr); }
+  .pf-av { width: 58px; height: 58px; font-size: 28px; }
+  .pf-net { grid-column: 1 / -1; text-align: left; }
+  .pf-stats { grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 6px; }
+  .pf-stats > div { padding: 9px 4px; }
+  .pf-stats b { font-size: 16px; }
+  .pf-stats em { font-size: 8.5px; letter-spacing: .06em; }
+  .pf-ach { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  .pf-two { grid-template-columns: 1fr; }
+}
 .pp-none { padding: 16px 6px; font: 600 15px/1.3 Inter, sans-serif; color: #8d97a8; text-align: center; }
 .pp-bet { position: relative; flex: none; display: grid; gap: 6px; padding: 10px 12px 11px 13px; border-radius: 12px; background: rgba(255,255,255,.035); border: 1px solid rgba(190,210,240,.1); border-left: 5px solid rgba(190,210,240,.28); }
 .pp-bet.k-w { border-left-color: var(--win); background: linear-gradient(90deg, rgba(61,220,151,.13), rgba(255,255,255,.03) 65%); }
@@ -3558,6 +3636,7 @@ body.tv .rb-games.primeg.mason > .rb-pcol { padding-top: 16px; -webkit-mask-imag
   <section class="ph" id="ph" aria-label="Sweat Board">
     <header class="ph-top">
       <div class="ph-brand"><b>Sweat</b><span>Board</span><i class="ph-dot" id="phDot"></i></div>
+      <button type="button" class="ph-unit" id="phPf">Profiles</button>
       <button type="button" class="ph-unit num" id="phUnit">1u = $15</button>
       <span class="astag" hidden></span>
     </header>
@@ -3586,6 +3665,7 @@ body.tv .rb-games.primeg.mason > .rb-pcol { padding-top: 16px; -webkit-mask-imag
     </div>
     <button type="button" class="chip sample edit" id="sampleChip" hidden>Sample data · clear</button>
     <button type="button" class="chip edit" id="unitChip">1u = $15</button>
+    <button type="button" class="chip" id="pfBtn">Profiles</button>
     <button type="button" class="chip" id="sndBtn" aria-pressed="true">Tap for sound</button>
     <button type="button" class="chip lockstop" id="lockStop" hidden>Lock in playing · stop</button>
     <button type="button" class="btn ghost" id="tvBtn">TV mode</button>
@@ -5987,25 +6067,27 @@ body.tv .rb-games.primeg.mason > .rb-pcol { padding-top: 16px; -webkit-mask-imag
     }).join("");
   }
   // one straight bet in someone's column: the pick with its line, the price, the game, where it stands
-  const BT_DEF = { nuke: ["💣", "Nuke"], botd: ["👑", "Bet of the day"], whale: ["🐋", "Whale"], dart: ["🎯", "Dart"], opal: ["🌌", "Galaxy opal"], lotto: ["🎰", "Lotto"], snipe: ["<svg class=\"bt-ico\" viewBox=\"0 0 24 24\" aria-hidden=\"true\"><circle cx=\"12\" cy=\"12\" r=\"7.5\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2.2\"/><circle cx=\"12\" cy=\"12\" r=\"1.8\" fill=\"currentColor\"/><path d=\"M12 1.5v6M12 16.5v6M1.5 12h6M16.5 12h6\" stroke=\"currentColor\" stroke-width=\"2.2\" stroke-linecap=\"round\"/></svg>", "Snipe"], long: ["🏹", "Long shot"], pink: ["💗", "Pink diamond"], prime: ["🌙", "Primetime"], dawg: ["🐶", "Dawg"], gold: ["🥇", "Gold"], silver: ["🥈", "Silver"], bronze: ["🥉", "Bronze"] };
+  const BT_DEF = { nuke: ["💣", "Nuke"], botd: ["👑", "Bet of the day"], whale: ["🐋", "Whale"], dart: ["🎯", "Dart"], opal: ["🌌", "Galaxy opal"], lotto: ["🎰", "Lotto"], snipe: ["<svg class=\"bt-ico\" viewBox=\"0 0 24 24\" aria-hidden=\"true\"><circle cx=\"12\" cy=\"12\" r=\"7.5\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2.2\"/><circle cx=\"12\" cy=\"12\" r=\"1.8\" fill=\"currentColor\"/><path d=\"M12 1.5v6M12 16.5v6M1.5 12h6M16.5 12h6\" stroke=\"currentColor\" stroke-width=\"2.2\" stroke-linecap=\"round\"/></svg>", "Snipe"], long: ["🏹", "Long shot"], prime: ["🌙", "Primetime"], dawg: ["🐶", "Dawg"], gold: ["🥇", "Gold"], silver: ["🥈", "Silver"], bronze: ["🥉", "Bronze"] };
   const fxUSD = (v) => "$" + (Math.abs(v - Math.round(v)) < 0.005 ? Math.round(v).toLocaleString() : v.toFixed(2));
-  const etDayOf = (t) => new Intl.DateTimeFormat("en-CA", { timeZone: "America/New_York" }).format(new Date(t));
-  const etHr = (t) => Number(new Intl.DateTimeFormat("en-US", { timeZone: "America/New_York", hour: "numeric", hourCycle: "h23" }).format(new Date(t)));
+  const ET_DAY = new Intl.DateTimeFormat("en-CA", { timeZone: "America/New_York" }), ET_HR = new Intl.DateTimeFormat("en-US", { timeZone: "America/New_York", hour: "numeric", hourCycle: "h23" });
+  const etDayOf = (t) => ET_DAY.format(new Date(t)), etHr = (t) => Number(ET_HR.format(new Date(t)));
   // the day's bet of the day (its biggest straight from $50 up to a nuke) and dawg of the day (its biggest underdog moneyline)
-  let btDay = { key: "" };
-  function btDaily() {
-    const all = [...S.bets.values(), ...(S.goneBets ? S.goneBets.values() : [])], today = etDayOf(Date.now());
-    const key = today + ":" + S.unit + ":" + all.map((b) => b.id + "/" + b.units).join(",");
-    if (btDay.key === key) return btDay;
-    let botd = null, dawg = null;
-    for (const b of all) {
-      if (b.kind === "parlay" || !b.placedAt || etDayOf(b.placedAt) !== today || b.trial) continue;
-      const usd = (Number(b.units) || 0) * S.unit;
-      if (usd >= WHALE_USD - 0.005 && usd < NUKE_USD - 0.005 && (!botd || usd > botd.usd)) botd = { id: b.id, usd };
-      if (b.sel && b.sel.m === "ml" && Number(b.odds) > 100 && (!dawg || usd > dawg.usd)) dawg = { id: b.id, usd };
+  let btDayC = { key: "", m: new Map() };
+  function btDays() {
+    const key = S.unit + ":" + S.bets.size + ":" + (S.goneBets ? S.goneBets.size : 0) + ":" + Math.floor(Date.now() / 4000);
+    if (btDayC.key === key) return btDayC.m;
+    const m = new Map();
+    for (const b of [...S.bets.values(), ...(S.goneBets ? S.goneBets.values() : [])]) {
+      if (b.kind === "parlay" || !b.placedAt || b.trial) continue;
+      const day = etDayOf(b.placedAt), usd = (Number(b.units) || 0) * S.unit;
+      let d = m.get(day); if (!d) m.set(day, (d = { botd: null, dawg: null, bu: 0, du: 0 }));
+      if (usd >= WHALE_USD - 0.005 && usd < NUKE_USD - 0.005 && usd > d.bu) { d.botd = b.id; d.bu = usd; }
+      if (b.sel && b.sel.m === "ml" && Number(b.odds) > 100 && usd > d.du) { d.dawg = b.id; d.du = usd; }
     }
-    return (btDay = { key, botd: botd && botd.id, dawg: dawg && dawg.id });
+    btDayC = { key, m }; return m;
   }
+  const btDaily = (t) => btDays().get(etDayOf(t || Date.now())) || {};
+
   // a dart: a first or next TD scorer, or an exact bet (exact score, winning margin, next score / drive / play)
   const BT_EXACT = /\b(exact(ly)?|correct score|winning margin)\b/i, BT_NEXT = /\b(first|1st|next)\s+(td|touchdown|scorer|goal ?scorer|goal|basket|field goal|score|scoring play|drive|play)\b/i;
   const btDm = (x) => !!x && (x.m === "ftd" || x.m === "ntd");
@@ -6013,9 +6095,16 @@ body.tv .rb-games.primeg.mason > .rb-pcol { padding-top: 16px; -webkit-mask-imag
     if (b.kind === "parlay") return !!(b.legSel && b.legSel.length && b.legSel.every(btDm));
     return btDm(b.sel) || BT_EXACT.test(b.pick || "") || BT_NEXT.test(b.pick || "");
   }
+  // live: put in after its game (a parlay: its first game) kicked off
+  function btLive(b) {
+    const pa = Number(b.placedAt) || 0; if (!pa) return false;
+    const tOf = (x) => x && (x.t || (gameOf(x) || {}).t);
+    const t = b.kind === "parlay" ? Math.min(...(b.legSel || []).map(tOf).filter(Boolean), b.startAt || Infinity) : tOf(b.sel) || b.startAt;
+    return !!t && isFinite(t) && pa > t + 60e3;
+  }
   // every type a bet fits, its look first
   function betTypes(b, units) {
-    const o = Number(b.odds) || 0, par = b.kind === "parlay", n = par ? (b.legs || []).length : 1, u = units != null ? units : Number(b.units) || 0, usd = u * S.unit, m = b.sel && b.sel.m, d = btDaily();
+    const o = Number(b.odds) || 0, par = b.kind === "parlay", n = par ? (b.legs || []).length : 1, u = units != null ? units : Number(b.units) || 0, usd = u * S.unit, m = b.sel && b.sel.m, d = btDaily(b.placedAt);
     const t0 = !par && b.sel ? (gameOf(b.sel) || {}).t || b.startAt : null, night = !!t0 && etHr(t0) >= 19;
     const k = [];
     if (usd >= NUKE_USD - 0.005) k.push("nuke");
@@ -6026,7 +6115,6 @@ body.tv .rb-games.primeg.mason > .rb-pcol { padding-top: 16px; -webkit-mask-imag
     if (par && o >= 1000) k.push("lotto");
     if (!par && o >= SNIPER_ODDS) k.push("snipe");
     if (par && o >= 400 && o < 1000) k.push("long");
-    if (par && n === 2 && o >= 200) k.push("pink");
     if (night && (m === "ml" || m === "sp")) k.push("prime");
     if (!par && m === "ml" && o > 100) k.push("dawg");
     // the medals by stake (a whale or a nuke already says how big it is)
@@ -6035,23 +6123,111 @@ body.tv .rb-games.primeg.mason > .rb-pcol { padding-top: 16px; -webkit-mask-imag
   }
   function flexOf(b, units) {
     const ks = betTypes(b, units), k = ks[0] || null, usd = (units != null ? units : Number(b.units) || 0) * S.unit;
-    const name = k === "dawg" && btDaily().dawg === b.id ? "Dawg of the day" : k ? BT_DEF[k][1] : "";
-    const side = ["bronze", "silver", "prime"].includes(k) || (k === "dawg" && name === "Dawg");
-    return { k, odds: k, more: ks.slice(1, 4), name, usd, win: usd * ppu(Number(b.odds) || 0), winU: (usd / S.unit) * ppu(Number(b.odds) || 0), cls: k ? " fx bt bt-" + k : "", big: !!k && !side };
+    const name = k === "dawg" && btDaily(b.placedAt).dawg === b.id ? "Dawg of the day" : k ? BT_DEF[k][1] : "";
+    const side = ["bronze", "silver", "prime"].includes(k) || (k === "dawg" && name === "Dawg"), live = !!k && btLive(b);
+    return { k, odds: k, more: ks.slice(1, 4), name, usd, win: usd * ppu(Number(b.odds) || 0), winU: (usd / S.unit) * ppu(Number(b.odds) || 0), cls: k ? " fx bt bt-" + k + (live ? " bt-islive" : "") : "", live, big: !!k && !side };
   }
   const btT = () => "-" + ((Date.now() / 1000) % 120).toFixed(2) + "s";
   function fxRow(f) {
     if (!f || !f.k) return "";
-    return `<div class="fx-row"><i class="fx-glint" aria-hidden="true"></i><i class="bt-art" aria-hidden="true"><b></b></i><span class="bt-chip bt-c-${f.k}">${BT_DEF[f.k][0]} ${esc(f.name)}</span>${f.more.map((x) => `<span class="bt-mini bt-c-${x}" title="${BT_DEF[x][1]}">${BT_DEF[x][0]}</span>`).join("")}<span class="fx-pay">To win <b>${fU(f.winU)}</b></span></div>`;
+    return `<div class="fx-row"><i class="fx-glint" aria-hidden="true"></i><i class="bt-art" aria-hidden="true"><b></b></i><span class="bt-chip bt-c-${f.k}">${BT_DEF[f.k][0]} ${f.live ? '<i class="bt-lv">⚡ Live</i> ' : ""}${esc(f.name)}</span>${f.more.map((x) => `<span class="bt-mini bt-c-${x}" title="${BT_DEF[x][1]}">${BT_DEF[x][0]}</span>`).join("")}<span class="fx-pay">To win <b>${fU(f.winU)}</b></span></div>`;
   }
   // next to a name: a badge for each kind of bet they've hit (the count when it's more than one)
   function btBadges(done, max) {
     const n = new Map();
-    for (const b of done || []) { if (outcome(b) !== "W") continue; const k = betTypes(b)[0]; if (k) n.set(k, (n.get(k) || 0) + 1); }
+    for (const b of done || []) { if (outcome(b) !== "W") continue; const k = betTypes(b)[0]; if (k) { const key = k + (btLive(b) ? "~" : ""); n.set(key, (n.get(key) || 0) + 1); } }
     if (!n.size) return "";
-    const ks = Object.keys(BT_DEF).filter((k) => n.has(k)), cap = max && ks.length > max ? max - 1 : ks.length;
-    return `<span class="bt-bdgs">${ks.slice(0, cap).map((k) => `<i class="bt-bdg bt-c-${k}" title="${BT_DEF[k][1]} hit${n.get(k) > 1 ? " ×" + n.get(k) : ""}">${BT_DEF[k][0]}${n.get(k) > 1 ? `<sub>${n.get(k)}</sub>` : ""}</i>`).join("")}${cap < ks.length ? `<i class="bt-more">+${ks.length - cap}</i>` : ""}</span>`;
+    const ks = Object.keys(BT_DEF).flatMap((k) => [k, k + "~"]).filter((k) => n.has(k)), cap = max && ks.length > max ? max - 1 : ks.length;
+    return `<span class="bt-bdgs">${ks.slice(0, cap).map((key) => { const k = key.replace("~", ""), lv = key !== k, c = n.get(key); return `<i class="bt-bdg bt-c-${k}${lv ? " lv" : ""}" title="${lv ? "Live " : ""}${BT_DEF[k][1]} hit${c > 1 ? " ×" + c : ""}">${BT_DEF[k][0]}${c > 1 ? `<sub>${c}</sub>` : ""}</i>`; }).join("")}${cap < ks.length ? `<i class="bt-more">+${ks.length - cap}</i>` : ""}</span>`;
   }
+
+  // ---------- profiles: everyone's whole record, their achievements (and the live ones), their best and worst ----------
+  const PROFILES = [{ id: "me" }, { id: "mindel", nm: "Mindel" }, { id: "brad", nm: "Brad" }, { id: "julian", nm: "Julian" }];
+  const BT_HOW = { nuke: "Cash a $100+ bet", botd: "Cash the day's biggest straight", whale: "Cash a $50+ bet", dart: "First or next TD, or an exact bet", opal: "Cash plus money for $40+", lotto: "Cash a +1000 parlay", snipe: "Cash a +250 straight",
+    long: "Cash a +400 parlay", prime: "Night game ML or spread", dawg: "Cash an underdog ML", gold: "Cash a 3u bet", silver: "Cash a 2u bet", bronze: "Cash a 1u parlay" };
+  const pfName = (pr) => (pr.id === "me" ? meName() : pr.nm);
+  const pfDate = (t) => (t ? new Date(t).toLocaleDateString("en-US", { month: "short", day: "numeric" }) : "");
+  function pfOf(b) {
+    if (!b || b.trial) return null;
+    if (isMe(b)) return "me";
+    const k = guestKey(personName(b)); return PROFILES.some((p) => p.id === k) ? k : null;
+  }
+  const pfIdOfKey = (k) => { const id = k === "me" ? "me" : String(k || "").split(":").pop(); return PROFILES.some((p) => p.id === id) ? id : null; };
+  function pfData(id) {
+    const all = [...S.bets.values(), ...(S.goneBets ? S.goneBets.values() : [])].filter((b) => pfOf(b) === id);
+    const done = all.filter((b) => b.status !== "open").sort((x, y) => (x.settledAt || x.placedAt || 0) - (y.settledAt || y.placedAt || 0));
+    let w = 0, l = 0, p = 0, net = 0, risk = 0, run = 0, best = 0;
+    for (const b of done) {
+      const o = outcome(b); net += netOf(b);
+      if (o === "W") { w++; run = run > 0 ? run + 1 : 1; } else if (o === "L") { l++; run = run < 0 ? run - 1 : -1; } else p++;
+      if (o !== "P") risk += Number(b.units) || 0;
+      if (run > best) best = run;
+    }
+    const ach = new Map();
+    for (const b of done) {
+      if (outcome(b) !== "W") continue;
+      const lv = btLive(b);
+      for (const k of betTypes(b)) { const key = k + (lv ? "~" : ""), a = ach.get(key) || { n: 0, last: 0 }; a.n++; a.last = Math.max(a.last, b.settledAt || b.placedAt || 0); ach.set(key, a); }
+    }
+    const won = done.filter((b) => outcome(b) === "W"), lost = done.filter((b) => outcome(b) === "L");
+    return { all, done, open: all.filter((b) => b.status === "open").length, w, l, p, net, risk, run, best, ach,
+      wins: won.slice().sort((x, y) => netOf(y) - netOf(x)).slice(0, 5),
+      losses: lost.slice().sort((x, y) => netOf(x) - netOf(y) || (Number(y.units) || 0) * ppu(y.odds) - (Number(x.units) || 0) * ppu(x.odds)).slice(0, 5),
+      first: all.reduce((m, b) => Math.min(m, b.placedAt || Infinity), Infinity),
+      top: won.reduce((m, b) => Math.max(m, netOf(b)), 0), longest: won.reduce((m, b) => Math.max(m, Number(b.odds) || 0), 0) };
+  }
+  const PF = { id: "me", sig: "" };
+  function pfOpen(id) {
+    const el = $("#pf"); if (!el) return;
+    PF.id = id || PF.id; PF.sig = ""; el.hidden = false; pfRender(true);
+    requestAnimationFrame(() => el.classList.add("on"));
+  }
+  function pfClose() { const el = $("#pf"); if (!el || el.hidden) return; el.classList.remove("on"); setTimeout(() => { if (!el.classList.contains("on")) el.hidden = true; }, 260); }
+  function pfRender(force) {
+    const el = $("#pf"); if (!el || el.hidden) return;
+    const pr = PROFILES.find((p) => p.id === PF.id) || PROFILES[0], d = pfData(pr.id), nm = pfName(pr);
+    const sig = pr.id + ":" + d.all.length + ":" + d.done.length + ":" + Math.round(d.net * 100) + ":" + S.unit;
+    if (!force && sig === PF.sig) return;
+    PF.sig = sig;
+    const colOf = (q) => { const b = [...S.bets.values(), ...(S.goneBets ? S.goneBets.values() : [])].find((x) => pfOf(x) === q.id); return b ? personCol(b) : q.id === "me" ? meCol() : q.id === "julian" ? WHO_COL.julian : guestCol(q.nm); };
+    const col = colOf(pr), keys = Object.keys(BT_DEF);
+    const got = keys.filter((k) => d.ach.has(k)).length + keys.filter((k) => d.ach.has(k + "~")).length;
+    const tile = (k, lv) => { const a = d.ach.get(k + (lv ? "~" : ""));
+      return `<div class="pf-a bt-c-${k}${a ? " got" : ""}${lv ? " lv" : ""}" title="${esc((lv ? "Live " : "") + BT_DEF[k][1] + ": " + BT_HOW[k] + (lv ? " during the game" : ""))}"><i class="pf-md">${BT_DEF[k][0]}</i><span><b>${lv ? "Live " : ""}${esc(BT_DEF[k][1])}</b><em>${a ? (a.n > 1 ? "×" + a.n + " · " : "") + "last " + pfDate(a.last) : esc(BT_HOW[k])}</em></span></div>`; };
+    const row = (b, win) => { const F = flexOf(b), n = netOf(b), lv = btLive(b);
+      const meta = [pfDate(b.settledAt || b.placedAt), fOdds(b.odds), fU(b.units) + " risked", lv ? "⚡ live" : "", !win ? "would've paid " + fU((Number(b.units) || 0) * ppu(b.odds)) : ""].filter(Boolean).join(" · ");
+      const legs = b.kind === "parlay" && (b.legs || []).length ? `<small class="pf-legs">${esc((b.legs || []).join(" · "))}</small>` : "";
+      return `<div class="pf-b ${win ? "w" : "l"}${F.k ? " bt-c-" + F.k : ""}"><i class="pf-bi">${F.k ? BT_DEF[F.k][0] : b.kind === "parlay" ? "🧾" : "🎟️"}</i><span class="pf-bm"><b>${esc(b.pick || "")}</b><small>${esc(meta)}</small>${legs}</span><b class="pf-bn num">${fU(n, true)}</b></div>`; };
+    const pct = (v) => (v * 100).toFixed(0) + "%";
+    const stats = [["Record", `${d.w}-${d.l}${d.p ? "-" + d.p : ""}`], ["Hit rate", d.w + d.l ? pct(d.w / (d.w + d.l)) : "—"], ["ROI", d.risk ? (d.net >= 0 ? "+" : "−") + pct(Math.abs(d.net / d.risk)) : "—"], ["Best streak", d.best ? "W" + d.best : "—"],
+      ["Right now", d.run > 0 ? "W" + d.run : d.run < 0 ? "L" + -d.run : "—"], ["Biggest hit", d.top ? fU(d.top, true) : "—"], ["Longest odds hit", d.longest ? fOdds(d.longest) : "—"], ["Achievements", `${got} of ${keys.length * 2}`]];
+    const scr = el.querySelector(".pf-scroll"), top = scr ? scr.scrollTop : 0;
+    el.innerHTML = `<div class="pf-card" style="--c:${col}" role="dialog" aria-modal="true" aria-label="${esc(nm)}'s profile">
+      <nav class="pf-tabs">${PROFILES.map((q) => `<button type="button" data-pf="${q.id}" aria-pressed="${q.id === pr.id}" style="--c:${colOf(q)}"><i>${esc(pfName(q).slice(0, 1).toUpperCase())}</i>${esc(pfName(q))}</button>`).join("")}<button type="button" class="pf-x" data-pfx aria-label="Close">×</button></nav>
+      <div class="pf-scroll">
+        <header class="pf-h"><span class="pf-av">${esc(nm.slice(0, 1).toUpperCase())}</span><div class="pf-id"><b>${esc(nm)}</b><small>${[isFinite(d.first) ? "Betting since " + pfDate(d.first) : "", d.all.length + " bets", d.open ? d.open + " open now" : ""].filter(Boolean).join(" · ")}</small></div>
+          <div class="pf-net num ${d.net > 0.004 ? "up" : d.net < -0.004 ? "dn" : ""}">${fU(d.net, true)}<small>${fUSD(d.net * S.unit, true)} all-time</small></div></header>
+        <div class="pf-stats">${stats.map(([k, v]) => `<div><b class="num">${esc(v)}</b><em>${k}</em></div>`).join("")}</div>
+        <h3 class="pf-sec">Achievements</h3><div class="pf-ach">${keys.map((k) => tile(k, false)).join("")}</div>
+        <h3 class="pf-sec lv">⚡ Live achievements<small>the same, on a bet put in during the game</small></h3><div class="pf-ach">${keys.map((k) => tile(k, true)).join("")}</div>
+        <div class="pf-two"><section><h3 class="pf-sec">Best bets</h3>${d.wins.map((b) => row(b, true)).join("") || '<p class="pf-none">No wins yet.</p>'}</section>
+          <section><h3 class="pf-sec">Worst bets</h3>${d.losses.map((b) => row(b, false)).join("") || '<p class="pf-none">No losses yet.</p>'}</section></div>
+      </div></div>`;
+    const s2 = el.querySelector(".pf-scroll"); if (s2 && !force) s2.scrollTop = top;
+  }
+  document.body.insertAdjacentHTML("beforeend", '<div class="pf" id="pf" hidden></div>');
+  document.addEventListener("click", (e) => {
+    const t = e.target;
+    if (t.closest("#pfBtn, #phPf")) { pfOpen(PF.id); return; }
+    const pf = t.closest("#pf");
+    if (pf) { const tb = t.closest("[data-pf]"); if (tb) { PF.id = tb.dataset.pf; pfRender(true); } else if (t.closest("[data-pfx]") || t === pf) pfClose(); return; }
+    // a name on the board: their profile
+    const h = t.closest(".pp-h, .rb-lr .nm b, .rb-lr .av");
+    if (h) { const box = h.closest("[data-k]"), id = box && pfIdOfKey(box.dataset.k); if (id) { e.stopPropagation(); e.preventDefault(); pfOpen(id); } }
+  }, true);
+  document.addEventListener("keydown", (e) => { if (e.key === "Escape") pfClose(); });
+  setInterval(() => pfRender(false), 5000);
+
 
   function ppTicket(b) {
     const sel = b.sel || null, g = sel ? gameOf(sel) : null, p = { entries: [{ b, leg: null, sel, pick: b.pick }], pick: b.pick, sel };
@@ -6624,7 +6800,7 @@ body.tv .rb-games.primeg.mason > .rb-pcol { padding-top: 16px; -webkit-mask-imag
   // ---------- sheets ----------
   function openSheet(id) { $(id).hidden = false; }
   // keep every open screen current: when a new version is up, reload it (never mid-form or mid-animation)
-  const BUILD = "20261018224129";
+  const BUILD = "20261018225230";
   function checkBuild() {
     if (BUILD === "dev") return;
     fetch("version.json?t=" + Date.now(), { cache: "no-store" }).then((r) => (r.ok ? r.json() : null)).then((j) => {
