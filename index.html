@@ -883,6 +883,11 @@ body.tv .strip .chart { height: 96px; }
 .gchip i { width: 22px; height: 22px; border-radius: 50%; display: grid; place-items: center; font: 800 12px var(--f-num); font-style: normal; color: #05070b; background: var(--c); }
 .gchip button { width: 24px; height: 24px; border-radius: 50%; border: 0; background: rgba(255,255,255,.06); color: var(--ink-3); font: 600 15px/1 var(--f-ui); cursor: pointer; }
 .gchip button:hover { color: var(--loss); background: rgba(255,97,112,.12); }
+.gone-list { display: grid; gap: 8px; }
+.gone-row { display: flex; flex-wrap: wrap; align-items: center; gap: 8px; }
+.gone-row > em { flex: 0 0 100%; font: 700 11px var(--f-ui); font-style: normal; letter-spacing: .12em; text-transform: uppercase; color: var(--ink-3); }
+.gchip.off { opacity: .6; border-style: dashed; }
+.gchip.off button:hover { color: var(--win); background: rgba(61,220,151,.12); }
 .who-hint { display: block; margin-top: 8px; }
 
 /* play card: what just happened, before the clip */
@@ -3555,6 +3560,11 @@ body.tv .rb-games.primeg.mason > .rb-pcol { padding-top: 16px; -webkit-mask-imag
       <span class="hint">Saved to your account, so they're on every screen and show up when you log a bet. Removing someone keeps their bets and record.</span>
     </div>
     <div class="field">
+      <span class="lbl">Who's here</span>
+      <div class="gone-list" id="goneList"></div>
+      <span class="hint">Somebody left? Tap × and they come off the board on every screen (their bets stay saved and still settle). ↩ puts them back.</span>
+    </div>
+    <div class="field">
       <span class="lbl">Your name on the board</span>
       <div class="linein"><label for="f-host">Name</label><input type="text" id="f-host" maxlength="16" autocomplete="off" placeholder="You"><button type="button" class="btn sm" id="hostSave">Save</button></div>
       <span class="hint">Shows in the room standings, on group rides and on your bet slips.</span>
@@ -6193,7 +6203,7 @@ body.tv .rb-games.primeg.mason > .rb-pcol { padding-top: 16px; -webkit-mask-imag
   // ---------- sheets ----------
   function openSheet(id) { $(id).hidden = false; }
   // keep every open screen current: when a new version is up, reload it (never mid-form or mid-animation)
-  const BUILD = "20261018170146";
+  const BUILD = "20261018201128";
   function checkBuild() {
     if (BUILD === "dev") return;
     fetch("version.json?t=" + Date.now(), { cache: "no-store" }).then((r) => (r.ok ? r.json() : null)).then((j) => {
@@ -6878,7 +6888,7 @@ body.tv .rb-games.primeg.mason > .rb-pcol { padding-top: 16px; -webkit-mask-imag
     write((db) => db.doc("config/settings").set({ oddsKey: k }, { merge: true }), () => {});
     toast(k ? "Odds key saved. Prices show up in the TD scorer picker." : "Odds key removed");
   });
-  function openSettings() { ssSync(); renderGuests(); $("#f-oddskey").value = S.oddsKey || ""; $("#f-unit").value = trim(S.unit); $("#u-err").textContent = ""; resetClear(); openSheet("#setSheet"); }
+  function openSettings() { ssSync(); renderGuests(); renderGone(); $("#f-oddskey").value = S.oddsKey || ""; $("#f-unit").value = trim(S.unit); $("#u-err").textContent = ""; resetClear(); openSheet("#setSheet"); }
   $("#unitChip").addEventListener("click", openSettings);
   $("#sampleChip").addEventListener("click", openSettings);
   $("#setForm").addEventListener("submit", async (e) => {
@@ -12999,9 +13009,63 @@ body.tv .rb-games.primeg.mason > .rb-pcol { padding-top: 16px; -webkit-mask-imag
 
   // ---------- auto-settle bets once their games are final ----------
   const settling = new Set();
+  const GONE_SEED = { id: "1018", day: "2026-10-18", add: ["~farb", "~lucas"] };
+  S.gone = S.gone || new Set(); S.goneBets = S.goneBets || new Map();
+  const goneNm = (b) => String(personName(b) || "").toLowerCase().replace(/[^a-z0-9]/g, "");
+  const etToday = () => new Intl.DateTimeFormat("en-CA", { timeZone: "America/New_York" }).format(new Date());
+  function isGone(b) {
+    if (!b || isMe(b) || !S.gone.size) return false;
+    if (S.gone.has(personKey(b))) return true;
+    const n = goneNm(b);
+    for (const g of S.gone) if (g[0] === "~" && g.length > 1 && n.startsWith(g.slice(1))) return true;
+    return false;
+  }
+  // a bet in from the database: onto the board, or into the left-the-room pile
+  function goneSort(id, d) {
+    if (isGone(d)) { S.goneBets.set(id, d); S.bets.delete(id); return true; }
+    S.goneBets.delete(id); S.bets.set(id, d); return false;
+  }
+  function setGone(list) {
+    const next = new Set(list.map(String).filter(Boolean));
+    if (next.size === S.gone.size && [...next].every((k) => S.gone.has(k))) return;
+    S.gone = next;
+    for (const [id, b] of [...S.bets]) if (isGone(b)) { S.bets.delete(id); S.goneBets.set(id, b); }
+    for (const [id, b] of [...S.goneBets]) if (!isGone(b)) { S.goneBets.delete(id); S.bets.set(id, b); }
+    try { render(); } catch (e) {}
+    renderGone();
+  }
+  // the settings doc came in: its list (today's seed goes on once, from a host screen)
+  function goneCfg(d) {
+    const l = Array.isArray(d.gone) ? d.gone.map(String) : [], seeded = d.goneSeed === GONE_SEED.id, today = etToday() === GONE_SEED.day;
+    const want = seeded || !today ? l : [...new Set([...l, ...GONE_SEED.add])];
+    if (!seeded && today && !GUEST && S.canWrite && S.db) S.db.doc("config/settings").set({ gone: want, goneSeed: GONE_SEED.id }, { merge: true }).catch(() => {});
+    setGone(want);
+  }
+  function saveGone(list) {
+    setGone(list);
+    write((db) => db.doc("config/settings").set({ gone: [...S.gone], goneSeed: GONE_SEED.id }, { merge: true }), () => {});
+  }
+  // settings: everybody with bets, on the board or not, a tap to move them
+  function renderGone() {
+    const el = $("#goneList"); if (!el) return;
+    const ppl = new Map();
+    for (const b of [...S.bets.values(), ...S.goneBets.values()]) if (!isMe(b) && !b.trial) ppl.set(personKey(b), b);
+    const chip = (k, b, off) => `<span class="gchip${off ? " off" : ""}" style="--c:${personCol(b)}"><i>${esc(personName(b).slice(0, 1).toUpperCase())}</i>${esc(personName(b))}<button type="button" ${off ? `data-back="${esc(k)}" aria-label="Put ${esc(personName(b))} back on the board">↩` : `data-gone="${esc(k)}" aria-label="Take ${esc(personName(b))} off the board">×`}</button></span>`;
+    const on = [...ppl].filter(([, b]) => !isGone(b)), off = [...ppl].filter(([, b]) => isGone(b));
+    el.innerHTML = (on.length ? `<div class="gone-row"><em>On the board</em>${on.map(([k, b]) => chip(k, b, false)).join("")}</div>` : "") + (off.length ? `<div class="gone-row"><em>Left</em>${off.map(([k, b]) => chip(k, b, true)).join("")}</div>` : "") || '<span class="hint">Nobody else has bets yet.</span>';
+  }
+  document.addEventListener("click", (e) => {
+    const g = e.target.closest("#goneList [data-gone]"), bk = e.target.closest("#goneList [data-back]");
+    if (g) { saveGone([...S.gone, g.dataset.gone]); toast("Off the board. Their bets still settle."); }
+    else if (bk) {
+      const k = bk.dataset.back, b = [...S.goneBets.values()].find((x) => personKey(x) === k), n = b ? goneNm(b) : "";
+      saveGone([...S.gone].filter((x) => x !== k && !(x[0] === "~" && n.startsWith(x.slice(1)))));
+      toast("Back on the board");
+    }
+  });
   function autoSettle() {
     if (!S.db || !S.canWrite || !S.ready || GUEST) return;
-    for (const b of S.bets.values()) {
+    for (const b of [...S.bets.values(), ...S.goneBets.values()]) {
       if (b.status !== "open" || b.noAuto || b.trial || settling.has(b.id) || tdHold.has(b.id)) continue;
       if (cardBusy && b.sel && isTd(b.sel.m)) continue; // let his touchdown card play first
       let status = null;
@@ -13234,12 +13298,12 @@ body.tv .rb-games.primeg.mason > .rb-pcol { padding-top: 16px; -webkit-mask-imag
     GUEST.uid = u.uid; guestTag();
     // checking in with the room (refused only if the host has closed it)
     db.doc("members/" + u.uid).set({ name: GUEST.name, at: Date.now() }).then(() => {
-      gate(null); S.db = db; S.canWrite = true; S.ready = false; S.bets = new Map(); render();
+      gate(null); S.db = db; S.canWrite = true; S.ready = false; S.bets = new Map(); S.goneBets = new Map(); render();
       unsub.push(db.collection("guestBets").where("uid", "==", u.uid).onSnapshot((snap) => {
         const first = !S.ready;
         for (const ch of snap.docChanges()) {
           const prev = S.bets.get(ch.doc.id);
-          if (ch.type === "removed") { S.bets.delete(ch.doc.id); continue; }
+          if (ch.type === "removed") { S.bets.delete(ch.doc.id); S.goneBets.delete(ch.doc.id); continue; }
           const d = oneJulian({ id: ch.doc.id, ...ch.doc.data(), _col: "guestBets" });
           if (typeof d.odds !== "number" || typeof d.units !== "number") continue;
           S.bets.set(ch.doc.id, d);
@@ -13295,7 +13359,7 @@ body.tv .rb-games.primeg.mason > .rb-pcol { padding-top: 16px; -webkit-mask-imag
       unsub.forEach((f) => f()); unsub = [];
       if (GUEST) { guestAuth(u, auth, db, unsub); return; }
       if (!u) { S.db = null; S.canWrite = false; S.ready = true; render(); gate("signin"); return; }
-      gate(null); S.db = db; S.canWrite = true; S.ready = false; S.bets = new Map(); render();
+      gate(null); S.db = db; S.canWrite = true; S.ready = false; S.bets = new Map(); S.goneBets = new Map(); render();
       $("#who").textContent = u.email || "";
       const onErr = (e) => {
         if (e && e.code === "permission-denied") { S.canWrite = false; gate("denied", u.email ? "Signed in as " + u.email + "." : ""); }
@@ -13305,10 +13369,10 @@ body.tv .rb-games.primeg.mason > .rb-pcol { padding-top: 16px; -webkit-mask-imag
         const first = !S.ready;
         for (const ch of snap.docChanges()) {
           const prev = S.bets.get(ch.doc.id);
-          if (ch.type === "removed") { S.bets.delete(ch.doc.id); continue; }
+          if (ch.type === "removed") { S.bets.delete(ch.doc.id); S.goneBets.delete(ch.doc.id); continue; }
           const d = oneJulian({ id: ch.doc.id, ...ch.doc.data() });
           if (typeof d.odds !== "number" || typeof d.units !== "number") continue;
-          S.bets.set(ch.doc.id, d);
+          if (goneSort(ch.doc.id, d)) continue;
           if (first) continue;
           if (prev && prev.status === "open" && d.status !== "open") celebrate(d);
         if (prev && prev.status === "open" && d.status !== "open" && statusBet === d.id) stopStatus();
@@ -13322,10 +13386,10 @@ body.tv .rb-games.primeg.mason > .rb-pcol { padding-top: 16px; -webkit-mask-imag
         const first = !GB_READY;
         for (const ch of snap.docChanges()) {
           const prev = S.bets.get(ch.doc.id);
-          if (ch.type === "removed") { S.bets.delete(ch.doc.id); continue; }
+          if (ch.type === "removed") { S.bets.delete(ch.doc.id); S.goneBets.delete(ch.doc.id); continue; }
           const d = oneJulian({ id: ch.doc.id, ...ch.doc.data(), _col: "guestBets" });
           if (typeof d.odds !== "number" || typeof d.units !== "number") continue;
-          S.bets.set(ch.doc.id, d);
+          if (goneSort(ch.doc.id, d)) continue;
           if (first) continue;
           if (prev && prev.status === "open" && d.status !== "open") celebrate(d);
           else if (!prev && d.status === "open") announce(d);
@@ -13352,6 +13416,7 @@ body.tv .rb-games.primeg.mason > .rb-pcol { padding-top: 16px; -webkit-mask-imag
         if (hn != null && hn !== S.hostName) { S.hostName = hn; $("#f-host").value = hn; render(); }
         const gn = s.exists ? s.data().guestName : null;
         if (gn && gn !== S.guestName) { S.guestName = gn; renderGuests(); render(); }
+        if (!GUEST) goneCfg(s.exists ? s.data() : {});
         const gl = s.exists ? s.data().guests : null;
         if (Array.isArray(gl) && JSON.stringify(gl) !== JSON.stringify(S.guests)) { S.guests = gl; renderGuests(); render(); }
         const ws = s.exists ? s.data().winSound : null;
