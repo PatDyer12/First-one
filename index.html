@@ -5672,7 +5672,7 @@ body.tv .rb-games.primeg.mason > .rb-pcol { padding-top: 16px; -webkit-mask-imag
   // ---------- sheets ----------
   function openSheet(id) { $(id).hidden = false; }
   // keep every open screen current: when a new version is up, reload it (never mid-form or mid-animation)
-  const BUILD = "20261017231110";
+  const BUILD = "20261018003446";
   function checkBuild() {
     if (BUILD === "dev") return;
     fetch("version.json?t=" + Date.now(), { cache: "no-store" }).then((r) => (r.ok ? r.json() : null)).then((j) => {
@@ -7227,7 +7227,6 @@ body.tv .rb-games.primeg.mason > .rb-pcol { padding-top: 16px; -webkit-mask-imag
     clip("clips/w09", "Bryce Underwood", "vibe", 17.85, { song: "O Canada", artist: "National anthem", college: true }),
     clip("cfb/cfb09", "You light my fire", "up", 27.9),
     clip("cfb/cfb10", "Locker room singalong", "vibe", 26.9, { song: "Meet in the Middle", artist: "Diamond Rio" }),
-    clip("cfb/cfb11", "Nah nah honey I'm good", "vibe", 29.9, { song: "Honey, I'm Good.", artist: "Andy Grammer" }),
     clip("cfb/cfb12", "Backyard singalong", "vibe", 25.9, { song: "Poison", artist: "Bell Biv DeVoe" }),
     clip("clips/w14", "Drake Maye singing", "vibe", 17.7, { song: "Love in the Dark", artist: "Adele" }),
     clip("music/mus04", "Bad and Boujee", "vibe", 35, { dj: 1, bpm: 126.91, b0: 1.875, song: "Bad and Boujee", artist: "Migos ft. Lil Uzi Vert" }),
