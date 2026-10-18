@@ -945,6 +945,28 @@ body.tv .strip .chart { height: 96px; }
 .tdodds { font: 800 17px var(--f-num); font-style: normal; color: var(--accent); margin-left: 10px; min-width: 52px; text-align: right; }
 .tdodds i { font: 700 10px var(--f-ui); color: var(--ink-2); margin-left: 4px; font-style: normal; }
 .tdnote { font: 600 13px var(--f-ui); color: var(--ink-2); background: rgba(255,255,255,.04); border: 1px dashed var(--line); border-radius: 10px; padding: 8px 10px; }
+/* alt lines: a ladder per side, the main number marked */
+.altmk { grid-template-columns: 1fr; }
+.altp { padding: 0 12px 12px; display: grid; gap: 8px; }
+.alt-h { font: 700 12px var(--f-ui); letter-spacing: .12em; text-transform: uppercase; color: var(--ink-2); margin-top: 4px; }
+.alt-h small { margin-left: 6px; font: 600 11px var(--f-ui); letter-spacing: .04em; color: var(--ink-3); }
+.alt-row { display: grid; gap: 3px; min-width: 0; }
+.alt-row > span { font: 700 12px var(--f-ui); color: var(--ink-2); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.alt-sc { position: relative; display: flex; gap: 6px; overflow-x: auto; padding: 2px 2px 6px; scroll-snap-type: x proximity; -webkit-overflow-scrolling: touch; scrollbar-width: thin; }
+.alc { flex: none; display: grid; justify-items: center; align-content: center; gap: 3px; min-width: 56px; min-height: 46px; padding: 6px 7px; border-radius: 9px; border: 1px solid var(--line); background: var(--panel-2); color: inherit; font: inherit; cursor: pointer; scroll-snap-align: center; }
+.alc b { font: 700 15px/1 var(--f-num); }
+.alc i { font: 600 11px/1 var(--f-mono); font-style: normal; color: var(--gold); }
+.alc.main { border-style: dashed; border-color: var(--ink-3); }
+.alc.main::after { content: "main"; font: 700 8px/1 var(--f-ui); letter-spacing: .12em; text-transform: uppercase; color: var(--ink-3); }
+.alc.on { border-style: solid; border-color: var(--gold); background: rgba(79,157,255,.16); }
+#lineWrap { flex-wrap: wrap; row-gap: 6px; }
+#lineWrap .hint, #altNote { flex-basis: 100%; }
+.lnstep { display: inline-flex; gap: 4px; }
+.lnstep button { min-width: 42px; padding: 8px; border-radius: 9px; border: 1px solid var(--line); background: var(--panel-2); color: var(--ink); font: 700 14px var(--f-num); cursor: pointer; }
+.lnstep button[hidden] { display: none; }
+.altnote { font: 700 12px var(--f-ui); color: var(--gold); letter-spacing: .02em; }
+.llw { display: inline-flex; align-items: center; gap: 4px; }
+.llw button { padding: 4px 7px; border-radius: 7px; border: 1px solid var(--line); background: var(--panel-2); color: var(--ink); font: 700 13px var(--f-num); cursor: pointer; }
 .pkhs { width: 1.25em; height: 1.25em; border-radius: 50%; object-fit: cover; object-position: top; vertical-align: -.25em; margin-right: .35em; background: rgba(255,255,255,.08); }
 
 /* crew picks */
@@ -3225,7 +3247,7 @@ body.tv .rb-games.primeg.mason > .rb-pcol { padding-top: 16px; -webkit-mask-imag
     <div class="field" id="selField" hidden>
       <span class="lbl">Your pick</span>
       <div class="selcard"><b id="selText"></b><span id="selGame"></span><button type="button" class="x" id="selClear" aria-label="Clear pick">×</button></div>
-      <div class="linein" id="lineWrap"><label for="f-line">Line</label><input type="text" id="f-line" inputmode="decimal" autocomplete="off"><div class="seg ouseg" id="ouSeg" role="group" aria-label="Over or under" hidden><button type="button" data-ou="o">Over</button><button type="button" data-ou="u">Under</button></div><span class="hint">Match your slip. Prefilled numbers are DraftKings' via ESPN.</span></div>
+      <div class="linein" id="lineWrap"><label for="f-line">Line</label><input type="text" id="f-line" inputmode="decimal" autocomplete="off"><span class="lnstep" id="lnStep"><button type="button" data-ls="-0.5" aria-label="Half a point down">−½</button><button type="button" data-ls="0.5" aria-label="Half a point up">+½</button><button type="button" data-ls="flip" id="lnFlip" aria-label="Flip the sign">±</button></span><div class="seg ouseg" id="ouSeg" role="group" aria-label="Over or under" hidden><button type="button" data-ou="o">Over</button><button type="button" data-ou="u">Under</button></div><span class="hint">Match your slip. Prefilled numbers are DraftKings' via ESPN.</span><span class="altnote" id="altNote" hidden></span></div>
     </div>
     <div class="field" id="customField" hidden>
       <label for="f-pick">Pick</label>
@@ -5950,7 +5972,7 @@ body.tv .rb-games.primeg.mason > .rb-pcol { padding-top: 16px; -webkit-mask-imag
   // ---------- sheets ----------
   function openSheet(id) { $(id).hidden = false; }
   // keep every open screen current: when a new version is up, reload it (never mid-form or mid-animation)
-  const BUILD = "20261018160558";
+  const BUILD = "20261018163348";
   function checkBuild() {
     if (BUILD === "dev") return;
     fetch("version.json?t=" + Date.now(), { cache: "no-store" }).then((r) => (r.ok ? r.json() : null)).then((j) => {
@@ -6104,7 +6126,7 @@ body.tv .rb-games.primeg.mason > .rb-pcol { padding-top: 16px; -webkit-mask-imag
       if (open) {
         if (curBook() === "PM") pmLoad(g);
         const btn = (m, s) => { const p = mkPrefill(g, m, s); return `<button type="button" class="mkt${isOn(g, m, s) ? " on" : ""}" data-pick="${esc(g.id)}|${m}|${s}"><span>${esc(mkLabel(g, m, s, p.l))}</span><b>${p.o ? fOdds(p.o) : "—"}${p.c ? `<i class="pmc">${Math.round(p.c * 100)}¢</i>` : ""}</b></button>`; };
-        mk = `<div class="mkts">${btn("ml", "a")}${btn("ml", "h")}${btn("sp", "a")}${btn("sp", "h")}${btn("tot", "o")}${btn("tot", "u")}</div>`;
+        mk = `<div class="mkts">${btn("ml", "a")}${btn("ml", "h")}${btn("sp", "a")}${btn("sp", "h")}${btn("tot", "o")}${btn("tot", "u")}</div>` + altRow(g);
         if (g.sport === "NHL")
           mk += `<div class="tdmk ppmk">${PP_MK.map(([m, l]) => `<button type="button" class="mkt${F.tdG === g.id && F.tdM === m ? " on" : ""}" data-td="${esc(g.id)}|${m}"><span>${l}</span><b>${F.tdG === g.id && F.tdM === m ? "▾" : "›"}</b></button>`).join("")}</div>${F.tdG === g.id && isPP(F.tdM) ? tdPanel(g) : ""}`;
         const ppRowOf = (list) => `<div class="tdmk ppmk">${list.map(([m, l]) => `<button type="button" class="mkt${F.tdG === g.id && F.tdM === m ? " on" : ""}" data-td="${esc(g.id)}|${m}"><span>${l}</span><b>${F.tdG === g.id && F.tdM === m ? "▾" : "›"}</b></button>`).join("")}</div>`;
@@ -6116,6 +6138,7 @@ body.tv .rb-games.primeg.mason > .rb-pcol { padding-top: 16px; -webkit-mask-imag
         <span class="g-when">${gWhen(g)}</span><span class="g-teams">${esc(g.a.nm)} <i>@</i> ${esc(g.h.nm)}</span>
         <span class="g-meta">${g.st === "in" ? `${g.a.sc}-${g.h.sc} · ${esc(g.d)}` : g.sport}</span></button>${mk}</div>`;
     }).join("");
+    altCenter();
   }
   // TD scorer picker: both teams' skill players from ESPN rosters, with headshots
   const ROSTER = new Map(), TD_POS = ["RB", "WR", "TE", "QB", "FB"], NHL_POS = ["C", "LW", "RW", "D", "G"];
@@ -6171,6 +6194,157 @@ body.tv .rb-games.primeg.mason > .rb-pcol { padding-top: 16px; -webkit-mask-imag
     const e = v.map.get(normNm(p.nm)); if (!e || !e[m]) return null;
     const b = curBook(); return e[m][b] != null ? { o: e[m][b], book: b } : { o: e[m][b === "FD" ? "DK" : "FD"], book: b === "FD" ? "DK" : "FD" };
   }
+  // ---------- alt lines ----------
+  const ALTS = new Map(), OA_SK = { NFL: "americanfootball_nfl", CFB: "americanfootball_ncaaf", NBA: "basketball_nba", CBB: "basketball_ncaab", MLB: "baseball_mlb", NHL: "icehockey_nhl" };
+  const TOT0 = { NFL: 44.5, CFB: 52.5, NBA: 226.5, CBB: 145.5, MLB: 8.5, NHL: 6.5 };
+  const altK = (l) => String(Math.round(l * 10) / 10);
+  const altEmpty = () => ({ at: Date.now(), sp: { a: new Map(), h: new Map() }, tot: { o: new Map(), u: new Map() } });
+  // every spread and total the books hang on a game, with their prices (FanDuel and DraftKings, 10-minute cache)
+  function loadAlts(g) {
+    if (!S.oddsKey || !OA_SK[g.sport]) return null;
+    const have = ALTS.get(g.id); if (have && (have.then || Date.now() - have.at < 10 * 60e3)) return have;
+    const pr = (async () => {
+      try {
+        const sk = OA_SK[g.sport]; let evs = OA_EVENTS.get(sk);
+        if (!evs || Date.now() - evs.at > 30 * 60e3) { const r = await fetch(`${OA}${sk}/events?apiKey=${encodeURIComponent(S.oddsKey)}`); if (!r.ok) throw new Error(r.status === 401 ? "key" : "quota"); evs = { at: Date.now(), list: await r.json() }; OA_EVENTS.set(sk, evs); }
+        const want = [oaName(g.a.fn || g.a.nm), oaName(g.h.fn || g.h.nm)];
+        const ev = evs.list.find((e) => Math.abs(Date.parse(e.commence_time) - g.t) < 4 * 36e5 && [oaName(e.away_team), oaName(e.home_team)].every((n, i) => n === want[i] || n.includes(want[i]) || want[i].includes(n)));
+        const v = altEmpty();
+        if (!ev) { v.none = true; ALTS.set(g.id, v); return v; }
+        const r = await fetch(`${OA}${sk}/events/${ev.id}/odds?apiKey=${encodeURIComponent(S.oddsKey)}&regions=us&markets=spreads,totals,alternate_spreads,alternate_totals&oddsFormat=american&bookmakers=fanduel,draftkings`);
+        if (!r.ok) throw new Error(r.status === 401 ? "key" : "quota");
+        const j = await r.json(), aw = oaName(j.away_team || ev.away_team), hm = oaName(j.home_team || ev.home_team);
+        for (const bk of j.bookmakers || []) {
+          const book = bk.key === "draftkings" ? "DK" : bk.key === "fanduel" ? "FD" : null; if (!book) continue;
+          for (const mk of bk.markets || []) {
+            const tot = /totals$/.test(mk.key); if (!tot && !/spreads$/.test(mk.key)) continue;
+            for (const o of mk.outcomes || []) {
+              if (typeof o.point !== "number" || typeof o.price !== "number") continue;
+              const n = oaName(o.name), side = tot ? (n === "over" ? "o" : n === "under" ? "u" : null) : n === aw ? "a" : n === hm ? "h" : null; if (!side) continue;
+              const M = (tot ? v.tot : v.sp)[side], k = altK(o.point);
+              if (!M.has(k)) M.set(k, {}); M.get(k)[book] = o.price;
+            }
+          }
+        }
+        ALTS.set(g.id, v); return v;
+      } catch (e) { const v = altEmpty(); v.err = String(e.message || e); ALTS.set(g.id, v); return v; }
+    })();
+    ALTS.set(g.id, pr);
+    pr.then(() => {
+      if ($("#addSheet").hidden) return;
+      // a line picked before the prices came in gets its price now (unless the odds were typed)
+      if (F.sel && F.sel.g === g.id && kindNow() === "straight" && !F.oddsTouched && !$("#f-odds").value) { const ap = altPrice(g, F.sel.m, F.sel.s, F.sel.l); if (ap != null) { setOdds(ap); updatePreview(); } }
+      if (F.altG === g.id) renderGames(); else altNote();
+    });
+    return pr;
+  }
+  // the book's price on that line, when we know it
+  function altPrice(g, m, s, l) {
+    if (l == null || (m !== "sp" && m !== "tot")) return null;
+    const k = altK(l);
+    if (curBook() === "PM") {
+      const v = PMK.get(g.id); if (!v || v.then) return null;
+      if (m === "sp") { const e = v.sp.find((x) => x[s] && altK(x[s].l) === k); return e ? pmAm(e[s].p) : null; }
+      const e = v.tot.find((x) => altK(x.l) === k); return e ? pmAm(s === "o" ? e.o : e.u) : null;
+    }
+    const v = ALTS.get(g.id); if (!v || v.then) return null;
+    const e = (m === "sp" ? v.sp : v.tot)[s].get(k), b = curBook();
+    return e && e[b] != null ? e[b] : null;
+  }
+  const espnLine = (g, m, s) => (m === "sp" ? (g.sp && g.sp[s] ? g.sp[s].l : null) : m === "tot" ? (g.tot ? g.tot.l : null) : null);
+  // an alt: a spread or total off the main number
+  const altLine = (g, x) => (x.m === "sp" || x.m === "tot") && x.l != null && espnLine(g, x.m, x.s) != null && x.l !== espnLine(g, x.m, x.s);
+  // one side's ladder: the book's own list when we have it, filled out a point apart around the main number
+  function altLadder(g, m, s) {
+    const pre = mkPrefill(g, m, s), main = pre.l, out = new Map();
+    const put = (l, o) => { if (l == null || !isFinite(l) || (m === "tot" && l <= 0)) return; const k = altK(l), had = out.get(k); if (!had || (had.o == null && o != null)) out.set(k, { l: Number(k), o }); };
+    if (curBook() === "PM") {
+      const v = PMK.get(g.id);
+      if (v && !v.then) { if (m === "sp") { for (const x of v.sp) if (x[s]) put(x[s].l, pmAm(x[s].p)); } else for (const x of v.tot) put(x.l, pmAm(s === "o" ? x.o : x.u)); }
+    } else {
+      const v = ALTS.get(g.id), b = curBook();
+      if (v && !v.then) for (const [k, pr] of (m === "sp" ? v.sp : v.tot)[s]) if (pr[b] != null) put(Number(k), pr[b]);
+    }
+    if (main != null) put(main, pre.o);
+    if (out.size < 6) {
+      const c = main != null ? main : m === "sp" ? (s === "a" ? 2.5 : -2.5) : TOT0[g.sport] || 44.5;
+      for (let k = -10; k <= 10; k++) if (!(m === "sp" && c + k === 0)) put(c + k, null);
+    }
+    return { main, list: [...out.values()].sort((x, y) => x.l - y.l) };
+  }
+  const altOn = (g, m, s, l) => (kindNow() === "straight" ? !!F.sel && F.sel.g === g.id && F.sel.m === m && F.sel.s === s && F.sel.l === l : F.legs.some((x) => x.g === g.id && x.m === m && x.s === s && x.l === l));
+  function altPanel(g) {
+    const pm = curBook() === "PM";
+    const v = pm ? pmLoad(g) || PMK.get(g.id) : loadAlts(g) || ALTS.get(g.id);
+    const note = pm ? (v && v.then ? "Getting Polymarket's lines…" : "") : !S.oddsKey ? "Tap your line, then put in the price from your slip. Add your free odds key in Settings to see FanDuel and DraftKings alt prices here." : v && v.then ? "Getting alt prices…" : v && v.err === "key" ? "That odds key didn't work. Check it in Settings." : v && v.err ? "Couldn't get alt prices right now. Tap your line and put in the price from your slip." : v && v.none ? "No alt prices for this game yet. Tap your line and put in the price from your slip." : "";
+    const row = (m, s, nm) => {
+      const { main, list } = altLadder(g, m, s);
+      return `<div class="alt-row"><span>${esc(nm)}</span><div class="alt-sc">${list.map((x) => `<button type="button" class="alc${x.l === main ? " main" : ""}${altOn(g, m, s, x.l) ? " on" : ""}" data-alt="${esc(g.id)}|${m}|${s}|${x.l}"${x.o != null ? ` data-ao="${x.o}"` : ""}><b>${m === "sp" ? fLine(x.l) : trimL(x.l)}</b>${x.o != null ? `<i>${fOdds(x.o)}</i>` : ""}</button>`).join("")}</div></div>`;
+    };
+    const spn = g.sport === "MLB" ? "Alt run line" : g.sport === "NHL" ? "Alt puck line" : "Alt spread";
+    return `<div class="altp">${note ? `<div class="tdnote">${esc(note)}</div>` : ""}<div class="alt-h">${spn}</div>${row("sp", "a", g.a.nm)}${row("sp", "h", g.h.nm)}<div class="alt-h">Alt total<small>${esc(g.a.ab)}/${esc(g.h.ab)}</small></div>${row("tot", "o", "Over")}${row("tot", "u", "Under")}</div>`;
+  }
+  const altRow = (g) => `<div class="tdmk altmk"><button type="button" class="mkt${F.altG === g.id ? " on" : ""}" data-altopen="${esc(g.id)}"><span>Alt lines</span><b>${F.altG === g.id ? "▾" : "›"}</b></button></div>${F.altG === g.id ? altPanel(g) : ""}`;
+  // each ladder opens on the line you've got (or the main number) in the middle
+  function altCenter() {
+    document.querySelectorAll("#g-list .alt-sc").forEach((sc) => {
+      const c = sc.querySelector(".alc.on") || sc.querySelector(".alc.main") || sc.children[Math.floor(sc.children.length / 2)];
+      if (c) sc.scrollLeft = c.offsetLeft - (sc.clientWidth - c.offsetWidth) / 2;
+    });
+    altNote();
+  }
+  function altNote() {
+    const n = $("#altNote"); if (!n) return;
+    const g = F.sel && S.games.get(F.sel.g);
+    if (!g || kindNow() !== "straight" || !altLine(g, F.sel)) { n.hidden = true; return; }
+    const ap = altPrice(g, F.sel.m, F.sel.s, F.sel.l), bk = { FD: "FanDuel", DK: "DraftKings", PM: "Polymarket" }[curBook()] || "the book's", odds = formVals().odds;
+    n.hidden = false; n.textContent = ap != null && odds === ap ? `Alt line · ${bk} price filled in` : odds ? "Alt line" : "Alt line · put in the price from your slip";
+  }
+  // log a line off the ladder: its price comes with it when we know it, else the odds box clears for the slip's
+  function pickAlt(g, m, s, l, o) {
+    const main = mkPrefill(g, m, s);
+    if (o == null && l === main.l && main.o != null) o = main.o;
+    if (kindNow() === "straight") {
+      F.sel = { g: g.id, m, s, l }; F.custom = false;
+      $("#f-line").value = String(l);
+      if (o != null) { setOdds(o); F.oddsTouched = false; } else if (!F.oddsTouched) setOdds(null);
+      renderPicker(); updatePreview();
+      if (o == null) $("#f-odds").focus();
+      return;
+    }
+    const i = F.legs.findIndex((x) => x.g === g.id && x.m === m && x.s === s);
+    if (i >= 0 && F.legs[i].l === l) F.legs.splice(i, 1);
+    else if (i >= 0) Object.assign(F.legs[i], { l, o });
+    else F.legs.push({ g: g.id, m, s, l, o, sport: g.sport });
+    legOdds(); renderPicker(); updatePreview();
+  }
+  // a parlay's odds from its legs when they all have prices; an alt leg without one clears the box for the slip's number
+  function legOdds() {
+    if (F.oddsTouched) return;
+    if (F.legs.length >= 2 && F.legs.every((x) => x.o)) parlayOdds();
+    else if (F.legs.some((x) => x.g && !x.o && (x.m === "sp" || x.m === "tot"))) setOdds(null);
+  }
+  // a leg's or the pick's price after its line moved: the book's for that line, the main price on the main number
+  function linePrice(g, x) {
+    const ap = altPrice(g, x.m, x.s, x.l); if (ap != null) return ap;
+    const main = mkPrefill(g, x.m, x.s); return x.l === main.l ? main.o : null;
+  }
+  // which way a bare number goes: the side's own sign (its line, else its main number)
+  function sideSign(g, x) {
+    if (x.sg) return x.sg;
+    if (x.l) return Math.sign(x.l);
+    const main = mkPrefill(g, x.m, x.s).l; return main != null && main < 0 ? -1 : 1;
+  }
+  function lineTo(v, typed) {
+    if (!F.sel) return;
+    const g = S.games.get(F.sel.g); if (!g) return;
+    F.sel.l = v; if (v) F.sel.sg = Math.sign(v);
+    $("#selText").textContent = mkLabel(g, F.sel.m, F.sel.s, v, F.sel.p);
+    if (!typed) $("#f-line").value = v == null ? "" : String(v);
+    if ((F.sel.m === "sp" || F.sel.m === "tot") && v != null && !F.oddsTouched) { const o = linePrice(g, F.sel); setOdds(o); }
+    altNote(); updatePreview();
+    if (!typed) renderGames();
+  }
   const rosterOf = (g, side) => { const r = ROSTER.get(g.sport + "|" + g[side].id); return Array.isArray(r) ? r : null; };
   function tdList(g) {
     const q = (F.tdQ || "").trim().toLowerCase();
@@ -6212,11 +6386,11 @@ body.tv .rb-games.primeg.mason > .rb-pcol { padding-top: 16px; -webkit-mask-imag
       $("#selText").textContent = g ? mkLabel(g, F.sel.m, F.sel.s, F.sel.l, F.sel.p) : "";
       $("#selGame").textContent = g ? `${g.sport} · ${g.a.nm} @ ${g.h.nm} · ${g.st === "in" ? "live now" : startLabel(g.t)}` : "";
       $("#lineWrap").hidden = F.sel.m === "ml" || isTd(F.sel.m);
-      $("#ouSeg").hidden = !isPP(F.sel.m); document.querySelectorAll("#ouSeg [data-ou]").forEach((x) => x.setAttribute("aria-pressed", String(x.dataset.ou === F.sel.s)));
+      $("#ouSeg").hidden = !isPP(F.sel.m); $("#lnFlip").hidden = F.sel.m !== "sp"; document.querySelectorAll("#ouSeg [data-ou]").forEach((x) => x.setAttribute("aria-pressed", String(x.dataset.ou === F.sel.s)));
     }
     $("#legCount").textContent = F.legs.length ? "· " + F.legs.length + " picked" : "· tap markets below or add your own";
     $("#legList").innerHTML = F.legs.map((x, i) => `<div class="legrow"><span class="lt">${esc(legText(x))}</span>
-      ${x.g && x.m !== "ml" && !isTd(x.m) ? `<input data-ll="${i}" inputmode="decimal" autocomplete="off" value="${x.l == null ? "" : x.l}" aria-label="Line for leg ${i + 1}">` : "<span></span>"}
+      ${x.g && x.m !== "ml" && !isTd(x.m) ? `<span class="llw">${x.m === "sp" ? `<button type="button" data-lf="${i}" aria-label="Flip the sign of leg ${i + 1}">±</button>` : ""}<input data-ll="${i}" inputmode="decimal" autocomplete="off" value="${x.l == null ? "" : x.l}" aria-label="Line for leg ${i + 1}"></span>` : "<span></span>"}
       <span class="lo">${x.o ? fOdds(x.o) : ""}</span><button type="button" class="x" data-rm="${i}" aria-label="Remove leg">×</button></div>`).join("");
     renderGames();
   }
@@ -6254,22 +6428,65 @@ body.tv .rb-games.primeg.mason > .rb-pcol { padding-top: 16px; -webkit-mask-imag
     }
     renderPicker(); updatePreview();
   });
+  $("#g-list").addEventListener("click", (e) => {
+    const ob = e.target.closest("[data-altopen]");
+    if (ob) { F.altG = F.altG === ob.dataset.altopen ? null : ob.dataset.altopen; renderGames(); return; }
+    const c = e.target.closest("[data-alt]"); if (!c) return;
+    const [gid, m, s, l] = c.dataset.alt.split("|"), g = S.games.get(gid); if (!g) return;
+    pickAlt(g, m, s, Number(l), c.dataset.ao != null ? Number(c.dataset.ao) : null);
+  });
   $("#g-q").addEventListener("input", (e) => { F.q = e.target.value; renderGames(); });
   document.querySelectorAll('input[name="book"]').forEach((r) => r.addEventListener("change", () => {
     if (!F.tdG) { renderGames(); if (curBook() !== "PM") $("#g-fresh").textContent = S.slateAt ? "· lines via ESPN, " + tm(S.slateAt) : ""; }
-    if (F.sel && !isTd(F.sel.m) && !isPP(F.sel.m) && kindNow() === "straight") { const g = S.games.get(F.sel.g); if (g) { const p = mkPrefill(g, F.sel.m, F.sel.s); if (p.o) { if (F.sel.m !== "ml" && p.l != null) { F.sel.l = p.l; $("#f-line").value = String(p.l); } setOdds(p.o); renderPicker(); updatePreview(); } } }
+    if (F.sel && !isTd(F.sel.m) && !isPP(F.sel.m) && kindNow() === "straight") { const g = S.games.get(F.sel.g); if (g) { const p = mkPrefill(g, F.sel.m, F.sel.s); if (altLine(g, F.sel)) { if (!F.oddsTouched) setOdds(altPrice(g, F.sel.m, F.sel.s, F.sel.l)); renderPicker(); updatePreview(); } else if (p.o) { if (F.sel.m !== "ml" && p.l != null) { F.sel.l = p.l; $("#f-line").value = String(p.l); } setOdds(p.o); renderPicker(); updatePreview(); } } }
     if (F.tdG) renderGames(); else if (F.sel && isTd(F.sel.m)) { const g = S.games.get(F.sel.g), od = g && propOdds(g, F.sel.p, F.sel.m); if (od && od.book === curBook()) { setOdds(od.o); updatePreview(); } } }));
   $("#g-list").addEventListener("input", (e) => { if (!e.target.matches("[data-tdq]")) return; F.tdQ = e.target.value; const g = S.games.get(F.tdG), box = e.target.parentElement.querySelector(".tdlist"); if (g && box) box.innerHTML = tdList(g); });
   $("#g-sports").addEventListener("change", (e) => { if (e.target.name === "gsport") { F.sport = e.target.value; renderGames(); } });
   $("#customToggle").addEventListener("click", () => { F.custom = true; F.sel = null; renderPicker(); updatePreview(); $("#f-pick").focus(); });
   $("#selClear").addEventListener("click", () => { F.sel = null; renderPicker(); updatePreview(); });
-  $("#f-line").addEventListener("input", (e) => { if (F.sel) { const v = num(e.target.value); F.sel.l = v; $("#selText").textContent = mkLabel(S.games.get(F.sel.g), F.sel.m, F.sel.s, v, F.sel.p); } });
+  $("#f-line").addEventListener("input", (e) => {
+    if (!F.sel) return;
+    const g = S.games.get(F.sel.g); let v = num(e.target.value);
+    if (v != null && F.sel.m === "sp" && g && !/[-+−–]/.test(e.target.value)) v = sideSign(g, F.sel) * Math.abs(v);
+    lineTo(v, true);
+  });
+  $("#f-line").addEventListener("change", () => { if (F.sel && F.sel.l != null) $("#f-line").value = String(F.sel.l); });
+  $("#f-odds").addEventListener("input", () => altNote());
+  $("#sign").addEventListener("click", () => altNote());
+  $("#lnStep").addEventListener("click", (e) => {
+    const b = e.target.closest("[data-ls]"); if (!b || !F.sel) return;
+    const g = S.games.get(F.sel.g); if (!g) return;
+    if (b.dataset.ls === "flip") { F.sel.sg = -sideSign(g, F.sel); lineTo(F.sel.l == null ? null : -F.sel.l); return; }
+    const main = mkPrefill(g, F.sel.m, F.sel.s).l, base = F.sel.l != null ? F.sel.l : main != null ? main : 0;
+    const v = Math.round((base + Number(b.dataset.ls)) * 10) / 10;
+    if (F.sel.m !== "sp" && v <= 0) return;
+    lineTo(v);
+  });
   $("#ouSeg").addEventListener("click", (e) => { const b = e.target.closest("[data-ou]"); if (!b || !F.sel) return; F.sel.s = b.dataset.ou; renderPicker(); updatePreview(); });
   $("#legList").addEventListener("click", (e) => { const b = e.target.closest("[data-rm]"); if (!b) return; F.legs.splice(Number(b.dataset.rm), 1); parlayOdds(); renderPicker(); updatePreview(); });
   $("#legList").addEventListener("input", (e) => {
     const i = e.target.dataset.ll; if (i == null) return;
     F.legs[i].l = num(e.target.value);
     e.target.closest(".legrow").querySelector(".lt").textContent = legText(F.legs[i]);
+  });
+  // (then: a bare number keeps the leg's sign, the one it had when you went to change it, and its price follows the line)
+  $("#legList").addEventListener("focusin", (e) => { const i = e.target.dataset.ll, x = i != null && F.legs[i]; if (x && x.l && !x.sg) x.sg = Math.sign(x.l); });
+  $("#legList").addEventListener("input", (e) => {
+    const i = e.target.dataset.ll; if (i == null) return;
+    const x = F.legs[i], g = x && x.g && S.games.get(x.g); if (!g || (x.m !== "sp" && x.m !== "tot")) return;
+    if (x.l != null && x.m === "sp" && !/[-+−–]/.test(e.target.value)) x.l = sideSign(g, x) * Math.abs(x.l);
+    if (x.l) x.sg = Math.sign(x.l);
+    x.o = x.l == null ? null : linePrice(g, x);
+    const row = e.target.closest(".legrow"); row.querySelector(".lt").textContent = legText(x); row.querySelector(".lo").textContent = x.o ? fOdds(x.o) : "";
+    legOdds(); updatePreview();
+  });
+  $("#legList").addEventListener("change", (e) => { const i = e.target.dataset.ll; if (i != null && F.legs[i] && F.legs[i].l != null) e.target.value = String(F.legs[i].l); });
+  $("#legList").addEventListener("click", (e) => {
+    const b = e.target.closest("[data-lf]"); if (!b) return;
+    const x = F.legs[Number(b.dataset.lf)], g = x && x.g && S.games.get(x.g); if (!g) return;
+    x.sg = -sideSign(g, x); if (x.l != null) x.l = -x.l;
+    x.o = x.l == null ? null : linePrice(g, x);
+    legOdds(); renderPicker(); updatePreview();
   });
   function addCustomLeg() {
     const v = $("#f-leg").value.trim(); if (!v) return;
@@ -6379,7 +6596,7 @@ body.tv .rb-games.primeg.mason > .rb-pcol { padding-top: 16px; -webkit-mask-imag
     const me = document.querySelector('input[name="who"][value="me"]'); if (me) me.checked = true;
     $("#guestWrap").hidden = true; $("#f-guest").value = ""; renderGuests();
     $("#addForm").reset(); S.sign = -1; S.day = 0; $("#f-odds").value = "110"; $("#f-units").value = "1"; $("#f-err").textContent = "";
-    Object.assign(F, { sel: null, legs: [], q: "", openG: null, custom: false, oddsTouched: false, sport: focusLeague(), tail: null });
+    Object.assign(F, { sel: null, legs: [], q: "", openG: null, custom: false, oddsTouched: false, sport: focusLeague(), tail: null, altG: null });
     $("#addForm .sheet-head h3").textContent = "Log a bet";
     scanNote(""); slipBets = [];
     renderPicker(); updatePreview(); openSheet("#addSheet"); loadPickerGames();
@@ -6436,7 +6653,7 @@ body.tv .rb-games.primeg.mason > .rb-pcol { padding-top: 16px; -webkit-mask-imag
   });
 
   $("#oddsKeySave").addEventListener("click", () => {
-    const k = $("#f-oddskey").value.trim(); S.oddsKey = k; PROPS.clear(); OA_EVENTS.clear();
+    const k = $("#f-oddskey").value.trim(); S.oddsKey = k; PROPS.clear(); OA_EVENTS.clear(); ALTS.clear();
     write((db) => db.doc("config/settings").set({ oddsKey: k }, { merge: true }), () => {});
     toast(k ? "Odds key saved. Prices show up in the TD scorer picker." : "Odds key removed");
   });
@@ -12584,7 +12801,7 @@ body.tv .rb-games.primeg.mason > .rb-pcol { padding-top: 16px; -webkit-mask-imag
 
   // ---------- scan a bet slip (Gemini via Firebase AI Logic) ----------
   const SLIP_MODELS = ["gemini-3.5-flash-lite", "gemini-3.8-flash"];
-  const SLIP_PROMPT = "You read screenshots of sportsbook bet slips (usually FanDuel, DraftKings or Polymarket) and extract each bet on them.\nRules:\n- One entry per bet. A parlay is ONE bet with several legs; a straight bet has exactly one leg.\n- odds: the American odds of the whole bet as an integer (e.g. -110, 250). For a parlay, the parlay's total odds.\n- stake: the dollar amount wagered. to_win: the dollar payout profit shown, if any.\n- For each leg: pick = the selection as written (team or player and line); team = the team or player name only;\n  market = \"ml\" (moneyline/to win), \"spread\" (point spread, run line, puck line, alt spread), \"total\" (over/under game total), \"anytime_td\" (anytime touchdown scorer, \"to score a TD\"), \"first_td\" (first touchdown scorer of the game) or \"prop\" (anything else);\n  player = for touchdown scorer bets, the player's full name exactly as written (e.g. \"Bucky Irving\"), else null; for those bets team = the player's team if shown;\n  side = \"over\" or \"under\" for totals, else null; line = the signed number for spreads (e.g. -6.5) or the total number (e.g. 48.5), else null;\n  away and home = the two teams of the game if shown (an \"A @ B\" matchup means A is away, B is home), else null;\n  sport = NFL, CFB, NBA, CBB, MLB, NHL or OTHER, judged from the teams and market.\n- Hockey player props (NHL): market = \"prop\", player = the player's full name, stat = \"goals\", \"assists\", \"points\", \"shots_on_goal\" or \"saves\", side = \"over\" or \"under\", line = the number (\"To score a goal\" / anytime goal scorer = stat goals, side over, line 0.5; \"2+ shots\" = side over, line 1.5; \"1+ point\" = stat points, over 0.5), sport = NHL.\n- Other player props: market = \"prop\", player = the player's full name, sport = MLB, NBA, CBB, NFL or CFB, side = \"over\" or \"under\", line = the number (\"2+ hits\" = over 1.5; \"to hit a home run\" = stat home_runs, over 0.5; \"25+ points\" = over 24.5), stat = MLB: \"hits\", \"home_runs\", \"rbis\", \"runs\", \"walks\", \"hits_runs_rbis\", \"strikeouts\" (pitcher), \"earned_runs\", \"hits_allowed\", \"outs\"; NBA / college basketball: \"points\", \"rebounds\", \"assists\", \"threes\", \"steals\", \"blocks\", \"pra\" (points + rebounds + assists); NFL / college football: \"passing_yards\", \"passing_tds\", \"completions\", \"interceptions\", \"rushing_yards\", \"rushing_attempts\", \"receiving_yards\", \"receptions\", \"rush_rec_yards\".\n- book = \"FD\" for FanDuel, \"DK\" for DraftKings, \"PM\" for Polymarket (a prediction market: prices in cents like 62¢, shares, avg price, Buy / Yes / No), null if you can't tell.\n- Polymarket: price = the price paid per share in cents (e.g. 62 for 62¢; the avg price if shown), and odds = null unless American odds are printed; stake = the amount spent (cost / total); to_win = the profit if it pays (payout minus cost) when shown. The pick is the outcome bought: a team for a moneyline market like \"Bills vs. Rams\", \"Rams -3.5\" for \"Spread: Rams (-3.5)\", \"Over 54.5\" for \"O/U 54.5\"; buying \"No\" on one team of a two-team game means the other team. Take market, line and side from the market title.\n- Use null for anything not visible. Never invent numbers.";
+  const SLIP_PROMPT = "You read screenshots of sportsbook bet slips (usually FanDuel, DraftKings or Polymarket) and extract each bet on them.\nRules:\n- One entry per bet. A parlay is ONE bet with several legs; a straight bet has exactly one leg.\n- odds: the American odds of the whole bet as an integer (e.g. -110, 250). For a parlay, the parlay's total odds.\n- stake: the dollar amount wagered. to_win: the dollar payout profit shown, if any.\n- For each leg: pick = the selection as written (team or player and line); team = the team or player name only;\n  market = \"ml\" (moneyline/to win), \"spread\" (point spread, run line, puck line, alt spread), \"total\" (over/under game total, alt total), \"anytime_td\" (anytime touchdown scorer, \"to score a TD\"), \"first_td\" (first touchdown scorer of the game) or \"prop\" (anything else);\n  player = for touchdown scorer bets, the player's full name exactly as written (e.g. \"Bucky Irving\"), else null; for those bets team = the player's team if shown;\n  side = \"over\" or \"under\" for totals, else null; line = the signed number for spreads (e.g. -6.5) or the total number (e.g. 48.5), else null;\n  away and home = the two teams of the game if shown (an \"A @ B\" matchup means A is away, B is home), else null;\n  sport = NFL, CFB, NBA, CBB, MLB, NHL or OTHER, judged from the teams and market.\n- Hockey player props (NHL): market = \"prop\", player = the player's full name, stat = \"goals\", \"assists\", \"points\", \"shots_on_goal\" or \"saves\", side = \"over\" or \"under\", line = the number (\"To score a goal\" / anytime goal scorer = stat goals, side over, line 0.5; \"2+ shots\" = side over, line 1.5; \"1+ point\" = stat points, over 0.5), sport = NHL.\n- Other player props: market = \"prop\", player = the player's full name, sport = MLB, NBA, CBB, NFL or CFB, side = \"over\" or \"under\", line = the number (\"2+ hits\" = over 1.5; \"to hit a home run\" = stat home_runs, over 0.5; \"25+ points\" = over 24.5), stat = MLB: \"hits\", \"home_runs\", \"rbis\", \"runs\", \"walks\", \"hits_runs_rbis\", \"strikeouts\" (pitcher), \"earned_runs\", \"hits_allowed\", \"outs\"; NBA / college basketball: \"points\", \"rebounds\", \"assists\", \"threes\", \"steals\", \"blocks\", \"pra\" (points + rebounds + assists); NFL / college football: \"passing_yards\", \"passing_tds\", \"completions\", \"interceptions\", \"rushing_yards\", \"rushing_attempts\", \"receiving_yards\", \"receptions\", \"rush_rec_yards\".\n- book = \"FD\" for FanDuel, \"DK\" for DraftKings, \"PM\" for Polymarket (a prediction market: prices in cents like 62¢, shares, avg price, Buy / Yes / No), null if you can't tell.\n- Polymarket: price = the price paid per share in cents (e.g. 62 for 62¢; the avg price if shown), and odds = null unless American odds are printed; stake = the amount spent (cost / total); to_win = the profit if it pays (payout minus cost) when shown. The pick is the outcome bought: a team for a moneyline market like \"Bills vs. Rams\", \"Rams -3.5\" for \"Spread: Rams (-3.5)\", \"Over 54.5\" for \"O/U 54.5\"; buying \"No\" on one team of a two-team game means the other team. Take market, line and side from the market title.\n- Use null for anything not visible. Never invent numbers.";
   const SLIP_SCHEMA = {"type": "OBJECT", "properties": {"bets": {"type": "ARRAY", "items": {"type": "OBJECT", "properties": {"book": {"type": "STRING", "enum": ["FD", "DK", "PM"], "nullable": true}, "price": {"type": "NUMBER", "nullable": true}, "kind": {"type": "STRING", "enum": ["straight", "parlay"]}, "odds": {"type": "INTEGER", "nullable": true}, "stake": {"type": "NUMBER", "nullable": true}, "to_win": {"type": "NUMBER", "nullable": true}, "legs": {"type": "ARRAY", "items": {"type": "OBJECT", "properties": {"pick": {"type": "STRING"}, "team": {"type": "STRING", "nullable": true}, "market": {"type": "STRING", "enum": ["ml", "spread", "total", "anytime_td", "first_td", "prop"]}, "player": {"type": "STRING", "nullable": true}, "stat": {"type": "STRING", "enum": ["goals", "assists", "points", "shots_on_goal", "saves", "hits", "home_runs", "rbis", "runs", "walks", "hits_runs_rbis", "strikeouts", "earned_runs", "hits_allowed", "outs", "rebounds", "threes", "steals", "blocks", "pra", "passing_yards", "passing_tds", "completions", "interceptions", "rushing_yards", "rushing_attempts", "receiving_yards", "receptions", "rush_rec_yards"], "nullable": true}, "side": {"type": "STRING", "enum": ["over", "under"], "nullable": true}, "line": {"type": "NUMBER", "nullable": true}, "odds": {"type": "INTEGER", "nullable": true}, "price": {"type": "NUMBER", "nullable": true}, "away": {"type": "STRING", "nullable": true}, "home": {"type": "STRING", "nullable": true}, "sport": {"type": "STRING", "enum": ["NFL", "CFB", "NBA", "CBB", "MLB", "NHL", "OTHER"]}}, "required": ["pick", "market", "sport"]}}}, "required": ["kind", "legs"]}}}, "required": ["bets"]};
   async function shrink(file) {
     const url = URL.createObjectURL(file);
@@ -12899,7 +13116,7 @@ body.tv .rb-games.primeg.mason > .rb-pcol { padding-top: 16px; -webkit-mask-imag
         const v = s.exists ? Number(s.data().unitSize) : NaN;
         if (v > 0 && v !== S.unit) { S.unit = v; render(); }
         const ok = s.exists ? s.data().oddsKey : null;
-        if (ok && ok !== S.oddsKey) { S.oddsKey = ok; PROPS.clear(); OA_EVENTS.clear(); }
+        if (ok && ok !== S.oddsKey) { S.oddsKey = ok; PROPS.clear(); OA_EVENTS.clear(); ALTS.clear(); }
         const fc = s.exists ? s.data().focus : null;
         if (fc && ["auto", "CFB", "NFL"].includes(fc)) setFocus(fc);
         const spc = s.exists ? s.data().spClient : null;
