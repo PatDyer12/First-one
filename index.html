@@ -2575,6 +2575,113 @@ body.tv.pplb .roomtv:not([hidden]) canvas { width: 76px; height: 76px; grid-row:
 .fx-diamond .ob-legs li > i, .fx-moon .ob-legs li > i { border-color: #b8a6ff; color: #e4d2ff; }
 .fx-diamond .ob-legs li.hit > i, .fx-moon .ob-legs li.hit > i { background: linear-gradient(135deg, #e3b8ff, #9fd7ff); border-color: #c9b6ff; color: #101426; }
 @container (max-width: 260px) { .fx-chip { font-size: 9.5px; padding: 2px 7px; letter-spacing: .08em; } .fx-pay { font-size: 9.5px; } .fx-pay b { font-size: 14.5px; } }
+/* ---------- bet types: each its own frame, colors, texture and motion ---------- */
+.bt-nuke { --fxk: #ffb020; --fxb: repeating-linear-gradient(45deg, #ffb020 0 10px, #120c04 10px 20px); --fxbs: 300% 100%; --fxg: rgba(255,80,20,.5); --fxr: 0 0 0 2px rgba(255,120,40,.7);
+  --fxi: radial-gradient(120% 140% at 50% 125%, rgba(255,90,20,.34), transparent 60%), linear-gradient(180deg, #2c1006, #120604); animation: fxFoil 10s linear infinite, fxNuke 1.6s ease-in-out infinite; }
+.bt-botd { --fxk: #ffd86b; --fxb: linear-gradient(115deg, #7a5410, #ffd86b 12%, #fff4c2 18%, #e0a92e 30%, #8a5f12 45%, #ffd86b 60%, #fff4c2 66%, #b07d1c 80%, #7a5410); --fxbs: 300% 100%; --fxg: rgba(255,196,64,.5); --fxr: 0 0 0 2px rgba(255,216,107,.45);
+  --fxi: radial-gradient(90% 70% at 50% -10%, rgba(255,215,100,.3), transparent 60%), linear-gradient(180deg, #30230a, #140f04); animation: fxFoil 6s linear infinite; }
+.bt-whale { --fxk: #7fd8ff; --fxb: linear-gradient(135deg, #33e0ff, #0a4fd6 45%, #1fb6ff 70%, #0a3aa6); --fxbs: 300% 100%; --fxg: rgba(40,150,255,.45); --fxr: 0 0 0 2px rgba(51,180,255,.55);
+  --fxi: radial-gradient(80% 60% at 30% 125%, rgba(60,170,255,.32), transparent 70%), linear-gradient(180deg, #06233f, #041021); animation: fxFoil 9s linear infinite; }
+.bt-opal { --fxk: #e3d6ff; --fxb: linear-gradient(120deg, #f5f0ff, #9ef0ff 14%, #ffd1f2 28%, #fff7c2 40%, #b6ffd9 52%, #c9b8ff 66%, #ffffff 76%, #9ef0ff 88%, #f5f0ff); --fxbs: 300% 100%; --fxg: rgba(190,160,255,.45);
+  --fxi: radial-gradient(circle at 20% 30%, rgba(255,255,255,.85) 0 1px, transparent 1.6px) 0 0 / 43px 39px, radial-gradient(circle at 70% 65%, rgba(200,220,255,.6) 0 1px, transparent 1.6px) 0 0 / 59px 47px, radial-gradient(circle at 40% 80%, rgba(255,210,250,.7) 0 1px, transparent 1.4px) 0 0 / 31px 27px, radial-gradient(55% 75% at 84% 16%, rgba(160,90,255,.55), transparent 70%), radial-gradient(60% 70% at 10% 95%, rgba(40,200,255,.4), transparent 70%), radial-gradient(40% 50% at 50% 50%, rgba(255,120,220,.16), transparent 70%), linear-gradient(180deg, #170d36, #080518); animation: fxFoil 5s linear infinite; }
+.bt-lotto { --fxk: #ffd23f; --fxb: repeating-linear-gradient(45deg, #ff4f6d 0 9px, #ffd23f 9px 18px, #3bd16f 18px 27px, #3fa9ff 27px 36px, #b06bff 36px 45px); --fxbs: 300% 100%; --fxg: rgba(255,210,63,.38);
+  --fxi: radial-gradient(circle at 50% 50%, rgba(255,210,63,.16) 0 5px, transparent 6px) 0 0 / 34px 34px, linear-gradient(180deg, #1f1033, #0d0718); animation: fxFoil 4s linear infinite; }
+.bt-snipe { --fxk: #ff4a58; --fxb: linear-gradient(135deg, #ff2d3d, #4a080e 30%, #ff2d3d 50%, #4a080e 70%, #ff2d3d); --fxg: rgba(255,45,61,.35);
+  --fxi: linear-gradient(rgba(255,45,61,.07) 1px, transparent 1px) 0 0 / 100% 14px, linear-gradient(90deg, rgba(255,45,61,.07) 1px, transparent 1px) 0 0 / 14px 100%, linear-gradient(180deg, #1d0a0d, #0d0507); }
+.bt-long { --fxk: #4ff0d8; --fxb: linear-gradient(120deg, #19e3c6, #0a6b8a 40%, #7cf5ff 60%, #0a6b8a); --fxbs: 300% 100%; --fxg: rgba(25,227,198,.32);
+  --fxi: linear-gradient(105deg, transparent 38%, rgba(25,227,198,.1) 50%, transparent 62%), linear-gradient(180deg, #06231f, #04120f); animation: fxFoil 7s linear infinite; }
+.bt-pink { --fxk: #ff8fc8; --fxb: conic-gradient(from 20deg, #ff6fb5, #ffd1ea, #ff3d9a, #ffb3dc, #ff6fb5); --fxg: rgba(255,111,181,.45);
+  --fxi: radial-gradient(70% 60% at 82% 8%, rgba(255,111,181,.32), transparent 70%), linear-gradient(180deg, #2b0b1e, #14050e); }
+.bt-prime { --fxk: #ffb547; --fxb: linear-gradient(120deg, #7b3cff, #ffb547 30%, #7b3cff 60%, #ffb547); --fxbs: 300% 100%; --fxg: rgba(123,60,255,.42);
+  --fxi: radial-gradient(circle at 90% 16%, rgba(255,240,200,.9) 0 6px, rgba(255,240,200,.22) 7px, transparent 20px), radial-gradient(circle at 20% 30%, rgba(255,255,255,.7) 0 1px, transparent 1.5px) 0 0 / 47px 41px, linear-gradient(180deg, #170d36, #08051a); animation: fxFoil 8s linear infinite; }
+.bt-dawg { --fxk: #ff9a3d; --fxb: linear-gradient(135deg, #ff7a1a, #7a2e05 50%, #ffb066); --fxg: rgba(255,122,26,.35);
+  --fxi: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='46' height='46'%3E%3Cg fill='rgba(255,154,61,0.10)'%3E%3Cellipse cx='23' cy='28' rx='7' ry='6'/%3E%3Ccircle cx='14' cy='19' r='3'/%3E%3Ccircle cx='20' cy='14' r='3'/%3E%3Ccircle cx='27' cy='14' r='3'/%3E%3Ccircle cx='32' cy='19' r='3'/%3E%3C/g%3E%3C/svg%3E") 0 0 / 46px 46px, linear-gradient(180deg, #2b1306, #140803); }
+.bt-gold { --fxk: #f6d365; --fxb: linear-gradient(135deg, #8a6a12, #f6d365 30%, #fff1b8 45%, #d4af37 60%, #8a6a12); --fxg: rgba(212,175,55,.32); --fxi: linear-gradient(180deg, #251c07, #120d03); }
+.bt-silver { --fxk: #e6ebf2; --fxb: linear-gradient(135deg, #6f7a8b, #e6ebf2 35%, #ffffff 50%, #aeb7c4 65%, #6f7a8b); --fxg: rgba(200,215,235,.18); --fxi: linear-gradient(180deg, #1c2027, #0e1116); }
+.bt-bronze { --fxk: #e3a26b; --fxb: linear-gradient(135deg, #6b3a12, #e3a26b 35%, #ffd2a8 50%, #b8732f 65%, #6b3a12); --fxg: rgba(205,127,50,.25); --fxi: linear-gradient(180deg, #23150a, #110a05); }
+.fx.bt-nuke, .fx.bt-botd, .fx.bt-whale, .fx.bt-opal, .fx.bt-lotto { border-width: 3px; }
+/* a light sweep across the precious ones; water light on the whale */
+.bt-botd::after, .bt-opal::after, .bt-pink::after, .bt-gold::after, .bt-prime::after { content: ""; position: absolute; inset: 0; border-radius: inherit; pointer-events: none; z-index: 2;
+  background: linear-gradient(105deg, transparent 38%, rgba(255,255,255,.16) 48%, rgba(255,255,255,.04) 54%, transparent 62%) -160% 0 / 260% 100% no-repeat; animation: fxSheen 6.5s ease-in-out infinite; }
+.bt-whale::after { content: ""; position: absolute; inset: 0; border-radius: inherit; pointer-events: none; z-index: 2;
+  background: radial-gradient(60% 40% at 20% 120%, rgba(90,190,255,.18), transparent 70%), linear-gradient(100deg, transparent 36%, rgba(120,210,255,.16) 48%, transparent 60%) -160% 0 / 260% 100% no-repeat; animation: fxSheen 5s ease-in-out infinite; }
+/* each type's marks in the corners and its own glints */
+.bt .fx-glint::before, .bt .fx-glint::after { content: "✦"; }
+.bt-nuke .fx-glint::before, .bt-nuke .fx-glint::after { content: "☢"; }
+.bt-botd .fx-glint::before { content: "👑"; font-size: 16px; text-shadow: none; } .bt-botd .fx-glint::after { content: "✦"; }
+.bt-opal .fx-glint::before, .bt-opal .fx-glint::after { content: "✧"; }
+.bt-lotto .fx-glint::before, .bt-lotto .fx-glint::after { content: "★"; }
+.bt-snipe .fx-glint::before, .bt-snipe .fx-glint::after { content: "✛"; }
+.bt-long .fx-glint::before, .bt-long .fx-glint::after { content: "➶"; }
+.bt-pink .fx-glint::before, .bt-pink .fx-glint::after { content: "◆"; }
+.bt-prime .fx-glint::before, .bt-prime .fx-glint::after { content: "✦"; }
+.bt-dawg .fx-glint::before, .bt-dawg .fx-glint::after { content: "🐾"; text-shadow: none; font-size: 13px; }
+.bt-whale .fx-glint::before, .bt-whale .fx-glint::after { content: ""; width: 9px; height: 9px; border: 1.5px solid rgba(127,216,255,.75); border-radius: 50%; text-shadow: none; animation: btBubble 3.6s ease-in infinite; top: auto; bottom: 4px; }
+.bt-whale .fx-glint::before { right: 22%; } .bt-whale .fx-glint::after { left: 58%; animation-delay: 1.8s; width: 6px; height: 6px; }
+@keyframes btBubble { 0% { opacity: 0; transform: translateY(0) scale(.6); } 15% { opacity: 1; } 100% { opacity: 0; transform: translateY(-46px) scale(1.1); } }
+.bt-snipe .fx-glint { background: linear-gradient(var(--fxk), var(--fxk)) 0 0 / 18px 2px no-repeat, linear-gradient(var(--fxk), var(--fxk)) 0 0 / 2px 18px no-repeat, linear-gradient(var(--fxk), var(--fxk)) 100% 0 / 18px 2px no-repeat, linear-gradient(var(--fxk), var(--fxk)) 100% 0 / 2px 18px no-repeat, linear-gradient(var(--fxk), var(--fxk)) 0 100% / 18px 2px no-repeat, linear-gradient(var(--fxk), var(--fxk)) 0 100% / 2px 18px no-repeat, linear-gradient(var(--fxk), var(--fxk)) 100% 100% / 18px 2px no-repeat, linear-gradient(var(--fxk), var(--fxk)) 100% 100% / 2px 18px no-repeat, linear-gradient(90deg, transparent calc(50% - 1px), rgba(255,74,88,.18) calc(50% - 1px) calc(50% + 1px), transparent calc(50% + 1px)), linear-gradient(transparent calc(50% - 1px), rgba(255,74,88,.18) calc(50% - 1px) calc(50% + 1px), transparent calc(50% + 1px)); }
+/* the pick's name in the type's own finish */
+.bt-botd :is(.pp-pick, .ob-pick) .t, .slip.bt-botd .sl-pick, .bt-gold :is(.pp-pick, .ob-pick) .t, .slip.bt-gold .sl-pick { background: linear-gradient(180deg, #fff4c2, #f2c14e 60%, #c88a12); -webkit-background-clip: text; background-clip: text; color: transparent; }
+.bt-opal :is(.pp-pick, .ob-pick) .t, .slip.bt-opal .sl-pick { background: linear-gradient(100deg, #ffffff, #c8f6ff 25%, #ffd7f3 50%, #fff6c8 75%, #e6dcff); -webkit-background-clip: text; background-clip: text; color: transparent; }
+.bt-lotto :is(.pp-pick, .ob-pick) .t, .slip.bt-lotto .sl-pick { background: linear-gradient(90deg, #ff6b81, #ffd23f, #5fe08a, #5fb8ff, #c08bff); -webkit-background-clip: text; background-clip: text; color: transparent; }
+.bt-pink :is(.pp-pick, .ob-pick) .t, .slip.bt-pink .sl-pick { background: linear-gradient(180deg, #ffe3f2, #ff8fc8 60%, #ff3d9a); -webkit-background-clip: text; background-clip: text; color: transparent; }
+.bt-silver :is(.pp-pick, .ob-pick) .t, .slip.bt-silver .sl-pick { background: linear-gradient(180deg, #ffffff, #c9d1dc 60%, #8d97a8); -webkit-background-clip: text; background-clip: text; color: transparent; }
+.bt-bronze :is(.pp-pick, .ob-pick) .t, .slip.bt-bronze .sl-pick { background: linear-gradient(180deg, #ffe0c4, #e3a26b 60%, #a8642a); -webkit-background-clip: text; background-clip: text; color: transparent; }
+.bt-prime :is(.pp-pick, .ob-pick) .t, .slip.bt-prime .sl-pick { color: #fff; text-shadow: 0 0 10px rgba(160,110,255,.9), 0 0 22px rgba(255,181,71,.45); }
+.bt-nuke :is(.pp-pick, .ob-pick) .t, .slip.bt-nuke .sl-pick { color: #ffd08a; text-shadow: 0 0 14px rgba(255,90,30,.6); }
+.bt-whale :is(.pp-pick, .ob-pick) .t, .slip.bt-whale .sl-pick { color: #d8f3ff; text-shadow: 0 0 14px rgba(40,150,255,.6); }
+.bt-snipe :is(.pp-pick, .ob-pick) .t, .slip.bt-snipe .sl-pick { color: #ffd9dc; text-shadow: 0 0 12px rgba(255,45,61,.55); }
+.bt-long :is(.pp-pick, .ob-pick) .t, .slip.bt-long .sl-pick { color: #d6fff8; text-shadow: 0 0 12px rgba(25,227,198,.5); }
+.bt-dawg :is(.pp-pick, .ob-pick) .t, .slip.bt-dawg .sl-pick { color: #ffe1c4; text-shadow: 0 0 12px rgba(255,122,26,.55); }
+.bt :is(.pp-odds, .ob-odds) { color: var(--fxk); }
+/* the type's badge on the ticket, and the others it fits as small icons */
+.bt-chip { display: inline-flex; align-items: center; gap: 5px; padding: 3px 10px; border-radius: 999px; font: 900 11px/1.2 Inter, sans-serif; letter-spacing: .12em; text-transform: uppercase; white-space: nowrap; color: #0b0d12; background: var(--fxk); box-shadow: 0 0 12px color-mix(in srgb, var(--fxk) 55%, transparent); }
+.bt-mini { display: inline-grid; place-items: center; width: 22px; height: 22px; border-radius: 50%; font-size: 12px; background: rgba(255,255,255,.07); box-shadow: inset 0 0 0 1.5px var(--fxk); }
+.bt-c-nuke { --fxk: #ffb020; } .bt-c-botd { --fxk: #ffd86b; } .bt-c-whale { --fxk: #7fd8ff; } .bt-c-opal { --fxk: #e3d6ff; } .bt-c-lotto { --fxk: #ffd23f; } .bt-c-snipe { --fxk: #ff4a58; } .bt-c-long { --fxk: #4ff0d8; }
+.bt-c-pink { --fxk: #ff8fc8; } .bt-c-prime { --fxk: #ffb547; } .bt-c-dawg { --fxk: #ff9a3d; } .bt-c-gold { --fxk: #f6d365; } .bt-c-silver { --fxk: #e6ebf2; } .bt-c-bronze { --fxk: #e3a26b; }
+.bt-chip.bt-c-nuke { background: repeating-linear-gradient(45deg, #ffb020 0 8px, #ffcf60 8px 16px); }
+.bt-chip.bt-c-botd { background: linear-gradient(135deg, #fff1b0, #f2c14e 45%, #c88a12 70%, #ffe08a); }
+.bt-chip.bt-c-whale { color: #e9f6ff; background: linear-gradient(135deg, #0a4fd6, #1fb6ff); }
+.bt-chip.bt-c-opal { background: linear-gradient(120deg, #c8f6ff, #ffd7f3 35%, #fff6c8 65%, #e6dcff); }
+.bt-chip.bt-c-lotto { background: linear-gradient(90deg, #ff6b81, #ffd23f, #5fe08a, #5fb8ff, #c08bff); }
+.bt-chip.bt-c-snipe { color: #fff; background: linear-gradient(135deg, #ff2d3d, #a10e1a); }
+.bt-chip.bt-c-long { background: linear-gradient(135deg, #7cf5ff, #19e3c6); }
+.bt-chip.bt-c-pink { background: linear-gradient(135deg, #ffd1ea, #ff6fb5); }
+.bt-chip.bt-c-prime { color: #fff; background: linear-gradient(120deg, #7b3cff, #c04dff 50%, #ffb547); }
+.bt-chip.bt-c-dawg { background: linear-gradient(135deg, #ffb066, #ff7a1a); }
+.bt-chip.bt-c-gold { background: linear-gradient(135deg, #fff1b8, #d4af37); } .bt-chip.bt-c-silver { background: linear-gradient(135deg, #ffffff, #aeb7c4); } .bt-chip.bt-c-bronze { background: linear-gradient(135deg, #ffd2a8, #b8732f); }
+.bt .fx-pay b { color: var(--fxk); }
+/* a parlay's leg numbers in its type's color */
+.bt .ob-legs li > i { border-color: color-mix(in srgb, var(--fxk) 70%, transparent); color: var(--fxk); }
+.bt .ob-legs li.hit > i { background: var(--fxk); border-color: var(--fxk); color: #0b0d12; }
+/* badges next to the names: one for each kind of bet they've hit */
+.bt-bdgs { display: inline-flex; align-items: center; gap: 4px; flex: none; margin-left: 2px; }
+.bt-bdg { position: relative; display: inline-grid; place-items: center; width: 26px; height: 26px; border-radius: 50%; font-size: 14px; font-style: normal; line-height: 1; background: radial-gradient(circle at 35% 30%, color-mix(in srgb, var(--fxk) 45%, #10131a), #0b0d12 75%); box-shadow: 0 0 0 1.5px var(--fxk), 0 0 10px color-mix(in srgb, var(--fxk) 45%, transparent); }
+.bt-bdg sub { position: absolute; right: -6px; bottom: -5px; min-width: 15px; padding: 1px 3px; border-radius: 7px; font: 900 10px/1.1 Inter, sans-serif; color: #0b0d12; background: var(--fxk); text-align: center; }
+.bt-more { flex: none; font: 800 11px/1 Inter, sans-serif; font-style: normal; color: #a9b2c1; padding-left: 2px; }
+.pp-nm small { display: flex; align-items: center; gap: 7px; height: 22px; margin-top: 2px; overflow: visible; }
+.pp-nm small > span { flex: none; }
+.pp-nm .bt-bdgs { margin-left: 0; gap: 5px; }
+.pp-nm .bt-bdg { width: 20px; height: 20px; font-size: 11px; }
+.pp-nm .bt-bdg sub { font-size: 9px; right: -5px; bottom: -4px; min-width: 13px; }
+/* in the leaderboard the name keeps its room: the badges overlap a little and give way first */
+.rb-lr .nm b { flex: 0 .01 auto; min-width: 0; }
+.rb-lr .nm .bt-bdgs { flex: 0 100 auto; min-width: 0; overflow: hidden; gap: 0; margin-left: 0; padding: 3px 7px 4px 2px; -webkit-mask-image: linear-gradient(90deg, #000 calc(100% - 9px), transparent); mask-image: linear-gradient(90deg, #000 calc(100% - 9px), transparent); }
+.rb-lr .nm .bt-bdg { flex: none; width: 20px; height: 20px; font-size: 11px; }
+.rb-lr .nm .bt-bdg sub { font-size: 9px; right: -4px; bottom: -4px; min-width: 12px; }
+.rb-lr .nm .bt-bdg + .bt-bdg { margin-left: -5px; }
+.rb-lr .nm .bt-more { padding-left: 4px; }
+@container (max-width: 260px) { .bt-chip { font-size: 9.5px; padding: 2px 7px; letter-spacing: .08em; } .bt-mini { width: 18px; height: 18px; font-size: 10px; } .pp-nm .bt-bdg { width: 19px; height: 19px; font-size: 10.5px; } .pp-nm small { gap: 5px; } }
+/* the slip in each type's colors: a bigger badge, the rays in its color; the nuke shakes, the dawg barks, the snipe locks on */
+.slip.bt:not(.big) .sl-card { border: 2px solid transparent; background: var(--fxi) padding-box, var(--fxb) border-box; background-size: 100% 100%, var(--fxbs, 100% 100%); }
+.slip.big .bt-chip { font-size: 16px; padding: 6px 16px; }
+.slip.big .bt-mini { width: 30px; height: 30px; font-size: 16px; }
+.slip.big.bt-nuke .sl-card { animation: fxFoil 6s linear infinite, btShake .45s 1.1s 3; }
+.slip.big.bt-dawg .bt-chip, .slip.big.bt-botd .bt-chip, .slip.big.bt-lotto .bt-chip { animation: btPop .6s .9s cubic-bezier(.3,1.6,.5,1) both; }
+.slip.big.bt-snipe .fx-glint { animation: btLock .7s .5s cubic-bezier(.2,1.4,.4,1) both; }
+@keyframes btShake { 25% { transform: translate(-3px, 2px) rotate(-.4deg); } 50% { transform: translate(3px, -2px) rotate(.4deg); } 75% { transform: translate(-2px, -1px); } }
+@keyframes btPop { 0% { transform: scale(.3) rotate(-8deg); opacity: 0; } 100% { transform: none; opacity: 1; } }
+@keyframes btLock { 0% { transform: scale(1.6); opacity: 0; } 100% { transform: none; opacity: .95; } }
 .pp-none { padding: 16px 6px; font: 600 15px/1.3 Inter, sans-serif; color: #8d97a8; text-align: center; }
 .pp-bet { position: relative; flex: none; display: grid; gap: 6px; padding: 10px 12px 11px 13px; border-radius: 12px; background: rgba(255,255,255,.035); border: 1px solid rgba(190,210,240,.1); border-left: 5px solid rgba(190,210,240,.28); }
 .pp-bet.k-w { border-left-color: var(--win); background: linear-gradient(90deg, rgba(61,220,151,.13), rgba(255,255,255,.03) 65%); }
@@ -3558,7 +3665,7 @@ body.tv .rb-games.primeg.mason > .rb-pcol { padding-top: 16px; -webkit-mask-imag
     <div class="field">
       <span class="lbl">Win sound</span>
       <div class="sndlist" id="sndList"></div>
-      <span class="hint">Tap Play to hear one, then pick it. Your pick plays on every device you're signed in on. Bets of $30 or more get the whale, $70 or more get the nuke. Odds of +150 or longer get the sniper, with bigger versions at +200, +300 and +400 (a whale or nuke sized long shot gets both).</span>
+      <span class="hint">Tap Play to hear one, then pick it. Your pick plays on every device you're signed in on. Bets of $50 or more get the whale, $100 or more get the nuke. Odds of +250 or longer get the sniper, with bigger versions at +300 and +400 (a whale or nuke sized long shot gets both).</span>
       <div style="display:flex;gap:8px;flex-wrap:wrap">
         <button type="button" class="btn sm" id="coinTest">Preview Coin Alert</button>
         <button type="button" class="btn sm" id="lossTest">Preview loss sound</button>
@@ -5538,7 +5645,7 @@ body.tv .rb-games.primeg.mason > .rb-pcol { padding-top: 16px; -webkit-mask-imag
       return `<div class="rb-lr${p.heat ? " " + p.heat : ""}${p.k === lead ? " lead" : ""}" data-k="${esc(p.k)}" style="--c:${p.col}"${pids.length ? tapAttrs(pids, p.name + (p.me ? "" : "'s bets")) : ""}>
         <span class="rk num">${i + 1}</span>
         <span class="rb-av big" style="--c:${p.col}">${esc(p.name.slice(0, 1).toUpperCase())}${p.k === lead ? '<s class="crown">👑</s>' : ""}</span>
-        <div class="nm"><b>${esc(p.name)}</b>${heatTag(p)}</div>
+        <div class="nm"><b>${esc(p.name)}</b>${heatTag(p)}${btBadges(p.done, 3)}</div>
         <div class="net num ${cls(p.net)}">${fU(p.net, true)}<small>${fUSD(p.net * S.unit, true)}</small></div>
         <div class="ln num">${p.w + p.l + p.p ? `${p.w}-${p.l}${p.p ? "-" + p.p : ""} · ${pct(p.hit)} hit · ROI ${p.roi == null ? "–" : (p.roi > 0 ? "+" : "") + Math.round(p.roi * 100) + "%"}` : "No results yet"}</div>
         <div class="ft"><div class="l5">${p.last5.map((o) => `<i class="${o === "W" ? "w" : "l"}"></i>`).join("")}</div>
@@ -5765,18 +5872,63 @@ body.tv .rb-games.primeg.mason > .rb-pcol { padding-top: 16px; -webkit-mask-imag
     }).join("");
   }
   // one straight bet in someone's column: the pick with its line, the price, the game, where it stands
-  const FX_NAME = { silver: "Long shot", gold: "★ Gold ticket", diamond: "◆ Diamond", moon: "🚀 Moonshot" };
+  const BT_DEF = { nuke: ["💣", "Nuke"], botd: ["👑", "Bet of the day"], whale: ["🐋", "Whale"], opal: ["🌌", "Galaxy opal"], lotto: ["🎰", "Lotto"], snipe: ["🎯", "Snipe"], long: ["🏹", "Long shot"], pink: ["💗", "Pink diamond"], prime: ["🌙", "Primetime"], dawg: ["🐶", "Dawg"], gold: ["🥇", "Gold"], silver: ["🥈", "Silver"], bronze: ["🥉", "Bronze"] };
   const fxUSD = (v) => "$" + (Math.abs(v - Math.round(v)) < 0.005 ? Math.round(v).toLocaleString() : v.toFixed(2));
+  const etDayOf = (t) => new Intl.DateTimeFormat("en-CA", { timeZone: "America/New_York" }).format(new Date(t));
+  const etHr = (t) => Number(new Intl.DateTimeFormat("en-US", { timeZone: "America/New_York", hour: "numeric", hourCycle: "h23" }).format(new Date(t)));
+  // the day's bet of the day (its biggest straight from $50 up to a nuke) and dawg of the day (its biggest underdog moneyline)
+  let btDay = { key: "" };
+  function btDaily() {
+    const all = [...S.bets.values(), ...(S.goneBets ? S.goneBets.values() : [])], today = etDayOf(Date.now());
+    const key = today + ":" + S.unit + ":" + all.map((b) => b.id + "/" + b.units).join(",");
+    if (btDay.key === key) return btDay;
+    let botd = null, dawg = null;
+    for (const b of all) {
+      if (b.kind === "parlay" || !b.placedAt || etDayOf(b.placedAt) !== today || b.trial) continue;
+      const usd = (Number(b.units) || 0) * S.unit;
+      if (usd >= WHALE_USD - 0.005 && usd < NUKE_USD - 0.005 && (!botd || usd > botd.usd)) botd = { id: b.id, usd };
+      if (b.sel && b.sel.m === "ml" && Number(b.odds) > 100 && (!dawg || usd > dawg.usd)) dawg = { id: b.id, usd };
+    }
+    return (btDay = { key, botd: botd && botd.id, dawg: dawg && dawg.id });
+  }
+  // every type a bet fits, its look first
+  function betTypes(b, units) {
+    const o = Number(b.odds) || 0, par = b.kind === "parlay", n = par ? (b.legs || []).length : 1, u = units != null ? units : Number(b.units) || 0, usd = u * S.unit, m = b.sel && b.sel.m, d = btDaily();
+    const t0 = !par && b.sel ? (gameOf(b.sel) || {}).t || b.startAt : null, night = !!t0 && etHr(t0) >= 19;
+    const k = [];
+    if (usd >= NUKE_USD - 0.005) k.push("nuke");
+    if (d.botd === b.id) k.push("botd");
+    else if (usd >= WHALE_USD - 0.005 && usd < NUKE_USD - 0.005) k.push("whale");
+    if (!par && o > 100 && usd >= 40 - 0.005) k.push("opal");
+    if (par && o >= 1000) k.push("lotto");
+    if (!par && o >= SNIPER_ODDS) k.push("snipe");
+    if (par && o >= 400 && o < 1000) k.push("long");
+    if (par && n === 2 && o >= 200) k.push("pink");
+    if (night && (m === "ml" || m === "sp")) k.push("prime");
+    if (!par && m === "ml" && o > 100) k.push("dawg");
+    // the medals by stake (a whale or a nuke already says how big it is)
+    if (!k.some((x) => ["nuke", "botd", "whale", "opal"].includes(x))) { if (u >= 3 - 0.005) k.push("gold"); else if (u >= 2 - 0.005) k.push("silver"); else if (par && u >= 1 - 0.005) k.push("bronze"); }
+    return k;
+  }
   function flexOf(b, units) {
-    const o = Number(b.odds) || 0, par = b.kind === "parlay", n = par ? (b.legs || []).length : 1, usd = (units != null ? units : Number(b.units) || 0) * S.unit;
-    const odds = o >= 10000 ? "moon" : o >= 2500 || (par && n >= 6) ? "diamond" : o >= 1000 || (par && n >= 4 && o >= 600) ? "gold" : par && o >= 500 ? "silver" : null;
-    const stake = usd >= NUKE_USD - 0.005 ? "nuke" : usd >= WHALE_USD - 0.005 ? "whale" : null;
-    return { odds, stake, usd, win: usd * ppu(o), cls: odds || stake ? " fx" + (odds ? " fx-" + odds : "") + (stake ? " fs-" + stake : "") : "" };
+    const ks = betTypes(b, units), k = ks[0] || null, usd = (units != null ? units : Number(b.units) || 0) * S.unit;
+    const name = k === "dawg" && btDaily().dawg === b.id ? "Dawg of the day" : k ? BT_DEF[k][1] : "";
+    const side = ["bronze", "silver", "prime"].includes(k) || (k === "dawg" && name === "Dawg");
+    return { k, odds: k, more: ks.slice(1, 4), name, usd, win: usd * ppu(Number(b.odds) || 0), cls: k ? " fx bt bt-" + k : "", big: !!k && !side };
   }
   function fxRow(f) {
-    if (!f || !f.cls) return "";
-    return `<div class="fx-row"><i class="fx-glint" aria-hidden="true"></i>${f.odds ? `<span class="fx-chip c-${f.odds}">${FX_NAME[f.odds]}</span>` : ""}${f.stake ? `<span class="fx-chip c-${f.stake}">${f.stake === "nuke" ? "☢ Nuke" : "🐋 Whale"} · ${fxUSD(f.usd)}</span>` : ""}<span class="fx-pay">To win <b>${fxUSD(f.win)}</b></span></div>`;
+    if (!f || !f.k) return "";
+    return `<div class="fx-row"><i class="fx-glint" aria-hidden="true"></i><span class="bt-chip bt-c-${f.k}">${BT_DEF[f.k][0]} ${esc(f.name)}</span>${f.more.map((x) => `<span class="bt-mini bt-c-${x}" title="${BT_DEF[x][1]}">${BT_DEF[x][0]}</span>`).join("")}<span class="fx-pay">To win <b>${fxUSD(f.win)}</b></span></div>`;
   }
+  // next to a name: a badge for each kind of bet they've hit (the count when it's more than one)
+  function btBadges(done, max) {
+    const n = new Map();
+    for (const b of done || []) { if (outcome(b) !== "W") continue; const k = betTypes(b)[0]; if (k) n.set(k, (n.get(k) || 0) + 1); }
+    if (!n.size) return "";
+    const ks = Object.keys(BT_DEF).filter((k) => n.has(k)), cap = max && ks.length > max ? max - 1 : ks.length;
+    return `<span class="bt-bdgs">${ks.slice(0, cap).map((k) => `<i class="bt-bdg bt-c-${k}" title="${BT_DEF[k][1]} hit${n.get(k) > 1 ? " ×" + n.get(k) : ""}">${BT_DEF[k][0]}${n.get(k) > 1 ? `<sub>${n.get(k)}</sub>` : ""}</i>`).join("")}${cap < ks.length ? `<i class="bt-more">+${ks.length - cap}</i>` : ""}</span>`;
+  }
+
   function ppTicket(b) {
     const sel = b.sel || null, g = sel ? gameOf(sel) : null, p = { entries: [{ b, leg: null, sel, pick: b.pick }], pick: b.pick, sel };
     const st = g ? posState(p, g) : phase(b) === "pre" ? { cls: "pre", txt: startLabel(startOf(b)) } : { cls: "e", txt: "Open" };
@@ -5810,7 +5962,7 @@ body.tv .rb-games.primeg.mason > .rb-pcol { padding-top: 16px; -webkit-mask-imag
     const rec = (q) => `${q.w}-${q.l}${q.p ? "-" + q.p : ""}`, sign = (v) => (v > 0.004 ? "w" : v < -0.004 ? "l" : "");
     const ic = p.heat === "fire" ? "🔥" : p.heat === "ice" ? "🧊" : "";
     const tile = (v, l, c) => `<div><b class="num ${c || ""}">${v}</b><em>${l}</em></div>`;
-    return `<div class="pp-id"><span class="pp-avw">${avHtml(p.b)}${ic ? `<i>${ic}</i>` : ""}</span><div class="pp-nm"><b>${esc(p.name)}</b><small>#${rank} today${lead ? " 👑" : ""}</small></div><div class="pp-net num ${sign(p.net)}">${fU(p.net, true)}<small>${fUSD(p.net * S.unit, true)}</small></div></div>
+    return `<div class="pp-id"><span class="pp-avw">${avHtml(p.b)}${ic ? `<i>${ic}</i>` : ""}</span><div class="pp-nm"><b>${esc(p.name)}</b><small>${((bd) => `<span>#${rank}${bd ? "" : " today"}${lead ? " 👑" : ""}</span>${bd}`)(btBadges(p.done, 3))}</small></div><div class="pp-net num ${sign(p.net)}">${fU(p.net, true)}<small>${fUSD(p.net * S.unit, true)}</small></div></div>
       <div class="pp-tiles">${tile(rec(p), p.st >= 2 ? `Record · ${p.sd}${p.st}` : "Record")}${tile(p.w + p.l ? pct(p.hit) : "–", "Hit rate")}${tile(p.roi == null ? "–" : (p.roi > 0 ? "+" : "") + Math.round(p.roi * 100) + "%", "ROI", p.roi == null ? "" : sign(p.roi))}${tile(p.hold.n ? `<i class="w">${p.hold.up}<s>▲</s></i> <i class="l">${p.hold.dn}<s>▼</s></i>` : String(p.open.length - later), p.hold.n ? "Up / down" : "Live now")}${tile(fU(hold, true), "If it holds", sign(hold))}${tile(wk ? fU(wk.net, true) : "–", wk ? `Week ${rec(wk)}` : "This week", wk ? sign(wk.net) : "")}</div>
       <div class="pp-foot1">${p.open.length} open${later ? ` · ${later} later` : ""} · ${fU(risk)} to win ${fU(p.toWin)}</div>
       <div class="pp-foot"><span class="l5">${p.last5.map((o) => `<i class="${o === "W" ? "w" : "l"}"></i>`).join("")}</span><span class="pp-best">${best ? `Best hit: ${esc(best.kind === "parlay" ? (best.legs || []).length + "-leg parlay" : best.pick)} <b class="w num">${fU(netOf(best), true)}</b>` : p.done.length ? `${rec(p)} so far today` : "No results yet today"}</span></div>`;
@@ -6127,9 +6279,10 @@ body.tv .rb-games.primeg.mason > .rb-pcol { padding-top: 16px; -webkit-mask-imag
   }
   function announce(b) {
     const tag = isMe(b) ? null : { name: personName(b), sub: "just bet", col: personCol(b) };
-    if (isNuke(b)) { nukeWarn(b); if (tag) whoTag({ ...tag, sub: "nuke inbound" }, 7000); return; }
-    if (isWhale(b)) { whaleAlert(b, "place"); if (tag) whoTag({ ...tag, sub: "whale alert" }, 7000); return; }
-    if (isSniper(b) && b.kind !== "parlay") { sniperPlace(b, tag); return; }
+    const T = flexOf(b);
+    if (T.k === "nuke") { nukeWarn(b); if (tag) whoTag({ ...tag, sub: "nuke inbound" }, 7000); return; }
+    if (T.k === "whale") { whaleAlert(b, "place"); if (tag) whoTag({ ...tag, sub: "whale alert" }, 7000); return; }
+    if (T.k === "snipe") { sniperPlace(b, tag); return; }
     slipIn(b);
   }
   // a new bet: the slip slides in and gets stamped. Joining somebody's pick says so; so does taking the other side of yours
@@ -6148,11 +6301,11 @@ body.tv .rb-games.primeg.mason > .rb-pcol { padding-top: 16px; -webkit-mask-imag
     $("#slOdds").textContent = fOdds(b.odds);
     $("#slAmt").textContent = `${fU(b.units)} (${fUSD(b.units * S.unit)}) to win ${fU(b.units * ppu(b.odds))}`;
     $("#slSub").textContent = b.tail ? (b.tail.kind === "fade" ? "Fading " : "Tailing ") + b.tail.name : ride ? (viaLeg(b) ? "A leg rides with " : "Riding with ") + others.join(" + ") : vs ? (isMe(b) ? "Against " : "Fading ") + vs.map(personName).join(" + ") : b.kind === "parlay" ? (b.legs || []).length + "-leg parlay" : b.sport || "";
-    const F = flexOf(b), big = !!F.odds;
-    $("#slFx").innerHTML = big ? fxRow(F) : "";
+    const F = flexOf(b), big = F.big;
+    $("#slFx").innerHTML = F.k ? fxRow(F) : "";
     $("#slLegs").innerHTML = big && b.kind === "parlay" ? legsOf(b).map((l, i) => `<li style="--i:${i}"><i>${i + 1}</i><span>${esc(l.t)}</span><em>${esc(obLegTxt(l).txt)}</em></li>`).join("") : "";
     $("#slWin").innerHTML = big ? `<em>To win</em><b>$0</b>` : "";
-    el.className = "slip" + (ride ? " ride" : vs ? " vs" : "") + (squad ? " squad" : "") + (big ? " big" + F.cls : ""); el.hidden = false; void el.offsetWidth; el.classList.add("on");
+    el.className = "slip" + (ride ? " ride" : vs ? " vs" : "") + (squad ? " squad" : "") + (big ? " big" : "") + F.cls; el.hidden = false; void el.offsetWidth; el.classList.add("on");
     if (big) {
       if ($("#slSub").textContent.trim().toLowerCase() === String(b.pick || "").trim().toLowerCase()) $("#slSub").textContent = "";   // "4-leg parlay" twice
       snSound("bc_sting", 0.9, 0);
@@ -6162,7 +6315,7 @@ body.tv .rb-games.primeg.mason > .rb-pcol { padding-top: 16px; -webkit-mask-imag
     }
     if (squad) snSound("bc_sting", 0.85, 0);
     snSound("whoosh", 0.55, 0); snSound("slam", 0.7, 700);
-    clearTimeout(slipT); slipT = setTimeout(() => { el.classList.add("out"); setTimeout(() => { el.hidden = true; el.className = "slip"; }, 500); }, !big ? 4600 : F.odds === "silver" ? 6400 : F.odds === "gold" ? 8200 : 9200);
+    clearTimeout(slipT); slipT = setTimeout(() => { el.classList.add("out"); setTimeout(() => { el.hidden = true; el.className = "slip"; }, 500); }, !big ? (F.k ? 5600 : 4600) : ["botd", "lotto", "opal"].includes(F.k) ? 9200 : 8200);
   }
   // ---------- parlay legs: every leg that lands gets its moment ----------
   // a leg counts once we've seen it pending with its game loaded, so a reload doesn't replay hits from an hour ago
@@ -6347,7 +6500,7 @@ body.tv .rb-games.primeg.mason > .rb-pcol { padding-top: 16px; -webkit-mask-imag
   // ---------- sheets ----------
   function openSheet(id) { $(id).hidden = false; }
   // keep every open screen current: when a new version is up, reload it (never mid-form or mid-animation)
-  const BUILD = "20261018213516";
+  const BUILD = "20261018222000";
   function checkBuild() {
     if (BUILD === "dev") return;
     fetch("version.json?t=" + Date.now(), { cache: "no-store" }).then((r) => (r.ok ? r.json() : null)).then((j) => {
@@ -7529,7 +7682,7 @@ body.tv .rb-games.primeg.mason > .rb-pcol { padding-top: 16px; -webkit-mask-imag
     if (!run.keep && !cardBusy && statusSrc) stopStatus(); // a full-screen moment cuts off the music on the big screen (a leg card plays over it)
     setTimeout(fxNext, run());
   }
-  const NUKE_USD = 70;
+  const NUKE_USD = 100;
   const isNuke = (b) => Number(b.units) * S.unit >= NUKE_USD - 0.005;
   function playSfx(name, vol) { const c = ready(); if (!c) return; loadBuf("sounds/" + name).then((buf) => buf && playBuf(c, buf, vol)); }
 
@@ -7681,7 +7834,7 @@ body.tv .rb-games.primeg.mason > .rb-pcol { padding-top: 16px; -webkit-mask-imag
   }
 
   // ---------- the whale: ocean rolls in, beluga surfaces squeaking ----------
-  const WHALE_USD = 30;
+  const WHALE_USD = 50;
   const isWhale = (b) => Number(b.units) * S.unit >= WHALE_USD - 0.005 && !isNuke(b);
   let whaleDraw = null;
   function loadWhale() { loadVid("#whaleVid", "sounds/whale"); }
@@ -11217,13 +11370,13 @@ body.tv .rb-games.primeg.mason > .rb-pcol { padding-top: 16px; -webkit-mask-imag
 
   // ---------- Sniper: long shots, +180 and up ----------
   // the longer the odds, the longer the shot: +150 sniper, +200 long shot, +300 long range + the drive-off, +400 impossible (gold)
-  const SNIPER_ODDS = 150;
+  const SNIPER_ODDS = 250;
   const isSniper = (b) => Number(b.odds) >= SNIPER_ODDS;
   function snTier(odds) {
     const o = Number(odds);
     if (o >= 400) return { k: 4, name: "Impossible Shot", sub: "Golden squirrel down", range: 2450, wind: 11, rap: "rap4", cam: true, drive: true };
     if (o >= 300) return { k: 3, name: "Long Range Kill", sub: "Confirmed squirrel kill", range: 1850, wind: 8, rap: "rap3", cam: true, drive: true };
-    if (o >= 200) return { k: 2, name: "Long Shot Hit", sub: "Squirrel never saw it", range: 1200, wind: 5, rap: "rap2", cam: true };
+    if (o >= 200) return { k: 2, name: "Clean Snipe", sub: "Squirrel never saw it", range: 1200, wind: 5, rap: "rap2", cam: true };
     return { k: 1, name: "Sniper", sub: "Squirrel down", range: 820, wind: 3, rap: "rap1" };
   }
   // a sound with a handle so it can fade out
