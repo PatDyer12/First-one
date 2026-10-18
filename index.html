@@ -2349,12 +2349,8 @@ body.tv .rb-pcol.pr .rb-hs-side.r .rb-st { justify-self: start; }
 .jumbo.lux .jb-screen #jbBg { filter: blur(36px) brightness(.42) saturate(.95); }
 .jumbo.hz .jb-screen #jbBg { filter: blur(36px) brightness(.5) saturate(.85) sepia(.2); }
 .jumbo.lux #pipVid { transition: opacity .25s ease; }
-.dj-lap { position: absolute; left: 0; top: 0; width: 1280px; height: 800px; transform-origin: 0 0; pointer-events: none; z-index: 1; mix-blend-mode: screen; filter: blur(.35px); }
-.dj-lap b, .dj-lap em { position: absolute; left: 380px; width: 860px; white-space: nowrap; overflow: hidden; font-family: var(--f-display); line-height: 1; text-transform: uppercase; }
-.dj-lap b { top: 304px; height: 120px; font-size: 104px; font-weight: 800; color: #f2f6ff; letter-spacing: .01em; text-shadow: 0 0 22px rgba(70,140,255,.6); }
-.dj-lap em { top: 440px; height: 70px; font-size: 58px; font-weight: 700; font-style: normal; color: #7fb0ff; letter-spacing: .06em; }
-.dj-lap-art { position: absolute; left: 0; top: 0; width: 1280px; height: 800px; transform-origin: 0 0; pointer-events: none; z-index: 1; filter: blur(.4px) brightness(.93) saturate(1.05); }
-.dj-lap-art img { position: absolute; left: 70px; top: 260px; width: 260px; height: 260px; border-radius: 18px; object-fit: cover; box-shadow: 0 0 0 2px rgba(255,255,255,.06), 0 0 40px rgba(80,140,255,.25); }
+.dj-cv { position: absolute; inset: 0; width: 100%; height: 100%; pointer-events: none; }
+.jumbo.hz .dj-cv { filter: contrast(1.05) saturate(.92) sepia(.06); }
 .jumbo.hz #pipVid { filter: contrast(1.05) saturate(.92) sepia(.06); }
 .jumbo.lux .jb-screen::after { content: ""; position: absolute; inset: 0; z-index: 2; pointer-events: none; background: radial-gradient(130% 110% at 50% 50%, transparent 60%, rgba(0,0,0,.42) 100%); }
 .jumbo.lux .jb-screen::before { content: ""; position: absolute; inset: 16px; z-index: 3; pointer-events: none; opacity: .8;
@@ -3371,7 +3367,7 @@ body.tv .rb-games.primeg.mason > .rb-pcol { padding-top: 16px; -webkit-mask-imag
 <div class="jumbo" id="jumbo" hidden title="Tap to close">
   <div class="jb-head"><span class="jb-logo">SWEAT<b>ZONE</b></span><span class="jb-tag" id="jbTag">Live</span><b id="jbLbl"></b><span class="jb-x" aria-hidden="true">×</span></div>
   <div class="jb-main">
-    <div class="jb-screen"><video id="jbBg" muted playsinline preload="none" aria-hidden="true"></video><video id="pipVid" muted playsinline preload="none"></video><div class="dj-lap-art" id="djLapArt" hidden aria-hidden="true"><img id="djLapImg" alt=""></div><div class="dj-lap" id="djLap" hidden aria-hidden="true"><b id="djLapT"></b><em id="djLapA"></em></div><div class="jb-bug" id="jbBug" hidden></div><div class="jb-team" id="jbTeam" hidden><img id="jbTeamLg" alt="" referrerpolicy="no-referrer"><div><b id="jbTeamNm"></b><span id="jbTeamEv"></span></div></div><div class="wk-card" id="wkCard" hidden></div><div class="oa-chy" id="oaChy" hidden></div><div class="jb-np" id="jbNp" hidden><div class="np-art" aria-hidden="true"><i></i><i></i><i></i><i></i><i></i><img id="npImg" alt="" hidden></div><div class="np-txt"><span>Now playing</span><b id="npSong"></b><em id="npArtist"></em></div></div></div>
+    <div class="jb-screen"><video id="jbBg" muted playsinline preload="none" aria-hidden="true"></video><video id="pipVid" muted playsinline preload="none"></video><canvas class="dj-cv" id="djCv" hidden aria-hidden="true"></canvas><div class="jb-bug" id="jbBug" hidden></div><div class="jb-team" id="jbTeam" hidden><img id="jbTeamLg" alt="" referrerpolicy="no-referrer"><div><b id="jbTeamNm"></b><span id="jbTeamEv"></span></div></div><div class="wk-card" id="wkCard" hidden></div><div class="oa-chy" id="oaChy" hidden></div><div class="jb-np" id="jbNp" hidden><div class="np-art" aria-hidden="true"><i></i><i></i><i></i><i></i><i></i><img id="npImg" alt="" hidden></div><div class="np-txt"><span>Now playing</span><b id="npSong"></b><em id="npArtist"></em></div></div></div>
     <div class="jb-prog"><i id="jbProg"></i></div>
   </div>
   <aside class="jb-side"><h3><i class="dot"></i><span id="jbSideH">The room's bets</span></h3><div id="jbBets"></div></aside>
@@ -5685,7 +5681,7 @@ body.tv .rb-games.primeg.mason > .rb-pcol { padding-top: 16px; -webkit-mask-imag
   // ---------- sheets ----------
   function openSheet(id) { $(id).hidden = false; }
   // keep every open screen current: when a new version is up, reload it (never mid-form or mid-animation)
-  const BUILD = "20261018032714";
+  const BUILD = "20261018040854";
   function checkBuild() {
     if (BUILD === "dev") return;
     fetch("version.json?t=" + Date.now(), { cache: "no-store" }).then((r) => (r.ok ? r.json() : null)).then((j) => {
@@ -7151,7 +7147,7 @@ body.tv .rb-games.primeg.mason > .rb-pcol { padding-top: 16px; -webkit-mask-imag
     try { if (statusSrc) statusSrc.stop(); } catch (e) {}
     statusSrc = null; statusBet = null; $("#lockStop").hidden = true;
     if (whoJb) whoOff();
-    const jb = $("#jumbo"), v = $("#pipVid"), bg = $("#jbBg"); clearTimeout(pipT); clearTimeout(hideT); clearInterval(jbTick); clearInterval(djT); $("#djLap").hidden = true; $("#djLapArt").hidden = true;
+    const jb = $("#jumbo"), v = $("#pipVid"), bg = $("#jbBg"); clearTimeout(pipT); clearTimeout(hideT); clearInterval(jbTick); clearInterval(djT); $("#djCv").hidden = true;
     if (!jb.hidden) { jb.classList.add("out"); hideT = setTimeout(() => { jb.hidden = true; jb.classList.remove("out"); try { v.pause(); bg.pause(); } catch (e) {} }, 400); }
   }
   $("#lockStop").addEventListener("click", stopStatus);
@@ -7530,40 +7526,107 @@ body.tv .rb-games.primeg.mason > .rb-pcol { padding-top: 16px; -webkit-mask-imag
     return { so: Math.max(0, b0 + x0 / r), x0 };
   }
   const djGap = (D, a, b) => { const d = Math.abs(a - b); return a >= D.intro && b >= D.intro ? Math.min(d, D.loop - d) : d; };
-  // the laptop screen's place in every frame it's on (a homography from the 1280x800 screen to the 1920x1080 picture)
-  const DJ_LAP = {"fps":30,"f0":117,"H":[[0.0497798,-0.00108973,694.298,9.14367e-05,0.0504953,676.464,4.594e-07,-1.369e-06,1.0],[0.0497837,-0.00109371,694.273,9.41207e-05,0.0504987,676.666,4.59422e-07,-1.37006e-06,1.0],[0.0497844,-0.00109602,694.264,9.4545e-05,0.0504994,676.787,4.58274e-07,-1.37121e-06,1.0],[0.0497855,-0.00109761,694.264,9.50481e-05,0.050498,676.831,4.59411e-07,-1.37361e-06,1.0],[0.052035,-0.000942218,696.792,6.10897e-05,0.0531007,673.714,3.39992e-07,-1.15204e-06,1.0],[0.0544213,-0.000762029,699.361,3.00592e-05,0.0558815,670.384,2.00722e-07,-8.95346e-07,1.0],[0.0569547,-0.00054945,701.982,4.86718e-06,0.058857,666.819,4.09817e-08,-5.93366e-07,1.0],[0.0596441,-0.000299364,704.668,-1.29736e-05,0.0620414,662.996,-1.42388e-07,-2.39616e-07,1.0],[0.0625003,-8.96669e-06,707.43,-2.07896e-05,0.0654469,658.895,-3.51714e-07,1.69179e-07,1.0],[0.0655359,0.000329627,710.276,-1.51881e-05,0.0690908,654.496,-5.88649e-07,6.42591e-07,1.0],[0.0687657,0.000723379,713.215,8.62439e-06,0.07299,649.779,-8.53478e-07,1.18867e-06,1.0],[0.0722064,0.00118222,716.254,5.50488e-05,0.077164,644.728,-1.14704e-06,1.81878e-06,1.0],[0.0758755,0.00171464,719.396,0.000127771,0.0816312,639.33,-1.47133e-06,2.54157e-06,1.0],[0.0797976,0.00233489,722.641,0.000233578,0.0864154,633.573,-1.82294e-06,3.37195e-06,1.0],[0.0839985,0.00305723,725.986,0.000375996,0.0915404,627.452,-2.20172e-06,4.32388e-06,1.0],[0.0885139,0.00389905,729.421,0.000561525,0.0970329,620.967,-2.59983e-06,5.41306e-06,1.0],[0.0933828,0.00488046,732.932,0.000791697,0.102922,614.125,-3.01204e-06,6.65662e-06,1.0],[0.0986583,0.00602856,736.497,0.00106846,0.109242,606.94,-3.42423e-06,8.07692e-06,1.0],[0.104403,0.00737548,740.083,0.001387,0.116033,599.44,-3.82005e-06,9.69855e-06,1.0],[0.110698,0.00895845,743.651,0.00173646,0.123337,591.662,-4.17366e-06,1.15464e-05,1.0],[0.117647,0.0108256,747.149,0.002096,0.131204,583.661,-4.44604e-06,1.36507e-05,1.0],[0.125374,0.0130376,750.515,0.00242518,0.139693,575.511,-4.58715e-06,1.60465e-05,1.0],[0.134028,0.0156646,753.666,0.00266318,0.148873,567.298,-4.53349e-06,1.87709e-05,1.0],[0.14361,0.0186707,756.332,0.00285144,0.158861,558.802,-4.39689e-06,2.18477e-05,1.0],[0.154169,0.0220491,758.354,0.00302026,0.16977,549.891,-4.24437e-06,2.53056e-05,1.0],[0.165828,0.0258301,759.638,0.00316583,0.181712,540.536,-4.07741e-06,2.91767e-05,1.0],[0.178728,0.0300386,760.072,0.00328395,0.194827,530.707,-3.901e-06,3.34879e-05,1.0],[0.193041,0.0346965,759.516,0.003373,0.20929,520.364,-3.72025e-06,3.82638e-05,1.0],[0.208969,0.0398143,757.805,0.00343378,0.225327,509.454,-3.54257e-06,4.35189e-05,1.0],[0.226756,0.0453857,754.738,0.00347041,0.243227,497.9,-3.37837e-06,4.92509e-05,1.0],[0.246692,0.0513762,750.078,0.00349165,0.263363,485.593,-3.24082e-06,5.54306e-05,1.0],[0.269127,0.0577058,743.538,0.00351126,0.286216,472.375,-3.14666e-06,6.19834e-05,1.0],[0.294464,0.0642152,734.789,0.00354615,0.312391,458.029,-3.11873e-06,6.87552e-05,1.0],[0.32315,0.0706149,723.457,0.00361374,0.34262,442.264,-3.18426e-06,7.54586e-05,1.0],[0.355633,0.076393,709.154,0.00372207,0.377714,424.721,-3.37754e-06,8.15761e-05,1.0],[0.392229,0.0806708,691.552,0.00385338,0.418389,405.023,-3.73768e-06,8.62077e-05,1.0],[0.432859,0.0819845,670.549,0.00393657,0.464814,382.917,-4.30438e-06,8.78383e-05,1.0],[0.476506,0.0780375,646.614,0.00381424,0.515612,358.643,-5.10088e-06,8.4071e-05,1.0],[0.520355,0.0656378,621.368,0.00322633,0.566065,333.627,-6.09889e-06,7.1549e-05,1.0],[0.558843,0.0414423,598.272,0.00187412,0.605947,311.43,-7.15938e-06,4.67187e-05,1.0],[0.583792,0.00434794,582.702,-0.000356701,0.619619,298.007,-7.99033e-06,8.32474e-06,1.0],[0.588591,-0.0178919,579.572,-0.00170875,0.611837,296.587,-8.20644e-06,-1.47988e-05,1.0],[0.588679,-0.017888,579.514,-0.00170885,0.611935,296.549,-8.20894e-06,-1.47936e-05,1.0],[0.588853,-0.0178804,579.4,-0.00170905,0.612128,296.475,-8.21388e-06,-1.47834e-05,1.0],[0.58911,-0.0178692,579.232,-0.00170937,0.612413,296.365,-8.22125e-06,-1.47683e-05,1.0],[0.589448,-0.0178546,579.012,-0.00170972,0.612786,296.221,-8.23072e-06,-1.47485e-05,1.0],[0.589862,-0.0178366,578.742,-0.00171014,0.613246,296.044,-8.24245e-06,-1.47242e-05,1.0],[0.590351,-0.0178152,578.423,-0.00171065,0.613788,295.834,-8.25624e-06,-1.46954e-05,1.0],[0.590912,-0.0177904,578.056,-0.00171127,0.61441,295.594,-8.27225e-06,-1.4662e-05,1.0],[0.591543,-0.0177628,577.645,-0.00171189,0.615109,295.325,-8.29006e-06,-1.46248e-05,1.0],[0.59224,-0.0177321,577.19,-0.00171261,0.615882,295.027,-8.30985e-06,-1.45834e-05,1.0],[0.593001,-0.0176983,576.693,-0.00171335,0.616726,294.701,-8.33149e-06,-1.4538e-05,1.0],[0.593824,-0.0176615,576.156,-0.00171415,0.617639,294.349,-8.35484e-06,-1.44886e-05,1.0],[0.594706,-0.017622,575.58,-0.00171501,0.618617,293.972,-8.38003e-06,-1.44354e-05,1.0],[0.595644,-0.0175799,574.967,-0.00171582,0.619658,293.57,-8.40669e-06,-1.43789e-05,1.0],[0.596636,-0.017535,574.319,-0.0017168,0.620759,293.146,-8.43524e-06,-1.43187e-05,1.0],[0.59768,-0.0174874,573.638,-0.00171768,0.621917,292.699,-8.46504e-06,-1.42549e-05,1.0],[0.598772,-0.0174373,572.925,-0.00171861,0.623129,292.232,-8.49635e-06,-1.41879e-05,1.0],[0.59991,-0.017385,572.181,-0.00171954,0.624393,291.744,-8.52904e-06,-1.41179e-05,1.0],[0.601092,-0.0173301,571.409,-0.00172049,0.625706,291.238,-8.5631e-06,-1.40446e-05,1.0],[0.602315,-0.017273,570.611,-0.00172145,0.627064,290.715,-8.59842e-06,-1.39684e-05,1.0],[0.603576,-0.0172138,569.787,-0.00172237,0.628465,290.175,-8.63487e-06,-1.38894e-05,1.0],[0.604872,-0.0171523,568.941,-0.00172329,0.629905,289.62,-8.67244e-06,-1.38074e-05,1.0],[0.606202,-0.017089,568.073,-0.00172416,0.631382,289.051,-8.71098e-06,-1.37232e-05,1.0],[0.60756,-0.0170237,567.185,-0.00172503,0.632893,288.469,-8.75056e-06,-1.36365e-05,1.0],[0.608946,-0.0169568,566.28,-0.00172591,0.634434,287.875,-8.79103e-06,-1.35475e-05,1.0],[0.610356,-0.0168881,565.359,-0.00172669,0.636002,287.271,-8.83224e-06,-1.34564e-05,1.0],[0.611787,-0.0168177,564.424,-0.00172749,0.637594,286.657,-8.87426e-06,-1.33631e-05,1.0],[0.613237,-0.016746,563.477,-0.00172822,0.639207,286.036,-8.91687e-06,-1.32682e-05,1.0],[0.614701,-0.0166729,562.52,-0.00172889,0.640837,285.409,-8.95996e-06,-1.31716e-05,1.0],[0.616177,-0.0165988,561.556,-0.00172951,0.64248,284.776,-9.00358e-06,-1.30737e-05,1.0],[0.617662,-0.0165236,560.586,-0.00173011,0.644134,284.139,-9.04758e-06,-1.29745e-05,1.0],[0.619153,-0.0164477,559.612,-0.00173058,0.645794,283.5,-9.09174e-06,-1.28744e-05,1.0],[0.620646,-0.0163711,558.636,-0.00173107,0.647457,282.86,-9.13621e-06,-1.27735e-05,1.0],[0.622138,-0.0162939,557.661,-0.00173143,0.649119,282.22,-9.18057e-06,-1.26719e-05,1.0],[0.623624,-0.0162163,556.69,-0.00173179,0.650777,281.582,-9.22512e-06,-1.257e-05,1.0],[0.625103,-0.0161386,555.723,-0.00173211,0.652426,280.948,-9.26949e-06,-1.2468e-05,1.0],[0.626571,-0.0160609,554.764,-0.00173231,0.654062,280.318,-9.31354e-06,-1.2366e-05,1.0],[0.628022,-0.0159837,553.815,-0.00173247,0.655681,279.695,-9.35726e-06,-1.22648e-05,1.0],[0.629455,-0.0159067,552.879,-0.0017326,0.65728,279.08,-9.40051e-06,-1.2164e-05,1.0],[0.630865,-0.0158305,551.957,-0.00173263,0.658854,278.475,-9.44313e-06,-1.20644e-05,1.0],[0.632249,-0.0157553,551.053,-0.00173259,0.660398,277.881,-9.48505e-06,-1.19661e-05,1.0],[0.633602,-0.0156813,550.168,-0.00173256,0.661909,277.3,-9.52621e-06,-1.18694e-05,1.0],[0.63492,-0.0156089,549.306,-0.00173247,0.663381,276.733,-9.56637e-06,-1.17749e-05,1.0],[0.6362,-0.0155379,548.469,-0.00173231,0.664811,276.184,-9.60539e-06,-1.16825e-05,1.0],[0.637438,-0.0154688,547.66,-0.00173212,0.666194,275.652,-9.64323e-06,-1.15924e-05,1.0],[0.63863,-0.0154021,546.881,-0.0017319,0.667525,275.14,-9.67972e-06,-1.15056e-05,1.0],[0.63977,-0.0153377,546.135,-0.00173166,0.6688,274.65,-9.71473e-06,-1.14218e-05,1.0],[0.640856,-0.0152762,545.425,-0.00173143,0.670014,274.183,-9.74822e-06,-1.13419e-05,1.0],[0.641884,-0.0152179,544.753,-0.00173113,0.671163,273.742,-9.77983e-06,-1.1266e-05,1.0],[0.642848,-0.0151627,544.123,-0.00173084,0.672241,273.328,-9.80956e-06,-1.11943e-05,1.0],[0.643745,-0.0151113,543.536,-0.00173052,0.673244,272.942,-9.83723e-06,-1.11276e-05,1.0],[0.644571,-0.0150636,542.996,-0.00173025,0.674168,272.587,-9.86283e-06,-1.10658e-05,1.0],[0.645321,-0.0150203,542.505,-0.00172997,0.675007,272.265,-9.8861e-06,-1.10095e-05,1.0],[0.645991,-0.0149814,542.067,-0.00172971,0.675757,271.976,-9.90685e-06,-1.09592e-05,1.0],[0.646578,-0.0149472,541.683,-0.00172943,0.676413,271.724,-9.92497e-06,-1.09148e-05,1.0],[0.647077,-0.0149182,541.357,-0.00172924,0.676971,271.51,-9.94056e-06,-1.08774e-05,1.0],[0.647484,-0.0148943,541.091,-0.00172903,0.677427,271.335,-9.95315e-06,-1.08463e-05,1.0],[0.647794,-0.0148762,540.888,-0.0017289,0.677775,271.201,-9.96284e-06,-1.08228e-05,1.0],[0.648005,-0.0148638,540.75,-0.00172884,0.678011,271.111,-9.96945e-06,-1.08069e-05,1.0],[0.648113,-0.0148575,540.679,-0.00172876,0.678131,271.064,-9.97275e-06,-1.07988e-05,1.0],[0.656183,-0.00323428,492.832,-0.000319272,0.684022,293.225,-2.7135e-06,-2.08986e-06,1.0],[0.668343,0.0184455,404.114,0.000146544,0.691626,344.209,1.08449e-05,1.40437e-05,1.0],[0.675313,0.0378249,325.261,-0.00186461,0.694043,402.497,2.29738e-05,2.83153e-05,1.0],[0.677376,0.0547466,256.597,-0.00559361,0.691812,465.957,3.3567e-05,4.06291e-05,1.0],[0.674975,0.0691576,198.031,-0.0103591,0.685551,532.383,4.25909e-05,5.09765e-05,1.0],[0.66866,0.0810925,149.113,-0.0155846,0.675905,599.667,5.00712e-05,5.94173e-05,1.0],[0.659027,0.0906555,109.116,-0.0208093,0.663505,665.932,5.60788e-05,6.60622e-05,1.0],[0.646674,0.0979999,77.1304,-0.0256873,0.648934,729.592,6.07142e-05,7.10546e-05,1.0],[0.632165,0.10331,52.1522,-0.0299771,0.632707,789.388,6.40971e-05,7.45556e-05,1.0],[0.616007,0.106788,33.1609,-0.0335281,0.615269,844.375,6.63548e-05,7.67329e-05,1.0],[0.59864,0.10864,19.1801,-0.0362633,0.596989,893.895,6.76159e-05,7.7752e-05,1.0],[0.58043,0.109068,9.32073,-0.0381633,0.578163,937.545,6.80053e-05,7.77703e-05,1.0],[0.561677,0.108265,2.80741,-0.0392526,0.559028,975.127,6.76403e-05,7.69349e-05,1.0],[0.542613,0.106412,-1.0086,-0.0395854,0.539766,1006.62,6.66307e-05,7.53796e-05,1.0],[0.523417,0.103677,-2.64775,-0.0392388,0.520513,1032.12,6.50745e-05,7.32264e-05,1.0],[0.504226,0.100212,-2.5087,-0.0383001,0.501371,1051.86,6.30634e-05,7.05837e-05,1.0],[0.485138,0.096157,-0.880429,-0.0368641,0.482415,1066.11,6.06792e-05,6.75498e-05,1.0],[0.466226,0.0916375,2.04193,-0.035027,0.463699,1075.25,5.7996e-05,6.4212e-05,1.0],[0.447544,0.0867679,6.13938,-0.0328835,0.445265,1079.66,5.50806e-05,6.06485e-05,1.0],[0.429132,0.0816512,11.3508,-0.030522,0.427144,1079.77,5.19946e-05,5.69299e-05,1.0],[0.411026,0.07638,17.6551,-0.028025,0.409364,1076.05,4.87934e-05,5.31182e-05,1.0],[0.393257,0.0710372,25.0551,-0.025467,0.391949,1068.95,4.55262e-05,4.927e-05,1.0],[0.375853,0.0656963,33.5631,-0.0229121,0.374923,1058.94,4.22388e-05,4.54349e-05,1.0],[0.358846,0.0604217,43.1893,-0.0204148,0.358311,1046.49,3.89716e-05,4.1656e-05,1.0],[0.342266,0.0552686,53.9328,-0.0180217,0.342138,1032.03,3.57581e-05,3.79711e-05,1.0],[0.326145,0.050284,65.7757,-0.0157651,0.326427,1016.01,3.26311e-05,3.44118e-05,1.0],[0.310512,0.0455059,78.6798,-0.0136724,0.311205,998.819,2.96142e-05,3.1004e-05,1.0],[0.295399,0.0409644,92.5856,-0.0117594,0.296494,980.824,2.6729e-05,2.77685e-05,1.0],[0.280832,0.0366815,107.414,-0.0100337,0.282315,962.357,2.39929e-05,2.47202e-05,1.0],[0.266833,0.0326724,123.068,-0.00849928,0.268686,943.707,2.14158e-05,2.18694e-05,1.0],[0.253423,0.0289453,139.438,-0.00715226,0.255623,925.126,1.90058e-05,1.92219e-05,1.0],[0.240614,0.0255028,156.404,-0.00598317,0.243134,906.822,1.67688e-05,1.67792e-05,1.0],[0.228415,0.0223426,173.842,-0.00498267,0.231227,888.966,1.47034e-05,1.45398e-05,1.0],[0.216828,0.0194578,191.629,-0.00413754,0.219901,871.691,1.28078e-05,1.24986e-05,1.0],[0.20585,0.0168387,209.642,-0.00343169,0.209153,855.098,1.10788e-05,1.06485e-05,1.0],[0.195474,0.0144726,227.765,-0.00285159,0.198976,839.258,9.50873e-06,8.98028e-06,1.0],[0.185687,0.0123452,245.891,-0.00238171,0.189359,824.215,8.0903e-06,7.48374e-06,1.0],[0.176473,0.0104409,263.922,-0.00200778,0.180286,809.995,6.81462e-06,6.14777e-06,1.0],[0.167813,0.00874366,281.772,-0.00171611,0.17174,796.603,5.67246e-06,4.96037e-06,1.0],[0.159686,0.00723706,299.365,-0.00149456,0.163702,784.031,4.65376e-06,3.90987e-06,1.0],[0.152067,0.00590492,316.637,-0.00133114,0.15615,772.261,3.74959e-06,2.98445e-06,1.0],[0.144954,0.00473518,333.466,-0.00121697,0.149083,761.31,2.95216e-06,2.17471e-06,1.0],[0.138726,0.00378171,348.441,-0.00114796,0.142877,752.013,2.3003e-06,1.5166e-06,1.0],[0.133382,0.00302039,361.322,-0.00111055,0.137535,744.356,1.77948e-06,9.91515e-07,1.0],[0.128759,0.00240527,372.448,-0.001093,0.132901,737.989,1.3591e-06,5.67168e-07,1.0],[0.124733,0.00190341,382.094,-0.00108828,0.128856,732.653,1.01635e-06,2.21372e-07,1.0],[0.121206,0.00149028,390.482,-0.00109248,0.125304,728.151,7.33505e-07,-6.3026e-08,1.0],[0.1181,0.00114711,397.794,-0.00110204,0.122169,724.333,4.98614e-07,-2.99892e-07,1.0],[0.115354,0.00086044,404.178,-0.0011139,0.119392,721.082,3.03437e-07,-4.97485e-07,1.0],[0.112916,0.000619261,409.761,-0.00112788,0.116923,718.302,1.3915e-07,-6.64053e-07,1.0],[0.110746,0.000415164,414.646,-0.00114283,0.11472,715.922,2.8078e-10,-8.05457e-07,1.0],[0.108808,0.000241688,418.92,-0.00115795,0.11275,713.879,-1.17379e-07,-9.25907e-07,1.0],[0.107073,9.32606e-05,422.659,-0.00117328,0.110984,712.125,-2.18119e-07,-1.02979e-06,1.0],[0.10552,-3.37331e-05,425.926,-0.00118764,0.1094,710.618,-3.03473e-07,-1.11871e-06,1.0],[0.104126,-0.00014291,428.777,-0.00120168,0.107977,709.326,-3.76892e-07,-1.19545e-06,1.0],[0.102875,-0.000236904,431.257,-0.00121456,0.106698,708.22,-4.39376e-07,-1.26165e-06,1.0],[0.101751,-0.0003186,433.41,-0.00122684,0.105547,707.275,-4.93198e-07,-1.32032e-06,1.0],[0.100742,-0.000389087,435.27,-0.00123844,0.104512,706.471,-5.3965e-07,-1.37084e-06,1.0],[0.0998361,-0.000450142,436.869,-0.00124925,0.103582,705.791,-5.79588e-07,-1.41502e-06,1.0],[0.0990239,-0.000503518,438.236,-0.00125929,0.102747,705.22,-6.13943e-07,-1.45449e-06,1.0],[0.0982972,-0.000549582,439.396,-0.00126783,0.101998,704.744,-6.42534e-07,-1.48854e-06,1.0],[0.0976475,-0.000589504,440.37,-0.00127612,0.101329,704.352,-6.67546e-07,-1.51827e-06,1.0],[0.0970687,-0.000624433,441.179,-0.00128327,0.10073,704.033,-6.88325e-07,-1.54517e-06,1.0],[0.096554,-0.000654633,441.841,-0.00129018,0.100198,703.78,-7.06548e-07,-1.56861e-06,1.0],[0.0960985,-0.000680586,442.372,-0.00129618,0.0997257,703.582,-7.21591e-07,-1.58887e-06,1.0],[0.0956971,-0.000703155,442.788,-0.00130147,0.0993086,703.435,-7.34017e-07,-1.6072e-06,1.0],[0.0953454,-0.000722395,443.103,-0.00130579,0.0989424,703.33,-7.43799e-07,-1.623e-06,1.0],[0.095038,-0.000738904,443.329,-0.00131075,0.0986224,703.262,-7.53312e-07,-1.6369e-06,1.0],[0.0947734,-0.000752866,443.478,-0.00131361,0.0983451,703.225,-7.58985e-07,-1.64893e-06,1.0],[0.0945455,-0.000764712,443.561,-0.0013173,0.0981066,703.215,-7.64996e-07,-1.65944e-06,1.0],[0.0943525,-0.000774372,443.59,-0.0013199,0.0979039,703.227,-7.68961e-07,-1.66814e-06,1.0],[0.0941909,-0.00078284,443.574,-0.0013219,0.0977326,703.255,-7.71504e-07,-1.67665e-06,1.0],[0.0940578,-0.000789391,443.521,-0.0013231,0.0975912,703.298,-7.72621e-07,-1.68311e-06,1.0],[0.093949,-0.000794586,443.442,-0.00132525,0.0974759,703.349,-7.74742e-07,-1.68851e-06,1.0],[0.093863,-0.00079907,443.345,-0.00132658,0.0973833,703.406,-7.75487e-07,-1.69384e-06,1.0],[0.0937972,-0.000802214,443.237,-0.00132695,0.0973119,703.466,-7.74861e-07,-1.69757e-06,1.0],[0.0937474,-0.000804124,443.126,-0.00132857,0.097259,703.525,-7.75896e-07,-1.69972e-06,1.0],[0.093713,-0.000805649,443.02,-0.00132875,0.0972209,703.579,-7.75006e-07,-1.70194e-06,1.0],[0.0936908,-0.00080669,442.924,-0.00132829,0.0971954,703.627,-7.73408e-07,-1.70363e-06,1.0],[0.0936769,-0.000807277,442.845,-0.00132898,0.0971799,703.666,-7.73542e-07,-1.70482e-06,1.0],[0.0936704,-0.000807413,442.787,-0.00132906,0.0971723,703.694,-7.73007e-07,-1.70527e-06,1.0],[0.0936683,-0.000807656,442.755,-0.00132886,0.0971691,703.71,-7.72433e-07,-1.70594e-06,1.0]]};
-  function djLapText(song, artist, art) {
-    const el = $("#djLap"), t = $("#djLapT"), a = $("#djLapA"), ai = $("#djLapImg");
-    t.textContent = song || ""; a.textContent = artist || "";
-    el.style.transform = "scale(0)"; el.hidden = false;
-    for (const [x, px] of [[t, 104], [a, 58]]) { x.style.fontSize = px + "px"; const w = x.scrollWidth; if (w > 860) x.style.fontSize = Math.max(30, (px * 860) / w) + "px"; }
-    el.hidden = true;
-    // the album cover in the art square on his screen (Spotify's own, or the built-in song's)
-    $("#djLapArt").hidden = true;
-    if (art) { ai.src = art; ai.dataset.on = "1"; } else { ai.removeAttribute("src"); ai.dataset.on = ""; }
+  // the song on his laptop. Where the laptop's screen is in every frame of the clip (and how much of it the crowd hides)
+  // comes in once; each frame the picture and the song's cover and title are drawn together on one canvas over the video,
+  // so the cover can't slip about on the screen as the camera moves, and hands that pass in front of it hide it
+  let DJT = null, DJT_P = null;
+  function djTrackLoad() {
+    if (DJT_P) return DJT_P;
+    DJT_P = Promise.all([fetch("sounds/aura/djfly_track.json?v=1").then((r) => (r.ok ? r.json() : Promise.reject())),
+      new Promise((ok, bad) => { const im = new Image(); im.onload = () => ok(im); im.onerror = bad; im.src = "sounds/aura/djfly_mask.png?v=1"; })])
+      .then(([t, im]) => { t.mk = im; DJT = t; return t; }).catch(() => { DJT_P = null; return null; });
+    return DJT_P;
   }
-  // lay the song over the laptop for the frame on screen: the screen's homography, then the video's own fit in its box
-  function djLapAt(v, mt) {
-    const el = $("#djLap"), art = $("#djLapArt"), i = Math.round(mt * DJ_LAP.fps) - DJ_LAP.f0, h = DJ_LAP.H[i];
-    const hide = () => { if (!el.hidden) el.hidden = true; if (!art.hidden) art.hidden = true; };
-    if (!h || mt >= DJ_FLY.intro || !el.querySelector("b").textContent) { hide(); return; }
-    const vw = v.videoWidth || 1920, vh = v.videoHeight || 1080, cw = v.clientWidth, ch = v.clientHeight;
-    const s0 = (v.style.objectFit === "cover" ? Math.max : Math.min)(cw / vw, ch / vh), k = (s0 * vw) / 1920, ox = (cw - vw * s0) / 2, oy = (ch - vh * s0) / 2;
-    const m = [k * h[0] + ox * h[6], k * h[1] + ox * h[7], k * h[2] + ox * h[8], k * h[3] + oy * h[6], k * h[4] + oy * h[7], k * h[5] + oy * h[8], h[6], h[7], h[8]];
-    // fade with the screen's size: gone by the time it's a speck on the booth
-    const p = (x, y) => { const w = h[6] * x + h[7] * y + h[8]; return [(h[0] * x + h[1] * y + h[2]) / w, (h[3] * x + h[4] * y + h[5]) / w]; };
-    const [x0, y0] = p(0, 400), [x1, y1] = p(1280, 400), op = Math.max(0, Math.min(1, (Math.hypot(x1 - x0, y1 - y0) - 150) / 170));
-    if (op <= 0) { hide(); return; }
-    const tf = `matrix3d(${m[0]},${m[3]},0,${m[6]},${m[1]},${m[4]},0,${m[7]},0,0,1,0,${m[2]},${m[5]},0,${m[8]})`;
-    el.style.transform = tf; el.style.opacity = op.toFixed(3); if (el.hidden) el.hidden = false;
-    if ($("#djLapImg").dataset.on) { art.style.transform = tf; art.style.opacity = op.toFixed(3); if (art.hidden) art.hidden = false; } else if (!art.hidden) art.hidden = true;
+  const DJL = { tex: null, tmp: null, ov: null, song: "", artist: "", art: "", img: null, paints: 0, laps: 0, n: 0, i: -1 };
+  function djLapText(song, artist, art) {
+    Object.assign(DJL, { song: song || "", artist: artist || "", art: art || "", img: null, paints: 0, laps: 0, n: 0 });
+    if (!DJL.tex) { DJL.tex = document.createElement("canvas"); DJL.tmp = document.createElement("canvas"); DJL.ov = document.createElement("canvas"); DJL.tex.width = DJL.tmp.width = 1280; DJL.tex.height = DJL.tmp.height = 800; }
+    if (art) { const im = new Image(); im.onload = () => { if (DJL.art === art) { DJL.img = im; djLapPaint(); } }; im.src = art; }
+    djLapPaint(); djTrackLoad();
+    if (document.fonts && document.fonts.load) document.fonts.load('800 104px "Big Shoulders Display"').then(djLapPaint).catch(() => {});
+  }
+  // what goes on the screen (in the screen's own 1280 x 800): the cover in the art square (a touch over it, so none of
+  // what's under it shows round the edge), the title and artist beside it
+  function djLapPaint() {
+    const x = DJL.tex.getContext("2d"); x.clearRect(0, 0, 1280, 800);
+    if (DJL.img) { x.save(); x.beginPath(); if (x.roundRect) x.roundRect(67, 257, 266, 266, 19); else x.rect(67, 257, 266, 266); x.clip(); x.drawImage(DJL.img, 67, 257, 266, 266); x.restore(); }
+    const fit = (txt, px, wt) => { x.font = `${wt} ${px}px "Big Shoulders Display", Impact, sans-serif`; const w = x.measureText(txt).width; if (w <= 860) return px; const f = Math.max(30, (px * 860) / w); x.font = `${wt} ${f}px "Big Shoulders Display", Impact, sans-serif`; return f; };
+    const t = DJL.song.toUpperCase(), a = DJL.artist.toUpperCase();
+    let f = fit(t, 104, 800); x.save(); x.shadowColor = "rgba(70,140,255,.6)"; x.shadowBlur = 22; x.fillStyle = "#f2f6ff"; x.fillText(t, 380, 304 + f * 0.86); x.restore();
+    f = fit(a, 58, 700); x.fillStyle = "#7fb0ff"; x.fillText(a, 380, 440 + f * 0.86);
+  }
+  // one triangle of the screen's texture into the picture: the affine that takes its corners (u, v -> x, y) there,
+  // clipped to it. Neighbours share their edges exactly and are added up ("lighter"), so where the edges' antialiasing
+  // splits a pixel the two halves make a whole one: no seams
+  function djTri(ctx, img, A, B, C) {
+    const du1 = B[0] - A[0], dv1 = B[1] - A[1], du2 = C[0] - A[0], dv2 = C[1] - A[1], det = du1 * dv2 - du2 * dv1;
+    if (!det) return;
+    const p0 = A[2], p1 = B[2], p2 = C[2], dx1 = p1[0] - p0[0], dy1 = p1[1] - p0[1], dx2 = p2[0] - p0[0], dy2 = p2[1] - p0[1];
+    const a = (dx1 * dv2 - dx2 * dv1) / det, b = (dy1 * dv2 - dy2 * dv1) / det, c = (dx2 * du1 - dx1 * du2) / det, d = (dy2 * du1 - dy1 * du2) / det;
+    ctx.save(); ctx.beginPath(); ctx.moveTo(p0[0], p0[1]); ctx.lineTo(p1[0], p1[1]); ctx.lineTo(p2[0], p2[1]); ctx.closePath(); ctx.clip();
+    ctx.setTransform(a, b, c, d, p0[0] - a * A[0] - c * A[1], p0[1] - b * A[0] - d * A[1]); ctx.drawImage(img, 0, 0); ctx.restore();
+  }
+  // a frame: the picture as the video has it, then the song on the laptop wherever the track has the screen in that frame
+  function djPaint(v, mt) {
+    const cv = $("#djCv"); if (!cv) return;
+    // (sized off the video: it fills the same box, and the canvas has no size of its own until it's showing)
+    const dpr = Math.min(2, window.devicePixelRatio || 1), W_ = Math.round(v.clientWidth * dpr), H_ = Math.round(v.clientHeight * dpr);
+    if (!W_ || !H_ || !v.videoWidth) return;
+    if (cv.width !== W_ || cv.height !== H_) { cv.width = W_; cv.height = H_; }
+    const ctx = cv.getContext("2d"), vw = v.videoWidth, vh = v.videoHeight;
+    const s0 = (v.style.objectFit === "cover" ? Math.max : Math.min)(W_ / vw, H_ / vh), dw = vw * s0, dh = vh * s0, ox = (W_ - dw) / 2, oy = (H_ - dh) / 2;
+    ctx.setTransform(1, 0, 0, 1, 0, 0); ctx.globalAlpha = 1; ctx.clearRect(0, 0, W_, H_);
+    try { ctx.drawImage(v, ox, oy, dw, dh); } catch (e) { return; }
+    if (cv.hidden) cv.hidden = false;
+    const T = DJT, i = T ? Math.round(mt * T.fps) : 0, h = T && DJL.song ? T.H[i] : 0;
+    DJL.paints++; DJL.i = i;
+    if (!h) { DJL.n = 0; return; }
+    // only the part of the screen with the cover and title on it is drawn
+    const u0 = 60, u1 = 1250, w0 = 250, w1 = 530, um = (u0 + u1) / 2, wm = (w0 + w1) / 2;
+    // the screen's texture, with whatever's in front of it in this frame cut out of it
+    let src = DJL.tex;
+    const mi = T.m[i];
+    if (mi >= 0) {
+      const tx = DJL.tmp.getContext("2d"), c = mi % T.cols, r = (mi - c) / T.cols, cu = T.tw / T.mw, cw = T.th / T.mh;
+      tx.globalCompositeOperation = "source-over"; tx.clearRect(u0, w0, u1 - u0, w1 - w0); tx.drawImage(DJL.tex, u0, w0, u1 - u0, w1 - w0, u0, w0, u1 - u0, w1 - w0);
+      tx.globalCompositeOperation = "destination-in";
+      tx.drawImage(T.mk, c * (T.mw + 2) + 1 + u0 / cu, r * (T.mh + 2) + 1 + w0 / cw, (u1 - u0) / cu, (w1 - w0) / cw, u0, w0, u1 - u0, w1 - w0);
+      tx.globalCompositeOperation = "source-over"; src = DJL.tmp;
+    }
+    // where it lands (video px -> canvas px), in enough flat triangles that none is off the true perspective by more than
+    // a third of a pixel
+    const k = (s0 * vw) / 1920;
+    const P = (u, w) => { const z = h[6] * u + h[7] * w + h[8]; return [ox + (k * (h[0] * u + h[1] * w + h[2])) / z, oy + (k * (h[3] * u + h[4] * w + h[5])) / z]; };
+    const q00 = P(u0, w0), q11 = P(u1, w1), q10 = P(u1, w0), q01 = P(u0, w1), qm = P(um, wm);
+    const err = Math.max(Math.hypot(qm[0] - (q00[0] + q11[0]) / 2, qm[1] - (q00[1] + q11[1]) / 2), Math.hypot(qm[0] - (q10[0] + q01[0]) / 2, qm[1] - (q10[1] + q01[1]) / 2));
+    const n = Math.max(1, Math.min(8, Math.ceil(Math.sqrt(err / 0.33)))), G = [];
+    let x0 = 1e9, y0 = 1e9, x1 = -1e9, y1 = -1e9;
+    for (let q = 0; q <= n; q++) for (let p = 0; p <= n; p++) {
+      const u = u0 + ((u1 - u0) * p) / n, w = w0 + ((w1 - w0) * q) / n, xy = P(u, w);
+      G.push([u, w, xy]); x0 = Math.min(x0, xy[0]); y0 = Math.min(y0, xy[1]); x1 = Math.max(x1, xy[0]); y1 = Math.max(y1, xy[1]);
+    }
+    x0 = Math.max(0, Math.floor(x0) - 2); y0 = Math.max(0, Math.floor(y0) - 2); x1 = Math.min(W_, Math.ceil(x1) + 2); y1 = Math.min(H_, Math.ceil(y1) + 2);
+    if (x1 <= x0 || y1 <= y0) return;
+    const ov = DJL.ov; if (ov.width !== W_ || ov.height !== H_) { ov.width = W_; ov.height = H_; }
+    const o = ov.getContext("2d");
+    o.setTransform(1, 0, 0, 1, 0, 0); o.globalCompositeOperation = "source-over"; o.clearRect(x0, y0, x1 - x0, y1 - y0);
+    o.globalCompositeOperation = "lighter"; o.imageSmoothingEnabled = true; o.imageSmoothingQuality = "high";
+    for (let q = 0; q < n; q++) for (let p = 0; p < n; p++) {
+      const a = G[q * (n + 1) + p], b = G[q * (n + 1) + p + 1], c = G[(q + 1) * (n + 1) + p], d = G[(q + 1) * (n + 1) + p + 1];
+      djTri(o, src, a, b, c); djTri(o, src, b, d, c);
+    }
+    o.globalCompositeOperation = "source-over";
+    // the drop's white-out washes it out with the rest of the picture
+    ctx.globalAlpha = 1 - ((T.white && T.white[i]) || 0);
+    ctx.drawImage(ov, x0, y0, x1 - x0, y1 - y0, x0, y0, x1 - x0, y1 - y0);
+    ctx.globalAlpha = 1; DJL.n = n; DJL.laps++;
   }
   // run the clip: round the loop at its end (a jump of exactly one loop, onto the keyframe at its start), the blurred wash
   // with it, and the song on the laptop frame by frame
   function djRun(v, bg, D, go) {
     const end = D.intro + D.loop;
     const wrap = () => { if (v.currentTime >= end - 0.05) { try { v.currentTime = Math.max(D.intro, v.currentTime - D.loop); } catch (e) {} v.play().catch(() => {}); } if (bg.currentTime >= end - 0.3 || bg.ended) { try { bg.currentTime = v.currentTime; } catch (e) {} bg.play().catch(() => {}); } };
-    const tick = (now, md) => { if (go !== pipGo) { $("#djLap").hidden = true; $("#djLapArt").hidden = true; return; } wrap(); if (D === DJ_FLY) djLapAt(v, md ? md.mediaTime : v.currentTime); if (v.requestVideoFrameCallback) v.requestVideoFrameCallback(tick); else requestAnimationFrame(tick); };
+    const tick = (now, md) => { if (go !== pipGo) { $("#djCv").hidden = true; return; } wrap(); if (D === DJ_FLY) djPaint(v, md ? md.mediaTime : v.currentTime); if (v.requestVideoFrameCallback) v.requestVideoFrameCallback(tick); else requestAnimationFrame(tick); };
     if (v.requestVideoFrameCallback) v.requestVideoFrameCallback(tick); else requestAnimationFrame(tick);
     v.onended = () => { if (go === pipGo) { try { v.currentTime = D.intro; } catch (e) {} v.play().catch(() => {}); } };
     bg.onended = () => { if (go === pipGo) { try { bg.currentTime = v.currentTime; } catch (e) {} bg.play().catch(() => {}); } };
@@ -7575,7 +7638,7 @@ body.tv .rb-games.primeg.mason > .rb-pcol { padding-top: 16px; -webkit-mask-imag
     if (PHONE()) return;
     const jb = $("#jumbo"), v = $("#pipVid"), bg = $("#jbBg"), c = clipCtx(), go = ++pipGo, betId = b.id, team = pipTeam;
     pipTeam = null;
-    v.onended = null; bg.onended = null; v.style.opacity = ""; $("#djLap").hidden = true; $("#djLapArt").hidden = true;
+    v.onended = null; bg.onended = null; v.style.opacity = ""; $("#djCv").hidden = true;
     if (!pre) P = houseTurn(djTrack(P));
     const hz = !!(P.set || P.spSet) && !pre; SP.useHouse = !!P.spSet;
     if (hz) why = "House set";
