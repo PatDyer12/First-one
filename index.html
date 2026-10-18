@@ -6227,7 +6227,7 @@ body.tv .rb-games.primeg.mason > .rb-pcol { padding-top: 16px; -webkit-mask-imag
   // ---------- sheets ----------
   function openSheet(id) { $(id).hidden = false; }
   // keep every open screen current: when a new version is up, reload it (never mid-form or mid-animation)
-  const BUILD = "20261018204320";
+  const BUILD = "20261018211622";
   function checkBuild() {
     if (BUILD === "dev") return;
     fetch("version.json?t=" + Date.now(), { cache: "no-store" }).then((r) => (r.ok ? r.json() : null)).then((j) => {
@@ -9376,6 +9376,22 @@ body.tv .rb-games.primeg.mason > .rb-pcol { padding-top: 16px; -webkit-mask-imag
     react(b, "mid", P, { "end of half": "Halftime", "two-minute warning": "Two-minute warning", "end period": "End of the quarter" }[hit.kind] || "Commercial break");
     return true;
   }
+  let fillAt = 0;
+  function houseFill(now) {
+    if (!fbDay() || slateMode() !== "feature" || !clipsOn() || PHONE() || trial || clipBusy()) return false;
+    if (now - lastAny < 40e3 || now - fillAt < 40e3) return false;   // the house edits run about 20 s: a song, a breath, the next
+    const live = new Set([...S.games.values()].filter((g) => (g.sport === "NFL" || g.sport === "CFB") && g.st === "in").map((g) => String(g.id)));
+    if (!live.size) return false;
+    const open = [...S.bets.values()].filter((x) => x.status === "open"), b = open.find((x) => selsOf(x).some((y) => live.has(String(y.g)))) || open[0];
+    if (!b) return false;
+    const dj = now - lastDj >= DJ_DUE;
+    let P = dj ? pickClip(newSong(CLIPS.filter((c) => c.dj))) : null;
+    if (!P) { P = pickClip(houseEdits()); if (P) P = Object.assign({}, P, { ms: Math.min(P.ms || 75e3, 75e3) }); }
+    if (!P) return false;
+    fillAt = now; lastAny = now; lastKind = "pop"; if (dj) lastDj = now;
+    react(b, "mid", P, "Music break");
+    return true;
+  }
   function driveBreak(now) {
     if (!fbDay() || !clipsOn() || PHONE() || trial) return false;
     const mine = new Set(); for (const b of S.bets.values()) if (b.status === "open") for (const x of selsOf(b)) mine.add(String(x.g));
@@ -9387,11 +9403,12 @@ body.tv .rb-games.primeg.mason > .rb-pcol { padding-top: 16px; -webkit-mask-imag
       posSeen.set(g.id, pos);
       if (was && was !== pos && !hit) hit = g;   // the ball changed hands since the last look
     }
-    if (!hit || now - driveAt < (slateMode() === "busy" ? 8 : 3.5) * 60e3 || now - lastAny < 60e3 || clipBusy()) return false;
+    const few = slateMode() === "feature";
+    if (!hit || now - driveAt < (few ? 1.5 : 8) * 60e3 || now - lastAny < (few ? 40e3 : 60e3) || clipBusy()) return false;
     const b = [...S.bets.values()].find((x) => x.status === "open" && selsOf(x).some((y) => String(y.g) === String(hit.id)));
     if (!b) return false;
     const t = String(hit.a.id) === String(hit.sit.pos) ? hit.a : hit.h, dj = now - lastDj >= DJ_DUE;
-    const P = breakClip(hit.sport, t, 25e3, dj);
+    const P = breakClip(hit.sport, t, few ? 75e3 : 25e3, dj);
     if (!P) return false;
     driveAt = now; lastAny = now; lastKind = "pop"; if (dj) lastDj = now;
     react(b, "mid", P, `${t.ab} ball · between drives`);
@@ -10782,7 +10799,7 @@ body.tv .rb-games.primeg.mason > .rb-pcol { padding-top: 16px; -webkit-mask-imag
     }
     // quiet stretch: pop a clip that fits how one of the live bets is going
     if (!on || clipBusy() || trial) return;
-    if ((slateMode() === "prime" ? tvBreak(now) : driveBreak(now)) || fbDay()) return;
+    if ((slateMode() === "prime" ? tvBreak(now) : driveBreak(now) || houseFill(now)) || fbDay()) return;
     if (busy) {
       // busy slate: DJ Goldie, now and then, over whichever of your bets is live
       const due = now - lastDj >= DJ_DUE && now - lastAny >= 20e3;
