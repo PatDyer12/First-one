@@ -3785,6 +3785,94 @@ body.tv.pplb .roomtv:not([hidden]) canvas { width: 76px; height: 76px; grid-row:
 .cs.show.big .cs-bg { background: radial-gradient(48% 58% at 50% 46%, color-mix(in srgb, var(--fxk) 24%, transparent), transparent 70%), repeating-linear-gradient(0deg, rgba(255,255,255,.022) 0 1px, transparent 1px 4px), #04060a; }
 /* scenes change by fading, not blurring */
 @keyframes csActOut { to { opacity: 0; transform: scale(1.03); } }
+/* ---------- the board stays the base under the show ---------- */
+/* (dimmed by the show's own dark backdrop, not a filter: filtering the whole board every frame halved the frame rate) */
+body.cs-live .app, body.cs-live #cfield { will-change: translate, rotate; }
+body.cs-live .app *, body.cs-live .app *::before, body.cs-live .app *::after { animation-play-state: paused !important; }
+body.cs-quake .app, body.cs-quake #cfield { animation: boardQuake .55s cubic-bezier(.36,.07,.19,.97); }
+body.cs-quake.cs-big .app, body.cs-quake.cs-big #cfield { animation: boardQuakeBig .8s cubic-bezier(.36,.07,.19,.97); }
+@keyframes boardQuake { 10% { translate: -6px 3px; rotate: -.25deg; } 25% { translate: 7px -4px; rotate: .3deg; } 40% { translate: -5px 2px; } 60% { translate: 4px -2px; } 80% { translate: -2px 1px; } }
+@keyframes boardQuakeBig { 8% { translate: -16px 8px; rotate: -.7deg; scale: 1.015; } 20% { translate: 18px -10px; rotate: .8deg; } 34% { translate: -12px 6px; rotate: -.4deg; } 50% { translate: 9px -5px; } 68% { translate: -5px 3px; } 85% { translate: 2px -1px; } }
+.cs.show .cs-bg { background: radial-gradient(62% 62% at 50% 48%, color-mix(in srgb, var(--fxk) 12%, rgba(3,5,9,.6)), rgba(3,5,9,.82) 100%), repeating-linear-gradient(0deg, rgba(255,255,255,.02) 0 1px, transparent 1px 4px); }
+.cs.show.big .cs-bg { background: radial-gradient(62% 62% at 50% 48%, color-mix(in srgb, var(--fxk) 16%, rgba(3,5,9,.63)), rgba(3,5,9,.85) 100%), repeating-linear-gradient(0deg, rgba(255,255,255,.02) 0 1px, transparent 1px 4px); }
+/* the words sit on plates so the chaos never gets in the way of reading them */
+.cs.show .xh { padding: 14px 36px 16px; border-radius: 16px; background: rgba(5,7,11,.86); border: 1px solid color-mix(in srgb, var(--fxk) 32%, transparent); box-shadow: 0 22px 50px rgba(0,0,0,.55); }
+.cs.show .cs-det, .cs.show .cs-ach { padding: 18px 24px; border-radius: 20px; background: rgba(5,7,11,.88); border: 1px solid rgba(190,210,240,.12); box-shadow: 0 24px 60px rgba(0,0,0,.55); }
+.cs.show .cs-det { width: 352px; box-sizing: border-box; left: 8%; } .cs.show .cs-ach { width: 330px; box-sizing: border-box; right: 8%; }
+/* the plates come in with what's on them, not ahead of it */
+.cs.show .cs-det { opacity: 0; animation: csSlide .4s 1.2s ease-out forwards; } .cs.show .cs-ach { opacity: 0; animation: csUp .45s 1.5s ease-out forwards; }
+.cs.show .xh { animation: csUp .35s both; }
+.cs.show .cs-det > div:last-child { border-bottom: 0; }
+.cs.show .cs-pay { padding: 18px 40px 20px; border-radius: 22px; background: rgba(5,7,11,.86); border: 1px solid color-mix(in srgb, var(--fxk) 26%, transparent); box-shadow: 0 24px 60px rgba(0,0,0,.55); justify-self: center; width: max-content; margin-left: auto; margin-right: auto; }
+.cs.show .cs-who { background: rgba(5,7,11,.9); }
+.cs.show .xp-rule::before { content: ""; position: absolute; inset: -6px -34px -40px; z-index: -1; border-radius: 20px; background: rgba(5,7,11,.86); border: 1px solid rgba(190,210,240,.12); }
+.cs.show .xp-v { padding: 8px 44px 12px; border-radius: 999px; background: rgba(5,7,11,.88); border: 1px solid rgba(61,220,151,.35); }
+.cs.show .xp-par li { background: rgba(9,12,18,.9); }
+.cs.show .xp-cnt { padding: 18px 26px; border-radius: 22px; background: rgba(5,7,11,.86); }
+.cs.show .xn-t { background: linear-gradient(160deg, rgba(20,25,34,.95), rgba(8,11,16,.95)); }
+.cs.show .xn-t.hl { background: linear-gradient(160deg, color-mix(in srgb, var(--fxk) 16%, #0b0e14), #080b10); }
+.cs.show .xt-shelf::before { content: ""; position: absolute; inset: -30px -20px 0; z-index: -1; border-radius: 26px; background: rgba(5,7,11,.82); }
+.cs.show .xt-st > div { background: rgba(9,12,18,.92); }
+.cs.show .xs-r { background: rgba(10,13,19,.92); }
+.cs.show .xs-n { padding: 6px 30px 10px; border-radius: 16px; background: rgba(5,7,11,.86); }
+.cs.show .xa-dark { background: radial-gradient(64% 64% at 50% 50%, color-mix(in srgb, var(--fxk) 14%, rgba(4,6,10,.82)), rgba(1,2,3,.9) 82%); }
+.cs.show .xa-nuke .xa-dark { background: radial-gradient(64% 64% at 50% 50%, rgba(36,16,2,.84), rgba(3,1,0,.9) 82%); }
+.cs.show .xa-mid { padding: 34px 60px; border-radius: 28px; background: rgba(4,6,10,.6); }
+.cs.show .xy { background: transparent; }
+.cs.show .xy:not(.v) { background: radial-gradient(60% 70% at 62% 48%, color-mix(in srgb, var(--fxk) 20%, rgba(5,7,11,.55)), rgba(1,2,3,.72) 80%); }
+.cs.show .xy-bgv { opacity: .55; }
+.cs.show .xy-vig { background: linear-gradient(90deg, rgba(2,3,5,.9), rgba(2,3,5,.6) 42%, rgba(2,3,5,.15) 64%, transparent 80%); }
+.cs.show .xf { background: radial-gradient(60% 60% at 50% 50%, color-mix(in srgb, var(--fxk) 14%, rgba(5,7,11,.7)), rgba(1,2,3,.86) 80%); }
+.cs.show .xo-in { box-shadow: 0 30px 70px rgba(0,0,0,.6), 0 0 50px color-mix(in srgb, var(--fxk) 25%, transparent); }
+
+/* ---------- the chaos: behind the words, all round them ---------- */
+.cs-chaos { position: absolute; inset: 0; pointer-events: none; overflow: hidden; }
+/* stamps slammed all over the board like graffiti */
+.ch-stamp { position: absolute; translate: -50% -50%; rotate: var(--r); scale: var(--z); padding: 8px 20px 6px; border: 5px double var(--k); border-radius: 12px; color: var(--k); white-space: nowrap;
+  font: 900 72px/.9 var(--f-display), Inter, sans-serif; letter-spacing: .06em; text-transform: uppercase; background: rgba(4,6,10,.3); text-shadow: 0 0 22px color-mix(in srgb, var(--k) 50%, transparent);
+  -webkit-mask-image: var(--ink); mask-image: var(--ink); -webkit-mask-size: 220px 120px; mask-size: 220px 120px; animation: chSlam .3s cubic-bezier(.3,1.6,.5,1) both, chFade .9s 3.2s ease-in forwards; }
+@keyframes chSlam { from { opacity: 0; transform: scale(2.6); } to { opacity: .92; transform: none; } }
+@keyframes chFade { to { opacity: 0; } }
+/* die-cut stickers slapped on */
+.ch-stk { position: absolute; translate: -50% -50%; width: var(--s); height: var(--s); border-radius: 50%; display: grid; place-items: center; rotate: var(--r);
+  background: radial-gradient(circle at 35% 30%, #ffffff, #e9edf3 70%); box-shadow: 0 0 0 5px #ffffff, 0 0 0 7px var(--k), 0 14px 30px rgba(0,0,0,.55); animation: chSlap .34s cubic-bezier(.3,1.7,.5,1) both, chFade .8s 3.4s ease-in forwards; }
+.ch-stk b { font-size: calc(var(--s) * .56); line-height: 1; }
+.ch-stk b .bt-ico { width: calc(var(--s) * .6); height: calc(var(--s) * .6); color: var(--k); }
+@keyframes chSlap { from { opacity: 0; transform: scale(1.9) rotate(-40deg); } to { opacity: 1; transform: none; } }
+/* comic bursts on the beat */
+.ch-pow { position: absolute; translate: -50% -50%; rotate: var(--r); width: 300px; height: 210px; display: grid; place-items: center;
+  clip-path: polygon(50% 0, 60% 22%, 82% 6%, 76% 32%, 100% 30%, 82% 50%, 100% 70%, 76% 68%, 84% 96%, 60% 78%, 50% 100%, 40% 78%, 16% 96%, 24% 68%, 0 70%, 18% 50%, 0 30%, 24% 32%, 18% 6%, 40% 22%);
+  background: radial-gradient(circle, rgba(0,0,0,.22) 0 2px, transparent 2.6px) 0 0 / 10px 10px, var(--k); animation: chPow .45s cubic-bezier(.3,1.8,.5,1) both, chFade .5s 1.5s ease-in forwards; }
+.ch-pow b { font: 900 40px/.9 var(--f-display), Inter, sans-serif; letter-spacing: .02em; color: #0b0d12; text-align: center; transform: rotate(-4deg); text-shadow: 2px 2px 0 rgba(255,255,255,.65); max-width: 190px; }
+@keyframes chPow { 0% { opacity: 0; transform: scale(0) rotate(-20deg); } 70% { opacity: 1; transform: scale(1.12) rotate(4deg); } 100% { opacity: 1; transform: none; } }
+/* speed lines bursting from the card */
+.ch-speed { position: absolute; left: var(--x, 960px); top: var(--y, 470px); width: 2600px; height: 2600px; margin: -1300px 0 0 -1300px; border-radius: 50%;
+  background: repeating-conic-gradient(rgba(255,255,255,.55) 0 .6deg, transparent .6deg 4.2deg);
+  -webkit-mask-image: radial-gradient(closest-side, transparent 22%, #000 40%, transparent 92%); mask-image: radial-gradient(closest-side, transparent 22%, #000 40%, transparent 92%); animation: chSpeed .6s ease-out forwards; }
+@keyframes chSpeed { 0% { opacity: 0; transform: scale(.7) rotate(0deg); } 18% { opacity: 1; } 100% { opacity: 0; transform: scale(1.25) rotate(6deg); } }
+/* money blasting out of the card */
+.ch-bill { position: absolute; left: var(--x, 960px); top: var(--y, 470px); width: 66px; height: 30px; margin: -15px 0 0 -33px; border-radius: 3px;
+  background: linear-gradient(90deg, #2f6b3a, #4e9a5a 20%, #3d8449 50%, #4e9a5a 80%, #2f6b3a); box-shadow: inset 0 0 0 2px #1f4a28, inset 0 0 0 3px rgba(206,240,200,.4);
+  animation: chBill 1.4s cubic-bezier(.15,.75,.3,1) forwards; }
+.ch-bill::after { content: "$"; position: absolute; inset: 0; display: grid; place-items: center; font: 900 18px/1 var(--f-display), Inter, sans-serif; color: rgba(225,255,225,.9); }
+@keyframes chBill { 0% { opacity: 1; transform: translate(0, 0) rotate(0) scale(.6); } 70% { opacity: 1; } 100% { opacity: 0; transform: translate(var(--dx), var(--dy)) rotate(var(--rr)) scale(1); } }
+/* glitch hits over everything for a blink */
+.ch-glitch { position: absolute; inset: 0; z-index: 37; pointer-events: none; mix-blend-mode: screen; animation: chFade .1s .36s forwards; }
+.ch-glitch i { position: absolute; left: -2%; right: -2%; top: var(--t); height: var(--h); background: var(--k); opacity: .5; animation: chGl .36s steps(4) both; }
+@keyframes chGl { 0% { transform: translateX(-4%); } 25% { transform: translateX(3%); opacity: .7; } 50% { transform: translateX(-2%); opacity: .25; } 75% { transform: translateX(5%); opacity: .6; } 100% { transform: none; opacity: 0; } }
+.cs.lite .ch-speed { display: none; }
+.cs-chaos { --ink: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='220' height='120'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.9' numOctaves='2' seed='11'/%3E%3CfeColorMatrix values='0 0 0 0 0  0 0 0 0 0  0 0 0 0 0  0 0 0 -2.6 2.1'/%3E%3C/filter%3E%3Crect width='220' height='120' filter='url(%23n)'/%3E%3C/svg%3E"); }
+/* ---------- name badges, lined up ---------- */
+.bt-bdgs { display: inline-flex; align-items: center; gap: 8px; vertical-align: middle; }
+.bt-bdg { flex: none; vertical-align: middle; }
+.bt-bdg.lv::after { left: auto; right: -5px; top: -5px; width: 13px; height: 13px; display: grid; place-items: center; font-size: 8px; line-height: 1; border-radius: 50%; background: #0b0d12; box-shadow: 0 0 0 1.5px #ffe14d; filter: none; }
+.bt-bdg sub { right: -5px; bottom: -5px; }
+.pp-nm .bt-bdgs { gap: 6px; }
+.pp-nm .bt-bdg.lv::after, .rb-lr .nm .bt-bdg.lv::after { right: -4px; top: -4px; width: 11px; height: 11px; font-size: 7px; }
+.pp-nm .bt-bdg sub, .rb-lr .nm .bt-bdg sub { right: -4px; bottom: -4px; }
+.rb-lr .nm .bt-bdgs { gap: 9px; padding: 4px 4px 4px 0; -webkit-mask-image: none; mask-image: none; }
+.rb-lr .nm .bt-bdg { width: 19px; height: 19px; font-size: 10.5px; }
+.rb-lr .nm .bt-bdg + .bt-bdg { margin-left: 0; }
 .pp-none { padding: 16px 6px; font: 600 15px/1.3 Inter, sans-serif; color: #8d97a8; text-align: center; }
 .pp-bet { position: relative; flex: none; display: grid; gap: 6px; padding: 10px 12px 11px 13px; border-radius: 12px; background: rgba(255,255,255,.035); border: 1px solid rgba(190,210,240,.1); border-left: 5px solid rgba(190,210,240,.28); }
 .pp-bet.k-lost { opacity: .7; }
@@ -6740,7 +6828,7 @@ body.tv .rb-games.primeg.mason > .rb-pcol { padding-top: 16px; -webkit-mask-imag
       return `<div class="rb-lr${p.heat ? " " + p.heat : ""}${p.k === lead ? " lead" : ""}" data-k="${esc(p.k)}" style="--c:${p.col}"${pids.length ? tapAttrs(pids, p.name + (p.me ? "" : "'s bets")) : ""}>
         <span class="rk num">${i + 1}</span>
         <span class="rb-av big" style="--c:${p.col}">${esc(p.name.slice(0, 1).toUpperCase())}${p.k === lead ? '<s class="crown">👑</s>' : ""}</span>
-        <div class="nm"><b>${esc(p.name)}</b>${heatTag(p)}${btBadges(p.done, 3)}</div>
+        <div class="nm"><b>${esc(p.name)}</b>${heatTag(p)}${btBadges(p.done, 2)}</div>
         <div class="net num ${cls(p.net)}">${fU(p.net, true)}<small>${fUSD(p.net * S.unit, true)}</small></div>
         <div class="ln num">${p.w + p.l + p.p ? `${p.w}-${p.l}${p.p ? "-" + p.p : ""} · ${pct(p.hit)} hit · ROI ${p.roi == null ? "–" : (p.roi > 0 ? "+" : "") + Math.round(p.roi * 100) + "%"}` : "No results yet"}</div>
         <div class="ft"><div class="l5">${p.last5.map((o) => `<i class="${o === "W" ? "w" : "l"}"></i>`).join("")}</div>
@@ -7608,6 +7696,7 @@ body.tv .rb-games.primeg.mason > .rb-pcol { padding-top: 16px; -webkit-mask-imag
     SHOW.src = [];
     if (SHOW.pre) { try { SHOW.pre.removeAttribute("src"); SHOW.pre.load(); } catch (e) {} SHOW.pre = null; }
     document.removeEventListener("keydown", showKey, true);
+    document.body.classList.remove("cs-live", "cs-quake", "cs-big");
   }
   function showKey(e) { if (e.key === "Escape") { e.preventDefault(); e.stopPropagation(); showSkip(); } }
   function showSkip() {
@@ -7998,6 +8087,7 @@ body.tv .rb-games.primeg.mason > .rb-pcol { padding-top: 16px; -webkit-mask-imag
     if (i > 0) { const st = el.querySelector(".cs-sting"); if (st) { st.classList.remove("go"); void st.offsetWidth; st.classList.add("go"); } shSfx("sniper/whoosh", 0.4, 0); }
     if (SH[a.k].go) SH[a.k].go(c, d, a, el);
     showFxAct(c, a, i);
+    showChaos(c, a, i);
     SHOW.pkEls = [...el.querySelectorAll(".cs-pulse, .cs-neon, .cs-lz > i, .cs-pay > b, .xy-bgv, .xy-amt, .xy-lz")];
     showCount(d);
   }
@@ -8077,6 +8167,74 @@ body.tv .rb-games.primeg.mason > .rb-pcol { padding-top: 16px; -webkit-mask-imag
     cx.globalAlpha = 1; cx.globalCompositeOperation = "source-over";
   }
   // what fires when: the stamp, every act change at the big ones, the countdown, the party, the plaque
+
+  const CH_SLOTS = [[150, 170], [1770, 170], [150, 545], [1770, 545], [170, 900], [1750, 900], [560, 130], [1360, 130], [560, 975], [1360, 975], [360, 340], [1560, 340], [360, 760], [1560, 760]];
+  const CH_POW = ["KA-CHING!", "BOOM!", "CASH!", "SHEESH!", "LET'S GO!", "PAID!", "EASY MONEY", "COOKED"];
+  const CH_COL = ["var(--fxk)", "var(--c)", "#ffffff", "#ff4a58", "#3ddc97", "#ffd23f"];
+  const chPick = (l) => l[(Math.random() * l.length) | 0], chR = (a, b) => a + Math.random() * (b - a);
+  function chAdd(el, life) {
+    const h = $("#cash .cs-chaos"); if (!h) return;
+    h.appendChild(el); while (h.children.length > 30) h.firstChild.remove();
+    setTimeout(() => el.remove(), life);
+  }
+  function chSlot() { SHOW.slot = ((SHOW.slot || 0) + 1 + ((Math.random() * 3) | 0)) % CH_SLOTS.length; const [x, y] = CH_SLOTS[SHOW.slot]; return [x + chR(-70, 70), y + chR(-50, 50)]; }
+  function chStamp(c, word) {
+    const [x, y] = chSlot(), el = document.createElement("i");
+    const words = ["CASHED", "PAID", "HIT", c.F.k ? BT_DEF[c.F.k][1].toUpperCase() : "WINNER", String(c.name).toUpperCase(), "$$$", fU(c.n, true).toUpperCase()];
+    el.className = "ch-stamp"; el.textContent = word || chPick(words);
+    el.style.cssText = `left:${x | 0}px;top:${y | 0}px;--r:${chR(-24, 24) | 0}deg;--z:${chR(0.7, 1.3).toFixed(2)};--k:${chPick(CH_COL)}`;
+    chAdd(el, 4300);
+  }
+  function chSticker(c) {
+    const [x, y] = chSlot(), el = document.createElement("i"), ic = c.F.k && /^[^<]/.test(BT_DEF[c.F.k][0]) ? BT_DEF[c.F.k][0] : "💰";
+    el.className = "ch-stk"; el.innerHTML = `<b>${chPick([ic, ic, "💰", "🔥", "💸", "🤑", "👑", "💎"])}</b>`;
+    el.style.cssText = `left:${x | 0}px;top:${y | 0}px;--r:${chR(-30, 30) | 0}deg;--s:${chR(86, 132) | 0}px;--k:${chPick(CH_COL)}`;
+    chAdd(el, 4300);
+  }
+  function chPow() {
+    const [x, y] = chSlot(), el = document.createElement("i");
+    el.className = "ch-pow"; el.innerHTML = `<b>${chPick(CH_POW)}</b>`;
+    el.style.cssText = `left:${x | 0}px;top:${y | 0}px;--r:${chR(-16, 16) | 0}deg;--k:${chPick(["#ffd23f", "#ff4a58", "#00e5ff", "#7dff4f", "#ff2bd6"])}`;
+    chAdd(el, 2100);
+  }
+  function chSpeed(x, y) { const el = document.createElement("i"); el.className = "ch-speed"; el.style.cssText = `--x:${x || 960}px;--y:${y || 470}px`; chAdd(el, 700); }
+  function chBills(n, x, y) {
+    for (let i = 0; i < n; i++) { const a = (i / n) * 6.283 + chR(-0.2, 0.2), d = chR(420, 900), el = document.createElement("i");
+      el.className = "ch-bill"; el.style.cssText = `--x:${x || 960}px;--y:${y || 470}px;--dx:${(Math.cos(a) * d) | 0}px;--dy:${(Math.sin(a) * d * 0.7) | 0}px;--rr:${chR(-540, 540) | 0}deg;animation-delay:${chR(0, 0.12).toFixed(2)}s`; chAdd(el, 1700); }
+  }
+  function chGlitch() {
+    const b = $("#cash .cs-box"); if (!b) return;
+    const el = document.createElement("div"); el.className = "ch-glitch";
+    el.innerHTML = Array.from({ length: 7 }, () => `<i style="--t:${chR(4, 92) | 0}%;--h:${chR(6, 40) | 0}px;--k:${chPick(["#00e5ff", "#ff2bd6", "#ffffff", "var(--fxk)"])}"></i>`).join("");
+    b.appendChild(el); setTimeout(() => el.remove(), 520);
+  }
+  function chQuake(big) { const bd = document.body; bd.classList.remove("cs-quake"); void bd.offsetWidth; bd.classList.toggle("cs-big", !!big); bd.classList.add("cs-quake"); setTimeout(() => bd.classList.remove("cs-quake"), big ? 820 : 580); }
+  const CH_N = { stamps: [0, 3, 5, 8, 9, 11], stk: [0, 0, 3, 4, 5, 6], bills: [0, 12, 18, 22, 26, 30] };
+  function showChaos(c, a, i) {
+    const lvl = c.lvl, k = a.k;
+    if (k === "alert") { shAt(180, () => chSpeed(960, 400)); if (lvl >= 5) shAt(180, chGlitch); }
+    if (k === "cash") {
+      shAt(870, () => {
+        chSpeed(960, 470); chBills(CH_N.bills[lvl], 960, 470); chQuake(lvl >= 5);
+        if (lvl >= 3) chGlitch();
+        for (let q = 0; q < CH_N.stamps[lvl]; q++) setTimeout(() => SHOW.on && chStamp(c), q * 70);
+        for (let q = 0; q < CH_N.stk[lvl]; q++) setTimeout(() => SHOW.on && chSticker(c), 200 + q * 110);
+        if (lvl >= 2) chPow();
+      });
+      // the beat keeps it going: a burst and a stamp every bar
+      if (lvl >= 3) SHOW.onBeat = (bt) => { if (bt % 4 === 0) { chPow(); if (lvl >= 4) chStamp(c); } };
+    }
+    if (["play", "nums", "troph", "stand"].includes(k) && lvl >= 4) { shAt(250, () => chStamp(c)); shAt(450, () => chSticker(c)); }
+    if (k === "party") {
+      chSpeed(960, 520); chGlitch(); chQuake(lvl >= 5); chBills(30, 960, 900);
+      for (let q = 0; q < (lvl >= 5 ? 12 : 9); q++) shAt(q * 60, () => chStamp(c));
+      for (let q = 0; q < 6; q++) shAt(250 + q * 120, () => chSticker(c));
+      shAt(300, chPow); shAt(700, chPow);
+      const prev = SHOW.onBeat;
+      SHOW.onBeat = (bt) => { if (prev) prev(bt); if (bt % 4 === 0) { chStamp(c); chStamp(c); chPow(); if ((bt / 4) % 2) chSticker(c); if (lvl >= 5) chQuake(false); } };
+    }
+    if (k === "out" && lvl >= 4) shAt(520, () => { chSpeed(960, 540); chStamp(c, "HALL OF FAME"); chStamp(c, "LEGEND"); chStamp(c); });
+  }
   function showFxAct(c, a, i) {
     const lvl = c.lvl, k = a.k;
     if (k === "alert") {
@@ -8111,12 +8269,12 @@ body.tv .rb-games.primeg.mason > .rb-pcol { padding-top: 16px; -webkit-mask-imag
     c.acts = acts; c.T = T;
     el.className = "cs show " + (lvl >= 4 ? "big" : lvl >= 2 ? "mid" : "small") + " lv" + lvl + " ck-" + (F.k || "cash") + (F.k ? " bt-c-" + F.k : "");
     el.style.setProperty("--c", c.col); el.style.setProperty("--pk", "0");
-    el.innerHTML = `<div class="cs-bg"></div><i class="cs-pulse"></i><div class="cs-box">${showChrome(c)}<div class="cs-acts"></div><i class="cs-sting"></i></div>`;
+    el.innerHTML = `<div class="cs-bg"></div><i class="cs-pulse"></i><div class="cs-box"><div class="cs-chaos"></div>${showChrome(c)}<div class="cs-acts"></div><i class="cs-sting"></i></div>`;
     showFit(el);
     SHOW.fr = { n: 0, t: 0 }; const lite = !!SHOW.slow && !fxFull(); if (lite) el.classList.add("lite");
     { const cv = el.querySelector(".cs-fxc"); SHOW.fx = cv ? { cv, cx: cv.getContext("2d"), ps: [], jets: [], emb: [0, 0, 0, 4, 8, 12][lvl], acc: 0, y0: lvl >= 4 ? 1034 : 1080, lite: lite ? 1 : 0 } : null; }
     el.hidden = false; void el.offsetWidth; el.classList.add("on");
-    SHOW.on = true; SHOW.t0 = performance.now(); SHOW.fxId = fxRun;
+    SHOW.on = true; SHOW.t0 = performance.now(); SHOW.fxId = fxRun; SHOW.slot = 0; document.body.classList.add("cs-live");
     if (lvl >= 3) { el.style.pointerEvents = "auto"; el.onclick = showSkip; document.addEventListener("keydown", showKey, true); } else { el.style.pointerEvents = ""; el.onclick = null; }
     showMusic(c);
     acts.forEach((a, i) => shAt(a.t0, () => showAct(el, c, a, i)));
@@ -8420,7 +8578,7 @@ body.tv .rb-games.primeg.mason > .rb-pcol { padding-top: 16px; -webkit-mask-imag
   // ---------- sheets ----------
   function openSheet(id) { $(id).hidden = false; }
   // keep every open screen current: when a new version is up, reload it (never mid-form or mid-animation)
-  const BUILD = "20261019152438";
+  const BUILD = "20261019163100";
   function checkBuild() {
     if (BUILD === "dev") return;
     fetch("version.json?t=" + Date.now(), { cache: "no-store" }).then((r) => (r.ok ? r.json() : null)).then((j) => {
@@ -15739,7 +15897,7 @@ body.tv .rb-games.primeg.mason > .rb-pcol { padding-top: 16px; -webkit-mask-imag
   const P = (x, y) => [ox + x * s, oy + y * s];
   function frame(now) {
     requestAnimationFrame(frame);
-    const on = document.body.classList.contains("tv") && (document.body.classList.contains("cfb") || document.body.classList.contains("nflday")) && !document.hidden, nfl = document.body.classList.contains("nflday");
+    const on = document.body.classList.contains("tv") && (document.body.classList.contains("cfb") || document.body.classList.contains("nflday")) && !document.hidden && !document.body.classList.contains("cs-live"), nfl = document.body.classList.contains("nflday");
     if (!on || now - last < 33) return;
     const dt = Math.min(0.1, (now - last) / 1000); last = now; size();
     cx.clearRect(0, 0, W, H);
