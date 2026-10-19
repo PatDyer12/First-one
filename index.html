@@ -4144,6 +4144,53 @@ body.cs-live .app .ch-wv { animation: chWave .72s var(--wd, 0ms) cubic-bezier(.3
 .xb-old .xb-cl { background: linear-gradient(180deg, color-mix(in srgb, var(--c) 45%, #05070b), color-mix(in srgb, var(--c) 22%, #05070b)); }
 .xb-old .xb-cl { gap: 6px; padding: 22px 16px 70px; } .xb-old .xb-cl b { font-size: 54px; } .xb-old .xb-cl strong { font-size: 40px; }
 .xb-old .xb-cl small { max-width: 210px; font-size: 15px; } .xb-old .xb-cl em { font-size: 11px; }
+/* ---------- bigger: the camera hits, rings across the screen, a giant word, glass flying ---------- */
+#cash.punch .cs-box { animation: chPunch .45s cubic-bezier(.2,.9,.3,1); }
+#cash.punch2 .cs-box { animation: chPunch2 .7s cubic-bezier(.2,.9,.3,1); }
+@keyframes chPunch { 0% { transform: scale(1.05); } 35% { transform: scale(.99); } 100% { transform: none; } }
+@keyframes chPunch2 { 0% { transform: scale(1.11) rotate(-.8deg); } 25% { transform: scale(.972) rotate(.45deg); } 55% { transform: scale(1.014) rotate(-.15deg); } 100% { transform: none; } }
+.ch-ring { position: absolute; z-index: 36; width: 240px; height: 240px; margin: -120px 0 0 -120px; border-radius: 50%; pointer-events: none; will-change: transform, opacity;
+  box-shadow: 0 0 0 5px rgba(255,255,255,.9), 0 0 34px 10px color-mix(in srgb, var(--fxk) 70%, transparent), inset 0 0 34px 8px color-mix(in srgb, var(--fxk) 60%, transparent);
+  animation: chRing .8s cubic-bezier(.12,.7,.3,1) forwards; }
+.ch-ring.big { --rs: 17; animation-duration: 1.1s; box-shadow: 0 0 0 7px rgba(255,255,255,.95), 0 0 50px 16px color-mix(in srgb, var(--fxk) 75%, transparent), inset 0 0 50px 12px color-mix(in srgb, var(--fxk) 65%, transparent); }
+@keyframes chRing { from { transform: scale(.15); opacity: 1; } 70% { opacity: .65; } to { transform: scale(var(--rs, 10)); opacity: 0; } }
+.ch-flash { position: absolute; inset: 0; z-index: 38; pointer-events: none; background: radial-gradient(circle at 50% 45%, #ffffff, rgba(255,255,255,.88) 40%, rgba(255,240,220,.62)); animation: chFlashA .5s ease-out forwards; }
+@keyframes chFlashA { from { opacity: .78; } to { opacity: 0; } }
+.ch-mega { position: absolute; left: 50%; top: 50%; translate: -50% -50%; white-space: nowrap; font-family: var(--f-display), Inter, sans-serif; font-weight: 900; font-style: normal; line-height: .8; letter-spacing: .02em; text-transform: uppercase;
+  color: color-mix(in srgb, var(--fxk) 12%, transparent); -webkit-text-stroke: 6px color-mix(in srgb, var(--fxk) 85%, #fff); opacity: 0; will-change: transform, opacity; animation: chMega 3.4s cubic-bezier(.2,.9,.3,1) forwards; }
+@keyframes chMega { 0% { opacity: 0; transform: scale(2.8); } 7% { opacity: .92; transform: scale(1); } 70% { opacity: .55; transform: scale(1.08); } 100% { opacity: 0; transform: scale(1.12); } }
+.ch-shards { position: absolute; inset: 0; z-index: 36; pointer-events: none; }
+.ch-shards i { position: absolute; margin: -40px 0 0 -40px; background: linear-gradient(135deg, rgba(255,255,255,.8), rgba(200,225,255,.22) 45%, rgba(255,255,255,.6)); will-change: transform, opacity; animation: chShard var(--du) cubic-bezier(.2,.6,.4,1) forwards; }
+@keyframes chShard { 0% { opacity: 1; transform: translate(0, 0) rotate(0deg) scale(.6); } 15% { opacity: 1; } 100% { opacity: 0; transform: translate(var(--dx), var(--dy)) rotate(var(--r)) scale(1); } }
+
+/* the crack runs further and glows */
+.ch-crack { animation: chFade 1.3s 4.2s ease-in forwards; }
+.ch-crack svg { filter: drop-shadow(0 0 5px rgba(200,230,255,.6)); }
+.ch-crack path { stroke-width: 3.4; stroke: rgba(240,248,255,.88); }
+.ch-crack path.r { stroke-width: 2.2; stroke: rgba(240,248,255,.6); }
+.ch-crack b { width: 560px; height: 560px; margin: -280px 0 0 -280px; }
+
+/* the shockwave through the board throws the cards higher */
+@keyframes chWave { 0%, 100% { translate: 0 0; scale: 1; rotate: 0deg; filter: none; } 26% { translate: 0 -44px; scale: 1.07; rotate: var(--wr, 0deg); filter: brightness(2.4) saturate(1.4); }
+  55% { translate: 0 9px; scale: .99; rotate: 0deg; filter: brightness(1.3); } 78% { translate: 0 -4px; scale: 1; } }
+body.cs-live .app .ch-wv { animation-duration: .9s !important; }
+
+/* the ticket tears off the board harder: up, spinning, overshooting */
+@keyframes csLift {
+  0% { opacity: 1; transform: perspective(1200px) translate(var(--lx), var(--ly)) rotate(0deg) scale(var(--ls)); }
+  14% { opacity: 1; transform: perspective(1200px) translate(var(--lx), calc(var(--ly) - 46px)) rotate(calc(var(--lr) * -1)) scale(calc(var(--ls) * 1.18)); }
+  55% { transform: perspective(1200px) translate(calc(var(--lx) * .25), calc(var(--ly) * .25 - 150px)) rotate(calc(var(--lr) * 2)) scale(1.62); }
+  100% { opacity: 1; transform: perspective(1200px) translate(0px, 0px) rotate(0deg) scale(1.3); }
+}
+
+/* everything thrown around the screen, bigger */
+.ch-stamp { font-size: 90px; border-width: 6px; }
+.ch-pow { width: 450px; height: 316px; }
+.ch-pow b { font-size: 62px; max-width: 300px; }
+.ch-bill { width: 100px; height: 46px; margin: -23px 0 0 -50px; }
+.ch-bill::after { font-size: 26px; }
+.ch-speed { background: repeating-conic-gradient(rgba(255,255,255,.8) 0 .7deg, transparent .7deg 4deg); }
+.cs.show .cs-cf { width: 16px; height: 27px; }
 .pp-none { padding: 16px 6px; font: 600 15px/1.3 Inter, sans-serif; color: #8d97a8; text-align: center; }
 .pp-bet { position: relative; flex: none; display: grid; gap: 6px; padding: 10px 12px 11px 13px; border-radius: 12px; background: rgba(255,255,255,.035); border: 1px solid rgba(190,210,240,.1); border-left: 5px solid rgba(190,210,240,.28); }
 .pp-bet.k-lost { opacity: .7; }
@@ -8123,6 +8170,7 @@ body.tv .rb-games.primeg.mason > .rb-pcol { padding-top: 16px; -webkit-mask-imag
   function fwShot(nr) {
     const F = SHOW.fw; if (!F) return;
     const beat = 60 / ((SHOW.cur && SHOW.cur.bpm) || 128);
+    if (SHOW.fx && SHOW.fx.lite) nr = Math.ceil(nr / 2);
     for (let i = 0; i < nr; i++) { const x = 200 + Math.random() * 1520, y = 110 + Math.random() * 170; F.rk.push({ x0: x + (Math.random() - 0.5) * 240, y0: 1090, x, y, t: 0, d: beat * (0.92 + Math.random() * 0.12), col: F.cols[(Math.random() * F.cols.length) | 0] }); }
   }
   function fwStep(dt) {
@@ -8135,9 +8183,9 @@ body.tv .rb-games.primeg.mason > .rb-pcol { padding-top: 16px; -webkit-mask-imag
       const r = F.rk[i]; r.t += dt; const k = Math.min(1, r.t / r.d), e = 1 - Math.pow(1 - k, 2), x = r.x0 + (r.x - r.x0) * e, y = r.y0 + (r.y - r.y0) * e;
       cx.fillStyle = "rgba(255,236,190,.9)"; cx.beginPath(); cx.arc(x, y, 2.6, 0, 6.283); cx.fill();
       if (k >= 1) {
-        F.rk.splice(i, 1); const n = 60 + ((Math.random() * 30) | 0), sp = 190 + Math.random() * 140;
-        for (let j = 0; j < n; j++) { const an = (j / n) * 6.283 + Math.random() * 0.1, v = sp * (0.5 + Math.random() * 0.5); F.ps.push({ x, y, vx: Math.cos(an) * v, vy: Math.sin(an) * v, l: 1 + Math.random() * 0.8, m: 0, col: Math.random() < 0.15 ? "#ffffff" : r.col, s: 1.8 + Math.random() * 1.6 }); }
-        F.ps.push({ x, y, vx: 0, vy: 0, l: 0.18, m: 0, col: "#ffffff", s: 46, f: 1 });
+        F.rk.splice(i, 1); const n = Math.round((110 + ((Math.random() * 50) | 0)) * (SHOW.fx && SHOW.fx.lite ? 0.6 : 1)), sp = 260 + Math.random() * 220;
+        for (let j = 0; j < n; j++) { const an = (j / n) * 6.283 + Math.random() * 0.1, v = sp * (0.5 + Math.random() * 0.5); F.ps.push({ x, y, vx: Math.cos(an) * v, vy: Math.sin(an) * v, l: 1 + Math.random() * 0.8, m: 0, col: Math.random() < 0.15 ? "#ffffff" : r.col, s: 2.4 + Math.random() * 2.4 }); }
+        F.ps.push({ x, y, vx: 0, vy: 0, l: 0.22, m: 0, col: "#ffffff", s: 90, f: 1 });
       }
     }
     for (let i = F.ps.length - 1; i >= 0; i--) {
@@ -8145,7 +8193,7 @@ body.tv .rb-games.primeg.mason > .rb-pcol { padding-top: 16px; -webkit-mask-imag
       const dr = Math.pow(0.2, dt); p.vx *= dr; p.vy = p.vy * dr + 240 * dt; p.x += p.vx * dt; p.y += p.vy * dt;
       cx.globalAlpha = Math.max(0, 1 - p.m / p.l) * (p.f ? 0.7 : Math.random() < 0.12 ? 0.35 : 1);
       if (p.f) { const r = p.s * (1 + p.m * 8), g = cx.createRadialGradient(p.x, p.y, 0, p.x, p.y, r); g.addColorStop(0, "rgba(255,250,235,.9)"); g.addColorStop(0.35, "rgba(255,230,190,.35)"); g.addColorStop(1, "rgba(255,230,190,0)"); cx.fillStyle = g; cx.fillRect(p.x - r, p.y - r, r * 2, r * 2); continue; }
-      cx.fillStyle = p.col; cx.beginPath(); cx.arc(p.x, p.y, p.s, 0, 6.283); cx.fill();
+      cx.drawImage(fwDot(p.col), p.x - p.s, p.y - p.s, p.s * 2, p.s * 2);
     }
     cx.globalAlpha = 1;
   }
@@ -8270,7 +8318,7 @@ body.tv .rb-games.primeg.mason > .rb-pcol { padding-top: 16px; -webkit-mask-imag
         SHOW.onBeat = (bt) => {
           if (!d.isConnected) return;
           const bar = bt % 4 === 0;
-          if (bar) fwShot(2);
+          if (bar) fwShot(c.lvl >= 5 ? 5 : 3); else if (bt % 2 === 0) fwShot(c.lvl >= 5 ? 2 : 1);
           if (bar) { const F = SHOW.fx, q = (bt / 4) % 2 ? JC : [JP[1], JP[2]]; if (F) for (const [x, an] of q) F.jets.push({ x, y: F.y0, a: an, pw: 0.5, t: 0, dur: 0.3 }); if (c.lvl >= 5 && (bt / 8) % 2 === 0) blindNow(); }
           if (strobe && bt % 8 === 0) { strobe.style.opacity = "1"; setTimeout(() => (strobe.style.opacity = "0"), 70); }
           if (bar && c.F.k === "nuke" && py) { const r = document.createElement("i"); r.className = "xy-shock"; py.appendChild(r); setTimeout(() => r.remove(), 1700); }
@@ -8430,7 +8478,7 @@ body.tv .rb-games.primeg.mason > .rb-pcol { padding-top: 16px; -webkit-mask-imag
       const p = F.ps[i]; p.m += dt; if (p.m >= p.l) { F.ps.splice(i, 1); continue; }
       const k = p.m / p.l;
       if (p.e) { p.vx += Math.sin(p.m * 5 + p.w) * 60 * dt; p.x += p.vx * dt; p.y += p.vy * dt; const z = p.s * (1 - k * 0.6); cx.globalAlpha = Math.min(1, (1 - k) * 1.4) * (0.55 + Math.random() * 0.45); cx.drawImage(spr[1], p.x - z * 2, p.y - z * 2, z * 4, z * 4); continue; }
-      if (p.sp) { p.vy += 1400 * dt; p.x += p.vx * dt; p.y += p.vy * dt; cx.globalAlpha = 1 - k; cx.drawImage(spr[0], p.x - 6, p.y - 6, 12, 12); continue; }
+      if (p.sp) { p.vy += 1400 * dt; p.x += p.vx * dt; p.y += p.vy * dt; cx.globalAlpha = 1 - k; const zz = p.z || 12; cx.drawImage(spr[0], p.x - zz / 2, p.y - zz / 2, zz, zz); continue; }
       const dr = Math.pow(0.1, dt); p.vx = p.vx * dr + Math.sin(p.m * 14 + p.x * 0.05) * 160 * dt; p.vy = p.vy * dr - 220 * dt; p.x += p.vx * dt; p.y += p.vy * dt;
       const z = p.s0 + (p.s1 - p.s0) * Math.sqrt(k), si = k < 0.12 ? 0 : k < 0.32 ? 1 : k < 0.62 ? 2 : 3;
       cx.globalAlpha = (1 - k * k) * 0.85; cx.drawImage(spr[si], p.x - z, p.y - z, z * 2, z * 2);
@@ -8453,13 +8501,13 @@ body.tv .rb-games.primeg.mason > .rb-pcol { padding-top: 16px; -webkit-mask-imag
     const [x, y] = chSlot(), el = document.createElement("i");
     const words = ["CASHED", "PAID", "HIT", c.F.k ? BT_DEF[c.F.k][1].toUpperCase() : "WINNER", String(c.name).toUpperCase(), "$$$", fU(c.n, true).toUpperCase()];
     el.className = "ch-stamp"; el.textContent = word || chPick(words);
-    el.style.cssText = `left:${x | 0}px;top:${y | 0}px;--r:${chR(-24, 24) | 0}deg;--z:${chR(0.7, 1.3).toFixed(2)};--k:${chPick(CH_COL)}`;
+    el.style.cssText = `left:${x | 0}px;top:${y | 0}px;--r:${chR(-24, 24) | 0}deg;--z:${chR(0.95, 1.6).toFixed(2)};--k:${chPick(CH_COL)}`;
     chAdd(el, 4300);
   }
   function chSticker(c) {
     const [x, y] = chSlot(), el = document.createElement("i"), ic = c.F.k && /^[^<]/.test(BT_DEF[c.F.k][0]) ? BT_DEF[c.F.k][0] : "💰";
     el.className = "ch-stk"; el.innerHTML = `<b>${chPick([ic, ic, "💰", "🔥", "💸", "🤑", "👑", "💎"])}</b>`;
-    el.style.cssText = `left:${x | 0}px;top:${y | 0}px;--r:${chR(-30, 30) | 0}deg;--s:${chR(86, 132) | 0}px;--k:${chPick(CH_COL)}`;
+    el.style.cssText = `left:${x | 0}px;top:${y | 0}px;--r:${chR(-30, 30) | 0}deg;--s:${chR(130, 200) | 0}px;--k:${chPick(CH_COL)}`;
     chAdd(el, 4300);
   }
   function chPow() {
@@ -8470,7 +8518,7 @@ body.tv .rb-games.primeg.mason > .rb-pcol { padding-top: 16px; -webkit-mask-imag
   }
   function chSpeed(x, y) { const el = document.createElement("i"); el.className = "ch-speed"; el.style.cssText = `--x:${x || 960}px;--y:${y || 470}px`; chAdd(el, 700); }
   function chBills(n, x, y) {
-    for (let i = 0; i < n; i++) { const a = (i / n) * 6.283 + chR(-0.2, 0.2), d = chR(420, 900), el = document.createElement("i");
+    for (let i = 0; i < n; i++) { const a = (i / n) * 6.283 + chR(-0.2, 0.2), d = chR(620, 1400), el = document.createElement("i");
       el.className = "ch-bill"; el.style.cssText = `--x:${x || 960}px;--y:${y || 470}px;--dx:${(Math.cos(a) * d) | 0}px;--dy:${(Math.sin(a) * d * 0.7) | 0}px;--rr:${chR(-540, 540) | 0}deg;animation-delay:${chR(0, 0.12).toFixed(2)}s`; chAdd(el, 1700); }
   }
   function chGlitch() {
@@ -8480,7 +8528,7 @@ body.tv .rb-games.primeg.mason > .rb-pcol { padding-top: 16px; -webkit-mask-imag
     b.appendChild(el); setTimeout(() => el.remove(), 520);
   }
   function chQuake(big) { const bd = document.body; bd.classList.remove("cs-quake"); void bd.offsetWidth; bd.classList.toggle("cs-big", !!big); bd.classList.add("cs-quake"); setTimeout(() => bd.classList.remove("cs-quake"), big ? 820 : 580); }
-  const CH_N = { stamps: [0, 3, 5, 8, 9, 11], stk: [0, 0, 3, 4, 5, 6], bills: [0, 12, 18, 22, 26, 30] };
+  const CH_N = { stamps: [0, 4, 7, 10, 12, 14], stk: [0, 2, 4, 5, 6, 8], bills: [0, 24, 34, 44, 54, 64] };
   function showChaos(c, a, i) {
     const lvl = c.lvl, k = a.k;
     if (k === "alert" && (!c.v || c.v.alert === "classic")) { shAt(180, () => chSpeed(960, 400)); if (lvl >= 5) shAt(180, chGlitch); }
@@ -8576,7 +8624,7 @@ body.tv .rb-games.primeg.mason > .rb-pcol { padding-top: 16px; -webkit-mask-imag
     shSfx("sniper/whoosh", 0.55, 60);
   }
   function chCrack(x, y, lvl) {
-    const rays = lvl >= 5 ? 18 : lvl >= 4 ? 14 : 9, L0 = lvl >= 5 ? 700 : lvl >= 4 ? 520 : 340, rr = [];
+    const rays = [0, 0, 11, 15, 19, 24][lvl], L0 = [0, 0, 420, 620, 820, 1000][lvl], rr = [];
     for (let i = 0; i < rays; i++) {
       let a = (i / rays) * 6.283 + chR(-0.18, 0.18), px = x, py = y, d = 0; const pts = [[x, y]], L = chR(L0, L0 * 1.9);
       while (d < L) { const st = chR(40, 110); a += chR(-0.28, 0.28); px += Math.cos(a) * st; py += Math.sin(a) * st; d += st; pts.push([px, py]); }
@@ -8589,7 +8637,7 @@ body.tv .rb-games.primeg.mason > .rb-pcol { padding-top: 16px; -webkit-mask-imag
     }
     const el = document.createElement("i"); el.className = "ch-crack";
     el.innerHTML = `<svg viewBox="0 0 1920 1080" preserveAspectRatio="none">${p}</svg><b style="left:${x | 0}px;top:${y | 0}px"></b>`;
-    chAdd(el, 4800);
+    chAdd(el, 5600);
   }
   // a shockwave out from the stamp through every card on the board
   function chWave(x, y) {
@@ -8599,12 +8647,12 @@ body.tv .rb-games.primeg.mason > .rb-pcol { padding-top: 16px; -webkit-mask-imag
       .filter(([, r]) => r.width > 20 && r.bottom > 0 && r.top < innerHeight && r.right > 0 && r.left < innerWidth).slice(0, 80);
     for (const [e, r] of els) {
       const dl = Math.hypot(r.left + r.width / 2 - ox, r.top + r.height / 2 - oy) / k / 1.9;
-      e.style.setProperty("--wd", (dl | 0) + "ms"); e.classList.add("ch-wv"); setTimeout(() => e.classList.remove("ch-wv"), dl + 800);
+      e.style.setProperty("--wd", (dl | 0) + "ms"); e.style.setProperty("--wr", chR(-3, 3).toFixed(1) + "deg"); e.classList.add("ch-wv"); setTimeout(() => e.classList.remove("ch-wv"), dl + 800);
     }
   }
   function setImpact(c, d) {
     if (c.lvl >= 2) shAt(900, () => chWave(960, 470));
-    if (c.lvl < 3) return;
+    if (c.lvl < 2) return;
     shAt(895, () => {
       const sp = d.querySelector(".cs-stamp"), card = d.querySelector(".cs-card"), st = d.querySelector(".cs-stage"); if (!sp || !card || !st) return;
       const cx = st.offsetLeft - st.offsetWidth / 2 + card.offsetLeft, cy = st.offsetTop - st.offsetHeight / 2 + card.offsetTop, ox = cx + card.offsetWidth / 2, oy = cy + card.offsetHeight * 0.6;
@@ -8864,6 +8912,112 @@ body.tv .rb-games.primeg.mason > .rb-pcol { padding-top: 16px; -webkit-mask-imag
     SH[k] = { ok: base.ok ? (c) => (SET[k][c.v && c.v[k]] ? true : base.ok(c)) : undefined, html: (c, a) => of(c).html(c, a), go: (c, d, a, el) => { const x = of(c); if (x.go) x.go(c, d, a, el); } };
   }
   { const base = SH.cash.go; SH.cash.go = (c, d, a, el) => { setLift(c, d); base(c, d, a, el); setImpact(c, d); }; }
+
+  const FW_DOT = {};
+  function fwDot(col) {
+    let d = FW_DOT[col];
+    if (!d) { d = FW_DOT[col] = document.createElement("canvas"); d.width = d.height = 16; const x = d.getContext("2d"); x.fillStyle = col; x.beginPath(); x.arc(8, 8, 7.5, 0, 6.283); x.fill(); }
+    return d;
+  }
+  function chPunch(n) {
+    const el = $("#cash"); if (!el) return;
+    el.classList.remove("punch", "punch2"); void el.offsetWidth; el.classList.add(n >= 2 ? "punch2" : "punch");
+    clearTimeout(el._pt); el._pt = setTimeout(() => el.classList.remove("punch", "punch2"), 760);
+  }
+  function chRing(x, y, big) {
+    const b = $("#cash .cs-box"); if (!b) return;
+    const r = document.createElement("i"); r.className = "ch-ring" + (big ? " big" : ""); r.style.left = (x | 0) + "px"; r.style.top = (y | 0) + "px";
+    b.appendChild(r); setTimeout(() => r.remove(), 1200);
+  }
+  function chFlash() { const b = $("#cash .cs-box"); if (!b) return; const f = document.createElement("i"); f.className = "ch-flash"; b.appendChild(f); setTimeout(() => f.remove(), 560); }
+  function chMega(word, lvl) {
+    const el = document.createElement("i"); el.className = "ch-mega"; el.textContent = word;
+    el.style.fontSize = (Math.min(lvl >= 4 ? 620 : 500, 1840 / Math.max(1, String(word).length * 0.52)) | 0) + "px";
+    chAdd(el, 3600);
+  }
+  // sparks and a fireball out of the hit, on the fire canvas
+  function chBurst(x, y, lvl) {
+    const F = SHOW.fx; if (!F) return;
+    const k = F.lite ? 0.5 : 1, ns = Math.round([0, 16, 40, 70, 100, 140][lvl] * k), nf = Math.round([0, 0, 14, 24, 34, 46][lvl] * k);
+    for (let i = 0; i < ns && F.ps.length < 1500; i++) { const a = chR(0, 6.283), v = chR(700, 1700); F.ps.push({ sp: 1, x, y, vx: Math.cos(a) * v, vy: Math.sin(a) * v - 300, l: chR(0.8, 1.5), m: 0, z: chR(10, 22) }); }
+    for (let i = 0; i < nf && F.ps.length < 1500; i++) { const a = chR(0, 6.283), v = chR(300, 1000); F.ps.push({ x, y, vx: Math.cos(a) * v, vy: Math.sin(a) * v, l: chR(0.6, 1.1), m: 0, s0: 24, s1: chR(90, 150) }); }
+  }
+  function chShards(x, y, lvl) {
+    const b = $("#cash .cs-box"); if (!b) return;
+    const n = Math.round((lvl >= 5 ? 30 : lvl >= 4 ? 22 : 14) * (SHOW.fx && SHOW.fx.lite ? 0.5 : 1)), w = document.createElement("div");
+    let h = "";
+    for (let i = 0; i < n; i++) {
+      const a = chR(0, 6.283), d = chR(250, 1100), z = chR(40, 130), m = 3 + (Math.random() < 0.5 ? 1 : 0);
+      const pts = Array.from({ length: m }, (_, j) => { const an = (j / m) * 6.283 + chR(-0.4, 0.4), r = chR(32, 50); return `${(50 + Math.cos(an) * r) | 0}% ${(50 + Math.sin(an) * r) | 0}%`; }).join(",");
+      h += `<i style="left:${x | 0}px;top:${y | 0}px;width:${z | 0}px;height:${(z * chR(0.6, 1.4)) | 0}px;clip-path:polygon(${pts});--dx:${(Math.cos(a) * d) | 0}px;--dy:${(Math.sin(a) * d * 0.6 + chR(200, 600)) | 0}px;--r:${chR(-720, 720) | 0}deg;--du:${chR(0.9, 1.6).toFixed(2)}s"></i>`;
+    }
+    w.className = "ch-shards"; w.innerHTML = h; b.appendChild(w); setTimeout(() => w.remove(), 1800);
+  }
+  // one big hit: the camera, the ring, the sparks; the giant word and the glass where it's the stamp
+  function bigHit(x, y, lvl, o) {
+    o = o || {};
+    chPunch(lvl >= 4 ? 2 : 1); chRing(x, y, lvl >= 4);
+    if (lvl >= 4) setTimeout(() => SHOW.on && chRing(x, y, false), 150);
+    chBurst(x, y, Math.max(1, lvl));
+    if (o.flash || lvl >= 5) chFlash();
+    if (o.word && lvl >= 2) chMega(o.word, lvl);
+    if (o.shards && lvl >= 3) chShards(x, y, lvl);
+  }
+  // where the stamp lands on the card, from the layout
+  function setStampAt(d) {
+    const sp = d.querySelector(".cs-stamp"), card = d.querySelector(".cs-card"), st = d.querySelector(".cs-stage"); if (!sp || !card || !st) return [1300, 300];
+    const cx = st.offsetLeft - st.offsetWidth / 2 + card.offsetLeft, cy = st.offsetTop - st.offsetHeight / 2 + card.offsetTop, ox = cx + card.offsetWidth / 2, oy = cy + card.offsetHeight * 0.6;
+    return [ox + 1.3 * (cx + sp.offsetLeft + sp.offsetWidth / 2 - ox), oy + 1.3 * (cy + sp.offsetTop + sp.offsetHeight / 2 - oy)];
+  }
+  const BIG_AT = {
+    alert: (c, d, a) => {
+      const v = c.v && c.v.alert;
+      if (v === "news") { shAt(1060, () => { chPunch(1); chRing(960, 690, false); }); return; }
+      if (v === "hunt") {
+        const t = setStage(c.tile); if (!t) return;
+        shAt(Math.min(a.ms * 0.58, 2000), () => { const x = t.x + t.w / 2, y = t.y + t.h / 2; chPunch(1); chRing(x, y, c.lvl >= 4); chBurst(x, y, 2); });
+        return;
+      }
+      shAt(1300, () => chPunch(1));
+      if (c.lvl >= 5) for (let q = 0; q < 3; q++) shAt(a.ms - 3600 + q * 1200 + 60, () => { chPunch(q === 2 ? 2 : 1); chRing(960, 540, q === 2); });
+    },
+    cash: (c, d) => {
+      const word = (c.F.k ? BT_DEF[c.F.k][1] : "Cashed").toUpperCase();
+      shAt(60, () => { const t = setStage(c.tile); if (t) { chRing(t.x + t.w / 2, t.y + t.h / 2, false); chBurst(t.x + t.w / 2, t.y + t.h / 2, 1); } });
+      shAt(880, () => { const [x, y] = setStampAt(d); bigHit(x, y, c.lvl, { word, shards: true }); });
+      if (c.lvl >= 3) shNoise(880, 900, 70, 0.8, c.lvl >= 5 ? 0.9 : 0.6);
+    },
+    play: (c, d, a) => {
+      if (c.v && c.v.play === "slip") {
+        const n = d.querySelectorAll(".xr-l").length, gap = Math.min(120, (a.ms * 0.5) / Math.max(1, n));
+        shAt(250 + n * gap + 240, () => { chPunch(c.lvl >= 4 ? 2 : 1); chRing(1320, 520, c.lvl >= 4); chBurst(1320, 520, Math.min(3, c.lvl)); });
+        return;
+      }
+      shAt(c.legs.length >= 2 && c.legGap ? (0.9 + c.legs.length * c.legGap) * 1000 : 2300, () => chPunch(1));
+    },
+    nums: (c) => { if (c.v && c.v.nums === "stock") shAt(2250, () => { chPunch(c.lvl >= 4 ? 2 : 1); chRing(1666, 340, true); chBurst(1666, 340, Math.min(4, c.lvl)); }); },
+    troph: (c, d, a) => { if (c.v && c.v.troph === "card") shAt(a.ms * 0.5 + 420, () => { chPunch(1); chRing(960, 586, false); }); },
+    stand: () => shAt(1550, () => chPunch(1)),
+    stunt: (c, d, a) => {
+      const N = c.lvl >= 5 ? 3 : 2;
+      for (let j = 0; j < N; j++) shAt(100 + (j * (a.ms - 1000)) / N + 300, () => chPunch(1));
+      shAt(a.ms - 900, () => { chPunch(2); chRing(960, 540, true); chBurst(960, 540, c.lvl); });
+    },
+    party: (c) => {
+      bigHit(960, 520, c.lvl, { word: fU(c.n, true).toUpperCase(), flash: c.lvl >= 4 });
+      chWave(960, 540);
+      const prev = SHOW.onBeat;
+      SHOW.onBeat = (bt) => { if (prev) prev(bt); if (bt % 4 === 0 && c.lvl >= 4) { chPunch(1); chRing(chR(360, 1560), chR(240, 820), false); } };
+    },
+    out: (c) => {
+      const v = c.v && c.v.out;
+      if (v === "mag") shAt(620, () => { chPunch(2); chRing(960, 560, true); });
+      else if (v === "banner") shAt(1850, () => { chPunch(1); chRing(960, 420, false); });
+      else if (c.lvl >= 4) shAt(520, () => { chPunch(2); chRing(960, 540, true); chBurst(960, 540, c.lvl); });
+      else shAt(200, () => chPunch(1));
+    },
+  };
+  for (const k of Object.keys(BIG_AT)) { const g0 = SH[k].go; SH[k].go = (c, d, a, el) => { if (g0) g0(c, d, a, el); BIG_AT[k](c, d, a, el); }; }
   function showFxAct(c, a, i) {
     const lvl = c.lvl, k = a.k;
     if (k === "alert" && (!c.v || c.v.alert === "classic")) {
@@ -9208,7 +9362,7 @@ body.tv .rb-games.primeg.mason > .rb-pcol { padding-top: 16px; -webkit-mask-imag
   // ---------- sheets ----------
   function openSheet(id) { $(id).hidden = false; }
   // keep every open screen current: when a new version is up, reload it (never mid-form or mid-animation)
-  const BUILD = "20261019174534";
+  const BUILD = "20261019180834";
   function checkBuild() {
     if (BUILD === "dev") return;
     fetch("version.json?t=" + Date.now(), { cache: "no-store" }).then((r) => (r.ok ? r.json() : null)).then((j) => {
