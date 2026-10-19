@@ -3656,30 +3656,30 @@ body.tv.pplb .roomtv:not([hidden]) canvas { width: 76px; height: 76px; grid-row:
 .cs-neon { position: absolute; inset: 20px; z-index: 16; pointer-events: none; border-radius: 28px; border: 3px solid color-mix(in srgb, var(--fxk) 35%, #ffffff);
   box-shadow: 0 0 5px 1px var(--fxk), 0 0 20px 4px color-mix(in srgb, var(--fxk) 70%, transparent), 0 0 56px 10px color-mix(in srgb, var(--fxk) 32%, transparent), inset 0 0 5px 1px var(--fxk), inset 0 0 24px 4px color-mix(in srgb, var(--fxk) 40%, transparent);
   opacity: calc(.5 + var(--pk, 0) * .5); will-change: opacity; animation: neonOn 1.3s .1s steps(1) backwards; }
-.cs-neon::after { content: ""; position: absolute; inset: 9px; border-radius: 20px; border: 2px solid color-mix(in srgb, var(--c) 40%, #ffffff);
-  box-shadow: 0 0 4px 1px var(--c), 0 0 16px 3px color-mix(in srgb, var(--c) 60%, transparent), inset 0 0 12px 2px color-mix(in srgb, var(--c) 40%, transparent); animation: neonOn 1.3s .45s steps(1) backwards; }
 .cs.lv4 .cs-neon, .cs.lv5 .cs-neon { bottom: 60px; }
 @keyframes neonOn { 0% { opacity: 0; } 8% { opacity: .9; } 12% { opacity: .05; } 20% { opacity: .8; } 24% { opacity: .1; } 38% { opacity: 1; } 42% { opacity: .3; } 56% { opacity: 1; } }
 /* fire, embers, sparks */
 .cs-fxc { position: absolute; left: 0; top: 0; width: 1920px; height: 1080px; z-index: 14; pointer-events: none; mix-blend-mode: screen; }
 /* laser rigs in the top corners (and a fan from the floor at the nuke): bright white at the head, the color down the beam */
-.cs-lz { position: absolute; inset: 0; z-index: 12; pointer-events: none; overflow: hidden; mix-blend-mode: screen; opacity: .6; transition: opacity .7s; }
-.cs-lz i { position: absolute; top: -10px; width: 3px; height: 2300px; margin-left: -1.5px; transform-origin: 50% 0; border-radius: 2px;
+.cs-lz { position: absolute; inset: 0; z-index: 12; pointer-events: none; overflow: hidden; mix-blend-mode: screen; transition: opacity .7s; }
+.cs-lz i { position: absolute; top: -10px; width: 2px; height: 2300px; margin-left: -1px; transform-origin: 50% 0; border-radius: 2px;
   background: linear-gradient(#ffffff, var(--lc) 6%, color-mix(in srgb, var(--lc) 70%, transparent) 45%, transparent 92%);
-  box-shadow: 0 0 6px 2px color-mix(in srgb, var(--lc) 80%, transparent), 0 0 20px 6px color-mix(in srgb, var(--lc) 35%, transparent);
-  opacity: calc(.4 + var(--pk, 0) * .6); animation: lzSweep var(--du) ease-in-out var(--dl) infinite alternate; }
+  box-shadow: 0 0 5px 1px color-mix(in srgb, var(--lc) 80%, transparent), 0 0 14px 3px color-mix(in srgb, var(--lc) 30%, transparent);
+  opacity: calc(.5 + var(--pk, 0) * .5); animation: lzSweep var(--du) ease-in-out var(--dl) infinite alternate; }
 .cs-lz i.tl { left: 1%; } .cs-lz i.tr { left: 99%; }
 .cs-lz i.bc { top: auto; bottom: -10px; left: 50%; transform-origin: 50% 100%; background: linear-gradient(to top, #ffffff, var(--lc) 6%, color-mix(in srgb, var(--lc) 70%, transparent) 45%, transparent 92%); }
 @keyframes lzSweep { from { rotate: var(--a); } to { rotate: var(--b); } }
 /* moving heads washing the stage */
-.cs-wash { position: absolute; inset: 0; z-index: 11; pointer-events: none; overflow: hidden; mix-blend-mode: screen; opacity: .55; transition: opacity .7s; }
+.cs-wash { position: absolute; inset: 0; z-index: 11; pointer-events: none; overflow: hidden; mix-blend-mode: screen; transition: opacity .7s; }
 .cs-wash i { position: absolute; top: -40px; width: 560px; height: 1300px; margin-left: -280px; transform-origin: 50% 0;
   background: linear-gradient(to bottom, color-mix(in srgb, var(--lc) 60%, transparent), color-mix(in srgb, var(--lc) 14%, transparent) 70%, transparent);
   clip-path: polygon(44% 0, 56% 0, 100% 100%, 0 100%); animation: lzSweep var(--du) ease-in-out var(--dl) infinite alternate; }
 /* the lights drop while there's something to read, and go full at the party */
-.cs:is([data-act="play"], [data-act="nums"], [data-act="troph"], [data-act="stand"]) .cs-lz { opacity: .2; }
-.cs:is([data-act="play"], [data-act="nums"], [data-act="troph"], [data-act="stand"]) .cs-wash { opacity: .18; }
-.cs[data-act="party"] .cs-lz { opacity: 1; } .cs[data-act="party"] .cs-wash { opacity: .9; }
+.cs-lz { opacity: .45; } .cs-wash { opacity: .3; }
+.cs:is([data-act="play"], [data-act="nums"], [data-act="troph"], [data-act="stand"]) :is(.cs-lz, .cs-wash) { opacity: 0; }
+.cs[data-act="cash"] .cs-lz { animation: lzHit 4.4s forwards; } .cs[data-act="cash"] .cs-wash { animation: lzHit 4.4s forwards; }
+@keyframes lzHit { 0% { opacity: .1; } 20% { opacity: .1; } 23% { opacity: 1; } 45% { opacity: .8; } 100% { opacity: 0; } }
+.cs[data-act="party"] .cs-lz { opacity: .9; } .cs[data-act="party"] .cs-wash { opacity: .6; } .cs[data-act="out"] .cs-lz { opacity: .18; }
 /* a lens flare streaking across on the big moments */
 .cs-flare { position: absolute; left: -10%; width: 120%; height: 4px; margin-top: -2px; z-index: 35; pointer-events: none; mix-blend-mode: screen;
   background: linear-gradient(90deg, transparent, rgba(80,170,255,.55) 18%, #ffffff 50%, rgba(80,170,255,.55) 82%, transparent);
@@ -3711,13 +3711,15 @@ body.tv.pplb .roomtv:not([hidden]) canvas { width: 76px; height: 76px; grid-row:
   background: repeating-linear-gradient(0deg, #ff2200 0, #ff7a00 50px, #ffd000 95px, #fff4c0 120px, #ffd000 145px, #ff7a00 190px, #ff2200 240px) 0 0 / 100% 240px;
   -webkit-background-clip: text; background-clip: text; filter: drop-shadow(0 0 18px rgba(255,90,0,.9)); animation: pyName .7s .05s cubic-bezier(.2,1.3,.4,1) both, fireText .8s linear infinite; }
 @keyframes fireText { to { background-position: 0 -240px; } }
-.cs.show .xy-lz { width: 4px; filter: none; background: linear-gradient(to top, #ffffff, var(--lc) 6%, color-mix(in srgb, var(--lc) 60%, transparent) 50%, transparent 82%);
-  box-shadow: 0 0 8px 2px var(--lc), 0 0 26px 7px color-mix(in srgb, var(--lc) 40%, transparent); }
+.cs.show .xy-lz { width: 3px; filter: none; background: linear-gradient(to top, #ffffff, var(--lc) 6%, color-mix(in srgb, var(--lc) 60%, transparent) 50%, transparent 82%);
+  box-shadow: 0 0 6px 1px var(--lc), 0 0 18px 4px color-mix(in srgb, var(--lc) 35%, transparent); }
 /* a slow screen: the heaviest extras go */
-.cs.lite .cs-wash, .cs.lite .xy-bgv, .cs.lite .cs-neon::after { display: none; }
-.cs.lite .cs-lz i:nth-child(n+5), .cs.lite .xy-lz:nth-of-type(2n), .cs.lite .xy-bill:nth-of-type(2n) { display: none; }
+.cs.lite .cs-wash, .cs.lite .xy-bgv { display: none; }
+.cs.lite .cs-lz i:nth-child(n+5), .cs.lite .cs-lz i.bc, .cs.lite .xy-lz:nth-of-type(2n), .cs.lite .xy-bill:nth-of-type(2n) { display: none; }
 .cs.lite .cs-neon { box-shadow: 0 0 5px 1px var(--fxk), 0 0 18px 3px color-mix(in srgb, var(--fxk) 60%, transparent), inset 0 0 6px 1px var(--fxk); }
 .cs.lite .cs-lz i { box-shadow: 0 0 6px 2px color-mix(in srgb, var(--lc) 70%, transparent); }
+/* the stamp at the big ones: the flash and the shockwaves, no strobe (the party has it), less confetti */
+.cs.show .cs-act > .cs-strobe, .cs.show .cs-act > .cs-cf:nth-of-type(3n) { display: none; }
 .pp-none { padding: 16px 6px; font: 600 15px/1.3 Inter, sans-serif; color: #8d97a8; text-align: center; }
 .pp-bet { position: relative; flex: none; display: grid; gap: 6px; padding: 10px 12px 11px 13px; border-radius: 12px; background: rgba(255,255,255,.035); border: 1px solid rgba(190,210,240,.1); border-left: 5px solid rgba(190,210,240,.28); }
 .pp-bet.k-lost { opacity: .7; }
@@ -7671,8 +7673,8 @@ body.tv .rb-games.primeg.mason > .rb-pcol { padding-top: 16px; -webkit-mask-imag
   function partyHtml(c, a) {
     const P = c.ptr, vid = P && clipsOn() ? P.p.c.base : null, nm = c.who.join(" + "), k = c.F.k, R = Math.random;
     const src = (cls) => `<video class="${cls}" muted playsinline preload="auto"><source src="${vid}.webm" type="video/webm"><source src="${vid}.mp4" type="video/mp4"></video>`;
-    const lasers = shN("xy-lz l", 4, (i) => `--lc:${["var(--fxk)", "var(--c)", "#ffffff", "#ff4a8a"][i]}`) + shN("xy-lz r", 4, (i) => `--lc:${["var(--c)", "var(--fxk)", "#7fd8ff", "#ffffff"][i]}`);
-    const bills = Array.from({ length: c.lvl >= 5 ? 34 : 22 }, (_, i) => `<i class="xy-bill" style="--x:${(R() * 100).toFixed(1)}%;--dl:${(R() * 5).toFixed(2)}s;--du:${(3.2 + R() * 2.6).toFixed(2)}s;--r:${(R() * 80 - 40) | 0}deg;--s:${(0.7 + R() * 0.5).toFixed(2)}"></i>`).join("");
+    const lasers = shN("xy-lz l", 2, (i) => `--lc:${["var(--fxk)", "#ff2bd6"][i]}`) + shN("xy-lz r", 2, (i) => `--lc:${["#00e5ff", "var(--fxk)"][i]}`);
+    const bills = Array.from({ length: c.lvl >= 5 ? 20 : 14 }, (_, i) => `<i class="xy-bill" style="--x:${(R() * 100).toFixed(1)}%;--dl:${(R() * 5).toFixed(2)}s;--du:${(3.2 + R() * 2.6).toFixed(2)}s;--r:${(R() * 80 - 40) | 0}deg;--s:${(0.7 + R() * 0.5).toFixed(2)}"></i>`).join("");
     const cannon = (n0, d0) => Array.from({ length: n0 }, (_, i) => { const L = i % 2 === 0;
       return `<i class="cs-cf ${L ? "l" : "r"}" style="--dx:${((L ? 1 : -1) * (180 + R() * 820)) | 0}px;--dy:${(-(380 + R() * 600)) | 0}px;--r:${(R() * 1440 - 720) | 0}deg;--c:${["#ffd23f", "#ff5a7a", "#7fd8ff", "#7dffb0", "#ffffff", "var(--fxk)"][i % 6]};--dl:${(d0 + R() * 0.5).toFixed(2)}s"></i>`; }).join("");
     const reels = k === "lotto" ? `<div class="xy-reels">${[0, 1, 2].map((j) => `<b style="--j:${j}"><span>7<br>🍒<br>💎<br>BAR<br>🔔<br>7<br>🍒<br>💎<br>BAR<br>7</span></b>`).join("")}</div>` : "";
@@ -7683,7 +7685,7 @@ body.tv .rb-games.primeg.mason > .rb-pcol { padding-top: 16px; -webkit-mask-imag
         <small>${esc(c.b.pick)} · ${esc(fOdds(c.o))} · ${esc(BOOK[bookKey(c.b)])}</small></div>
       ${vid ? `<div class="xy-jt"><div class="xy-scr">${src("xy-fgv")}<i class="xy-scan"></i><span class="xy-live"><i></i>Now playing</span></div><div class="xy-np"><b>${esc(P.p.c.label || "House edit")}</b><small>House edit${h ? " · " + Math.round(h[0]) + " BPM" : ""}</small></div></div>`
         : `<div class="xy-emb">${k ? BT_DEF[k][0] : "💰"}</div>`}
-      ${bills}<canvas class="xy-fw"></canvas>${cannon(c.lvl >= 5 ? 90 : 60, 0.05)}${c.lvl >= 5 ? cannon(60, a.ms / 2000) + '<i class="xy-white"></i><i class="xy-strobe"></i>' : ""}</div>`;
+      ${bills}<canvas class="xy-fw"></canvas>${cannon(c.lvl >= 5 ? 56 : 40, 0.05)}${c.lvl >= 5 ? cannon(40, a.ms / 2000) + '<i class="xy-white"></i><i class="xy-strobe"></i>' : ""}</div>`;
   }
   // fireworks on the beat: a shell goes up on one beat and breaks on the next
   function fwInit(cv, c) {
@@ -7695,7 +7697,7 @@ body.tv .rb-games.primeg.mason > .rb-pcol { padding-top: 16px; -webkit-mask-imag
   function fwShot(nr) {
     const F = SHOW.fw; if (!F) return;
     const beat = 60 / ((SHOW.cur && SHOW.cur.bpm) || 128);
-    for (let i = 0; i < nr; i++) { const x = 160 + Math.random() * 1600, y = 110 + Math.random() * 400; F.rk.push({ x0: x + (Math.random() - 0.5) * 240, y0: 1090, x, y, t: 0, d: beat * (0.92 + Math.random() * 0.12), col: F.cols[(Math.random() * F.cols.length) | 0] }); }
+    for (let i = 0; i < nr; i++) { const x = 200 + Math.random() * 1520, y = 110 + Math.random() * 170; F.rk.push({ x0: x + (Math.random() - 0.5) * 240, y0: 1090, x, y, t: 0, d: beat * (0.92 + Math.random() * 0.12), col: F.cols[(Math.random() * F.cols.length) | 0] }); }
   }
   function fwStep(dt) {
     const F = SHOW.fw; if (!F) return;
@@ -7707,7 +7709,7 @@ body.tv .rb-games.primeg.mason > .rb-pcol { padding-top: 16px; -webkit-mask-imag
       const r = F.rk[i]; r.t += dt; const k = Math.min(1, r.t / r.d), e = 1 - Math.pow(1 - k, 2), x = r.x0 + (r.x - r.x0) * e, y = r.y0 + (r.y - r.y0) * e;
       cx.fillStyle = "rgba(255,236,190,.9)"; cx.beginPath(); cx.arc(x, y, 2.6, 0, 6.283); cx.fill();
       if (k >= 1) {
-        F.rk.splice(i, 1); const n = 70 + ((Math.random() * 40) | 0), sp = 250 + Math.random() * 240;
+        F.rk.splice(i, 1); const n = 60 + ((Math.random() * 30) | 0), sp = 190 + Math.random() * 140;
         for (let j = 0; j < n; j++) { const an = (j / n) * 6.283 + Math.random() * 0.1, v = sp * (0.5 + Math.random() * 0.5); F.ps.push({ x, y, vx: Math.cos(an) * v, vy: Math.sin(an) * v, l: 1 + Math.random() * 0.8, m: 0, col: Math.random() < 0.15 ? "#ffffff" : r.col, s: 1.8 + Math.random() * 1.6 }); }
         F.ps.push({ x, y, vx: 0, vy: 0, l: 0.18, m: 0, col: "#ffffff", s: 46, f: 1 });
       }
@@ -7842,9 +7844,9 @@ body.tv .rb-games.primeg.mason > .rb-pcol { padding-top: 16px; -webkit-mask-imag
         SHOW.onBeat = (bt) => {
           if (!d.isConnected) return;
           const bar = bt % 4 === 0;
-          fwShot(bar ? 2 : Math.random() < 0.55 ? 1 : 0);
-          if (bar) { const F = SHOW.fx, q = (bt / 4) % 2 ? [[60, -1.5], [1000, -1.57], [1500, -1.57]] : [[1250, -1.57], [1770, -1.57]]; if (F) for (const [x, an] of q) F.jets.push({ x, y: F.y0, a: an, pw: 0.6, t: 0, dur: 0.36 }); if (c.lvl >= 5 && (bt / 4) % 2 === 0) blindNow(); }
-          if (strobe && bar) { strobe.style.opacity = "1"; setTimeout(() => (strobe.style.opacity = "0"), 70); }
+          if (bar) fwShot(2);
+          if (bar) { const F = SHOW.fx, q = (bt / 4) % 2 ? JC : [JP[1], JP[2]]; if (F) for (const [x, an] of q) F.jets.push({ x, y: F.y0, a: an, pw: 0.5, t: 0, dur: 0.3 }); if (c.lvl >= 5 && (bt / 8) % 2 === 0) blindNow(); }
+          if (strobe && bt % 8 === 0) { strobe.style.opacity = "1"; setTimeout(() => (strobe.style.opacity = "0"), 70); }
           if (bar && c.F.k === "nuke" && py) { const r = document.createElement("i"); r.className = "xy-shock"; py.appendChild(r); setTimeout(() => r.remove(), 1700); }
         };
       },
@@ -7943,19 +7945,18 @@ body.tv .rb-games.primeg.mason > .rb-pcol { padding-top: 16px; -webkit-mask-imag
   }
 
   const fxFull = () => { try { return localStorage.getItem("sb-fx") === "full"; } catch (e) { return false; } };
-  const JC = [[110, -1.43], [1810, -1.71]], JROW = [150, 480, 810, 1110, 1440, 1770].map((x) => [x, -Math.PI / 2]);
+  const JC = [[110, -1.5], [1810, -1.64]], JP = [[110, -1.5], [1100, -1.5708], [1550, -1.5708], [1810, -1.64]];
   function showRig(c) {
-    const lvl = c.lvl, pal = c.F.k === "nuke" ? ["#ff2b2b", "#ff7a00", "#ffd000", "#ff3d00", "#ff5a1a"] : ["var(--fxk)", "var(--c)", "#ff2bd6", "#00e5ff", "#7dff4f"];
+    const lvl = c.lvl, pal = c.F.k === "nuke" ? ["#ff3d00", "#ffb020", "#ff2b2b", "#ffd000"] : ["var(--fxk)", "#ff2bd6", "#00e5ff", "var(--c)"];
     let h = '<i class="cs-neon"></i><canvas class="cs-fxc" width="1920" height="1080"></canvas>';
+    if (lvl >= 4) h += `<div class="cs-wash"><i style="--lc:${pal[1]};left:16%;--du:6s;--dl:0s;--a:-6deg;--b:-26deg"></i><i style="--lc:${pal[2]};left:84%;--du:6.8s;--dl:-2s;--a:6deg;--b:26deg"></i></div>`;
     if (lvl >= 3) {
-      const nw = lvl >= 4 ? 4 : 2;
-      h += `<div class="cs-wash">${Array.from({ length: nw }, (_, i) => `<i style="--lc:${pal[(i + 1) % pal.length]};left:${(nw > 1 ? 14 + (i * 72) / (nw - 1) : 50).toFixed(0)}%;--du:${(4.6 + i * 1.3).toFixed(1)}s;--dl:${(-i * 1.7).toFixed(1)}s;--a:${i % 2 ? 22 : -22}deg;--b:${i % 2 ? -16 : 16}deg"></i>`).join("")}</div>`;
-      const per = lvl >= 5 ? 5 : lvl >= 4 ? 4 : 2, beams = [];
-      for (let i = 0; i < per; i++) {
-        beams.push(`<i class="tl" style="--lc:${pal[i % pal.length]};--a:${-16 - i * 9}deg;--b:${-50 - i * 7}deg;--du:${(2.2 + i * 0.37).toFixed(2)}s;--dl:${(-i * 0.6).toFixed(1)}s"></i>`);
-        beams.push(`<i class="tr" style="--lc:${pal[(i + 2) % pal.length]};--a:${16 + i * 9}deg;--b:${50 + i * 7}deg;--du:${(2.5 + i * 0.31).toFixed(2)}s;--dl:${(-i * 0.5).toFixed(1)}s"></i>`);
+      const per = lvl >= 4 ? 3 : 2, beams = [];
+      for (let q = 0; q < per; q++) {
+        beams.push(`<i class="tl" style="--lc:${pal[q % pal.length]};--a:${-6 - q * 7}deg;--b:${-22 - q * 6}deg;--du:${(2.6 + q * 0.4).toFixed(1)}s;--dl:${(-q * 0.7).toFixed(1)}s"></i>`);
+        beams.push(`<i class="tr" style="--lc:${pal[q % pal.length]};--a:${6 + q * 7}deg;--b:${22 + q * 6}deg;--du:${(2.6 + q * 0.4).toFixed(1)}s;--dl:${(-q * 0.7).toFixed(1)}s"></i>`);
       }
-      if (lvl >= 5) for (let i = 0; i < 7; i++) beams.push(`<i class="bc" style="--lc:${pal[i % pal.length]};--a:${-62 + i * 20}deg;--b:${-38 + i * 13}deg;--du:${(1.8 + i * 0.2).toFixed(2)}s;--dl:${(-i * 0.3).toFixed(1)}s"></i>`);
+      if (lvl >= 5) for (let q = 0; q < 5; q++) beams.push(`<i class="bc" style="--lc:${pal[q % pal.length]};--a:${-44 + q * 22}deg;--b:${-30 + q * 15}deg;--du:2.4s;--dl:${(-q * 0.4).toFixed(1)}s"></i>`);
       h += `<div class="cs-lz">${beams.join("")}</div>`;
     }
     if (lvl >= 4) h += '<i class="cs-blind l"></i><i class="cs-blind r"></i>';
@@ -7989,12 +7990,12 @@ body.tv .rb-games.primeg.mason > .rb-pcol { padding-top: 16px; -webkit-mask-imag
     if (!F.cv.isConnected) { SHOW.fx = null; return; }
     const cx = F.cx, spr = fxSprites(), host = $("#cash"), act = host ? host.dataset.act : "";
     cx.clearRect(0, 0, 1920, 1080);
-    F.acc += dt * F.emb * (F.lite ? 0.5 : 1) * (act === "party" ? 3 : act === "cash" || act === "alert" || act === "out" ? 1 : 0.5);
-    while (F.acc >= 1) { F.acc--; F.ps.push({ e: 1, x: Math.random() * 1920, y: F.y0 + 10, vx: (Math.random() - 0.5) * 40, vy: -(70 + Math.random() * 140), l: 3 + Math.random() * 4, m: 0, s: 2.5 + Math.random() * 4.5, w: Math.random() * 6 }); }
+    F.acc += dt * F.emb * (F.lite ? 0.5 : 1) * (act === "party" ? 2 : act === "cash" || act === "alert" || act === "out" ? 1 : 0.3);
+    while (F.acc >= 1) { F.acc--; F.ps.push({ e: 1, x: Math.random() < 0.5 ? Math.random() * 420 : 1500 + Math.random() * 420, y: F.y0 + 10, vx: (Math.random() - 0.5) * 40, vy: -(70 + Math.random() * 140), l: 3 + Math.random() * 4, m: 0, s: 2.5 + Math.random() * 4.5, w: Math.random() * 6 }); }
     for (let i = F.jets.length - 1; i >= 0; i--) {
       const j = F.jets[i]; j.t += dt; if (j.t > j.dur) { F.jets.splice(i, 1); continue; }
       const n = Math.round(200 * j.pw * dt * (j.t < j.dur * 0.15 ? 1.6 : 1) * (F.lite ? 0.5 : 1));
-      for (let q = 0; q < n && F.ps.length < (F.lite ? 450 : 1000); q++) { const a = j.a + (Math.random() - 0.5) * 0.16, v = (1100 + Math.random() * 500) * j.pw; F.ps.push({ x: j.x + (Math.random() - 0.5) * 18, y: j.y, vx: Math.cos(a) * v, vy: Math.sin(a) * v, l: 0.45 + Math.random() * 0.35, m: 0, s0: 14 * j.pw, s1: (60 + Math.random() * 44) * j.pw }); }
+      for (let q = 0; q < n && F.ps.length < (F.lite ? 450 : 1000); q++) { const a = j.a + (Math.random() - 0.5) * 0.11, v = (1100 + Math.random() * 500) * j.pw; F.ps.push({ x: j.x + (Math.random() - 0.5) * 18, y: j.y, vx: Math.cos(a) * v, vy: Math.sin(a) * v, l: 0.42 + Math.random() * 0.3, m: 0, s0: 10 * j.pw, s1: (38 + Math.random() * 30) * j.pw }); }
       if (Math.random() < dt * 34) F.ps.push({ sp: 1, x: j.x, y: j.y, vx: (Math.random() - 0.5) * 560, vy: -(900 + Math.random() * 760) * j.pw, l: 1 + Math.random() * 0.6, m: 0 });
     }
     cx.globalCompositeOperation = "lighter";
@@ -8012,24 +8013,17 @@ body.tv .rb-games.primeg.mason > .rb-pcol { padding-top: 16px; -webkit-mask-imag
   // what fires when: the stamp, every act change at the big ones, the countdown, the party, the plaque
   function showFxAct(c, a, i) {
     const lvl = c.lvl, k = a.k;
-    if (lvl >= 4 && i > 0 && k !== "party") shJets(60, JC, 0.6, 320, true);
-    if (lvl >= 5 && i > 0 && k !== "party") shFlare(0, 540);
     if (k === "alert") {
       shFlare(180, 560); if (lvl >= 4) shBlind(180);
-      if (lvl >= 5) { for (let q = 0; q < 3; q++) shJets(a.ms - 3600 + q * 1200 + 60, [JC[q % 2]], 0.85, 420); shJets(a.ms - 260, JROW, 1.1, 700); }
+      if (lvl >= 5) for (let q = 0; q < 3; q++) shJets(a.ms - 3600 + q * 1200 + 60, [JC[q % 2]], 0.55, 360, true);
     }
     if (k === "cash") {
-      shFlare(880, 470); shEmbers(880, lvl >= 3 ? 90 : 50);
-      if (lvl >= 3) shJets(860, JC, lvl >= 4 ? 1.15 : 0.9, lvl >= 4 ? 900 : 650);
+      shFlare(880, 470); shEmbers(880, lvl >= 3 ? 60 : 36);
+      if (lvl >= 3) shJets(860, JC, lvl >= 5 ? 0.9 : lvl >= 4 ? 0.8 : 0.65, lvl >= 4 ? 700 : 500);
       if (lvl >= 4) shBlind(880);
-      if (lvl >= 5) shJets(900, JROW, 1.25, 1000, true);
     }
-    if (k === "party") {
-      shFlare(0, 520); shBlind(0);
-      JROW.forEach((j, q) => shJets(q * 85, [j], 1.1, 520, q > 0));
-      shJets(720, JROW, 1.3, 800, true);
-    }
-    if (k === "out" && lvl >= 4) { shJets(500, JC, 1, 650); shFlare(520, 560); shEmbers(520, 80); }
+    if (k === "party") { shFlare(0, 520); shBlind(0); shJets(0, JP, 0.75, 600); }
+    if (k === "out" && lvl >= 4) { shJets(500, JC, 0.6, 500); shFlare(520, 560); }
   }
   function showChrome(c) {
     const b = c.b, lvl = c.lvl;
@@ -8054,7 +8048,7 @@ body.tv .rb-games.primeg.mason > .rb-pcol { padding-top: 16px; -webkit-mask-imag
     el.innerHTML = `<div class="cs-bg"></div><i class="cs-pulse"></i><div class="cs-box">${showChrome(c)}<div class="cs-acts"></div><i class="cs-sting"></i></div>`;
     showFit(el);
     SHOW.fr = { n: 0, t: 0 }; const lite = !!SHOW.slow && !fxFull(); if (lite) el.classList.add("lite");
-    { const cv = el.querySelector(".cs-fxc"); SHOW.fx = cv ? { cv, cx: cv.getContext("2d"), ps: [], jets: [], emb: [0, 0, 4, 12, 22, 36][lvl], acc: 0, y0: lvl >= 4 ? 1034 : 1080, lite: lite ? 1 : 0 } : null; }
+    { const cv = el.querySelector(".cs-fxc"); SHOW.fx = cv ? { cv, cx: cv.getContext("2d"), ps: [], jets: [], emb: [0, 0, 0, 4, 8, 12][lvl], acc: 0, y0: lvl >= 4 ? 1034 : 1080, lite: lite ? 1 : 0 } : null; }
     el.hidden = false; void el.offsetWidth; el.classList.add("on");
     SHOW.on = true; SHOW.t0 = performance.now(); SHOW.fxId = fxRun;
     if (lvl >= 3) { el.style.pointerEvents = "auto"; el.onclick = showSkip; document.addEventListener("keydown", showKey, true); } else { el.style.pointerEvents = ""; el.onclick = null; }
@@ -8360,7 +8354,7 @@ body.tv .rb-games.primeg.mason > .rb-pcol { padding-top: 16px; -webkit-mask-imag
   // ---------- sheets ----------
   function openSheet(id) { $(id).hidden = false; }
   // keep every open screen current: when a new version is up, reload it (never mid-form or mid-animation)
-  const BUILD = "20261019025847";
+  const BUILD = "20261019030819";
   function checkBuild() {
     if (BUILD === "dev") return;
     fetch("version.json?t=" + Date.now(), { cache: "no-store" }).then((r) => (r.ok ? r.json() : null)).then((j) => {
