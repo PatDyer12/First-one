@@ -3735,6 +3735,56 @@ body.tv.pplb .roomtv:not([hidden]) canvas { width: 76px; height: 76px; grid-row:
 .cs.show .cs-card::after { animation-duration: 8s; background-image: linear-gradient(105deg, transparent 42%, rgba(255,255,255,.08) 50%, transparent 58%); }
 /* ---------- no live blur behind the show either (it's 94% dark) ---------- */
 .cs-bg { -webkit-backdrop-filter: none; backdrop-filter: none; }
+/* ---------- the win shows, sharpened ---------- */
+.cs.show .xh b { text-shadow: 0 2px 0 rgba(0,0,0,.55), 0 0 22px color-mix(in srgb, var(--fxk) 26%, transparent); animation: csUp .4s .12s both; }
+.cs.show .xh em { font-size: 16px; text-shadow: none; }
+.cs.show .xp-v { color: #3ddc97; text-shadow: 0 3px 0 rgba(0,0,0,.6), 0 0 28px rgba(61,220,151,.28); }
+.cs.show .xs-n { color: var(--fxk); text-shadow: 0 3px 0 rgba(0,0,0,.6), 0 0 24px color-mix(in srgb, var(--fxk) 28%, transparent); }
+.cs.show .xa-plate b { text-shadow: 0 3px 0 rgba(0,0,0,.6), 0 0 30px color-mix(in srgb, var(--fxk) 32%, transparent); }
+.cs.show .cs-pay > b, .cs.show:is(.lv3, .lv4, .lv5) .cs-pay > b { text-shadow: 0 4px 0 rgba(0,0,0,.55), 0 0 34px color-mix(in srgb, var(--fxk) 36%, transparent); }
+.cs.show.lv4 .cs-pay > b, .cs.show.lv5 .cs-pay > b, .cs.show .xy-amt { transform: none; will-change: auto; }
+.cs.show .cs-usd { text-shadow: 0 3px 0 rgba(0,0,0,.55); }
+/* the stamp's details down the left, what it earned on the right, whose it is */
+.cs.show .cs-det { width: 340px; }
+.cs.show .cs-det > div { grid-template-columns: 116px 1fr; padding: 12px 0; }
+.cs.show .cs-det em { font-size: 14px; letter-spacing: .12em; color: #9aa4b4; }
+.cs.show .cs-det b { font-size: 25px; }
+.cs.show .cs-ach-t em { font-size: 14px; }
+.cs.show .cs-ach-t small { font-size: 18px; color: #b8c0cc; }
+.cs.show .cs-more li { font-size: 17px; padding: 9px 12px; }
+.cs.show .cs-pay > span { font-size: 18px; color: #c3cad6; }
+.cs.show .cs-who { font-size: 18px; color: #c3cad6; }
+/* the rest of the acts */
+.cs.show .cs-ch em { font-size: 12px; color: #7d8796; }
+.cs.show .cs-ch .on em { color: #ffffff; }
+.cs.show .xn-t > em { font-size: 16px; letter-spacing: .14em; color: #9aa4b4; }
+.cs.show .xn-t > small { font-size: 21px; color: #c3cad6; }
+.cs.show .xt-st em { font-size: 15px; color: #9aa4b4; }
+.cs.show .xs-r > small { color: #b8c0cc; }
+.cs.show .xp-tm .xtn small { font-size: 18px; color: rgba(255,255,255,.8); }
+.cs.show .xp-rule .ln em { font-size: 19px; }
+.cs.show .xp-rule .v em { font-size: 20px; }
+.cs.show .xp-rule .lo, .cs.show .xp-rule .hi { font-size: 16px; color: #7d8796; }
+.cs.show .xp-par li small { font-size: 19px; color: #b8c0cc; }
+.cs.show .xp-who small { font-size: 26px; color: #c3cad6; }
+.cs.show .xy-l > em { font-size: 19px; }
+.cs.show .xy-l > small { font-size: 21px; color: #c3cad6; text-shadow: 0 2px 0 rgba(0,0,0,.6); }
+.cs.show .xy-usd { text-shadow: 0 3px 0 rgba(0,0,0,.55); }
+.cs.show .xy-nm { text-shadow: 0 4px 0 rgba(0,0,0,.5), 0 0 44px color-mix(in srgb, var(--fxk) 38%, transparent); }
+.cs.lv5 .xy-nm { text-shadow: none; filter: drop-shadow(0 4px 0 rgba(0,0,0,.6)) drop-shadow(0 0 16px rgba(255,90,0,.55)); }
+/* what sits behind the words, quieter */
+.cs.show .cs-card .bt-art { opacity: .5; }
+.cs.show .cs-word span { -webkit-text-stroke-color: color-mix(in srgb, var(--fxk) 12%, transparent); }
+.cs.show .cs-pulse { opacity: calc(var(--pk, 0) * .3); }
+.cs.show .cs-beam { animation: csFadeHalf .6s .4s forwards, csSweep 3.2s .4s ease-in-out infinite alternate; }
+@keyframes csFadeHalf { to { opacity: .45; } }
+@keyframes lzHit { 0% { opacity: .1; } 20% { opacity: .1; } 23% { opacity: .6; } 45% { opacity: .4; } 100% { opacity: 0; } }
+/* the show's backdrop is solid: the board behind it doesn't show through (with no blur it read as clutter) */
+.cs.show .cs-bg { background: radial-gradient(42% 52% at 50% 46%, color-mix(in srgb, var(--fxk) 18%, transparent), transparent 70%), repeating-linear-gradient(0deg, rgba(255,255,255,.022) 0 1px, transparent 1px 4px),
+  linear-gradient(rgba(255,255,255,.03) 1px, transparent 1px) 0 0 / 64px 64px, linear-gradient(90deg, rgba(255,255,255,.03) 1px, transparent 1px) 0 0 / 64px 64px, #04060a; }
+.cs.show.big .cs-bg { background: radial-gradient(48% 58% at 50% 46%, color-mix(in srgb, var(--fxk) 24%, transparent), transparent 70%), repeating-linear-gradient(0deg, rgba(255,255,255,.022) 0 1px, transparent 1px 4px), #04060a; }
+/* scenes change by fading, not blurring */
+@keyframes csActOut { to { opacity: 0; transform: scale(1.03); } }
 .pp-none { padding: 16px 6px; font: 600 15px/1.3 Inter, sans-serif; color: #8d97a8; text-align: center; }
 .pp-bet { position: relative; flex: none; display: grid; gap: 6px; padding: 10px 12px 11px 13px; border-radius: 12px; background: rgba(255,255,255,.035); border: 1px solid rgba(190,210,240,.1); border-left: 5px solid rgba(190,210,240,.28); }
 .pp-bet.k-lost { opacity: .7; }
@@ -8370,7 +8420,7 @@ body.tv .rb-games.primeg.mason > .rb-pcol { padding-top: 16px; -webkit-mask-imag
   // ---------- sheets ----------
   function openSheet(id) { $(id).hidden = false; }
   // keep every open screen current: when a new version is up, reload it (never mid-form or mid-animation)
-  const BUILD = "20261019033006";
+  const BUILD = "20261019152438";
   function checkBuild() {
     if (BUILD === "dev") return;
     fetch("version.json?t=" + Date.now(), { cache: "no-store" }).then((r) => (r.ok ? r.json() : null)).then((j) => {
