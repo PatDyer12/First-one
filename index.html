@@ -3054,6 +3054,257 @@ body.tv.pplb .roomtv:not([hidden]) canvas { width: 76px; height: 76px; grid-row:
 .bt-rivalry.bt-hype .bt-art::after { animation: btCrackle 1.2s steps(1) var(--d, 0s) infinite; }
 @keyframes btCrackle { 0%, 100% { opacity: .4; } 10% { opacity: 1; } 14% { opacity: .2; } 18% { opacity: .95; } 30% { opacity: .45; } 62% { opacity: .9; } 66% { opacity: .35; } }
 .bt-c-rivalry { --fxk: #ffe14d; } .bt-chip.bt-c-rivalry { color: #111; background: linear-gradient(135deg, #fff3a8, #ffd000); }
+/* ---------- the cash ---------- */
+.cs { --fxk: #ffd86b; position: fixed; inset: 0; z-index: 8600; pointer-events: none; overflow: hidden; font-family: Inter, sans-serif; color: #eef2f7; }
+.cs[hidden] { display: none; }
+.cs-bg { position: absolute; inset: 0; opacity: 0; transition: opacity .35s;
+  background: radial-gradient(42% 52% at 50% 46%, color-mix(in srgb, var(--fxk) 22%, transparent), transparent 70%), repeating-linear-gradient(0deg, rgba(255,255,255,.022) 0 1px, transparent 1px 4px),
+    linear-gradient(rgba(255,255,255,.03) 1px, transparent 1px) 0 0 / 64px 64px, linear-gradient(90deg, rgba(255,255,255,.03) 1px, transparent 1px) 0 0 / 64px 64px, rgba(3,5,9,.94);
+  -webkit-backdrop-filter: blur(8px); backdrop-filter: blur(8px); }
+.cs.on .cs-bg { opacity: 1; }
+.cs.out { animation: csOut .55s ease-in forwards; }
+@keyframes csOut { to { opacity: 0; transform: scale(1.02); } }
+/* the frame: corner ticks, a status line top left, the ticket number top right */
+.cs-hud > i { position: absolute; width: 34px; height: 34px; border: 0 solid color-mix(in srgb, var(--fxk) 70%, #fff); opacity: 0; animation: csTick .5s .15s ease-out forwards; }
+.cs-hud .c1 { left: 40px; top: 40px; border-width: 2px 0 0 2px; } .cs-hud .c2 { right: 40px; top: 40px; border-width: 2px 2px 0 0; }
+.cs-hud .c3 { left: 40px; bottom: 40px; border-width: 0 0 2px 2px; } .cs-hud .c4 { right: 40px; bottom: 40px; border-width: 0 2px 2px 0; }
+@keyframes csTick { from { opacity: 0; transform: scale(1.6); } to { opacity: .9; transform: none; } }
+.cs-l, .cs-r { position: absolute; top: 50px; font: 600 13px/1 "Azeret Mono", monospace; letter-spacing: .14em; text-transform: uppercase; color: #a9b2c1; opacity: 0; animation: csFade .4s .25s forwards; }
+.cs-l { left: 90px; display: flex; align-items: center; gap: 10px; } .cs-r { right: 90px; }
+.cs-l > i { width: 9px; height: 9px; border-radius: 50%; background: var(--fxk); box-shadow: 0 0 12px var(--fxk); animation: tlPulse 1.2s infinite; }
+@keyframes csFade { to { opacity: 1; } }
+/* the card in the middle, stamped */
+.cs-stage { position: absolute; left: 50%; top: 46%; width: 620px; translate: -50% -50%; }
+.cs-card { position: relative; z-index: 2; transform-origin: 50% 60%; opacity: 0; animation: csCard .75s .12s cubic-bezier(.16,1,.3,1) forwards; }
+.cs-card .pp-bet { width: 100%; box-sizing: border-box; font-size: 18px; }
+.cs-card :is(.pp-pick .t) { font-size: 30px; }
+@keyframes csCard { 0% { opacity: 0; transform: perspective(1200px) translateY(120px) rotateX(28deg) scale(.82); } 70% { opacity: 1; } 100% { opacity: 1; transform: perspective(1200px) rotateX(0) scale(1.3); } }
+.cs.on .cs-card { animation: csCard .75s .12s cubic-bezier(.16,1,.3,1) forwards, csJolt .22s .9s ease-out; }
+@keyframes csJolt { 40% { translate: 0 6px; } }
+.cs-stamp { position: absolute; right: -54px; top: -40px; z-index: 5; display: grid; justify-items: center; padding: 10px 22px 8px; border: 5px double var(--fxk); border-radius: 12px; color: var(--fxk);
+  font: 900 54px/0.9 var(--f-display), Inter, sans-serif; letter-spacing: .06em; text-transform: uppercase; rotate: -9deg; opacity: 0; background: rgba(4,6,10,.35);
+  -webkit-mask-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='220' height='120'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.9' numOctaves='2' seed='7'/%3E%3CfeColorMatrix values='0 0 0 0 0  0 0 0 0 0  0 0 0 0 0  0 0 0 -2.6 2.1'/%3E%3C/filter%3E%3Crect width='220' height='120' filter='url(%23n)'/%3E%3C/svg%3E"); mask-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='220' height='120'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.9' numOctaves='2' seed='7'/%3E%3CfeColorMatrix values='0 0 0 0 0  0 0 0 0 0  0 0 0 0 0  0 0 0 -2.6 2.1'/%3E%3C/filter%3E%3Crect width='220' height='120' filter='url(%23n)'/%3E%3C/svg%3E"); -webkit-mask-size: 220px 120px; mask-size: 220px 120px;
+  text-shadow: 0 0 18px color-mix(in srgb, var(--fxk) 60%, transparent); animation: csStamp .3s .82s cubic-bezier(.3,1.5,.5,1) forwards; }
+.cs-stamp small { font: 700 12px/1 "Azeret Mono", monospace; letter-spacing: .2em; margin-top: 4px; }
+@keyframes csStamp { 0% { opacity: 0; transform: scale(2.4); } 100% { opacity: 1; transform: scale(1); } }
+/* what it paid */
+.cs-pay { position: relative; z-index: 2; display: grid; justify-items: center; gap: 6px; margin-top: 74px; opacity: 0; animation: csUp .5s 1s ease-out forwards; }
+.cs-pay > b { font: 900 92px/.9 var(--f-num), Inter, sans-serif; letter-spacing: -.02em; color: #fff; text-shadow: 0 0 32px color-mix(in srgb, var(--fxk) 60%, transparent); font-variant-numeric: tabular-nums; }
+.cs-pay > span { display: flex; gap: 10px; font: 600 15px/1 "Azeret Mono", monospace; letter-spacing: .12em; text-transform: uppercase; color: #a9b2c1; }
+.cs-pay > span i { font-style: normal; color: var(--fxk); }
+@keyframes csUp { from { opacity: 0; transform: translateY(18px); } to { opacity: 1; transform: none; } }
+.cs-card .ob-legs li.hit > i { animation: csTickLeg .35s calc(1.2s + var(--i) * .14s) cubic-bezier(.3,1.6,.5,1) both; }
+@keyframes csTickLeg { from { transform: scale(0); } to { transform: none; } }
+/* the details down the left */
+.cs-side { position: absolute; top: 50%; translate: 0 -50%; width: 300px; }
+.cs-det { left: 9%; display: grid; gap: 2px; }
+.cs-det > div { display: grid; grid-template-columns: 96px 1fr; align-items: baseline; gap: 14px; padding: 10px 0; border-bottom: 1px solid rgba(190,210,240,.1); opacity: 0; animation: csSlide .4s calc(1.25s + var(--i) * .09s) ease-out forwards; }
+.cs-det em { font: 600 11px/1 "Azeret Mono", monospace; font-style: normal; letter-spacing: .16em; text-transform: uppercase; color: #6f7a8b; }
+.cs-det b { font: 800 19px/1.1 Inter, sans-serif; color: #eef2f7; }
+@keyframes csSlide { from { opacity: 0; transform: translateX(-16px); } to { opacity: 1; transform: none; } }
+/* what it earned, on the right */
+.cs-ach { right: 9%; display: grid; justify-items: start; gap: 14px; }
+.cs-medal { position: relative; width: 132px; height: 132px; display: grid; place-items: center; opacity: 0; animation: csMedal .6s 1.55s cubic-bezier(.3,1.5,.5,1) forwards; }
+.cs-medal svg { position: absolute; inset: 0; rotate: -90deg; }
+.cs-medal circle { fill: none; stroke-width: 5; }
+.cs-medal .trk { stroke: rgba(190,210,240,.14); }
+.cs-medal .fil { stroke: var(--fxk); stroke-dasharray: 340; stroke-dashoffset: 340; stroke-linecap: round; filter: drop-shadow(0 0 6px var(--fxk)); animation: csRing 1s 1.7s ease-out forwards; }
+@keyframes csRing { to { stroke-dashoffset: 0; } }
+.cs-medal > i { display: grid; place-items: center; width: 96px; height: 96px; border-radius: 50%; font-size: 48px; font-style: normal; line-height: 1;
+  background: radial-gradient(circle at 35% 30%, color-mix(in srgb, var(--fxk) 45%, #10131a), #07090d 75%); box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--fxk) 50%, transparent); }
+.cs-medal > i .bt-ico { width: 52px; height: 52px; color: var(--fxk); }
+.cs-medal > b { position: absolute; top: -6px; right: -18px; padding: 4px 9px; border-radius: 6px; font: 900 13px/1 Inter, sans-serif; letter-spacing: .1em; color: #0b0d12; background: var(--fxk); box-shadow: 0 0 16px var(--fxk); rotate: 8deg; }
+.cs-medal.lv::after { content: "⚡"; position: absolute; left: -8px; top: -8px; font-size: 26px; filter: drop-shadow(0 0 6px rgba(255,225,77,.9)); }
+.cs-medal.new::before { content: ""; position: absolute; inset: -30px; border-radius: 50%; background: repeating-conic-gradient(color-mix(in srgb, var(--fxk) 55%, transparent) 0 4deg, transparent 4deg 22deg);
+  -webkit-mask-image: radial-gradient(closest-side, transparent 52%, #000 56%, transparent); mask-image: radial-gradient(closest-side, transparent 52%, #000 56%, transparent); animation: btSpin 8s linear infinite; }
+@keyframes csMedal { from { opacity: 0; transform: scale(.4) rotate(-30deg); } to { opacity: 1; transform: none; } }
+.cs-ach-t { display: grid; gap: 6px; opacity: 0; animation: csUp .45s 1.9s ease-out forwards; }
+.cs-ach-t em { font: 600 11px/1 "Azeret Mono", monospace; font-style: normal; letter-spacing: .18em; text-transform: uppercase; color: var(--fxk); }
+.cs-ach-t b { font: 900 32px/1 var(--f-display), Inter, sans-serif; text-transform: uppercase; letter-spacing: .02em; }
+.cs-ach-t small { font: 600 14px/1.3 Inter, sans-serif; color: #8d97a8; }
+.cs-more { list-style: none; margin: 4px 0 0; padding: 0; display: grid; gap: 6px; width: 100%; }
+.cs-more li { display: flex; align-items: center; gap: 10px; padding: 7px 10px; border-radius: 10px; background: rgba(255,255,255,.04); border: 1px solid color-mix(in srgb, var(--fxk) 30%, transparent); font: 700 14px/1 Inter, sans-serif; opacity: 0; animation: csSlide .35s 2.2s ease-out forwards; }
+.cs-more li:nth-child(2) { animation-delay: 2.3s; } .cs-more li:nth-child(3) { animation-delay: 2.4s; }
+.cs-more li i { font-style: normal; font-size: 16px; } .cs-more li .bt-ico { color: var(--fxk); }
+.cs-more li b { margin-left: auto; font-size: 12px; letter-spacing: .1em; color: var(--fxk); }
+.cs-medal.plain { --fxk: #3ddc97; } .cs-medal.plain > i { font-size: 46px; color: #3ddc97; }
+/* whose it is and their day */
+.cs-who { position: absolute; left: 50%; bottom: 64px; translate: -50% 0; display: flex; align-items: center; gap: 16px; padding: 10px 20px 10px 10px; border-radius: 999px; background: rgba(255,255,255,.05); border: 1px solid rgba(190,210,240,.14);
+  font: 700 16px/1 "Azeret Mono", monospace; letter-spacing: .06em; text-transform: uppercase; color: #a9b2c1; opacity: 0; animation: csUp .45s 1.45s ease-out forwards; white-space: nowrap; }
+.cs-who .rb-av { width: 40px; height: 40px; font-size: 18px; }
+.cs-who > b { font: 900 22px/1 Inter, sans-serif; text-transform: none; letter-spacing: 0; color: #fff; }
+.cs-who .up { color: #3ddc97; } .cs-who .dn { color: #ff6170; } .cs-who .hot { color: #ffb020; }
+/* sizes: a plain win is quicker and smaller; a big one fills more */
+.cs.small .cs-stage { width: 560px; } .cs.small .cs-pay > b { font-size: 76px; }
+.cs.big .cs-stage { width: 660px; } .cs.big .cs-pay > b { font-size: 112px; } .cs.big .cs-stamp { font-size: 64px; }
+.cs.big .cs-bg { background: radial-gradient(48% 58% at 50% 46%, color-mix(in srgb, var(--fxk) 32%, transparent), transparent 70%), repeating-linear-gradient(0deg, rgba(255,255,255,.022) 0 1px, transparent 1px 4px), rgba(3,5,9,.95); }
+.cs.big .cs-card { animation: csCard .9s .12s cubic-bezier(.16,1,.3,1) forwards, csJolt .3s .9s ease-out, csFloat 4s 1.5s ease-in-out infinite alternate; }
+@keyframes csFloat { to { translate: 0 -8px; } }
+/* the sweep */
+.cs-sw { position: absolute; left: 50%; top: 42%; translate: -50% -50%; display: flex; gap: 18px; align-items: flex-start; }
+.cs-swc { position: relative; width: 300px; opacity: 0; animation: csCard .6s calc(.15s + var(--i) * .26s) cubic-bezier(.16,1,.3,1) forwards; }
+.cs-swc .cs-stamp { font-size: 30px; right: -10px; top: -18px; animation-delay: calc(.7s + var(--i) * .26s); border-width: 4px; }
+.cs-swc > b { display: block; margin-top: 10px; text-align: center; font: 900 30px/1 var(--f-num), Inter, sans-serif; color: #3ddc97; }
+.cs-pay.sw { position: absolute; left: 50%; bottom: 120px; translate: -50% 0; margin: 0; }
+/* ---------- each type's detail behind the card ---------- */
+.cs-fx { position: absolute; left: 50%; top: 40%; width: 0; height: 0; z-index: 1; }
+.cs-fx > i, .cs-fx > b, .cs-fx > svg, .cs-fx > div { position: absolute; font-style: normal; }
+/* plain cash and medals: rays and coins */
+.cs-fx .ray { left: -2px; top: -340px; width: 4px; height: 300px; transform-origin: 50% 340px; rotate: calc(var(--i) * 30deg); background: linear-gradient(transparent, color-mix(in srgb, var(--fxk) 70%, transparent)); opacity: 0; animation: csRay 1.4s .9s ease-out forwards; }
+.fx-botd .ray { rotate: calc(var(--i) * 22.5deg); }
+@keyframes csRay { 0% { opacity: 0; scale: 1 .2; } 30% { opacity: .55; } 100% { opacity: 0; scale: 1 1.1; } }
+.cs-fx .coin { left: -11px; top: -11px; width: 22px; height: 22px; border-radius: 50%; background: radial-gradient(circle at 35% 30%, #fff6cf, #f2c14e 50%, #a5760c); box-shadow: 0 0 10px rgba(255,200,80,.6); opacity: 0;
+  animation: csCoin 1.6s calc(.95s + var(--i) * .04s) cubic-bezier(.2,.6,.3,1) forwards; --a: calc(var(--i) * 36deg); }
+@keyframes csCoin { 0% { opacity: 1; transform: rotate(var(--a)) translateY(0) scale(.6); } 100% { opacity: 0; transform: rotate(var(--a)) translateY(-360px) scale(1); } }
+.fx-gold .coin, .fx-silver .coin, .fx-bronze .coin { left: -70px; top: -320px; width: 140px; height: 140px; animation: csMedalFlip 1.4s .9s cubic-bezier(.2,.8,.2,1) forwards;
+  background: radial-gradient(circle at 35% 30%, var(--m1, #fff6cf), var(--m2, #f2c14e) 45%, var(--m4, #8a5f12) 100%); box-shadow: inset 0 0 0 6px rgba(255,255,255,.25), 0 0 30px color-mix(in srgb, var(--fxk) 60%, transparent); }
+.fx-gold { --m1: #fff6cf; --m2: #f4c64e; --m4: #6a4806; } .fx-silver { --m1: #ffffff; --m2: #c8d0db; --m4: #4f5763; } .fx-bronze { --m1: #ffe6cc; --m2: #e3a26b; --m4: #6b3a12; }
+@keyframes csMedalFlip { 0% { opacity: 0; transform: translateY(-200px) rotateY(0); } 40% { opacity: 1; } 100% { opacity: .9; transform: translateY(0) rotateY(720deg); } }
+/* nuke: shockwaves, a flash, the screen jolts */
+.cs-fx .ring { left: -150px; top: -150px; width: 300px; height: 300px; border-radius: 50%; border: 3px solid var(--fxk); opacity: 0; animation: csRing2 1.6s calc(.85s + var(--i) * .22s) ease-out forwards; }
+@keyframes csRing2 { 0% { opacity: .9; transform: scale(.2); } 100% { opacity: 0; transform: scale(3.4); } }
+.fx-nuke .flash { left: -50vw; top: -60vh; width: 100vw; height: 120vh; background: radial-gradient(circle, rgba(255,220,150,.9), rgba(255,120,30,.4) 30%, transparent 60%); opacity: 0; animation: csFlash .9s .85s ease-out forwards; }
+@keyframes csFlash { 0% { opacity: 0; } 12% { opacity: 1; } 100% { opacity: 0; } }
+.cs.ck-nuke.on .cs-stage { animation: csShake .5s .88s; }
+@keyframes csShake { 20% { transform: translate(-8px, 4px); } 40% { transform: translate(7px, -5px); } 60% { transform: translate(-5px, 3px); } 80% { transform: translate(3px, -2px); } }
+/* bet of the day: the crown comes down on it */
+.fx-botd .crown { left: -40px; top: -330px; font-size: 80px; opacity: 0; filter: drop-shadow(0 0 20px rgba(255,216,107,.8)); animation: csCrown .8s 1.05s cubic-bezier(.3,1.4,.5,1) forwards; }
+@keyframes csCrown { from { opacity: 0; transform: translateY(-140px) rotate(-20deg); } to { opacity: 1; transform: none; } }
+/* whale: ripples and bubbles */
+.fx-whale .ring { border-color: rgba(127,216,255,.8); }
+.cs-fx .bub { left: calc(-260px + var(--i) * 46px); top: 220px; width: calc(8px + (var(--i) * 7px) % 16px); aspect-ratio: 1; border-radius: 50%; border: 2px solid rgba(127,216,255,.7); opacity: 0; animation: csBub 2.6s calc(1s + var(--i) * .12s) ease-in forwards; }
+@keyframes csBub { 0% { opacity: 0; transform: translateY(0); } 15% { opacity: 1; } 100% { opacity: 0; transform: translateY(-520px); } }
+/* dart: a target behind, the hit */
+.cs-fx .tgt { left: calc(-60px - var(--i) * 50px); top: calc(-60px - var(--i) * 50px); width: calc(120px + var(--i) * 100px); aspect-ratio: 1; border-radius: 50%; border: 2px solid color-mix(in srgb, var(--fxk) 60%, transparent); opacity: 0; animation: csFade .5s calc(.3s + var(--i) * .07s) forwards; }
+.fx-dart .hit { left: -26px; top: -26px; width: 52px; height: 52px; border-radius: 50%; background: radial-gradient(circle, #fff, var(--fxk) 40%, transparent 70%); opacity: 0; animation: csFlash .8s .88s forwards; }
+/* opal and primetime: the sky */
+.fx-opal .neb { left: -420px; top: -300px; width: 840px; height: 600px; border-radius: 50%; background: radial-gradient(30% 40% at 35% 40%, rgba(255,80,200,.4), transparent 70%), radial-gradient(30% 40% at 65% 60%, rgba(100,70,255,.45), transparent 70%), radial-gradient(25% 30% at 55% 30%, rgba(40,200,255,.35), transparent 70%);
+  opacity: 0; animation: csNeb 2.4s .7s ease-out forwards; }
+@keyframes csNeb { from { opacity: 0; transform: scale(.4) rotate(-20deg); } to { opacity: 1; transform: scale(1.1) rotate(10deg); } }
+.cs-fx .star { left: calc(-400px + (var(--i) * 53px) % 800px); top: calc(-300px + (var(--i) * 97px) % 560px); width: 4px; height: 4px; border-radius: 50%; background: #fff; box-shadow: 0 0 8px #fff; opacity: 0; animation: btTw 1.2s calc(1s + var(--i) * .1s) ease-in-out infinite alternate; }
+.fx-prime .moon { left: 230px; top: -330px; width: 90px; height: 90px; border-radius: 50%; box-shadow: -18px 10px 0 0 #ffe9b8; filter: drop-shadow(0 0 18px rgba(255,233,184,.7)); opacity: 0; animation: csFade .8s .9s forwards; }
+/* lotto: the reels land on 7s */
+.fx-lotto .reels { left: -180px; top: -350px; display: flex; gap: 12px; opacity: 0; animation: csFade .3s .6s forwards; }
+.fx-lotto .reels b { width: 110px; height: 100px; overflow: hidden; border-radius: 12px; background: linear-gradient(#1a0f2e, #0d0718); border: 3px solid #ffd23f; box-shadow: 0 0 20px rgba(255,210,63,.5); }
+.fx-lotto .reels span { display: block; text-align: center; font: 900 64px/100px var(--f-display), Inter, sans-serif; color: #ffd23f; animation: csReel calc(1.2s + var(--j) * .35s) .6s cubic-bezier(.2,.7,.25,1) forwards; }
+@keyframes csReel { from { transform: translateY(0); } to { transform: translateY(-900px); } }
+/* snipe: the brackets close on it, a trace */
+.cs-fx .brk { left: -330px; top: -170px; width: 60px; height: 60px; border: 3px solid #ff4a58; border-width: 3px 0 0 3px; animation: csBrk .7s .4s cubic-bezier(.3,1.3,.5,1) both; transform: rotate(calc(var(--i) * 90deg)); transform-origin: 330px 170px; }
+@keyframes csBrk { from { opacity: 0; scale: 1.6; } to { opacity: .9; scale: 1; } }
+.fx-snipe .trace { left: -50vw; top: -2px; width: 50vw; height: 3px; background: linear-gradient(90deg, transparent, #ff4a58 70%, #fff); opacity: 0; animation: csTrace .35s .78s ease-in forwards; }
+@keyframes csTrace { 0% { opacity: 1; transform: translateX(-40vw); } 100% { opacity: 0; transform: translateX(0); } }
+/* long shot: the arrow lands */
+.fx-long .arrow { left: -50vw; top: -3px; width: 380px; height: 6px; background: linear-gradient(90deg, transparent, #4ff0d8); clip-path: polygon(0 40%, 92% 40%, 92% 0, 100% 50%, 92% 100%, 92% 60%, 0 60%); opacity: 0; animation: csArrow .45s .7s cubic-bezier(.5,0,.8,.4) forwards; }
+@keyframes csArrow { from { opacity: 1; transform: translateX(0); } to { opacity: 1; transform: translateX(calc(50vw - 380px)); } }
+/* dawg: paw prints walking up to it */
+.cs-fx .paw { left: calc(-480px + var(--i) * 70px); top: calc(240px - (var(--i) % 2) * 40px); width: 34px; height: 34px; opacity: 0; animation: csFade .2s calc(.5s + var(--i) * .16s) forwards;
+  background: radial-gradient(ellipse 45% 40% at 50% 70%, #ff9a3d 0 98%, transparent), radial-gradient(circle at 18% 30%, #ff9a3d 0 13%, transparent 15%), radial-gradient(circle at 40% 12%, #ff9a3d 0 13%, transparent 15%), radial-gradient(circle at 62% 12%, #ff9a3d 0 13%, transparent 15%), radial-gradient(circle at 84% 30%, #ff9a3d 0 13%, transparent 15%); rotate: -20deg; }
+/* six: a spiral and confetti in the team's colors */
+.fx-six .ball { left: -420px; top: -40px; width: 56px; height: 32px; border-radius: 50%; background: linear-gradient(90deg, transparent 47%, #fff 47% 53%, transparent 53%) center / 100% 30% no-repeat, radial-gradient(#8a4a1e, #5a2e10); animation: csSpiral 1.1s .4s cubic-bezier(.3,.6,.4,1) both; }
+@keyframes csSpiral { 0% { opacity: 0; transform: translate(0, 200px) rotate(-30deg); } 20% { opacity: 1; } 100% { opacity: 0; transform: translate(800px, -260px) rotate(20deg); } }
+.cs-fx .conf { left: calc(-480px + (var(--i) * 37px) % 960px); top: -360px; width: 9px; height: 14px; background: hsl(calc(var(--i) * 47deg) 85% 62%); opacity: 0; animation: csConf 2.6s calc(1s + (var(--i) % 7) * .1s) linear forwards; }
+@keyframes csConf { 0% { opacity: 1; transform: translateY(0) rotate(0); } 100% { opacity: 0; transform: translateY(760px) rotate(720deg); } }
+/* chains: the chain goes tight, first down */
+.fx-chains .post { top: -40px; width: 10px; height: 160px; border-radius: 4px; background: linear-gradient(#ffb340, #c46a00); box-shadow: 0 0 14px rgba(255,159,26,.5); opacity: 0; animation: csFade .3s .5s forwards; }
+.fx-chains .post.a { left: -400px; } .fx-chains .post.b { left: 390px; }
+.fx-chains .chain { left: -390px; top: 30px; width: 780px; height: 4px; background: repeating-linear-gradient(90deg, #d9dde3 0 12px, transparent 12px 16px); transform-origin: 0 50%; animation: csChain .6s .7s cubic-bezier(.3,1.6,.5,1) both; }
+@keyframes csChain { from { transform: scaleX(.3) translateY(40px); } to { transform: none; } }
+.fx-chains .first { left: 300px; top: -110px; padding: 6px 10px; border-radius: 6px; background: #ff9f1a; color: #111; font: 900 18px/1 Inter, sans-serif; letter-spacing: .08em; white-space: nowrap; opacity: 0; animation: csCrown .5s 1.2s cubic-bezier(.3,1.4,.5,1) forwards; }
+/* dinger: the ball's flight, fireworks where it lands */
+.fx-dinger .arc { left: -300px; top: -330px; width: 600px; height: 260px; overflow: visible; }
+.fx-dinger .arc path { fill: none; stroke: rgba(255,255,255,.7); stroke-width: 3; stroke-dasharray: 8 10; stroke-dashoffset: 900; animation: csDraw 1s .3s ease-out forwards; }
+@keyframes csDraw { to { stroke-dashoffset: 0; } }
+.cs-fx .spark { left: 270px; top: -220px; width: 4px; height: 70px; transform-origin: 2px 0; rotate: calc(var(--i) * 25.7deg); background: linear-gradient(#ffd23f, transparent); opacity: 0; animation: csSpark 1s calc(1.25s) ease-out forwards; }
+@keyframes csSpark { 0% { opacity: 1; scale: 1 .1; } 100% { opacity: 0; scale: 1 1.2; } }
+/* punchout: the K drawn in chalk */
+.fx-punchout .kk { left: -460px; top: -200px; width: 260px; height: 260px; }
+.fx-punchout .kk path { fill: none; stroke: #ff5d5d; stroke-width: 16; stroke-linecap: round; stroke-linejoin: round; stroke-dasharray: 600; stroke-dashoffset: 600; filter: drop-shadow(0 0 12px rgba(255,93,93,.7)); animation: csDraw .9s .9s ease-out forwards; }
+/* light the lamp: the goal light */
+.fx-lamp .beam { left: -500px; top: -500px; width: 1000px; height: 1000px; border-radius: 50%; background: conic-gradient(rgba(255,50,50,.35) 0 20deg, transparent 20deg 180deg, rgba(255,50,50,.35) 180deg 200deg, transparent 200deg);
+  -webkit-mask-image: radial-gradient(closest-side, #000 10%, transparent); mask-image: radial-gradient(closest-side, #000 10%, transparent); opacity: 0; animation: csFade .3s .8s forwards, btSpin 1.4s .8s linear infinite; }
+.fx-lamp .bulb { left: -36px; top: -380px; width: 72px; height: 72px; border-radius: 50%; background: radial-gradient(circle, #fff 0 10%, #ff3030 40%, rgba(255,48,48,0) 72%); opacity: 0; animation: csFade .2s .8s forwards, btPulse .4s .8s ease-in-out infinite alternate; }
+/* bucket: the net swishes */
+.fx-bucket .hoop { left: 260px; top: -330px; width: 200px; height: 200px; overflow: visible; }
+.fx-bucket .hoop ellipse { fill: none; stroke: #ff7a1a; stroke-width: 6; }
+.fx-bucket .hoop .net { fill: none; stroke: rgba(255,255,255,.75); stroke-width: 2.5; transform-origin: 100px 42px; animation: csSwish .6s 1.05s ease-out; }
+@keyframes csSwish { 30% { transform: scaleY(1.25) skewX(6deg); } 60% { transform: scaleY(.92) skewX(-4deg); } }
+.fx-bucket .ball { left: 336px; top: -440px; width: 48px; height: 48px; border-radius: 50%; background: radial-gradient(circle at 35% 30%, #ffb066, #e0620f 60%, #8a3a06); box-shadow: inset 0 0 0 2px rgba(0,0,0,.3); opacity: 0; animation: csDrop .7s .5s cubic-bezier(.5,0,.8,.5) forwards; }
+@keyframes csDrop { 0% { opacity: 1; transform: translateY(0); } 100% { opacity: 0; transform: translateY(250px); } }
+/* shootout: the scoreboard flickers */
+.fx-shootout .led { left: -170px; top: -360px; display: flex; gap: 6px; padding: 10px 16px; border-radius: 10px; background: #0a0704; border: 2px solid rgba(255,176,32,.5); }
+.fx-shootout .led i { position: static; font: 900 64px/1 "Azeret Mono", monospace; color: #ffb020; text-shadow: 0 0 16px #ff8a00; opacity: 0; animation: btTw .12s calc(.5s + var(--i) * .07s) steps(2, jump-none) 6 alternate, csFade .1s 1.4s forwards; }
+/* lockdown: the dial spins and locks, the bolts throw */
+.fx-lockdown .dial { left: -170px; top: -170px; width: 340px; height: 340px; border-radius: 50%; border: 10px solid rgba(169,196,220,.3); border-top-color: #a9c4dc; opacity: 0; animation: csFade .3s .4s forwards, csDial 1.2s .4s cubic-bezier(.6,0,.2,1) forwards; }
+@keyframes csDial { from { rotate: 0deg; } to { rotate: 540deg; } }
+.fx-lockdown .bolt { top: -8px; width: 120px; height: 16px; border-radius: 8px; background: linear-gradient(#e8eef4, #8fa3b8); opacity: 0; animation: csBolt .3s 1.5s cubic-bezier(.3,1.6,.5,1) forwards; }
+.fx-lockdown .bolt.a { left: -400px; } .fx-lockdown .bolt.b { left: 280px; }
+@keyframes csBolt { from { opacity: 1; transform: scaleX(.2); } to { opacity: 1; transform: none; } }
+/* rivalry: the bolt strikes */
+.fx-rivalry .zap { left: -60px; top: -420px; width: 120px; height: 360px; opacity: 0; filter: drop-shadow(0 0 20px #ffe14d); animation: btCrackle 1s .8s steps(1) 2, csFade .1s 2.8s reverse forwards; }
+.fx-rivalry .zap path { fill: #ffe14d; }
+/* ---------- the team card (a moneyline or a spread) ---------- */
+.bt.bt-team { --fxk: var(--tca, #c9d1dc); --fxg: color-mix(in srgb, var(--tca, #8892a0) 22%, transparent); --fxr: 0 0 0 1px color-mix(in srgb, var(--tca, #8892a0) 28%, transparent); --fxbs: 100% 100%;
+  --fxb: linear-gradient(135deg, var(--tc1, #5a6475), color-mix(in srgb, var(--tc1, #5a6475) 30%, #232a35) 30%, #2a3140 60%, color-mix(in srgb, var(--tc2, #5a6475) 60%, #2a3140));
+  --fxi: linear-gradient(118deg, transparent 0 80%, color-mix(in srgb, var(--tc1, #5a6475) 75%, transparent) 80% 84%, transparent 84% 85.5%, color-mix(in srgb, var(--tca, #c9d1dc) 70%, transparent) 85.5% 86.6%, transparent 86.6%),
+    radial-gradient(80% 120% at 100% 0%, color-mix(in srgb, var(--tc1, #5a6475) 20%, transparent), transparent 62%),
+    radial-gradient(circle, rgba(255,255,255,.035) 0 1px, transparent 1.4px) 0 0 / 5px 5px, linear-gradient(180deg, #171c25, #0e1218);
+  animation: none; }
+.fx.bt.bt-team { border-width: 2px; }
+.pp-bet.fx.bt.bt-team { box-shadow: inset 5px 0 0 var(--tc1, #5a6475), inset 7px 0 0 var(--tca, #c9d1dc), 0 0 18px var(--fxg), var(--fxr); }
+.ob-bet.fx.bt.bt-team { box-shadow: inset 5px 0 0 var(--c), inset 0 3px 0 color-mix(in srgb, var(--tc1, #5a6475) 80%, transparent), 0 0 18px var(--fxg), var(--fxr); }
+.bt-team .bt-art::before, .bt-team .bt-art::after, .bt-team .bt-art > b { display: none; }
+.bt-team .bt-tlg { display: block; opacity: .17; }
+.bt.bt-team::after { content: none; }
+.bt-team :is(.pp-pick, .ob-pick) .t, .slip.bt-team .sl-pick { background: none; color: #fff; -webkit-text-fill-color: #fff; text-shadow: 0 0 14px color-mix(in srgb, var(--tca, #000) 45%, transparent); filter: none; }
+.bt-team :is(.pp-odds, .ob-odds) { color: var(--tca, #c9d1dc); }
+.bt-team.bt-metal .bt-art > u { mix-blend-mode: normal; background: linear-gradient(115deg, transparent 40%, rgba(255,255,255,.14) 48%, transparent 56%); }
+.slip.bt-team .sl-card { box-shadow: inset 6px 0 0 var(--tc1, #5a6475), 0 30px 80px rgba(0,0,0,.65); }
+
+/* ---------- six: the end zone, painted ---------- */
+/* the team's color between the goal line and the end line, white boundary all round, the team's name lettered across in
+   paint (grass showing through it), a pylon at each corner */
+.bt-six { --fxb: linear-gradient(#f4f4ee, #f4f4ee); --fxbs: 100% 100%; --fxk: #ffffff;
+  --fxi: linear-gradient(180deg, rgba(0,0,0,.22), rgba(0,0,0,.42)), linear-gradient(90deg, #f1f1ea 0 8px, transparent 8px calc(100% - 4px), #f1f1ea calc(100% - 4px)),
+    repeating-linear-gradient(90deg, rgba(255,255,255,.035) 0 22px, transparent 22px 44px), repeating-linear-gradient(135deg, rgba(0,0,0,.08) 0 3px, transparent 3px 10px),
+    linear-gradient(180deg, color-mix(in srgb, var(--tc1, #1f6b3a) 84%, #000), color-mix(in srgb, var(--tc1, #1f6b3a) 64%, #000)); animation: none; }
+.bt-six .bt-art { container-type: size; }
+.bt-six .bt-art::before { content: attr(data-tn); top: 0; bottom: 0; left: 8px; right: 4px; width: auto; display: grid; place-items: center; box-shadow: none; opacity: 1; background: none;
+  font: 900 min(56cqh, calc(150cqw / var(--nch, 7)))/1 var(--f-display), Inter, sans-serif; letter-spacing: .06em; white-space: nowrap; color: color-mix(in srgb, #ffffff 20%, transparent);
+  -webkit-text-stroke: 2px color-mix(in srgb, var(--tca, #ffffff) 55%, transparent); -webkit-mask-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='160' height='90'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='1.4' numOctaves='2' seed='3'/%3E%3CfeColorMatrix values='0 0 0 0 0  0 0 0 0 0  0 0 0 0 0  0 0 0 -2.2 1.9'/%3E%3C/filter%3E%3Crect width='160' height='90' filter='url(%23n)'/%3E%3C/svg%3E"); mask-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='160' height='90'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='1.4' numOctaves='2' seed='3'/%3E%3CfeColorMatrix values='0 0 0 0 0  0 0 0 0 0  0 0 0 0 0  0 0 0 -2.2 1.9'/%3E%3C/filter%3E%3Crect width='160' height='90' filter='url(%23n)'/%3E%3C/svg%3E"); }
+.bt-six .bt-art::after { top: 0; bottom: 0; left: 8px; right: 4px; width: auto; height: auto; border-radius: 0; box-shadow: none;
+  background: linear-gradient(#ff7a00, #ff7a00) left top / 8px 12px no-repeat, linear-gradient(#ff7a00, #ff7a00) left bottom / 8px 12px no-repeat, linear-gradient(#ff7a00, #ff7a00) right top / 8px 12px no-repeat, linear-gradient(#ff7a00, #ff7a00) right bottom / 8px 12px no-repeat; }
+.bt-six.bt-hype .bt-art::after { animation: btTw .5s steps(2, jump-none) var(--d, 0s) infinite alternate; }
+.bt-six .bt-tlg { display: none; }
+.bt-six :is(.pp-pick, .ob-pick) .t, .slip.bt-six .sl-pick { color: #fff; text-shadow: 0 2px 6px rgba(0,0,0,.85); }
+.bt-six :is(.pp-meta, .ob-meta, .ob-strip, .fx-pay) { text-shadow: 0 1px 3px rgba(0,0,0,.9); }
+.bt-six .pp-mid, .bt-six .ob-st { background-color: rgba(0,0,0,.42); border-radius: 9px; }
+.bt-six .pp-mid { padding: 5px 8px; }
+
+/* ---------- the cash at its bigger levels ---------- */
+.cs.lv3 .cs-stage { width: 640px; }
+.cs-beam { position: absolute; bottom: -12%; width: 300px; height: 150vh; transform-origin: 50% 100%; opacity: 0; mix-blend-mode: screen; pointer-events: none;
+  background: linear-gradient(to top, color-mix(in srgb, var(--fxk) 50%, transparent), transparent 85%); clip-path: polygon(46% 100%, 54% 100%, 100% 0, 0 0); animation: csFade .6s .4s forwards, csSweep 3.2s .4s ease-in-out infinite alternate; }
+.cs-beam.l { left: 10%; --a: -30deg; --b: 16deg; } .cs-beam.r { right: 10%; --a: 30deg; --b: -16deg; }
+@keyframes csSweep { from { rotate: var(--a); } to { rotate: var(--b); } }
+.cs-word { position: absolute; left: 0; right: 0; top: 50%; translate: 0 -50%; overflow: hidden; white-space: nowrap; opacity: 0; animation: csFade .6s .5s forwards; pointer-events: none; }
+.cs-word span { display: inline-block; font: 900 280px/1 var(--f-display), Inter, sans-serif; letter-spacing: .02em; color: transparent; -webkit-text-stroke: 2px color-mix(in srgb, var(--fxk) 30%, transparent); animation: csMarq 16s linear infinite; }
+@keyframes csMarq { to { transform: translateX(-50%); } }
+.cs-beat { position: absolute; inset: 0; pointer-events: none; background: radial-gradient(60% 60% at 50% 48%, color-mix(in srgb, var(--fxk) 20%, transparent), transparent 70%); opacity: 0; animation: csBeat .48s 1s ease-out infinite; }
+@keyframes csBeat { 0% { opacity: 1; } 100% { opacity: 0; } }
+.cs.lv4 .cs-pay > b, .cs.lv5 .cs-pay > b { animation: csPunch .48s 2.3s ease-out infinite; }
+@keyframes csPunch { 0% { transform: scale(1.07); } 100% { transform: scale(1); } }
+.cs-cf { position: absolute; bottom: -12px; width: 10px; height: 16px; border-radius: 2px; background: var(--c); opacity: 0; pointer-events: none; animation: csCannon 2.9s var(--dl) cubic-bezier(.15,.7,.3,1) forwards; }
+.cs-cf.l { left: 5%; } .cs-cf.r { right: 5%; }
+@keyframes csCannon { 0% { opacity: 1; transform: translate(0, 0) rotate(0); } 55% { opacity: 1; transform: translate(calc(var(--dx) * .8), var(--dy)) rotate(calc(var(--r) * .6)); } 100% { opacity: 0; transform: translate(var(--dx), calc(var(--dy) + 560px)) rotate(var(--r)); } }
+.cs-fl { position: absolute; width: 180px; height: 180px; margin: -90px 0 0 -90px; border-radius: 50%; background: radial-gradient(circle, rgba(255,255,255,.85), rgba(255,255,255,0) 60%); opacity: 0; pointer-events: none; animation: csFl .35s var(--dl) ease-out forwards; }
+@keyframes csFl { 0% { opacity: 0; scale: .4; } 20% { opacity: 1; } 100% { opacity: 0; scale: 1.4; } }
+.cs-white { position: absolute; inset: 0; background: #fff; opacity: 0; pointer-events: none; animation: csFlash .8s .86s ease-out forwards; }
+.cs-shock { position: absolute; left: 50%; top: 46%; width: 400px; height: 400px; margin: -200px 0 0 -200px; border-radius: 50%; border: 4px solid #ffb020; box-shadow: 0 0 40px #ff7a1a; opacity: 0; pointer-events: none; animation: csRing2 1.8s calc(.9s + var(--i) * .25s) ease-out forwards; }
+.cs-strobe { position: absolute; inset: 0; background: rgba(255,240,220,.16); opacity: 0; pointer-events: none; animation: csStrobe .16s 1.2s steps(2, jump-none) 14; }
+@keyframes csStrobe { from { opacity: 0; } to { opacity: 1; } }
+.cs.lv5 .cs-stage { animation: csShake .5s .88s, csShake .5s 2.6s; }
+.cs.lv5 .cs-stamp { font-size: 70px; }
+.cs.lv5 .cs-pay > b { font-size: 124px; }
 .pp-none { padding: 16px 6px; font: 600 15px/1.3 Inter, sans-serif; color: #8d97a8; text-align: center; }
 .pp-bet { position: relative; flex: none; display: grid; gap: 6px; padding: 10px 12px 11px 13px; border-radius: 12px; background: rgba(255,255,255,.035); border: 1px solid rgba(190,210,240,.1); border-left: 5px solid rgba(190,210,240,.28); }
 .pp-bet.k-lost { opacity: .7; }
@@ -6338,19 +6589,25 @@ body.tv .rb-games.primeg.mason > .rb-pcol { padding-top: 16px; -webkit-mask-imag
     const hype = !!k && ((Number(b.odds) || 0) >= 1000 || usd >= 50 - 0.005);
     // the team: its colors (and both teams' for a rivalry), its logo when the pick is a side or one of its players
     const vars = {}, g = b.kind !== "parlay" && b.sel ? gameOf(b.sel) : null, hex = (c) => (/^#[0-9a-f]{6}$/i.test(c || "") ? c : "");
-    let tlg = "";
+    let tlg = "", tn = "";
     if (g && k) {
       if (hex(g.a.col)) vars["--ta"] = hex(g.a.col); if (hex(g.h.col)) vars["--th"] = hex(g.h.col);
       const tm = b.sel.s === "a" || b.sel.s === "h" ? g[b.sel.s] : null;
-      if (tm) { if (hex(tm.col)) vars["--tc1"] = hex(tm.col); if (hex(tm.alt)) vars["--tc2"] = hex(tm.alt); if (/^https:\/\/[^\s"'()<>]+$/.test(tm.lg || "")) tlg = tm.lg; }
+      if (tm) { if (hex(tm.col)) vars["--tc1"] = hex(tm.col); if (hex(tm.alt)) vars["--tc2"] = hex(tm.alt);
+        tn = String(tm.nm || tm.ab || "").toUpperCase();
+        // the accent: whichever of its colors shows up on a dark card
+        const lum = (c) => { const v = parseInt(c.slice(1), 16); return ((v >> 16) * 299 + ((v >> 8) & 255) * 587 + (v & 255) * 114) / 1000; };
+        const cs = [hex(tm.col), hex(tm.alt)].filter(Boolean).sort((x, y) => lum(y) - lum(x));
+        if (cs[0]) vars["--tca"] = lum(cs[0]) < 70 ? "#c9d1dc" : cs[0]; if (/^https:\/\/[^\s"'()<>]+$/.test(tm.lg || "")) tlg = tm.lg; }
     }
+    const team = !!k && k !== "rivalry" && b.kind !== "parlay" && !!b.sel && (b.sel.m === "ml" || b.sel.m === "sp") && !!vars["--tc1"];
     const sty = "--d:" + btT() + Object.entries(vars).map(([a, v]) => ";" + a + ":" + v).join("");
-    return { k, odds: k, more: ks.slice(1, 4), name, usd, win: usd * ppu(Number(b.odds) || 0), winU: (usd / S.unit) * ppu(Number(b.odds) || 0), cls: k ? " fx bt bt-" + k + (live ? " bt-islive" : "") + (["bronze", "silver", "gold"].includes(k) ? " bt-metal" : "") + (hype ? " bt-hype" : "") : "", live, hype, vars, sty, tlg, big: !!k && (!side || hype) };
+    return { k, odds: k, more: ks.slice(1, 4), name, usd, win: usd * ppu(Number(b.odds) || 0), winU: (usd / S.unit) * ppu(Number(b.odds) || 0), cls: k ? " fx bt bt-" + k + (live ? " bt-islive" : "") + (["bronze", "silver", "gold"].includes(k) ? " bt-metal" : "") + (hype ? " bt-hype" : "") + (team ? " bt-team" : "") : "", live, hype, vars, sty, tlg, tn: b.sel && b.sel.m === "td" ? tn : "", team, big: !!k && (!side || hype) };
   }
   const btT = () => "-" + ((Date.now() / 1000) % 120).toFixed(2) + "s";
   function fxRow(f) {
     if (!f || !f.k) return "";
-    return `<div class="fx-row"><i class="fx-glint" aria-hidden="true"></i><i class="bt-art" aria-hidden="true"><b></b><u></u><s></s><em></em>${f.tlg ? `<img class="bt-tlg" src="${esc(f.tlg)}" alt="" loading="lazy" referrerpolicy="no-referrer" onerror="this.remove()">` : ""}</i><span class="bt-chip bt-c-${f.k}">${BT_DEF[f.k][0]} ${f.live ? '<i class="bt-lv">⚡ Live</i> ' : ""}${esc(f.name)}</span>${f.more.map((x) => `<span class="bt-mini bt-c-${x}" title="${BT_DEF[x][1]}">${BT_DEF[x][0]}</span>`).join("")}<span class="fx-pay">To win <b>${fU(f.winU)}</b></span></div>`;
+    return `<div class="fx-row"><i class="fx-glint" aria-hidden="true"></i><i class="bt-art" aria-hidden="true"${f.tn ? ` data-tn="${esc(f.tn)}" style="--nch:${f.tn.length}"` : ""}><b></b><u></u><s></s><em></em>${f.tlg ? `<img class="bt-tlg" src="${esc(f.tlg)}" alt="" loading="lazy" referrerpolicy="no-referrer" onerror="this.remove()">` : ""}</i><span class="bt-chip bt-c-${f.k}">${BT_DEF[f.k][0]} ${f.live ? '<i class="bt-lv">⚡ Live</i> ' : ""}${esc(f.name)}</span>${f.more.map((x) => `<span class="bt-mini bt-c-${x}" title="${BT_DEF[x][1]}">${BT_DEF[x][0]}</span>`).join("")}<span class="fx-pay">To win <b>${fU(f.winU)}</b></span></div>`;
   }
   // next to a name: a badge for each kind of bet they've hit (the count when it's more than one)
   function btBadges(done, max) {
@@ -6727,40 +6984,180 @@ body.tv .rb-games.primeg.mason > .rb-pcol { padding-top: 16px; -webkit-mask-imag
   const flQ = []; let flT = 0;
   function qFlash(...a) { flQ.push(a); if (!flT) flStep(); }
   function flStep() { const a = flQ.shift(); if (!a) { flT = 0; return; } flash(...a); flT = setTimeout(flStep, 2900); }
+
+  const CASH = { q: [], t: 0 };
+  const CASH_LV = { nuke: 5, botd: 4, whale: 4, lotto: 4, opal: 3, dart: 3, snipe: 3, long: 3, gold: 3, dinger: 3, lamp: 3 };
+  function cashLevel(b, F) {
+    const usd = (Number(b.units) || 0) * S.unit, o = Number(b.odds) || 0;
+    let lv = F.k ? CASH_LV[F.k] || 2 : 1;
+    if (F.hype) lv = Math.max(lv, 4);
+    if (usd >= 100 - 0.005 || o >= 2500) lv = 5;
+    return lv;
+  }
+  // a house song under the big ones: up fast, held, faded at the end
+  function cashMusic(lv, T) {
+    const H = pickClip(houseEdits()); if (!H || !H.base) return;
+    const a = new Audio(H.base + ".mp3"), peak = lv >= 5 ? 1 : lv >= 4 ? 0.85 : 0.6, t0 = performance.now(), dur = T - 250;
+    a.volume = 0; a.play().catch(() => {});
+    const tick = () => {
+      const t = performance.now() - t0;
+      a.volume = Math.max(0, Math.min(peak, t < 500 ? (peak * t) / 500 : t > dur - 1100 ? (peak * (dur - t)) / 1100 : peak));
+      if (t < dur) requestAnimationFrame(tick); else a.pause();
+    };
+    requestAnimationFrame(tick);
+  }
+  function cashExtras(lv, F) {
+    const word = (F.k ? BT_DEF[F.k][1] : "Cashed").toUpperCase(), R = Math.random;
+    let h = "";
+    if (lv >= 3) h += '<i class="cs-beam l"></i><i class="cs-beam r"></i>';
+    if (lv >= 4) {
+      h += `<div class="cs-word"><span>${(esc(word) + " · ").repeat(8)}</span></div><i class="cs-beat"></i>`;
+      h += Array.from({ length: lv >= 5 ? 90 : 60 }, (_, i) => { const L = i % 2 === 0;
+        return `<i class="cs-cf ${L ? "l" : "r"}" style="--dx:${((L ? 1 : -1) * (180 + R() * 760)) | 0}px;--dy:${(-(360 + R() * 560)) | 0}px;--r:${(R() * 1440 - 720) | 0}deg;--c:${["#ffd23f", "#ff5a7a", "#7fd8ff", "#7dffb0", "#ffffff", "var(--fxk)"][i % 6]};--dl:${(1 + R() * 0.6 + (i > 45 ? 2.2 : 0)).toFixed(2)}s"></i>`; }).join("");
+      h += Array.from({ length: lv >= 5 ? 14 : 9 }, (_, i) => `<i class="cs-fl" style="left:${(6 + R() * 88) | 0}%;top:${(8 + R() * 74) | 0}%;--dl:${(1.1 + i * 0.32 + R() * 0.2).toFixed(2)}s"></i>`).join("");
+    }
+    if (lv >= 5) h += '<i class="cs-white"></i><i class="cs-shock" style="--i:0"></i><i class="cs-shock" style="--i:1"></i><i class="cs-shock" style="--i:2"></i><i class="cs-strobe"></i>';
+    return h;
+  }
+  const etClock = (t) => new Date(t).toLocaleTimeString("en-US", { timeZone: "America/New_York", hour: "numeric", minute: "2-digit" });
+  const heldFor = (ms) => { const m = Math.max(1, Math.round(ms / 60e3)); return m < 60 ? m + "m" : Math.floor(m / 60) + "h " + String(m % 60).padStart(2, "0") + "m"; };
+  const allBets = () => [...S.bets.values(), ...(S.goneBets ? S.goneBets.values() : [])];
+  function cashAch(b) {
+    const pk = personKey(b), had = new Map();
+    for (const x of allBets()) {
+      if (x.id === b.id || personKey(x) !== pk || x.status === "open" || outcome(x) !== "W") continue;
+      const lv = btLive(x); for (const k of betTypes(x)) { const key = k + (lv ? "~" : ""); had.set(key, (had.get(key) || 0) + 1); }
+    }
+    const lv = btLive(b);
+    return betTypes(b).map((k) => { const n = (had.get(k + (lv ? "~" : "")) || 0) + 1; return { k, lv, n, isNew: n === 1 }; });
+  }
+  function cashDay(b) {
+    const pk = personKey(b), t0 = dayStart(Date.now()).getTime();
+    const done = allBets().filter((x) => personKey(x) === pk && x.status !== "open" && (x.settledAt || 0) >= t0).sort((x, y) => (x.settledAt || 0) - (y.settledAt || 0));
+    let w = 0, l = 0, net = 0, run = 0;
+    for (const x of done) { const o = outcome(x); net += netOf(x); if (o === "W") { w++; run = run > 0 ? run + 1 : 1; } else if (o === "L") { l++; run = run < 0 ? run - 1 : -1; } }
+    const wins = allBets().filter((x) => personKey(x) === pk && x.status !== "open" && outcome(x) === "W").length;
+    return { w, l, net, run, wins };
+  }
+  // one small detail per type, behind the card
+  function cashFx(k) {
+    const n = (c, m) => Array.from({ length: m }, (_, i) => `<i class="${c}" style="--i:${i}"></i>`).join("");
+    const art = {
+      nuke: n("ring", 3) + '<i class="flash"></i>',
+      botd: '<i class="crown">👑</i>' + n("ray", 16),
+      whale: n("ring", 4) + n("bub", 12),
+      dart: n("tgt", 5) + '<i class="hit"></i>',
+      opal: '<i class="neb"></i>' + n("star", 16),
+      lotto: '<div class="reels">' + [0, 1, 2].map((j) => `<b style="--j:${j}"><span>7<br>🍒<br>💎<br>BAR<br>🔔<br>7<br>🍒<br>💎<br>BAR<br>7</span></b>`).join("") + "</div>",
+      snipe: n("brk", 4) + '<i class="trace"></i>',
+      long: '<i class="arrow"></i>' + n("ring", 2),
+      prime: '<i class="moon"></i>' + n("star", 14),
+      dawg: n("paw", 7),
+      gold: '<i class="coin"></i>' + n("ray", 12), silver: '<i class="coin"></i>' + n("ray", 12), bronze: '<i class="coin"></i>' + n("ray", 12),
+      six: '<i class="ball"></i>' + n("conf", 26),
+      chains: '<i class="post a"></i><i class="post b"></i><i class="chain"></i><i class="first">1ST DOWN</i>',
+      dinger: '<svg class="arc" viewBox="0 0 600 260"><path d="M20 250 Q300 -90 580 120"/></svg><i class="ball"></i>' + n("spark", 14),
+      punchout: '<svg class="kk" viewBox="0 0 200 200"><path d="M50 20 L50 180 M150 20 L54 104 L150 180"/></svg>',
+      lamp: '<i class="beam"></i><i class="bulb"></i>',
+      bucket: '<svg class="hoop" viewBox="0 0 200 200"><ellipse cx="100" cy="40" rx="62" ry="12"/><path class="net" d="M40 42 L62 150 M160 42 L138 150 M70 44 L80 150 M130 44 L120 150 M100 52 L100 152 M48 80 L152 80 M56 115 L144 115 M62 150 L138 150"/></svg><i class="ball"></i>',
+      shootout: '<b class="led">' + "88:88".split("").map((c, i) => `<i style="--i:${i}">${c}</i>`).join("") + "</b>",
+      lockdown: '<i class="dial"></i><i class="bolt a"></i><i class="bolt b"></i>',
+      rivalry: '<svg class="zap" viewBox="0 0 100 300"><path d="M58 0 L30 120 L56 126 L22 300 L80 150 L52 144 L78 0 Z"/></svg>',
+    };
+    return art[k] || n("ray", 12) + n("coin", 10);
+  }
+  function cashQ(b, n, names) {
+    if (PHONE()) return;
+    CASH.q.push({ b, n, names });
+    if (!CASH.t) CASH.t = setTimeout(cashFlush, 900);   // a beat to gather wins that land together
+  }
+  function cashFlush() {
+    CASH.t = 0;
+    const items = CASH.q.splice(0); if (!items.length) return;
+    if (items.length >= 3) { fx(afterCard(() => cashSweep(items))); return; }
+    for (const it of items) fx(afterCard(() => cashRun(it)));
+  }
+  function cashEl() {
+    let el = $("#cash");
+    if (!el) { document.body.insertAdjacentHTML("beforeend", '<div class="cs" id="cash" hidden aria-live="polite"></div>'); el = $("#cash"); }
+    clearTimeout(el._t); clearTimeout(el._t2); el.className = "cs"; return el;
+  }
+  function cashCount(el, sel, to, at, dur) {
+    const w = el.querySelector(sel); if (!w) return;
+    const t0 = performance.now() + at;
+    const step = (t) => { const k = Math.min(1, Math.max(0, (t - t0) / dur)); w.textContent = fU(to * (1 - Math.pow(1 - k, 3)), true); if (k < 1 && !el.hidden) requestAnimationFrame(step); };
+    requestAnimationFrame(step);
+  }
+  function cashRun({ b, n, names }) {
+    const el = cashEl(), F = flexOf(b), lvl = cashLevel(b, F), tier = lvl >= 4 ? "big" : lvl >= 2 ? "mid" : "small";
+    const g = b.kind !== "parlay" && b.sel ? gameOf(b.sel) : null, day = cashDay(b), ach = F.k ? cashAch(b) : [], lv = btLive(b), o = Number(b.odds) || 0;
+    const pr = 1 / (ppu(o) + 1), legs = b.kind === "parlay" ? legsOf(b) : [];
+    const rows = [["Placed", etClock(b.placedAt || Date.now())], lv ? ["Live", "⚡ In-game"] : null, b.settledAt && b.placedAt ? ["Held", heldFor(b.settledAt - b.placedAt)] : null,
+      g ? [g.st === "post" ? "Final" : "Score", `${g.a.ab} ${g.a.sc ?? ""} – ${g.h.ab} ${g.h.sc ?? ""}`] : null, legs.length ? ["Legs", `${legs.length} for ${legs.length}`] : null,
+      ["The shot", Math.round(pr * 100) + "%"], ["Book", BOOK[bookKey(b)]]].filter(Boolean);
+    const who = names && names.length ? names : [personName(b)];
+    const top = ach[0], more = ach.slice(1, 4);
+    const medal = top ? `<div class="cs-medal bt-c-${top.k}${top.isNew ? " new" : ""}${top.lv ? " lv" : ""}"><svg viewBox="0 0 120 120"><circle class="trk" cx="60" cy="60" r="54"/><circle class="fil" cx="60" cy="60" r="54"/></svg><i>${BT_DEF[top.k][0]}</i>${top.isNew ? "<b>NEW</b>" : ""}</div>
+        <div class="cs-ach-t"><em>${top.isNew ? "Achievement unlocked" : "Achievement"}</em><b>${top.lv ? "⚡ Live " : ""}${esc(BT_DEF[top.k][1])}</b><small>${top.isNew ? esc(BT_HOW[top.k] || "") : "×" + top.n + " career"}</small></div>
+        ${more.length ? `<ul class="cs-more">${more.map((a) => `<li class="bt-c-${a.k}"><i>${BT_DEF[a.k][0]}</i>${a.lv ? "Live " : ""}${esc(BT_DEF[a.k][1])}<b>${a.isNew ? "NEW" : "×" + a.n}</b></li>`).join("")}</ul>` : ""}`
+      : `<div class="cs-medal plain"><svg viewBox="0 0 120 120"><circle class="trk" cx="60" cy="60" r="54"/><circle class="fil" cx="60" cy="60" r="54"/></svg><i>✓</i></div><div class="cs-ach-t"><em>Career</em><b>Win #${day.wins}</b><small>${esc(personName(b))}'s ${day.wins}${["th", "st", "nd", "rd"][(day.wins % 100 > 10 && day.wins % 100 < 14) || day.wins % 10 > 3 ? 0 : day.wins % 10]} cash</small></div>`;
+    el.className = "cs " + tier + " lv" + lvl + " ck-" + (F.k || "cash") + (F.k ? " bt-c-" + F.k : "");
+    el.style.setProperty("--c", personCol(b));
+    el.innerHTML = `<div class="cs-bg"></div>${cashExtras(lvl, F)}<div class="cs-hud"><i class="c1"></i><i class="c2"></i><i class="c3"></i><i class="c4"></i>
+        <span class="cs-l"><i></i>${lvl >= 5 ? "Nuke · " : lvl >= 4 ? "Big cash · " : ""}Cashed · ${esc(etClock(b.settledAt || Date.now()))}</span><span class="cs-r">${esc(BOOK[bookKey(b)])} · #${esc(String(b.id).slice(-4).toUpperCase())}</span></div>
+      <div class="cs-stage"><div class="cs-fx fx-${F.k || "cash"}">${cashFx(F.k)}</div>
+        <div class="cs-card">${b.kind === "parlay" ? ppParlay(b) : ppTicket(b)}<div class="cs-stamp"><span>Cashed</span><small>${esc(etClock(b.settledAt || Date.now()))}</small></div></div>
+        <div class="cs-pay"><b class="num" id="csAmt">+0u</b><span>${esc(fOdds(o))}<i>·</i>${esc(fU(b.units))} risked<i>·</i>paid ${esc(fU(b.units + n))}</span></div></div>
+      <div class="cs-side cs-det">${rows.map(([a, v], i) => `<div style="--i:${i}"><em>${a}</em><b>${esc(v)}</b></div>`).join("")}</div>
+      <div class="cs-side cs-ach">${medal}</div>
+      <div class="cs-who"><span class="rb-av" style="--c:${personCol(b)}">${esc(personName(b).slice(0, 1).toUpperCase())}</span><b>${esc(who.join(" + "))}</b>
+        <span>${day.w}-${day.l} today</span><span class="${day.net >= 0 ? "up" : "dn"}">${fU(day.net, true)}</span>${day.run > 1 ? `<span class="hot">W${day.run} 🔥</span>` : ""}</div>`;
+    // a straight's status on the card: final, won, what it paid
+    const mid = el.querySelector(".cs-card .pp-mid");
+    if (mid) mid.innerHTML = `<div class="ob-st k-won"><i class="tl tl-g fin" aria-hidden="true"></i><em>${legs.length ? "All hit · " + legs.length + " for " + legs.length : "Final"}</em><b>✓ Won ${esc(fU(n, true))}</b></div>`;
+    // a cashed parlay: every leg ticked, one after another
+    el.querySelectorAll(".cs-card .ob-legs li").forEach((li, i) => { li.className = "hit"; li.style.setProperty("--i", i); const ic = li.querySelector("i"); if (ic) ic.textContent = "✓"; const em = li.querySelector("em"); if (em && !/final/i.test(em.textContent)) em.remove(); });
+    el.hidden = false; void el.offsetWidth; el.classList.add("on");
+    const T = [0, 5200, 7200, 9400, 12500, 15500][lvl];
+    if (lvl >= 3) { snSound("bc_sting", 0.9, 0); cashMusic(lvl, T); }
+    if (lvl >= 4) { snSound("launch", 0.8, 1000); snSound("launch", 0.7, 3200); }
+    if (lvl >= 5) { playSfx("siren", 0.6); setTimeout(() => playSfx("nuke", 0.9), 860); }
+    snSound("whoosh", 0.5, 0); snSound("slam", 0.85, 880);
+    setTimeout(() => { playWin(); playSfx("payout", 0.55); }, 900);
+    cashCount(el, "#csAmt", n, 1100, tier === "big" ? 1800 : 1200);
+    if (top && top.isNew) snSound("bc_check", 0.8, 1900);
+    if (F.k === "lamp") snSound("goal_horn_short", 0.6, 1200);
+    el._t = setTimeout(() => { el.classList.add("out"); el._t2 = setTimeout(() => { el.hidden = true; el.innerHTML = ""; }, 600); }, T - 600);
+    if (lvl >= 5 && clipsOn()) setTimeout(() => encore(b, n, { name: who.join(" + "), sub: "cashed", col: personCol(b) }), 50);
+    return T;
+  }
+  // three or more at once: a sweep, every ticket stamped in a row and the total
+  function cashSweep(items) {
+    const el = cashEl(), tot = items.reduce((a, x) => a + x.n, 0), people = [...new Set(items.flatMap((x) => x.names || [personName(x.b)]))];
+    el.className = "cs sweep";
+    el.innerHTML = `<div class="cs-bg"></div><div class="cs-hud"><i class="c1"></i><i class="c2"></i><i class="c3"></i><i class="c4"></i><span class="cs-l"><i></i>Sweep · ${items.length} cashed</span><span class="cs-r">${esc(etClock(Date.now()))}</span></div>
+      <div class="cs-sw">${items.slice(0, 5).map((x, i) => `<div class="cs-swc" style="--i:${i}">${x.b.kind === "parlay" ? ppParlay(x.b) : ppTicket(x.b)}<div class="cs-stamp"><span>Cashed</span></div><b class="num">${fU(x.n, true)}</b></div>`).join("")}</div>
+      <div class="cs-pay sw"><b class="num" id="csAmt">+0u</b><span>${esc(people.join(" · "))}</span></div>`;
+    el.hidden = false; void el.offsetWidth; el.classList.add("on");
+    items.slice(0, 5).forEach((_, i) => snSound("slam", 0.6, 700 + i * 260));
+    setTimeout(() => { playWin(); playSfx("coins", 0.6); }, 900);
+    cashCount(el, "#csAmt", tot, 900 + items.length * 260, 1400);
+    const T = 6200 + Math.min(5, items.length) * 260;
+    el._t = setTimeout(() => { el.classList.add("out"); el._t2 = setTimeout(() => { el.hidden = true; el.innerHTML = ""; }, 600); }, T - 600);
+    return T;
+  }
   function celebrate(b) {
     try { if (window.sbCrowd) window.sbCrowd.pop(); } catch (e) {}
     const o = outcome(b), n = netOf(b), k = rideKey(b);
     if (!isMe(b)) {
       const mates = rideMates(b), withMe = [...S.bets.values()].some((m) => isMe(m) && m.id !== b.id && rideKey(m) === k && (m.status === "open" || Date.now() - (m.settledAt || 0) < 3 * 3600e3));
-      const dup = Date.now() - (rideFx.get(k) || 0) < 120e3, fade = fadingMe(b);
-      if (o === "W" && !fade && !withMe && !dup && clipsOn()) {
-        rideFx.set(k, Date.now());
-        const names = [personName(b), ...mates], td = b.kind !== "parlay" && b.sel && isTd(b.sel.m);
-        const tag = { name: names.length > 1 ? names.join(" + ") : names[0], sub: td ? "TD scorer cashed" : names.length > 1 ? "group ride hit" : "hit", col: personCol(b) };
-        const big = isMoney(b, n) || b.kind === "parlay" || isNuke(b) || isWhale(b);
-        if (td && !isMoney(b, n) && (tdEdit(b, b.sel, `${tag.name} · TD scorer cashed`, tag) || (!fbDay() && !fxRush() && (fxLog.push(Date.now()), edShow(b, n, tag), true)))) return;
-        if (big || (!td && !fxRush())) { fxLog.push(Date.now()); winFx(b, n, tag); return; }
-        playWin();
-        qFlash("W", `${tag.name.toUpperCase()} HIT`, b.pick, `${fOdds(b.odds)} · ${fU(n, true)} (${fUSD(n * S.unit, true)})`);
-        return;
-      }
-      if (o === "W" && !fade && !withMe && !dup) playWin();
+      const dup = Date.now() - (rideFx.get(k) || 0) < 120e3;
+      // their win gets the cash (riding with yours, yours carries their names)
+      if (o === "W" && !withMe && !dup) { rideFx.set(k, Date.now()); cashQ(b, n, [personName(b), ...mates]); return; }
       qFlash(o, `${personName(b).toUpperCase()} ${o === "W" ? (withMe ? "HIT TOO" : "HIT") : o === "L" ? "LOST" : b.status === "cashout" ? "CASHED" : "PUSH"}`, b.pick, `${fOdds(b.odds)} · ${fU(n, true)} (${fUSD(n * S.unit, true)})`);
       return;
     }
-    if (o === "W") {
-      rideFx.set(k, Date.now());
-      const mates = rideMates(b);
-      const tag = mates.length ? { name: [personName(b), ...mates].join(" + "), sub: "group ride hit", col: "#e2c17e" } : null, td = b.kind !== "parlay" && b.sel && isTd(b.sel.m);
-      const big = isMoney(b, n) || b.kind === "parlay" || isNuke(b) || isWhale(b);
-      if (td && !big) {   // your touchdown scorer: its edit, or (between edits, on a football day) the banner
-        if (tdEdit(b, b.sel, "Touchdown · " + ((b.sel.p && b.sel.p.nm) || b.pick), tag)) return;
-        if (fbDay()) { playWin(); qFlash("W", "WINNER", b.pick, `${BOOK[bookKey(b)]} · ${fOdds(b.odds)} · ${fU(n, true)} (${fUSD(n * S.unit, true)})`); return; }
-      }
-      if (big || !fxRush()) { fxLog.push(Date.now()); winFx(b, n, tag); return; }
-      playWin(); qFlash("W", "WINNER", b.pick, `${BOOK[bookKey(b)]} · ${fOdds(b.odds)} · ${fU(n, true)} (${fUSD(n * S.unit, true)})`);
-      return;
-    }
+    if (o === "W") { rideFx.set(k, Date.now()); cashQ(b, n, [personName(b), ...rideMates(b)]); return; }
     if (o === "L") { playLoss(); if (!fxRush()) { fxLog.push(Date.now()); lossReact(b, n); } }
     const word = b.status === "cashout" ? "CASHED" : o === "W" ? "WINNER" : o === "L" ? "LOSS" : "PUSH";
     qFlash(o, word, b.pick, `${BOOK[bookKey(b)]} · ${fOdds(b.odds)} · ${fU(n, true)} (${fUSD(n * S.unit, true)})`);
@@ -6783,6 +7180,13 @@ body.tv .rb-games.primeg.mason > .rb-pcol { padding-top: 16px; -webkit-mask-imag
     const c = EDITS[(edLast = edBag.splice(j, 1)[0])]; edPre(c);
     fx(afterCard(() => { const ms = introEdit(c, b, n); if (tag) whoTag(tag, ms); return ms; }));
     if (isNuke(b)) nukeHit(b.pick, n); else if (isWhale(b)) whaleSplash(b, n);
+  }
+  function encore(b, n, tag) {
+    if (!EDITS.length) return;
+    if (!edBag.length) { edBag = shuffled(EDITS.map((_, i) => i)); if (edBag[edBag.length - 1] === edLast) edBag.unshift(edBag.pop()); }
+    let j = edBag.length - 1; while (j > 0 && EDITS[edBag[j]].fits && !EDITS[edBag[j]].fits(b)) j--;
+    const c = EDITS[(edLast = edBag.splice(j, 1)[0])]; edPre(c);
+    fx(afterCard(() => { const ms = introEdit(c, b, n); if (tag) whoTag(tag, ms); return ms; }));
   }
   // whose bet is on screen: a name pill riding over any animation
   let whoT = 0, whoJb = false;
@@ -7023,7 +7427,7 @@ body.tv .rb-games.primeg.mason > .rb-pcol { padding-top: 16px; -webkit-mask-imag
   // ---------- sheets ----------
   function openSheet(id) { $(id).hidden = false; }
   // keep every open screen current: when a new version is up, reload it (never mid-form or mid-animation)
-  const BUILD = "20261018232748";
+  const BUILD = "20261019000157";
   function checkBuild() {
     if (BUILD === "dev") return;
     fetch("version.json?t=" + Date.now(), { cache: "no-store" }).then((r) => (r.ok ? r.json() : null)).then((j) => {
@@ -8765,6 +9169,15 @@ body.tv .rb-games.primeg.mason > .rb-pcol { padding-top: 16px; -webkit-mask-imag
     clip("house/hs22", "Legends only", "up win vibe", 12.5, { house: 1, lux: 1, music: true, songId: "hs22" }),
     clip("house/hs23", "Jets and yachts", "up win vibe", 28.23, { house: 1, lux: 1, music: true, songId: "hs23" }),
     clip("house/hs36", "Tour life", "up win vibe", 23.87, { house: 1, lux: 1, music: true, songId: "hs36" }),
+    clip("house/hs37", "Send it", "up win vibe", 15.23, { house: 1, lux: 1, music: true, songId: "hs37" }),
+    clip("house/hs38", "Matchday", "up win vibe", 10.37, { house: 1, lux: 1, music: true, songId: "hs38" }),
+    clip("house/hs39", "Nine darter", "up win vibe", 35.87, { house: 1, lux: 1, music: true, songId: "hs39" }),
+    clip("house/hs40", "Ari at the club", "up win vibe", 30.23, { house: 1, lux: 1, music: true, songId: "hs40" }),
+    clip("house/hs41", "Lights out", "up win vibe", 26.5, { house: 1, lux: 1, music: true, songId: "hs41" }),
+    clip("house/hs42", "You and me", "up win vibe", 40.77, { house: 1, lux: 1, music: true, songId: "hs42" }),
+    clip("house/hs43", "Hollywood Ari", "up win vibe", 44.23, { house: 1, lux: 1, music: true, songId: "hs43" }),
+    clip("house/hs44", "Celebration", "up win vibe", 12.37, { house: 1, lux: 1, music: true, songId: "hs44" }),
+    clip("house/hs45", "Point Break", "up win vibe", 71.1, { house: 1, lux: 1, music: true, songId: "hs45" }),
     clip("clips/w02", "Car ride laughs", "up win", 22.45),
     clip("clips/w03", "Tiger: Pure.", "up win", 30),
     clip("clips/w04", "Migos carpool", "up win vibe", 30, { song: "Walk It Talk It", artist: "Migos ft. Drake" }),
@@ -10702,7 +11115,7 @@ body.tv .rb-games.primeg.mason > .rb-pcol { padding-top: 16px; -webkit-mask-imag
     const H = pickClip(houseEdits());
     return H ? Object.assign({}, H, { house: 1, lux: 1, set: 1 }) : P;
   }
-  { const DUR_FIX = {"sounds/cfb/cfb01":12.0,"sounds/cfb/cfb02":14.6,"sounds/cfb/cfb03":26.8,"sounds/cfb/cfb04":11.5,"sounds/cfb/cfb05":28.0,"sounds/cfb/cfb06":30.0,"sounds/cfb/cfb07":25.8,"sounds/cfb/cfb08":5.7,"sounds/cfb/cfb09":27.93,"sounds/cfb/cfb10":26.93,"sounds/cfb/cfb11":29.9,"sounds/cfb/cfb12":25.93,"sounds/cfb/cfb13":22.03,"sounds/cfb/cfb14":33.4,"sounds/cfb/cfb15":15.0,"sounds/cfb/cfb16":31.2,"sounds/cfb/cfb17":32.0,"sounds/cfb/cfb18":30.2,"sounds/cfb/cfb19":14.63,"sounds/cfb/cfb20":12.8,"sounds/cfb/cfb21":30.5,"sounds/cfb/cfb22":26.93,"sounds/cfb/cfb23":33.5,"sounds/cfb/cfb24":33.5,"sounds/cfb/cfb25":13.0,"sounds/cfb/cfb26":26.0,"sounds/cfb/cfb27":26.0,"sounds/cfb/cfb28":27.0,"sounds/cfb/cfb29":25.8,"sounds/cfb/cfb30":15.07,"sounds/cfb/cfb31":17.0,"sounds/cfb/cfb32":28.03,"sounds/cfb/cfb33":5.5,"sounds/cfb/cfb34":15.5,"sounds/cfb/cfb35":18.0,"sounds/cfb/cfb36":22.2,"sounds/cfb/cfb37":23.03,"sounds/cfb/cfb38":16.07,"sounds/cfb/cfb39":31.0,"sounds/cfb/cfb40":29.2,"sounds/cfb/cfb41":30.0,"sounds/cfb/cfb42":30.5,"sounds/cfb/cfb43":26.0,"sounds/cfb/cfb44":29.6,"sounds/cfb/cfb45":31.4,"sounds/cfb/cfb46":31.0,"sounds/cfb/cfb47":13.2,"sounds/cfb/cfb48":22.23,"sounds/clips/g06":30.0,"sounds/clips/g08":30.07,"sounds/clips/g09":28.93,"sounds/clips/l01":29.5,"sounds/clips/l02":27.8,"sounds/clips/l03":11.27,"sounds/clips/l04":16.57,"sounds/clips/l05":24.87,"sounds/clips/l06":18.87,"sounds/clips/l07":30.0,"sounds/clips/l08":30.0,"sounds/clips/w02":22.47,"sounds/clips/w03":30.0,"sounds/clips/w04":30.0,"sounds/clips/w05":30.0,"sounds/clips/w06":22.07,"sounds/clips/w07":27.97,"sounds/clips/w09":17.87,"sounds/clips/w14":17.07,"sounds/clips/w15":15.07,"sounds/clips/w16":29.87,"sounds/house/hs01":12.73,"sounds/house/hs02":19.0,"sounds/house/hs03":21.5,"sounds/house/hs04":19.5,"sounds/house/hs05":25.5,"sounds/house/hs06":39.23,"sounds/house/hs07":14.73,"sounds/house/hs08":21.23,"sounds/house/hs09":17.6,"sounds/house/hs10":16.0,"sounds/house/hs11":12.23,"sounds/house/hs12":36.37,"sounds/house/hs13":31.73,"sounds/house/hs14":21.1,"sounds/house/hs15":21.6,"sounds/house/hs16":57.6,"sounds/house/hs17":16.73,"sounds/house/hs18":42.6,"sounds/house/hs19":17.0,"sounds/house/hs20":44.13,"sounds/house/hs21":34.87,"sounds/house/hs22":12.5,"sounds/house/hs23":28.23,"sounds/mlb/mlb08":64.0,"sounds/mlb/mlb09":18.0,"sounds/mlb/mlb10":57.5,"sounds/mlb/mlb11":37.83,"sounds/mlb/mlb12":24.5,"sounds/mlb/mlb13":69.5,"sounds/mlb/mlb14":14.1,"sounds/mlb/mlb15":29.0,"sounds/mlb/mlb16":13.5,"sounds/mlb/mlb17":16.73,"sounds/mlb/mlb18":20.5,"sounds/mlb/mlb19":44.73,"sounds/house/hs36":23.87,"sounds/mlb/mlb01":20.8,"sounds/mlb/mlb02":25.47,"sounds/mlb/mlb03":16.3,"sounds/mlb/mlb04":13.77,"sounds/mlb/mlb05":30.0,"sounds/mlb/mlb06":15.27,"sounds/mlb/mlb07":8.6,"sounds/mlb/mlb20":60.73,"sounds/mlb/mlb21":71.13,"sounds/mlb/mlb22":25.37,"sounds/mlb/mlb23":47.0,"sounds/mlb/mlb24":29.73,"sounds/nfl/nfl01":16.0,"sounds/nfl/nfl02":16.6,"sounds/nfl/nfl03":15.37,"sounds/nfl/nfl04":28.2,"sounds/nfl/nfl05":11.27,"sounds/nfl/nfl06":10.7,"sounds/nfl/nfl07":29.1,"sounds/nfl/nfl08":60.6,"sounds/nfl/nfl09":56.2,"sounds/nfl/nfl10":49.5,"sounds/nfl/nfl11":19.5,"sounds/nfl/nfl12":60.6,"sounds/nfl/nfl13":29.7,"sounds/nfl/nfl14":27.8,"sounds/nfl/nfl15":21.7,"sounds/nfl/nfl16":14.0,"sounds/nfl/nfl17":12.4,"sounds/nfl/nfl18":22.1,"sounds/nfl/nfl19":17.6,"sounds/nfl/nfl20":15.8,"sounds/nfl/nfl21":23.9,"sounds/nfl/nfl22":21.0,"sounds/nfl/nfl23":9.9,"sounds/nfl/nfl24":20.6,"sounds/nfl/nfl25":20.1,"sounds/nfl/nfl26":18.6,"sounds/nfl/nfl27":11.4,"sounds/nfl/nfl28":35.1,"sounds/nfl/nfl29":30.3,"sounds/nfl/nfl30":32.1,"sounds/nfl/nfl31":37.2,"sounds/nfl/nfl32":25.1,"sounds/nfl/nfl33":22.93,"sounds/nfl/nfl34":39.3,"sounds/nfl/nfl35":29.3,"sounds/nfl/nfl36":31.0,"sounds/nfl/nfl37":36.3,"sounds/nfl/nfl38":18.63,"sounds/nfl/nfl39":23.6,"sounds/nfl/nfl40":21.7,"sounds/nfl/nfl41":17.3,"sounds/nfl/nfl42":40.9,"sounds/nfl/nfl43":14.5,"sounds/nfl/nfl44":26.1,"sounds/nfl/nfl45":31.3,"sounds/nfl/nfl46":16.07,"sounds/nfl/nfl47":21.3,"sounds/nfl/nfl48":36.0,"sounds/nfl/nfl49":24.1,"sounds/nfl/nfl50":34.2,"sounds/nfl/nfl51":17.5,"sounds/nfl/nfl52":29.5,"sounds/nfl/nfl53":26.2,"sounds/nfl/nfl54":21.7,"sounds/nfl/nfl55":39.1,"sounds/nhlv/hk01":43.43,"sounds/nhlv/hk02":39.57,"sounds/nhlv/hk03":17.2,"sounds/nhlv/hk04":36.0,"sounds/nhlv/hk05":17.43,"sounds/nhlv/hk06":34.3,"sounds/nhlv/hk07":44.7,"sounds/nhlv/hk08":12.43,"sounds/nhlv/hk09":30.1,"sounds/uga/uga01":13.97,"sounds/uga/uga02":30.03,"sounds/uga/uga03":25.77,"sounds/uga/uga04":30.0,"sounds/uga/uga05":16.27,"sounds/win/win09":30.0,"sounds/win/win10":29.77,"sounds/win/win11":36.5,"sounds/win/win12":23.93,"sounds/win/win13":31.77,"sounds/win/win14":17.07,"sounds/win/win15":10.27,"sounds/win/win16":17.57,"sounds/win/win17":30.03,"sounds/win/win18":24.73,"sounds/win/win19":17.1,"sounds/win/win20":15.67,"sounds/win/win21":26.37,"sounds/win/win22":28.57,"sounds/win/win23":30.43}; for (const c of CLIPS) if (c && c.base && DUR_FIX[c.base]) c.ms = DUR_FIX[c.base] * 1000; }
+  { const DUR_FIX = {"sounds/cfb/cfb01":12.0,"sounds/cfb/cfb02":14.6,"sounds/cfb/cfb03":26.8,"sounds/cfb/cfb04":11.5,"sounds/cfb/cfb05":28.0,"sounds/cfb/cfb06":30.0,"sounds/cfb/cfb07":25.8,"sounds/cfb/cfb08":5.7,"sounds/cfb/cfb09":27.93,"sounds/cfb/cfb10":26.93,"sounds/cfb/cfb11":29.9,"sounds/cfb/cfb12":25.93,"sounds/cfb/cfb13":22.03,"sounds/cfb/cfb14":33.4,"sounds/cfb/cfb15":15.0,"sounds/cfb/cfb16":31.2,"sounds/cfb/cfb17":32.0,"sounds/cfb/cfb18":30.2,"sounds/cfb/cfb19":14.63,"sounds/cfb/cfb20":12.8,"sounds/cfb/cfb21":30.5,"sounds/cfb/cfb22":26.93,"sounds/cfb/cfb23":33.5,"sounds/cfb/cfb24":33.5,"sounds/cfb/cfb25":13.0,"sounds/cfb/cfb26":26.0,"sounds/cfb/cfb27":26.0,"sounds/cfb/cfb28":27.0,"sounds/cfb/cfb29":25.8,"sounds/cfb/cfb30":15.07,"sounds/cfb/cfb31":17.0,"sounds/cfb/cfb32":28.03,"sounds/cfb/cfb33":5.5,"sounds/cfb/cfb34":15.5,"sounds/cfb/cfb35":18.0,"sounds/cfb/cfb36":22.2,"sounds/cfb/cfb37":23.03,"sounds/cfb/cfb38":16.07,"sounds/cfb/cfb39":31.0,"sounds/cfb/cfb40":29.2,"sounds/cfb/cfb41":30.0,"sounds/cfb/cfb42":30.5,"sounds/cfb/cfb43":26.0,"sounds/cfb/cfb44":29.6,"sounds/cfb/cfb45":31.4,"sounds/cfb/cfb46":31.0,"sounds/cfb/cfb47":13.2,"sounds/cfb/cfb48":22.23,"sounds/clips/g06":30.0,"sounds/clips/g08":30.07,"sounds/clips/g09":28.93,"sounds/clips/l01":29.5,"sounds/clips/l02":27.8,"sounds/clips/l03":11.27,"sounds/clips/l04":16.57,"sounds/clips/l05":24.87,"sounds/clips/l06":18.87,"sounds/clips/l07":30.0,"sounds/clips/l08":30.0,"sounds/clips/w02":22.47,"sounds/clips/w03":30.0,"sounds/clips/w04":30.0,"sounds/clips/w05":30.0,"sounds/clips/w06":22.07,"sounds/clips/w07":27.97,"sounds/clips/w09":17.87,"sounds/clips/w14":17.07,"sounds/clips/w15":15.07,"sounds/clips/w16":29.87,"sounds/house/hs01":12.73,"sounds/house/hs02":19.0,"sounds/house/hs03":21.5,"sounds/house/hs04":19.5,"sounds/house/hs05":25.5,"sounds/house/hs06":39.23,"sounds/house/hs07":14.73,"sounds/house/hs08":21.23,"sounds/house/hs09":17.6,"sounds/house/hs10":16.0,"sounds/house/hs11":12.23,"sounds/house/hs12":36.37,"sounds/house/hs13":31.73,"sounds/house/hs14":21.1,"sounds/house/hs15":21.6,"sounds/house/hs16":57.6,"sounds/house/hs17":16.73,"sounds/house/hs18":42.6,"sounds/house/hs19":17.0,"sounds/house/hs20":44.13,"sounds/house/hs21":34.87,"sounds/house/hs22":12.5,"sounds/house/hs23":28.23,"sounds/mlb/mlb08":64.0,"sounds/mlb/mlb09":18.0,"sounds/mlb/mlb10":57.5,"sounds/mlb/mlb11":37.83,"sounds/mlb/mlb12":24.5,"sounds/mlb/mlb13":69.5,"sounds/mlb/mlb14":14.1,"sounds/mlb/mlb15":29.0,"sounds/mlb/mlb16":13.5,"sounds/mlb/mlb17":16.73,"sounds/mlb/mlb18":20.5,"sounds/mlb/mlb19":44.73,"sounds/house/hs36":23.87,"sounds/house/hs37":15.23,"sounds/house/hs38":10.37,"sounds/house/hs39":35.87,"sounds/house/hs40":30.23,"sounds/house/hs41":26.5,"sounds/house/hs42":40.77,"sounds/house/hs43":44.23,"sounds/house/hs44":12.37,"sounds/house/hs45":71.1,"sounds/mlb/mlb01":20.8,"sounds/mlb/mlb02":25.47,"sounds/mlb/mlb03":16.3,"sounds/mlb/mlb04":13.77,"sounds/mlb/mlb05":30.0,"sounds/mlb/mlb06":15.27,"sounds/mlb/mlb07":8.6,"sounds/mlb/mlb20":60.73,"sounds/mlb/mlb21":71.13,"sounds/mlb/mlb22":25.37,"sounds/mlb/mlb23":47.0,"sounds/mlb/mlb24":29.73,"sounds/nfl/nfl01":16.0,"sounds/nfl/nfl02":16.6,"sounds/nfl/nfl03":15.37,"sounds/nfl/nfl04":28.2,"sounds/nfl/nfl05":11.27,"sounds/nfl/nfl06":10.7,"sounds/nfl/nfl07":29.1,"sounds/nfl/nfl08":60.6,"sounds/nfl/nfl09":56.2,"sounds/nfl/nfl10":49.5,"sounds/nfl/nfl11":19.5,"sounds/nfl/nfl12":60.6,"sounds/nfl/nfl13":29.7,"sounds/nfl/nfl14":27.8,"sounds/nfl/nfl15":21.7,"sounds/nfl/nfl16":14.0,"sounds/nfl/nfl17":12.4,"sounds/nfl/nfl18":22.1,"sounds/nfl/nfl19":17.6,"sounds/nfl/nfl20":15.8,"sounds/nfl/nfl21":23.9,"sounds/nfl/nfl22":21.0,"sounds/nfl/nfl23":9.9,"sounds/nfl/nfl24":20.6,"sounds/nfl/nfl25":20.1,"sounds/nfl/nfl26":18.6,"sounds/nfl/nfl27":11.4,"sounds/nfl/nfl28":35.1,"sounds/nfl/nfl29":30.3,"sounds/nfl/nfl30":32.1,"sounds/nfl/nfl31":37.2,"sounds/nfl/nfl32":25.1,"sounds/nfl/nfl33":22.93,"sounds/nfl/nfl34":39.3,"sounds/nfl/nfl35":29.3,"sounds/nfl/nfl36":31.0,"sounds/nfl/nfl37":36.3,"sounds/nfl/nfl38":18.63,"sounds/nfl/nfl39":23.6,"sounds/nfl/nfl40":21.7,"sounds/nfl/nfl41":17.3,"sounds/nfl/nfl42":40.9,"sounds/nfl/nfl43":14.5,"sounds/nfl/nfl44":26.1,"sounds/nfl/nfl45":31.3,"sounds/nfl/nfl46":16.07,"sounds/nfl/nfl47":21.3,"sounds/nfl/nfl48":36.0,"sounds/nfl/nfl49":24.1,"sounds/nfl/nfl50":34.2,"sounds/nfl/nfl51":17.5,"sounds/nfl/nfl52":29.5,"sounds/nfl/nfl53":26.2,"sounds/nfl/nfl54":21.7,"sounds/nfl/nfl55":39.1,"sounds/nhlv/hk01":43.43,"sounds/nhlv/hk02":39.57,"sounds/nhlv/hk03":17.2,"sounds/nhlv/hk04":36.0,"sounds/nhlv/hk05":17.43,"sounds/nhlv/hk06":34.3,"sounds/nhlv/hk07":44.7,"sounds/nhlv/hk08":12.43,"sounds/nhlv/hk09":30.1,"sounds/uga/uga01":13.97,"sounds/uga/uga02":30.03,"sounds/uga/uga03":25.77,"sounds/uga/uga04":30.0,"sounds/uga/uga05":16.27,"sounds/win/win09":30.0,"sounds/win/win10":29.77,"sounds/win/win11":36.5,"sounds/win/win12":23.93,"sounds/win/win13":31.77,"sounds/win/win14":17.07,"sounds/win/win15":10.27,"sounds/win/win16":17.57,"sounds/win/win17":30.03,"sounds/win/win18":24.73,"sounds/win/win19":17.1,"sounds/win/win20":15.67,"sounds/win/win21":26.37,"sounds/win/win22":28.57,"sounds/win/win23":30.43}; for (const c of CLIPS) if (c && c.base && DUR_FIX[c.base]) c.ms = DUR_FIX[c.base] * 1000; }
   const HLX_LG = [["NFL", "football/nfl", "NFL"], ["College football", "football/college-football", "CFB"], ["NBA", "basketball/nba", "NBA"], ["WNBA", "basketball/wnba", "NBA"],
     ["College hoops", "basketball/mens-college-basketball", "CBB"], ["MLB", "baseball/mlb", "MLB"], ["NHL", "hockey/nhl", "NHL"], ["Premier League", "soccer/eng.1", "Soccer"],
     ["MLS", "soccer/usa.1", "Soccer"], ["Champions League", "soccer/uefa.champions", "Soccer"], ["La Liga", "soccer/esp.1", "Soccer"], ["UFC", "mma/ufc", "UFC"],
