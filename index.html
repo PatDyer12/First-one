@@ -3720,6 +3720,19 @@ body.tv.pplb .roomtv:not([hidden]) canvas { width: 76px; height: 76px; grid-row:
 .cs.lite .cs-lz i { box-shadow: 0 0 6px 2px color-mix(in srgb, var(--lc) 70%, transparent); }
 /* the stamp at the big ones: the flash and the shockwaves, no strobe (the party has it), less confetti */
 .cs.show .cs-act > .cs-strobe, .cs.show .cs-act > .cs-cf:nth-of-type(3n) { display: none; }
+/* ---------- calmer glare ---------- */
+@keyframes btSweepSoft { 0% { translate: -100% 0; } 22%, 100% { translate: 100% 0; } }
+.bt-art > u { animation: btSweepSoft 12s cubic-bezier(.45,0,.3,1) var(--d, 0s) infinite;
+  background: linear-gradient(115deg, transparent 40%, color-mix(in srgb, var(--fxk) 9%, transparent) 46%, rgba(255,255,255,.08) 49%, color-mix(in srgb, var(--fxk) 6%, transparent) 52%, transparent 58%); }
+.bt-metal .bt-art > u { animation-duration: 12s; background: linear-gradient(115deg, transparent 32%, rgba(255,255,255,.1) 41%, rgba(255,255,255,.34) 47%, rgba(255,255,255,.12) 51%, transparent 60%); }
+.bt-team.bt-metal .bt-art > u { background: linear-gradient(115deg, transparent 40%, rgba(255,255,255,.07) 48%, transparent 56%); }
+.bt-opal .bt-art > b::before, .bt-pink .bt-art > b::before, .bt-gold .bt-art > b::before, .bt-silver .bt-art > b::before, .bt-bronze .bt-art > b::before, .bt-long .bt-art::before {
+  animation: btSweepSoft 12s ease-in-out var(--d, 0s) infinite; opacity: .55; }
+.fx-glint::before, .fx-glint::after { animation-duration: 6s; animation-delay: var(--d, 0s); }
+.fx-glint::after { animation-delay: calc(var(--d, 0s) - 3s); }
+@keyframes fxTwinkle { 0%, 100% { opacity: 0; transform: scale(.3) rotate(0deg); } 45%, 55% { opacity: .55; transform: scale(1) rotate(45deg); } }
+.bt-islive .fx-glint { animation: none; }
+.cs.show .cs-card::after { animation-duration: 8s; background-image: linear-gradient(105deg, transparent 42%, rgba(255,255,255,.08) 50%, transparent 58%); }
 .pp-none { padding: 16px 6px; font: 600 15px/1.3 Inter, sans-serif; color: #8d97a8; text-align: center; }
 .pp-bet { position: relative; flex: none; display: grid; gap: 6px; padding: 10px 12px 11px 13px; border-radius: 12px; background: rgba(255,255,255,.035); border: 1px solid rgba(190,210,240,.1); border-left: 5px solid rgba(190,210,240,.28); }
 .pp-bet.k-lost { opacity: .7; }
@@ -7016,10 +7029,11 @@ body.tv .rb-games.primeg.mason > .rb-pcol { padding-top: 16px; -webkit-mask-imag
         if (cs[0]) vars["--tca"] = lum(cs[0]) < 70 ? "#c9d1dc" : cs[0]; if (/^https:\/\/[^\s"'()<>]+$/.test(tm.lg || "")) tlg = tm.lg; }
     }
     const team = !!k && k !== "rivalry" && b.kind !== "parlay" && !!b.sel && (b.sel.m === "ml" || b.sel.m === "sp") && !!vars["--tc1"];
-    const sty = "--d:" + btT() + Object.entries(vars).map(([a, v]) => ";" + a + ":" + v).join("");
+    const sty = "--d:" + btT(b.id) + Object.entries(vars).map(([a, v]) => ";" + a + ":" + v).join("");
     return { k, odds: k, more: ks.slice(1, 4), name, usd, win: usd * ppu(Number(b.odds) || 0), winU: (usd / S.unit) * ppu(Number(b.odds) || 0), cls: k ? " fx bt bt-" + k + (live ? " bt-islive" : "") + (["bronze", "silver", "gold"].includes(k) ? " bt-metal" : "") + (hype ? " bt-hype" : "") + (team ? " bt-team" : "") : "", live, hype, vars, sty, tlg, tn: b.sel && b.sel.m === "td" ? tn : "", team, big: !!k && (!side || hype) };
   }
-  const btT = () => "-" + ((Date.now() / 1000) % 120).toFixed(2) + "s";
+  const btHash = (id) => { let h = 0; for (const ch of String(id || "")) h = (h * 31 + ch.charCodeAt(0)) | 0; return Math.abs(h); };
+  const btT = (id) => "-" + ((Date.now() / 1000 + (id != null ? btHash(id) % 60 : 0)) % 120).toFixed(2) + "s";
   function fxRow(f) {
     if (!f || !f.k) return "";
     return `<div class="fx-row"><i class="fx-glint" aria-hidden="true"></i><i class="bt-art" aria-hidden="true"${f.tn ? ` data-tn="${esc(f.tn)}" style="--nch:${f.tn.length}"` : ""}><b></b><u></u><s></s><em></em>${f.tlg ? `<img class="bt-tlg" src="${esc(f.tlg)}" alt="" loading="lazy" referrerpolicy="no-referrer" onerror="this.remove()">` : ""}</i><span class="bt-chip bt-c-${f.k}">${BT_DEF[f.k][0]} ${f.live ? '<i class="bt-lv">⚡ Live</i> ' : ""}${esc(f.name)}</span>${f.more.map((x) => `<span class="bt-mini bt-c-${x}" title="${BT_DEF[x][1]}">${BT_DEF[x][0]}</span>`).join("")}<span class="fx-pay">To win <b>${fU(f.winU)}</b></span></div>`;
@@ -8354,7 +8368,7 @@ body.tv .rb-games.primeg.mason > .rb-pcol { padding-top: 16px; -webkit-mask-imag
   // ---------- sheets ----------
   function openSheet(id) { $(id).hidden = false; }
   // keep every open screen current: when a new version is up, reload it (never mid-form or mid-animation)
-  const BUILD = "20261019030819";
+  const BUILD = "20261019031948";
   function checkBuild() {
     if (BUILD === "dev") return;
     fetch("version.json?t=" + Date.now(), { cache: "no-store" }).then((r) => (r.ok ? r.json() : null)).then((j) => {
