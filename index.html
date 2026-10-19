@@ -4191,6 +4191,74 @@ body.cs-live .app .ch-wv { animation-duration: .9s !important; }
 .ch-bill::after { font-size: 26px; }
 .ch-speed { background: repeating-conic-gradient(rgba(255,255,255,.8) 0 .7deg, transparent .7deg 4deg); }
 .cs.show .cs-cf { width: 16px; height: 27px; }
+/* ---------- the guest site: just the scanner ---------- */
+html.gsx body > :not(#gs) { display: none !important; }
+html.gsx, html.gsx body { background: #06080c; overscroll-behavior: none; }
+#gs { --gold: #ffd36b; --ok: #3ddc97; --bad: #ff5a6a; --warn: #ffb547; --line: rgba(190,210,240,.13); min-height: 100dvh; box-sizing: border-box; max-width: 520px; margin: 0 auto; padding: max(18px, env(safe-area-inset-top)) 18px calc(28px + env(safe-area-inset-bottom));
+  color: #eef2f7; font: 500 16px/1.35 Inter, system-ui, sans-serif; background: radial-gradient(120% 60% at 50% -10%, rgba(255,211,107,.12), transparent 60%), #06080c; }
+#gs * { box-sizing: border-box; }
+.gs-top { display: flex; align-items: center; justify-content: space-between; margin-bottom: 18px; }
+.gs-top b { font: 900 30px/1 "Big Shoulders Display", Inter, sans-serif; letter-spacing: .06em; text-transform: uppercase; }
+.gs-top b i { font-style: normal; color: var(--gold); }
+.gs-conn { display: flex; align-items: center; gap: 7px; padding: 6px 11px; border-radius: 999px; background: rgba(255,255,255,.06); color: #9aa4b4; font: 600 12px/1 "Azeret Mono", monospace; letter-spacing: .08em; text-transform: uppercase; }
+.gs-conn i { width: 8px; height: 8px; border-radius: 50%; background: #7d8796; }
+.gs-conn.on { color: #c9f5e2; } .gs-conn.on i { background: var(--ok); box-shadow: 0 0 10px var(--ok); }
+.gs-who { margin-bottom: 16px; }
+.gs-who label { display: block; margin-bottom: 7px; color: #9aa4b4; font: 600 12px/1 "Azeret Mono", monospace; letter-spacing: .14em; text-transform: uppercase; }
+.gs-who input { width: 100%; padding: 15px 16px; border-radius: 14px; border: 1px solid var(--line); background: rgba(255,255,255,.05); color: #fff; font: 700 20px/1 Inter, sans-serif; outline: none; }
+.gs-who input:focus { border-color: var(--gold); }
+.gs-as { display: flex; align-items: center; gap: 10px; color: #b8c0cc; font-size: 15px; }
+.gs-as .rb-av { width: 30px; height: 30px; font-size: 14px; }
+.gs-as b { color: #fff; }
+.gs-as button { margin-left: auto; padding: 6px 10px; border: 0; border-radius: 8px; background: rgba(255,255,255,.07); color: #b8c0cc; font: 600 13px/1 Inter, sans-serif; }
+.gs-scan { position: relative; display: grid; justify-items: center; gap: 10px; padding: 34px 20px 30px; border-radius: 24px; text-align: center; cursor: pointer; -webkit-tap-highlight-color: transparent; overflow: hidden;
+  background: linear-gradient(160deg, rgba(255,211,107,.16), rgba(255,211,107,.04)); border: 2px dashed rgba(255,211,107,.55); transition: transform .12s; }
+.gs-scan:active { transform: scale(.98); }
+.gs-scan svg { width: 64px; height: 64px; color: var(--gold); }
+.gs-scan b { font: 900 32px/1 "Big Shoulders Display", Inter, sans-serif; letter-spacing: .03em; text-transform: uppercase; }
+.gs-scan span { color: #b8c0cc; font-size: 15px; max-width: 300px; }
+.gs-scan.off { opacity: .45; }
+.gs-scan input { position: absolute; width: 1px; height: 1px; opacity: 0; pointer-events: none; }
+.gs-st { position: relative; display: grid; grid-template-columns: 74px 1fr; gap: 14px; align-items: center; margin-top: 14px; padding: 12px; border-radius: 18px; background: rgba(255,255,255,.05); border: 1px solid var(--line); }
+.gs-st .th { position: relative; width: 74px; height: 110px; border-radius: 10px; overflow: hidden; background: #111 center / cover no-repeat; }
+.gs-st .th::after { content: ""; position: absolute; left: 0; right: 0; height: 26px; background: linear-gradient(transparent, rgba(255,211,107,.7), transparent); animation: gsScanLine 1.1s ease-in-out infinite alternate; }
+@keyframes gsScanLine { from { top: -26px; } to { top: 100%; } }
+.gs-st b { display: block; font: 800 18px/1.2 Inter, sans-serif; }
+.gs-st small { color: #9aa4b4; font-size: 14px; }
+.gs-err { margin: 12px 0 0; padding: 12px 14px; border-radius: 14px; background: rgba(255,90,106,.12); color: #ffb3bb; font-size: 15px; }
+.gs-h { display: flex; align-items: baseline; justify-content: space-between; margin: 26px 2px 10px; color: #9aa4b4; font: 600 12px/1 "Azeret Mono", monospace; letter-spacing: .14em; text-transform: uppercase; }
+.gs-card { margin-bottom: 10px; padding: 14px 15px; border-radius: 18px; background: rgba(255,255,255,.045); border: 1px solid var(--line); animation: gsIn .35s cubic-bezier(.2,1.2,.4,1) both; }
+.gs-card.new { border-color: rgba(61,220,151,.45); background: linear-gradient(160deg, rgba(61,220,151,.1), rgba(255,255,255,.03)); }
+.gs-card.warn { border-color: rgba(255,181,71,.5); }
+@keyframes gsIn { from { opacity: 0; transform: translateY(10px) scale(.98); } }
+.gs-c1 { display: flex; align-items: baseline; gap: 10px; }
+.gs-c1 b { flex: 1; min-width: 0; font: 800 18px/1.2 Inter, sans-serif; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.gs-c1 em { font: 700 16px/1 "Azeret Mono", monospace; font-style: normal; color: var(--gold); }
+.gs-c1 .x { margin-left: 2px; width: 30px; height: 30px; flex: none; border: 0; border-radius: 50%; background: rgba(255,255,255,.07); color: #9aa4b4; font: 700 14px/1 Inter, sans-serif; }
+.gs-c1 .x.sure { width: auto; padding: 0 10px; border-radius: 999px; background: rgba(255,90,106,.2); color: #ffb3bb; }
+.gs-tag { display: inline-flex; align-items: center; gap: 6px; margin-bottom: 7px; color: var(--ok); font: 700 11px/1 "Azeret Mono", monospace; letter-spacing: .14em; text-transform: uppercase; }
+.gs-tag.dupe { color: #9aa4b4; }
+.gs-amt { margin-top: 4px; color: #9aa4b4; font-size: 14px; }
+.gs-g { display: flex; align-items: center; gap: 8px; margin-top: 8px; padding: 8px 10px; border-radius: 10px; background: rgba(0,0,0,.3); color: #dfe5ee; font: 600 14px/1.2 Inter, sans-serif; }
+.gs-g i { width: 8px; height: 8px; flex: none; border-radius: 50%; background: #7d8796; }
+.gs-g.gs-on i { background: var(--ok); box-shadow: 0 0 8px var(--ok); animation: gsBlink 1.4s ease-in-out infinite; }
+.gs-g.gs-w { color: #c9f5e2; } .gs-g.gs-l { color: #ffc2c8; }
+.gs-g.gs-w i { background: var(--ok); } .gs-g.gs-l i { background: var(--bad); box-shadow: 0 0 8px var(--bad); }
+.gs-g small { margin-left: auto; color: #9aa4b4; font-size: 12px; white-space: nowrap; }
+.gs-g .gs-lg { font-weight: 500; color: #b8c0cc; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+@keyframes gsBlink { 50% { opacity: .35; } }
+.gs-miss { margin-top: 8px; padding: 10px 12px; border-radius: 12px; background: rgba(255,181,71,.1); color: #ffd9a3; font-size: 14px; }
+.gs-miss b { color: #fff; }
+.gs-btn { display: inline-block; margin-top: 8px; padding: 10px 14px; border: 0; border-radius: 10px; background: var(--gold); color: #0b0d12; font: 800 14px/1 Inter, sans-serif; }
+.gs-btn.ghost { background: rgba(255,255,255,.08); color: #eef2f7; }
+.gs-pick { display: grid; gap: 6px; margin-top: 10px; max-height: 340px; overflow: auto; }
+.gs-pick button { display: flex; align-items: center; gap: 8px; padding: 11px 12px; border: 1px solid var(--line); border-radius: 12px; background: rgba(255,255,255,.04); color: #eef2f7; font: 600 15px/1.2 Inter, sans-serif; text-align: left; }
+.gs-pick button small { margin-left: auto; color: #9aa4b4; font-size: 12px; white-space: nowrap; }
+.gs-fix { display: flex; gap: 8px; margin-top: 8px; }
+.gs-fix input { flex: 1; min-width: 0; padding: 10px 12px; border-radius: 10px; border: 1px solid var(--line); background: rgba(255,255,255,.06); color: #fff; font: 700 16px/1 Inter, sans-serif; }
+.gs-empty { padding: 18px; border-radius: 16px; border: 1px dashed var(--line); color: #7d8796; text-align: center; font-size: 14px; }
+.gs-done { opacity: .6; }
+.gs-foot { margin-top: 26px; color: #5d6676; font-size: 12px; text-align: center; }
 .pp-none { padding: 16px 6px; font: 600 15px/1.3 Inter, sans-serif; color: #8d97a8; text-align: center; }
 .pp-bet { position: relative; flex: none; display: grid; gap: 6px; padding: 10px 12px 11px 13px; border-radius: 12px; background: rgba(255,255,255,.035); border: 1px solid rgba(190,210,240,.1); border-left: 5px solid rgba(190,210,240,.28); }
 .pp-bet.k-lost { opacity: .7; }
@@ -9362,7 +9430,7 @@ body.tv .rb-games.primeg.mason > .rb-pcol { padding-top: 16px; -webkit-mask-imag
   // ---------- sheets ----------
   function openSheet(id) { $(id).hidden = false; }
   // keep every open screen current: when a new version is up, reload it (never mid-form or mid-animation)
-  const BUILD = "20261019180834";
+  const BUILD = "20261019192757";
   function checkBuild() {
     if (BUILD === "dev") return;
     fetch("version.json?t=" + Date.now(), { cache: "no-store" }).then((r) => (r.ok ? r.json() : null)).then((j) => {
@@ -16356,6 +16424,9 @@ body.tv .rb-games.primeg.mason > .rb-pcol { padding-top: 16px; -webkit-mask-imag
     const s = " " + normName(slip) + " ";
     if (t.fn && normName(t.fn) === normName(slip)) return 3;
     for (const c of [t.fn, t.nm]) if (c && normName(c).length > 2 && s.includes(" " + normName(c) + " ")) return 2;
+    const n = normName(slip), f = normName(t.fn);
+    if (n.length > 3 && f && (f + " ").startsWith(n + " ")) return 2;
+    if (t.ab && t.ab.length > 1 && n.split(" ").includes(t.ab.toLowerCase())) return 1;
     return 0;
   }
   // find the ESPN game (and side) a slip leg is about
@@ -16368,11 +16439,11 @@ body.tv .rb-games.primeg.mason > .rb-pcol { padding-top: 16px; -webkit-mask-imag
       const pair = Math.max(nameHit(leg.away, g.a) + nameHit(leg.home, g.h), nameHit(leg.away, g.h) + nameHit(leg.home, g.a));
       const ta = Math.max(nameHit(leg.team, g.a), nameHit(leg.pick, g.a)), th = Math.max(nameHit(leg.team, g.h), nameHit(leg.pick, g.h));
       const score = pair * 2 + Math.max(ta, th);
-      if (score < 2) continue;
+      if (score < (leg._any ? 3 : 2)) continue;
       if (leg.market !== "total" && !ta && !th) continue;
       if (!best || score > best.score || (score === best.score && Math.abs(g.t - Date.now()) < Math.abs(best.g.t - Date.now()))) best = { g, score, ta, th };
     }
-    if (!best) return null;
+    if (!best) return leg.sport && leg.sport !== "OTHER" && !leg._any ? matchLeg({ ...leg, sport: "OTHER", _any: 1 }) : null;
     const g = best.g;
     if (leg.market === "total") {
       if (leg.side !== "over" && leg.side !== "under") return null;
@@ -16506,10 +16577,247 @@ body.tv .rb-games.primeg.mason > .rb-pcol { padding-top: 16px; -webkit-mask-imag
     closeSheets(); toast(`Added ${n} bets from your slip`);
   });
 
+
+  const GS = { auth: null, ga: null, gated: false, fail: "", busy: false, res: [], pick: null, side: null, sure: null };
+  const gsSleep = (ms) => new Promise((r) => setTimeout(r, ms));
+  // a guest bet carries its dollar stake: the host's board turns it into the host's units
+  function gsUsd(d) { if (!GUEST && d && d.usd > 0 && S.unit > 0) d.units = Math.round((d.usd / S.unit) * 100) / 100; return d; }
+  const GS_ICON = '<svg viewBox="0 0 64 64" fill="none" stroke="currentColor" stroke-width="4" stroke-linecap="round" stroke-linejoin="round"><path d="M6 20V10a4 4 0 0 1 4-4h10M44 6h10a4 4 0 0 1 4 4v10M58 44v10a4 4 0 0 1-4 4H44M20 58H10a4 4 0 0 1-4-4V44"/><path d="M22 18h20v28l-4-3-3 3-3-3-3 3-3-3-4 3z"/><path d="M27 26h10M27 33h7"/></svg>';
+  const gsWhen = (t) => { const d = new Date(t), today = new Date().toDateString() === d.toDateString(); return (today ? "" : d.toLocaleDateString([], { weekday: "short" }) + " ") + tm(t); };
+  const gsTdish = (l) => l.market === "anytime_td" || l.market === "first_td" || l.market === "prop";
+  const gsCanLink = (l) => !!l && !(l.market === "prop" && !ppSlipMk(l));
+  function gsErr(t) { const e = $("#gsErr"); if (e) e.innerHTML = t ? `<p class="gs-err">${t}</p>` : ""; }
+  function gsStatus(file, txt, sub) {
+    const el = $("#gsSt"); if (!el) return;
+    if (GS.url) { URL.revokeObjectURL(GS.url); GS.url = null; }
+    if (!txt) { el.innerHTML = ""; return; }
+    GS.url = file ? URL.createObjectURL(file) : null;
+    el.innerHTML = `<div class="gs-st"><div class="th"${GS.url ? ` style="background-image:url('${GS.url}')"` : ""}></div><div><b>${txt}</b><small>${sub || ""}</small></div></div>`;
+  }
+  function gsWho(edit) {
+    const w = $("#gsWho"); if (!w) return;
+    if (!GUEST.name || edit) {
+      w.innerHTML = `<label for="gsName">Your name</label><input id="gsName" maxlength="20" autocomplete="given-name" autocapitalize="words" enterkeyhint="done" placeholder="So the board knows whose bets" value="${esc(GUEST.name || "")}">`;
+      const i = $("#gsName"), save = () => {
+        const nm = i.value.trim().slice(0, 20); if (!nm) return;
+        GUEST.name = nm; try { localStorage.setItem("sb-guest-name", nm); } catch (e) {}
+        guestTag(); gsWho(false); gsErr(""); gsReady().catch(() => {});
+      };
+      i.addEventListener("change", save); i.addEventListener("keydown", (e) => { if (e.key === "Enter") { e.preventDefault(); i.blur(); save(); } });
+      if (edit) i.focus();
+    } else w.innerHTML = `<div class="gs-as"><span class="rb-av" style="--c:${meCol()}">${esc(GUEST.name.slice(0, 1).toUpperCase())}</span><span>Betting as <b>${esc(meName())}</b></span><button type="button" id="gsEdit">Change</button></div>`;
+    $("#gsScan").classList.toggle("off", !GUEST.name);
+  }
+  // signed in and checked in with the room, quietly (a returning guest is already there)
+  async function gsReady() {
+    if (S.canWrite && S.db && GUEST.uid) return;
+    if (!GS.auth) throw new Error(GS.fail || "Couldn't load the board. Reload the page.");
+    GS.fail = "";
+    if (!GS.auth.currentUser) {
+      try { await GS.auth.signInAnonymously(); }
+      catch (e) { if (e && e.code === "auth/operation-not-allowed") await GS.auth.signInWithPopup(new firebase.auth.GoogleAuthProvider()); else throw e; }
+    }
+    for (let i = 0; i < 80; i++) {
+      if (S.canWrite && S.db && GUEST.uid) return;
+      if (GS.fail) throw new Error(GS.fail);
+      if (i === 4 && GS.gated && GS.auth.currentUser && GS.ga) GS.ga();   // signed in before the name was in: check in now
+      await gsSleep(150);
+    }
+    throw new Error("Couldn't reach the board. Check your connection and try again.");
+  }
+  // games further out than tomorrow: the week ahead (and last night, for a late game) in that sport
+  async function gsMore(legs) {
+    const sps = [...new Set(legs.map((l) => (ESPN[l.sport] ? l.sport : "")))], any = sps.includes("") || !sps.length;
+    const list = any ? Object.keys(ESPN) : sps, now = Date.now(), keys = [];
+    for (let d = -1; d <= (any ? 3 : 7); d++) for (const sp of list) { const k = sp + "|" + etDate(now + d * 864e5); if (now - (boardAt.get(k) || 0) > 300e3) keys.push(k); }
+    if (keys.length) await loadBoards(keys);
+  }
+  const gsFound = (l) => (gsTdish(l) ? !!l._td || !!matchLeg({ ...l, market: "ml", team: l.team || l.away || l.home }) : !!matchLeg(l));
+  const gsLineOdds = (g, m) => (m.m === "ml" ? g.ml && g.ml[m.s] : m.m === "sp" ? g.sp && g.sp[m.s] && g.sp[m.s].o : m.m === "tot" ? g.tot && g.tot[m.s] : null);
+  // one slip bet, ready to save: every leg on its game where it can be, the gaps filled and flagged
+  function gsBuild(pb) {
+    const legs = (pb.legs || []).filter((l) => l && l.pick); if (!legs.length) return null;
+    for (const l of legs) if (l.market === "spread" && l.line == null) { const m = matchLeg({ ...l, market: "ml" }), g = m && S.games.get(m.g); if (g && g.sp && g.sp[m.s]) l.line = g.sp[m.s].l; }
+    const flags = [];
+    let odds = pb.odds && Math.abs(pb.odds) >= 100 ? pb.odds : null;
+    if (!odds && legs.length === 1 && legs[0].odds) odds = legs[0].odds;
+    if (!odds && legs.length > 1 && legs.every((l) => l.odds && Math.abs(l.odds) >= 100)) { const dec = legs.reduce((x, l) => x * (1 + ppu(l.odds)), 1); odds = dec >= 2 ? Math.round((dec - 1) * 100) : Math.round(-100 / (dec - 1)); }
+    if (!odds && legs.length === 1) { const m = matchLeg(legs[0]), g = m && S.games.get(m.g), o = g && gsLineOdds(g, m); if (o && Math.abs(o) >= 100) { odds = o; flags.push("odds"); } }
+    if (!odds) { odds = -110; flags.push("odds"); }
+    let stake = pb.stake > 0 ? pb.stake : null;
+    if (!stake && pb.to_win > 0) stake = Math.round((pb.to_win / ppu(odds)) * 100) / 100;
+    const usd = stake;
+    if (!stake) { stake = S.unit; flags.push("stake"); }
+    const d = betFromSlip({ ...pb, legs, odds, stake }, pb.book || "FD"); if (!d) return null;
+    if (usd) d.usd = usd;
+    d.slip = [pb.kind, pb.odds || "", pb.stake || "", pb.to_win || "", legs.map((l) => l.pick).join("~")].join("|").slice(0, 400);
+    const unl = d.kind === "parlay" ? legs.map((_, i) => i).filter((i) => !(d.legSel || [])[i]) : d.sel ? [] : [0];
+    return { d, legs, unl, flags };
+  }
+  // the same bet scanned again
+  const gsDupe = (d) => [...S.bets.values()].find((b) => isMe(b) && b.status === "open" && b.slip && b.slip === d.slip) || [...S.bets.values()].find((b) => isMe(b) && b.status === "open" && b.odds === d.odds && Math.abs(b.units - d.units) < 0.01 && b.kind === d.kind && b.pick === d.pick && JSON.stringify(b.legs || []) === JSON.stringify(d.legs || []));
+  async function gsScan(files) {
+    if (GS.busy || !files.length) return;
+    GS.busy = true; gsErr(""); $("#gsScan").classList.add("off");
+    try {
+      gsStatus(files[0], "Reading your slip…", files.length > 1 ? `${files.length} screenshots` : "One sec");
+      await Promise.all([gsReady(), loadPickerGames()]);
+      const all = [];
+      for (const f of files) all.push(...(await readSlip(await shrink(f))).filter((b) => b && Array.isArray(b.legs) && b.legs.length));
+      const c2o = (c) => (c > 0 && c < 100 ? pmAm(c / 100) : null);
+      for (const b of all) { if (!b.odds && c2o(b.price)) b.odds = c2o(b.price); for (const l of b.legs) if (l && !l.odds && c2o(l.price)) l.odds = c2o(l.price); if (!b.odds && b.legs.length === 1 && b.legs[0].odds) b.odds = b.legs[0].odds; if (b.price && !b.book) b.book = "PM"; }
+      if (!all.length) { gsErr("Couldn't find a bet on that. Screenshot the bet slip (or the bet in My Bets) and try again."); return; }
+      gsStatus(files[0], "Finding the games…", all.length === 1 ? "1 bet" : all.length + " bets");
+      const legs = all.flatMap((b) => b.legs.filter(Boolean));
+      const far = legs.filter((l) => !gsFound(l)); if (far.length) await gsMore(far);
+      if (legs.some(gsTdish)) await resolveTdLegs(all);
+      let n = 0;
+      for (const pb of all) {
+        const r = gsBuild(pb); if (!r) continue;
+        r.d.placedAt = Date.now();
+        const dup = gsDupe(r.d); if (dup) { const was = GS.res.find((x) => x.id === dup.id); GS.res = GS.res.filter((x) => x !== was); GS.res.unshift(was ? { ...was, dupe: true } : { ...r, id: dup.id, dupe: true, flags: [] }); continue; }
+        const id = "b" + Date.now().toString(36) + Math.random().toString(36).slice(2, 6);
+        if (await putBet(id, r.d)) { r.id = id; GS.res.unshift(r); n++; }
+      }
+      if (!n && !GS.res.some((r) => r.dupe)) gsErr("Couldn't add that one. Try the screenshot again.");
+      if (navigator.vibrate && n) navigator.vibrate(30);
+    } catch (e) {
+      gsErr(esc(String((e && e.message) || e).slice(0, 160)));
+    } finally { GS.busy = false; gsStatus(null, ""); $("#gsScan").classList.toggle("off", !GUEST.name); gsRender(); }
+  }
+  // put a leg on the game the guest tapped
+  async function gsLink(r, i, g, side) {
+    const leg = r.legs[i], mk = ppSlipMk(leg), who = leg.player || String(leg.pick || "").replace(/\b(anytime|first|td|touchdown|scorer|to score|a)\b/gi, "").trim();
+    let m;
+    if (leg.market === "anytime_td" || leg.market === "first_td" || mk) {
+      const rs = await Promise.all(["a", "h"].map((sd) => Promise.resolve(loadRoster(g.sport, g[sd].id)).catch(() => [])));
+      let p = null, s0 = null; ["a", "h"].forEach((sd, k) => { if (p) return; const pl = (Array.isArray(rs[k]) ? rs[k] : []).find((x) => sameName(x.nm, who)); if (pl) { p = pl; s0 = sd; } });
+      p = p || { nm: who, hs: "", j: "", pos: "" };
+      m = mk ? { m: mk, s: leg.side === "under" ? "u" : "o", l: leg.line == null ? PP_DEF[ppStat(mk)] : Math.abs(leg.line), p } : { m: leg.market === "first_td" ? "ftd" : "td", s: s0 || "a", l: null, p };
+    } else if (leg.market === "total") {
+      m = { m: "tot", s: leg.side === "under" ? "u" : "o", l: leg.line == null ? (g.tot ? g.tot.l : null) : Math.abs(leg.line) };
+    } else {
+      let s1 = side;
+      if (!s1) {
+        const ta = Math.max(nameHit(leg.team, g.a), nameHit(leg.pick, g.a)), th = Math.max(nameHit(leg.team, g.h), nameHit(leg.pick, g.h));
+        if (!ta && !th) { GS.side = { id: r.id, i, g: g.id }; GS.pick = null; gsRender(); return; }
+        s1 = ta >= th ? "a" : "h";
+      }
+      const l = leg.market === "spread" ? (leg.line != null ? leg.line : g.sp && g.sp[s1] ? g.sp[s1].l : null) : null;
+      m = { m: leg.market === "spread" ? "sp" : "ml", s: s1, l };
+    }
+    if (m.m === "tot" && m.l == null) { gsErr("That game has no total yet. Try again closer to kickoff."); return; }
+    const sel = { g: g.id, m: m.m, s: m.s, l: m.l, sp: g.sport, t: g.t }; if (m.p) sel.p = m.p;
+    const b = S.bets.get(r.id); if (!b) return;
+    const label = mkLabel(g, m.m, m.s, m.l, m.p);
+    let patch;
+    if (b.kind === "parlay") { const ls = (b.legSel || []).slice(), tx = (b.legs || []).slice(); while (ls.length < tx.length) ls.push(null); ls[i] = sel; tx[i] = label; patch = { legSel: ls, legs: tx }; }
+    else patch = { sel, pick: label, sport: g.sport };
+    const starts = (patch.legSel || [patch.sel]).filter(Boolean).map((x) => x.t).filter(Boolean); if (starts.length) patch.startAt = Math.min(...starts);
+    GS.pick = null; GS.side = null;
+    if (await patchBet(r.id, patch)) r.unl = r.unl.filter((x) => x !== i);
+    gsRender();
+  }
+  function gsChoices(leg) {
+    const now = Date.now(), sp = ESPN[leg.sport] ? leg.sport : null;
+    let gs = [...S.games.values()].filter((g) => g.st !== "post" && g.t > now - 8 * 36e5 && g.t < now + 8 * 864e5);
+    if (sp && !GS.all) { const f = gs.filter((g) => g.sport === sp); if (f.length) gs = f; }
+    return gs.sort((x, y) => (x.st === "in" ? 0 : 1) - (y.st === "in" ? 0 : 1) || x.t - y.t).slice(0, 40);
+  }
+  // a bet's game, live: the score and clock, green when it's winning, red when it's losing
+  function gsGame(sel, label) {
+    const g = sel && S.games.get(sel.g);
+    if (!g) return `<div class="gs-g"><i></i><span class="gs-lg">${label ? esc(label) + " · " : ""}not on a game</span></div>`;
+    let ev = null; try { if (g.st !== "pre") ev = evalSel(sel); } catch (e) {}
+    const wl = ev ? (ev.res === "W" ? " gs-w" : ev.res === "L" ? " gs-l" : "") : "";
+    const sc = g.st === "pre" ? `${g.a.ab} @ ${g.h.ab}` : `${g.a.ab} ${g.a.sc ?? 0} – ${g.h.ab} ${g.h.sc ?? 0}`, when = g.st === "pre" ? gsWhen(g.t) : g.d || (g.st === "post" ? "Final" : "Live");
+    return label ? `<div class="gs-g${g.st === "in" ? " gs-on" : ""}${wl}"><i></i><span class="gs-lg">${esc(label)}</span><small>${esc(sc)} · ${esc(when)}</small></div>`
+      : `<div class="gs-g${g.st === "in" ? " gs-on" : ""}${wl}"><i></i><span>${esc(sc)}</span><small>${esc(when)}</small></div>`;
+  }
+  function gsFix(r, b) {
+    if (!r || b.status !== "open") return "";
+    let h = "";
+    for (const i of r.unl) {
+      const leg = r.legs[i]; if (!leg || (b.kind === "parlay" ? (b.legSel || [])[i] : b.sel)) continue;
+      if (!gsCanLink(leg)) { h += `<div class="gs-miss"><b>${esc(leg.pick)}</b> can't be tracked live. It's on the board; the host settles it.</div>`; continue; }
+      const key = r.id + "|" + i;
+      h += `<div class="gs-miss"><b>${esc(leg.pick)}</b> isn't on a game yet.${GS.pick === key ? "" : ` <button type="button" class="gs-btn" data-gslink="${key}">Pick the game</button>`}`;
+      if (GS.pick === key) h += `<div class="gs-pick">${gsChoices(leg).map((g) => `<button type="button" data-gsg="${key}|${g.id}"><span>${esc(g.a.nm)} @ ${esc(g.h.nm)}</span><small>${g.st === "in" ? "LIVE" : esc(gsWhen(g.t))}</small></button>`).join("") || "<small>No games found.</small>"}</div>${GS.all ? "" : `<button type="button" class="gs-btn ghost" data-gsall="1">Every sport</button>`}`;
+      if (GS.side && GS.side.id === r.id && GS.side.i === i) { const g = S.games.get(GS.side.g); if (g) h += `<div class="gs-pick">${["a", "h"].map((sd) => `<button type="button" data-gss="${key}|${g.id}|${sd}"><span>${esc(g[sd].fn || g[sd].nm)}</span></button>`).join("")}</div>`; }
+      h += `</div>`;
+    }
+    if (r.flags.includes("stake") && !(b.usd > 0)) h += `<div class="gs-miss">The slip didn't show the stake, so it's in as 1u (${esc(fUSD(S.unit))}).<div class="gs-fix"><input inputmode="decimal" placeholder="Stake in $" data-gsstake="${r.id}"><button type="button" class="gs-btn" data-gsss="${r.id}">Save</button></div></div>`;
+    if (r.flags.includes("odds")) h += `<div class="gs-miss">The slip didn't show the odds, so it's in at ${esc(fOdds(b.odds))}${r.legs.length === 1 && b.sel ? " (the game's line)" : ""}.<div class="gs-fix"><input inputmode="numeric" placeholder="Odds, like -110 or 250" data-gsodds="${r.id}"><button type="button" class="gs-btn" data-gsos="${r.id}">Save</button></div></div>`;
+    return h;
+  }
+  function gsCard(b, r) {
+    const open = b.status === "open", parlay = b.kind === "parlay", stake = b.usd > 0 ? b.usd : b.units * S.unit;
+    const st = open ? "" : b.status === "won" ? " · ✅ Cashed" : b.status === "lost" ? " · ❌ Lost" : " · " + esc(b.status);
+    const games = parlay ? (b.legs || []).map((t, i) => gsGame((b.legSel || [])[i], t)).join("") : gsGame(b.sel);
+    const x = open ? `<button type="button" class="x${GS.sure === b.id ? " sure" : ""}" data-gsx="${b.id}">${GS.sure === b.id ? "Remove?" : "✕"}</button>` : "";
+    const tag = r ? (r.dupe ? `<div class="gs-tag dupe">Already on the board</div>` : `<div class="gs-tag">✓ On the board</div>`) : "";
+    return `<div class="gs-card${r && !r.dupe ? " new" : ""}${r && (r.unl.length || r.flags.length) && open ? " warn" : ""}${open ? "" : " gs-done"}">${tag}
+      <div class="gs-c1"><b>${esc(b.pick)}</b><em>${esc(fOdds(b.odds))}</em>${x}</div>
+      <div class="gs-amt">${esc(fUSD(stake))} to win ${esc(fUSD(stake * ppu(b.odds)))} · ${esc(fU(b.units))}${st}</div>${games}${gsFix(r, b)}</div>`;
+  }
+  function gsRender() {
+    if (!$("#gs")) return;
+    const a = document.activeElement; if (a && a.tagName === "INPUT" && a.closest("#gs")) return;   // don't redraw under someone typing
+    const res = GS.res.filter((r) => S.bets.has(r.id)).slice(0, 10), ids = new Set(res.map((r) => r.id));
+    $("#gsRes").innerHTML = res.map((r) => gsCard(S.bets.get(r.id), r)).join("");
+    const mine = [...S.bets.values()].filter((b) => isMe(b) && !ids.has(b.id) && (b.status === "open" || Date.now() - (b.settledAt || 0) < 12 * 36e5)).sort((x, y) => (x.status === "open" ? 0 : 1) - (y.status === "open" ? 0 : 1) || (y.placedAt || 0) - (x.placedAt || 0));
+    const nOpen = [...S.bets.values()].filter((b) => isMe(b) && b.status === "open").length;
+    $("#gsN").textContent = nOpen ? nOpen + " open" : "";
+    $("#gsMine").innerHTML = mine.length ? mine.map((b) => gsCard(b, null)).join("") : res.length ? "" : `<div class="gs-empty">Nothing yet. Scan a slip and it shows up here and on the TV.</div>`;
+    const on = !!(S.canWrite && S.db && GUEST.uid), c = $("#gsConn"); c.classList.toggle("on", on); c.querySelector("span").textContent = on ? "On the board" : GUEST.name ? "Connecting" : "Not joined";
+  }
+  if (GUEST) {
+    document.documentElement.classList.add("gsx");
+    document.body.insertAdjacentHTML("beforeend", `<div id="gs">
+      <div class="gs-top"><b>Sweat <i>Zone</i></b><span class="gs-conn" id="gsConn"><i></i><span>Connecting</span></span></div>
+      <div class="gs-who" id="gsWho"></div>
+      <label class="gs-scan" id="gsScan">${GS_ICON}<b>Scan your bet slip</b><span>Pick a screenshot of your slip (or the bet in My Bets). It goes straight on the board, live on its game.</span><input id="gsFile" type="file" accept="image/*" multiple></label>
+      <div id="gsSt"></div><div id="gsErr"></div><div id="gsRes"></div>
+      <div class="gs-h"><span>Your bets on the board</span><span id="gsN"></span></div><div id="gsMine"></div>
+      <p class="gs-foot">Wins, losses and the live sweat play on the TV.</p></div>`);
+    gsWho(false);
+    $("#gsScan").addEventListener("click", (e) => {
+      if (GS.busy) { e.preventDefault(); return; }
+      if (!GUEST.name) { e.preventDefault(); gsErr("Put your name in first so the board knows whose bets these are."); const i = $("#gsName"); if (i) i.focus(); }
+    });
+    $("#gsFile").addEventListener("change", (e) => { const fs = [...(e.target.files || [])]; e.target.value = ""; gsScan(fs); });
+    $("#gs").addEventListener("click", async (e) => {
+      const t = e.target.closest("button"); if (!t) return;
+      if (t.id === "gsEdit") { gsWho(true); return; }
+      const d = t.dataset, rOf = (k) => GS.res.find((r) => r.id === k);
+      if (d.gsx) {
+        if (GS.sure !== d.gsx) { GS.sure = d.gsx; gsRender(); setTimeout(() => { if (GS.sure === d.gsx) { GS.sure = null; gsRender(); } }, 3500); return; }
+        GS.sure = null; await delBet(d.gsx); GS.res = GS.res.filter((r) => r.id !== d.gsx); gsRender(); return;
+      }
+      if (d.gslink) { GS.pick = d.gslink; GS.side = null; gsRender(); return; }
+      if (d.gsall) { GS.all = true; gsRender(); return; }
+      if (d.gsg || d.gss) {
+        const [id, i, gid, sd] = (d.gsg || d.gss).split("|"), r = rOf(id), g = S.games.get(gid);
+        if (r && g) await gsLink(r, Number(i), g, sd || null); return;
+      }
+      if (d.gsss || d.gsos) {
+        const id = d.gsss || d.gsos, r = rOf(id), b = S.bets.get(id), inp = t.parentNode.querySelector("input"), v = Number(String(inp.value).replace(/[^0-9.+-]/g, ""));
+        if (!r || !b) return;
+        if (d.gsss) { if (!(v > 0)) { inp.focus(); return; } if (await patchBet(id, { units: Math.round((v / S.unit) * 100) / 100, usd: v })) r.flags = r.flags.filter((f) => f !== "stake"); }
+        else { if (!(Math.abs(v) >= 100)) { inp.focus(); return; } if (await patchBet(id, { odds: Math.round(v) })) r.flags = r.flags.filter((f) => f !== "odds"); }
+        inp.blur(); gsRender();
+      }
+    });
+    // the scores tick along; a guest who's been here before is back on the board without doing anything
+    setInterval(gsRender, 2500);
+    setInterval(() => { if (!document.hidden) loadPickerGames(); }, 60e3);
+    setTimeout(() => { loadPickerGames().then(gsRender); if (GUEST.name) gsReady().then(gsRender).catch(() => gsRender()); }, 600);
+  }
   // ---------- sign in + connect ----------
   let GB_READY = false;
   // the guest page: join (just a name), then just their own bets
   function wireGuest(auth, db) {
+    GS.auth = auth;
     $("#gu-name").value = GUEST.name;
     const go = (signIn) => {
       const nm = $("#gu-name").value.trim().slice(0, 20);
@@ -16522,6 +16830,7 @@ body.tv .rb-games.primeg.mason > .rb-pcol { padding-top: 16px; -webkit-mask-imag
     $("#guGoogle").addEventListener("click", () => go(() => auth.signInWithPopup(new firebase.auth.GoogleAuthProvider())));
   }
   function guestAuth(u, auth, db, unsub) {
+    GS.ga = () => guestAuth(auth.currentUser, auth, db, unsub); GS.gated = !u || !GUEST.name;
     if (!u || !GUEST.name) { S.db = null; S.canWrite = false; S.ready = true; render(); gate("guest"); return; }
     GUEST.uid = u.uid; guestTag();
     // checking in with the room (refused only if the host has closed it)
@@ -16532,7 +16841,7 @@ body.tv .rb-games.primeg.mason > .rb-pcol { padding-top: 16px; -webkit-mask-imag
         for (const ch of snap.docChanges()) {
           const prev = S.bets.get(ch.doc.id);
           if (ch.type === "removed") { S.bets.delete(ch.doc.id); S.goneBets.delete(ch.doc.id); continue; }
-          const d = oneJulian({ id: ch.doc.id, ...ch.doc.data(), _col: "guestBets" });
+          const d = gsUsd(oneJulian({ id: ch.doc.id, ...ch.doc.data(), _col: "guestBets" }));
           if (typeof d.odds !== "number" || typeof d.units !== "number") continue;
           S.bets.set(ch.doc.id, d);
           if (!first && prev && prev.status === "open" && d.status !== "open") toast(d.status === "won" ? `✅ ${d.pick} cashed` : d.status === "lost" ? `❌ ${d.pick} lost` : `${d.pick} · ${d.status}`);
@@ -16545,6 +16854,7 @@ body.tv .rb-games.primeg.mason > .rb-pcol { padding-top: 16px; -webkit-mask-imag
     });
   }
   const gate = (which, msg) => {
+    if (GUEST && which === "guest" && msg) GS.fail = msg;
     $("#gate").hidden = !which;
     ["setup", "signin", "denied", "guest"].forEach((k) => ($("#gate-" + k).hidden = k !== which));
     $("#gate-err").textContent = msg || "";
@@ -16615,7 +16925,7 @@ body.tv .rb-games.primeg.mason > .rb-pcol { padding-top: 16px; -webkit-mask-imag
         for (const ch of snap.docChanges()) {
           const prev = S.bets.get(ch.doc.id);
           if (ch.type === "removed") { S.bets.delete(ch.doc.id); S.goneBets.delete(ch.doc.id); continue; }
-          const d = oneJulian({ id: ch.doc.id, ...ch.doc.data(), _col: "guestBets" });
+          const d = gsUsd(oneJulian({ id: ch.doc.id, ...ch.doc.data(), _col: "guestBets" }));
           if (typeof d.odds !== "number" || typeof d.units !== "number") continue;
           if (goneSort(ch.doc.id, d)) continue;
           if (first) continue;
@@ -16627,7 +16937,7 @@ body.tv .rb-games.primeg.mason > .rb-pcol { padding-top: 16px; -webkit-mask-imag
       unsub.push(db.doc("config/room").onSnapshot((r) => { const o = !(r.exists && r.data().open === false); if (o !== S.roomOpen) { S.roomOpen = o; $("#f-roomOpen").checked = o; showRoom(); } }, () => {}));
       unsub.push(db.doc("config/settings").onSnapshot((s) => {
         const v = s.exists ? Number(s.data().unitSize) : NaN;
-        if (v > 0 && v !== S.unit) { S.unit = v; render(); }
+        if (v > 0 && v !== S.unit) { S.unit = v; for (const b of S.bets.values()) gsUsd(b); render(); }
         const ok = s.exists ? s.data().oddsKey : null;
         if (ok && ok !== S.oddsKey) { S.oddsKey = ok; PROPS.clear(); OA_EVENTS.clear(); ALTS.clear(); }
         const fc = s.exists ? s.data().focus : null;
