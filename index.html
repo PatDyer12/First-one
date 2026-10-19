@@ -7427,7 +7427,7 @@ body.tv .rb-games.primeg.mason > .rb-pcol { padding-top: 16px; -webkit-mask-imag
   // ---------- sheets ----------
   function openSheet(id) { $(id).hidden = false; }
   // keep every open screen current: when a new version is up, reload it (never mid-form or mid-animation)
-  const BUILD = "20261019000157";
+  const BUILD = "20261019003631";
   function checkBuild() {
     if (BUILD === "dev") return;
     fetch("version.json?t=" + Date.now(), { cache: "no-store" }).then((r) => (r.ok ? r.json() : null)).then((j) => {
@@ -10564,6 +10564,40 @@ body.tv .rb-games.primeg.mason > .rb-pcol { padding-top: 16px; -webkit-mask-imag
     P = driveTurn++ % 2 === 0 ? H || E : E || H;
     return P ? Object.assign({}, P, { ms: Math.min(P.ms || max, max) }) : null;
   }
+  let tvOn = null, idleAt = 0;
+  const tvKey = (g) => {
+    const lp = g.sit && g.sit.lp, d = String(g.d || "");
+    const kind = lp && TV_STOP.test(lp.type) ? lp.type.toLowerCase() : /^halftime/i.test(d) ? "end of half" : /^end of/i.test(d) ? "end period" : null;
+    return kind ? g.id + ":" + (lp && lp.id ? lp.id : d) : null;
+  };
+  function houseOn(b, why) {
+    const P = pickClip(houseEdits()); if (!P) return false;
+    lastAny = Date.now(); lastKind = "pop";
+    react(b, "mid", Object.assign({}, P, { ms: Math.min(P.ms || 75e3, 75e3) }), why);
+    return true;
+  }
+  function houseTick() {
+    if (!S.ready || PHONE() || trial || !clipsOn() || !document.body.classList.contains("tv")) return;
+    const now = Date.now();
+    if (tvOn) {
+      const g = S.games.get(tvOn.gid), cur = g && g.st === "in" ? tvKey(g) : null;
+      if (cur !== tvOn.key) {
+        if (cur && fbDay() && slateMode() === "prime" && tvBreak(now)) return;   // straight into the next break
+        if (tvOn && statusSrc && tvOn.mine) stopStatus(); tvOn = null; return;   // the game's back: the music goes
+      }
+      if (!clipBusy() && now - tvOn.t0 < 4 * 60e3 && now - lastAny > 4e3) tvOn.mine = houseOn(tvOn.b, tvOn.why);
+      else if (clipBusy() && !statusSrc) tvOn.mine = false;   // something else took the screen
+      return;
+    }
+    if (fbDay() && slateMode() === "prime" && tvBreak(now)) return;
+    // nothing on yet (or between windows): house on a loop, unless the off-air channel has the room
+    if (!fbDay() || AIR.on || clipBusy()) return;
+    if ([...S.games.values()].some((g) => (g.sport === "NFL" || g.sport === "CFB") && g.st === "in")) return;
+    if (now - lastAny < 10e3 || now - idleAt < 10e3) return;
+    idleAt = now;
+    houseOn([...S.bets.values()].find((x) => x.status === "open") || oaBet("NFL"), "House · before kickoff");
+  }
+  setInterval(houseTick, 3000);
   function tvBreak(now) {
     if (!fbDay() || !clipsOn() || PHONE() || trial) return false;
     let hit = null;
@@ -10574,23 +10608,26 @@ body.tv .rb-games.primeg.mason > .rb-pcol { padding-top: 16px; -webkit-mask-imag
       if (!kind) continue;
       const key = g.id + ":" + (lp && lp.id ? lp.id : d);
       if (tvSeen.has(key)) continue;
-      if (now - tvAt < 3 * 60e3) { tvSeen.add(key); continue; }   // too soon after the last one: let this break go
+      if (now - tvAt < 75e3) { tvSeen.add(key); continue; }   // too soon after the last one: let this break go
       if (!hit) hit = { g, kind, key };
     }
     // something just played: look again next time (the break's on till the next play shows up)
-    if (!hit || now - lastAny < 45e3 || clipBusy()) return false;
-    const open = [...S.bets.values()].filter((x) => x.status === "open"), b = open.find((x) => selsOf(x).some((y) => String(y.g) === String(hit.g.id))) || open[0];
-    if (!b) return false;
-    const dj = now - lastDj >= DJ_DUE, P = breakClip(hit.g.sport, fieldTeam(), 75e3, dj);
-    if (!P) return false;
-    tvSeen.add(hit.key); tvAt = now; driveAt = now; lastAny = now; lastKind = "pop"; if (dj) lastDj = now;
-    react(b, "mid", P, { "end of half": "Halftime", "two-minute warning": "Two-minute warning", "end period": "End of the quarter" }[hit.kind] || "Commercial break");
+    // a new break while the last one's still marked on: that one's over
+    // our own music still up from it: go straight into this one, no gap
+    const held = !!(tvOn && hit && hit.key !== tvOn.key && tvOn.mine && statusSrc);
+    if (tvOn && hit && hit.key !== tvOn.key) tvOn = null;
+    if (!hit || tvOn || (!held && (now - lastAny < 15e3 || clipBusy()))) return false;
+    const open = [...S.bets.values()].filter((x) => x.status === "open"), b = open.find((x) => selsOf(x).some((y) => String(y.g) === String(hit.g.id))) || open[0] || oaBet(hit.g.sport);
+    const why = { "end of half": "Halftime", "two-minute warning": "Two-minute warning", "end period": "End of the quarter" }[hit.kind] || "Commercial break";
+    if (!houseOn(b, why)) { if (held) stopStatus(); return false; }
+    tvSeen.add(hit.key); tvAt = now; driveAt = now;
+    tvOn = { gid: hit.g.id, key: hit.key, t0: now, b, why, mine: true };
     return true;
   }
-  let fillAt = 0;
+  let fillAt = 0, fillEnd = 0;
   function houseFill(now) {
     if (!fbDay() || slateMode() !== "feature" || !clipsOn() || PHONE() || trial || clipBusy()) return false;
-    if (now - lastAny < 40e3 || now - fillAt < 40e3) return false;   // the house edits run about 20 s: a song, a breath, the next
+    if (now - lastAny < 40e3 || now - fillAt < 40e3 || now < fillEnd + 12e3) return false;   // a song, a breath, the next
     const live = new Set([...S.games.values()].filter((g) => (g.sport === "NFL" || g.sport === "CFB") && g.st === "in").map((g) => String(g.id)));
     if (!live.size) return false;
     const open = [...S.bets.values()].filter((x) => x.status === "open"), b = open.find((x) => selsOf(x).some((y) => live.has(String(y.g)))) || open[0];
@@ -10599,7 +10636,7 @@ body.tv .rb-games.primeg.mason > .rb-pcol { padding-top: 16px; -webkit-mask-imag
     let P = dj ? pickClip(newSong(CLIPS.filter((c) => c.dj))) : null;
     if (!P) { P = pickClip(houseEdits()); if (P) P = Object.assign({}, P, { ms: Math.min(P.ms || 75e3, 75e3) }); }
     if (!P) return false;
-    fillAt = now; lastAny = now; lastKind = "pop"; if (dj) lastDj = now;
+    fillAt = now; fillEnd = now + Math.min(P.ms || 30e3, 75e3); lastAny = now; lastKind = "pop"; if (dj) lastDj = now;
     react(b, "mid", P, "Music break");
     return true;
   }
@@ -11271,12 +11308,12 @@ body.tv .rb-games.primeg.mason > .rb-pcol { padding-top: 16px; -webkit-mask-imag
     if (AIR.seg && !AIR.rest) { AIR.rest = true; AIR.next = now + 20e3; return; }   // the board gets 20 s between blocks
     AIR.rest = false;
     const hr = Number(new Intl.DateTimeFormat("en-US", { timeZone: "America/New_York", hour: "numeric", hourCycle: "h23" }).format(new Date()));
-    const plan = hr < 9 ? ["dj", "week", "dj", "center"] : ["center", "week", "dj"], ctr = oaCenter(), wkb = wkBlock(), want = plan[AIR.turn++ % plan.length];
+    const plan = ["dj", "center", "dj", "week"], ctr = oaCenter(), wkb = wkBlock(), want = plan[AIR.turn++ % plan.length];
     let seg = want === "center" ? (ctr ? "center" : wkb ? "week" : "dj") : want === "week" ? (wkb ? "week" : ctr ? "center" : "dj") : "dj";
     if (seg !== "dj" && seg === AIR.last) seg = "dj";
     AIR.last = seg; AIR.seg = seg; AIR.idx = 0;
     if (seg === "week") { WK.block = wkb; WK.bi = -1; WK.cardAt = 0; }
-    AIR.items = seg === "center" ? ctr : seg === "week" ? Array(6).fill("pv") : Array(spUsable() ? 3 : 2).fill("dj");
+    AIR.items = seg === "center" ? ctr : seg === "week" ? Array(6).fill("pv") : Array(5).fill("dj");
     if (seg === "center") ctr.forEach((x) => wkHl(x));
     oaBump(seg); AIR.bumpUntil = now + 3000;
   }
@@ -11290,8 +11327,8 @@ body.tv .rb-games.primeg.mason > .rb-pcol { padding-top: 16px; -webkit-mask-imag
       return;
     }
     if (x === "dj") {
-      const P = pickClip(newSong(CLIPS.filter((c) => c.dj)));
-      if (P) react(oaBet(), "mid", P, `DJ set · ${AIR.idx} of ${AIR.items.length}`);
+      const P = pickClip(houseEdits());
+      if (P) react(oaBet(), "mid", Object.assign({}, P, { ms: Math.min(P.ms || 75e3, 75e3) }), `House set · ${AIR.idx} of ${AIR.items.length}`);
       return;
     }
     AIR.shown.set(x.id, now); hlSeen.add(x.id); keep("sb-hl", hlSeen);
