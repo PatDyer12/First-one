@@ -4259,6 +4259,54 @@ html.gsx, html.gsx body { background: #06080c; overscroll-behavior: none; }
 .gs-empty { padding: 18px; border-radius: 16px; border: 1px dashed var(--line); color: #7d8796; text-align: center; font-size: 14px; }
 .gs-done { opacity: .6; }
 .gs-foot { margin-top: 26px; color: #5d6676; font-size: 12px; text-align: center; }
+/* ---------- NBA mode: the board on the hardwood ---------- */
+body.tv.hoops::before { background:
+  radial-gradient(900px 460px at 50% -8%, rgba(255,226,180,.22), transparent 66%), radial-gradient(600px 380px at 6% -4%, rgba(255,140,60,.14), transparent 64%), radial-gradient(600px 380px at 94% -4%, rgba(255,140,60,.14), transparent 64%),
+  linear-gradient(180deg, #0b0806 0%, #120c08 58%, #1a110a 100%) !important; }
+#hcourt { display: none; }
+body.tv.hoops #hcourt { display: block; position: fixed; inset: 0; z-index: 0; pointer-events: none; opacity: .5; }
+body.tv.hoops #hcourt svg { display: block; width: 100%; height: 100%; }
+body.tv.hoops #hcourt::after { content: ""; position: absolute; inset: 0; background: radial-gradient(1300px 760px at 50% 45%, rgba(10,6,3,.2), rgba(8,5,3,.72) 100%); }
+body.tv.hoops .rb-g, body.tv.hoops .rb-sec, body.tv.hoops .rb-card { background: linear-gradient(180deg, rgba(22,15,10,.88), rgba(12,8,6,.93)) !important; border-color: rgba(255,150,70,.18); box-shadow: inset 0 1px 0 rgba(255,236,214,.07), 0 18px 40px rgba(0,0,0,.45); }
+body.tv.hoops .rb-pos, body.tv.hoops .rb-h2h, body.tv.hoops .rb-pl .pl-legs li, body.tv.hoops .rb-lr { background-color: rgba(255,170,90,.04); }
+body.tv.hoops .top .brand h1 span { color: #ff9a4a; text-shadow: 0 0 18px rgba(255,130,40,.45); }
+body.tv.hoops .modechip { background: rgba(255,120,40,.18) !important; color: #ffe2cc !important; border-color: rgba(255,150,80,.5) !important; }
+body.tv.hoops #ticker { background: linear-gradient(180deg, rgba(30,16,8,.96), rgba(16,9,5,.98)); border-top-color: rgba(255,150,70,.3); }
+body.tv.hoops .rb-g.hero { border-color: rgba(255,190,130,.26); }
+
+/* ---- the game's tracker: a shot chart on the hardwood, the run, the pace, the team stats, the quarters ---- */
+.rb-hoop { display: grid; gap: 10px; padding: 4px 2px 6px; }
+.hp-ends { display: flex; justify-content: space-between; font: 700 12px/1 var(--f-num, "Azeret Mono", monospace); letter-spacing: .12em; text-transform: uppercase; color: rgba(255,255,255,.75); }
+.hp-ends span { display: inline-flex; align-items: center; gap: 6px; }
+.hp-ends span::before { content: ""; width: 9px; height: 9px; border-radius: 50%; background: var(--c); box-shadow: 0 0 8px var(--c); }
+.hp-ends span:last-child { flex-direction: row-reverse; }
+.hp-ends em { font-style: normal; opacity: .6; }
+.hp-svg { display: block; width: 100%; height: auto; border-radius: 10px; box-shadow: 0 0 0 1px rgba(255,255,255,.15), 0 10px 26px rgba(0,0,0,.45); }
+.hp-svg .new { animation: hpNew 1.1s ease-in-out infinite alternate; transform-box: fill-box; transform-origin: center; }
+@keyframes hpNew { from { transform: scale(1); } to { transform: scale(1.7); } }
+.hp-chips { display: flex; flex-wrap: wrap; gap: 8px; }
+.hp-chip { display: inline-flex; align-items: center; gap: 7px; padding: 6px 10px; border-radius: 999px; background: rgba(255,255,255,.07); color: #f3eadf; font: 700 13px/1 var(--f-num, "Azeret Mono", monospace); letter-spacing: .04em; white-space: nowrap; }
+.hp-chip i { width: 8px; height: 8px; border-radius: 50%; background: var(--c, #ff8a3d); box-shadow: 0 0 8px var(--c, #ff8a3d); }
+.hp-chip.run { background: color-mix(in srgb, var(--c) 22%, rgba(0,0,0,.4)); box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--c) 55%, transparent); }
+.hp-chip.ov { color: #9ff0c8; } .hp-chip.un { color: #ffb8a6; }
+.hp-chip.lst { max-width: 100%; overflow: hidden; text-overflow: ellipsis; font-family: Inter, sans-serif; font-weight: 600; letter-spacing: 0; }
+.hp-bars { display: grid; gap: 6px; }
+.hp-bar { display: grid; grid-template-columns: 54px 1fr 54px; align-items: center; gap: 10px; }
+.hp-bar > b { font: 800 15px/1 var(--f-num, "Azeret Mono", monospace); color: #fff; }
+.hp-bar > b:last-child { text-align: right; }
+.hp-bar > div { display: grid; gap: 4px; }
+.hp-bar span { font: 700 10px/1 var(--f-num, "Azeret Mono", monospace); letter-spacing: .14em; text-transform: uppercase; color: rgba(255,255,255,.55); text-align: center; }
+.hp-bar i { display: flex; height: 6px; border-radius: 3px; overflow: hidden; background: rgba(255,255,255,.08); gap: 2px; }
+.hp-bar em { display: block; height: 100%; }
+.hp-q { width: 100%; border-collapse: collapse; font: 700 13px/1 var(--f-num, "Azeret Mono", monospace); color: rgba(255,255,255,.8); }
+.hp-q th { padding: 4px 6px; font-size: 10px; letter-spacing: .12em; color: rgba(255,255,255,.45); text-align: center; font-weight: 700; }
+.hp-q td { padding: 5px 6px; text-align: center; border-top: 1px solid rgba(255,255,255,.07); }
+.hp-q td:first-child, .hp-q th:first-child { text-align: left; }
+.hp-q td:last-child { color: #fff; font-weight: 900; }
+.hp-q td:first-child i { display: inline-block; width: 8px; height: 8px; margin-right: 6px; border-radius: 50%; background: var(--c); }
+/* the compact cards: the run, the pace, the last bucket */
+.hp-strip { display: flex; flex-wrap: wrap; gap: 6px; margin: 6px 0 2px; }
+.hp-strip .hp-chip { padding: 5px 9px; font-size: 12px; }
 .pp-none { padding: 16px 6px; font: 600 15px/1.3 Inter, sans-serif; color: #8d97a8; text-align: center; }
 .pp-bet { position: relative; flex: none; display: grid; gap: 6px; padding: 10px 12px 11px 13px; border-radius: 12px; background: rgba(255,255,255,.035); border: 1px solid rgba(190,210,240,.1); border-left: 5px solid rgba(190,210,240,.28); }
 .pp-bet.k-lost { opacity: .7; }
@@ -5914,7 +5962,7 @@ body.tv .rb-games.primeg.mason > .rb-pcol { padding-top: 16px; -webkit-mask-imag
     document.querySelectorAll("#spSet [data-spp]").forEach((p) => (p.hidden = p.dataset.spp !== b.dataset.spt));
   });
   function render() {
-    syncPhone(); syncHockey(); syncBall();
+    syncPhone(); syncHockey(); syncBall(); syncHoops();
     const everyone = [...S.bets.values()], all = everyone.filter(isMe);
     const start = rangeStart(S.range);
     const settled = all.filter((b) => b.status !== "open" && b.settledAt && b.settledAt >= start).sort((a, b) => a.settledAt - b.settledAt);
@@ -6860,10 +6908,141 @@ body.tv .rb-games.primeg.mason > .rb-pcol { padding-top: 16px; -webkit-mask-imag
     return `<div class="rb-scp"><h4>Scoring</h4>${plays.slice(-4).reverse().map((p, i) => { const t = tmOf(p.tm);
       return `<div class="r${i === 0 ? " new" : ""}" style="--c:${esc(t ? bright(t) : "#8a94a8")}">${t && t.lg ? `<img src="${esc(t.lg)}" alt="" referrerpolicy="no-referrer">` : "<span></span>"}<span class="q num">Q${esc(p.q ?? "")} ${esc(p.clk)}</span><span class="tx"><b>${esc(p.type)}</b>${esc(p.text)}</span><span class="s num">${esc(g.a.ab)} ${p.a ?? ""} · ${esc(g.h.ab)} ${p.h ?? ""}</span></div>`; }).join("")}</div>`;
   }
+
+  const HOOP = new Map();
+  const isHoop = (g) => !!g && (g.sport === "NBA" || g.sport === "CBB");
+  // basketball games with a bet on them (open, or settled in the last two hours) that have tipped off
+  function hoopGames() {
+    const ids = new Map(), now = Date.now();
+    for (const b of S.bets.values()) {
+      if (b.status !== "open" && !(b.settledAt && now - b.settledAt < 2 * 36e5)) continue;
+      for (const sl of selsOf(b)) { const g = gameOf(sl); if (isHoop(g) && g.st !== "pre") ids.set(g.id, g); }
+    }
+    return ids;
+  }
+  function hoopParse(j, g) {
+    const shots = [], scores = [];
+    for (const p of Array.isArray(j.plays) ? j.plays : []) {
+      const tm = p.team && p.team.id != null ? String(p.team.id) : "";
+      if (p.scoringPlay && p.scoreValue > 0 && tm) scores.push({ tm, v: p.scoreValue });
+      if (!p.shootingPlay) continue;
+      const c = p.coordinate || {}, x = Number(c.x), y = Number(c.y);
+      if (!(x >= 0 && x <= 50 && y >= 0 && y <= 94) || /free throw/i.test(((p.type && p.type.text) || "") + " " + (p.text || ""))) continue;
+      shots.push({ id: String(p.id), tm, x, y, made: !!p.scoringPlay, v: p.scoreValue || 0, txt: p.text || "" });
+    }
+    const tms = {};
+    for (const t of (j.boxscore && j.boxscore.teams) || []) { const o = {}; for (const x of t.statistics || []) o[x.name] = x.displayValue; tms[String(t.team && t.team.id)] = o; }
+    const hd = j.header && j.header.competitions && j.header.competitions[0], qs = {};
+    for (const c of (hd && hd.competitors) || []) qs[c.homeAway === "home" ? "h" : "a"] = (c.linescores || []).map((l) => l.displayValue);
+    // the run that's on: the last team to score, back through the plays while the other side barely answered
+    let run = null;
+    if (scores.length) {
+      const who = scores[scores.length - 1].tm; let us = 0, them = 0;
+      for (let i = scores.length - 1; i >= 0; i--) { const x = scores[i]; if (x.tm === who) us += x.v; else { if (them + x.v > Math.max(4, us / 3)) break; them += x.v; } }
+      if (us >= 8 && us - them >= 7) run = { tm: who, us, them };
+    }
+    return { shots, tm: tms, qs, run, final: !!(hd && hd.status && hd.status.type && hd.status.type.completed) };
+  }
+  function loadHoop() {
+    if (document.visibilityState !== "visible") return;
+    const now = Date.now();
+    for (const g of hoopGames().values()) {
+      const c = HOOP.get(g.id); if (c && (c.busy || c.final || now - c.at < (g.st === "in" ? 20e3 : 120e3))) continue;
+      HOOP.set(g.id, { ...(c || {}), busy: true, at: now });
+      fetch(`https://site.api.espn.com/apis/site/v2/sports/${ESPN[g.sport]}/summary?event=${g.id}`).then((r) => r.json())
+        .then((j) => { HOOP.set(g.id, { ...hoopParse(j, g), at: Date.now(), busy: false }); render(); })
+        .catch(() => HOOP.set(g.id, { ...(c || {}), busy: false, at: Date.now() }));
+    }
+  }
+  setInterval(loadHoop, 5000);
+  // where the game's on pace to finish
+  function hoopPace(g) {
+    if (g.st !== "in" || g.a.sc == null || g.h.sc == null) return null;
+    const nba = g.sport === "NBA", N = nba ? 4 : 2, L = nba ? 12 : 20, pd = g.pd || 1, left = Math.max(0, Number(g.clk) || 0) / 60;
+    const el = pd <= N ? (pd - 1) * L + (L - left) : N * L + (pd - N - 1) * 5 + (5 - left);
+    if (el < 4) return null;
+    return Math.round(((g.a.sc + g.h.sc) / el) * (pd <= N ? N * L : el + left));
+  }
+  // a court, 94 by 50 feet: the hardwood, the home team's paint and its logo at centre court
+  function hoopCourt(t, idp) {
+    const k = esc(bright(t));
+    return `<defs><linearGradient id="${idp}W" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#d9a368"/><stop offset=".5" stop-color="#c98e56"/><stop offset="1" stop-color="#b87a44"/></linearGradient>
+      <pattern id="${idp}P" width="14" height="1.6" patternUnits="userSpaceOnUse"><rect width="14" height=".8" fill="rgba(90,48,18,.07)"/><rect x="6" y=".8" width="8" height=".8" fill="rgba(255,240,220,.06)"/><rect x="6" y="0" width=".08" height="1.6" fill="rgba(70,36,12,.12)"/></pattern></defs>
+      <rect width="94" height="50" fill="url(#${idp}W)"/><rect width="94" height="50" fill="url(#${idp}P)"/>
+      <g fill="${k}" opacity=".62"><rect x="0" y="17" width="19" height="16"/><rect x="75" y="17" width="19" height="16"/></g>
+      <circle cx="47" cy="25" r="6" fill="${k}" opacity=".4"/>
+      ${t.lg ? `<image href="${esc(t.lg)}" x="42.2" y="20.2" width="9.6" height="9.6" opacity=".7"/>` : ""}
+      <g fill="none" stroke="rgba(255,255,255,.9)" stroke-width=".3">
+        <rect x=".15" y=".15" width="93.7" height="49.7"/><line x1="47" y1="0" x2="47" y2="50"/><circle cx="47" cy="25" r="6"/><circle cx="47" cy="25" r="2"/>
+        <rect x="0" y="17" width="19" height="16"/><rect x="75" y="17" width="19" height="16"/><circle cx="19" cy="25" r="6"/><circle cx="75" cy="25" r="6"/>
+        <path d="M0 3H14A23.75 23.75 0 0 1 14 47H0"/><path d="M94 3H80A23.75 23.75 0 0 0 80 47H94"/>
+        <path d="M5.25 21A4 4 0 0 1 5.25 29"/><path d="M88.75 21A4 4 0 0 0 88.75 29"/>
+        <line x1="4" y1="22" x2="4" y2="28" stroke-width=".45"/><line x1="90" y1="22" x2="90" y2="28" stroke-width=".45"/>
+      </g>
+      <g fill="none" stroke="#ff6a1a" stroke-width=".32"><circle cx="5.25" cy="25" r=".75"/><circle cx="88.75" cy="25" r=".75"/></g>`;
+  }
+  const hpChip = (cls, html, c) => `<span class="hp-chip ${cls}"${c ? ` style="--c:${esc(c)}"` : ""}>${html}</span>`;
+  function hoopChips(g, d, compact) {
+    const A = String(g.a.id), out = [];
+    if (d && d.run && g.st === "in") { const t = d.run.tm === A ? g.a : g.h; out.push(hpChip("run", `<i></i>${esc(t.ab)} ${d.run.us}-${d.run.them} run`, bright(t))); }
+    const pc = hoopPace(g), tl = g.tot && g.tot.l != null ? Number(g.tot.l) : null;
+    if (pc != null) out.push(hpChip(tl == null ? "" : pc > tl ? "ov" : pc < tl ? "un" : "", `Pace ${pc}${tl != null ? ` · O/U ${trim(tl)}` : ""}`));
+    const lb = d && d.shots ? [...d.shots].reverse().find((x) => x.made) : null;
+    if (lb && g.st === "in") out.push(hpChip("lst", esc(lb.txt.replace(/\s*\([^)]*\)\s*$/, "")), bright(lb.tm === A ? g.a : g.h)));
+    return out.join("");
+  }
+  function hoopHtml(g) {
+    const d = HOOP.get(g.id); if (!d || !d.shots) { setTimeout(loadHoop, 0); return ""; }
+    const A = String(g.a.id), H = String(g.h.id), ca = bright(g.a), ch = bright(g.h), lastId = d.shots.length ? d.shots[d.shots.length - 1].id : "";
+    // the away team shoots at the right-hand basket, the home team at the left (ESPN's shots are feet from the rim)
+    const pt = (x) => (x.tm === A ? [88.75 - x.y, x.x] : [5.25 + x.y, 50 - x.x]);
+    const dot = (x) => { const [cx, cy] = pt(x), c = esc(x.tm === A ? ca : ch), nw = x.id === lastId ? " new" : "";
+      return x.made ? `<circle class="hp-mk${nw}" cx="${cx.toFixed(1)}" cy="${cy.toFixed(1)}" r="1.05" fill="${c}" stroke="#fff" stroke-width=".3"/>`
+        : `<path class="hp-ms${nw}" d="M${(cx - 0.7).toFixed(2)} ${(cy - 0.7).toFixed(2)}l1.4 1.4m0-1.4l-1.4 1.4" stroke="${c}" stroke-width=".42" stroke-linecap="round" opacity=".85"/>`; };
+    const svg = `<svg class="hp-svg" viewBox="0 0 94 50" role="img" aria-label="Shot chart">${hoopCourt(g.h, "hpc")}${d.shots.filter((x) => !x.made).map(dot).join("")}${d.shots.filter((x) => x.made).map(dot).join("")}</svg>`;
+    const ta = d.tm[A] || {}, th = d.tm[H] || {}, n = (v) => parseFloat(v) || 0;
+    const bar = (lbl, a, h, fa, fh) => { const x = n(a), y = n(h), t = x + y || 1;
+      return `<div class="hp-bar"><b class="num">${esc(fa ?? a)}</b><div><span>${lbl}</span><i><em style="width:${((100 * x) / t).toFixed(1)}%;background:${esc(ca)}"></em><em style="width:${((100 * y) / t).toFixed(1)}%;background:${esc(ch)}"></em></i></div><b class="num">${esc(fh ?? h)}</b></div>`; };
+    const k3 = "threePointFieldGoalsMade-threePointFieldGoalsAttempted";
+    const bars = ta.fieldGoalPct != null ? [bar("FG%", ta.fieldGoalPct, th.fieldGoalPct, ta.fieldGoalPct + "%", th.fieldGoalPct + "%"), ta[k3] ? bar("Threes", n(ta[k3]), n(th[k3]), ta[k3], th[k3]) : "",
+      bar("Rebounds", ta.totalRebounds, th.totalRebounds), bar("Assists", ta.assists, th.assists), bar("Turnovers", ta.totalTurnovers ?? ta.turnovers, th.totalTurnovers ?? th.turnovers),
+      ta.pointsInPaint != null ? bar("Paint", ta.pointsInPaint, th.pointsInPaint) : ""].join("") : "";
+    const qa = d.qs.a || [], qh = d.qs.h || [], nq = Math.max(qa.length, qh.length), half = g.sport === "CBB";
+    const ql = (i) => (half ? (i < 2 ? "H" + (i + 1) : "OT" + (i - 1)) : i < 4 ? "Q" + (i + 1) : "OT" + (i - 3));
+    const row = (t, q, c) => `<tr><td><i style="--c:${esc(c)}"></i>${esc(t.ab)}</td>${Array.from({ length: nq }, (_, i) => `<td>${esc(q[i] ?? "")}</td>`).join("")}<td>${t.sc ?? ""}</td></tr>`;
+    const qt = nq ? `<table class="hp-q"><tr><th></th>${Array.from({ length: nq }, (_, i) => `<th>${ql(i)}</th>`).join("")}<th>T</th></tr>${row(g.a, qa, ca)}${row(g.h, qh, ch)}</table>` : "";
+    const chips = hoopChips(g, d);
+    return `<div class="rb-hoop"><div class="hp-ends"><span style="--c:${esc(ca)}">${esc(g.a.ab)} <em>shoots →</em></span><span style="--c:${esc(ch)}">${esc(g.h.ab)} <em>← shoots</em></span></div>${svg}
+      ${chips ? `<div class="hp-chips">${chips}</div>` : ""}${bars ? `<div class="hp-bars">${bars}</div>` : ""}${qt}</div>`;
+  }
+  // the game the room has the most riding on tonight (live first)
+  function hoopFocus() {
+    const now = Date.now(); let best = null, bn = -1;
+    for (const g of S.games.values()) {
+      if (!isHoop(g) || g.st === "post" || g.t > now + 14 * 36e5 || g.t < now - 6 * 36e5) continue;
+      const n = [...S.bets.values()].filter((b) => b.status === "open" && selsOf(b).some((x) => String(x.g) === String(g.id))).length + (g.st === "in" ? 0.5 : 0);
+      if (n > bn) { best = g; bn = n; }
+    }
+    return best;
+  }
+  function hoopBg() {
+    let el = $("#hcourt");
+    if (!el) { document.body.insertAdjacentHTML("afterbegin", '<div id="hcourt" aria-hidden="true"></div>'); el = $("#hcourt"); }
+    const g = hoopFocus(), t = g ? g.h : { col: "#c8102e", alt: "", lg: "" }, key = g ? g.id : "none";
+    if (el.dataset.k === key) return;
+    el.dataset.k = key;
+    el.innerHTML = `<svg viewBox="-2 -4 98 58" preserveAspectRatio="xMidYMid slice">${hoopCourt(t, "hbg")}</svg>`;
+  }
+  function syncHoops() {
+    const b = document.body, want = !PHONE() && !b.classList.contains("hockey") && !b.classList.contains("baseball") && ["NBA", "CBB"].includes(DIR && DIR.sport ? DIR.sport : nightSport());
+    if (want !== b.classList.contains("hoops")) { b.classList.toggle("hoops", want); loadTicker(); }
+    if (want) hoopBg();
+  }
   function fieldHtml(g) {
     if (!sset(g.sport, "tracker")) return "";
     if (g.sport === "NHL" && g.st !== "pre") return rinkHtml(g);
     if (g.sport === "MLB" && g.st !== "pre") return diamondHtml(g);
+    if (isHoop(g) && g.st !== "pre") { const h = hoopHtml(g); if (h) return h; }
     const sit = g.sit || {}, fb = g.sport === "NFL" || g.sport === "CFB";
     const col = (t) => esc(bright(t));
     if (g.st === "pre") {
@@ -7030,6 +7209,7 @@ body.tv .rb-games.primeg.mason > .rb-pcol { padding-top: 16px; -webkit-mask-imag
   }
   // a live football game's whole show under the scoreboard
   function gxPlay(g, size) {
+    if (isHoop(g) && g.st === "in" && sset(g.sport, "tracker")) { const c = hoopChips(g, HOOP.get(g.id)); return c ? `<div class="hp-strip">${c}</div>` : ""; }
     if (!gxFoot(g) || g.st !== "in" || !sset(g.sport, "tracker")) return "";
     return `<div class="gx-play">${gxField(g, size)}${gxInfo(g, size === "big")}${gxWp(g)}${gxLdr(g)}</div>`;
   }
@@ -9430,7 +9610,7 @@ body.tv .rb-games.primeg.mason > .rb-pcol { padding-top: 16px; -webkit-mask-imag
   // ---------- sheets ----------
   function openSheet(id) { $(id).hidden = false; }
   // keep every open screen current: when a new version is up, reload it (never mid-form or mid-animation)
-  const BUILD = "20261019200733";
+  const BUILD = "20261020174316";
   function checkBuild() {
     if (BUILD === "dev") return;
     fetch("version.json?t=" + Date.now(), { cache: "no-store" }).then((r) => (r.ok ? r.json() : null)).then((j) => {
@@ -13538,7 +13718,7 @@ body.tv .rb-games.primeg.mason > .rb-pcol { padding-top: 16px; -webkit-mask-imag
     setTimeout(() => el.classList.add("ub-off"), 7000);
     setTimeout(() => { el.hidden = true; el.classList.remove("ub-on", "ub-off"); upsBusy = false; upsNext(); }, 7600);
   }
-  function dirApply() { try { syncHockey(); syncBall(); syncCfb(); showMode(); if (typeof TK !== "undefined" && TK.lg !== focusLeague()) loadTicker(); } catch (e) {} }
+  function dirApply() { try { syncHockey(); syncBall(); syncHoops(); syncCfb(); showMode(); if (typeof TK !== "undefined" && TK.lg !== focusLeague()) loadTicker(); } catch (e) {} }
   setInterval(dirPoll, 20e3); setTimeout(dirPoll, 1500);
   setInterval(dirTick, 30e3);
   const WK_LG = ["NFL", "CFB", "MLB", "NHL", "NBA", "CBB"], WK_PRI = { NFL: 0, MLB: 1, CFB: 2, NBA: 3, NHL: 4, CBB: 5 };
@@ -13962,7 +14142,7 @@ body.tv .rb-games.primeg.mason > .rb-pcol { padding-top: 16px; -webkit-mask-imag
     const m = slateMode(), n = slateGames();
     el.hidden = !n && slatePin() === "auto";
     el.className = "chip modechip " + m;
-    el.textContent = (document.body.classList.contains("cfb") ? (etDow() === 6 ? "College Saturday" : "College football") : document.body.classList.contains("hockey") ? "Hockey night" : document.body.classList.contains("baseball") ? "Ballpark" : DIR && (DIR.sport === "NBA" || DIR.sport === "CBB") ? "Hoops night" : nflWindow() || MODE_LABEL[m]) + (n ? ` · ${n} game${n > 1 ? "s" : ""}` : "");
+    el.textContent = (document.body.classList.contains("cfb") ? (etDow() === 6 ? "College Saturday" : "College football") : document.body.classList.contains("hockey") ? "Hockey night" : document.body.classList.contains("baseball") ? "Ballpark" : document.body.classList.contains("hoops") || (DIR && (DIR.sport === "NBA" || DIR.sport === "CBB")) ? (DIR && DIR.sport === "CBB" ? "Hoops night" : "NBA night") : nflWindow() || MODE_LABEL[m]) + (n ? ` · ${n} game${n > 1 ? "s" : ""}` : "");
   }
   function autoReact() {
     if (!S.ready) return;
