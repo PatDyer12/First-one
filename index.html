@@ -1,6 +1,7 @@
 <!doctype html>
 <html lang="en">
 <head>
+<script type="importmap">{"imports": {"three": "./vendor/three/three.module.min.js", "three/addons/": "./vendor/three/jsm/"}}</script>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
 <meta name="theme-color" content="#0A0F17">
@@ -4316,6 +4317,181 @@ body.tv.hoops #hcourt::after { background: linear-gradient(180deg, rgba(5,4,3,.5
 body.tv.hoops .ob-bet { background-color: rgba(14,10,8,.9); }
 body.tv.hoops .ob-h2h { background: rgba(10,7,5,.6); }
 body.tv.hoops .rb-g, body.tv.hoops .rb-sec, body.tv.hoops .rb-card { background: linear-gradient(180deg, rgba(22,15,10,.97), rgba(12,8,6,.98)) !important; }
+
+/* ---------- the NBA family: matte black, one accent each, a light running round the edge, the game's line art ---------- */
+.bt-nb { --fxi: radial-gradient(90% 170% at 100% 0%, color-mix(in srgb, var(--fxk) 18%, transparent), transparent 58%), radial-gradient(70% 120% at 0% 100%, rgba(255,255,255,.035), transparent 60%), linear-gradient(180deg, #131417, #0a0b0d);
+  --fxb: linear-gradient(100deg, rgba(255,255,255,.07) 0 34%, color-mix(in srgb, var(--fxk) 70%, transparent) 43%, #fff 47%, var(--fxk) 51%, rgba(255,255,255,.07) 62% 100%); --fxbs: 280% 100%;
+  --fxg: color-mix(in srgb, var(--fxk) 22%, transparent); --fxr: 0 0 0 1px color-mix(in srgb, var(--fxk) 22%, transparent); animation: btNbEdge 6s linear var(--d, 0s) infinite; }
+.bt-nb.bt-hype { --fxg: color-mix(in srgb, var(--fxk) 42%, transparent); animation-duration: 3s; }
+@keyframes btNbEdge { from { background-position: 0 0, 140% 0; } to { background-position: 0 0, -140% 0; } }
+.bt-nb .fx-glint { display: none; }
+.bt-nb .bt-art::after { left: 18px; right: 18px; bottom: 0; height: 1px; background: linear-gradient(90deg, transparent, color-mix(in srgb, var(--fxk) 70%, transparent) 50%, transparent); opacity: .7; }
+.bt-nb .bt-art::before { width: 170px; aspect-ratio: 1; right: 168px; top: 50%; margin-top: -85px; background: var(--fxk); opacity: .2; -webkit-mask: var(--art) center / contain no-repeat; mask: var(--art) center / contain no-repeat; }
+.bt-nb .bt-art > b::before { inset: 0; background: linear-gradient(100deg, transparent 30%, color-mix(in srgb, var(--fxk) 10%, transparent) 46%, rgba(255,255,255,.07) 50%, transparent 62%) 0 0 / 300% 100%; animation: btNbSheen 7s ease-in-out var(--d, 0s) infinite; }
+@keyframes btNbSheen { 0%, 55% { background-position: 150% 0; } 100% { background-position: -150% 0; } }
+.bt-nb :is(.pp-pick, .ob-pick) .t, .slip.bt-nb .sl-pick { color: #fff; text-shadow: 0 0 18px color-mix(in srgb, var(--fxk) 45%, transparent); }
+.bt-chip:is(.bt-c-bucket, .bt-c-cook, .bt-c-splash, .bt-c-glass, .bt-c-dimes, .bt-c-stocks, .bt-c-stuffer, .bt-c-brick, .bt-c-matador, .bt-c-rockfight, .bt-c-freehoops, .bt-c-backdoor, .bt-c-doubt, .bt-c-him) { color: #0b0c0e; background: linear-gradient(135deg, color-mix(in srgb, var(--fxk) 55%, #fff), var(--fxk) 60%); box-shadow: 0 0 14px color-mix(in srgb, var(--fxk) 45%, transparent); }
+.bt-chip:is(.bt-c-bucket, .bt-c-cook, .bt-c-splash, .bt-c-glass, .bt-c-dimes, .bt-c-stocks, .bt-c-stuffer, .bt-c-brick, .bt-c-matador, .bt-c-rockfight, .bt-c-freehoops, .bt-c-backdoor, .bt-c-doubt, .bt-c-him) .bt-ico { stroke-width: 2.4; }
+/* each one's art and how it moves */
+.bt-bucket .bt-art::before { opacity: .17; animation: btSpin 26s linear var(--d, 0s) infinite; }
+.bt-bucket.bt-hype .bt-art::before { animation-duration: 6s; opacity: .3; }
+.bt-cook .bt-art::before { width: 230px; right: 140px; margin-top: -115px; opacity: .18; animation: btHeat 2.6s linear var(--d, 0s) infinite; -webkit-mask-size: 100% 50%; mask-size: 100% 50%; -webkit-mask-repeat: repeat-y; mask-repeat: repeat-y; }
+.bt-cook .bt-art > b::after { left: 0; right: 0; bottom: 0; height: 55%; background: linear-gradient(to top, color-mix(in srgb, var(--fxk) 24%, transparent), transparent); animation: btHeatGlow 1.6s ease-in-out var(--d, 0s) infinite alternate; }
+@keyframes btHeat { to { -webkit-mask-position: 0 -105px; mask-position: 0 -105px; } }
+@keyframes btHeatGlow { from { opacity: .5; } to { opacity: 1; } }
+.bt-splash .bt-art > b::after { width: 150px; aspect-ratio: 1; right: 178px; top: 50%; margin-top: -75px; border-radius: 50%; border: 2px solid var(--fxk); opacity: 0; animation: btRipple 3s ease-out var(--d, 0s) infinite; }
+@keyframes btRipple { 0% { transform: scale(.2); opacity: .55; } 100% { transform: scale(1.5); opacity: 0; } }
+.bt-glass .bt-art::before { opacity: .22; }
+.bt-glass .bt-art > b::after { width: 200px; top: 0; bottom: 0; right: 150px; background: linear-gradient(115deg, transparent 40%, rgba(255,255,255,.18) 48%, transparent 56%) 0 0 / 300% 100%; animation: btNbSheen 4s ease-in-out var(--d, 0s) infinite; }
+.bt-dimes .bt-art::before { opacity: .24; }
+.bt-dimes .bt-art > b::after { width: 9px; height: 9px; border-radius: 50%; background: var(--fxk); box-shadow: 0 0 10px var(--fxk); right: 0; top: 0; offset-path: path("M -301 147 C -270 47 -206 47 -175 147"); offset-rotate: 0deg; animation: btDime 2.4s cubic-bezier(.4,0,.6,1) var(--d, 0s) infinite; }
+@keyframes btDime { 0% { offset-distance: 0%; opacity: 0; } 12% { opacity: 1; } 88% { opacity: 1; } 100% { offset-distance: 100%; opacity: 0; } }
+.bt-stocks .bt-art::before { opacity: .24; -webkit-mask-size: 300% 100%; mask-size: 100% 100%; animation: btTick 3.2s ease-in-out var(--d, 0s) infinite alternate; }
+@keyframes btTick { from { opacity: .12; } to { opacity: .3; } }
+.bt-stuffer .bt-art::before { opacity: .16; }
+.bt-brick .bt-art::before { width: 300px; right: 120px; margin-top: -150px; opacity: .14; -webkit-mask-image: var(--art), linear-gradient(90deg, transparent, #000 60%); mask-image: var(--art), linear-gradient(90deg, transparent, #000 60%); -webkit-mask-composite: source-in; mask-composite: intersect; }
+.bt-matador .bt-art::before { opacity: .22; transform-origin: 30% 10%; animation: btCape 3.4s ease-in-out var(--d, 0s) infinite alternate; }
+@keyframes btCape { from { transform: rotate(-4deg); } to { transform: rotate(5deg) translateX(6px); } }
+.bt-rockfight .bt-art::before { opacity: .2; }
+.bt-freehoops .bt-art::before { opacity: .22; }
+.bt-freehoops .bt-art > b::after { width: 4px; height: 56px; right: 251px; top: 50%; margin-top: -48px; background: var(--fxk); border-radius: 2px; transform-origin: 50% 100%; opacity: .5; animation: btSpin 4s steps(24) var(--d, 0s) infinite; }
+.bt-backdoor .bt-art > b::after { width: 74px; right: 222px; top: 14px; bottom: 14px; background: linear-gradient(90deg, color-mix(in srgb, var(--fxk) 35%, transparent), transparent); clip-path: polygon(0 0, 100% 14%, 100% 86%, 0 100%); animation: btHeatGlow 2s ease-in-out var(--d, 0s) infinite alternate; }
+.bt-doubt .bt-art::before { opacity: .24; }
+.bt-him .bt-art::before { opacity: .26; animation: btSpin 30s linear var(--d, 0s) infinite; }
+.bt-him .bt-art > b::after { width: 240px; aspect-ratio: 1; right: 132px; top: 50%; margin-top: -110px; border-radius: 50%; background: radial-gradient(circle, color-mix(in srgb, var(--fxk) 30%, transparent), transparent 62%); animation: btHeatGlow 2.2s ease-in-out var(--d, 0s) infinite alternate; }
+.bt-bucket { --fxk: #ff7a1a; --art: url("data:image/svg+xml,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22 width=%22200%22 height=%22200%22 viewBox=%220 0 200 200%22 fill=%22none%22 stroke=%22%23000%22 stroke-width=%223%22 stroke-linecap=%22round%22 stroke-linejoin=%22round%22%3E%3Ccircle cx=%22100%22 cy=%22100%22 r=%2292%22/%3E%3Cpath d=%22M8 100h184M100 8v184M34 34c30 30 30 102 0 132M166 34c-30 30-30 102 0 132%22/%3E%3C/svg%3E"); } .bt-c-bucket { --fxk: #ff7a1a; }
+.bt-cook { --fxk: #ff5a2a; --art: url("data:image/svg+xml,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22 width=%22200%22 height=%22200%22 viewBox=%220 0 200 200%22 fill=%22none%22 stroke=%22%23000%22 stroke-width=%224%22 stroke-linecap=%22round%22 stroke-linejoin=%22round%22%3E%3Cpath d=%22M40 200c-20-30 20-50 0-80s20-50 0-80 20-40 0-60%22/%3E%3Cpath d=%22M90 200c-20-30 20-50 0-80s20-50 0-80 20-40 0-60%22/%3E%3Cpath d=%22M140 200c-20-30 20-50 0-80s20-50 0-80 20-40 0-60%22/%3E%3Cpath d=%22M190 200c-20-30 20-50 0-80s20-50 0-80 20-40 0-60%22/%3E%3C/svg%3E"); } .bt-c-cook { --fxk: #ff5a2a; }
+.bt-splash { --fxk: #2fd0ff; --art: url("data:image/svg+xml,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22 width=%22200%22 height=%22200%22 viewBox=%220 0 200 200%22 fill=%22none%22 stroke=%22%23000%22 stroke-width=%223%22 stroke-linecap=%22round%22 stroke-linejoin=%22round%22%3E%3Cellipse cx=%22100%22 cy=%2240%22 rx=%2270%22 ry=%2218%22/%3E%3Cpath d=%22M30 40l22 130h96l22-130M68 56l10 114M132 56l-10 114M100 58v112M38 86h124M46 128h108%22/%3E%3C/svg%3E"); } .bt-c-splash { --fxk: #2fd0ff; }
+.bt-glass { --fxk: #9fe3ff; --art: url("data:image/svg+xml,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22 width=%22200%22 height=%22200%22 viewBox=%220 0 200 200%22 fill=%22none%22 stroke=%22%23000%22 stroke-width=%223%22 stroke-linecap=%22round%22 stroke-linejoin=%22round%22%3E%3Crect x=%2210%22 y=%2220%22 width=%22180%22 height=%22120%22 rx=%228%22/%3E%3Crect x=%2270%22 y=%2262%22 width=%2260%22 height=%2246%22/%3E%3Cpath d=%22M100 140v22M70 162h60l-10 30H80z%22/%3E%3C/svg%3E"); } .bt-c-glass { --fxk: #9fe3ff; }
+.bt-dimes { --fxk: #dfe6ef; --art: url("data:image/svg+xml,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22 width=%22200%22 height=%22200%22 viewBox=%220 0 200 200%22 fill=%22none%22 stroke=%22%23000%22 stroke-width=%223%22 stroke-linecap=%22round%22 stroke-linejoin=%22round%22%3E%3Ccircle cx=%2222%22 cy=%22160%22 r=%2214%22/%3E%3Ccircle cx=%22178%22 cy=%22160%22 r=%2214%22/%3E%3Cpath d=%22M34 146C70 40 130 40 166 146%22 stroke-dasharray=%2210 12%22/%3E%3C/svg%3E"); } .bt-c-dimes { --fxk: #dfe6ef; }
+.bt-stocks { --fxk: #3ddc97; --art: url("data:image/svg+xml,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22 width=%22200%22 height=%22200%22 viewBox=%220 0 200 200%22 fill=%22none%22 stroke=%22%23000%22 stroke-width=%223%22 stroke-linecap=%22round%22 stroke-linejoin=%22round%22%3E%3Cpath d=%22M10 170l50-50 36 32 94-102%22/%3E%3Cpath d=%22M130 50h60v60%22/%3E%3Cpath d=%22M10 190h180M10 150h180M10 110h180M10 70h180%22 stroke-width=%221%22 opacity=%22.5%22/%3E%3C/svg%3E"); } .bt-c-stocks { --fxk: #3ddc97; }
+.bt-stuffer { --fxk: #b48cff; --art: url("data:image/svg+xml,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22 width=%22200%22 height=%22200%22 viewBox=%220 0 200 200%22 fill=%22none%22 stroke=%22%23000%22 stroke-width=%222.5%22 stroke-linecap=%22round%22 stroke-linejoin=%22round%22%3E%3Crect x=%228%22 y=%228%22 width=%22184%22 height=%22184%22 rx=%2210%22/%3E%3Cpath d=%22M8 54h184M8 100h184M8 146h184M54 8v184M100 8v184M146 8v184%22/%3E%3C/svg%3E"); } .bt-c-stuffer { --fxk: #b48cff; }
+.bt-brick { --fxk: #e0603f; --art: url("data:image/svg+xml,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22 width=%22200%22 height=%22200%22 viewBox=%220 0 200 200%22 fill=%22none%22 stroke=%22%23000%22 stroke-width=%222.5%22 stroke-linecap=%22round%22 stroke-linejoin=%22round%22%3E%3Cpath d=%22M0 30h200M0 70h200M0 110h200M0 150h200M0 190h200M40 30v40M120 30v40M200 30v40M0 70v40M80 70v40M160 70v40M40 110v40M120 110v40M200 110v40M0 150v40M80 150v40M160 150v40%22/%3E%3C/svg%3E"); } .bt-c-brick { --fxk: #e0603f; }
+.bt-matador { --fxk: #ff2e55; --art: url("data:image/svg+xml,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22 width=%22200%22 height=%22200%22 viewBox=%220 0 200 200%22 fill=%22none%22 stroke=%22%23000%22 stroke-width=%223.5%22 stroke-linecap=%22round%22 stroke-linejoin=%22round%22%3E%3Cpath d=%22M30 14c64 12 106 56 114 170-42-32-82-41-114-32 21-44 21-96 0-138z%22/%3E%3Cpath d=%22M144 184c6-60 26-93 53-105%22/%3E%3C/svg%3E"); } .bt-c-matador { --fxk: #ff2e55; }
+.bt-rockfight { --fxk: #a4b2c2; --art: url("data:image/svg+xml,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22 width=%22200%22 height=%22200%22 viewBox=%220 0 200 200%22 fill=%22none%22 stroke=%22%23000%22 stroke-width=%223%22 stroke-linecap=%22round%22 stroke-linejoin=%22round%22%3E%3Cpath d=%22M14 170l26-74 54-44 63 22 28 64-22 52H40z%22/%3E%3Cpath d=%22M94 52l9 54 54-30M40 96l63 10M103 106l-20 64M157 128l-54-22%22/%3E%3C/svg%3E"); } .bt-c-rockfight { --fxk: #a4b2c2; }
+.bt-freehoops { --fxk: #ffd23f; --art: url("data:image/svg+xml,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22 width=%22200%22 height=%22200%22 viewBox=%220 0 200 200%22 fill=%22none%22 stroke=%22%23000%22 stroke-width=%223%22 stroke-linecap=%22round%22 stroke-linejoin=%22round%22%3E%3Ccircle cx=%22100%22 cy=%22112%22 r=%2280%22/%3E%3Cpath d=%22M100 70v42l30 18M72 16h56M100 16v26M170 50l14-14%22/%3E%3Cpath d=%22M100 40v8M100 176v8M28 112h8M164 112h8%22/%3E%3C/svg%3E"); } .bt-c-freehoops { --fxk: #ffd23f; }
+.bt-backdoor { --fxk: #7cf5c8; --art: url("data:image/svg+xml,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22 width=%22200%22 height=%22200%22 viewBox=%220 0 200 200%22 fill=%22none%22 stroke=%22%23000%22 stroke-width=%223%22 stroke-linecap=%22round%22 stroke-linejoin=%22round%22%3E%3Cpath d=%22M40 194V20h100v174M20 194h160%22/%3E%3Cpath d=%22M140 20l32 18v142l-32 18%22/%3E%3Ccircle cx=%22118%22 cy=%22110%22 r=%227%22/%3E%3C/svg%3E"); } .bt-c-backdoor { --fxk: #7cf5c8; }
+.bt-doubt { --fxk: #ffa62b; --art: url("data:image/svg+xml,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22 width=%22200%22 height=%22200%22 viewBox=%220 0 200 200%22 fill=%22none%22 stroke=%22%23000%22 stroke-width=%224%22 stroke-linecap=%22round%22 stroke-linejoin=%22round%22%3E%3Cpath d=%22M10 40l66 104 40-46 74 84%22/%3E%3Cpath d=%22M138 182h52v-52%22/%3E%3C/svg%3E"); } .bt-c-doubt { --fxk: #ffa62b; }
+.bt-him { --fxk: #ffe27a; --art: url("data:image/svg+xml,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22 width=%22200%22 height=%22200%22 viewBox=%220 0 200 200%22 fill=%22none%22 stroke=%22%23000%22 stroke-width=%223%22 stroke-linecap=%22round%22 stroke-linejoin=%22round%22%3E%3Cpath d=%22M100 10l22 70 70 22-70 22-22 70-22-70-70-22 70-22z%22/%3E%3Cpath d=%22M100 0v10M100 194v10M0 102h10M194 102h10%22 opacity=%22.6%22/%3E%3C/svg%3E"); } .bt-c-him { --fxk: #ffe27a; }
+
+/* ---- a play that helps a prop ---- */
+.ppx { position: fixed; z-index: 70; display: grid; grid-template-columns: 200px 84px minmax(0, 1fr); align-items: center; gap: 14px; box-sizing: border-box; min-height: 150px; padding: 8px 18px 8px 8px; border-radius: 16px; pointer-events: none;
+  background: radial-gradient(120% 160% at 0% 50%, color-mix(in srgb, var(--a) 20%, transparent), transparent 55%), linear-gradient(180deg, #111215, #08090b);
+  box-shadow: 0 0 0 1.5px color-mix(in srgb, var(--a) 70%, transparent), 0 0 34px color-mix(in srgb, var(--a) 40%, transparent), 0 20px 50px rgba(0,0,0,.6);
+  opacity: 0; transform-origin: 50% 50%; scale: .94; transition: opacity .25s ease, scale .35s cubic-bezier(.2,1.4,.4,1); color: #fff; font-family: Inter, sans-serif; }
+.ppx:not(.on-card) { width: 640px; }
+.ppx.ppx-in { opacity: 1; scale: 1; }
+.ppx.ppx-out { opacity: 0; scale: .97; transition-duration: .35s; }
+.ppx::after { content: ""; position: absolute; inset: 0; border-radius: inherit; background: linear-gradient(100deg, transparent 35%, rgba(255,255,255,.12) 48%, transparent 60%) 0 0 / 300% 100% no-repeat; background-position: 160% 0; animation: ppxSheen 1.4s .15s ease-out forwards; }
+@keyframes ppxSheen { to { background-position: -160% 0; } }
+.ppx-cv { width: 200px; height: 140px; }
+.ppx-hs { position: relative; width: 84px; height: 84px; border-radius: 50%; overflow: hidden; background: color-mix(in srgb, var(--tc) 35%, #111); box-shadow: 0 0 0 3px var(--a), 0 0 18px color-mix(in srgb, var(--a) 50%, transparent); display: grid; place-items: center; }
+.ppx-hs img { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; object-position: 50% 12%; }
+.ppx-hs span { font: 900 28px/1 "Big Shoulders Display", Inter, sans-serif; color: rgba(255,255,255,.8); }
+.ppx-t { min-width: 0; display: grid; gap: 4px; }
+.ppx-w { display: flex; align-items: baseline; gap: 10px; }
+.ppx-w b { font: 900 40px/0.9 "Big Shoulders Display", Inter, sans-serif; color: var(--a); text-shadow: 0 0 18px color-mix(in srgb, var(--a) 60%, transparent); }
+.ppx-w em { font: 800 13px/1 Inter, sans-serif; font-style: normal; letter-spacing: .16em; text-transform: uppercase; color: rgba(255,255,255,.75); }
+.ppx-nm { font: 800 19px/1.1 Inter, sans-serif; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.ppx-v { display: flex; align-items: baseline; gap: 8px; white-space: nowrap; }
+.ppx-v b { font: 900 30px/1 "Big Shoulders Display", Inter, sans-serif; min-width: 1.4em; }
+.ppx-v i { font-style: normal; font: 700 13px/1 Inter, sans-serif; color: rgba(255,255,255,.6); text-transform: uppercase; letter-spacing: .1em; }
+.ppx-v span, .ppx-v small { font: 700 12px/1 "Azeret Mono", monospace; color: rgba(255,255,255,.55); text-transform: uppercase; letter-spacing: .06em; }
+.ppx-v u { text-decoration: none; padding: 4px 9px; border-radius: 999px; background: #3ddc97; color: #04140c; font: 900 11px/1 Inter, sans-serif; letter-spacing: .14em; text-transform: uppercase; opacity: 0; transform: scale(.6); transition: .3s cubic-bezier(.2,1.6,.4,1); }
+.ppx.ppx-hit .ppx-v u { opacity: 1; transform: none; }
+.ppx-bar { position: relative; height: 7px; border-radius: 4px; background: rgba(255,255,255,.1); overflow: visible; }
+.ppx-bar i { position: absolute; left: 0; top: 0; bottom: 0; width: var(--p0); border-radius: 4px; background: linear-gradient(90deg, color-mix(in srgb, var(--a) 60%, #000), var(--a)); box-shadow: 0 0 12px color-mix(in srgb, var(--a) 60%, transparent); transition: width .6s cubic-bezier(.3,.9,.3,1); }
+.ppx.ppx-go .ppx-bar i { width: var(--p1); }
+.ppx.ppx-hit .ppx-bar i { background: linear-gradient(90deg, #1f9e68, #3ddc97); box-shadow: 0 0 16px rgba(61,220,151,.7); }
+.ppx-bar s { position: absolute; top: -5px; bottom: -5px; width: 2px; margin-left: -1px; background: #fff; border-radius: 1px; box-shadow: 0 0 6px rgba(255,255,255,.8); }
+.ppx-who { display: flex; align-items: center; gap: 7px; font: 600 13px/1 Inter, sans-serif; color: rgba(255,255,255,.62); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.ppx-who .rb-av { width: 20px; height: 20px; font-size: 11px; }
+
+/* ---------- the show, v3: clean glass over the 3D stage ---------- */
+.cs.v3 .cs-3d { position: absolute; left: 0; top: 0; width: 1920px; height: 1080px; z-index: 0; display: block; }
+.cs.v3 .cs-acts { z-index: 2; }
+.cs.v3.has3d .x3-fb, .cs.v3.wait3d .x3-fb { display: none !important; }
+.cs.v3 .cs-bg { background: radial-gradient(120% 90% at 50% 45%, rgba(10,11,14,.9), rgba(3,4,6,.97)); }
+.x3-hud { position: absolute; left: 48px; right: 48px; top: 30px; z-index: 20; display: flex; justify-content: space-between; font: 600 13px/1 "Azeret Mono", monospace; letter-spacing: .22em; text-transform: uppercase; color: rgba(255,255,255,.6); }
+.x3-hud .l { display: inline-flex; align-items: center; gap: 10px; }
+.x3-hud .l i { width: 8px; height: 8px; border-radius: 50%; background: var(--fxk); box-shadow: 0 0 12px var(--fxk); }
+.cs.v3 .x3-ch { position: absolute; left: 48px; right: 48px; bottom: 26px; z-index: 20; }
+.cs.v3 .x3-tk { z-index: 19; }
+.x3-skip { position: absolute; right: 48px; bottom: 58px; z-index: 20; font: 600 11px/1 "Azeret Mono", monospace; letter-spacing: .2em; text-transform: uppercase; color: rgba(255,255,255,.35); }
+.x3 .rb-av { width: 40px; height: 40px; font-size: 18px; }
+@keyframes x3Up { from { opacity: 0; transform: translateY(26px); } }
+@keyframes x3L { from { opacity: 0; transform: translateX(-40px); } }
+@keyframes x3R { from { opacity: 0; transform: translateX(40px); } }
+@keyframes x3Pop { 0% { opacity: 0; transform: scale(.6); } 60% { opacity: 1; transform: scale(1.06); } 100% { transform: none; } }
+/* the drop */
+.x3-drop .x3-call { position: absolute; left: 0; right: 0; top: 380px; text-align: center; font: 900 190px/1 var(--f-display); letter-spacing: .01em; text-transform: uppercase; color: #fff; text-shadow: 0 0 60px color-mix(in srgb, var(--fxk) 60%, transparent); animation: x3Pop .5s .45s both; }
+.x3-dw { position: absolute; left: 0; right: 0; bottom: 120px; display: grid; justify-items: center; gap: 14px; animation: x3Up .5s .8s both; }
+.x3-tag { padding: 7px 16px; border-radius: 999px; background: color-mix(in srgb, var(--fxk) 18%, rgba(0,0,0,.6)); box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--fxk) 60%, transparent); color: #fff; font: 800 14px/1 Inter, sans-serif; letter-spacing: .2em; text-transform: uppercase; }
+.x3-who { display: flex; align-items: center; gap: 12px; }
+.x3-who b { font: 800 30px/1 Inter, sans-serif; color: #fff; }
+.x3-pk { font: 600 22px/1.2 Inter, sans-serif; color: rgba(255,255,255,.75); } .x3-pk i { font-style: normal; color: var(--fxk); margin-left: 6px; }
+.x3-cd b { position: absolute; left: 0; right: 0; top: 330px; text-align: center; font: 900 260px/1 var(--f-display); color: var(--fxk); opacity: 0; animation: x3Cd 1s calc(var(--i) * 1s) both; }
+@keyframes x3Cd { 0% { opacity: 0; transform: scale(1.6); } 20% { opacity: 1; transform: scale(1); } 80% { opacity: 1; } 100% { opacity: 0; transform: scale(.85); } }
+/* the cash */
+.x3-p { position: absolute; top: 250px; width: 330px; box-sizing: border-box; padding: 22px 24px; border-radius: 18px; background: rgba(8,9,12,.66); box-shadow: inset 0 0 0 1px rgba(255,255,255,.09), 0 24px 60px rgba(0,0,0,.45); }
+.x3-l { left: 64px; display: grid; gap: 16px; animation: x3L .6s 1.1s both; }
+.x3-l > div { display: grid; gap: 5px; }
+.x3-l em, .x3-acht em { font: 600 11px/1 "Azeret Mono", monospace; font-style: normal; letter-spacing: .2em; text-transform: uppercase; color: rgba(255,255,255,.45); }
+.x3-l b { font: 800 22px/1.15 Inter, sans-serif; color: #fff; }
+.x3-r { right: 64px; display: grid; justify-items: start; gap: 14px; animation: x3R .6s 1.3s both; }
+.x3-med { width: 86px; height: 86px; border-radius: 50%; display: grid; place-items: center; color: var(--fxk); background: radial-gradient(circle at 35% 30%, color-mix(in srgb, var(--fxk) 30%, #1a1b1f), #0b0c0e 70%); box-shadow: inset 0 0 0 2px var(--fxk), 0 0 30px color-mix(in srgb, var(--fxk) 45%, transparent); }
+.x3-med .bt-ico { width: 44px; height: 44px; } .x3-med.new { animation: x3Pop .6s 1.9s both; }
+.x3-mono { font: 900 40px/1 var(--f-display); font-style: normal; color: var(--fxk, #fff); }
+.x3-acht { display: grid; gap: 6px; }
+.x3-acht b { font: 900 34px/1 var(--f-display); text-transform: uppercase; letter-spacing: .02em; color: #fff; }
+.x3-acht small { font: 500 15px/1.3 Inter, sans-serif; color: rgba(255,255,255,.65); }
+.x3-more { list-style: none; margin: 4px 0 0; padding: 0; display: grid; gap: 8px; width: 100%; }
+.x3-more li { display: flex; align-items: center; gap: 10px; color: var(--fxk); font: 700 14px/1 Inter, sans-serif; }
+.x3-more li .bt-ico, .x3-al li .bt-ico { width: 18px; height: 18px; }
+.x3-more li span { color: #fff; } .x3-more li b { margin-left: auto; color: rgba(255,255,255,.55); font-weight: 700; }
+.x3-pay { position: absolute; left: 0; right: 0; top: 948px; display: grid; justify-items: center; gap: 8px; animation: x3Up .5s 1.2s both; }
+.x3-pay em { font: 900 44px/1 var(--f-display); font-style: normal; color: #3ddc97; text-shadow: 0 0 22px rgba(61,220,151,.45); letter-spacing: .02em; }
+.x3-pay span { font: 600 16px/1 Inter, sans-serif; color: rgba(255,255,255,.6); letter-spacing: .04em; } .x3-pay span i { font-style: normal; margin: 0 8px; opacity: .5; }
+.x3-wb { position: absolute; left: 64px; bottom: 74px; animation: x3L .5s 1.5s both; }
+.x3-wb span { padding: 6px 11px; border-radius: 999px; background: rgba(255,255,255,.07); font: 700 14px/1 Inter, sans-serif; color: rgba(255,255,255,.8); }
+.x3-wb .up { color: #3ddc97; } .x3-wb .dn { color: #ff6b6b; } .x3-wb .hot { color: #ffb547; }
+.x3-tix { position: absolute; left: 50%; top: 290px; width: 760px; translate: -50% 0; display: grid; gap: 22px; justify-items: center; animation: x3Pop .5s .3s both; }
+.x3-tix > b { font: 900 120px/1 var(--f-display); color: #fff; }
+/* the achievement */
+.x3-tro { position: absolute; inset: 0; }
+.x3-th { position: absolute; left: 980px; top: 300px; width: 820px; display: grid; gap: 12px; animation: x3R .6s .9s both; }
+.x3-th em { font: 600 13px/1 "Azeret Mono", monospace; font-style: normal; letter-spacing: .24em; text-transform: uppercase; color: var(--fxk); }
+.x3-th b { font: 900 96px/.95 var(--f-display); text-transform: uppercase; color: #fff; }
+.x3-th p { margin: 0; font: 600 24px/1.3 Inter, sans-serif; color: rgba(255,255,255,.75); }
+.x3-th small { font: 700 15px/1 "Azeret Mono", monospace; letter-spacing: .14em; text-transform: uppercase; color: rgba(255,255,255,.5); }
+.x3-al { position: absolute; left: 980px; top: 640px; width: 820px; list-style: none; margin: 0; padding: 0; display: flex; flex-wrap: wrap; gap: 10px; }
+.x3-al li { display: flex; align-items: center; gap: 9px; padding: 9px 14px; border-radius: 12px; background: rgba(8,9,12,.66); box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--fxk) 40%, transparent); color: var(--fxk); animation: x3Up .4s calc(1.4s + var(--i) * .12s) both; }
+.x3-al li b { color: #fff; font: 700 15px/1 Inter, sans-serif; } .x3-al li span { color: rgba(255,255,255,.55); font: 700 13px/1 Inter, sans-serif; }
+.x3-st { position: absolute; left: 980px; top: 760px; display: flex; gap: 14px; }
+.x3-st > div { min-width: 150px; padding: 16px 18px; border-radius: 14px; background: rgba(8,9,12,.66); box-shadow: inset 0 0 0 1px rgba(255,255,255,.09); display: grid; gap: 6px; animation: x3Up .4s calc(1.8s + var(--i) * .1s) both; }
+.x3-st b { font: 900 34px/1 var(--f-display); color: #fff; } .x3-st em { font: 600 11px/1 "Azeret Mono", monospace; font-style: normal; letter-spacing: .18em; text-transform: uppercase; color: rgba(255,255,255,.45); }
+.x3-coin { position: absolute; left: 260px; top: 330px; width: 420px; height: 420px; border-radius: 50%; display: grid; place-items: center; color: #3a2606; background: radial-gradient(circle at 40% 30%, #fff3c8, #e0a93a 60%, #7a5410); box-shadow: 0 0 80px rgba(255,200,90,.35); animation: x3Pop .7s .2s both; }
+.x3-coin .bt-ico { width: 200px; height: 200px; } .x3-coin .x3-mono { font-size: 200px; color: #3a2606; }
+/* the party */
+.x3-pp { position: absolute; left: 80px; bottom: 120px; display: grid; gap: 6px; animation: x3L .6s .4s both; }
+.x3-pp em { font: 600 13px/1 "Azeret Mono", monospace; font-style: normal; letter-spacing: .22em; text-transform: uppercase; color: var(--fxk); }
+.x3-pp b { font: 900 150px/.9 var(--f-display); color: #fff; text-shadow: 0 0 40px color-mix(in srgb, var(--fxk) 50%, transparent); transform: scale(calc(1 + var(--pk, 0) * .05)); transform-origin: 0 100%; }
+.x3-pp span { font: 900 40px/1 var(--f-display); color: #3ddc97; }
+.x3-pp small { font: 600 17px/1.2 Inter, sans-serif; color: rgba(255,255,255,.65); }
+.x3-np { position: absolute; right: 70px; top: 90px; display: grid; grid-template-columns: auto 1fr; column-gap: 10px; align-items: center; padding: 12px 16px; border-radius: 14px; background: rgba(8,9,12,.6); box-shadow: inset 0 0 0 1px rgba(255,255,255,.09); animation: x3R .5s .6s both; }
+.x3-np i { grid-row: span 2; width: 10px; height: 10px; border-radius: 50%; background: #ff3b5c; box-shadow: 0 0 10px #ff3b5c; animation: x3Blink 1s steps(2) infinite; }
+@keyframes x3Blink { 50% { opacity: .3; } }
+.x3-np b { font: 800 16px/1.1 Inter, sans-serif; color: #fff; } .x3-np small { font: 600 11px/1 "Azeret Mono", monospace; letter-spacing: .16em; text-transform: uppercase; color: rgba(255,255,255,.5); }
+.x3-vid { position: absolute; width: 4px; height: 4px; opacity: 0; pointer-events: none; }
+.cs.v3:not(.has3d) .x3-vid { left: 1180px; top: 150px; width: auto; height: 700px; opacity: 1; border-radius: 16px; box-shadow: 0 30px 80px rgba(0,0,0,.6); }
+.x3-fbn { position: absolute; left: 80px; top: 200px; font: 900 200px/.9 var(--f-display); text-transform: uppercase; color: #fff; }
+/* the rafters */
+.x3-plq { position: absolute; left: 50%; top: 260px; translate: -50% 0; width: 640px; padding: 50px; box-sizing: border-box; border-radius: 22px; text-align: center; display: grid; gap: 12px; background: linear-gradient(180deg, color-mix(in srgb, var(--fxk) 30%, #111), #0b0c0e); box-shadow: inset 0 0 0 2px rgba(255,255,255,.7); animation: x3Up .7s .2s both; }
+.x3-plq em { font: 700 14px/1 "Azeret Mono", monospace; font-style: normal; letter-spacing: .26em; text-transform: uppercase; color: rgba(255,255,255,.7); }
+.x3-plq b { font: 900 120px/.95 var(--f-display); text-transform: uppercase; color: #fff; } .x3-plq span { font: 900 44px/1 var(--f-display); color: #fff; } .x3-plq small { font: 600 18px/1.3 Inter, sans-serif; color: rgba(255,255,255,.7); }
+.x3-sign { position: absolute; left: 0; right: 0; bottom: 96px; text-align: center; font: 600 13px/1 "Azeret Mono", monospace; letter-spacing: .4em; text-transform: uppercase; color: rgba(255,255,255,.4); animation: x3Up .6s 1.2s both; }
+/* the sweep: no rubber stamps */
+.cs.sweep .cs-stamp { display: none; }
 .pp-none { padding: 16px 6px; font: 600 15px/1.3 Inter, sans-serif; color: #8d97a8; text-align: center; }
 .pp-bet { position: relative; flex: none; display: grid; gap: 6px; padding: 10px 12px 11px 13px; border-radius: 12px; background: rgba(255,255,255,.035); border: 1px solid rgba(190,210,240,.1); border-left: 5px solid rgba(190,210,240,.28); }
 .pp-bet.k-lost { opacity: .7; }
@@ -6963,7 +7139,7 @@ body.tv .rb-games.primeg.mason > .rb-pcol { padding-top: 16px; -webkit-mask-imag
       fetch(`https://site.api.espn.com/apis/site/v2/sports/${ESPN[g.sport]}/summary?event=${g.id}`).then((r) => r.json())
         .then((j) => {
           HOOPF.set(g.id, { busy: false, at: Date.now() });
-          const v = { ...hoopParse(j, g), feed: hoopFeed(j) }, apply = () => { HOOP.set(g.id, { ...v, at: Date.now() }); render(); };
+          const v = { ...hoopParse(j, g), feed: hoopFeed(j), lead: hoopLead(j), pev: hoopEvents(j) }, apply = () => { HOOP.set(g.id, { ...v, at: Date.now() }); render(); try { propScan(g.id); } catch (er) {} };
           if (!c.shots || v.final) apply(); else setTimeout(apply, tvDelay() * 1000);
         })
         .catch(() => HOOPF.set(g.id, { busy: false, at: Date.now() }));
@@ -7078,6 +7254,160 @@ body.tv .rb-games.primeg.mason > .rb-pcol { padding-top: 16px; -webkit-mask-imag
   const hoopRight = (g) => String((hoopTeam(g) || g.a).id);
   // a shot's spot on the arena floor: ESPN gives feet across (0-50) and out from the rim
   const hoopSpot = (p, R) => (p.tm === R ? [88.75 - p.y, 50 - p.x] : [5.25 + p.y, p.x]);
+  function hoopLead(j) {
+    const L = { a: 0, h: 0 };
+    for (const p of Array.isArray(j.plays) ? j.plays : []) { const a = Number(p.awayScore), h = Number(p.homeScore); if (!Number.isFinite(a) || !Number.isFinite(h)) continue; L.a = Math.max(L.a, a - h); L.h = Math.max(L.h, h - a); }
+    return L;
+  }
+
+  // every player's running line, play by play, and each thing that moved it
+  function hoopEvents(j) {
+    const tal = new Map(), out = [], T = (nm) => { const k = normNm(nm); let t = tal.get(k); if (!t) tal.set(k, (t = { pts: 0, reb: 0, ast: 0, stl: 0, blk: 0, tpm: 0 })); return t; };
+    for (const p of Array.isArray(j.plays) ? j.plays : []) {
+      const t = String(p.text || ""), ty = String((p.type && p.type.text) || ""), id = String(p.id), tm = p.team && p.team.id != null ? String(p.team.id) : "";
+      const push = (nm, kind, d, extra) => { nm = nm.trim(); if (!nm) return; const x = T(nm); x[kind] += d; out.push({ id: id + ":" + kind + ":" + normNm(nm), nm, kind, d, tal: { ...x }, tm, ...(extra || {}) }); };
+      const mk = /^(.+?) makes\b/.exec(t);
+      if (p.scoringPlay && p.scoreValue > 0 && mk) {
+        const ft = /free throw/i.test(ty + " " + t), three = !ft && (p.scoreValue === 3 || /three point/i.test(t)), c = p.coordinate || {}, dist = /(\d+)-foot/.exec(t);
+        push(mk[1], "pts", p.scoreValue, { shot: { ft, three, v: p.scoreValue, x: Number(c.x), y: Number(c.y), dist: ft ? 15 : dist ? Number(dist[1]) : /dunk|layup|tip/i.test(t) ? 1 : three ? 25 : 12, kind: ty } });
+        if (three) push(mk[1], "tpm", 1);
+        const as = /\(([^()]+?) assists\)/.exec(t); if (as) push(as[1], "ast", 1, { to: mk[1] });
+      }
+      const rb = /^(.+?) (offensive|defensive) rebound\b/.exec(t); if (rb && !/team rebound/i.test(t)) push(rb[1], "reb", 1, { off: rb[2] === "offensive" });
+      const st = /\(([^()]+?) steals\)/.exec(t); if (st) push(st[1], "stl", 1);
+      const bk = /^(.+?) blocks\b/.exec(t); if (bk) push(bk[1], "blk", 1);
+    }
+    const box = new Map();
+    for (const t of (j.boxscore && j.boxscore.players) || []) for (const grp of t.statistics || []) { const K = grp.keys || [];
+      for (const a of grp.athletes || []) { if (!a.athlete || !a.stats) continue; const v = (k) => { const i = K.indexOf(k); return i < 0 ? 0 : parseFloat(String(a.stats[i]).split("-")[0]) || 0; };
+        box.set(normNm(a.athlete.displayName || ""), { pts: v("points"), reb: v("rebounds"), ast: v("assists"), stl: v("steals"), blk: v("blocks"), tpm: v("threePointFieldGoalsMade-threePointFieldGoalsAttempted") }); } }
+    const off = new Map();
+    for (const [k, t] of tal) { const bx = box.get(k); if (!bx) continue; const o = {}; for (const s of Object.keys(t)) o[s] = Math.max(0, (bx[s] || 0) - t[s]); off.set(k, o); }
+    for (const e of out) { const o = off.get(normNm(e.nm)); if (o) for (const s of Object.keys(e.tal)) e.tal[s] += o[s] || 0; }
+    return out.slice(-120);
+  }
+  const PROP_KIND = { nba_pts: ["pts"], nba_3pm: ["tpm"], nba_reb: ["reb"], nba_ast: ["ast"], nba_stl: ["stl"], nba_blk: ["blk"], nba_pra: ["pts", "reb", "ast"] };
+  const PROP_VAL = (st, t) => (st === "nba_pra" ? t.pts + t.reb + t.ast : t[(PROP_KIND[st] || ["pts"])[0]] || 0);
+  const PP_SEEN = new Map(), PP_Q = []; let ppBusy = false;
+  // new plays for a game: anyone's open over (straight or a parlay leg) on the player who just did it
+  function propScan(gid) {
+    const d = HOOP.get(gid); if (!d || !d.pev) return;
+    let seen = PP_SEEN.get(gid);
+    if (!seen) { PP_SEEN.set(gid, new Set(d.pev.map((e) => e.id))); return; }
+    const fresh = d.pev.filter((e) => !seen.has(e.id)); fresh.forEach((e) => seen.add(e.id));
+    if (!fresh.length || PHONE()) return;
+    const now = Date.now(), hits = [];
+    for (const b of S.bets.values()) {
+      if (b.status !== "open" && !(b.settledAt && now - b.settledAt < 90e3 && b.status === "won")) continue;
+      const sels = b.kind === "parlay" ? b.legSel || [] : b.sel ? [b.sel] : [];
+      for (const x of sels) {
+        if (!x || !isPP(x.m) || x.s === "u" || !x.p || !x.p.nm) continue;
+        const st = ppStat(x.m), ks = PROP_KIND[st]; if (!ks) continue;
+        const g = gameOf(x); if (!g || String(g.id) !== String(gid)) continue;
+        const who = normNm(x.p.nm);
+        for (const e of fresh) if (normNm(e.nm) === who && ks.includes(e.kind)) hits.push({ b, x, st, e, g });
+      }
+    }
+    // one moment per bet per batch (its latest play), the newest last
+    const last = new Map(); for (const h of hits) last.set(h.b.id + "|" + h.x.p.nm, h);
+    for (const h of last.values()) PP_Q.push(h);
+    while (PP_Q.length > 4) PP_Q.shift();
+    propNext();
+  }
+  function propNext() {
+    if (ppBusy || !PP_Q.length) return;
+    if (typeof SHOW !== "undefined" && SHOW.on) { setTimeout(propNext, 1500); return; }
+    ppBusy = true; propShow(PP_Q.shift());
+  }
+  const PP_WORDS = { pts: (e) => (e.shot && e.shot.ft ? "Free throw" : e.shot && e.shot.three ? "Three" : /dunk/i.test(e.shot && e.shot.kind) ? "Dunk" : /layup/i.test(e.shot && e.shot.kind) ? "Layup" : "Bucket"), tpm: () => "Three", reb: (e) => (e.off ? "Offensive board" : "Rebound"), ast: () => "Dime", stl: () => "Steal", blk: () => "Block" };
+  const PP_UNIT = { nba_pts: "pts", nba_3pm: "threes", nba_reb: "reb", nba_ast: "ast", nba_stl: "stl", nba_blk: "blk", nba_pra: "PRA" };
+  function propShow(h) {
+    const { b, x, st, e, g } = h, l = Number(x.l ?? PP_DEF[st] ?? 0.5), after = PROP_VAL(st, e.tal), add = st === "nba_pra" || st === "nba_pts" ? e.d : 1, before = Math.max(0, after - add);
+    const cleared = before <= l && after > l, F = b.kind === "parlay" ? null : flexOf(b), card = [...document.querySelectorAll(`.ob-bet[data-ids="${b.id}"], .pp-bet[data-ids="${b.id}"]`)].find((el) => { const r = el.getBoundingClientRect(); return r.width > 200 && r.top > 60 && r.bottom < innerHeight - 40; });
+    const acc = (card && getComputedStyle(card).getPropertyValue("--fxk").trim()) || personCol(b), row = (BOX.get(g.id) || { names: new Map() }).names.get(normNm(x.p.nm)), tmx = String(g.a.id) === e.tm ? g.a : g.h;
+    const hs = row && row.id ? `https://a.espncdn.com/combiner/i?img=/i/headshots/${g.sport === "CBB" ? "mens-college-basketball" : "nba"}/players/full/${row.id}.png&w=200&h=146` : "";
+    const word = (PP_WORDS[e.kind] || (() => "Play"))(e), plus = e.kind === "pts" ? `+${e.d}` : `+1`, unit = PP_UNIT[st] || "", pct = (v) => Math.max(0, Math.min(100, (v / Math.max(l + 1, after) ) * 100));
+    const el = document.createElement("div");
+    el.className = "ppx" + (cleared ? " clr" : "") + (card ? " on-card" : "");
+    el.style.setProperty("--a", acc); el.style.setProperty("--tc", bright(tmx));
+    el.innerHTML = `<canvas class="ppx-cv" width="400" height="280"></canvas>
+      <div class="ppx-hs">${hs ? `<img src="${esc(hs)}" alt="" referrerpolicy="no-referrer" onerror="this.remove()">` : ""}<span>${esc(x.p.nm.split(/\s+/).map((w) => w[0]).join("").slice(0, 2))}</span></div>
+      <div class="ppx-t"><div class="ppx-w"><b>${esc(plus)}</b><em>${esc(word)}</em></div><div class="ppx-nm">${esc(x.p.nm)}</div>
+        <div class="ppx-v"><b class="num" data-a="${before}" data-b="${after}">${trim(before)}</b><i>${esc(unit)}</i><span>line ${esc(trim(l))}</span>${cleared ? "<u>Line cleared</u>" : `<small>${after > l ? "over" : esc(trimL(l - after)) + " to go"}</small>`}</div>
+        <div class="ppx-bar"><i style="--p0:${pct(before).toFixed(1)}%;--p1:${pct(after).toFixed(1)}%"></i><s style="left:${pct(l).toFixed(1)}%"></s></div>
+        <div class="ppx-who"><span class="rb-av" style="--c:${personCol(b)}">${esc(personName(b).slice(0, 1).toUpperCase())}</span>${esc(personName(b))}'s ${b.kind === "parlay" ? "parlay leg" : "over"}${F && F.k ? ` · ${esc(BT_DEF[F.k][1])}` : ""}</div></div>`;
+    document.body.appendChild(el);
+    const place = () => {
+      if (card && card.isConnected) { const r = card.getBoundingClientRect(); el.style.left = r.left + "px"; el.style.top = r.top + "px"; el.style.width = r.width + "px"; el.style.height = Math.max(r.height, 150) + "px"; }
+      else { el.style.left = "50%"; el.style.bottom = "64px"; el.style.transform = "translateX(-50%)"; }
+    };
+    place();
+    requestAnimationFrame(() => el.classList.add("ppx-in"));
+    const t0 = performance.now(), cv = el.querySelector(".ppx-cv"), num = el.querySelector(".ppx-v b"), DUR = 4600;
+    const frame = (t) => {
+      const k = (t - t0) / 1000; if (!el.isConnected) return;
+      if (card) place();
+      ppDraw(cv, e, k, acc);
+      const c = Math.min(1, Math.max(0, (k - 1.15) / 0.6)); num.textContent = trim(Math.round((before + (after - before) * c) * 10) / 10);
+      if (k * 1000 < DUR) requestAnimationFrame(frame);
+    };
+    requestAnimationFrame(frame);
+    setTimeout(() => el.classList.add("ppx-go"), 1150);
+    if (cleared) setTimeout(() => { el.classList.add("ppx-hit"); try { playSfx("payout", 0.3); } catch (er) {} }, 1800);
+    try { playSfx(e.kind === "pts" ? "swish" : "clink", 0.25); } catch (er) {}
+    setTimeout(() => { el.classList.add("ppx-out"); setTimeout(() => { el.remove(); ppBusy = false; propNext(); }, 380); }, DUR);
+  }
+  // the play from the side, small: the floor, the rim, where it came from and how it got there
+  function ppDraw(cv, e, k, acc) {
+    const x = cv.getContext("2d"), W = 400, H = 280, fl = 236, rimX = 334, rimY = 124, ft = 9.2, sh = e.shot;
+    x.clearRect(0, 0, W, H);
+    // the floor and the stanchion, a faint key and the arc's mark
+    x.strokeStyle = "rgba(255,255,255,.22)"; x.lineWidth = 3; x.beginPath(); x.moveTo(12, fl); x.lineTo(W - 12, fl); x.stroke();
+    x.strokeStyle = "rgba(255,255,255,.55)"; x.lineWidth = 5; x.beginPath(); x.moveTo(rimX + 30, 70); x.lineTo(rimX + 30, 150); x.stroke();
+    x.strokeStyle = "rgba(255,255,255,.18)"; x.lineWidth = 4; x.beginPath(); x.moveTo(rimX + 30, 150); x.lineTo(rimX + 44, 160); x.lineTo(rimX + 44, fl); x.stroke();
+    const three = rimX - 23.75 * ft; x.fillStyle = "rgba(255,255,255,.35)"; x.fillRect(three - 1.5, fl - 10, 3, 10);
+    x.font = "700 16px Inter, sans-serif"; x.fillStyle = "rgba(255,255,255,.35)"; x.fillText("3PT", three - 14, fl + 22);
+    // the net, swishing when it drops
+    const sw = sh && k > 1.05 && k < 1.6 ? Math.sin((k - 1.05) * 40) * 4 * (1.6 - k) : 0;
+    x.strokeStyle = "rgba(255,255,255,.75)"; x.lineWidth = 2.2;
+    for (let i = 0; i <= 4; i++) { const t = i / 4, xa = rimX - 22 + 44 * t, xb = rimX - 13 + 26 * t + sw; x.beginPath(); x.moveTo(xa, rimY); x.lineTo(xb, rimY + 34); x.stroke(); }
+    x.strokeStyle = "#ff7a1a"; x.lineWidth = 5; x.beginPath(); x.moveTo(rimX - 24, rimY); x.lineTo(rimX + 30, rimY); x.stroke();
+    const ball = (bx, by, r) => { const g = x.createRadialGradient(bx - r * 0.35, by - r * 0.35, r * 0.1, bx, by, r); g.addColorStop(0, "#ffb26b"); g.addColorStop(0.6, "#f2711c"); g.addColorStop(1, "#7a2c04");
+      x.fillStyle = g; x.beginPath(); x.arc(bx, by, r, 0, Math.PI * 2); x.fill(); x.strokeStyle = "rgba(40,14,2,.8)"; x.lineWidth = 1.6; x.beginPath(); x.moveTo(bx - r, by); x.lineTo(bx + r, by); x.moveTo(bx, by - r); x.lineTo(bx, by + r); x.stroke(); };
+    const dot = (px, py, c, r) => { x.fillStyle = c; x.beginPath(); x.arc(px, py, r || 9, 0, Math.PI * 2); x.fill(); };
+    const ez = (u) => 1 - Math.pow(1 - Math.min(1, Math.max(0, u)), 2);
+    if (sh || e.kind === "tpm") {
+      // the arc, traced as it goes, with the shooter's spot glowing
+      const s0 = sh || { dist: 25, three: true }, dist = Math.max(1, Math.min(32, s0.dist || 12)), sx = rimX - dist * ft, sy = fl - 68, apex = 46 + dist * 2.8, u = Math.min(1, k / 1.05);
+      const at = (v) => [sx + (rimX - sx) * v, sy + (rimY - 8 - sy) * v - 4 * apex * v * (1 - v)];
+      dot(sx, fl - 4, acc, 10); x.globalAlpha = 0.5; dot(sx, fl - 4, acc, 10 + 10 * Math.sin(k * 6) ** 2); x.globalAlpha = 1;
+      x.setLineDash([3, 9]); x.strokeStyle = acc; x.lineWidth = 3.5; x.beginPath(); for (let i = 0; i <= 40; i++) { const q = at((u * i) / 40); i ? x.lineTo(q[0], q[1]) : x.moveTo(q[0], q[1]); } x.stroke(); x.setLineDash([]);
+      if (k < 1.05) { const q = at(u); ball(q[0], q[1], 12); }
+      else if (k < 1.5) { ball(rimX, rimY - 8 + (k - 1.05) * 140, 12); }
+      if (k > 1.05) { const f = Math.max(0, 1 - (k - 1.05) / 0.8); x.globalAlpha = f; x.strokeStyle = acc; x.lineWidth = 4; for (const r of [26, 46]) { x.beginPath(); x.arc(rimX, rimY + 10, r * (1 + (k - 1.05) * 1.6), 0, Math.PI * 2); x.stroke(); } x.globalAlpha = 1; }
+    } else if (e.kind === "reb") {
+      // off the rim and into his hands
+      const px = rimX - 120, py = fl - 92, u = Math.min(1, k / 1.1);
+      dot(px, py + 40, acc, 12);
+      const bx = rimX - 10 + (px - rimX + 10) * ez(u), by = rimY - 10 - 70 * Math.sin(Math.PI * Math.min(1, u * 1.2)) * (1 - u * 0.4) + (py - rimY + 10) * u;
+      ball(bx, by, 12);
+      if (k > 1.1) { x.globalAlpha = Math.max(0, 1 - (k - 1.1)); x.strokeStyle = acc; x.lineWidth = 4; x.beginPath(); x.arc(px, py, 26 + (k - 1.1) * 40, 0, Math.PI * 2); x.stroke(); x.globalAlpha = 1; }
+    } else if (e.kind === "ast") {
+      // the pass, then the finish
+      const ax = 70, bx2 = rimX - 120, y0 = fl - 40, u = Math.min(1, k / 0.75);
+      dot(ax, y0, acc, 12); dot(bx2, y0, "rgba(255,255,255,.6)", 12);
+      x.setLineDash([4, 10]); x.strokeStyle = acc; x.lineWidth = 3.5; x.beginPath(); x.moveTo(ax, y0 - 16); x.quadraticCurveTo((ax + bx2) / 2, y0 - 70, bx2, y0 - 16); x.stroke(); x.setLineDash([]);
+      if (k < 0.75) { const q = [ax + (bx2 - ax) * u, y0 - 16 - 54 * 4 * u * (1 - u) * 0.5]; ball(q[0], q[1], 11); }
+      else { const v = Math.min(1, (k - 0.75) / 0.6), q = [bx2 + (rimX - bx2) * v, y0 - 16 + (rimY - 8 - y0 + 16) * v - 4 * 50 * v * (1 - v)]; ball(q[0], q[1], 11); }
+    } else {
+      // a steal (the ball changes hands) or a block (sent back the way it came)
+      const blk = e.kind === "blk", u = Math.min(1, k / 1.2), y0 = fl - 50;
+      if (blk) { const sx = rimX - 150, q = (v) => [sx + (rimX - 30 - sx) * v, y0 - 30 - 4 * 70 * v * (1 - v)]; const v = Math.min(1, u * 1.6); dot(rimX - 48, rimY - 6, acc, 13);
+        if (v < 1) { const p = q(v * 0.82); ball(p[0], p[1], 11); } else { const w = (u - 0.62) / 0.38; ball(rimX - 48 - 190 * w, rimY - 6 + 120 * w * w, 11); } }
+      else { const a = 80, c2 = rimX - 60; dot(a, y0, "rgba(255,255,255,.55)", 12); dot((a + c2) / 2, y0 - 6, acc, 13); const v = Math.min(1, u * 1.5);
+        if (v < 0.5) ball(a + ((a + c2) / 2 - a) * v * 2, y0 - 14, 11); else ball((a + c2) / 2 + (c2 - (a + c2) / 2) * (v - 0.5) * 2, y0 - 14 - 20 * Math.sin((v - 0.5) * Math.PI * 2), 11); }
+    }
+  }
   // every shot with who took it and the score after, free throws too (from the line), for the floor
   function hoopFeed(j) {
     const out = [];
@@ -7947,6 +8277,33 @@ body.tv .rb-games.primeg.mason > .rb-pcol { padding-top: 16px; -webkit-mask-imag
   }
   // one straight bet in someone's column: the pick with its line, the price, the game, where it stands
   const BT_DEF = { nuke: ["💣", "Nuke"], botd: ["👑", "Bet of the day"], whale: ["🐋", "Whale"], dart: ["🎯", "Dart"], dinger: ["💥", "Dinger"], lamp: ["🚨", "Light the lamp"], bucket: ["🏀", "Bucket"], punchout: ["⚾", "Punchout"], six: ["🏈", "Six"], chains: ["⛓️", "Move the chains"], opal: ["🌌", "Galaxy opal"], lotto: ["🎰", "Lotto"], snipe: ["<svg class=\"bt-ico\" viewBox=\"0 0 24 24\" aria-hidden=\"true\"><circle cx=\"12\" cy=\"12\" r=\"7.5\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2.2\"/><circle cx=\"12\" cy=\"12\" r=\"1.8\" fill=\"currentColor\"/><path d=\"M12 1.5v6M12 16.5v6M1.5 12h6M16.5 12h6\" stroke=\"currentColor\" stroke-width=\"2.2\" stroke-linecap=\"round\"/></svg>", "Snipe"], long: ["🏹", "Long shot"], rivalry: ["⚔️", "Rivalry"], shootout: ["🎆", "Shootout"], lockdown: ["🔒", "Lockdown"], prime: ["🌙", "Primetime"], dawg: ["🐶", "Dawg"], gold: ["🥇", "Gold"], silver: ["🥈", "Silver"], bronze: ["🥉", "Bronze"] };
+
+  // basketball's types: their icons and names (the NBA has its own words for all of it)
+  const BT_NBA = new Set(["bucket", "cook", "splash", "glass", "dimes", "stocks", "stuffer", "brick", "matador", "rockfight", "freehoops", "backdoor", "doubt", "him"]);
+  Object.assign(BT_DEF, { bucket: ["<svg class=\"bt-ico\" viewBox=\"0 0 24 24\" aria-hidden=\"true\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\" stroke-linecap=\"round\" stroke-linejoin=\"round\"><circle cx=\"12\" cy=\"12\" r=\"9.2\"/><path d=\"M2.8 12h18.4M12 2.8v18.4M5.6 5.4c3.2 3.2 3.2 10 0 13.2M18.4 5.4c-3.2 3.2-3.2 10 0 13.2\"/></svg>", "Walking bucket"], cook: ["<svg class=\"bt-ico\" viewBox=\"0 0 24 24\" aria-hidden=\"true\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\" stroke-linecap=\"round\" stroke-linejoin=\"round\"><path d=\"M12 21.4c-3.9 0-6.9-2.7-6.9-6.5 0-3.4 2.4-5.4 3.9-8.1.6 2 1.6 3.1 2.9 3.6.3-3 1.6-5.8 4-7.8-.2 3.2 3.9 5.9 3.9 11 0 4.4-3.5 7.8-7.8 7.8z\"/><path d=\"M12 21.4c-1.7 0-3-1.3-3-3 0-1.9 1.5-2.8 2.4-4.4.9 1.4 3.6 2.4 3.6 4.6 0 1.6-1.3 2.8-3 2.8z\"/></svg>", "Let him cook"], splash: ["<svg class=\"bt-ico\" viewBox=\"0 0 24 24\" aria-hidden=\"true\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\" stroke-linecap=\"round\" stroke-linejoin=\"round\"><ellipse cx=\"12\" cy=\"5.8\" rx=\"8.2\" ry=\"2.6\"/><path d=\"M3.8 5.8l2.6 12.4h11.2l2.6-12.4M8.2 8.2l1.3 10M15.8 8.2l-1.3 10M12 8.4v9.8M4.9 11h14.2M5.8 14.8h12.4\"/></svg>", "Splash"], glass: ["<svg class=\"bt-ico\" viewBox=\"0 0 24 24\" aria-hidden=\"true\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\" stroke-linecap=\"round\" stroke-linejoin=\"round\"><rect x=\"2.8\" y=\"3.2\" width=\"18.4\" height=\"12.6\" rx=\"1.6\"/><rect x=\"8.8\" y=\"7.6\" width=\"6.4\" height=\"5\"/><path d=\"M12 15.8v2.4M8.6 18.2h6.8l-1 3h-4.8z\"/></svg>", "Glass cleaner"], dimes: ["<svg class=\"bt-ico\" viewBox=\"0 0 24 24\" aria-hidden=\"true\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\" stroke-linecap=\"round\" stroke-linejoin=\"round\"><circle cx=\"5\" cy=\"17.5\" r=\"2.3\"/><circle cx=\"19\" cy=\"17.5\" r=\"2.3\"/><path d=\"M6.4 15C9 6.6 15 6.6 17.6 15\" stroke-dasharray=\"2.2 2.6\"/><path d=\"M14.6 13.2l3 1.9.9-3.4\"/></svg>", "Dimes"], stocks: ["<svg class=\"bt-ico\" viewBox=\"0 0 24 24\" aria-hidden=\"true\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\" stroke-linecap=\"round\" stroke-linejoin=\"round\"><path d=\"M3 18.5l5.5-5.5 4 3.6L21 7.5\"/><path d=\"M15.2 7.5H21v5.8\"/></svg>", "Stocks"], stuffer: ["<svg class=\"bt-ico\" viewBox=\"0 0 24 24\" aria-hidden=\"true\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\" stroke-linecap=\"round\" stroke-linejoin=\"round\"><rect x=\"3.2\" y=\"3.2\" width=\"17.6\" height=\"17.6\" rx=\"2.2\"/><path d=\"M3.2 9.2h17.6M3.2 15h17.6M9.2 3.2v17.6M15 3.2v17.6\"/></svg>", "Stat stuffer"], brick: ["<svg class=\"bt-ico\" viewBox=\"0 0 24 24\" aria-hidden=\"true\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\" stroke-linecap=\"round\" stroke-linejoin=\"round\"><rect x=\"2.8\" y=\"4.5\" width=\"18.4\" height=\"15\" rx=\"1.2\"/><path d=\"M2.8 9.5h18.4M2.8 14.5h18.4M9 4.5v5M15.5 4.5v5M6 9.5v5M12 9.5v5M18 9.5v5M9 14.5v5M15.5 14.5v5\"/></svg>", "Bricklayer"], matador: ["<svg class=\"bt-ico\" viewBox=\"0 0 24 24\" aria-hidden=\"true\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\" stroke-linecap=\"round\" stroke-linejoin=\"round\"><path d=\"M4.5 3.5c6.4 1.2 10.6 5.6 11.4 17-4.2-3.2-8.2-4.1-11.4-3.2 2.1-4.4 2.1-9.6 0-13.8z\"/><path d=\"M15.9 20.5c.6-6 2.6-9.3 5.3-10.5\"/></svg>", "Matador D"], rockfight: ["<svg class=\"bt-ico\" viewBox=\"0 0 24 24\" aria-hidden=\"true\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\" stroke-linecap=\"round\" stroke-linejoin=\"round\"><path d=\"M3.5 17.5l2.6-7.4 5.4-4.4 6.3 2.2 2.8 6.4-2.2 5.2H6.1z\"/><path d=\"M11.5 5.7l.9 5.4 5.4-3M6.1 10.1l6.3 1\"/></svg>", "Rock fight"], freehoops: ["<svg class=\"bt-ico\" viewBox=\"0 0 24 24\" aria-hidden=\"true\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\" stroke-linecap=\"round\" stroke-linejoin=\"round\"><circle cx=\"12\" cy=\"13.2\" r=\"8\"/><path d=\"M12 9v4.2l3 1.8M9.2 2.6h5.6M12 2.6v2.6M19 6.2l1.4-1.4\"/></svg>", "Free basketball"], backdoor: ["<svg class=\"bt-ico\" viewBox=\"0 0 24 24\" aria-hidden=\"true\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\" stroke-linecap=\"round\" stroke-linejoin=\"round\"><path d=\"M5.5 21V3.2h10.2V21M3.5 21h17\"/><path d=\"M15.7 3.2l3.2 1.8v14.2l-3.2 1.8\"/><circle cx=\"13\" cy=\"12.4\" r=\"1\" fill=\"currentColor\"/></svg>", "Backdoor cover"], doubt: ["<svg class=\"bt-ico\" viewBox=\"0 0 24 24\" aria-hidden=\"true\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\" stroke-linecap=\"round\" stroke-linejoin=\"round\"><path d=\"M3 5.5l6.8 10.6 4-4.6L21 19\"/><path d=\"M15.8 19H21v-5.2\"/></svg>", "Never in doubt"], him: ["<svg class=\"bt-ico\" viewBox=\"0 0 24 24\" aria-hidden=\"true\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\" stroke-linecap=\"round\" stroke-linejoin=\"round\"><path d=\"M12 2.6l2.3 7.1 7.1 2.3-7.1 2.3L12 21.4l-2.3-7.1L2.6 12l7.1-2.3z\"/></svg>", "He's him"] });
+  // what the room yells when one hits
+  const BT_CALL = {
+    bucket: ["Bucket", "Walking bucket", "Too small", "Get buckets"], cook: ["Let him cook", "He's cooking", "Chef mode"], splash: ["Bang!", "Splash", "From downtown", "Night night"],
+    glass: ["Board man gets paid", "Glass cleaner", "Crash the glass"], dimes: ["Dimes", "Point god", "Dishing"], stocks: ["Not in my house", "Get that outta here", "Pickpocket"],
+    stuffer: ["Stat stuffer", "Filled it up", "Triple-double szn"], brick: ["Bricklayer", "Brick city", "Clank"], matador: ["Olé", "Matador D", "Nobody guarded anybody"],
+    rockfight: ["Rock fight", "Grit and grind"], freehoops: ["Free basketball", "Bonus hoops"], backdoor: ["Backdoor cover", "Garbage time legend"], doubt: ["Never in doubt", "Comeback szn"],
+    him: ["He's him", "Different breed"], nba: ["Count it", "Ballgame", "Buckets"],
+  };
+  // the stories a cashed NBA bet can tell, worked out from the game when it settles (and kept on the bet after)
+  const HIM_BY = { nba_pts: 10, nba_reb: 5, nba_ast: 5, nba_3pm: 3, nba_pra: 12, nba_stl: 2, nba_blk: 2 };
+  function hoopStory(b, status) {
+    if (Array.isArray(b.story)) return b.story.filter((k) => BT_NBA.has(k));
+    if ((status || b.status) !== "won" || b.kind === "parlay" || !b.sel) return [];
+    const g = gameOf(b.sel); if (!g || g.sport !== "NBA") return [];
+    const x = b.sel, out = [];
+    if (g.st === "post" && Number(g.pd) > 4) out.push("freehoops");
+    const ev = g.st !== "pre" ? evalSel(x) : null;
+    if (x.m === "sp" && ev && ev.m > 0 && ev.m <= 2) out.push("backdoor");
+    if ((x.m === "ml" || x.m === "sp") && (x.s === "a" || x.s === "h")) { const L = (HOOP.get(g.id) || {}).lead; if (L && (L[x.s === "a" ? "h" : "a"] || 0) >= 15) out.push("doubt"); }
+    if (isPP(x.m) && x.s !== "u" && ev && ev.v != null) { const st = ppStat(x.m), l = Number(x.l ?? PP_DEF[st] ?? 0.5); if (HIM_BY[st] && ev.v - l >= HIM_BY[st]) out.push("him"); }
+    return out;
+  }
+  const hoopStoryPatch = (b, status) => { try { const st = status === "won" ? hoopStory({ ...b, story: undefined }, "won") : []; return st.length ? { story: st } : {}; } catch (e) { return {}; } };
   const fxUSD = (v) => "$" + (Math.abs(v - Math.round(v)) < 0.005 ? Math.round(v).toLocaleString() : v.toFixed(2));
   const ET_DAY = new Intl.DateTimeFormat("en-CA", { timeZone: "America/New_York" }), ET_HR = new Intl.DateTimeFormat("en-US", { timeZone: "America/New_York", hour: "numeric", hourCycle: "h23" });
   const etDayOf = (t) => ET_DAY.format(new Date(t)), etHr = (t) => Number(ET_HR.format(new Date(t)));
@@ -7988,7 +8345,11 @@ body.tv .rb-games.primeg.mason > .rb-pcol { padding-top: 16px; -webkit-mask-imag
     const st = isPP(x.m) ? ppStat(x.m) : "";
     if (st === "mlb_hr") return "dinger";
     if (st === "g") return "lamp";
-    if (["nba_pts", "nba_3pm", "nba_pra"].includes(st) && x.s !== "u") return "bucket";
+    if (st.startsWith("nba_")) {
+      if (x.s === "u") return "brick";
+      if (st === "nba_pts") return Number(x.l) >= 25.5 ? "cook" : "bucket";
+      return { nba_3pm: "splash", nba_reb: "glass", nba_ast: "dimes", nba_stl: "stocks", nba_blk: "stocks", nba_pra: "stuffer" }[st] || "bucket";
+    }
     if (st === "mlb_k" && x.s !== "u") return "punchout";
     if (["fb_pyd", "fb_ruyd", "fb_ryd", "fb_rry"].includes(st) && x.s !== "u") return "chains";
     return "";
@@ -8005,6 +8366,7 @@ body.tv .rb-games.primeg.mason > .rb-pcol { padding-top: 16px; -webkit-mask-imag
     // the sport's own: a home run, a goal, a bucket, strikeouts, a TD scorer, yardage (a parlay of all one kind counts)
     let sk = par ? ((b.legSel || []).length && b.legSel.every((x) => btSport(x) && btSport(x) === btSport(b.legSel[0])) ? btSport(b.legSel[0]) : "") : btSport(b.sel);
     if (!sk && !par && !b.sel) { const t = b.pick || ""; sk = /\b(hr|home ?runs?|homers?|dingers?)\b/i.test(t) && b.sport !== "NHL" ? "dinger" : /\banytime (td|touchdown)\b/i.test(t) ? "six" : /\b(anytime goal|goal ?scorer)\b/i.test(t) ? "lamp" : ""; }
+    for (const st of hoopStory(b)) k.push(st);
     if (sk) k.push(sk);
     if (!par && o > 100 && usd >= 40 - 0.005) k.push("opal");
     if (par && o >= 1000) k.push("lotto");
@@ -8014,8 +8376,9 @@ body.tv .rb-games.primeg.mason > .rb-pcol { padding-top: 16px; -webkit-mask-imag
     if (!par && b.sel && ["ml", "sp"].includes(m) && u >= 1 - 0.005 && (b.sel.sp || b.sport) === "NFL") { const g = gameOf(b.sel); if (g && NFL_DIV[g.a.ab] && NFL_DIV[g.a.ab] === NFL_DIV[g.h.ab]) k.push("rivalry"); }
     if (!par && m === "tot") {
       const l = Number(b.sel.l), big = { NFL: 49.5, CFB: 55.5, NBA: 230, CBB: 150, MLB: 9.5, NHL: 6.5 }[b.sel.sp || b.sport];
-      if (b.sel.s === "o" && big && l >= big) k.push("shootout");
-      if (b.sel.s === "u" && u >= 1 - 0.005) k.push("lockdown");
+      const nb = (b.sel.sp || b.sport) === "NBA" || (gameOf(b.sel) || {}).sport === "NBA";
+      if (b.sel.s === "o" && big && l >= big) k.push(nb ? "matador" : "shootout");
+      if (b.sel.s === "u" && u >= 1 - 0.005) k.push(nb ? "rockfight" : "lockdown");
     }
     if (night && (m === "ml" || m === "sp")) k.push("prime");
     if (!par && m === "ml" && o > 100) k.push("dawg");
@@ -8026,7 +8389,7 @@ body.tv .rb-games.primeg.mason > .rb-pcol { padding-top: 16px; -webkit-mask-imag
   function flexOf(b, units) {
     const ks = betTypes(b, units), k = ks[0] || null, usd = (units != null ? units : Number(b.units) || 0) * S.unit;
     const name = k === "dawg" && btDaily(b.placedAt).dawg === b.id ? "Dawg of the day" : k ? BT_DEF[k][1] : "";
-    const side = ["bronze", "silver", "prime", "six", "chains", "dinger", "punchout", "lamp", "bucket", "shootout", "lockdown", "rivalry"].includes(k) || (k === "dawg" && name === "Dawg"), live = !!k && btLive(b);
+    const side = ["bronze", "silver", "prime", "six", "chains", "dinger", "punchout", "lamp", "bucket", "shootout", "lockdown", "rivalry", "cook", "splash", "glass", "dimes", "stocks", "stuffer", "brick", "matador", "rockfight"].includes(k) || (k === "dawg" && name === "Dawg"), live = !!k && btLive(b);
     const hype = !!k && ((Number(b.odds) || 0) >= 1000 || usd >= 50 - 0.005);
     // the team: its colors (and both teams' for a rivalry), its logo when the pick is a side or one of its players
     const vars = {}, g = b.kind !== "parlay" && b.sel ? gameOf(b.sel) : null, hex = (c) => (/^#[0-9a-f]{6}$/i.test(c || "") ? c : "");
@@ -8043,7 +8406,7 @@ body.tv .rb-games.primeg.mason > .rb-pcol { padding-top: 16px; -webkit-mask-imag
     }
     const team = !!k && k !== "rivalry" && b.kind !== "parlay" && !!b.sel && (b.sel.m === "ml" || b.sel.m === "sp") && !!vars["--tc1"];
     const sty = "--d:" + btT(b.id) + Object.entries(vars).map(([a, v]) => ";" + a + ":" + v).join("");
-    return { k, odds: k, more: ks.slice(1, 4), name, usd, win: usd * ppu(Number(b.odds) || 0), winU: (usd / S.unit) * ppu(Number(b.odds) || 0), cls: k ? " fx bt bt-" + k + (live ? " bt-islive" : "") + (["bronze", "silver", "gold"].includes(k) ? " bt-metal" : "") + (hype ? " bt-hype" : "") + (team ? " bt-team" : "") : "", live, hype, vars, sty, tlg, tn: b.sel && b.sel.m === "td" ? tn : "", team, big: !!k && (!side || hype) };
+    return { k, odds: k, more: ks.slice(1, 4), name, usd, win: usd * ppu(Number(b.odds) || 0), winU: (usd / S.unit) * ppu(Number(b.odds) || 0), cls: k ? " fx bt bt-" + k + (live ? " bt-islive" : "") + (["bronze", "silver", "gold"].includes(k) ? " bt-metal" : "") + (BT_NBA.has(k) ? " bt-nb" : "") + (hype ? " bt-hype" : "") + (team ? " bt-team" : "") : "", live, hype, vars, sty, tlg, tn: b.sel && b.sel.m === "td" ? tn : "", team, big: !!k && (!side || hype) };
   }
   const btHash = (id) => { let h = 0; for (const ch of String(id || "")) h = (h * 31 + ch.charCodeAt(0)) | 0; return Math.abs(h); };
   const btT = (id) => "-" + ((Date.now() / 1000 + (id != null ? btHash(id) % 60 : 0)) % 120).toFixed(2) + "s";
@@ -8065,6 +8428,7 @@ body.tv .rb-games.primeg.mason > .rb-pcol { padding-top: 16px; -webkit-mask-imag
   const BT_HOW = { nuke: "Cash a $100+ bet", botd: "Cash the day's biggest straight", whale: "Cash a $50+ bet", dart: "First or next TD, or an exact bet", opal: "Cash plus money for $40+", lotto: "Cash a +1000 parlay", snipe: "Cash a +250 straight",
     long: "Cash a +400 parlay", dinger: "Cash a home run", lamp: "Cash an anytime goal", bucket: "Cash a points or threes over", punchout: "Cash a strikeout over",
     six: "Cash an anytime TD scorer", chains: "Cash a yardage over", rivalry: "Cash a 1u+ side in a division game", shootout: "Cash an over on a big total", lockdown: "Cash a 1u+ under", prime: "Night game ML or spread", dawg: "Cash an underdog ML", gold: "Cash a 3u bet", silver: "Cash a 2u bet", bronze: "Cash a 1u parlay" };
+  Object.assign(BT_HOW, { bucket: "Cash a points over", cook: "Cash a 25.5+ points over", splash: "Cash a threes over", glass: "Cash a rebounds over", dimes: "Cash an assists over", stocks: "Cash a steals or blocks over", stuffer: "Cash a points + rebounds + assists over", brick: "Cash a player under: he bricked it", matador: "Cash an NBA over at 230+", rockfight: "Cash a 1u+ NBA under", freehoops: "Cash a bet in an overtime game", backdoor: "Cash a spread by 2 or less", doubt: "Cash a side that trailed by 15+", him: "A player over cleared by a mile" });
   const pfName = (pr) => (pr.id === "me" ? meName() : pr.nm);
   const pfDate = (t) => (t ? new Date(t).toLocaleDateString("en-US", { month: "short", day: "numeric" }) : "");
   function pfOf(b) {
@@ -8396,7 +8760,7 @@ body.tv .rb-games.primeg.mason > .rb-pcol { padding-top: 16px; -webkit-mask-imag
 
   function settle(id, status, net) {
     const b = S.bets.get(id); if (!b) return;
-    const patch = { status, settledAt: Date.now() };
+    const patch = { status, settledAt: Date.now(), ...hoopStoryPatch(b, status) };
     patch.net = status === "cashout" ? net : netOf({ ...b, status });
     S.open = null; S.cashout = null;
     patchBet(id, patch);
@@ -8428,7 +8792,7 @@ body.tv .rb-games.primeg.mason > .rb-pcol { padding-top: 16px; -webkit-mask-imag
   function flStep() { const a = flQ.shift(); if (!a) { flT = 0; return; } flash(...a); flT = setTimeout(flStep, 2900); }
 
   const CASH = { q: [], t: 0 };
-  const CASH_LV = { nuke: 5, botd: 4, whale: 4, lotto: 4, opal: 3, dart: 3, snipe: 3, long: 3, gold: 3, dinger: 3, lamp: 3 };
+  const CASH_LV = { nuke: 5, botd: 4, whale: 4, lotto: 4, opal: 3, dart: 3, snipe: 3, long: 3, gold: 3, dinger: 3, lamp: 3, cook: 3, splash: 3, him: 3, doubt: 3, freehoops: 3, backdoor: 3 };
   function cashLevel(b, F) {
     const usd = (Number(b.units) || 0) * S.unit, o = Number(b.odds) || 0;
     let lv = F.k ? CASH_LV[F.k] || 2 : 1;
@@ -8560,6 +8924,7 @@ body.tv .rb-games.primeg.mason > .rb-pcol { padding-top: 16px; -webkit-mask-imag
     });
   }
   function showClear() {
+    try { if (window.SB3D) SB3D.stop(); } catch (e) {}
     SHOW.on = false; SHOW.id++;
     SHOW.tm.forEach(clearTimeout); SHOW.tm = []; SHOW.iv.forEach(clearInterval); SHOW.iv = [];
     cancelAnimationFrame(SHOW.raf); SHOW.onBeat = null; SHOW.fw = null; SHOW.fx = null; SHOW.beat = -1; SHOW.beatFrom = null; SHOW.cur = null;
@@ -8940,7 +9305,7 @@ body.tv .rb-games.primeg.mason > .rb-pcol { padding-top: 16px; -webkit-mask-imag
       if (ph != null) {
         const f = ph - Math.floor(ph), bt = Math.floor(ph);
         const pk = Math.pow(1 - f, 3).toFixed(3); for (const x of SHOW.pkEls || []) x.style.setProperty("--pk", pk);
-        if (bt !== SHOW.beat) { SHOW.beat = bt; el.dataset.b = String(((bt % 4) + 4) % 4); if (SHOW.onBeat) try { SHOW.onBeat(bt); } catch (e) {} }
+        if (bt !== SHOW.beat) { SHOW.beat = bt; el.dataset.b = String(((bt % 4) + 4) % 4); if (SHOW.onBeat) try { SHOW.onBeat(bt); } catch (e) {} try { if (window.SB3D) SB3D.beat(bt, Number(pk)); } catch (e) {} }
       }
       if (SHOW.fw) fwStep(dt);
       if (SHOW.fx) fxStep(dt);
@@ -9596,7 +9961,193 @@ body.tv .rb-games.primeg.mason > .rb-pcol { padding-top: 16px; -webkit-mask-imag
     if (lvl >= 3) h += `<span class="cs-skip">Tap to skip</span>`;
     return h + showRig(c);
   }
+
+  // ---- the show, v3: clean, in 3D ----
+  const SHOW3_ACTS = {
+    1: [["cash", 6600]],
+    2: [["cash", 7400], ["play", 4600]],
+    3: [["drop", 2600], ["cash", 8000], ["play", 5200], ["out", 2800]],
+    4: [["drop", 3400], ["cash", 8600], ["play", 5600], ["troph", 4800], ["stand", 4600], ["party", 7000], ["out", 3800]],
+    5: [["drop", 4600], ["cash", 9600], ["play", 6400], ["troph", 5400], ["stand", 5400], ["party", 11000], ["out", 4600]],
+  };
+  const SHOW3_LAB = { drop: "The drop", cash: "Cashed", play: "How it hit", troph: "Achievement", stand: "Standings", party: "Party", out: "The rafters" };
+  Object.assign(BT_CALL, { nuke: ["Nuke", "Tactical nuke"], botd: ["Bet of the day"], whale: ["Whale alert"], dart: ["Bullseye"], opal: ["Galaxy opal"], lotto: ["Jackpot"], snipe: ["Sniped"], long: ["Long shot"], dinger: ["Gone"],
+    lamp: ["Light the lamp"], punchout: ["Punched out"], six: ["Touchdown"], chains: ["Move the chains"], rivalry: ["Rivalry win"], shootout: ["Shootout"], lockdown: ["Lockdown"], prime: ["Primetime"], dawg: ["Dawg"] });
+  const show3Off = () => { try { return localStorage.getItem("sb-3d") === "off"; } catch (e) { return false; } };
+  const s3pref = (k) => { try { return (localStorage.getItem("sb-3d") || "").includes(k); } catch (e) { return false; } };
+  const btIco = (k) => (BT_DEF[k] && String(BT_DEF[k][0]).startsWith("<svg") ? BT_DEF[k][0] : `<i class="x3-mono">${esc(String((BT_DEF[k] || ["", "?"])[1]).slice(0, 1))}</i>`);
+  const s3col = (v, d) => (/^\s*(#[0-9a-f]{3,8}|rgb|hsl)/i.test(v || "") ? String(v).trim() : d);
+  function show3Info(c, el) {
+    const b = c.b, k = c.F.k, sel = c.sel, g = c.g, sport = (g && g.sport) || b.sport || (sel && sel.sp) || "", tm = g && sel && (sel.s === "a" || sel.s === "h") ? g[sel.s] : null;
+    const acc = s3col(getComputedStyle(el).getPropertyValue("--fxk"), "#ffd23f"), top = c.ach[0], hoops = /^(NBA|CBB)$/.test(sport);
+    return { lvl: c.lvl, sport, hoops, acc, col: s3col(c.col, "#ffffff"), name: c.who.join(" + "), word: c.word, call: c.call, pick: b.pick, sub: [b.kind === "parlay" ? (b.legs || []).length + "-leg parlay" : "", g ? `${g.a.ab} ${g.a.sc ?? ""} – ${g.h.ab} ${g.h.sc ?? ""}${g.st === "post" ? " · Final" : ""}` : ""].filter(Boolean).join(" · "),
+      odds: fOdds(c.o), risk: fU(b.units), paid: fU(b.units + c.n), book: String(BOOK[bookKey(b)] || "").toUpperCase(), n: c.n, amt: fU(c.n, true), usd: fUSD(c.usd),
+      date: new Date(b.settledAt || Date.now()).toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric", timeZone: "America/New_York" }).toUpperCase(),
+      icon: top && BT_DEF[top.k] && String(BT_DEF[top.k][0]).startsWith("<svg") ? BT_DEF[top.k][0] : null, achName: top ? BT_DEF[top.k][1] : "",
+      ban1: s3col(tm && tm.col, acc), ban2: "#0b0c0e", vid: c.vid || null, lite: (!!SHOW.slow && !fxFull()) || s3pref("lite"), low: s3pref("low") };
+  }
+  function show3Chrome(c) {
+    const b = c.b, lvl = c.lvl;
+    let h = `<div class="x3-hud"><span class="l"><i></i>${lvl >= 5 ? "Nuke" : lvl >= 4 ? "Big cash" : "Cashed"} · ${esc(etClock(b.settledAt || Date.now()))}</span><span class="r">${esc(BOOK[bookKey(b)])} · #${esc(String(b.id).slice(-4).toUpperCase())}</span></div>`;
+    if (c.acts.length > 1) h += `<div class="cs-ch x3-ch">${c.acts.map((a) => `<span style="--ms:${a.ms}ms;flex-grow:${(a.ms / 1000 + 7).toFixed(1)}"><em>${SHOW3_LAB[a.k] || a.k}</em><i></i></span>`).join("")}</div>`;
+    if (lvl >= 4) { const t = showTicker(c); h += `<div class="cs-tk x3-tk"><b>${lvl >= 5 ? "Nuke" : "Big cash"}</b><div><span>${t}${t}</span></div></div>`; }
+    if (lvl >= 3) h += `<span class="cs-skip x3-skip">Tap to skip</span>`;
+    return h;
+  }
+  const s3init = (c) => esc(String(c.name || "?").slice(0, 1).toUpperCase());
+  const SH3 = {
+    drop: {
+      html: (c) => `<div class="x3-drop"><b class="x3-call x3-fb">${esc(c.call)}</b><div class="x3-dw"><span class="x3-tag">${c.lvl >= 5 ? "Nuke inbound" : c.F.k ? esc(BT_DEF[c.F.k][1]) : "Bet alert"}${c.lv ? " · Live" : ""}</span>
+        <div class="x3-who"><span class="rb-av" style="--c:${c.col}">${s3init(c)}</span><b>${esc(c.who.join(" + "))}</b></div><div class="x3-pk">${esc(c.b.pick)} <i>${esc(fOdds(c.o))}</i></div></div>
+        ${c.lvl >= 5 ? '<div class="x3-cd x3-fb"><b style="--i:0">3</b><b style="--i:1">2</b><b style="--i:2">1</b></div>' : ""}</div>`,
+      go: (c) => {
+        const tc = c.lvl >= 5 ? 3250 : 550;
+        shSfx("sniper/whoosh", 0.6, 0); shSfx("sniper/bc_sting", 0.7, 80);
+        if (c.lvl >= 5) for (let i = 0; i < 3; i++) shSfx("sniper/bc_tick", 1, i * 1000 + 60);
+        shSfx("sniper/slam", 0.9, tc); if (c.F.k === "nuke") shSfx("nuke", 0.8, tc);
+      },
+    },
+    cash: {
+      html: (c) => {
+        const b = c.b, g = c.g, day = c.day, legs = c.legs, top = c.ach[0], more = c.ach.slice(1, 4);
+        const rows = [["Placed", etClock(b.placedAt || Date.now())], c.lv ? ["Live", "In-game"] : null, b.settledAt && b.placedAt ? ["Held", heldFor(b.settledAt - b.placedAt)] : null,
+          g ? [g.st === "post" ? "Final" : "Score", `${g.a.ab} ${g.a.sc ?? ""} – ${g.h.ab} ${g.h.sc ?? ""}`] : null, legs.length ? ["Legs", `${legs.length} for ${legs.length}`] : null,
+          ["The shot", Math.round(c.pr * 100) + "%"], ["Book", BOOK[bookKey(b)]]].filter(Boolean);
+        const med = top ? `<div class="x3-med bt-c-${top.k}${top.isNew ? " new" : ""}">${btIco(top.k)}</div><div class="x3-acht"><em>${top.isNew ? "Achievement unlocked" : "Achievement"}</em><b>${top.lv ? "Live " : ""}${esc(BT_DEF[top.k][1])}</b><small>${esc(top.isNew ? BT_HOW[top.k] || "" : "×" + top.n + " career")}</small></div>
+            ${more.length ? `<ul class="x3-more">${more.map((a) => `<li class="bt-c-${a.k}">${btIco(a.k)}<span>${a.lv ? "Live " : ""}${esc(BT_DEF[a.k][1])}</span><b>${a.isNew ? "New" : "×" + a.n}</b></li>`).join("")}</ul>` : ""}`
+          : `<div class="x3-med plain"><i class="x3-mono">W</i></div><div class="x3-acht"><em>Career</em><b>Win #${day.wins}</b><small>${esc(c.name)}'s ${day.wins}${["th", "st", "nd", "rd"][(day.wins % 100 > 10 && day.wins % 100 < 14) ? 0 : day.wins % 10 < 4 ? day.wins % 10 : 0]} cash</small></div>`;
+        return `<div class="x3-cash"><div class="x3-p x3-l">${rows.map(([a, v], i) => `<div style="--i:${i}"><em>${a}</em><b>${esc(String(v))}</b></div>`).join("")}</div>
+          <div class="x3-p x3-r">${med}</div>
+          <div class="x3-fb x3-tix">${b.kind === "parlay" ? ppParlay(b) : ppTicket(b)}<b class="num" data-to="${c.n}" data-f="u" data-at="1100" data-dur="${c.lvl >= 4 ? 1800 : 1200}">+0u</b></div>
+          <div class="x3-pay"><em class="num" data-to="${c.usd}" data-f="usd" data-at="1150" data-dur="1300">$0.00</em><span>${esc(fOdds(c.o))}<i>·</i>${esc(fU(b.units))} risked<i>·</i>paid ${esc(fU(b.units + c.n))}</span></div>
+          <div class="x3-who x3-wb"><span class="rb-av" style="--c:${c.col}">${s3init(c)}</span><b>${esc(c.who.join(" + "))}</b><span>${day.w}-${day.l} today</span><span class="${day.net >= 0 ? "up" : "dn"}">${fU(day.net, true)}</span>${day.run > 1 ? `<span class="hot">W${day.run}</span>` : ""}</div></div>`;
+      },
+      go: (c, d) => {
+        const lvl = c.lvl, top = c.ach[0], mid = d.querySelector(".x3-tix .pp-mid");
+        if (mid) mid.innerHTML = `<div class="ob-st k-won"><i class="tl tl-g fin" aria-hidden="true"></i><em>${c.legs.length ? "All hit · " + c.legs.length + " for " + c.legs.length : "Final"}</em><b>Won ${esc(fU(c.n, true))}</b></div>`;
+        if (lvl < 3) shSfx("sniper/whoosh", 0.5, 0);
+        if (/^(NBA|CBB)$/.test((c.g && c.g.sport) || c.b.sport || "")) shSfx("swish", 0.8, 820);
+        shSfx("sniper/slam", 0.85, 880);
+        if (lvl <= 2) shAt(900, () => { playWin(); playSfx("payout", 0.55); }); else { shSfx("coins", 0.6, 1000); shSfx("payout", 0.35, 950); }
+        if (top && top.isNew) shSfx("sniper/bc_check", 0.8, 1900);
+        if (c.F.k === "lamp") shSfx("sniper/goal_horn_short", 0.6, 1200);
+        if (lvl >= 4) { shSfx("sniper/launch", 0.8, 1000); shSfx("sniper/launch", 0.7, 3200); }
+        if (lvl >= 5) shSfx("nuke", 0.9, 860);
+      },
+    },
+    play: {
+      ok: (c) => !!playHtml(c, { ms: 5000 }),
+      html: (c, a) => playHtml(c, a),
+      go: (c, d) => {
+        if (c.legs.length >= 2) {
+          const N = c.legs.length, cnt = d.querySelector(".xp-cnt b");
+          for (let i = 0; i < N; i++) shAt((0.7 + i * c.legGap) * 1000 + 180, () => { if (cnt) cnt.textContent = String(i + 1); shSfx("sniper/bc_tick", 0.7, 0); if (i === N - 1) shSfx("sniper/bc_check", 0.8, 120); });
+          shSfx("sniper/slam", 0.6, (0.9 + N * c.legGap) * 1000);
+          return;
+        }
+        if (c.xc != null) shSfx("sniper/bc_check", 0.75, c.xc * 1000);
+        shSfx("sniper/slam", 0.55, 2300);
+      },
+    },
+    troph: {
+      html: (c) => {
+        const A = c.ach.slice(0, 5), top = A[0], d = c.day;
+        const st = [[d.wins, "Career cashes"], [`${d.w}-${d.l}`, "Today"], [d.run > 1 ? "W" + d.run : "W1", "Streak"], [fU(d.net, true), "Net today"]];
+        const head = top ? `<em>${top.isNew ? "Achievement unlocked" : "Trophy case"}</em><b>${top.lv ? "Live " : ""}${esc(BT_DEF[top.k][1])}</b><p>${esc(BT_HOW[top.k] || "")}</p><small>${top.isNew ? "First one" : "×" + top.n + " career"}</small>`
+          : `<em>Trophy case</em><b>Win #${d.wins}</b><p>${esc(c.name)} keeps stacking</p>`;
+        return `<div class="x3-tro"><div class="x3-fb x3-coin${top ? " bt-c-" + top.k : ""}">${top ? btIco(top.k) : '<i class="x3-mono">W</i>'}</div><div class="x3-th">${head}</div>
+          ${A.length > 1 ? `<ul class="x3-al">${A.slice(1).map((a, i) => `<li style="--i:${i}" class="bt-c-${a.k}">${btIco(a.k)}<b>${a.lv ? "Live " : ""}${esc(BT_DEF[a.k][1])}</b><span>${a.isNew ? "New" : "×" + a.n}</span></li>`).join("")}</ul>` : ""}
+          <div class="x3-st">${st.map(([v, l], i) => `<div style="--i:${i}"><b>${esc(String(v))}</b><em>${l}</em></div>`).join("")}</div></div>`;
+      },
+      go: (c) => { shSfx("sniper/whoosh", 0.55, 80); shSfx("clink", 0.7, 1250); if (c.ach[0] && c.ach[0].isNew) shSfx("sniper/bc_check", 0.85, 1350); },
+    },
+    stand: { ok: (c) => SH.stand.ok(c), html: (c, a) => SH.stand.html(c, a), go: (c, d, a, el) => SH.stand.go && SH.stand.go(c, d, a, el) },
+    party: {
+      html: (c) => {
+        const P = c.ptr, h = hbOf(P && P.p.c);
+        return `<div class="x3-party"><div class="x3-pp"><em>${esc(c.word)} · cashed ${esc(etClock(c.b.settledAt || Date.now()))}</em><b class="num x3-pulse" data-to="${c.n}" data-f="u" data-at="250" data-dur="2200">+0u</b>
+          <span class="num" data-to="${c.usd}" data-f="usd" data-at="450" data-dur="2400">$0.00</span><small>${esc(c.b.pick)} · ${esc(fOdds(c.o))} · ${esc(BOOK[bookKey(c.b)])}</small></div>
+          ${P && clipsOn() ? `<div class="x3-np"><i></i><b>${esc(P.p.c.label || "House edit")}</b><small>Now playing${h ? " · " + Math.round(h[0]) + " BPM" : ""}</small></div>` : ""}<b class="x3-fb x3-fbn">${esc(c.who.join(" + "))}</b></div>`;
+      },
+      go: (c, d, a) => {
+        const P = c.ptr, vid = P && clipsOn() ? P.p.c.base : null;
+        if (vid) {
+          const v = document.createElement("video"); v.muted = true; v.playsInline = true; v.preload = "auto"; v.className = "x3-vid";
+          v.innerHTML = `<source src="${vid}.webm" type="video/webm"><source src="${vid}.mp4" type="video/mp4">`; d.appendChild(v);
+          const at = () => (P.a && !P.a.paused && P.a.currentTime > 0 ? P.a.currentTime : Math.max(0, P.p.off + (performance.now() - SHOW.t0 - P.p.t) / 1000));
+          const sync = (hard) => { const t = at(); try { if (hard || Math.abs(v.currentTime - t) > 0.25) v.currentTime = t; } catch (e) {} };
+          v.addEventListener("loadedmetadata", () => { sync(true); v.play().catch(() => {}); }, { once: true });
+          sync(true); v.play().catch(() => {});
+          SHOW.iv.push(setInterval(() => d.isConnected && sync(false), 1500));
+          c.vid = v; if (c.s3) c.s3.info.vid = v;
+        }
+        shSfx("sniper/launch", 0.8, 0); shSfx("sniper/launch", 0.7, 260);
+        if (c.F.k === "lamp") shSfx("sniper/goal_horn", 0.6, 100);
+        if (c.F.k === "lotto") shSfx("jackpot", 0.45, 300);
+        if (c.F.k === "whale") shSfx("splash", 0.6, 0);
+        if (c.lvl >= 5) { shSfx("nuke", 0.7, 0); shSfx("sniper/launch", 0.7, a.ms / 2); }
+      },
+    },
+    out: {
+      html: (c) => `<div class="x3-out"><div class="x3-fb x3-plq"><em>Hall of fame</em><b>${esc(c.who.join(" + "))}</b><span>${esc(fU(c.n, true))} · ${esc(fUSD(c.usd))}</span><small>${esc(c.b.pick)}</small></div><span class="x3-sign">Sweat Board</span></div>`,
+      go: (c) => { if (c.lvl >= 4) { shSfx("sniper/slam", 0.75, 520); shSfx("clink", 0.6, 950); } else shSfx("sniper/bc_out", 0.6, 0); },
+    },
+  };
+  function showAct3(el, c, a, i) {
+    const box = el.querySelector(".cs-acts"); if (!box) return;
+    [...box.children].forEach((x) => { x.classList.add("gone"); setTimeout(() => x.remove(), 520); });
+    SHOW.onBeat = null;
+    const d = document.createElement("div");
+    d.className = "cs-act x3 act-" + a.k; d.style.setProperty("--T", a.ms / 1000 + "s"); el.dataset.act = a.k;
+    d.innerHTML = SH3[a.k].html(c, a);
+    box.appendChild(d);
+    el.querySelectorAll(".cs-ch > span").forEach((x, j) => { x.classList.toggle("done", j < i); x.classList.toggle("on", j === i); });
+    if (i > 0) shSfx("sniper/whoosh", 0.4, 0);
+    if (SH3[a.k].go) SH3[a.k].go(c, d, a, el);
+    c.curAct = { k: a.k, ms: a.ms, at: performance.now() };
+    if (c.s3 && window.SB3D) SB3D.act(a.k, a.ms);
+    SHOW.pkEls = [...el.querySelectorAll(".x3-pulse")];
+    showCount(d);
+  }
+  // the 3D library waits until the board's on the TV, then loads quietly so the first show doesn't wait for it
+  setInterval(() => { if (!window.__s3pre && window.SB3D && document.body.classList.contains("tv") && !PHONE() && !GUEST && !show3Off() && SB3D.ok()) { window.__s3pre = 1; SB3D.preload(); } }, 12000);
   function cashRun({ b, n, names, tile }) {
+    showClear();
+    const el = cashEl(), F = flexOf(b), lvl = showLevel(b, F, n), c = showCtx(b, n, names, F, lvl);
+    c.tile = tile || null; c.v = null;
+    const sp = (c.g && c.g.sport) || b.sport || "", calls = (F.k && BT_CALL[F.k]) || (/^(NBA|CBB)$/.test(sp) ? BT_CALL.nba : null);
+    c.call = calls ? calls[Math.floor(Math.random() * calls.length)] : lvl >= 5 ? "Nuke" : "Cashed";
+    const acts = SHOW3_ACTS[lvl].map(([k, ms]) => ({ k, ms })).filter((a) => !SH3[a.k].ok || SH3[a.k].ok(c));
+    const lost = SHOW3_ACTS[lvl].filter(([k]) => !acts.some((a) => a.k === k)).reduce((x, a) => x + a[1], 0);
+    (acts.find((a) => a.k === "party") || acts.find((a) => a.k === "cash")).ms += lost;
+    let T = 0; for (const a of acts) { a.t0 = T; T += a.ms; }
+    c.acts = acts; c.T = T;
+    const want3 = !!(window.SB3D && SB3D.ok() && !show3Off()), ready3 = want3 && SB3D.ready();
+    el.className = "cs show v3 " + (lvl >= 4 ? "big" : lvl >= 2 ? "mid" : "small") + " lv" + lvl + " ck-" + (F.k || "cash") + (F.k ? " bt-c-" + F.k : "") + (ready3 ? " wait3d" : "");
+    el.style.setProperty("--c", c.col); el.style.setProperty("--pk", "0");
+    el.innerHTML = `<div class="cs-bg"></div><div class="cs-box">${show3Chrome(c)}<div class="cs-acts"></div></div>`;
+    showFit(el);
+    SHOW.fr = { n: 0, t: 0 };
+    el.hidden = false; void el.offsetWidth; el.classList.add("on");
+    SHOW.on = true; SHOW.t0 = performance.now(); SHOW.fxId = fxRun; SHOW.slot = 0; document.body.classList.add("cs-live");
+    if (lvl >= 3) { el.style.pointerEvents = "auto"; el.onclick = showSkip; document.addEventListener("keydown", showKey, true); } else { el.style.pointerEvents = ""; el.onclick = null; }
+    showMusic(c);
+    // the 3D stage comes up under the acts; until it's there (or if it can't be) the clean 2D versions show
+    if (want3) {
+      const id = SHOW.id, giveUp = setTimeout(() => el.classList.remove("wait3d"), 2500);
+      SB3D.start(el.querySelector(".cs-box"), show3Info(c, el)).then((st) => {
+        clearTimeout(giveUp);
+        if (!SHOW.on || SHOW.id !== id) { SB3D.stop(); return; }
+        c.s3 = st; el.classList.remove("wait3d"); el.classList.add("has3d");
+        if (c.curAct) SB3D.act(c.curAct.k, c.curAct.ms - (performance.now() - c.curAct.at));
+      }).catch(() => { clearTimeout(giveUp); el.classList.remove("wait3d"); });
+    }
+    acts.forEach((a, i) => shAt(a.t0, () => showAct3(el, c, a, i)));
+    showLoop(el);
+    el._t = setTimeout(() => { el.classList.add("out"); el._t2 = setTimeout(() => { showClear(); el.hidden = true; el.innerHTML = ""; el.style.pointerEvents = ""; el.onclick = null; }, 600); }, T - 600);
+    return T;
+  }
+  function cashRunV2({ b, n, names, tile }) {
     showClear();
     const el = cashEl(), F = flexOf(b), lvl = showLevel(b, F, n), c = showCtx(b, n, names, F, lvl);
     c.tile = tile || null; c.v = setPick(c);
@@ -9918,7 +10469,7 @@ body.tv .rb-games.primeg.mason > .rb-pcol { padding-top: 16px; -webkit-mask-imag
   // ---------- sheets ----------
   function openSheet(id) { $(id).hidden = false; }
   // keep every open screen current: when a new version is up, reload it (never mid-form or mid-animation)
-  const BUILD = "20261020192636";
+  const BUILD = "20261020212600";
   function checkBuild() {
     if (BUILD === "dev") return;
     fetch("version.json?t=" + Date.now(), { cache: "no-store" }).then((r) => (r.ok ? r.json() : null)).then((j) => {
@@ -11751,6 +12302,22 @@ body.tv .rb-games.primeg.mason > .rb-pcol { padding-top: 16px; -webkit-mask-imag
     clip("mlb/mlb22", "Brewers: a bunch of gamers", "up hype", 25.37, { sport: "MLB", fan: "MIL", songId: "mlb22" }),
     clip("mlb/mlb23", "Brewers: the Brewers song", "up hype", 47.0, { sport: "MLB", fan: "MIL", songId: "mlb23" }),
     clip("mlb/mlb24", "Brewers: beat the champ", "up hype", 29.73, { sport: "MLB", fan: "MIL", songId: "mlb24" }),
+    clip("nba/nba01", "Dame: I had to earn my way", "up hype", 40.3, { sport: "NBA", fan: "POR", songId: "nba01" }),
+    clip("nba/nba02", "Wolves: a bunch of boys this year", "up hype", 60.0, { sport: "NBA", fan: "MIN", songId: "nba02" }),
+    clip("nba/nba03", "Around the league: love me", "up hype", 39.57, { sport: "NBA", songId: "nba03" }),
+    clip("nba/nba04", "Draymond on Finals physicality", "up hype", 37.07, { sport: "NBA", fan: "GS", songId: "nba04" }),
+    clip("nba/nba05", "Draymond: I told you", "up hype", 18.3, { sport: "NBA", fan: "GS", songId: "nba05" }),
+    clip("nba/nba06", "Warriors: Fancy", "up hype", 21.5, { sport: "NBA", fan: "GS", song: "Fancy", artist: "Iggy Azalea ft. Charli XCX", songId: "nba06" }),
+    clip("nba/nba07", "Kobe: Mamba", "up hype", 25.1, { sport: "NBA", fan: "LAL", songId: "nba07" }),
+    clip("nba/nba08", "Spurs: impossible stuff", "up hype", 38.47, { sport: "NBA", fan: "SA", songId: "nba08" }),
+    clip("nba/nba09", "Celtics: '08 Finals intros", "hype up", 82.73, { sport: "NBA", fan: "BOS", songId: "nba09" }),
+    clip("nba/nba10", "Tatum: the Garden", "up hype", 25.3, { sport: "NBA", fan: "BOS", songId: "nba10" }),
+    clip("nba/nba11", "Bulls: MJ and Pip", "up hype", 20.2, { sport: "NBA", fan: "CHI", songId: "nba11" }),
+    clip("nba/nba12", "Hornets: I'm from Charlotte", "up hype", 21.0, { sport: "NBA", fan: "CHA", songId: "nba12" }),
+    clip("nba/nba13", "PG-13: the Pacers years", "up hype", 15.0, { sport: "NBA", fan: "IND", songId: "nba13" }),
+    clip("nba/nba14", "D-Rose: Chicago's own", "up hype", 16.1, { sport: "NBA", fan: "CHI", songId: "nba14" }),
+    clip("nba/nba15", "Around the league: the stars", "up hype", 42.3, { sport: "NBA", songId: "nba15" }),
+    clip("nba/nba16", "NBA is back", "hype", 69.2, { sport: "NBA", songId: "nba16" }),
     clip("cfb/cfb16", "365 days, part 2", "hype up", 31.2, UGA),
     clip("cfb/cfb19", "Dawgs going crazy, part 2", "hype up", 14.6, UGA),
     clip("cfb/cfb17", "I don't lose, part 2", "down comeback", 32),
@@ -13646,7 +14213,7 @@ body.tv .rb-games.primeg.mason > .rb-pcol { padding-top: 16px; -webkit-mask-imag
     const H = pickClip(houseEdits());
     return H ? Object.assign({}, H, { house: 1, lux: 1, set: 1 }) : P;
   }
-  { const DUR_FIX = {"sounds/cfb/cfb01":12.0,"sounds/cfb/cfb02":14.6,"sounds/cfb/cfb03":26.8,"sounds/cfb/cfb04":11.5,"sounds/cfb/cfb05":28.0,"sounds/cfb/cfb06":30.0,"sounds/cfb/cfb07":25.8,"sounds/cfb/cfb08":5.7,"sounds/cfb/cfb09":27.93,"sounds/cfb/cfb10":26.93,"sounds/cfb/cfb11":29.9,"sounds/cfb/cfb12":25.93,"sounds/cfb/cfb13":22.03,"sounds/cfb/cfb14":33.4,"sounds/cfb/cfb15":15.0,"sounds/cfb/cfb16":31.2,"sounds/cfb/cfb17":32.0,"sounds/cfb/cfb18":30.2,"sounds/cfb/cfb19":14.63,"sounds/cfb/cfb20":12.8,"sounds/cfb/cfb21":30.5,"sounds/cfb/cfb22":26.93,"sounds/cfb/cfb23":33.5,"sounds/cfb/cfb24":33.5,"sounds/cfb/cfb25":13.0,"sounds/cfb/cfb26":26.0,"sounds/cfb/cfb27":26.0,"sounds/cfb/cfb28":27.0,"sounds/cfb/cfb29":25.8,"sounds/cfb/cfb30":15.07,"sounds/cfb/cfb31":17.0,"sounds/cfb/cfb32":28.03,"sounds/cfb/cfb33":5.5,"sounds/cfb/cfb34":15.5,"sounds/cfb/cfb35":18.0,"sounds/cfb/cfb36":22.2,"sounds/cfb/cfb37":23.03,"sounds/cfb/cfb38":16.07,"sounds/cfb/cfb39":31.0,"sounds/cfb/cfb40":29.2,"sounds/cfb/cfb41":30.0,"sounds/cfb/cfb42":30.5,"sounds/cfb/cfb43":26.0,"sounds/cfb/cfb44":29.6,"sounds/cfb/cfb45":31.4,"sounds/cfb/cfb46":31.0,"sounds/cfb/cfb47":13.2,"sounds/cfb/cfb48":22.23,"sounds/clips/g06":30.0,"sounds/clips/g08":30.07,"sounds/clips/g09":28.93,"sounds/clips/l01":29.5,"sounds/clips/l02":27.8,"sounds/clips/l03":11.27,"sounds/clips/l04":16.57,"sounds/clips/l05":24.87,"sounds/clips/l06":18.87,"sounds/clips/l07":30.0,"sounds/clips/l08":30.0,"sounds/clips/w02":22.47,"sounds/clips/w03":30.0,"sounds/clips/w04":30.0,"sounds/clips/w05":30.0,"sounds/clips/w06":22.07,"sounds/clips/w07":27.97,"sounds/clips/w09":17.87,"sounds/clips/w14":17.07,"sounds/clips/w15":15.07,"sounds/clips/w16":29.87,"sounds/house/hs01":12.73,"sounds/house/hs02":19.0,"sounds/house/hs03":21.5,"sounds/house/hs04":19.5,"sounds/house/hs05":25.5,"sounds/house/hs06":39.23,"sounds/house/hs07":14.73,"sounds/house/hs08":21.23,"sounds/house/hs09":17.6,"sounds/house/hs10":16.0,"sounds/house/hs11":12.23,"sounds/house/hs12":36.37,"sounds/house/hs13":31.73,"sounds/house/hs14":21.1,"sounds/house/hs15":21.6,"sounds/house/hs16":57.6,"sounds/house/hs17":16.73,"sounds/house/hs18":42.6,"sounds/house/hs19":17.0,"sounds/house/hs20":44.13,"sounds/house/hs21":34.87,"sounds/house/hs22":12.5,"sounds/house/hs23":28.23,"sounds/mlb/mlb08":64.0,"sounds/mlb/mlb09":18.0,"sounds/mlb/mlb10":57.5,"sounds/mlb/mlb11":37.83,"sounds/mlb/mlb12":24.5,"sounds/mlb/mlb13":69.5,"sounds/mlb/mlb14":14.1,"sounds/mlb/mlb15":29.0,"sounds/mlb/mlb16":13.5,"sounds/mlb/mlb17":16.73,"sounds/mlb/mlb18":20.5,"sounds/mlb/mlb19":44.73,"sounds/house/hs36":23.87,"sounds/house/hs37":15.23,"sounds/house/hs38":10.37,"sounds/house/hs39":35.87,"sounds/house/hs40":30.23,"sounds/house/hs41":26.5,"sounds/house/hs42":40.77,"sounds/house/hs43":44.23,"sounds/house/hs44":12.37,"sounds/house/hs45":71.1,"sounds/mlb/mlb01":20.8,"sounds/mlb/mlb02":25.47,"sounds/mlb/mlb03":16.3,"sounds/mlb/mlb04":13.77,"sounds/mlb/mlb05":30.0,"sounds/mlb/mlb06":15.27,"sounds/mlb/mlb07":8.6,"sounds/mlb/mlb20":60.73,"sounds/mlb/mlb21":71.13,"sounds/mlb/mlb22":25.37,"sounds/mlb/mlb23":47.0,"sounds/mlb/mlb24":29.73,"sounds/nfl/nfl01":16.0,"sounds/nfl/nfl02":16.6,"sounds/nfl/nfl03":15.37,"sounds/nfl/nfl04":28.2,"sounds/nfl/nfl05":11.27,"sounds/nfl/nfl06":10.7,"sounds/nfl/nfl07":29.1,"sounds/nfl/nfl08":60.6,"sounds/nfl/nfl09":56.2,"sounds/nfl/nfl10":49.5,"sounds/nfl/nfl11":19.5,"sounds/nfl/nfl12":60.6,"sounds/nfl/nfl13":29.7,"sounds/nfl/nfl14":27.8,"sounds/nfl/nfl15":21.7,"sounds/nfl/nfl16":14.0,"sounds/nfl/nfl17":12.4,"sounds/nfl/nfl18":22.1,"sounds/nfl/nfl19":17.6,"sounds/nfl/nfl20":15.8,"sounds/nfl/nfl21":23.9,"sounds/nfl/nfl22":21.0,"sounds/nfl/nfl23":9.9,"sounds/nfl/nfl24":20.6,"sounds/nfl/nfl25":20.1,"sounds/nfl/nfl26":18.6,"sounds/nfl/nfl27":11.4,"sounds/nfl/nfl28":35.1,"sounds/nfl/nfl29":30.3,"sounds/nfl/nfl30":32.1,"sounds/nfl/nfl31":37.2,"sounds/nfl/nfl32":25.1,"sounds/nfl/nfl33":22.93,"sounds/nfl/nfl34":39.3,"sounds/nfl/nfl35":29.3,"sounds/nfl/nfl36":31.0,"sounds/nfl/nfl37":36.3,"sounds/nfl/nfl38":18.63,"sounds/nfl/nfl39":23.6,"sounds/nfl/nfl40":21.7,"sounds/nfl/nfl41":17.3,"sounds/nfl/nfl42":40.9,"sounds/nfl/nfl43":14.5,"sounds/nfl/nfl44":26.1,"sounds/nfl/nfl45":31.3,"sounds/nfl/nfl46":16.07,"sounds/nfl/nfl47":21.3,"sounds/nfl/nfl48":36.0,"sounds/nfl/nfl49":24.1,"sounds/nfl/nfl50":34.2,"sounds/nfl/nfl51":17.5,"sounds/nfl/nfl52":29.5,"sounds/nfl/nfl53":26.2,"sounds/nfl/nfl54":21.7,"sounds/nfl/nfl55":39.1,"sounds/nhlv/hk01":43.43,"sounds/nhlv/hk02":39.57,"sounds/nhlv/hk03":17.2,"sounds/nhlv/hk04":36.0,"sounds/nhlv/hk05":17.43,"sounds/nhlv/hk06":34.3,"sounds/nhlv/hk07":44.7,"sounds/nhlv/hk08":12.43,"sounds/nhlv/hk09":30.1,"sounds/uga/uga01":13.97,"sounds/uga/uga02":30.03,"sounds/uga/uga03":25.77,"sounds/uga/uga04":30.0,"sounds/uga/uga05":16.27,"sounds/win/win09":30.0,"sounds/win/win10":29.77,"sounds/win/win11":36.5,"sounds/win/win12":23.93,"sounds/win/win13":31.77,"sounds/win/win14":17.07,"sounds/win/win15":10.27,"sounds/win/win16":17.57,"sounds/win/win17":30.03,"sounds/win/win18":24.73,"sounds/win/win19":17.1,"sounds/win/win20":15.67,"sounds/win/win21":26.37,"sounds/win/win22":28.57,"sounds/win/win23":30.43}; for (const c of CLIPS) if (c && c.base && DUR_FIX[c.base]) c.ms = DUR_FIX[c.base] * 1000; }
+  { const DUR_FIX = {"sounds/cfb/cfb01":12.0,"sounds/cfb/cfb02":14.6,"sounds/cfb/cfb03":26.8,"sounds/cfb/cfb04":11.5,"sounds/cfb/cfb05":28.0,"sounds/cfb/cfb06":30.0,"sounds/cfb/cfb07":25.8,"sounds/cfb/cfb08":5.7,"sounds/cfb/cfb09":27.93,"sounds/cfb/cfb10":26.93,"sounds/cfb/cfb11":29.9,"sounds/cfb/cfb12":25.93,"sounds/cfb/cfb13":22.03,"sounds/cfb/cfb14":33.4,"sounds/cfb/cfb15":15.0,"sounds/cfb/cfb16":31.2,"sounds/cfb/cfb17":32.0,"sounds/cfb/cfb18":30.2,"sounds/cfb/cfb19":14.63,"sounds/cfb/cfb20":12.8,"sounds/cfb/cfb21":30.5,"sounds/cfb/cfb22":26.93,"sounds/cfb/cfb23":33.5,"sounds/cfb/cfb24":33.5,"sounds/cfb/cfb25":13.0,"sounds/cfb/cfb26":26.0,"sounds/cfb/cfb27":26.0,"sounds/cfb/cfb28":27.0,"sounds/cfb/cfb29":25.8,"sounds/cfb/cfb30":15.07,"sounds/cfb/cfb31":17.0,"sounds/cfb/cfb32":28.03,"sounds/cfb/cfb33":5.5,"sounds/cfb/cfb34":15.5,"sounds/cfb/cfb35":18.0,"sounds/cfb/cfb36":22.2,"sounds/cfb/cfb37":23.03,"sounds/cfb/cfb38":16.07,"sounds/cfb/cfb39":31.0,"sounds/cfb/cfb40":29.2,"sounds/cfb/cfb41":30.0,"sounds/cfb/cfb42":30.5,"sounds/cfb/cfb43":26.0,"sounds/cfb/cfb44":29.6,"sounds/cfb/cfb45":31.4,"sounds/cfb/cfb46":31.0,"sounds/cfb/cfb47":13.2,"sounds/cfb/cfb48":22.23,"sounds/clips/g06":30.0,"sounds/clips/g08":30.07,"sounds/clips/g09":28.93,"sounds/clips/l01":29.5,"sounds/clips/l02":27.8,"sounds/clips/l03":11.27,"sounds/clips/l04":16.57,"sounds/clips/l05":24.87,"sounds/clips/l06":18.87,"sounds/clips/l07":30.0,"sounds/clips/l08":30.0,"sounds/clips/w02":22.47,"sounds/clips/w03":30.0,"sounds/clips/w04":30.0,"sounds/clips/w05":30.0,"sounds/clips/w06":22.07,"sounds/clips/w07":27.97,"sounds/clips/w09":17.87,"sounds/clips/w14":17.07,"sounds/clips/w15":15.07,"sounds/clips/w16":29.87,"sounds/house/hs01":12.73,"sounds/house/hs02":19.0,"sounds/house/hs03":21.5,"sounds/house/hs04":19.5,"sounds/house/hs05":25.5,"sounds/house/hs06":39.23,"sounds/house/hs07":14.73,"sounds/house/hs08":21.23,"sounds/house/hs09":17.6,"sounds/house/hs10":16.0,"sounds/house/hs11":12.23,"sounds/house/hs12":36.37,"sounds/house/hs13":31.73,"sounds/house/hs14":21.1,"sounds/house/hs15":21.6,"sounds/house/hs16":57.6,"sounds/house/hs17":16.73,"sounds/house/hs18":42.6,"sounds/house/hs19":17.0,"sounds/house/hs20":44.13,"sounds/house/hs21":34.87,"sounds/house/hs22":12.5,"sounds/house/hs23":28.23,"sounds/mlb/mlb08":64.0,"sounds/mlb/mlb09":18.0,"sounds/mlb/mlb10":57.5,"sounds/mlb/mlb11":37.83,"sounds/mlb/mlb12":24.5,"sounds/mlb/mlb13":69.5,"sounds/mlb/mlb14":14.1,"sounds/mlb/mlb15":29.0,"sounds/mlb/mlb16":13.5,"sounds/mlb/mlb17":16.73,"sounds/mlb/mlb18":20.5,"sounds/mlb/mlb19":44.73,"sounds/house/hs36":23.87,"sounds/house/hs37":15.23,"sounds/house/hs38":10.37,"sounds/house/hs39":35.87,"sounds/house/hs40":30.23,"sounds/house/hs41":26.5,"sounds/house/hs42":40.77,"sounds/house/hs43":44.23,"sounds/house/hs44":12.37,"sounds/house/hs45":71.1,"sounds/mlb/mlb01":20.8,"sounds/mlb/mlb02":25.47,"sounds/mlb/mlb03":16.3,"sounds/mlb/mlb04":13.77,"sounds/mlb/mlb05":30.0,"sounds/mlb/mlb06":15.27,"sounds/mlb/mlb07":8.6,"sounds/mlb/mlb20":60.73,"sounds/mlb/mlb21":71.13,"sounds/mlb/mlb22":25.37,"sounds/mlb/mlb23":47.0,"sounds/mlb/mlb24":29.73,"sounds/nfl/nfl01":16.0,"sounds/nfl/nfl02":16.6,"sounds/nfl/nfl03":15.37,"sounds/nfl/nfl04":28.2,"sounds/nfl/nfl05":11.27,"sounds/nfl/nfl06":10.7,"sounds/nfl/nfl07":29.1,"sounds/nfl/nfl08":60.6,"sounds/nfl/nfl09":56.2,"sounds/nfl/nfl10":49.5,"sounds/nfl/nfl11":19.5,"sounds/nfl/nfl12":60.6,"sounds/nfl/nfl13":29.7,"sounds/nfl/nfl14":27.8,"sounds/nfl/nfl15":21.7,"sounds/nfl/nfl16":14.0,"sounds/nfl/nfl17":12.4,"sounds/nfl/nfl18":22.1,"sounds/nfl/nfl19":17.6,"sounds/nfl/nfl20":15.8,"sounds/nfl/nfl21":23.9,"sounds/nfl/nfl22":21.0,"sounds/nfl/nfl23":9.9,"sounds/nfl/nfl24":20.6,"sounds/nfl/nfl25":20.1,"sounds/nfl/nfl26":18.6,"sounds/nfl/nfl27":11.4,"sounds/nfl/nfl28":35.1,"sounds/nfl/nfl29":30.3,"sounds/nfl/nfl30":32.1,"sounds/nfl/nfl31":37.2,"sounds/nfl/nfl32":25.1,"sounds/nfl/nfl33":22.93,"sounds/nfl/nfl34":39.3,"sounds/nfl/nfl35":29.3,"sounds/nfl/nfl36":31.0,"sounds/nfl/nfl37":36.3,"sounds/nfl/nfl38":18.63,"sounds/nfl/nfl39":23.6,"sounds/nfl/nfl40":21.7,"sounds/nfl/nfl41":17.3,"sounds/nfl/nfl42":40.9,"sounds/nfl/nfl43":14.5,"sounds/nfl/nfl44":26.1,"sounds/nfl/nfl45":31.3,"sounds/nfl/nfl46":16.07,"sounds/nfl/nfl47":21.3,"sounds/nfl/nfl48":36.0,"sounds/nfl/nfl49":24.1,"sounds/nfl/nfl50":34.2,"sounds/nfl/nfl51":17.5,"sounds/nfl/nfl52":29.5,"sounds/nfl/nfl53":26.2,"sounds/nfl/nfl54":21.7,"sounds/nfl/nfl55":39.1,"sounds/nhlv/hk01":43.43,"sounds/nhlv/hk02":39.57,"sounds/nhlv/hk03":17.2,"sounds/nhlv/hk04":36.0,"sounds/nhlv/hk05":17.43,"sounds/nhlv/hk06":34.3,"sounds/nhlv/hk07":44.7,"sounds/nhlv/hk08":12.43,"sounds/nhlv/hk09":30.1,"sounds/uga/uga01":13.97,"sounds/uga/uga02":30.03,"sounds/uga/uga03":25.77,"sounds/uga/uga04":30.0,"sounds/uga/uga05":16.27,"sounds/win/win09":30.0,"sounds/win/win10":29.77,"sounds/win/win11":36.5,"sounds/win/win12":23.93,"sounds/win/win13":31.77,"sounds/win/win14":17.07,"sounds/win/win15":10.27,"sounds/win/win16":17.57,"sounds/win/win17":30.03,"sounds/win/win18":24.73,"sounds/win/win19":17.1,"sounds/win/win20":15.67,"sounds/win/win21":26.37,"sounds/win/win22":28.57,"sounds/win/win23":30.43,"sounds/nba/nba01":40.3,"sounds/nba/nba02":60.0,"sounds/nba/nba03":39.57,"sounds/nba/nba04":37.07,"sounds/nba/nba05":18.3,"sounds/nba/nba06":21.5,"sounds/nba/nba07":25.1,"sounds/nba/nba08":38.47,"sounds/nba/nba09":82.73,"sounds/nba/nba10":25.3,"sounds/nba/nba11":20.2,"sounds/nba/nba12":21.0,"sounds/nba/nba13":15.0,"sounds/nba/nba14":16.1,"sounds/nba/nba15":42.3,"sounds/nba/nba16":69.2}; for (const c of CLIPS) if (c && c.base && DUR_FIX[c.base]) c.ms = DUR_FIX[c.base] * 1000; }
   const HLX_LG = [["NFL", "football/nfl", "NFL"], ["College football", "football/college-football", "CFB"], ["NBA", "basketball/nba", "NBA"], ["WNBA", "basketball/wnba", "NBA"],
     ["College hoops", "basketball/mens-college-basketball", "CBB"], ["MLB", "baseball/mlb", "MLB"], ["NHL", "hockey/nhl", "NHL"],
     ["UFC", "mma/ufc", "UFC"],
@@ -16864,7 +17431,7 @@ body.tv .rb-games.primeg.mason > .rb-pcol { padding-top: 16px; -webkit-mask-imag
       }
       if (!status) continue;
       settling.add(b.id);
-      patchBet(b.id, { status, settledAt: Date.now(), net: netOf({ ...b, status }), auto: true }).finally(() => settling.delete(b.id));
+      patchBet(b.id, { status, settledAt: Date.now(), net: netOf({ ...b, status }), auto: true, ...hoopStoryPatch(b, status) }).finally(() => settling.delete(b.id));
     }
   }
 
@@ -17526,6 +18093,456 @@ body.tv .rb-games.primeg.mason > .rb-pcol { padding-top: 16px; -webkit-mask-imag
   requestAnimationFrame(frame);
   window.sbCrowd = { pop: (k) => { boost = Math.min(1.6, boost + (k || 1)); } };
 })();
+</script>
+<script type="module">
+// ---------- the show's 3D stage ----------
+// a three.js scene behind the show's words, loaded the first time a show starts (the library is vendored with the site):
+// chrome and gold lettering in the board's own face, the ticket as a slab of glass and metal, the sport's ball doing its
+// thing (a swish through a real rim, a spiral through the uprights, a puck in the net, a ball out of the yard), sparks,
+// metallic confetti, a shockwave on the drop, a trophy under moving lights, a banner raised to the rafters. Everything is
+// timed off the show's own clock and beat; it lightens itself (no bloom, fewer bits) if the frame rate can't keep up
+const S3 = { lib: null, ld: null, R: null, run: null, cache: {} };
+async function s3lib() {
+  if (S3.lib) return S3.lib;
+  if (!S3.ld) S3.ld = (async () => {
+    const THREE = await import("three");
+    const m = await Promise.all(["postprocessing/EffectComposer.js", "postprocessing/RenderPass.js", "postprocessing/UnrealBloomPass.js", "postprocessing/OutputPass.js", "geometries/TextGeometry.js", "loaders/FontLoader.js", "geometries/RoundedBoxGeometry.js", "environments/RoomEnvironment.js"].map((p) => import("three/addons/" + p)));
+    const fj = await (await fetch("img/bsd900.typeface.json")).json();
+    const font = new m[5].FontLoader().parse(fj);
+    return (S3.lib = { THREE, EffectComposer: m[0].EffectComposer, RenderPass: m[1].RenderPass, UnrealBloomPass: m[2].UnrealBloomPass, OutputPass: m[3].OutputPass, TextGeometry: m[4].TextGeometry, RoundedBoxGeometry: m[6].RoundedBoxGeometry, RoomEnvironment: m[7].RoomEnvironment, font });
+  })().catch((e) => { S3.ld = null; throw e; });
+  return S3.ld;
+}
+// one renderer for every show (a WebGL context is too precious to make per show)
+function s3renderer(L) {
+  if (S3.R) return S3.R;
+  const { THREE } = L, r = new THREE.WebGLRenderer({ antialias: true, alpha: false, powerPreference: "high-performance" });
+  r.setPixelRatio(1); r.setSize(1920, 1080, false); r.outputColorSpace = THREE.SRGBColorSpace; r.toneMapping = THREE.ACESFilmicToneMapping; r.toneMappingExposure = 0.92;
+  const pm = new THREE.PMREMGenerator(r), env = pm.fromScene(new L.RoomEnvironment(r), 0.04).texture;
+  r.domElement.className = "cs-3d";
+  return (S3.R = { r, env });
+}
+const ez = { out: (k) => 1 - Math.pow(1 - k, 3), outx: (k) => (k >= 1 ? 1 : 1 - Math.pow(2, -10 * k)), io: (k) => (k < 0.5 ? 4 * k * k * k : 1 - Math.pow(-2 * k + 2, 3) / 2), back: (k) => { const c = 1.9; return 1 + (c + 1) * Math.pow(k - 1, 3) + c * Math.pow(k - 1, 2); } };
+const cl = (v, a, b) => Math.max(a, Math.min(b, v)), seg = (t, a, d) => cl((t - a) / d, 0, 1);
+
+// ---- textures drawn once ----
+function canvasTex(L, w, h, draw, key) {
+  if (key && S3.cache[key]) return S3.cache[key];
+  const c = document.createElement("canvas"); c.width = w; c.height = h; draw(c.getContext("2d"), w, h);
+  const t = new L.THREE.CanvasTexture(c); t.colorSpace = L.THREE.SRGBColorSpace; t.anisotropy = 4;
+  if (key) S3.cache[key] = t; return t;
+}
+function spriteTex(L) {
+  return canvasTex(L, 64, 64, (x) => { const g = x.createRadialGradient(32, 32, 0, 32, 32, 32); g.addColorStop(0, "rgba(255,255,255,1)"); g.addColorStop(0.25, "rgba(255,255,255,.7)"); g.addColorStop(1, "rgba(255,255,255,0)"); x.fillStyle = g; x.fillRect(0, 0, 64, 64); }, "spr");
+}
+function ballTex(L, kind) {
+  return canvasTex(L, 1024, 512, (x, W, H) => {
+    if (kind === "nba") {
+      x.fillStyle = "#d8641c"; x.fillRect(0, 0, W, H);
+      for (let i = 0; i < 26000; i++) { const px = Math.random() * W, py = Math.random() * H, v = Math.random(); x.fillStyle = v < 0.5 ? "rgba(90,30,0,.18)" : "rgba(255,170,90,.14)"; x.fillRect(px, py, 2, 2); }
+      x.strokeStyle = "#1a0d06"; x.lineWidth = 9; x.lineCap = "round";
+      x.beginPath(); x.moveTo(0, H / 2); x.lineTo(W, H / 2); x.stroke();
+      for (const u of [0.25, 0.75]) { x.beginPath(); x.moveTo(u * W, 0); x.lineTo(u * W, H); x.stroke(); }
+      for (const sg of [1, -1]) { x.beginPath(); for (let i = 0; i <= 200; i++) { const u = i / 200, v = 0.5 + sg * 0.36 * Math.cos(u * Math.PI * 2); i ? x.lineTo(u * W, v * H) : x.moveTo(u * W, v * H); } x.stroke(); }
+    } else if (kind === "nfl") {
+      const g = x.createLinearGradient(0, 0, 0, H); g.addColorStop(0, "#5a2a12"); g.addColorStop(0.5, "#7a3a18"); g.addColorStop(1, "#4a2210"); x.fillStyle = g; x.fillRect(0, 0, W, H);
+      for (let i = 0; i < 20000; i++) { x.fillStyle = Math.random() < 0.5 ? "rgba(0,0,0,.16)" : "rgba(255,200,150,.07)"; x.fillRect(Math.random() * W, Math.random() * H, 2, 2); }
+      x.fillStyle = "#f4f1ea"; x.fillRect(W * 0.12, H * 0.08, W * 0.03, H * 0.84); x.fillRect(W * 0.85, H * 0.08, W * 0.03, H * 0.84);
+      x.fillRect(W * 0.38, H * 0.47, W * 0.24, H * 0.04); for (let i = 0; i < 8; i++) x.fillRect(W * (0.4 + i * 0.028), H * 0.43, W * 0.008, H * 0.12);
+    } else if (kind === "mlb") {
+      x.fillStyle = "#f3f0e8"; x.fillRect(0, 0, W, H); x.strokeStyle = "#c4161c"; x.lineWidth = 6;
+      for (const sg of [1, -1]) { x.beginPath(); for (let i = 0; i <= 200; i++) { const u = i / 200, v = 0.5 + sg * 0.3 * Math.sin(u * Math.PI * 2); i ? x.lineTo(u * W, v * H) : x.moveTo(u * W, v * H); } x.stroke();
+        for (let i = 0; i < 60; i++) { const u = i / 60, v = 0.5 + sg * 0.3 * Math.sin(u * Math.PI * 2); x.beginPath(); x.moveTo(u * W - 6, v * H - 10); x.lineTo(u * W + 6, v * H + 10); x.stroke(); } }
+    }
+  }, "ball:" + kind);
+}
+
+// ---- the stage ----
+function S3build(L, info) {
+  const { THREE } = L, { r, env } = s3renderer(L);
+  const scene = new THREE.Scene(), cam = new THREE.PerspectiveCamera(32, 16 / 9, 0.1, 400);
+  scene.background = new THREE.Color(0x010102); scene.environment = env; scene.fog = new THREE.Fog(0x040507, 26, 80);
+  cam.position.set(0, 0, 12);
+  const acc = new THREE.Color(info.acc || "#ffd23f"), col = new THREE.Color(info.col || "#ffffff");
+  info.acc = "#" + acc.getHexString(); info.col = "#" + col.getHexString();   // plain hex from here on (the canvases need it)
+  // the backdrop: a deep vignette in the accent, slowly breathing
+  const bgMat = new THREE.ShaderMaterial({ depthWrite: false, uniforms: { c: { value: acc.clone() }, k: { value: 0 }, t: { value: 0 } },
+    vertexShader: "varying vec2 v; void main(){ v=uv; gl_Position=projectionMatrix*modelViewMatrix*vec4(position,1.); }",
+    fragmentShader: "uniform vec3 c; uniform float k; uniform float t; varying vec2 v; void main(){ vec2 p=v-vec2(.5,.56); p.x*=1.78; float d=length(p); float g=exp(-d*d*3.)*(.011+.016*k)+exp(-d*d*14.)*(.005+.03*k); vec3 col=vec3(.0016,.0018,.0024)+c*g; gl_FragColor=vec4(col,1.); }" });
+  const bg = new THREE.Mesh(new THREE.PlaneGeometry(90, 52), bgMat); bg.position.z = -30; scene.add(bg);
+  scene.add(new THREE.HemisphereLight(0xbfd4ff, 0x0b0a08, 0.35));
+  const key = new THREE.DirectionalLight(0xffffff, 1.6); key.position.set(4, 6, 8); scene.add(key);
+  const rimA = new THREE.PointLight(acc, 22, 30, 2); rimA.position.set(-6, 2, 3); scene.add(rimA);
+  const rimB = new THREE.PointLight(col, 14, 30, 2); rimB.position.set(6, -2, 3); scene.add(rimB);
+  const comp = new L.EffectComposer(r); comp.setSize(1920, 1080);
+  comp.addPass(new L.RenderPass(scene, cam));
+  const bloom = new L.UnrealBloomPass(new THREE.Vector2(960, 540), 0.45, 0.4, 0.86); comp.addPass(bloom);
+  comp.addPass(new L.OutputPass());
+  const mats = {
+    chrome: new THREE.MeshStandardMaterial({ color: 0xe8ecf2, metalness: 1, roughness: 0.18, envMapIntensity: 0.95 }),
+    gold: new THREE.MeshStandardMaterial({ color: 0xe9b04a, metalness: 1, roughness: 0.24, envMapIntensity: 1.0 }),
+    acc: new THREE.MeshStandardMaterial({ color: acc, metalness: 0.85, roughness: 0.3, emissive: acc, emissiveIntensity: 0.05, envMapIntensity: 0.8 }),
+    glow: new THREE.MeshBasicMaterial({ color: acc, transparent: true, blending: THREE.AdditiveBlending, depthWrite: false }),
+  };
+  return { L, THREE, r, scene, cam, comp, bloom, bgMat, key, rimA, rimB, acc, col, mats, objs: [], tick: [], info, look: new THREE.Vector3(), camTo: { p: new THREE.Vector3(0, 0, 12), l: new THREE.Vector3() }, shake: 0, flash: 0, beat: 0 };
+}
+function S3add(st, o) { st.scene.add(o); st.objs.push(o); return o; }
+function S3text(st, s, size, mat, deep) {
+  const { L, THREE } = st, key = "t:" + s + ":" + size + ":" + (deep || 0.3);
+  let g = S3.cache[key];
+  if (!g) {
+    g = new L.TextGeometry(String(s), { font: L.font, size, height: size * (deep || 0.3), depth: size * (deep || 0.3), curveSegments: 5, bevelEnabled: true, bevelThickness: size * 0.045, bevelSize: size * 0.028, bevelSegments: 3 });
+    g.computeBoundingBox(); const b = g.boundingBox; g.translate(-(b.max.x + b.min.x) / 2, -(b.max.y + b.min.y) / 2, -(b.max.z + b.min.z) / 2);
+    if (Object.keys(S3.cache).length < 400) S3.cache[key] = g;
+  }
+  return new THREE.Mesh(g, mat);
+}
+// a number that counts: one mesh per character, glyphs made once
+function S3num(st, size, mat) {
+  const { L, THREE } = st, grp = new THREE.Group(), res = L.font.data.resolution, gl = L.font.data.glyphs, kids = [];
+  const geo = (ch) => { const key = "g:" + ch + ":" + size; let g = S3.cache[key]; if (!g) { g = new L.TextGeometry(ch, { font: L.font, size, height: size * 0.3, depth: size * 0.3, curveSegments: 4, bevelEnabled: true, bevelThickness: size * 0.04, bevelSize: size * 0.025, bevelSegments: 2 }); S3.cache[key] = g; } return g; };
+  let last = "";
+  const set = (s) => {
+    if (s === last) return; last = s;
+    let x = 0; const xs = [];
+    for (const ch of s) { xs.push(x); x += ((gl[ch] && gl[ch].ha) || res * 0.3) * (size / res); }
+    [...s].forEach((ch, i) => { let m = kids[i]; if (!m) { m = new THREE.Mesh(geo(ch), mat); kids[i] = m; grp.add(m); } else if (m.userData.ch !== ch) m.geometry = geo(ch); m.userData.ch = ch; m.visible = true; m.position.set(xs[i] - x / 2, -size * 0.36, 0); });
+    for (let i = s.length; i < kids.length; i++) kids[i].visible = false;
+  };
+  return { grp, set };
+}
+// sparks: a burst from a point, falling, additive
+function S3sparks(st, n, colr) {
+  const { THREE } = st, pos = new Float32Array(n * 3), vel = new Float32Array(n * 3), life = new Float32Array(n), cols = new Float32Array(n * 3);
+  const g = new THREE.BufferGeometry(); g.setAttribute("position", new THREE.BufferAttribute(pos, 3)); g.setAttribute("color", new THREE.BufferAttribute(cols, 3));
+  const m = new THREE.PointsMaterial({ size: 0.16, map: spriteTex(st.L), vertexColors: true, transparent: true, blending: THREE.AdditiveBlending, depthWrite: false });
+  const pts = S3add(st, new THREE.Points(g, m)); pts.frustumCulled = false;
+  let used = 0; for (let i = 0; i < n; i++) { pos[i * 3 + 1] = -999; life[i] = 0; }
+  const burst = (x, y, z, k, sp, c2) => { const c = new THREE.Color(c2 || colr); for (let q = 0; q < k; q++) { const i = used++ % n, a = Math.random() * Math.PI * 2, e = (Math.random() - 0.5) * Math.PI, v = sp * (0.35 + Math.random() * 0.75);
+    pos[i * 3] = x; pos[i * 3 + 1] = y; pos[i * 3 + 2] = z; vel[i * 3] = Math.cos(a) * Math.cos(e) * v; vel[i * 3 + 1] = Math.sin(e) * v + sp * 0.25; vel[i * 3 + 2] = Math.sin(a) * Math.cos(e) * v * 0.6; life[i] = 0.8 + Math.random() * 0.9;
+    const w = Math.random() < 0.3 ? 1 : 0; cols[i * 3] = w ? 1 : c.r; cols[i * 3 + 1] = w ? 1 : c.g; cols[i * 3 + 2] = w ? 1 : c.b; } };
+  st.tick.push((t, dt) => { for (let i = 0; i < n; i++) { if (life[i] <= 0) continue; life[i] -= dt; if (life[i] <= 0) { pos[i * 3 + 1] = -999; continue; }
+    vel[i * 3 + 1] -= 6 * dt; const d = Math.pow(0.35, dt); vel[i * 3] *= d; vel[i * 3 + 1] *= d; vel[i * 3 + 2] *= d; pos[i * 3] += vel[i * 3] * dt; pos[i * 3 + 1] += vel[i * 3 + 1] * dt; pos[i * 3 + 2] += vel[i * 3 + 2] * dt; }
+    g.attributes.position.needsUpdate = true; g.attributes.color.needsUpdate = true; });
+  return { burst };
+}
+// metallic confetti: flakes tumbling down through the light
+function S3confetti(st, n, palette) {
+  const { THREE } = st, mesh = S3add(st, new THREE.InstancedMesh(new THREE.PlaneGeometry(0.13, 0.22), new THREE.MeshStandardMaterial({ metalness: 0.75, roughness: 0.3, side: THREE.DoubleSide, envMapIntensity: 1.3 }), n));
+  const P = [], M = new THREE.Matrix4(), Q = new THREE.Quaternion(), E = new THREE.Euler(), V = new THREE.Vector3(), Sc = new THREE.Vector3(1, 1, 1), C = new THREE.Color();
+  for (let i = 0; i < n; i++) { P.push({ x: (Math.random() - 0.5) * 16, y: 5 + Math.random() * 10, z: (Math.random() - 0.5) * 6 - 1, vy: -(1.2 + Math.random() * 1.6), sw: Math.random() * 6, rx: Math.random() * 6, ry: Math.random() * 6, sx: 2 + Math.random() * 6, sy: 2 + Math.random() * 6, on: false }); mesh.setColorAt(i, C.set(palette[i % palette.length])); }
+  mesh.instanceColor.needsUpdate = true; mesh.frustumCulled = false;
+  let rate = 0, acc = 0, live = 0;
+  const go = (r0) => { rate = r0; };
+  const dump = (k) => { for (let i = 0; i < n && k > 0; i++) if (!P[i].on) { P[i].on = true; P[i].y = 4.2 + Math.random() * 2.5; P[i].x = (Math.random() - 0.5) * 14; P[i].vy = -(1 + Math.random() * 1.8); k--; } };
+  st.tick.push((t, dt) => {
+    acc += rate * dt; while (acc >= 1) { acc--; dump(1); }
+    live = 0;
+    for (let i = 0; i < n; i++) { const p = P[i];
+      if (p.on) { p.y += p.vy * dt; p.x += Math.sin(t * 1.3 + p.sw) * 0.4 * dt; p.rx += p.sx * dt; p.ry += p.sy * dt; if (p.y < -4.5) p.on = false; live++; }
+      E.set(p.rx, p.ry, 0); Q.setFromEuler(E); V.set(p.x, p.on ? p.y : -99, p.z); M.compose(V, Q, Sc); mesh.setMatrixAt(i, M); }
+    mesh.instanceMatrix.needsUpdate = true; });
+  return { go, dump };
+}
+// the shockwave on an impact
+function S3ring(st, x, y, z, s, c) {
+  const { THREE } = st, m = new THREE.MeshBasicMaterial({ color: c || st.acc, transparent: true, blending: THREE.AdditiveBlending, depthWrite: false, side: THREE.DoubleSide });
+  const ring = S3add(st, new THREE.Mesh(new THREE.RingGeometry(0.92, 1, 96), m)); ring.position.set(x, y, z);
+  const t0 = st.t; st.tick.push((t) => { const k = (t - t0) / 0.9; if (k > 1) { ring.visible = false; return; } ring.scale.setScalar(0.3 + ez.out(k) * s); m.opacity = (1 - k) * 0.9; });
+}
+// light streaks rushing past the camera
+function S3streaks(st, n) {
+  const { THREE } = st, mesh = S3add(st, new THREE.InstancedMesh(new THREE.BoxGeometry(1, 1, 1), new THREE.MeshBasicMaterial({ color: 0xffffff, transparent: true, opacity: 0.9, blending: THREE.AdditiveBlending, depthWrite: false }), n));
+  const P = [], M = new THREE.Matrix4(), Q = new THREE.Quaternion(), V = new THREE.Vector3(), Sc = new THREE.Vector3(), C = new THREE.Color();
+  for (let i = 0; i < n; i++) { const a = Math.random() * Math.PI * 2, rr = 2.4 + Math.random() * 7; P.push({ x: Math.cos(a) * rr, y: Math.sin(a) * rr * 0.62, z: -60 - Math.random() * 60, l: 2 + Math.random() * 6, w: 0.015 + Math.random() * 0.035 }); mesh.setColorAt(i, C.set(i % 3 ? st.acc : 0xffffff)); }
+  mesh.instanceColor.needsUpdate = true; mesh.frustumCulled = false;
+  let spd = 0;
+  st.tick.push((t, dt) => { for (let i = 0; i < n; i++) { const p = P[i]; p.z += spd * dt; if (p.z > 14) p.z -= 120; V.set(p.x, p.y, p.z); Sc.set(p.w, p.w, p.l * (0.4 + spd / 90)); M.compose(V, Q, Sc); mesh.setMatrixAt(i, M); } mesh.instanceMatrix.needsUpdate = true; mesh.material.opacity = Math.min(0.9, spd / 60); });
+  return { set: (v) => { spd = v; } };
+}
+// the sport's ball
+function S3ball(st, sport) {
+  const { THREE } = st;
+  if (sport === "NFL" || sport === "CFB") { const m = new THREE.Mesh(new THREE.SphereGeometry(0.5, 48, 32), new THREE.MeshStandardMaterial({ map: ballTex(st.L, "nfl"), roughness: 0.55, metalness: 0.05 })); m.scale.set(1.55, 0.95, 0.95); return m; }
+  if (sport === "MLB") return new THREE.Mesh(new THREE.SphereGeometry(0.36, 48, 32), new THREE.MeshStandardMaterial({ map: ballTex(st.L, "mlb"), roughness: 0.5 }));
+  if (sport === "NHL") { const m = new THREE.Mesh(new THREE.CylinderGeometry(0.42, 0.42, 0.17, 48), new THREE.MeshStandardMaterial({ color: 0x0b0b0c, roughness: 0.35, metalness: 0.2 })); m.rotation.x = Math.PI / 2; const g = new THREE.Group(); g.add(m); return g; }
+  if (sport === "NBA" || sport === "CBB") return new THREE.Mesh(new THREE.SphereGeometry(0.44, 64, 40), new THREE.MeshStandardMaterial({ map: ballTex(st.L, "nba"), roughness: 0.62, metalness: 0.02 }));
+  const coin = new THREE.Mesh(new THREE.CylinderGeometry(0.62, 0.62, 0.1, 64), st.mats.gold); coin.rotation.x = Math.PI / 2; const g = new THREE.Group(); g.add(coin); return g;
+}
+// a rim, its net and the glass, for the swish
+function S3hoop(st) {
+  const { THREE } = st, g = new THREE.Group();
+  const rim = new THREE.Mesh(new THREE.TorusGeometry(0.5, 0.035, 14, 64), new THREE.MeshStandardMaterial({ color: 0xff5a14, metalness: 0.6, roughness: 0.35, emissive: 0x3a1000 })); rim.rotation.x = Math.PI / 2; g.add(rim);
+  const glass = new THREE.Mesh(new THREE.BoxGeometry(1.9, 1.15, 0.04), new THREE.MeshStandardMaterial({ color: 0xcfe6ff, metalness: 0, roughness: 0.04, transparent: true, opacity: 0.16, envMapIntensity: 2 })); glass.position.set(0, 0.42, -0.62); g.add(glass);
+  const edge = new THREE.LineSegments(new THREE.EdgesGeometry(new THREE.BoxGeometry(1.9, 1.15, 0.04)), new THREE.LineBasicMaterial({ color: 0xffffff })); edge.position.copy(glass.position); g.add(edge);
+  const sq = new THREE.LineSegments(new THREE.EdgesGeometry(new THREE.PlaneGeometry(0.62, 0.46)), new THREE.LineBasicMaterial({ color: 0xffffff })); sq.position.set(0, 0.25, -0.595); g.add(sq);
+  // the net: strands from the rim to a narrower ring, criss-crossed
+  const N = 16, pts = [], base = [];
+  for (let i = 0; i < N; i++) { const a = (i / N) * Math.PI * 2, b = ((i + 0.5) / N) * Math.PI * 2;
+    base.push([Math.cos(a) * 0.5, 0, Math.sin(a) * 0.5, Math.cos(b) * 0.36, -0.38, Math.sin(b) * 0.36], [Math.cos(b) * 0.36, -0.38, Math.sin(b) * 0.36, Math.cos(a + 0.4) * 0.28, -0.72, Math.sin(a + 0.4) * 0.28]);
+    base.push([Math.cos(a + Math.PI / N * 2) * 0.5, 0, Math.sin(a + Math.PI / N * 2) * 0.5, Math.cos(b) * 0.36, -0.38, Math.sin(b) * 0.36]); }
+  for (const s of base) pts.push(...s);
+  const ng = new THREE.BufferGeometry(); const arr = new Float32Array(pts); ng.setAttribute("position", new THREE.BufferAttribute(arr, 3));
+  const net = new THREE.LineSegments(ng, new THREE.LineBasicMaterial({ color: 0xf2f2f2, transparent: true, opacity: 0.9 })); g.add(net);
+  let kick = 0;
+  st.tick.push((t, dt) => { if (kick <= 0) return; kick = Math.max(0, kick - dt * 1.4); const w = Math.sin(t * 38) * 0.06 * kick;
+    for (let i = 0; i < base.length; i++) { const s = base[i]; for (const o of [0, 3]) { const y = s[o + 1]; arr[i * 6 + o] = s[o] * (1 - kick * 0.18 * (y < -0.1 ? 1 : 0)) + w * (y < 0 ? -y : 0); arr[i * 6 + o + 1] = y * (1 + kick * 0.35); } }
+    ng.attributes.position.needsUpdate = true; });
+  g.userData.swish = () => { kick = 1; };
+  return g;
+}
+// the ticket: a slab with its face drawn on
+function S3ticket(st) {
+  const { L, THREE } = st, I = st.info, W = 5.6, H = 2.9;
+  const face = canvasTex(L, 1120, 580, (x, w, h) => {
+    const g = x.createLinearGradient(0, 0, 0, h); g.addColorStop(0, "#15171c"); g.addColorStop(1, "#08090b"); x.fillStyle = g; x.fillRect(0, 0, w, h);
+    const rg = x.createRadialGradient(w * 0.95, 0, 10, w * 0.95, 0, w * 0.8); rg.addColorStop(0, I.acc + "55"); rg.addColorStop(1, "rgba(0,0,0,0)"); x.fillStyle = rg; x.fillRect(0, 0, w, h);
+    x.fillStyle = I.col; x.fillRect(0, 0, 14, h);
+    x.font = "800 30px Inter, sans-serif"; x.fillStyle = I.acc; x.textBaseline = "alphabetic"; x.fillText((I.word || "Cashed").toUpperCase(), 60, 86);
+    x.font = "700 28px Inter, sans-serif"; x.fillStyle = "rgba(255,255,255,.62)"; x.fillText((I.name || "").toUpperCase(), 60, 140);
+    let fs = 78; x.font = `900 ${fs}px Inter, sans-serif`; while (x.measureText(I.pick || "").width > w - 120 && fs > 40) { fs -= 4; x.font = `900 ${fs}px Inter, sans-serif`; }
+    x.fillStyle = "#ffffff"; x.fillText(I.pick || "", 60, 246);
+    x.font = "600 30px Inter, sans-serif"; x.fillStyle = "rgba(255,255,255,.55)"; x.fillText(I.sub || "", 60, 300);
+    x.strokeStyle = "rgba(255,255,255,.12)"; x.lineWidth = 2; x.beginPath(); x.moveTo(60, 360); x.lineTo(w - 60, 360); x.stroke();
+    const cell = (lab, val, cx) => { x.font = "700 22px Inter, sans-serif"; x.fillStyle = "rgba(255,255,255,.45)"; x.fillText(lab.toUpperCase(), cx, 420); x.font = "800 40px Inter, sans-serif"; x.fillStyle = "#fff"; x.fillText(val, cx, 472); };
+    cell("Odds", I.odds || "", 60); cell("Risked", I.risk || "", 330); cell("Paid", I.paid || "", 620);
+    x.fillStyle = "#3ddc97"; x.beginPath(); x.roundRect ? x.roundRect(w - 330, 404, 270, 76, 38) : x.rect(w - 330, 404, 270, 76); x.fill();
+    x.font = "900 34px Inter, sans-serif"; x.fillStyle = "#03140b"; x.textAlign = "center"; x.fillText("CASHED ✓", w - 195, 455); x.textAlign = "start";
+    x.font = "700 22px Inter, sans-serif"; x.fillStyle = "rgba(255,255,255,.4)"; x.fillText(I.book || "", 60, 540);
+  });
+  const g = new THREE.Group();
+  const slab = new THREE.Mesh(new L.RoundedBoxGeometry(W + 0.14, H + 0.14, 0.14, 4, 0.12), st.mats.acc); g.add(slab);
+  const pl = new THREE.Mesh(new THREE.PlaneGeometry(W, H), new THREE.MeshStandardMaterial({ map: face, roughness: 0.32, metalness: 0.15, envMapIntensity: 0.5 })); pl.position.z = 0.072; g.add(pl);
+  // a glint that runs across the glass
+  const gm = new THREE.ShaderMaterial({ transparent: true, depthWrite: false, blending: THREE.AdditiveBlending, uniforms: { p: { value: -1 } },
+    vertexShader: "varying vec2 v; void main(){ v=uv; gl_Position=projectionMatrix*modelViewMatrix*vec4(position,1.); }",
+    fragmentShader: "uniform float p; varying vec2 v; void main(){ float d=abs((v.x+v.y*.35)-p); float a=smoothstep(.12,0.,d)*.55; gl_FragColor=vec4(vec3(1.),a); }" });
+  const gl = new THREE.Mesh(new THREE.PlaneGeometry(W, H), gm); gl.position.z = 0.08; g.add(gl);
+  g.userData.glint = (p) => { gm.uniforms.p.value = p; };
+  return g;
+}
+// a trophy: the championship one for basketball, a cup for everything else
+function S3trophy(st) {
+  const { THREE } = st, g = new THREE.Group(), mat = st.mats.gold, V = (x, y) => new THREE.Vector2(x, y);
+  if (st.info.hoops) {
+    const prof = [V(0, 0), V(0.95, 0), V(0.95, 0.12), V(0.8, 0.16), V(0.8, 0.42), V(0.62, 0.48), V(0.6, 0.56), V(0.24, 0.62), V(0.2, 0.7), V(0.24, 1.0), V(0.32, 1.45), V(0.42, 1.95), V(0.5, 2.25), V(0.52, 2.3), V(0, 2.3)];
+    g.add(new THREE.Mesh(new THREE.LatheGeometry(prof, 64), mat));
+    const rim = new THREE.Mesh(new THREE.TorusGeometry(0.54, 0.05, 12, 48), mat); rim.rotation.x = Math.PI / 2; rim.position.y = 2.3; g.add(rim);
+    const ball = new THREE.Mesh(new THREE.SphereGeometry(0.5, 48, 32), new THREE.MeshStandardMaterial({ color: 0xffd27a, metalness: 1, roughness: 0.18, map: ballTex(st.L, "nba") })); ball.position.y = 2.82; g.add(ball);
+    // the net's diamond pattern on the stand
+    const net = new THREE.Mesh(new THREE.LatheGeometry([V(0.205, 0.7), V(0.245, 1.0), V(0.325, 1.45), V(0.425, 1.95), V(0.505, 2.25)], 32), new THREE.MeshStandardMaterial({ color: 0xfff1c9, metalness: 1, roughness: 0.1, wireframe: true })); g.add(net);
+  } else {
+    const prof = [V(0, 0), V(0.9, 0), V(0.9, 0.14), V(0.7, 0.2), V(0.7, 0.5), V(0.5, 0.56), V(0.18, 0.66), V(0.14, 1.1), V(0.2, 1.24), V(0.5, 1.36), V(0.86, 1.7), V(1.02, 2.3), V(1.06, 2.62), V(0.98, 2.64), V(0.9, 2.3), V(0.74, 1.8), V(0.4, 1.5), V(0, 1.46)];
+    g.add(new THREE.Mesh(new THREE.LatheGeometry(prof, 64), mat));
+    for (const s of [1, -1]) { const h = new THREE.Mesh(new THREE.TorusGeometry(0.42, 0.06, 12, 32, Math.PI * 1.1), mat); h.position.set(s * 1.0, 2.0, 0); h.rotation.z = s > 0 ? -Math.PI * 0.55 : Math.PI * 1.55; g.add(h); }
+  }
+  return g;
+}
+// the banner raised to the rafters
+function S3banner(st) {
+  const { L, THREE } = st, I = st.info, W = 3.1, H = 4.6;
+  const tex = canvasTex(L, 620, 920, (x, w, h) => {
+    const g = x.createLinearGradient(0, 0, 0, h); g.addColorStop(0, I.ban1 || I.acc); g.addColorStop(1, I.ban2 || "#0b0c0e"); x.fillStyle = g; x.fillRect(0, 0, w, h);
+    x.fillStyle = "rgba(0,0,0,.42)"; x.fillRect(0, 0, w, h);   // deep enough for white lettering to read
+    for (let i = 0; i < 9000; i++) { x.fillStyle = Math.random() < 0.5 ? "rgba(0,0,0,.08)" : "rgba(255,255,255,.05)"; x.fillRect(Math.random() * w, Math.random() * h, 1.5, 1.5); }
+    x.strokeStyle = "rgba(255,255,255,.85)"; x.lineWidth = 6; x.strokeRect(26, 26, w - 52, h - 52); x.lineWidth = 2; x.strokeRect(40, 40, w - 80, h - 80);
+    x.textAlign = "center"; x.fillStyle = "#fff";
+    x.font = "800 30px Inter, sans-serif"; x.fillText("SWEAT BOARD", w / 2, 108);
+    x.font = "700 24px Inter, sans-serif"; x.globalAlpha = 0.75; x.fillText((I.word || "").toUpperCase(), w / 2, 150); x.globalAlpha = 1;
+    let fs = 150; x.font = `900 ${fs}px "Big Shoulders Display", Impact, sans-serif`; while (x.measureText((I.name || "").toUpperCase()).width > w - 110 && fs > 60) { fs -= 6; x.font = `900 ${fs}px "Big Shoulders Display", Impact, sans-serif`; }
+    x.fillText((I.name || "").toUpperCase(), w / 2, 360);
+    x.font = `900 120px "Big Shoulders Display", Impact, sans-serif`; x.fillText(I.amt || "", w / 2, 540);
+    x.font = "700 30px Inter, sans-serif"; x.globalAlpha = 0.85; x.fillText(I.usd || "", w / 2, 600);
+    x.font = "600 26px Inter, sans-serif"; x.globalAlpha = 0.7; const words = (I.pick || "").split(" "); let line = "", y = 700;
+    for (const wd of words) { const t = line ? line + " " + wd : wd; if (x.measureText(t).width > w - 120) { x.fillText(line, w / 2, y); y += 36; line = wd; } else line = t; } if (line) x.fillText(line, w / 2, y);
+    x.globalAlpha = 0.6; x.font = "700 22px Inter, sans-serif"; x.fillText(I.date || "", w / 2, h - 70); x.globalAlpha = 1;
+  });
+  const geo = new THREE.PlaneGeometry(W, H, 18, 26), base = geo.attributes.position.array.slice();
+  const m = new THREE.Mesh(geo, new THREE.MeshStandardMaterial({ map: tex, roughness: 0.85, metalness: 0, side: THREE.DoubleSide, emissive: 0xffffff, emissiveMap: tex, emissiveIntensity: 0.12 }));
+  const g = new THREE.Group(); g.add(m);
+  for (const s of [-1, 1]) { const rope = new THREE.Mesh(new THREE.CylinderGeometry(0.012, 0.012, 6, 6), new THREE.MeshStandardMaterial({ color: 0x777777, metalness: 0.8, roughness: 0.4 })); rope.position.set(s * W * 0.42, H / 2 + 3, 0); g.add(rope); }
+  const bar = new THREE.Mesh(new THREE.CylinderGeometry(0.035, 0.035, W + 0.3, 12), st.mats.chrome); bar.rotation.z = Math.PI / 2; bar.position.y = H / 2 + 0.02; g.add(bar);
+  st.tick.push((t) => { const a = geo.attributes.position.array; for (let i = 0; i < a.length; i += 3) { const x0 = base[i], y0 = base[i + 1], k = (H / 2 - y0) / H; a[i + 2] = Math.sin(x0 * 1.8 + t * 1.9) * 0.06 * k + Math.sin(y0 * 2.2 + t * 1.3) * 0.04 * k; } geo.attributes.position.needsUpdate = true; geo.computeVertexNormals(); });
+  return g;
+}
+// a video screen hanging in the arena (the edit that's playing)
+function S3screen(st, vid) {
+  const { THREE } = st, tex = new THREE.VideoTexture(vid); tex.colorSpace = THREE.SRGBColorSpace;
+  const g = new THREE.Group(), ar = vid.videoWidth && vid.videoHeight ? vid.videoWidth / vid.videoHeight : 9 / 16, H = 3.6, W = H * ar;
+  const scr = new THREE.Mesh(new THREE.PlaneGeometry(W, H), new THREE.MeshBasicMaterial({ map: tex, toneMapped: false })); g.add(scr);
+  const fr = new THREE.Mesh(new THREE.BoxGeometry(W + 0.12, H + 0.12, 0.08), new THREE.MeshStandardMaterial({ color: 0x0b0c0e, metalness: 0.7, roughness: 0.3 })); fr.position.z = -0.05; g.add(fr);
+  return g;
+}
+
+// ---- the acts ----
+const ACT3 = {
+  // the drop: light rushes past, the call slams in, the ring goes out
+  drop(st, a) {
+    const I = st.info, T = a.ms / 1000, cd = I.lvl >= 5 ? 3 : 0, tc = cd ? cd + 0.25 : 0.55;
+    const sk = S3streaks(st, 160), sp = S3sparks(st, 500, I.acc);
+    const word = S3text(st, String(I.call || "Cashed").toUpperCase(), I.call && I.call.length > 12 ? 0.92 : 1.3, st.mats.chrome, 0.32); S3add(st, word); word.position.z = -60; word.visible = false;
+    const emb = S3ball(st, I.sport); S3add(st, emb); emb.position.set(0, 0, -4); emb.scale.multiplyScalar(2.4); emb.visible = false;
+    const nums = cd ? [3, 2, 1].map((n) => { const m = S3text(st, String(n), 2.6, st.mats.acc, 0.4); m.visible = false; return S3add(st, m); }) : [];
+    let hit = false;
+    st.camTo.p.set(0, 0, 12); st.camTo.l.set(0, 0, 0);
+    st.tick.push((t) => {
+      const k = t - a.t;
+      sk.set(k < tc + 0.1 ? 40 + 80 * seg(k, 0, 0.5) : Math.max(4, 120 * (1 - seg(k, tc, 0.8))));
+      nums.forEach((m, i) => { const q = k - i; m.visible = q >= 0 && q < 1; if (m.visible) { m.position.z = -8 + ez.outx(seg(q, 0, 0.35)) * 8; m.rotation.y = (1 - ez.out(seg(q, 0, 0.5))) * 1.2; m.scale.setScalar(1 + q * 0.15); } });
+      if (k >= tc - 0.35) { word.visible = true; const q = seg(k, tc - 0.35, 0.35); word.position.z = -60 + ez.outx(q) * 60; word.rotation.x = (1 - q) * 0.4;
+        if (q >= 1) { word.rotation.y = Math.sin((k - tc) * 0.8) * 0.12; word.position.y = Math.sin((k - tc) * 1.2) * 0.05; }
+        if (!hit && q >= 1) { hit = true; S3ring(st, 0, 0, -0.5, 9); S3ring(st, 0, 0, -0.5, 5, 0xffffff); sp.burst(0, 0, 0, 260, 9); st.shake = 0.5; st.flash = 1; emb.visible = true; } }
+      if (emb.visible) { emb.rotation.y += 0.02; emb.rotation.x = 0.3; emb.position.z = -4 - seg(k, tc, T) * 2; }
+    });
+  },
+  // the cash: the sport's moment, the slab slams in, the number counts
+  cash(st, a) {
+    const I = st.info, T0 = a.t, slam = 0.88, tk = S3ticket(st), sp = S3sparks(st, 700, I.acc), cf = I.lvl >= 3 ? S3confetti(st, I.lvl >= 4 ? 360 : 220, [I.acc, "#ffffff", I.col, "#ffd23f", "#c0c8d4"]) : null;
+    S3add(st, tk); tk.position.set(0, 0.55, -6); tk.rotation.y = 1.4;
+    const num = S3num(st, 0.9, I.lvl >= 4 ? st.mats.gold : st.mats.chrome); S3add(st, num.grp); num.grp.position.set(0, -1.95, 0.2); num.grp.visible = false;
+    // the moment before: a swish, a spiral through the posts, a puck in the net, one out of the yard, a coin
+    const ball = S3ball(st, I.sport); S3add(st, ball); ball.visible = false;
+    const hoops = I.sport === "NBA" || I.sport === "CBB", hp = hoops ? S3add(st, S3hoop(st)) : null;
+    if (hp) { hp.position.set(3.5, 2.1, -2); hp.rotation.y = -0.5; }
+    let posts = null;
+    if (I.sport === "NFL" || I.sport === "CFB") { posts = new st.THREE.Group(); const y = new st.THREE.MeshStandardMaterial({ color: 0xffd400, metalness: 0.4, roughness: 0.35, emissive: 0x332200 }), cyl = (h, r) => new st.THREE.Mesh(new st.THREE.CylinderGeometry(r, r, h, 16), y);
+      const up = cyl(2.2, 0.05); up.position.y = -1.1; posts.add(up); const cb = cyl(2.6, 0.05); cb.rotation.z = Math.PI / 2; posts.add(cb); for (const s of [-1, 1]) { const u = cyl(3.2, 0.05); u.position.set(s * 1.3, 1.6, 0); posts.add(u); } S3add(st, posts); posts.position.set(0, 0.4, -14); }
+    let hit = false, cnt = false;
+    st.camTo.p.set(0, 0, 12); st.camTo.l.set(0, 0, 0);
+    st.tick.push((t, dt) => {
+      const k = t - T0;
+      // the ball's flight, landing on the slam
+      if (k < slam + 0.5) {
+        const u = seg(k, 0.05, slam - 0.05); ball.visible = k < slam + 0.45;
+        if (hoops) { const p0 = [-5.5, -2.8, 1], p1 = [3.5, 2.12, -2]; ball.position.set(p0[0] + (p1[0] - p0[0]) * u, p0[1] + (p1[1] - p0[1]) * u + 4 * 2.6 * u * (1 - u), p0[2] + (p1[2] - p0[2]) * u); if (k > slam) ball.position.y = p1[1] - (k - slam) * 6; ball.rotation.z -= 0.25; }
+        else if (posts) { ball.position.set(Math.sin(u * 3) * 0.3, -2 + u * 2.8 + 4 * 1.2 * u * (1 - u), 6 - u * 20); ball.rotation.x += 0.5; ball.rotation.z = -Math.PI / 2 + 0.3; }
+        else if (I.sport === "MLB") { ball.position.set(-4 + u * 10, -2 + u * 6, 2 - u * 30); ball.rotation.x += 0.4; }
+        else if (I.sport === "NHL") { ball.position.set(-6 + u * 6, -1.2, 2 - u * 6); ball.rotation.y += 0.4; }
+        else { ball.position.set(0, -3 + u * 3.6 + 4 * 1.2 * u * (1 - u), 1); ball.rotation.x += 0.35; }
+      } else ball.visible = false;
+      if (hp) { hp.visible = k < 2.4; const f = 1 - seg(k, 1.6, 0.8); hp.scale.setScalar(Math.max(0.001, f)); }
+      if (posts) posts.visible = k < 1.4;
+      // the slab: edge-on to face-on, a hard landing, then floating
+      const q = seg(k, 0.15, slam - 0.15);
+      tk.position.z = -6 + ez.out(q) * 6; tk.rotation.y = 1.4 * (1 - ez.back(q)) + (q >= 1 ? 0.12 * Math.sin((k - slam) * 0.7) + 0.08 : 0); tk.rotation.x = q >= 1 ? 0.05 * Math.sin((k - slam) * 0.9) : 0;
+      tk.position.y = 0.55 + (q >= 1 ? 0.06 * Math.sin((k - slam) * 1.1) : 0);
+      tk.userData.glint(-0.6 + seg(k, slam + 0.2, 1.1) * 2.4);
+      if (!hit && k >= slam) { hit = true; if (hp) hp.userData.swish(); S3ring(st, 0, 0.55, -0.4, 10); sp.burst(0, 0.55, 0.3, I.lvl >= 3 ? 420 : 240, 10); st.shake = I.lvl >= 4 ? 0.6 : 0.35; st.flash = 1; if (cf) { cf.dump(I.lvl >= 4 ? 200 : 120); cf.go(I.lvl >= 4 ? 40 : 18); } }
+      // the number
+      if (k >= slam + 0.2) { num.grp.visible = true; const c = ez.out(seg(k, slam + 0.2, I.lvl >= 4 ? 1.8 : 1.2)); num.set("+" + (I.n * c).toFixed(2) + "u"); num.grp.scale.setScalar(0.6 + 0.4 * ez.back(seg(k, slam + 0.2, 0.5))); num.grp.rotation.y = Math.sin(k * 0.9) * 0.1; if (!cnt && c >= 1) { cnt = true; S3ring(st, 0, -1.95, 0, 6, 0xffffff); sp.burst(0, -1.95, 0.4, 160, 6, "#ffffff"); } }
+    });
+  },
+  // how it hit and the standings get the arena breathing behind them
+  play(st, a) { ACT3.ambient(st, a, 0.45); },
+  stand(st, a) { ACT3.ambient(st, a, 0.35); },
+  ambient(st, a, dim) {
+    // just the room breathing behind the numbers: a slow drift of confetti, the light moving
+    const I = st.info, cf = S3confetti(st, 80, [I.acc, "#ffffff"]); cf.go(6);
+    st.camTo.p.set(-0.6, 0.2, 13); st.camTo.l.set(0, 0, 0);
+    st.dim = dim;
+  },
+  // the achievement: a medallion flips in and lands face-on
+  troph(st, a) {
+    const { THREE } = st, I = st.info, g = new THREE.Group();
+    const face = canvasTex(st.L, 512, 512, (x, w, h) => { const r = w / 2; const gr = x.createRadialGradient(r, r * 0.8, 10, r, r, r); gr.addColorStop(0, "#fff3c8"); gr.addColorStop(0.6, "#e0a93a"); gr.addColorStop(1, "#7a5410"); x.fillStyle = gr; x.beginPath(); x.arc(r, r, r, 0, Math.PI * 2); x.fill();
+      x.strokeStyle = "rgba(60,38,6,.7)"; x.lineWidth = 10; x.beginPath(); x.arc(r, r, r - 26, 0, Math.PI * 2); x.stroke();
+      if (I.icon) { const im = new Image(); im.onload = () => { x.save(); x.globalAlpha = 0.95; x.drawImage(im, r - 150, r - 170, 300, 300); x.restore(); face.needsUpdate = true; }; im.src = "data:image/svg+xml," + encodeURIComponent(I.icon.replace("<svg ", '<svg xmlns="http://www.w3.org/2000/svg" width="300" height="300" ').replace(/currentColor/g, "#3a2606")); }
+      x.font = "900 54px Inter, sans-serif"; x.fillStyle = "rgba(58,38,6,.85)"; x.textAlign = "center"; x.fillText((I.achName || I.word || "").toUpperCase().slice(0, 16), r, r + 190); });
+    face.center.set(0.5, 0.5); face.rotation = Math.PI / 2;
+    const mat = new THREE.MeshStandardMaterial({ map: face, metalness: 0.75, roughness: 0.3, envMapIntensity: 0.9 });
+    const coin = new THREE.Mesh(new THREE.CylinderGeometry(1.7, 1.7, 0.22, 96), [st.mats.gold, mat, mat]); coin.rotation.x = Math.PI / 2; g.add(coin);
+    const halo = new THREE.Mesh(new THREE.RingGeometry(1.95, 2.05, 96), new THREE.MeshBasicMaterial({ color: st.acc, transparent: true, opacity: 0.8, blending: THREE.AdditiveBlending, depthWrite: false })); halo.position.z = -0.2; g.add(halo);
+    S3add(st, g); g.position.set(-3.6, 0.2, 0);
+    const sp = S3sparks(st, 300, "#ffd27a"); let hit = false;
+    st.camTo.p.set(-0.8, 0, 12); st.camTo.l.set(-0.8, 0, 0);
+    st.tick.push((t) => { const k = t - a.t, q = seg(k, 0.1, 1.2); g.rotation.y = (1 - ez.out(q)) * Math.PI * 5 + (q >= 1 ? Math.sin((k - 1.3) * 0.9) * 0.18 : 0); g.position.y = 0.2 + (1 - ez.out(q)) * 3;
+      halo.scale.setScalar(1 + Math.sin(k * 3) * 0.03); if (!hit && q >= 1) { hit = true; S3ring(st, -3.6, 0.2, -0.3, 6); sp.burst(-3.6, 0.2, 0.3, 220, 7); st.shake = 0.3; st.flash = 0.7; } });
+  },
+  // the party: the trophy under moving light, the name in chrome, confetti, the edit on the big screen, all on the beat
+  party(st, a) {
+    const { THREE } = st, I = st.info, tro = S3add(st, S3trophy(st)); tro.position.set(1.2, -3.1, 0.5); tro.scale.setScalar(1.05);
+    const nm = S3text(st, (I.name || "").toUpperCase(), (I.name || "").length > 8 ? 1.5 : 2.1, st.mats.chrome, 0.35); S3add(st, nm); nm.position.set(0, 2.15, -5);
+    const cf = S3confetti(st, I.lvl >= 5 ? 520 : 360, [I.acc, "#ffffff", I.col, "#ffd23f", "#c0c8d4", "#7fd8ff"]); cf.dump(160); cf.go(I.lvl >= 5 ? 70 : 45);
+    const sp = S3sparks(st, 600, I.acc);
+    // beams from the floor, swinging
+    const beams = [];
+    for (let i = 0; i < 6; i++) { const m = new THREE.MeshBasicMaterial({ color: i % 2 ? st.acc : st.col, transparent: true, opacity: 0.05, blending: THREE.AdditiveBlending, depthWrite: false, side: THREE.DoubleSide });
+      const b = new THREE.Mesh(new THREE.ConeGeometry(0.9, 16, 32, 1, true), m); b.geometry.translate(0, -8, 0); b.position.set(-7 + i * 2.8, -4.5, -6); b.rotation.z = Math.PI; S3add(st, b); beams.push(b); }
+    if (I.vid) { const s = S3add(st, S3screen(st, I.vid)); s.position.set(-5.2, 0.6, -3.5); s.rotation.y = 0.32; const s2 = S3add(st, S3screen(st, I.vid)); s2.position.set(5.2, 0.6, -3.5); s2.rotation.y = -0.32; }
+    st.camTo.p.set(0, 0.4, 12.5); st.camTo.l.set(0, 0.3, 0);
+    st.onBeat = (bt) => { st.flash = Math.max(st.flash, bt % 4 === 0 ? 0.55 : 0.25); if (bt % 4 === 0) { sp.burst((Math.random() - 0.5) * 8, 2 + Math.random() * 2, -2, 120, 8); S3ring(st, 0, -0.2, -1, 7); } beams.forEach((b, i) => { b.material.opacity = bt % 2 === i % 2 ? 0.1 : 0.035; }); };
+    st.tick.push((t) => { const k = t - a.t; tro.rotation.y = k * 0.6; nm.rotation.y = Math.sin(k * 0.5) * 0.15; beams.forEach((b, i) => { b.rotation.z = Math.PI + Math.sin(k * 0.9 + i) * 0.35; });
+      st.camTo.p.set(Math.sin(k * 0.25) * 2.2, 0.4 + Math.sin(k * 0.3) * 0.3, 12.5 - Math.min(1.5, k * 0.12)); });
+  },
+  // the rafters: their banner goes up into the dark
+  out(st, a) {
+    const { THREE } = st, I = st.info, T = a.ms / 1000, ban = S3add(st, S3banner(st)); ban.position.set(0, -6, -1);
+    const spot = new THREE.SpotLight(0xffffff, 26, 30, 0.42, 0.7, 1.4); spot.position.set(0, -6, 7); spot.target = ban; S3add(st, spot);
+    const cf = S3confetti(st, 120, [I.acc, "#ffffff"]); cf.go(I.lvl >= 4 ? 14 : 6);
+    st.camTo.p.set(0, -1.5, 12); st.camTo.l.set(0, -1, 0);
+    st.tick.push((t) => { const k = t - a.t, q = ez.io(seg(k, 0.1, Math.min(T - 0.4, 2.6))); ban.position.y = -6 + q * 6.6; ban.rotation.y = Math.sin(k * 0.6) * 0.08;
+      st.camTo.p.set(0, -1.5 + q * 2.2, 12 - q * 1.2); st.camTo.l.set(0, -1 + q * 1.6, 0); });
+  },
+};
+ACT3.alert = ACT3.drop;
+
+// ---- running it ----
+function S3clear(st) {
+  for (const o of st.objs) { st.scene.remove(o); o.traverse && o.traverse((m) => { if (m.geometry && !Object.values(S3.cache).includes(m.geometry)) m.geometry.dispose(); if (m.material) [].concat(m.material).forEach((x) => { if (x.map && !Object.values(S3.cache).includes(x.map)) x.map.dispose(); x.dispose && x !== st.mats.chrome && x !== st.mats.gold && x !== st.mats.acc && x.dispose(); }); }); }
+  st.objs = []; st.tick = []; st.onBeat = null; st.dim = 0;
+}
+function S3loop(st) {
+  let last = performance.now(), fr = [0, 0], lite = !!st.info.lite, low = false;
+  const shrink = () => { if (low) return; low = true; st.r.setPixelRatio(0.6); st.comp.setPixelRatio(0.6); };
+  if (lite) st.bloom.enabled = false;
+  if (st.info.low) shrink();
+  const step = (now) => {
+    if (S3.run !== st) return;
+    const rdt = (now - last) / 1000, dt = Math.min(0.05, rdt); last = now; st.t = (now - st.t0) / 1000;
+    for (const f of st.tick.slice()) { try { f(st.t, dt); } catch (e) { console.warn("3d", e); } }
+    st.shake = Math.max(0, st.shake - dt * 1.6); st.flash = Math.max(0, st.flash - dt * 2.2);
+    const c = st.cam, j = st.shake * st.shake;
+    c.position.lerp(st.camTo.p, 1 - Math.pow(0.02, dt)); st.look.lerp(st.camTo.l, 1 - Math.pow(0.02, dt));
+    c.position.x += (Math.random() - 0.5) * j * 0.6; c.position.y += (Math.random() - 0.5) * j * 0.6; c.lookAt(st.look);
+    st.bgMat.uniforms.t.value = st.t; st.bgMat.uniforms.k.value = st.flash * 0.8 + (st.pk || 0) * 0.4;
+    st.bloom.strength = 0.42 + st.flash * 0.5; st.key.intensity = 1.6 + st.flash * 1.2;
+    st.key.position.set(4 * Math.cos(st.t * 0.4), 6, 8);
+    st.r.toneMappingExposure = 0.92 + st.flash * 0.15 - (st.dim || 0) * 0.3;
+    st.comp.render(dt);
+    // keep up or lighten up: no bloom below ~32 fps, a smaller picture below ~22 (measured on real time)
+    if (st.t > 1.0 && !low) { fr[0]++; fr[1] += rdt; if (fr[1] > 1.5) { const fps = fr[0] / fr[1]; if (fps < 32 && !lite) { lite = true; st.bloom.enabled = false; } else if (fps < 22) shrink(); fr = [0, 0]; } }
+    requestAnimationFrame(step);
+  };
+  requestAnimationFrame(step);
+}
+async function S3warm() {
+  const L = await s3lib(); if (S3.warm) return; S3.warm = true;
+  const st = S3build(L, { lvl: 5, sport: "NBA", hoops: true, acc: "#ff7a1a", col: "#4fb3ff", name: "Warm", word: "Cashed", call: "Bang!", pick: "Warm up", n: 1, amt: "+1u", usd: "$15", date: "", lite: false });
+  for (const k of ["drop", "cash", "troph", "party", "out", "play"]) {
+    ACT3[k](st, { t: 0, ms: 4000 }); st.t = 0;
+    for (const t of [0.4, 1.0, 2.0]) { st.t = t; for (const f of st.tick.slice()) { try { f(t, 0.016); } catch (e) {} } }
+    st.r.compile(st.scene, st.cam); st.comp.render(0.016); S3clear(st);
+    await new Promise((ok) => setTimeout(ok, 30));
+  }
+  st.scene.clear(); S3.warmed = true;
+}
+window.SB3D = {
+  ok: () => { try { const c = document.createElement("canvas"); return !!(c.getContext("webgl2") || c.getContext("webgl")); } catch (e) { return false; } },
+  preload: () => s3lib().then(() => new Promise((ok) => setTimeout(ok, 400))).then(S3warm).catch(() => null),
+  ready: () => !!S3.warmed,
+  // start a show's stage inside the given box; info: what the show is about
+  async start(box, info) {
+    const L = await s3lib(), st = S3build(L, info);
+    S3.run = st; st.t0 = performance.now(); st.t = 0;
+    box.prepend(st.r.domElement);
+    S3loop(st);
+    return st;
+  },
+  act(k, ms) { const st = S3.run; if (!st) return; S3clear(st); const f = ACT3[k]; if (f) f(st, { t: st.t, ms: ms || 5000 }); },
+  beat(bt, pk) { const st = S3.run; if (!st) return; st.pk = pk; if (st.onBeat) try { st.onBeat(bt); } catch (e) {} },
+  stop() { const st = S3.run; if (!st) return; S3.run = null; S3clear(st); st.scene.clear(); st.comp.dispose && st.comp.dispose(); st.r.setPixelRatio(1); if (st.r.domElement.parentNode) st.r.domElement.remove(); },
+};
+
 </script>
 </body>
 </html>
