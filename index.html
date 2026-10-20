@@ -5241,6 +5241,62 @@ body.tv.cfb #cfCrowd { display: block; position: absolute; inset: 0; width: 100%
 body.tv .rb-games.primeg.mason { grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); gap: 24px; }
 .rb-games.primeg.mason > .rb-pcol, .rb-games.primeg.mason > .rb-pcol > .loopclone { gap: 24px; }
 body.tv .rb-games.primeg.mason > .rb-pcol { padding-top: 16px; -webkit-mask-image: linear-gradient(180deg, transparent 0, #000 16px, #000 calc(100% - 28px), transparent 100%); mask-image: linear-gradient(180deg, transparent 0, #000 16px, #000 calc(100% - 28px), transparent 100%); }
+
+/* ---------- frames, not wallpaper: a clean face under the words, the type in its border and in the light at the edges ---------- */
+:is(.pp-bet, .ob-bet, .slip).fx.bt { --fxi: radial-gradient(110% 160% at 100% 0%, color-mix(in srgb, var(--fxk) 12%, transparent), transparent 58%), linear-gradient(180deg, #16181d, #0b0c0f); border-width: 3px; }
+:is(.pp-bet, .ob-bet, .slip).fx.bt.bt-team { --fxi: radial-gradient(110% 160% at 100% 0%, color-mix(in srgb, var(--tc1, #5a6475) 26%, transparent), transparent 60%), linear-gradient(180deg, #16191f, #0b0d11); border-width: 3px; }
+.slip.bt:not(.big) .sl-card { border-width: 3px; }
+:is(.pp-bet, .ob-bet).fx.bt::after { content: none; }
+.bt-nb { --fxb: linear-gradient(100deg, color-mix(in srgb, var(--fxk) 34%, #1b1d22) 0 34%, color-mix(in srgb, var(--fxk) 80%, transparent) 43%, #fff 47%, var(--fxk) 51%, color-mix(in srgb, var(--fxk) 34%, #1b1d22) 62% 100%); }
+.bf { position: absolute; inset: 0; z-index: -1; pointer-events: none; overflow: hidden; }
+/* the inner hairline and the corner marks */
+.bf::before, .bf::after { content: ""; position: absolute; inset: 4px 4px 4px 9px; border-radius: 7px; pointer-events: none; }
+.slip .bf::before, .slip .bf::after { inset: 5px; }
+.bf::before { box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--fxk) 24%, transparent); }
+.bf::after { --cm: color-mix(in srgb, var(--fxk) 80%, #fff); border-radius: 0;
+  background: linear-gradient(var(--cm), var(--cm)) 0 0 / 14px 2px no-repeat, linear-gradient(var(--cm), var(--cm)) 0 0 / 2px 14px no-repeat,
+    linear-gradient(var(--cm), var(--cm)) 100% 0 / 14px 2px no-repeat, linear-gradient(var(--cm), var(--cm)) 100% 0 / 2px 14px no-repeat,
+    linear-gradient(var(--cm), var(--cm)) 0 100% / 14px 2px no-repeat, linear-gradient(var(--cm), var(--cm)) 0 100% / 2px 14px no-repeat,
+    linear-gradient(var(--cm), var(--cm)) 100% 100% / 14px 2px no-repeat, linear-gradient(var(--cm), var(--cm)) 100% 100% / 2px 14px no-repeat; }
+.bt-nb .bf::after { display: none; }
+/* the light: strongest at the edges, faint under the words */
+.bf-lt { position: absolute; inset: 0; overflow: hidden; --l1: color-mix(in srgb, var(--fxk) 58%, transparent); --l2: color-mix(in srgb, var(--fxk) 34%, rgba(255,255,255,.12));
+  -webkit-mask-image: radial-gradient(118% 115% at 50% 50%, rgba(0,0,0,.34) 30%, #000 76%); mask-image: radial-gradient(118% 115% at 50% 50%, rgba(0,0,0,.34) 30%, #000 76%); }
+.bf-lt::before, .bf-lt::after { content: ""; position: absolute; pointer-events: none; }
+/* spotlight: a soft cone from the top, panning */
+.bf-lt::before { top: -75%; left: 22%; width: 56%; height: 150%; border-radius: 50%; background: radial-gradient(closest-side, var(--l1), color-mix(in srgb, var(--fxk) 16%, transparent) 62%, transparent); animation: bfPan 10s ease-in-out var(--d, 0s) infinite alternate; }
+@keyframes bfPan { from { transform: translateX(-62%); } to { transform: translateX(62%); } }
+/* heat: a glow rising off the bottom edge, breathing */
+.bt-nuke .bf-lt::before, .bt-six .bf-lt::before, .bt-dinger .bf-lt::before, .bt-shootout .bf-lt::before, .bt-cook .bf-lt::before, .bt-lamp .bf-lt::before, .bt-bucket .bf-lt::before, .bt-rivalry .bf-lt::before, .bt-punchout .bf-lt::before { left: -25%; right: -25%; top: auto; bottom: -62%; width: auto; height: 100%; border-radius: 50%; transform-origin: 50% 100%;
+  background: radial-gradient(50% 50% at 50% 50%, color-mix(in srgb, var(--fxk) 66%, transparent), color-mix(in srgb, var(--fxk) 22%, transparent) 55%, transparent 72%); animation: bfHeat 2.6s ease-in-out var(--d, 0s) infinite alternate; }
+.bt-nuke .bf-lt::after, .bt-six .bf-lt::after, .bt-dinger .bf-lt::after, .bt-shootout .bf-lt::after, .bt-cook .bf-lt::after, .bt-lamp .bf-lt::after, .bt-bucket .bf-lt::after, .bt-rivalry .bf-lt::after, .bt-punchout .bf-lt::after { left: 35%; right: -35%; bottom: -70%; height: 100%; border-radius: 50%; transform-origin: 50% 100%; background: radial-gradient(50% 50% at 50% 50%, rgba(255,226,170,.34), transparent 70%); animation: bfHeat 1.9s ease-in-out calc(var(--d, 0s) - 1s) infinite alternate; }
+@keyframes bfHeat { from { transform: scaleY(.78); opacity: .6; } to { transform: scaleY(1.12); opacity: 1; } }
+/* aurora: two ribbons of color drifting along the top and bottom edges */
+.bt-whale .bf-lt::before, .bt-opal .bf-lt::before, .bt-prime .bf-lt::before, .bt-long .bf-lt::before, .bt-pink .bf-lt::before, .bt-splash .bf-lt::before, .bt-glass .bf-lt::before, .bt-freehoops .bf-lt::before { top: -24%; left: 0; width: 300%; height: 72%; border-radius: 0; background: linear-gradient(90deg, transparent, var(--l1) 10%, transparent 22%, var(--l2) 36%, transparent 50%, var(--l1) 63%, transparent 76%, var(--l2) 89%, transparent);
+  -webkit-mask-image: linear-gradient(180deg, #000, transparent); mask-image: linear-gradient(180deg, #000, transparent); animation: bfFlow 22s linear var(--d, 0s) infinite; }
+.bt-whale .bf-lt::after, .bt-opal .bf-lt::after, .bt-prime .bf-lt::after, .bt-long .bf-lt::after, .bt-pink .bf-lt::after, .bt-splash .bf-lt::after, .bt-glass .bf-lt::after, .bt-freehoops .bf-lt::after { bottom: -24%; left: -200%; width: 300%; height: 72%; background: linear-gradient(90deg, transparent, var(--l2) 12%, transparent 26%, var(--l1) 40%, transparent 54%, var(--l2) 68%, transparent 82%, var(--l1) 92%, transparent);
+  -webkit-mask-image: linear-gradient(0deg, #000, transparent); mask-image: linear-gradient(0deg, #000, transparent); animation: bfFlow 30s linear var(--d, 0s) infinite reverse; }
+@keyframes bfFlow { to { transform: translateX(-66.66%); } }
+.bt-whale .bf-lt { --l1: rgba(51,224,255,.55); --l2: rgba(30,110,255,.6); } .bt-opal .bf-lt { --l1: rgba(255,186,236,.52); --l2: rgba(140,236,255,.5); }
+.bt-prime .bf-lt { --l1: rgba(140,80,255,.62); --l2: rgba(255,181,71,.4); } .bt-long .bf-lt { --l1: rgba(25,227,198,.55); --l2: rgba(124,245,255,.38); }
+/* pulse: the frame breathes light inward, like a lock-on */
+.bt-snipe .bf-lt::before, .bt-dart .bf-lt::before, .bt-lockdown .bf-lt::before, .bt-chains .bf-lt::before, .bt-stocks .bf-lt::before, .bt-dimes .bf-lt::before, .bt-brick .bf-lt::before, .bt-rockfight .bf-lt::before, .bt-backdoor .bf-lt::before, .bt-doubt .bf-lt::before { inset: 0; top: 0; left: 0; width: auto; height: auto; border-radius: 9px; background: none; box-shadow: inset 0 0 34px 4px color-mix(in srgb, var(--fxk) 58%, transparent); animation: bfPulse 2.2s ease-in-out var(--d, 0s) infinite; }
+@keyframes bfPulse { 50% { opacity: .3; } }
+/* metals: a slow sheen across the face, kept faint */
+.bt-metal .bf-lt::after { inset: 0; background: linear-gradient(110deg, transparent 36%, rgba(255,255,255,.1) 46%, rgba(255,255,255,.22) 50%, rgba(255,255,255,.08) 54%, transparent 64%) 0 0 / 300% 100%; animation: bfSheen 6s ease-in-out var(--d, 0s) infinite; }
+@keyframes bfSheen { from { background-position: 120% 0; } to { background-position: -120% 0; } }
+/* hype: a light running round the edge, and everything a touch brighter */
+.bf-rg { position: absolute; inset: 0; display: none; padding: 2px; container-type: size; overflow: hidden; border-radius: 9px;
+  -webkit-mask: linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0); -webkit-mask-composite: xor; mask: linear-gradient(#000 0 0) content-box exclude, linear-gradient(#000 0 0); }
+.bf-rg::before { content: ""; position: absolute; left: 50%; top: 50%; width: 150cqmax; aspect-ratio: 1; translate: -50% -50%;
+  background: conic-gradient(from 0deg, transparent 0 60%, var(--fxk) 76%, #fff 82%, var(--fxk) 88%, transparent 96%); animation: btSpin 3s linear var(--d, 0s) infinite; }
+.bt-hype .bf-rg { display: block; }
+.bt-hype .bf-lt { --l1: color-mix(in srgb, var(--fxk) 70%, transparent); }
+.bt-hype .bf::before { box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--fxk) 40%, transparent); }
+/* the lotto's pick in plain white: the rainbow stays in its frame */
+.bt-lotto :is(.pp-pick, .ob-pick) .t, .slip.bt-lotto .sl-pick { background: none; color: #fff; -webkit-text-fill-color: #fff; }
+/* cards that aren't live or hype hold their light still */
+.bt:not(.bt-hype):not(.bt-islive) .bf-lt::before, .bt:not(.bt-hype):not(.bt-islive) .bf-lt::after { animation-play-state: paused; }
 </style>
 </head>
 <body>
@@ -8470,7 +8526,7 @@ body.tv .rb-games.primeg.mason > .rb-pcol { padding-top: 16px; -webkit-mask-imag
   const btT = (id) => "-" + ((Date.now() / 1000 + (id != null ? btHash(id) % 60 : 0)) % 120).toFixed(2) + "s";
   function fxRow(f) {
     if (!f || !f.k) return "";
-    return `<div class="fx-row"><i class="fx-glint" aria-hidden="true"></i><i class="bt-art" aria-hidden="true"${f.tn ? ` data-tn="${esc(f.tn)}" style="--nch:${f.tn.length}"` : ""}><b></b><u></u><s></s><em></em>${f.tlg ? `<img class="bt-tlg" src="${esc(f.tlg)}" alt="" loading="lazy" referrerpolicy="no-referrer" onerror="this.remove()">` : ""}</i><span class="bt-chip bt-c-${f.k}">${BT_DEF[f.k][0]} ${f.live ? '<i class="bt-lv">⚡ Live</i> ' : ""}${esc(f.name)}</span>${f.more.map((x) => `<span class="bt-mini bt-c-${x}" title="${BT_DEF[x][1]}">${BT_DEF[x][0]}</span>`).join("")}<span class="fx-pay">To win <b>${fU(f.winU)}</b></span></div>`;
+    return `<div class="fx-row"><i class="bf" aria-hidden="true"><i class="bf-lt"></i><i class="bf-rg"></i></i><span class="bt-chip bt-c-${f.k}">${BT_DEF[f.k][0]} ${f.live ? '<i class="bt-lv">⚡ Live</i> ' : ""}${esc(f.name)}</span>${f.more.map((x) => `<span class="bt-mini bt-c-${x}" title="${BT_DEF[x][1]}">${BT_DEF[x][0]}</span>`).join("")}<span class="fx-pay">To win <b>${fU(f.winU)}</b></span></div>`;
   }
   // next to a name: a badge for each kind of bet they've hit (the count when it's more than one)
   function btBadges(done, max) {
@@ -10533,7 +10589,7 @@ body.tv .rb-games.primeg.mason > .rb-pcol { padding-top: 16px; -webkit-mask-imag
   // ---------- sheets ----------
   function openSheet(id) { $(id).hidden = false; }
   // keep every open screen current: when a new version is up, reload it (never mid-form or mid-animation)
-  const BUILD = "20261020230259";
+  const BUILD = "20261020233746";
   function checkBuild() {
     if (BUILD === "dev") return;
     fetch("version.json?t=" + Date.now(), { cache: "no-store" }).then((r) => (r.ok ? r.json() : null)).then((j) => {
@@ -18232,7 +18288,7 @@ function S3build(L, info) {
   // the backdrop: a deep vignette in the accent, slowly breathing
   const bgMat = new THREE.ShaderMaterial({ depthWrite: false, uniforms: { c: { value: acc.clone() }, k: { value: 0 }, t: { value: 0 } },
     vertexShader: "varying vec2 v; void main(){ v=uv; gl_Position=projectionMatrix*modelViewMatrix*vec4(position,1.); }",
-    fragmentShader: "uniform vec3 c; uniform float k; uniform float t; varying vec2 v; void main(){ vec2 p=v-vec2(.5,.56); p.x*=1.78; float d=length(p); float g=exp(-d*d*3.)*(.011+.016*k)+exp(-d*d*14.)*(.005+.03*k); vec3 col=vec3(.0016,.0018,.0024)+c*g; gl_FragColor=vec4(col,1.); }" });
+    fragmentShader: "uniform vec3 c; uniform float k; uniform float t; varying vec2 v; void main(){ vec2 p=v-vec2(.5,.56); p.x*=1.78; float d=length(p); float g=exp(-d*d*3.)*(.011+.016*k)+exp(-d*d*14.)*(.005+.03*k); vec2 q=v-vec2(.5,1.18); q.x*=1.78; float a=atan(q.x,-q.y), r=length(q); float ry=pow(.5+.5*sin(a*9.+t*.22),9.)*.65+pow(.5+.5*sin(a*15.-t*.17+1.7),12.)*.45+pow(.5+.5*sin(a*5.+t*.11+.6),6.)*.3; float fall=smoothstep(2.3,.3,r)*smoothstep(.05,.5,r); vec3 col=vec3(.0016,.0018,.0024)+c*g+c*ry*fall*(.0042+.009*k)+vec3(ry*fall*.0012); gl_FragColor=vec4(col,1.); }" });
   const bg = new THREE.Mesh(new THREE.PlaneGeometry(90, 52), bgMat); bg.position.z = -30; scene.add(bg);
   scene.add(new THREE.HemisphereLight(0xbfd4ff, 0x0b0a08, 0.35));
   const key = new THREE.DirectionalLight(0xffffff, 1.6); key.position.set(4, 6, 8); scene.add(key);
@@ -18275,19 +18331,28 @@ function S3num(st, size, mat) {
   };
   return { grp, set };
 }
-// sparks: a burst from a point, falling, additive
+// sparks: a burst from a point, falling, additive. Each one a streak along its flight (a hot trail, not a dot)
+function streakTex(L) {
+  return canvasTex(L, 128, 16, (x, w, h) => { const g = x.createLinearGradient(0, 0, w, 0); g.addColorStop(0, "rgba(255,255,255,0)"); g.addColorStop(0.7, "rgba(255,255,255,.55)"); g.addColorStop(1, "rgba(255,255,255,1)");
+    x.fillStyle = g; x.fillRect(0, 0, w, h); x.globalCompositeOperation = "destination-in"; const v = x.createLinearGradient(0, 0, 0, h); v.addColorStop(0, "rgba(0,0,0,0)"); v.addColorStop(0.5, "rgba(0,0,0,1)"); v.addColorStop(1, "rgba(0,0,0,0)"); x.fillStyle = v; x.fillRect(0, 0, w, h); }, "streak");
+}
 function S3sparks(st, n, colr, size) {
-  const { THREE } = st, pos = new Float32Array(n * 3), vel = new Float32Array(n * 3), life = new Float32Array(n), cols = new Float32Array(n * 3);
-  const g = new THREE.BufferGeometry(); g.setAttribute("position", new THREE.BufferAttribute(pos, 3)); g.setAttribute("color", new THREE.BufferAttribute(cols, 3));
-  const m = new THREE.PointsMaterial({ size: size || 0.16, map: spriteTex(st.L), vertexColors: true, transparent: true, blending: THREE.AdditiveBlending, depthWrite: false });
-  const pts = S3add(st, new THREE.Points(g, m)); pts.frustumCulled = false;
-  let used = 0; for (let i = 0; i < n; i++) { pos[i * 3 + 1] = -999; life[i] = 0; }
+  const { THREE } = st, pos = new Float32Array(n * 3), vel = new Float32Array(n * 3), life = new Float32Array(n), l0 = new Float32Array(n), base = new Float32Array(n * 3);
+  const mesh = S3add(st, new THREE.InstancedMesh(new THREE.PlaneGeometry(1, 1), new THREE.MeshBasicMaterial({ map: streakTex(st.L), transparent: true, blending: THREE.AdditiveBlending, depthWrite: false, side: THREE.DoubleSide, toneMapped: false }), n));
+  mesh.frustumCulled = false; const W = (size || 0.16) * 0.42, M = new THREE.Matrix4(), Q = new THREE.Quaternion(), V = new THREE.Vector3(), Sc = new THREE.Vector3(), Z = new THREE.Vector3(0, 0, 1), C = new THREE.Color();
+  for (let i = 0; i < n; i++) { life[i] = 0; mesh.setColorAt(i, C.setRGB(0, 0, 0)); M.makeScale(0, 0, 0); mesh.setMatrixAt(i, M); }
+  let used = 0, awake = 0;
   const burst = (x, y, z, k, sp, c2) => { const c = new THREE.Color(c2 || colr); for (let q = 0; q < k; q++) { const i = used++ % n, a = Math.random() * Math.PI * 2, e = (Math.random() - 0.5) * Math.PI, v = sp * (0.35 + Math.random() * 0.75);
-    pos[i * 3] = x; pos[i * 3 + 1] = y; pos[i * 3 + 2] = z; vel[i * 3] = Math.cos(a) * Math.cos(e) * v; vel[i * 3 + 1] = Math.sin(e) * v + sp * 0.25; vel[i * 3 + 2] = Math.sin(a) * Math.cos(e) * v * 0.6; life[i] = 0.8 + Math.random() * 0.9;
-    const w = Math.random() < 0.3 ? 1 : 0; cols[i * 3] = w ? 1 : c.r; cols[i * 3 + 1] = w ? 1 : c.g; cols[i * 3 + 2] = w ? 1 : c.b; } };
-  st.tick.push((t, dt) => { for (let i = 0; i < n; i++) { if (life[i] <= 0) continue; life[i] -= dt; if (life[i] <= 0) { pos[i * 3 + 1] = -999; continue; }
-    vel[i * 3 + 1] -= 6 * dt; const d = Math.pow(0.35, dt); vel[i * 3] *= d; vel[i * 3 + 1] *= d; vel[i * 3 + 2] *= d; pos[i * 3] += vel[i * 3] * dt; pos[i * 3 + 1] += vel[i * 3 + 1] * dt; pos[i * 3 + 2] += vel[i * 3 + 2] * dt; }
-    g.attributes.position.needsUpdate = true; g.attributes.color.needsUpdate = true; });
+    pos[i * 3] = x; pos[i * 3 + 1] = y; pos[i * 3 + 2] = z; vel[i * 3] = Math.cos(a) * Math.cos(e) * v; vel[i * 3 + 1] = Math.sin(e) * v + sp * 0.25; vel[i * 3 + 2] = Math.sin(a) * Math.cos(e) * v * 0.6; if (z < -0.3) vel[i * 3 + 2] = -Math.abs(vel[i * 3 + 2]); life[i] = l0[i] = 0.6 + Math.random() * 0.8;
+    const w = Math.random() < 0.3 ? 1 : 0; base[i * 3] = w ? 1 : c.r; base[i * 3 + 1] = w ? 1 : c.g; base[i * 3 + 2] = w ? 1 : c.b; } awake = 2; };
+  st.tick.push((t, dt) => { if (!awake) return; let any = false;
+    for (let i = 0; i < n; i++) { if (life[i] <= 0) continue; life[i] -= dt;
+      if (life[i] <= 0) { M.makeScale(0, 0, 0); mesh.setMatrixAt(i, M); continue; } any = true;
+      vel[i * 3 + 1] -= 6 * dt; const d = Math.pow(0.35, dt); vel[i * 3] *= d; vel[i * 3 + 1] *= d; vel[i * 3 + 2] *= d; pos[i * 3] += vel[i * 3] * dt; pos[i * 3 + 1] += vel[i * 3 + 1] * dt; pos[i * 3 + 2] += vel[i * 3 + 2] * dt;
+      const vx = vel[i * 3], vy = vel[i * 3 + 1], spd = Math.hypot(vx, vy) || 1, f = life[i] / l0[i], len = Math.min(1.1, 0.05 + spd * 0.075) * (0.4 + 0.6 * f);
+      Q.setFromAxisAngle(Z, Math.atan2(vy, vx)); V.set(pos[i * 3] - (vx / spd) * len * 0.5, pos[i * 3 + 1] - (vy / spd) * len * 0.5, pos[i * 3 + 2]); Sc.set(len, W * (0.5 + 0.5 * f), 1);
+      M.compose(V, Q, Sc); mesh.setMatrixAt(i, M); const g = Math.min(1, f * 1.6) * 1.4; mesh.setColorAt(i, C.setRGB(base[i * 3] * g, base[i * 3 + 1] * g, base[i * 3 + 2] * g)); }
+    mesh.instanceMatrix.needsUpdate = true; mesh.instanceColor.needsUpdate = true; if (!any) awake--; });
   return { burst };
 }
 // metallic confetti: flakes tumbling down through the light
@@ -18495,7 +18560,7 @@ const ACT3 = {
       tk.position.z = -6 + ez.out(q) * 6; tk.rotation.y = 1.4 * (1 - ez.back(q)) + (q >= 1 ? 0.12 * Math.sin((k - slam) * 0.7) + 0.08 : 0); tk.rotation.x = q >= 1 ? 0.05 * Math.sin((k - slam) * 0.9) : 0;
       tk.position.y = 0.55 + (q >= 1 ? 0.06 * Math.sin((k - slam) * 1.1) : 0);
       tk.userData.glint(-0.6 + seg(k, slam + 0.2, 1.1) * 2.4);
-      if (!hit && k >= slam) { hit = true; if (hp) hp.userData.swish(); S3ring(st, 0, 0.55, -0.4, 10); sp.burst(0, 0.55, 0.3, I.lvl >= 3 ? 420 : 240, 10); st.shake = I.lvl >= 4 ? 0.6 : 0.35; st.flash = 1; if (cf) { cf.dump(I.lvl >= 4 ? 200 : 120); cf.go(I.lvl >= 4 ? 40 : 18); } }
+      if (!hit && k >= slam) { hit = true; if (hp) hp.userData.swish(); S3ring(st, 0, 0.55, -0.4, 10); sp.burst(0, 0.55, -0.7, I.lvl >= 3 ? 420 : 240, 10); st.shake = I.lvl >= 4 ? 0.6 : 0.35; st.flash = 1; if (cf) { cf.dump(I.lvl >= 4 ? 200 : 120); cf.go(I.lvl >= 4 ? 40 : 18); } }
       // the number
       if (k >= slam + 0.2) { num.grp.visible = true; const c = ez.out(seg(k, slam + 0.2, I.lvl >= 4 ? 1.8 : 1.2)); num.set("+" + (I.n * c).toFixed(2) + "u"); num.grp.scale.setScalar(0.6 + 0.4 * ez.back(seg(k, slam + 0.2, 0.5))); num.grp.rotation.y = Math.sin(k * 0.9) * 0.1; if (!cnt && c >= 1) { cnt = true; S3ring(st, 0, -1.95, 0, 6, 0xffffff); sp.burst(0, -1.95, 0.4, 160, 6, "#ffffff"); } }
     });
@@ -18838,6 +18903,7 @@ const SIG = {
 function S3legs(st, a) {
   const { L, THREE } = st, I = st.info, legs = (I.legs || []).slice(0, 10), N = legs.length, gap = I.legGap || 0.35, H = Math.min(0.62, 4.6 / N), sp = S3sparks(st, 600, "#3ddc97");
   const grp = new THREE.Group(); S3add(st, grp); grp.position.set(1.4, 0, 0);
+  const glT = canvasTex(L, 256, 8, (x, w, h) => { const g = x.createLinearGradient(0, 0, w, 0); g.addColorStop(0, "rgba(255,255,255,0)"); g.addColorStop(0.5, "rgba(200,255,230,.55)"); g.addColorStop(1, "rgba(255,255,255,0)"); x.fillStyle = g; x.fillRect(0, 0, w, h); }, "s3glint");
   const bars = legs.map((lg, i) => {
     const tex = canvasTex(L, 1400, 150, (x, w, h) => { x.fillStyle = "#0e1014"; x.fillRect(0, 0, w, h); x.fillStyle = "rgba(255,255,255,.05)"; x.fillRect(0, 0, w, 2);
       x.textBaseline = "middle"; x.font = "900 60px Inter, sans-serif"; x.fillStyle = "rgba(255,255,255,.32)"; x.fillText(String(i + 1), 40, h / 2 + 2);
@@ -18850,8 +18916,9 @@ function S3legs(st, a) {
     const ckT = canvasTex(L, 128, 128, (x, w, h) => { x.fillStyle = "#3ddc97"; x.beginPath(); x.arc(64, 64, 62, 0, 7); x.fill(); x.strokeStyle = "#06120c"; x.lineWidth = 15; x.lineCap = x.lineJoin = "round"; x.beginPath(); x.moveTo(34, 66); x.lineTo(56, 88); x.lineTo(96, 42); x.stroke(); }, "s3chk");
     const chk = new THREE.Mesh(new THREE.PlaneGeometry(H * 0.6, H * 0.6), new THREE.MeshBasicMaterial({ map: ckT, transparent: true, opacity: 0, toneMapped: false })); chk.position.set(2.75, 0, 0.06); g.add(chk);
     const edge = new THREE.Mesh(new THREE.PlaneGeometry(0.06, H * 0.8), new THREE.MeshBasicMaterial({ color: 0x3ddc97, transparent: true, opacity: 0 })); edge.position.set(-3.18, 0, 0.06); g.add(edge);
+    const gl = new THREE.Mesh(new THREE.PlaneGeometry(1.4, H * 0.8), new THREE.MeshBasicMaterial({ map: glT, transparent: true, blending: THREE.AdditiveBlending, depthWrite: false, opacity: 0, toneMapped: false })); gl.position.z = 0.058; g.add(gl);
     g.position.set(0, (N / 2 - i - 0.5) * H, 0); grp.add(g);
-    return { g, chk, edge, y: g.position.y, done: false };
+    return { g, chk, edge, gl, y: g.position.y, done: false };
   });
   // the chain on the left, link after link
   const links = [], linkM = new THREE.MeshStandardMaterial({ color: 0x9aa3ad, metalness: 1, roughness: 0.32, envMapIntensity: 0.35 });
@@ -18860,10 +18927,10 @@ function S3legs(st, a) {
   let all = false;
   st.tick.push((t) => { const k = t - a.t;
     bars.forEach((b, i) => { const t1 = 0.7 + i * gap, q = seg(k, t1 - 0.3, 0.3); b.g.position.x = (1 - ez.out(q)) * 9; b.g.rotation.y = (1 - ez.out(q)) * -0.8; b.g.visible = k > t1 - 0.32;
-      if (!b.done && k >= t1 + 0.18) { b.done = true; b.chk.material.opacity = 1; b.edge.material.opacity = 1; sp.burst(grp.position.x + 2.75, b.y, 0.3, 50, 4); st.flash = Math.max(st.flash, 0.35); S3ring(st, grp.position.x + 2.75, b.y, 0.2, 0.9, 0x3ddc97); }
-      if (b.done) b.chk.scale.setScalar(1 + Math.max(0, 1 - (k - t1 - 0.18) * 4) * 0.6); });
+      if (!b.done && k >= t1 + 0.18) { b.done = true; b.chk.material.opacity = 1; b.edge.material.opacity = 1; sp.burst(grp.position.x + 3.3, b.y, -0.8, 34, 4); st.flash = Math.max(st.flash, 0.35); S3ring(st, grp.position.x + 2.75, b.y, 0.2, 0.9, 0x3ddc97); }
+      if (b.done) { const u = k - t1 - 0.18; b.chk.scale.setScalar(1 + Math.max(0, 1 - u * 4) * 0.6); const q2 = Math.min(1, u / 0.5); b.gl.position.x = -3.2 + ez.out(q2) * 6.4; b.gl.material.opacity = q2 < 1 ? Math.sin(q2 * Math.PI) : 0; } });
     links.forEach((l, i) => { l.visible = k > 0.7 + (i + 1) * gap; });
-    if (!all && k > 0.9 + N * gap) { all = true; st.flash = 1; st.shake = 0.5; S3ring(st, grp.position.x, 0, 0.3, 9, 0x3ddc97); sp.burst(grp.position.x, 0, 0.5, 400, 9); }
+    if (!all && k > 0.9 + N * gap) { all = true; st.flash = 1; st.shake = 0.5; S3ring(st, grp.position.x, 0, 0.3, 9, 0x3ddc97); sp.burst(grp.position.x, 0, -1.2, 260, 9); }
     if (all) { const q = seg(k, 0.9 + N * gap, 0.8); grp.rotation.y = Math.sin(k * 0.6) * 0.12 * q; } });
 }
 
