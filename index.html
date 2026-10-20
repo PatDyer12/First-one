@@ -4307,6 +4307,15 @@ body.tv.hoops .rb-g.hero { border-color: rgba(255,190,130,.26); }
 /* the compact cards: the run, the pace, the last bucket */
 .hp-strip { display: flex; flex-wrap: wrap; gap: 6px; margin: 6px 0 2px; }
 .hp-strip .hp-chip { padding: 5px 9px; font-size: 12px; }
+
+/* ---- NBA night: the arena ---- */
+body.tv.hoops #hcourt { opacity: 1; background: #060403 url(img/court_nba.jpg?v=1) center bottom / cover no-repeat; }
+body.tv.hoops #hcourt::after { background: linear-gradient(180deg, rgba(5,4,3,.5) 0%, rgba(5,4,3,.12) 22%, rgba(5,4,3,0) 45%), radial-gradient(1400px 820px at 50% 62%, transparent 55%, rgba(5,4,3,.4) 100%); }
+#hcourt canvas { position: absolute; inset: 0; z-index: 1; width: 100%; height: 100%; }
+/* the bets read off the floor the way they do off the football field */
+body.tv.hoops .ob-bet { background-color: rgba(14,10,8,.9); }
+body.tv.hoops .ob-h2h { background: rgba(10,7,5,.6); }
+body.tv.hoops .rb-g, body.tv.hoops .rb-sec, body.tv.hoops .rb-card { background: linear-gradient(180deg, rgba(22,15,10,.97), rgba(12,8,6,.98)) !important; }
 .pp-none { padding: 16px 6px; font: 600 15px/1.3 Inter, sans-serif; color: #8d97a8; text-align: center; }
 .pp-bet { position: relative; flex: none; display: grid; gap: 6px; padding: 10px 12px 11px 13px; border-radius: 12px; background: rgba(255,255,255,.035); border: 1px solid rgba(190,210,240,.1); border-left: 5px solid rgba(190,210,240,.28); }
 .pp-bet.k-lost { opacity: .7; }
@@ -6943,15 +6952,21 @@ body.tv .rb-games.primeg.mason > .rb-pcol { padding-top: 16px; -webkit-mask-imag
     }
     return { shots, tm: tms, qs, run, final: !!(hd && hd.status && hd.status.type && hd.status.type.completed) };
   }
+  const HOOPF = new Map();
   function loadHoop() {
     if (document.visibilityState !== "visible") return;
-    const now = Date.now();
+    const now = Date.now(), fg = document.body.classList.contains("hoops") ? hoopFocus() : null;
     for (const g of hoopGames().values()) {
-      const c = HOOP.get(g.id); if (c && (c.busy || c.final || now - c.at < (g.st === "in" ? 20e3 : 120e3))) continue;
-      HOOP.set(g.id, { ...(c || {}), busy: true, at: now });
+      const c = HOOP.get(g.id) || {}, f = HOOPF.get(g.id) || {};
+      if (f.busy || c.final || now - (f.at || 0) < (g.st === "in" ? (fg && fg.id === g.id ? 10e3 : 20e3) : 120e3)) continue;
+      HOOPF.set(g.id, { busy: true, at: now });
       fetch(`https://site.api.espn.com/apis/site/v2/sports/${ESPN[g.sport]}/summary?event=${g.id}`).then((r) => r.json())
-        .then((j) => { HOOP.set(g.id, { ...hoopParse(j, g), at: Date.now(), busy: false }); render(); })
-        .catch(() => HOOP.set(g.id, { ...(c || {}), busy: false, at: Date.now() }));
+        .then((j) => {
+          HOOPF.set(g.id, { busy: false, at: Date.now() });
+          const v = { ...hoopParse(j, g), feed: hoopFeed(j) }, apply = () => { HOOP.set(g.id, { ...v, at: Date.now() }); render(); };
+          if (!c.shots || v.final) apply(); else setTimeout(apply, tvDelay() * 1000);
+        })
+        .catch(() => HOOPF.set(g.id, { busy: false, at: Date.now() }));
     }
   }
   setInterval(loadHoop, 5000);
@@ -6994,12 +7009,12 @@ body.tv .rb-games.primeg.mason > .rb-pcol { padding-top: 16px; -webkit-mask-imag
   function hoopHtml(g) {
     const d = HOOP.get(g.id); if (!d || !d.shots) { setTimeout(loadHoop, 0); return ""; }
     const A = String(g.a.id), H = String(g.h.id), ca = bright(g.a), ch = bright(g.h), lastId = d.shots.length ? d.shots[d.shots.length - 1].id : "";
-    // the away team shoots at the right-hand basket, the home team at the left (ESPN's shots are feet from the rim)
-    const pt = (x) => (x.tm === A ? [88.75 - x.y, x.x] : [5.25 + x.y, 50 - x.x]);
+    // the room's team shoots at the right-hand basket, like on the arena floor (ESPN's shots are feet from the rim)
+    const RS = hoopRight(g), pt = (x) => (x.tm === RS ? [88.75 - x.y, x.x] : [5.25 + x.y, 50 - x.x]), ends = RS === H ? [g.h, ch, g.a, ca] : [g.a, ca, g.h, ch];
     const dot = (x) => { const [cx, cy] = pt(x), c = esc(x.tm === A ? ca : ch), nw = x.id === lastId ? " new" : "";
       return x.made ? `<circle class="hp-mk${nw}" cx="${cx.toFixed(1)}" cy="${cy.toFixed(1)}" r="1.05" fill="${c}" stroke="#fff" stroke-width=".3"/>`
         : `<path class="hp-ms${nw}" d="M${(cx - 0.7).toFixed(2)} ${(cy - 0.7).toFixed(2)}l1.4 1.4m0-1.4l-1.4 1.4" stroke="${c}" stroke-width=".42" stroke-linecap="round" opacity=".85"/>`; };
-    const svg = `<svg class="hp-svg" viewBox="0 0 94 50" role="img" aria-label="Shot chart">${hoopCourt(g.h, "hpc")}${d.shots.filter((x) => !x.made).map(dot).join("")}${d.shots.filter((x) => x.made).map(dot).join("")}</svg>`;
+    const svg = `<svg class="hp-svg" viewBox="0 0 94 50" role="img" aria-label="Shot chart">${hoopCourt(hoopTeam(g) || g.h, "hpc")}${d.shots.filter((x) => !x.made).map(dot).join("")}${d.shots.filter((x) => x.made).map(dot).join("")}</svg>`;
     const ta = d.tm[A] || {}, th = d.tm[H] || {}, n = (v) => parseFloat(v) || 0;
     const bar = (lbl, a, h, fa, fh) => { const x = n(a), y = n(h), t = x + y || 1;
       return `<div class="hp-bar"><b class="num">${esc(fa ?? a)}</b><div><span>${lbl}</span><i><em style="width:${((100 * x) / t).toFixed(1)}%;background:${esc(ca)}"></em><em style="width:${((100 * y) / t).toFixed(1)}%;background:${esc(ch)}"></em></i></div><b class="num">${esc(fh ?? h)}</b></div>`; };
@@ -7012,7 +7027,7 @@ body.tv .rb-games.primeg.mason > .rb-pcol { padding-top: 16px; -webkit-mask-imag
     const row = (t, q, c) => `<tr><td><i style="--c:${esc(c)}"></i>${esc(t.ab)}</td>${Array.from({ length: nq }, (_, i) => `<td>${esc(q[i] ?? "")}</td>`).join("")}<td>${t.sc ?? ""}</td></tr>`;
     const qt = nq ? `<table class="hp-q"><tr><th></th>${Array.from({ length: nq }, (_, i) => `<th>${ql(i)}</th>`).join("")}<th>T</th></tr>${row(g.a, qa, ca)}${row(g.h, qh, ch)}</table>` : "";
     const chips = hoopChips(g, d);
-    return `<div class="rb-hoop"><div class="hp-ends"><span style="--c:${esc(ca)}">${esc(g.a.ab)} <em>shoots →</em></span><span style="--c:${esc(ch)}">${esc(g.h.ab)} <em>← shoots</em></span></div>${svg}
+    return `<div class="rb-hoop"><div class="hp-ends"><span style="--c:${esc(ends[1])}">${esc(ends[0].ab)} <em>shoots →</em></span><span style="--c:${esc(ends[3])}">${esc(ends[2].ab)} <em>← shoots</em></span></div>${svg}
       ${chips ? `<div class="hp-chips">${chips}</div>` : ""}${bars ? `<div class="hp-bars">${bars}</div>` : ""}${qt}</div>`;
   }
   // the game the room has the most riding on tonight (live first)
@@ -7026,18 +7041,310 @@ body.tv .rb-games.primeg.mason > .rb-pcol { padding-top: 16px; -webkit-mask-imag
     return best;
   }
   function hoopBg() {
-    let el = $("#hcourt");
-    if (!el) { document.body.insertAdjacentHTML("afterbegin", '<div id="hcourt" aria-hidden="true"></div>'); el = $("#hcourt"); }
-    const g = hoopFocus(), t = g ? g.h : { col: "#c8102e", alt: "", lg: "" }, key = g ? g.id : "none";
-    if (el.dataset.k === key) return;
-    el.dataset.k = key;
-    el.innerHTML = `<svg viewBox="-2 -4 98 58" preserveAspectRatio="xMidYMid slice">${hoopCourt(t, "hbg")}</svg>`;
+    if (!$("#hcourt")) document.body.insertAdjacentHTML("afterbegin", '<div id="hcourt" aria-hidden="true"><canvas id="hcPaint"></canvas><canvas id="hcLive"></canvas></div>');
+    hoopPaint();
   }
   function syncHoops() {
     const b = document.body, want = !PHONE() && !b.classList.contains("hockey") && !b.classList.contains("baseball") && ["NBA", "CBB"].includes(DIR && DIR.sport ? DIR.sport : nightSport());
     if (want !== b.classList.contains("hoops")) { b.classList.toggle("hoops", want); loadTicker(); }
     if (want) hoopBg();
   }
+
+  // the arena picture's camera: court feet (X 0-94 along, Y 0-50 across from the near sideline, Z up) -> its pixels
+  // (2560 x 1440, drawn cover / bottom); the bands of the stands and the LED ribbons in the same pixels
+  const CRT = (() => {
+    const W = 2560, H = 1440, F = 1280 / Math.tan((33 * Math.PI) / 180), C = [47, -58, 32], T = [47, 20, 0];
+    const sub = (a, b) => [a[0] - b[0], a[1] - b[1], a[2] - b[2]], nrm = (a) => { const l = Math.hypot(a[0], a[1], a[2]); return [a[0] / l, a[1] / l, a[2] / l]; };
+    const crs = (a, b) => [a[1] * b[2] - a[2] * b[1], a[2] * b[0] - a[0] * b[2], a[0] * b[1] - a[1] * b[0]], dot = (a, b) => a[0] * b[0] + a[1] * b[1] + a[2] * b[2];
+    const f = nrm(sub(T, C)), r = nrm(crs(f, [0, 0, 1])), u = crs(r, f);
+    const P = (x, y, z = 0) => { const d = sub([x, y, z], C), zc = dot(f, d); return [W / 2 + (F * dot(r, d)) / zc, H * 0.7692 - (F * dot(u, d)) / zc]; };
+    return { W, H, P, CS: [797, 851], LOW: [556, 765], UP: [380, 524], RIB: [[767, 793], [526, 552]] };
+  })();
+  // the team the room's on in the featured game (yours count triple, parlay legs half), else the home side
+  function hoopTeam(g) {
+    if (!g) return null;
+    if (rbPrime && (g.a.ab === rbPrime || g.h.ab === rbPrime)) return g.a.ab === rbPrime ? g.a : g.h;
+    const w = { a: 0, h: 0 };
+    for (const b of S.bets.values()) {
+      if (b.status !== "open") continue;
+      for (const x of selsOf(b)) {
+        const gg = gameOf(x); if (!gg || gg.id !== g.id || (x.s !== "a" && x.s !== "h") || x.m === "tot") continue;
+        w[x.s] += (isMe(b) ? 3 : 1) * (Number(b.units) || 1) * (b.kind === "parlay" ? 0.5 : 1);
+      }
+    }
+    return w.a > w.h ? g.a : g.h;
+  }
+  // that team attacks the right-hand basket (the one the board leaves showing), on the floor and in the shot chart
+  const hoopRight = (g) => String((hoopTeam(g) || g.a).id);
+  // a shot's spot on the arena floor: ESPN gives feet across (0-50) and out from the rim
+  const hoopSpot = (p, R) => (p.tm === R ? [88.75 - p.y, 50 - p.x] : [5.25 + p.y, p.x]);
+  // every shot with who took it and the score after, free throws too (from the line), for the floor
+  function hoopFeed(j) {
+    const out = [];
+    for (const p of Array.isArray(j.plays) ? j.plays : []) {
+      if (!p.shootingPlay) continue;
+      const c = p.coordinate || {}, x = Number(c.x), y = Number(c.y), t = p.text || "", ft = /free throw/i.test(((p.type && p.type.text) || "") + " " + t);
+      if (!ft && !(x >= 0 && x <= 50 && y >= 0 && y <= 94)) continue;
+      const m = /^(.+?) (makes|misses)\b/.exec(t), pa = (p.participants || [])[0], ft2 = /(\d) of (\d)/.exec(t), dist = /(\d+)-foot/.exec(t);
+      const kind = ft ? `Free throw${ft2 ? ` ${ft2[1]} of ${ft2[2]}` : ""}` : /dunk/i.test(t) ? "Dunk" : /layup/i.test(t) ? "Layup" : /three point/i.test(t) || p.pointsAttempted === 3 ? `3PT${dist ? ` · ${dist[1]} ft` : ""}` : `2PT${dist ? ` · ${dist[1]} ft` : ""}`;
+      out.push({ id: String(p.id), tm: p.team && p.team.id != null ? String(p.team.id) : "", x: ft ? 25 : x, y: ft ? 13.75 : y, made: !!p.scoringPlay, v: p.scoreValue || 0, ft,
+        nm: m ? m[1] : "", aid: m && pa && pa.athlete && pa.athlete.id ? String(pa.athlete.id) : "", kind, blk: /blocks/i.test(t), a: p.awayScore, h: p.homeScore });
+    }
+    return out.slice(-40);
+  }
+  // the screen box the arena picture is drawn into, and a court point in it
+  function hcBox() {
+    const el = $("#hcourt"); if (!el) return null;
+    const r = el.getBoundingClientRect(), Wc = Math.max(1, Math.round(r.width)), Hc = Math.max(1, Math.round(r.height)), sc = Math.max(Wc / CRT.W, Hc / CRT.H);
+    return { Wc, Hc, sc, ox: (Wc - CRT.W * sc) / 2, oy: Hc - CRT.H * sc };
+  }
+  const hcAt = (B, x, y, z) => { const p = CRT.P(x, y, z || 0); return [B.ox + p[0] * B.sc, B.oy + p[1] * B.sc]; };
+  // the floor in their colours, redrawn only when the team or the screen changes
+  let hcKey = "", hcLg = "", hcImg = null;
+  function hoopPaint() {
+    const cv = $("#hcPaint"), B = hcBox(); if (!cv || !B) return;
+    const g = hoopFocus(), t = g ? hoopTeam(g) : null;
+    if (!t) { if (hcKey) { cv.getContext("2d").clearRect(0, 0, cv.width, cv.height); hcKey = ""; } return; }
+    const lg = String(t.lg || "").replace("/500-dark/", "/500/");
+    if (lg && lg !== hcLg) { hcLg = lg; hcImg = new Image(); hcImg.onload = () => { hcKey = ""; hoopPaint(); }; hcImg.src = lg; }
+    const key = [t.ab, t.col, t.alt, B.Wc, B.Hc, hcImg && hcImg.complete && hcImg.naturalWidth ? 1 : 0, document.fonts && document.fonts.status].join("|");
+    if (key === hcKey) return;
+    hcKey = key;
+    if (cv.width !== B.Wc || cv.height !== B.Hc) { cv.width = B.Wc; cv.height = B.Hc; }
+    const x = cv.getContext("2d"); x.setTransform(1, 0, 0, 1, 0, 0); x.clearRect(0, 0, B.Wc, B.Hc);
+    const at = (X, Y, Z) => hcAt(B, X, Y, Z), col = t.col || "#1d428a", alt = t.alt && t.alt.toLowerCase() !== col.toLowerCase() ? t.alt : "#ffffff";
+    const path = (pts, close) => { pts.forEach((p, i) => (i ? x.lineTo(p[0], p[1]) : x.moveTo(p[0], p[1]))); if (close) x.closePath(); };
+    const rect = (x0, y0, x1, y1) => [at(x0, y0), at(x1, y0), at(x1, y1), at(x0, y1)];
+    const arc = (cx, cy, r, a0, a1, n) => Array.from({ length: (n || 64) + 1 }, (_, i) => { const a = a0 + ((a1 - a0) * i) / (n || 64); return at(cx + r * Math.cos(a), cy + r * Math.sin(a)); });
+    const PI = Math.PI;
+    // the apron round the lines (the floor out past it stays dark), the lanes, centre court
+    x.fillStyle = col;
+    x.globalAlpha = 0.6; x.beginPath(); path(rect(-2.4, -7, 96.4, 57), true); path(rect(0, 0, 94, 50).reverse(), true); x.fill("evenodd");
+    x.globalAlpha = 0.86; for (const [a, b] of [[0, 19], [75, 94]]) { x.beginPath(); path(rect(a, 17, b, 33), true); x.fill(); }
+    x.globalAlpha = 0.9; x.beginPath(); path(arc(47, 25, 6, 0, 2 * PI), true); x.fill();
+    // a second-colour ring inside the centre circle
+    x.globalAlpha = 0.9; x.strokeStyle = alt; x.lineWidth = Math.max(1.5, Math.hypot(...[0, 1].map((k) => at(47, 25.6)[k] - at(47, 25)[k])));
+    x.beginPath(); path(arc(47, 25, 5.45, 0, 2 * PI), true); x.stroke();
+    // the lines back over the paint, as thick as the picture's at that depth
+    x.globalAlpha = 1; x.strokeStyle = "rgba(250,248,240,.95)"; x.lineJoin = "round"; x.lineCap = "round";
+    const lw = (X, Y) => { const p = at(X, Y), q = at(X + 0.17, Y), w = at(X, Y + 0.17); return Math.max(1, (Math.hypot(q[0] - p[0], q[1] - p[1]) + Math.hypot(w[0] - p[0], w[1] - p[1])) * 0.55); };
+    const line = (pts, X, Y, close) => { x.lineWidth = lw(X, Y); x.beginPath(); path(pts, close); x.stroke(); };
+    line(rect(0, 0, 94, 50), 47, 25, true); line([at(47, 0), at(47, 50)], 47, 25);
+    line(arc(47, 25, 6, 0, 2 * PI), 47, 25, true);
+    for (const [a, b, fx, rx, sg] of [[0, 19, 19, 5.25, 1], [75, 94, 75, 88.75, -1]]) {
+      line(rect(a, 17, b, 33), fx, 25, true);
+      line(arc(rx, 25, 4, sg > 0 ? -PI / 2 : PI / 2, sg > 0 ? PI / 2 : 1.5 * PI), rx + 2 * sg, 25);
+      x.setLineDash([lw(fx, 25) * 3, lw(fx, 25) * 3]); line(arc(fx, 25, 6, sg > 0 ? PI / 2 : -PI / 2, sg > 0 ? 1.5 * PI : PI / 2, 40), fx - 3 * sg, 25); x.setLineDash([]);
+    }
+    // their logo at centre court; their name on the far apron over each half, the letters' feet to the sideline
+    const tmp = document.createElement("canvas"); tmp.width = B.Wc; tmp.height = B.Hc; const tx = tmp.getContext("2d");
+    if (hcImg && hcImg.complete && hcImg.naturalWidth) fldWarp(tx, hcImg, (u, v) => at(42.3 + 9.4 * u, 29.7 - 9.4 * v), 10);
+    const nm = String(t.nm || t.ab).toUpperCase(), tc = document.createElement("canvas"); tc.width = 1700; tc.height = 280;
+    { const c = tc.getContext("2d"); let fs = 230; c.font = `900 ${fs}px "Big Shoulders Display", Impact, sans-serif`; const w = c.measureText(nm).width; if (w > 1560) { fs = Math.floor((fs * 1560) / w); c.font = `900 ${fs}px "Big Shoulders Display", Impact, sans-serif`; }
+      c.textAlign = "center"; c.textBaseline = "middle"; c.lineJoin = "round"; c.lineWidth = Math.max(10, fs * 0.09); c.strokeStyle = alt; c.strokeText(nm, 850, 146); c.fillStyle = "#ffffff"; c.fillText(nm, 850, 146); }
+    for (const cx of [23.5, 70.5]) fldWarp(tx, tc, (u, v) => at(cx - 15 + 30 * u, 56.4 - 4.9 * v), 8);
+    x.globalAlpha = 0.94; x.drawImage(tmp, 0, 0); x.globalAlpha = 1;
+    // the baskets stand in front of the far apron: cut them back out of the paint
+    x.globalCompositeOperation = "destination-out";
+    for (const sg of [1, -1]) {
+      const X = (v) => (sg > 0 ? v : 94 - v), bx = X(4), pts = [];
+      x.beginPath(); path([at(bx, 21.8, 8.8), at(bx, 28.2, 8.8), at(bx, 28.2, 12.7), at(bx, 21.8, 12.7)], true); x.fill();
+      for (let k = 0; k < 16; k++) { const a = (k / 16) * 2 * PI; pts.push(at(X(5.25) + 0.85 * Math.cos(a), 25 + 0.85 * Math.sin(a), 10.1), at(X(5.25) + 0.55 * Math.cos(a), 25 + 0.55 * Math.sin(a), 8.1)); }
+      const xs = pts.map((p) => p[0]), ys = pts.map((p) => p[1]); x.fillRect(Math.min(...xs) - 2, Math.min(...ys) - 2, Math.max(...xs) - Math.min(...xs) + 4, Math.max(...ys) - Math.min(...ys) + 4);
+    }
+    x.globalCompositeOperation = "source-over";
+  }
+
+  // ---- the live layer: the crowd, the ribbons, the shots ----
+  const HC = { last: 0, gAt: 0, g: null, t: null, R: "", gid: "", feed: null, seen: new Set(), q: [], anim: null, boost: 0, flash: 0, flashTxt: "", flashCol: "", lastTxt: "",
+    lights: [], flashes: [], rib: null, ribKey: "", sprite: null, heads: new Map() };
+  {
+    const R = (a, b) => a + Math.random() * (b - a);
+    for (let i = 0; i < 300; i++) { const band = i % 4 === 0 ? CRT.UP : i % 9 === 0 ? CRT.CS : CRT.LOW; HC.lights.push({ x: R(0, CRT.W), y: R(band[0] + 5, band[1] - 5), r: band === CRT.UP ? R(1.1, 1.7) : R(1.5, 2.6), ph: R(0, 6.28), sp: R(0.4, 1.4), sw: R(2, 6), on: Math.random() < 0.5, t: R(2, 14) }); }
+  }
+  // one soft white dot, stamped for every light (cheaper than a gradient each)
+  function hcSprite() {
+    if (HC.sprite) return HC.sprite;
+    const c = document.createElement("canvas"); c.width = c.height = 64; const x = c.getContext("2d"), g = x.createRadialGradient(32, 32, 0, 32, 32, 32);
+    g.addColorStop(0, "rgba(255,255,255,1)"); g.addColorStop(0.3, "rgba(225,236,255,.5)"); g.addColorStop(1, "rgba(200,220,255,0)"); x.fillStyle = g; x.fillRect(0, 0, 64, 64);
+    return (HC.sprite = c);
+  }
+  // the LED ribbons: the score, the clock, the last bucket, the board, the team; flashing their colour when they score
+  function hcRibbons(B, g, t) {
+    const h = Math.max(8, Math.round(26 * B.sc)), key = [h, g ? [g.a.ab, g.a.sc, g.h.ab, g.h.sc, g.d].join() : "", t ? t.ab : "", HC.lastTxt].join("|");
+    if (key === HC.ribKey && HC.rib) return HC.rib;
+    HC.ribKey = key;
+    const items = [];
+    if (g) items.push([`${g.a.ab} ${g.a.sc ?? ""}`, bright(g.a)], [`${g.h.ab} ${g.h.sc ?? ""}`, bright(g.h)], [String(g.d || "").toUpperCase(), "#ffffff"]);
+    items.push(["SWEAT BOARD", "#ff8a3d"]);
+    if (HC.lastTxt) items.push([HC.lastTxt.toUpperCase(), "#ffffff"]);
+    if (t) items.push([String(t.fn || t.nm || t.ab).toUpperCase(), bright(t)]);
+    items.push(["NBA NIGHT", "#ffffff"]);
+    const strip = (list) => {
+      const m = document.createElement("canvas").getContext("2d"), font = `900 ${Math.round(h * 0.8)}px "Big Shoulders Display", Impact, sans-serif`; m.font = font;
+      const gap = h * 1.5, ws = list.map(([s]) => m.measureText(s).width), W = Math.max(400, Math.ceil(ws.reduce((a, b) => a + b + gap, 0)));
+      const c = document.createElement("canvas"); c.width = W; c.height = h; const x = c.getContext("2d");
+      x.fillStyle = "#03060e"; x.fillRect(0, 0, W, h); x.font = font; x.textBaseline = "middle";
+      let px = gap / 2;
+      list.forEach(([s, col], i) => { x.fillStyle = col; x.shadowColor = col; x.shadowBlur = h * 0.35; x.fillText(s, px, h * 0.54); x.shadowBlur = 0; px += ws[i] + gap;
+        x.fillStyle = "#ff8a3d"; x.beginPath(); x.arc(px - gap / 2, h / 2, h * 0.12, 0, 2 * Math.PI); x.fill(); });
+      return c;
+    };
+    return (HC.rib = [strip(items), strip([...items].reverse())]);
+  }
+  // queue what's new on the floor; the first look replays the latest shot once
+  function hcSync(g, feed, now) {
+    const away = now - (HC.syncAt || 0) > 30e3; HC.syncAt = now;
+    if (feed === HC.feed) return;
+    HC.feed = feed;
+    // a new game, or back after a while away from NBA night: start from here, the latest shot replayed once
+    if (HC.gid !== g.id || away) { HC.gid = g.id; HC.seen = new Set(feed.map((p) => p.id)); HC.q = []; HC.anim = null; const l = feed[feed.length - 1]; if (l) HC.q.push(l); return; }
+    const fresh = feed.filter((p) => !HC.seen.has(p.id)); if (!fresh.length) return;
+    fresh.forEach((p) => HC.seen.add(p.id));
+    HC.q.push(...fresh); if (HC.q.length > 5) HC.q = HC.q.slice(-5);
+  }
+  function hcHead(aid, sport) {
+    if (!aid) return null;
+    let im = HC.heads.get(aid);
+    if (!im) { im = new Image(); im.referrerPolicy = "no-referrer"; im.src = `https://a.espncdn.com/combiner/i?img=/i/headshots/${sport === "CBB" ? "mens-college-basketball" : "nba"}/players/full/${aid}.png&w=160&h=116`; HC.heads.set(aid, im); }
+    return im.complete && im.naturalWidth ? im : null;
+  }
+  const hcEase = (k) => 1 - Math.pow(1 - Math.min(1, Math.max(0, k)), 3);
+  function hcFrame(now) {
+    requestAnimationFrame(hcFrame);
+    const bd = document.body; if (!bd.classList.contains("tv") || !bd.classList.contains("hoops") || document.hidden || now - HC.last < 33) return;
+    const dt = Math.min(0.1, (now - HC.last) / 1000); HC.last = now;
+    const cv = $("#hcLive"), B = hcBox(); if (!cv || !B) return;
+    if (cv.width !== B.Wc || cv.height !== B.Hc) { cv.width = B.Wc; cv.height = B.Hc; }
+    if (now - HC.gAt > 1000) { HC.gAt = now; HC.g = hoopFocus(); HC.t = HC.g ? hoopTeam(HC.g) : null; HC.R = HC.g ? hoopRight(HC.g) : ""; }
+    const x = cv.getContext("2d"), g = HC.g, t = HC.t, sc = B.sc, at = (X, Y, Z) => hcAt(B, X, Y, Z), T = now / 1000;
+    x.setTransform(1, 0, 0, 1, 0, 0); x.clearRect(0, 0, B.Wc, B.Hc);
+    const P = (px, py) => [B.ox + px * sc, B.oy + py * sc], bst = HC.boost; HC.boost = Math.max(0, HC.boost - dt * 0.22); HC.flash = Math.max(0, HC.flash - dt);
+    const hr = new Date().getHours(), night = hr >= 17 || hr < 5;
+    // phone lights swaying in the bowl, camera flashes; everything up when the room's team scores or the room cashes
+    x.globalCompositeOperation = "lighter";
+    const sp = hcSprite();
+    for (const L of HC.lights) {
+      L.t -= dt; if (L.t <= 0) { L.on = Math.random() < (night ? 0.5 : 0.12) + bst * 0.4; L.t = 3 + Math.random() * 12; }
+      const a = Math.min(1, Math.max((L.on ? 0.5 + 0.5 * Math.sin(T * L.sp + L.ph) ** 2 : 0) * (night ? 0.9 : 0.35), bst * (0.55 + 0.45 * Math.sin(T * 9 + L.ph))));
+      if (a < 0.04) continue;
+      const [px, py] = P(L.x + Math.sin(T * L.sp * 1.7 + L.ph) * L.sw * (1 + bst * 2), L.y), r = Math.max(1.5, L.r * sc * 5);
+      x.globalAlpha = a; x.drawImage(sp, px - r, py - r, r * 2, r * 2);
+    }
+    if (Math.random() < ((night ? 1.4 : 0.3) + bst * 24) * dt) { const band = [CRT.LOW, CRT.UP, CRT.CS][Math.floor(Math.random() * 3)]; HC.flashes.push({ x: Math.random() * CRT.W, y: band[0] + Math.random() * (band[1] - band[0]), life: 0.16 }); }
+    for (let i = HC.flashes.length - 1; i >= 0; i--) { const f = HC.flashes[i]; f.life -= dt; if (f.life <= 0) { HC.flashes.splice(i, 1); continue; } const [px, py] = P(f.x, f.y), r = 30 * sc; x.globalAlpha = Math.min(1, f.life / 0.16); x.drawImage(sp, px - r, py - r, r * 2, r * 2); }
+    x.globalAlpha = 1; x.globalCompositeOperation = "source-over";
+    // the ribbons
+    const rib = hcRibbons(B, g, t);
+    CRT.RIB.forEach(([y0, y1], k) => {
+      const py = B.oy + y0 * sc, h = rib[k].height;
+      if (HC.flash > 0) {
+        const on = Math.floor(HC.flash * 6) % 2 === 0; x.fillStyle = on ? HC.flashCol : "#03060e"; x.fillRect(0, py, B.Wc, h);
+        x.font = `900 ${Math.round(h * 0.8)}px "Big Shoulders Display", Impact, sans-serif`; x.textBaseline = "middle"; x.fillStyle = on ? "#ffffff" : HC.flashCol;
+        const w = x.measureText(HC.flashTxt).width + h * 2; for (let px = -((T * 160) % w); px < B.Wc; px += w) x.fillText(HC.flashTxt, px, py + h * 0.54);
+        return;
+      }
+      const w = rib[k].width, off = ((T * (k ? -38 : 46)) % w + w) % w;
+      for (let px = -off; px < B.Wc; px += w) x.drawImage(rib[k], Math.round(px), Math.round(py));
+    });
+    if (!g) return;
+    const d = HOOP.get(g.id), feed = d && d.feed; if (!feed) return;
+    hcSync(g, feed, now);
+    const A = String(g.a.id), colOf = (p) => bright(p.tm === A ? g.a : g.h), R = HC.R;
+    const ell = (X, Y, r) => { const c = at(X, Y), a = at(X + r, Y), b = at(X, Y + r); return [c[0], c[1], Math.hypot(a[0] - c[0], a[1] - c[1]), Math.max(1, Math.hypot(b[0] - c[0], b[1] - c[1]))]; };
+    // the last shots where they were taken, fading with age; the one in the air waits to land
+    const shots = feed.filter((p) => !p.ft).slice(-16), live = HC.anim && HC.anim.p;
+    shots.forEach((p, i) => {
+      if (live && live.id === p.id) return;
+      const [X, Y] = hoopSpot(p, R), a = 0.3 + 0.7 * ((i + 1) / shots.length), c = colOf(p), newest = i === shots.length - 1;
+      if (p.made) {
+        const [cx, cy, rx, ry] = ell(X, Y, 0.95);
+        if (newest) { const k = 1 + 0.35 * Math.sin(T * 4); x.globalAlpha = 0.35; x.fillStyle = c; x.beginPath(); x.ellipse(cx, cy, rx * 2.2 * k, ry * 2.2 * k, 0, 0, 2 * Math.PI); x.fill(); }
+        x.globalAlpha = a; x.fillStyle = c; x.strokeStyle = "#fff"; x.lineWidth = Math.max(1.5, rx * 0.22);
+        x.beginPath(); x.ellipse(cx, cy, rx, ry, 0, 0, 2 * Math.PI); x.fill(); x.stroke();
+      } else {
+        const q = [at(X - 0.7, Y - 0.7), at(X + 0.7, Y + 0.7), at(X - 0.7, Y + 0.7), at(X + 0.7, Y - 0.7)], w = Math.max(2, Math.hypot(q[1][0] - q[0][0], q[1][1] - q[0][1]) * 0.2);
+        x.globalAlpha = a * 0.85; x.lineCap = "round";
+        for (const [lw, st] of [[w + 2, "rgba(0,0,0,.55)"], [w, c]]) { x.lineWidth = lw; x.strokeStyle = st; x.beginPath(); x.moveTo(...q[0]); x.lineTo(...q[1]); x.moveTo(...q[2]); x.lineTo(...q[3]); x.stroke(); }
+      }
+    });
+    x.globalAlpha = 1;
+    // the newest shot, played out: the release, the arc, the rim
+    if (!HC.anim && HC.q.length && (!HC.idle || now > HC.idle)) {
+      const p = HC.q.shift(), right = p.tm === R, rx = right ? 88.75 : 5.25, [sx, sy] = hoopSpot(p, R), dist = Math.hypot(rx - sx, 25 - sy);
+      const mine = t && p.tm === String(t.id), dur = 0.7 + dist / 42;
+      HC.anim = { p, t0: now, rx, sx, sy, dist, dur, hmax: Math.min(7, Math.max(2.5, 2 + dist * 0.2)), mine, c: colOf(p), done: false, side: right ? 1 : -1, bx: (Math.random() - 0.5) * 4 };
+    }
+    const an = HC.anim;
+    if (an) {
+      const k = (now - an.t0) / 1000, p = an.p, made = p.made, D = an.dur, ball = (bx, by, bz) => {
+        const sh = ell(bx, by, 0.6); x.globalAlpha = 0.4 * Math.max(0, 1 - bz / 30); x.fillStyle = "#000"; x.beginPath(); x.ellipse(sh[0], sh[1], sh[2] * 1.1, sh[3] * 1.1, 0, 0, 2 * Math.PI); x.fill();
+        // a touch bigger than life so it reads across the room, with a glow behind it
+        const c = at(bx, by, bz), e = at(bx + 0.6, by, bz), r = Math.max(4, Math.hypot(e[0] - c[0], e[1] - c[1]));
+        x.globalCompositeOperation = "lighter"; x.globalAlpha = 0.55; x.drawImage(hcSprite(), c[0] - r * 3, c[1] - r * 3, r * 6, r * 6); x.globalCompositeOperation = "source-over";
+        const gr = x.createRadialGradient(c[0] - r * 0.35, c[1] - r * 0.35, r * 0.1, c[0], c[1], r); gr.addColorStop(0, "#ffb26b"); gr.addColorStop(0.6, "#f2711c"); gr.addColorStop(1, "#8a3206");
+        x.globalAlpha = 1; x.fillStyle = gr; x.beginPath(); x.arc(c[0], c[1], r, 0, 2 * Math.PI); x.fill();
+        x.strokeStyle = "rgba(40,14,2,.85)"; x.lineWidth = Math.max(1, r * 0.12); x.beginPath(); x.moveTo(c[0] - r, c[1]); x.lineTo(c[0] + r, c[1]); x.moveTo(c[0], c[1] - r); x.lineTo(c[0], c[1] + r); x.stroke();
+      };
+      // the shooter's spot lights up as it goes
+      if (k < 0.9 && !p.ft) {
+        const [cx, cy, ex, ey] = ell(an.sx, an.sy, 1 + k * 2.5); x.globalAlpha = 0.9 * (1 - k / 0.9); x.strokeStyle = an.c; x.lineWidth = Math.max(2, ex * 0.12); x.beginPath(); x.ellipse(cx, cy, ex, ey, 0, 0, 2 * Math.PI); x.stroke();
+        // a beam up from the spot to where it left the hand
+        const top = at(an.sx, an.sy, 7.5), gr = x.createLinearGradient(cx, cy, top[0], top[1]); gr.addColorStop(0, an.c); gr.addColorStop(1, "rgba(255,255,255,0)");
+        x.globalAlpha = 0.75 * (1 - k / 0.9); x.strokeStyle = gr; x.lineWidth = Math.max(3, ex * 0.35); x.beginPath(); x.moveTo(cx, cy); x.lineTo(top[0], top[1]); x.stroke();
+      }
+      if (k < D) {
+        const u = k / D, bx = an.sx + (an.rx - an.sx) * u, by = an.sy + (25 - an.sy) * u, bz = 7.5 + 2.6 * u + 4 * an.hmax * u * (1 - u);
+        // the arc it's tracing
+        x.globalAlpha = 0.5; x.strokeStyle = "#fff"; x.lineWidth = Math.max(1.5, 3 * sc); x.setLineDash([4 * sc + 2, 6 * sc + 3]); x.beginPath();
+        for (let i = 0; i <= 24; i++) { const v = (u * i) / 24, q = at(an.sx + (an.rx - an.sx) * v, an.sy + (25 - an.sy) * v, 7.5 + 2.6 * v + 4 * an.hmax * v * (1 - v)); i ? x.lineTo(...q) : x.moveTo(...q); }
+        x.stroke(); x.setLineDash([]);
+        ball(bx, by, bz);
+      } else if (made) {
+        const k2 = k - D;
+        if (!an.done) { an.done = true; HC.lastTxt = `${p.v > 1 ? "+" + p.v : "+1"} ${p.nm}`; if (an.mine) { HC.boost = Math.min(1.6, HC.boost + (p.v >= 3 ? 1.1 : p.v === 2 ? 0.6 : 0.25)); if (p.v >= 2) { HC.flash = 2.2; HC.flashTxt = `${t.ab} +${p.v}`; HC.flashCol = bright(t); } } }
+        if (k2 < 0.35) ball(an.rx, 25, 10 - k2 * 11);
+        // the rim lights up
+        const rc = at(an.rx, 25, 10), re = at(an.rx + 4, 25, 10), rr = Math.hypot(re[0] - rc[0], re[1] - rc[1]) * (0.6 + hcEase(k2 / 0.5)), ga = Math.max(0, 1 - k2 / 0.9);
+        if (ga > 0) { const gr = x.createRadialGradient(rc[0], rc[1], 0, rc[0], rc[1], rr); gr.addColorStop(0, an.c); gr.addColorStop(1, "rgba(0,0,0,0)"); x.globalCompositeOperation = "lighter"; x.globalAlpha = ga; x.fillStyle = gr; x.fillRect(rc[0] - rr, rc[1] - rr, rr * 2, rr * 2); x.globalCompositeOperation = "source-over"; }
+        // "+3" next to the rim, rising and fading
+        const pa = Math.min(1, k2 / 0.15) * Math.max(0, Math.min(1, (2.4 - k2) / 0.5)), pp = at(an.rx - an.side * 8.75, 25, 8 + k2 * 1.4), fs = Math.round((p.v >= 3 ? 92 : p.v === 2 ? 74 : 56) * sc * (1 + 0.25 * (1 - hcEase(k2 / 0.35))));
+        if (pa > 0) { x.globalAlpha = pa; x.font = `900 ${fs}px "Big Shoulders Display", Impact, sans-serif`; x.textAlign = "center"; x.textBaseline = "middle"; x.lineJoin = "round"; x.lineWidth = fs * 0.14; x.strokeStyle = "rgba(0,0,0,.75)"; x.strokeText(`+${p.v || 1}`, pp[0], pp[1]); x.shadowColor = an.c; x.shadowBlur = fs * 0.4; x.fillStyle = "#fff"; x.fillText(`+${p.v || 1}`, pp[0], pp[1]); x.shadowBlur = 0; x.textAlign = "start"; }
+      } else {
+        // off the rim, down to the floor
+        const k2 = k - D, u = Math.min(1, k2 / 0.75), bx = an.rx - an.side * 6 * u, by = 25 + an.bx * u, bz = Math.max(0.4, 10 * (1 - u) + 7 * u * (1 - u));
+        x.globalAlpha = 1; if (k2 < 1.1) ball(bx, by, bz);
+      }
+      // who it was, on the floor by the basket the board leaves showing
+      const cin = Math.min(1, Math.max(0, (k - D + 0.2) / 0.3)), cout = Math.max(0, Math.min(1, (D + 3.6 - k) / 0.4)), ca = hcEase(cin) * cout;
+      if (ca > 0 && p.nm) hcCall(x, B, g, p, an.c, ca);
+      if (k > D + (made ? 4 : 2.2)) { HC.anim = null; HC.idle = now + 400; }
+    }
+    x.globalAlpha = 1;
+  }
+  const hcRR = (x, a, b, w, h, r) => (x.roundRect ? x.roundRect(a, b, w, h, r) : x.rect(a, b, w, h));
+  // the play's card on the floor: their colour, the headshot, the name, the shot, the score after
+  function hcCall(x, B, g, p, c, a) {
+    const sc = Math.max(0.6, B.sc), w = 430 * sc, h = 84 * sc, q = hcAt(B, 82, 4.5, 0), px = B.Wc - 345 * B.sc - w + (1 - a) * 40 * sc, py = q[1] - h;
+    x.save(); x.globalAlpha = a;
+    x.fillStyle = "rgba(8,6,5,.86)"; x.beginPath(); hcRR(x, px, py, w, h, 14 * sc); x.fill();
+    x.fillStyle = c; x.beginPath(); hcRR(x, px, py, 8 * sc, h, [14 * sc, 0, 0, 14 * sc]); x.fill();
+    const im = hcHead(p.aid, g.sport), hx = px + 16 * sc, hs = h - 14 * sc;
+    if (im) { x.save(); x.beginPath(); hcRR(x, hx, py + 7 * sc, hs * 1.2, hs, 10 * sc); x.clip(); x.fillStyle = "rgba(255,255,255,.08)"; x.fill(); x.drawImage(im, hx, py + 7 * sc, hs * 1.2, hs); x.restore(); }
+    const tx0 = hx + (im ? hs * 1.2 + 12 * sc : 4 * sc);
+    x.textBaseline = "alphabetic"; x.fillStyle = "#fff"; x.font = `800 ${Math.round(24 * sc)}px Inter, sans-serif`;
+    let nm = p.nm; while (nm.length > 4 && x.measureText(nm).width > px + w - tx0 - 64 * sc) nm = nm.slice(0, -2) + "…";
+    x.fillText(nm, tx0, py + 36 * sc);
+    x.fillStyle = "rgba(255,255,255,.62)"; x.font = `700 ${Math.round(15 * sc)}px "Azeret Mono", monospace`;
+    x.fillText(`${p.made ? "" : p.blk ? "BLOCKED · " : "MISS · "}${p.kind.toUpperCase()}`, tx0, py + 60 * sc);
+    if (p.a != null && p.h != null) { x.fillStyle = "rgba(255,255,255,.85)"; x.fillText(`${g.a.ab} ${p.a} · ${g.h.ab} ${p.h}`, tx0, py + 77 * sc); }
+    if (p.made) { x.textAlign = "right"; x.font = `900 ${Math.round(46 * sc)}px "Big Shoulders Display", Impact, sans-serif`; x.fillStyle = c; x.fillText(`+${p.v || 1}`, px + w - 14 * sc, py + 56 * sc); x.textAlign = "start"; }
+    x.restore();
+  }
+  requestAnimationFrame(hcFrame);
+  window.addEventListener("resize", () => { hcKey = ""; HC.ribKey = ""; try { hoopPaint(); } catch (e) {} });
+  if (document.fonts && document.fonts.ready) document.fonts.ready.then(() => { hcKey = ""; HC.ribKey = ""; try { hoopPaint(); } catch (e) {} });
+  setInterval(() => { if (document.body.classList.contains("hoops")) try { hoopPaint(); } catch (e) {} }, 5000);
   function fieldHtml(g) {
     if (!sset(g.sport, "tracker")) return "";
     if (g.sport === "NHL" && g.st !== "pre") return rinkHtml(g);
@@ -9331,6 +9638,7 @@ body.tv .rb-games.primeg.mason > .rb-pcol { padding-top: 16px; -webkit-mask-imag
   }
   function celebrate(b) {
     try { if (window.sbCrowd) window.sbCrowd.pop(); } catch (e) {}
+    try { if (document.body.classList.contains("hoops")) HC.boost = Math.min(1.6, HC.boost + 1); } catch (e) {}
     const o = outcome(b), n = netOf(b), k = rideKey(b);
     if (!isMe(b)) {
       const mates = rideMates(b), withMe = [...S.bets.values()].some((m) => isMe(m) && m.id !== b.id && rideKey(m) === k && (m.status === "open" || Date.now() - (m.settledAt || 0) < 3 * 3600e3));
@@ -9610,7 +9918,7 @@ body.tv .rb-games.primeg.mason > .rb-pcol { padding-top: 16px; -webkit-mask-imag
   // ---------- sheets ----------
   function openSheet(id) { $(id).hidden = false; }
   // keep every open screen current: when a new version is up, reload it (never mid-form or mid-animation)
-  const BUILD = "20261020174316";
+  const BUILD = "20261020192636";
   function checkBuild() {
     if (BUILD === "dev") return;
     fetch("version.json?t=" + Date.now(), { cache: "no-store" }).then((r) => (r.ok ? r.json() : null)).then((j) => {
