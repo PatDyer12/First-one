@@ -5347,6 +5347,14 @@ body.tv .rb-games.primeg.mason > .rb-pcol { padding-top: 16px; -webkit-mask-imag
 .ppx-bar u.ok { border-color: #3ddc97; background: rgba(61,220,151,.25); }
 .ppx-pc { margin-top: 6px; font: 700 12px/1 Inter, sans-serif; letter-spacing: .06em; text-transform: uppercase; color: #ffb08a; }
 .ppx-pc.ok { color: #7fe3b6; }
+
+/* ---------- out of sight, out of motion; the trend light glows on its own layer ---------- */
+body.tv .offv, body.tv .offv *, body.tv .offv::before, body.tv .offv::after, body.tv .offv *::before, body.tv .offv *::after { animation-play-state: paused !important; }
+i.tl[class*="tl-"] { animation: none; box-shadow: 0 0 0 2px rgba(0,0,0,.5); }
+i.tl[class*="tl-"]::after { content: ""; position: absolute; inset: 0; border-radius: 50%; pointer-events: none; box-shadow: 0 0 10px 2px var(--tlc), 0 0 24px 5px color-mix(in srgb, var(--tlc) 45%, transparent); animation: tlGlow 1.6s ease-in-out infinite; }
+i.tl.fin[class*="tl-"]::after { animation: none; }
+img.tl { animation: none; }
+@keyframes tlGlow { 50% { opacity: .3; } }
 </style>
 </head>
 <body>
@@ -6308,6 +6316,7 @@ body.tv .rb-games.primeg.mason > .rb-pcol { padding-top: 16px; -webkit-mask-imag
     legWatch();
     fitTV();
     renderPhone();
+    apSoon();
   }
   // the bet boards: group rides up top, then yours, then the crew's. A bet riding in a group shows once, in the ride
   function renderBets(open, everyone, start) {
@@ -6354,17 +6363,44 @@ body.tv .rb-games.primeg.mason > .rb-pcol { padding-top: 16px; -webkit-mask-imag
     if (!el || ASC.some((s) => s.el === el)) return;
     const st = { el, pos: 0, user: 0, last: performance.now(), hold: performance.now() + 4000, clone: null, period: 0, speed: speed || 30 };
     const poke = () => { st.user = performance.now(); st.pos = el.scrollTop; };
+    LOOPMO.observe(el, { childList: true, subtree: true, characterData: true, attributes: true, attributeOldValue: true });
     for (const ev of ["wheel", "touchstart", "keydown"]) el.addEventListener(ev, poke, { passive: true });
     ASC.push(st);
     return st;
   }
-  function loopDrop(all) { for (const st of ASC) { if (st.el.id === "jbBets" && !all) continue; if (st.clone) { st.clone.remove(); st.clone = null; } st.period = 0; } }
+  function loopDrop(all) { for (const st of ASC) { if (st.el.id === "jbBets" && !all) continue; if (st.clone) { st.kept = st.clone; st.clone.remove(); st.clone = null; } st.period = 0; } }
+  // what changed in a rolling column since its copy was made: anything but the copy itself going in and out, or a card
+  // pausing / resuming its animations off screen
+  const apCls = (v) => String(v || "").split(/\s+/).filter((x) => x && x !== "offv").join(" ");
+  const LOOPMO = new MutationObserver((r) => loopMark(r));
+  function loopMark(recs) {
+    for (const r of recs) {
+      if (r.type === "childList" && [...r.addedNodes, ...r.removedNodes].every((n) => n.nodeType === 1 && n.classList.contains("loopclone"))) continue;
+      if (r.type === "attributes" && r.attributeName === "class" && apCls(r.oldValue) === apCls(r.target.getAttribute && r.target.getAttribute("class"))) continue;
+      for (const st of ASC) {
+        if (st.dirty || !(st.el === r.target || st.el.contains(r.target))) continue;
+        if ((st.clone && st.clone.contains(r.target)) || (st.kept && st.kept.contains(r.target))) continue;
+        st.dirty = true;
+      }
+    }
+  }
   function loopSync(st) {
     if (!st) return;
+    loopMark(LOOPMO.takeRecords());
     const el = st.el;
-    if (st.clone) { st.clone.remove(); st.clone = null; }
+    if (st.clone) { st.kept = st.clone; st.clone.remove(); st.clone = null; }
+    const kept = st.kept, saved = st.saved; st.kept = null;
     st.period = 0;
     if (!document.body.classList.contains("tv") || !el.isConnected || el.offsetParent === null) return;
+    // nothing in it changed and it's the same size: the copy it had goes back as it was
+    const sz = el.clientWidth + "x" + el.clientHeight + "x" + el.scrollHeight;
+    if (kept && saved && !st.dirty && st.sz === sz) {
+      el.appendChild(kept); st.clone = kept; st.period = saved.period; st.stops = saved.stops;
+      if (st.period > 0) st.pos %= st.period;
+      loopMark(LOOPMO.takeRecords()); apSoon();
+      return;
+    }
+    st.dirty = false; st.sz = sz; st.saved = null;
     const kids = [...el.children].filter((k) => !k.hidden && getComputedStyle(k).display !== "none");
     if (!kids.length || el.scrollHeight <= el.clientHeight + 2) { st.pos = 0; el.scrollTop = 0; return; }
     const c = document.createElement("div");
@@ -6385,8 +6421,23 @@ body.tv .rb-games.primeg.mason > .rb-pcol { padding-top: 16px; -webkit-mask-imag
     if (el.classList.contains("pp-list")) { st.dwell = 3600; st.speed = 16; }
     if (el.classList.contains("mc") || el.classList.contains("pr")) st.speed = Math.max(el.classList.contains("mc") ? 14 : 13, Math.min(26, st.period / 420));
     if (st.period > 0) st.pos %= st.period;
+    st.saved = { period: st.period, stops: st.stops };
+    loopMark(LOOPMO.takeRecords()); st.dirty = false; apSoon();
   }
   const loopSyncEl = (el) => loopSync(ASC.find((s) => s.el === el));
+  const APIO = typeof IntersectionObserver === "function" ? new IntersectionObserver((es) => { for (const e of es) e.target.classList.toggle("offv", !e.isIntersecting); }, { rootMargin: "80px 0px" }) : null;
+  let apEls = [], apT = 0;
+  function apScan() {
+    apT = 0; if (!APIO) return;
+    apEls = apEls.filter((el) => { if (el.isConnected) return true; APIO.unobserve(el); return false; });
+    if (!document.body.classList.contains("tv")) return;
+    const seen = new Set(apEls);
+    for (const st of ASC) {
+      if (!st.el.isConnected) continue;
+      for (const el of st.el.querySelectorAll(":scope > *, :scope > .loopclone > *, .ob-bet, .pp-bet, .bet, .rb-g")) if (!seen.has(el)) { seen.add(el); apEls.push(el); APIO.observe(el); }
+    }
+  }
+  const apSoon = () => { if (!apT) apT = requestAnimationFrame(apScan); };
   const DWELL = 2600;
   function ascTick(now) {
     const on = document.body.classList.contains("tv");
@@ -7303,7 +7354,8 @@ body.tv .rb-games.primeg.mason > .rb-pcol { padding-top: 16px; -webkit-mask-imag
       fetch(`https://site.api.espn.com/apis/site/v2/sports/${ESPN[g.sport]}/summary?event=${g.id}`).then((r) => r.json())
         .then((j) => {
           HOOPF.set(g.id, { busy: false, at: Date.now() });
-          const v = { ...hoopParse(j, g), feed: hoopFeed(j), lead: hoopLead(j), pev: hoopEvents(j) }, apply = () => { HOOP.set(g.id, { ...v, at: Date.now() }); render(); try { propScan(g.id); } catch (er) {} };
+          const bx = boxGames().has(g.id) ? boxParse(j, g.sport) : null;
+          const v = { ...hoopParse(j, g), feed: hoopFeed(j), lead: hoopLead(j), pev: hoopEvents(j) }, apply = () => { HOOP.set(g.id, { ...v, at: Date.now() }); if (bx) BOX.set(g.id, { ...bx, at: Date.now(), busy: false }); render(); try { propScan(g.id); } catch (er) {} if (bx) autoSettle(); };
           if (!c.shots || v.final) apply(); else setTimeout(apply, tvDelay() * 1000);
         })
         .catch(() => HOOPF.set(g.id, { busy: false, at: Date.now() }));
@@ -8435,6 +8487,7 @@ body.tv .rb-games.primeg.mason > .rb-pcol { padding-top: 16px; -webkit-mask-imag
     const live = keys.filter((k) => tier(k) === 0);
     return (live.length > 1 ? boardShuffle(live) : live).concat(keys.filter((k) => tier(k) !== 0).sort((a, b) => tier(a) - tier(b) || (tier(a) === 3 ? gm(a).t - gm(b).t : 0)));
   }
+  let MB = null;   // the two-column board as built: its order, each block's html
   function masonBoard(parts) {
     const G = $("#rbGames"); G.classList.add("primeg", "mason");
     let A = $("#rbM1"), B = $("#rbM2");
@@ -8444,10 +8497,26 @@ body.tv .rb-games.primeg.mason > .rb-pcol { padding-top: 16px; -webkit-mask-imag
       for (let i = ASC.length - 1; i >= 0; i--) if (!ASC[i].el.isConnected) ASC.splice(i, 1);
       autoScroll(A, 14); autoScroll(B, 15);
     }
-    const by = new Map(parts), keys = masonOrder(parts.map((x) => x[0]));
-    A.innerHTML = keys.map((k) => by.get(k)).join(""); B.innerHTML = "";
+    const by = new Map(parts), keys = masonOrder(parts.map((x) => x[0])), sig = keys.join("|");
+    const frag = (k, h) => { const t = document.createElement("template"); t.innerHTML = h; for (const el of t.content.children) el.dataset.mk = k; return t.content; };
+    // the same blocks in the same order: only the ones that changed are swapped, in place
+    if (MB && MB.sig === sig && MB.A === A && A.isConnected) {
+      let chA = false, chB = false;
+      for (const k of keys) {
+        const h = by.get(k); if (h === MB.html.get(k)) continue;
+        const old = [...A.children, ...B.children].filter((el) => el.dataset.mk === k), nu = frag(k, h);
+        if (!old.length || !nu.children.length) { MB = null; break; }   // a block appearing or emptying: lay it out again
+        const col = old[0].parentNode; old[0].before(nu); old.forEach((el) => el.remove());
+        MB.html.set(k, h); if (col === A) chA = true; else chB = true;
+      }
+      if (MB) { if (chA) loopSyncEl(A); if (chB) loopSyncEl(B); return; }
+    }
+    A.innerHTML = ""; B.innerHTML = "";
+    const html = new Map();
+    for (const k of keys) { const h = by.get(k) || ""; html.set(k, h); A.append(frag(k, h)); }
     let ha = 0, hb = 0;
     for (const k of [...A.children]) { const h = k.offsetHeight + 24; if (ha <= hb) { A.appendChild(k); ha += h; } else { B.appendChild(k); hb += h; } }
+    MB = { sig, A, html };
     loopSyncEl(A); loopSyncEl(B);
   }
   const pplWant = () => document.body.classList.contains("tv") && document.body.classList.contains("nflday");
@@ -10717,7 +10786,7 @@ body.tv .rb-games.primeg.mason > .rb-pcol { padding-top: 16px; -webkit-mask-imag
   // ---------- sheets ----------
   function openSheet(id) { $(id).hidden = false; }
   // keep every open screen current: when a new version is up, reload it (never mid-form or mid-animation)
-  const BUILD = "20261021044051";
+  const BUILD = "20261021201707";
   function checkBuild() {
     if (BUILD === "dev") return;
     fetch("version.json?t=" + Date.now(), { cache: "no-store" }).then((r) => (r.ok ? r.json() : null)).then((j) => {
@@ -11474,7 +11543,7 @@ body.tv .rb-games.primeg.mason > .rb-pcol { padding-top: 16px; -webkit-mask-imag
     const c = e.competitions[0], t = {};
     for (const x of c.competitors) t[x.homeAway] = x;
     const st = e.status.type;
-    const team = (k) => { const x = t[k], tm = x.team; return { id: tm.id, rec: ((x.records || [])[0] || {}).summary || "", rk: x.curatedRank && x.curatedRank.current <= 25 ? x.curatedRank.current : 0, ab: tm.abbreviation || "", nm: tm.shortDisplayName || tm.name || "", fn: tm.displayName || "", lg: dkLg(tm.logo), col: tm.color ? "#" + tm.color : "", alt: tm.alternateColor ? "#" + tm.alternateColor : "", sc: /^\d+$/.test(String(x.score)) ? Number(x.score) : null }; };
+    const team = (k) => { const x = t[k], tm = x.team; return { id: tm.id, rec: (((x.records || [])[0] || {}).summary || "").replace(/^0-0(-0)?$/, ""), rk: x.curatedRank && x.curatedRank.current <= 25 ? x.curatedRank.current : 0, ab: tm.abbreviation || "", nm: tm.shortDisplayName || tm.name || "", fn: tm.displayName || "", lg: dkLg(tm.logo), col: tm.color ? "#" + tm.color : "", alt: tm.alternateColor ? "#" + tm.alternateColor : "", sc: /^\d+$/.test(String(x.score)) ? Number(x.score) : null }; };
     const g = { id: String(e.id), sport, t: Date.parse(e.date), st: st.state || "pre", d: st.shortDetail || "", a: team("away"), h: team("home"), pd: e.status.period || 0, clk: e.status.clock };
     g.net = ((((c.broadcasts || [])[0] || {}).names) || [])[0] || "";
     g.city = (c.venue && c.venue.address && c.venue.address.city) || ""; g.abroad = !!(c.venue && c.venue.address && c.venue.address.country && c.venue.address.country !== "USA");
@@ -14901,7 +14970,7 @@ body.tv .rb-games.primeg.mason > .rb-pcol { padding-top: 16px; -webkit-mask-imag
     if (!H || !A) return null;
     const lead = (L) => { const y = (L.leaders || [])[0] || {}, a = y.athlete || {}; return { n: L.name, v: y.displayValue || "", p: a.shortName || a.displayName || "" }; };
     const tm = (x) => { const t = x.team || {}, rk = x.curatedRank && x.curatedRank.current;
-      return { id: String(t.id), ab: t.abbreviation || "", nm: t.shortDisplayName || t.name || t.abbreviation || "", loc: t.location || t.shortDisplayName || t.abbreviation || "", lg: dkLg(t.logo), col: t.color ? "#" + t.color : "#3a3a3a", rec: ((x.records || [])[0] || {}).summary || "", rk: rk && rk <= 25 ? rk : 0, sc: x.score != null && x.score !== "" ? Number(x.score) : null, win: !!x.winner, ldr: (x.leaders || []).map(lead) }; };
+      return { id: String(t.id), ab: t.abbreviation || "", nm: t.shortDisplayName || t.name || t.abbreviation || "", loc: t.location || t.shortDisplayName || t.abbreviation || "", lg: dkLg(t.logo), col: t.color ? "#" + t.color : "#3a3a3a", rec: (((x.records || [])[0] || {}).summary || "").replace(/^0-0(-0)?$/, ""), rk: rk && rk <= 25 ? rk : 0, sc: x.score != null && x.score !== "" ? Number(x.score) : null, win: !!x.winner, ldr: (x.leaders || []).map(lead) }; };
     const st = (e.status && e.status.type) || {}, o = (c.odds || [])[0];
     const g = { id: String(e.id), lg, pre: ty === 1, t: Date.parse(e.date) || 0, st: st.state || "pre", fin: st.shortDetail || "", a: tm(A), h: tm(H), ns: !!c.neutralSite,
       tba: c.timeValid === false || e.timeValid === false, tv: ((((c.broadcasts || [])[0] || {}).names) || [])[0] || "", ser: (c.series && c.series.summary) || "", note: ((c.notes || [])[0] || {}).headline || "", ldr: (c.leaders || []).map(lead) };
@@ -15514,7 +15583,7 @@ body.tv .rb-games.primeg.mason > .rb-pcol { padding-top: 16px; -webkit-mask-imag
           hp: lp && lp.probability ? lp.probability.homeWinPercentage : null, line: det && det !== "EVEN" ? det : det === "EVEN" ? "Pick'em" : "", ou: od && od.overUnder ? od.overUnder : null, favAb: fm ? fm[1] : null, spr: fm ? Number(fm[2]) : 0 };
         // conditions: ESPN carries the forecast / current weather (the text and the icon code swap fields once a game starts)
         const wr = e.weather || null, ven = c.venue || {}, dv = wr ? String(wr.displayValue || "") : "", ci = wr ? String(wr.conditionId || "") : "";
-        g.wx = ven.indoor ? { dome: true } : wr ? { t: wr.temperature, txt: /^\d+$/.test(dv) ? ci : dv } : null;
+        g.wx = ven.indoor ? (/^(NBA|NHL|CBB|WNBA)$/.test(TK.lg) ? null : { dome: true }) : wr ? { t: wr.temperature, txt: /^\d+$/.test(dv) ? ci : dv } : null;
         g.loc = ven.address && ven.address.city ? { city: ven.address.city, st: ven.address.state || "", ctry: ven.address.country || "" } : null;
         games.push(g);
         if (lg === "MLB") { try { hrScan(g, lp, "ticker"); } catch (err) {} }
