@@ -5332,6 +5332,21 @@ body.tv .rb-games.primeg.mason > .rb-pcol { padding-top: 16px; -webkit-mask-imag
 .sct-r.warn { box-shadow: inset 3px 0 0 #ffb547; } .sct-r em { font-style: normal; color: #ffcf80; font-size: 12.5px; }
 
 .pmx-note { margin-top: 6px; font: 600 12.5px/1.2 Inter, sans-serif; color: #7fe3b6; }
+
+/* ---------- pace bars: what he has (solid), where he's headed (striped), the line (the tick) ---------- */
+.meter.pmeter { overflow: visible; }
+.meter.pmeter::before { display: none; }
+.pmeter, .lg-pace { --pc: var(--loss, #ff5a6a); }
+.pmeter.pw, .lg-pace.pw { --pc: var(--win, #3ddc97); }
+:is(.pmeter, .lg-pace) > i, :is(.pmeter, .lg-pace) > b { position: absolute; top: 0; bottom: 0; left: 0; }
+:is(.pmeter, .lg-pace) > i.pb-p { width: 0; border-radius: inherit; background: repeating-linear-gradient(135deg, color-mix(in srgb, var(--pc) 55%, transparent) 0 5px, color-mix(in srgb, var(--pc) 18%, transparent) 5px 10px); box-shadow: none; transition: width .8s cubic-bezier(.2,.9,.3,1); }
+:is(.pmeter, .lg-pace) > i.pb-v { width: 0; border-radius: inherit; background: var(--pc); box-shadow: 0 0 12px color-mix(in srgb, var(--pc) 60%, transparent); transition: width .8s cubic-bezier(.2,.9,.3,1); }
+:is(.pmeter, .lg-pace) > b.pb-l { width: 2px; top: -4px; bottom: -4px; margin-left: -1px; border-radius: 1px; background: #fff; box-shadow: 0 0 6px rgba(255,255,255,.7); z-index: 1; }
+.lg-bar.lg-pace { position: relative; overflow: visible; height: 6px; }
+.ppx-bar u { position: absolute; top: -3px; bottom: -3px; width: 10px; margin-left: -5px; border-radius: 3px; border: 2px solid #ff8a5b; background: rgba(255,138,91,.25); }
+.ppx-bar u.ok { border-color: #3ddc97; background: rgba(61,220,151,.25); }
+.ppx-pc { margin-top: 6px; font: 700 12px/1 Inter, sans-serif; letter-spacing: .06em; text-transform: uppercase; color: #ffb08a; }
+.ppx-pc.ok { color: #7fe3b6; }
 </style>
 </head>
 <body>
@@ -6459,6 +6474,24 @@ body.tv .rb-games.primeg.mason > .rb-pcol { padding-top: 16px; -webkit-mask-imag
     if (g.sport === "MLB") { const half = /^top/i.test(g.d) ? 0.25 : /^mid/i.test(g.d) ? 0.5 : /^bot/i.test(g.d) ? 0.75 : /^end/i.test(g.d) ? 1 : 0.5; return Math.min(0.99, (pd - 1 + half) / 9); }
     return 0;
   }
+  const PITCH_ST = new Set(["mlb_k", "mlb_outs", "mlb_ha", "mlb_er"]);
+  function ppPace(v, l, g, st) {
+    if (!g || g.st !== "in" || !(l >= 1.5)) return null;
+    let f = gameDone(g); if (PITCH_ST.has(st)) f = Math.min(0.99, f * 1.5);
+    if (!(f > 0.02) || f >= 0.99) return null;
+    const w = Math.min(1, f / 0.6), rate = w * (v / f) + (1 - w) * l;
+    return Math.round((v + (1 - f) * rate) * 10) / 10;
+  }
+  // a pace bar's insides: the projection (striped), what he has (solid), the line (a tick)
+  function paceIn(v, proj, l, under) {
+    const p = proj == null ? v : proj, top = Math.max(l * 1.35, p, v, 1), pc = (x) => Math.max(0, Math.min(100, (x / top) * 100)).toFixed(1);
+    return { ok: under ? p <= l : p >= l, h: `<i class="pb-p" style="width:${pc(p)}%"></i><i class="pb-v" style="width:${pc(v)}%"></i><b class="pb-l" style="left:${pc(l)}%"></b>` };
+  }
+  function ppMeter(sel, ev) {
+    if (!ev || ev.v == null) return "";
+    const l = Number(sel.l ?? PP_DEF[ppStat(sel.m)] ?? 0.5), x = paceIn(ev.v, ev.proj, l, sel.s === "u");
+    return `<div class="meter pmeter ${x.ok ? "pw" : "pl"}" aria-hidden="true">${x.h}</div>`;
+  }
   // TD scorer bets: graded off the game's scoring plays (who's named first in a touchdown call is the scorer)
   const TDP = new Map();
   const foldNm = (x) => String(x || "").normalize("NFD").replace(/[\u0300-\u036f]/g, "").replace(/[łŁ]/g, "l").replace(/[øØ]/g, "o").replace(/[đĐ]/g, "d").replace(/ı/g, "i").replace(/ß/g, "ss").replace(/[æÆ]/g, "ae");
@@ -6559,17 +6592,18 @@ body.tv .rb-games.primeg.mason > .rb-pcol { padding-top: 16px; -webkit-mask-imag
     if (!d) return { m: 0, res: "P", fin: false, txt: "Getting the box score…", g };
     const row = ppRow(d, sel.p);
     if (!row && fin) return { m: 0, res: "P", fin: true, txt: "Didn't play · void", g };
-    const v = row ? (st === "pts" ? row.g + row.a : row[st] || 0) : 0, m = sel.s === "u" ? l - v : v - l, over = v > l;
-    const unit = (n) => (st === "sog" ? "SOG" : n === 1 ? w[0] : w[1]), need = Math.floor(l) + 1 - v;
+    const v = row ? (st === "pts" ? row.g + row.a : row[st] || 0) : 0, over = v > l, proj = !fin && !over ? ppPace(v, l, g, st) : null;
+    const m = proj != null ? (sel.s === "u" ? l - proj : proj - l) : sel.s === "u" ? l - v : v - l;
+    const unit = (n) => (st === "sog" ? "SOG" : n === 1 ? w[0] : w[1]), need = Math.floor(l) + 1 - v, pr = proj != null ? Math.round(proj) : null;
     let txt, done = fin;
     if (sel.s !== "u") {
       if (over) { done = true; txt = st === "g" && l === 0.5 ? (v > 1 ? `Scored ${v}` : "Scored") : `Hit · ${v} ${unit(v)}`; }
-      else txt = fin ? `Final · ${v} ${unit(v)}` : st === "g" && l === 0.5 ? "No goal yet" : `${v} ${unit(v)} · needs ${need} more`;
+      else txt = fin ? `Final · ${v} ${unit(v)}` : st === "g" && l === 0.5 ? "No goal yet" : proj != null ? (proj > l ? `${v} ${unit(v)} · on pace for ${pr}` : `${v} ${unit(v)} · pace ${pr} · needs ${need}`) : `${v} ${unit(v)} · needs ${need} more`;
     } else {
       if (over) { done = true; txt = `Over the line · ${v} ${unit(v)}`; }
-      else txt = fin ? `Final · ${v} ${unit(v)}` : `${v} ${unit(v)} · ${trimL(l - v)} to spare`;
+      else txt = fin ? `Final · ${v} ${unit(v)}` : proj != null ? (proj < l ? `${v} ${unit(v)} · pace ${pr} · under` : `${v} ${unit(v)} · pace ${pr} · over the line`) : `${v} ${unit(v)} · ${trimL(l - v)} to spare`;
     }
-    return { m, res: m > 0 ? "W" : m < 0 ? "L" : "P", fin: done, txt, g, v };
+    return { m, res: m > 0 ? "W" : m < 0 ? "L" : "P", fin: done, txt, g, v, l, proj };
   }
   const BOX = new Map();
   const bxN = (x) => { const m = String(x ?? "").match(/^(-?\d+(?:\.\d+)?)/); return m ? Number(m[1]) : 0; };
@@ -6890,7 +6924,7 @@ body.tv .rb-games.primeg.mason > .rb-pcol { padding-top: 16px; -webkit-mask-imag
       <div class="book ${bookKey(b)}" title="${BOOK[bookKey(b)]}"><img src="${BOOK_IMG[bookKey(b)]}" alt="${BOOK[bookKey(b)]}"></div>
       <div style="min-width:0"><div class="pick">${b.sel && b.sel.p && b.sel.p.hs ? `<img class="pkhs" src="${esc(b.sel.p.hs)}" alt="" loading="lazy">` : ""}${esc(b.pick)}${b.kind !== "parlay" ? ballTag(hasBall(b.sel)) : ""}</div><div class="meta">${chips}</div></div>
       <div class="odds num"><b>${b.odds == null ? "LEG" : fOdds(b.odds)}</b><span>${ride ? rideLine(ride) : fU(b.units) + " → " + fU(towin, true)}</span>${legs.length ? `<span class="prog">${hits}/${legs.length} legs</span>` : ""}</div>
-      ${ev && !ev.fin && ph === "live" ? meterHtml(b.sel, ev) : legs.length && ph !== "pre" ? legMeter(legs) : ""}
+      ${ev && !ev.fin && ph === "live" ? (isPP(b.sel.m) ? ppMeter(b.sel, ev) : meterHtml(b.sel, ev)) : legs.length && ph !== "pre" ? legMeter(legs) : ""}
       ${b.kind !== "parlay" && b.sel ? scorebug(b.sel) : ""}
       ${ride ? ridersHtml(ride) : ""}
       ${b.note ? `<div class="note-line">${esc(b.note)}</div>` : ""}${legsHtml}${actions}</article>`;
@@ -7170,7 +7204,7 @@ body.tv .rb-games.primeg.mason > .rb-pcol { padding-top: 16px; -webkit-mask-imag
   const tapAttrs = (ids, title) => ` data-ids="${esc(ids.join(","))}" data-title="${esc(title)}"`;
   function posRow(p, g) {
     const st = posState(p, g), hb = p.sel ? hasBall(p.sel) : null;
-    const meter = st.ev && !st.ev.fin && g.st === "in" && !isTd(p.sel.m) && !isPP(p.sel.m) ? meterHtml(p.sel, st.ev) : "";
+    const meter = st.ev && !st.ev.fin && g.st === "in" && !isTd(p.sel.m) ? (isPP(p.sel.m) ? ppMeter(p.sel, st.ev) : meterHtml(p.sel, st.ev)) : "";
     const avs = [...new Map(p.entries.map((e) => [personKey(e.b), e.b])).values()].map((b) => avHtml(b)).join("");
     const hs = p.sel && p.sel.p && p.sel.p.hs ? `<img class="rb-hs" src="${esc(p.sel.p.hs)}" alt="" loading="lazy" referrerpolicy="no-referrer" onerror="this.remove()">` : "";
     const nP = p.people ? p.people.size : 1, crew = nP >= 3 ? " squad" : nP === 2 ? " duo" : "";
@@ -7457,7 +7491,7 @@ body.tv .rb-games.primeg.mason > .rb-pcol { padding-top: 16px; -webkit-mask-imag
     if (cleared && b.kind !== "parlay") garbMark(b.id, g);
     const acc = (card && getComputedStyle(card).getPropertyValue("--fxk").trim()) || personCol(b), row = (BOX.get(g.id) || { names: new Map() }).names.get(normNm(x.p.nm)), tmx = String(g.a.id) === e.tm ? g.a : g.h;
     const hs = row && row.id ? `https://a.espncdn.com/combiner/i?img=/i/headshots/${g.sport === "CBB" ? "mens-college-basketball" : "nba"}/players/full/${row.id}.png&w=200&h=146` : "";
-    const word = (PP_WORDS[e.kind] || (() => "Play"))(e), plus = e.kind === "pts" ? `+${e.d}` : `+1`, unit = PP_UNIT[st] || "", pct = (v) => Math.max(0, Math.min(100, (v / Math.max(l + 1, after) ) * 100));
+    const word = (PP_WORDS[e.kind] || (() => "Play"))(e), plus = e.kind === "pts" ? `+${e.d}` : `+1`, unit = PP_UNIT[st] || "", pace = !cleared && after <= l ? ppPace(after, l, g, st) : null, pct = (v) => Math.max(0, Math.min(100, (v / Math.max(l + 1, after, pace || 0) ) * 100));
     const el = document.createElement("div");
     el.className = "ppx" + (cleared ? " clr" : "") + (card ? " on-card" : "");
     el.style.setProperty("--a", acc); el.style.setProperty("--tc", bright(tmx));
@@ -7465,7 +7499,8 @@ body.tv .rb-games.primeg.mason > .rb-pcol { padding-top: 16px; -webkit-mask-imag
       <div class="ppx-hs">${hs ? `<img src="${esc(hs)}" alt="" referrerpolicy="no-referrer" onerror="this.remove()">` : ""}<span>${esc(x.p.nm.split(/\s+/).map((w) => w[0]).join("").slice(0, 2))}</span></div>
       <div class="ppx-t"><div class="ppx-w"><b>${esc(plus)}</b><em>${esc(word)}</em></div><div class="ppx-nm">${esc(x.p.nm)}</div>
         <div class="ppx-v"><b class="num" data-a="${before}" data-b="${after}">${trim(before)}</b><i>${esc(unit)}</i><span>line ${esc(trim(l))}</span>${cleared ? "<u>Line cleared</u>" : `<small>${after > l ? "over" : esc(trimL(l - after)) + " to go"}</small>`}</div>
-        <div class="ppx-bar"><i style="--p0:${pct(before).toFixed(1)}%;--p1:${pct(after).toFixed(1)}%"></i><s style="left:${pct(l).toFixed(1)}%"></s></div>
+        <div class="ppx-bar"><i style="--p0:${pct(before).toFixed(1)}%;--p1:${pct(after).toFixed(1)}%"></i><s style="left:${pct(l).toFixed(1)}%"></s>${pace != null ? `<u class="ppx-pace${pace >= l ? " ok" : ""}" style="left:${pct(pace).toFixed(1)}%"></u>` : ""}</div>
+        ${pace != null ? `<div class="ppx-pc${pace >= l ? " ok" : ""}">On pace for ${esc(trim(Math.round(pace)))}</div>` : ""}
         <div class="ppx-who"><span class="rb-av" style="--c:${personCol(b)}">${esc(personName(b).slice(0, 1).toUpperCase())}</span>${esc(personName(b))}'s ${b.kind === "parlay" ? "parlay leg" : "over"}${F && F.k ? ` · ${esc(BT_DEF[F.k][1])}` : ""}</div></div>`;
     document.body.appendChild(el);
     const place = () => {
@@ -8230,7 +8265,7 @@ body.tv .rb-games.primeg.mason > .rb-pcol { padding-top: 16px; -webkit-mask-imag
     st = st || posState(p, g);
     const people = [...new Map(p.entries.map((e) => [personKey(e.b), e.b])).values()], n = people.length;
     const hb = p.sel && g ? hasBall(p.sel) : null;
-    const meter = st.ev && !st.ev.fin && g && g.st === "in" && p.sel && !isTd(p.sel.m) && !isPP(p.sel.m) ? meterHtml(p.sel, st.ev) : "";
+    const meter = st.ev && !st.ev.fin && g && g.st === "in" && p.sel && !isTd(p.sel.m) ? (isPP(p.sel.m) ? ppMeter(p.sel, st.ev) : meterHtml(p.sel, st.ev)) : "";
     const hs = p.sel && p.sel.p && p.sel.p.hs ? `<img class="ob-hs" src="${esc(p.sel.p.hs)}" alt="" loading="lazy" referrerpolicy="no-referrer" onerror="this.remove()">` : "";
     const names = people.map((b) => `<b style="--c:${personCol(b)}">${esc(personName(b))}</b>`).join('<i class="pl">+</i>');
     const st0 = (p.entries || []).filter((e) => e.leg == null), F = st0.length ? flexOf(st0[0].b, Math.max(...st0.map((e) => Number(e.b.units) || 0))) : null;
@@ -8283,10 +8318,10 @@ body.tv .rb-games.primeg.mason > .rb-pcol { padding-top: 16px; -webkit-mask-imag
       if (pp && ev) {
         const stt = ppStat(s.m), ln = Number(s.l ?? PP_DEF[stt] ?? 0.5), v = Number(ev.v) || 0;
         sub = ev.txt;
-        if (s.s !== "u") bar = `<span class="lg-bar"><i style="width:${Math.min(100, (v / Math.max(ln, 0.5)) * 100).toFixed(1)}%"></i></span>`;
+        if (ln >= 1.5) { const x = paceIn(v, ev.proj, ln, s.s === "u"); bar = `<span class="lg-bar lg-pace ${x.ok ? "pw" : "pl"}">${x.h}</span>`; }
       } else if (s.m === "tot" && s.l != null) {
         const pts = (g.a.sc || 0) + (g.h.sc || 0); sub = `${pts} pts${ev ? " · " + ev.txt : ""}`;
-        bar = `<span class="lg-bar"><i style="width:${Math.min(100, (pts / Number(s.l)) * 100).toFixed(1)}%"></i></span>`;
+        { const x = paceIn(pts, g.st === "in" ? ppPace(pts, Number(s.l), g, "tot") : null, Number(s.l), s.s === "u"); bar = `<span class="lg-bar lg-pace ${x.ok ? "pw" : "pl"}">${x.h}</span>`; }
       } else if (td) sub = ev ? ev.txt : "";
       else sub = `${g.a.ab} ${g.a.sc ?? ""}–${g.h.sc ?? ""} ${g.h.ab}${ev ? " · " + ev.txt : ""}`;
       if (clock) sub += " · " + clock;
@@ -10682,7 +10717,7 @@ body.tv .rb-games.primeg.mason > .rb-pcol { padding-top: 16px; -webkit-mask-imag
   // ---------- sheets ----------
   function openSheet(id) { $(id).hidden = false; }
   // keep every open screen current: when a new version is up, reload it (never mid-form or mid-animation)
-  const BUILD = "20261021025037";
+  const BUILD = "20261021044051";
   function checkBuild() {
     if (BUILD === "dev") return;
     fetch("version.json?t=" + Date.now(), { cache: "no-store" }).then((r) => (r.ok ? r.json() : null)).then((j) => {
@@ -13356,7 +13391,8 @@ body.tv .rb-games.primeg.mason > .rb-pcol { padding-top: 16px; -webkit-mask-imag
   function clipsOn() { if (PHONE()) return false; try { return localStorage.getItem("sb-clips") !== "off"; } catch (e) { return true; } }
   const clipBusy = () => fxBusy || cardBusy || !!statusSrc || !$("#jumbo").hidden;
   function swingState(b, ev, prev) {
-    const bar = BARS[(b.sel && b.sel.sp) || b.sport] || 3;
+    let bar = BARS[(b.sel && b.sel.sp) || b.sport] || 3;
+    if (b.sel && isPP(b.sel.m)) bar = Math.max(bar, Number(ev.l || 0) * 0.15);
     if (ev.m >= bar) return "W";
     if (ev.m <= -bar) return "L";
     return prev || "E"; // inside the bar: keep the last call ("E" = even, not called yet)
