@@ -5317,6 +5317,19 @@ body.tv .rb-games.primeg.mason > .rb-pcol { padding-top: 16px; -webkit-mask-imag
 .bt-garbage { --fxk: #b5c48a; --fxb: linear-gradient(135deg, #3d4733, #b5c48a 45%, #6b7a5a 70%, #3d4733); --fxbs: 300% 100%; --fxg: color-mix(in srgb, #b5c48a 30%, transparent); animation: fxFoil 10s linear var(--d, 0s) infinite; } .bt-c-garbage { --fxk: #b5c48a; }
 .bt-cardiac.bt-hype .bf-lt::before { animation-duration: .9s; }
 .bt-fade .bf::before { box-shadow: inset 0 0 0 1px rgba(255,255,255,.12); }
+
+/* ---------- the scan, on the board: what went in ---------- */
+.sct { position: fixed; left: 50%; bottom: 28px; translate: -50% 0; z-index: 9000; width: min(520px, calc(100vw - 32px)); padding: 14px 16px 12px; border-radius: 16px; background: #10141b; color: #fff;
+  box-shadow: 0 0 0 1.5px rgba(61,220,151,.55), 0 18px 50px rgba(0,0,0,.55); font: 500 14px/1.3 Inter, sans-serif; opacity: 0; transform: translateY(16px); transition: opacity .3s, transform .3s; }
+.sct.sct-in { opacity: 1; transform: none; } .sct.sct-out { opacity: 0; transform: translateY(16px); }
+.sct-h { display: flex; align-items: center; gap: 10px; margin-bottom: 8px; }
+.sct-h i { width: 24px; height: 24px; border-radius: 50%; display: grid; place-items: center; background: #3ddc97; color: #06120c; font: 900 14px/1 Inter, sans-serif; font-style: normal; }
+.sct-h b { font-weight: 800; font-size: 15px; } .sct-h small { color: rgba(255,255,255,.55); }
+.sct-h button { margin-left: auto; border: 0; border-radius: 999px; padding: 6px 12px; background: rgba(255,255,255,.1); color: #fff; font: 700 13px/1 Inter, sans-serif; cursor: pointer; }
+.sct-h #sctX { margin-left: 0; padding: 6px 9px; background: none; color: rgba(255,255,255,.6); }
+.sct-r { display: grid; gap: 2px; padding: 8px 10px; margin-top: 6px; border-radius: 10px; background: rgba(255,255,255,.05); box-shadow: inset 3px 0 0 #3ddc97; }
+.sct-r b { font-weight: 800; } .sct-r span { color: rgba(255,255,255,.7); font-size: 13px; }
+.sct-r.warn { box-shadow: inset 3px 0 0 #ffb547; } .sct-r em { font-style: normal; color: #ffcf80; font-size: 12.5px; }
 </style>
 </head>
 <body>
@@ -5465,7 +5478,7 @@ body.tv .rb-games.primeg.mason > .rb-pcol { padding-top: 16px; -webkit-mask-imag
   <form class="sheet" id="addForm" novalidate>
     <div class="sheet-head"><h3>Log a bet</h3><button type="button" class="x" data-close aria-label="Close">×</button></div>
     <label class="scan" id="scanBtn" for="scanFile"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 7V5a1 1 0 0 1 1-1h2M17 4h2a1 1 0 0 1 1 1v2M20 17v2a1 1 0 0 1-1 1h-2M7 20H5a1 1 0 0 1-1-1v-2"/><path d="M7 9h10M7 12h10M7 15h6"/></svg><span id="scanLbl">Scan a bet slip screenshot</span></label>
-    <input type="file" id="scanFile" accept="image/*" hidden>
+    <input type="file" id="scanFile" accept="image/*" multiple hidden>
     <div class="scan-note" id="scanNote" hidden></div>
     <div class="field">
       <span class="lbl">Whose bet</span>
@@ -6444,7 +6457,8 @@ body.tv .rb-games.primeg.mason > .rb-pcol { padding-top: 16px; -webkit-mask-imag
   }
   // TD scorer bets: graded off the game's scoring plays (who's named first in a touchdown call is the scorer)
   const TDP = new Map();
-  const normNm = (x) => String(x || "").toLowerCase().replace(/\b(jr|sr|ii|iii|iv)\b\.?/g, "").replace(/[^a-z]/g, "");
+  const foldNm = (x) => String(x || "").normalize("NFD").replace(/[\u0300-\u036f]/g, "").replace(/[łŁ]/g, "l").replace(/[øØ]/g, "o").replace(/[đĐ]/g, "d").replace(/ı/g, "i").replace(/ß/g, "ss").replace(/[æÆ]/g, "ae");
+  const normNm = (x) => foldNm(x).toLowerCase().replace(/\b(jr|sr|ii|iii|iv)\b\.?/g, "").replace(/[^a-z]/g, "");
   const scorerOf = (text) => { const m = String(text || "").match(/^(.+?)\s+\d+\s+(?:Yd|yd|Yds|yds|Yard|yard)/); return m ? m[1].trim() : ""; };
   // the hero baseball game's play-by-play: batted balls with where they went (ESPN's field coordinates: home plate near 125,205,
   // about 2.5 feet to a unit), and the scoring plays
@@ -6560,7 +6574,9 @@ body.tv .rb-games.primeg.mason > .rb-pcol { padding-top: 16px; -webkit-mask-imag
       const h = b("hits"), rr = b("runs"), rbi = b("RBIs");
       return { mlb_h: h, mlb_hr: b("homeRuns"), mlb_rbi: rbi, mlb_r: rr, mlb_bb: b("walks"), mlb_hrr: h + rr + rbi, mlb_k: p("strikeouts"), mlb_er: p("earnedRuns"), mlb_ha: p("hits"), mlb_outs: Number(ip[0] || 0) * 3 + Number(ip[1] || 0) }; },
     NBA: (r) => { const x = (k) => bxN(r["*." + k]), pts = x("points"), reb = x("rebounds"), ast = x("assists");
-      return { nba_pts: pts, nba_reb: reb, nba_ast: ast, nba_3pm: x("threePointFieldGoalsMade-threePointFieldGoalsAttempted"), nba_stl: x("steals"), nba_blk: x("blocks"), nba_pra: pts + reb + ast }; },
+      const stl = x("steals"), blk = x("blocks"), dbl = [pts, reb, ast, stl, blk].filter((v) => v >= 10).length;
+      return { nba_pts: pts, nba_reb: reb, nba_ast: ast, nba_3pm: x("threePointFieldGoalsMade-threePointFieldGoalsAttempted"), nba_stl: stl, nba_blk: blk, nba_pra: pts + reb + ast,
+        nba_pr: pts + reb, nba_pa: pts + ast, nba_ra: reb + ast, nba_sb: stl + blk, nba_to: x("turnovers"), nba_dd: dbl >= 2 ? 1 : 0, nba_td: dbl >= 3 ? 1 : 0 }; },
     FB: (r) => { const x = (k) => bxN(r[k]), ru = x("rushing.rushingYards"), re = x("receiving.receivingYards");
       return { fb_pyd: x("passing.passingYards"), fb_ptd: x("passing.passingTouchdowns"), fb_cmp: x("passing.completions/passingAttempts"), fb_int: x("passing.interceptions"), fb_ruyd: ru, fb_rua: x("rushing.rushingAttempts"), fb_ryd: re, fb_rec: x("receiving.receptions"), fb_rry: ru + re }; },
   };
@@ -7396,8 +7412,8 @@ body.tv .rb-games.primeg.mason > .rb-pcol { padding-top: 16px; -webkit-mask-imag
     for (const e of out) { const o = off.get(normNm(e.nm)); if (o) for (const s of Object.keys(e.tal)) e.tal[s] += o[s] || 0; }
     return out.slice(-120);
   }
-  const PROP_KIND = { nba_pts: ["pts"], nba_3pm: ["tpm"], nba_reb: ["reb"], nba_ast: ["ast"], nba_stl: ["stl"], nba_blk: ["blk"], nba_pra: ["pts", "reb", "ast"] };
-  const PROP_VAL = (st, t) => (st === "nba_pra" ? t.pts + t.reb + t.ast : t[(PROP_KIND[st] || ["pts"])[0]] || 0);
+  const PROP_KIND = { nba_pts: ["pts"], nba_3pm: ["tpm"], nba_reb: ["reb"], nba_ast: ["ast"], nba_stl: ["stl"], nba_blk: ["blk"], nba_pra: ["pts", "reb", "ast"], nba_pr: ["pts", "reb"], nba_pa: ["pts", "ast"], nba_ra: ["reb", "ast"], nba_sb: ["stl", "blk"] };
+  const PROP_VAL = (st, t) => (PROP_KIND[st] || ["pts"]).reduce((a, k) => a + (t[k] || 0), 0);
   const PP_SEEN = new Map(), PP_Q = []; let ppBusy = false;
   // new plays for a game: anyone's open over (straight or a parlay leg) on the player who just did it
   function propScan(gid) {
@@ -7430,9 +7446,9 @@ body.tv .rb-games.primeg.mason > .rb-pcol { padding-top: 16px; -webkit-mask-imag
     ppBusy = true; propShow(PP_Q.shift());
   }
   const PP_WORDS = { pts: (e) => (e.shot && e.shot.ft ? "Free throw" : e.shot && e.shot.three ? "Three" : /dunk/i.test(e.shot && e.shot.kind) ? "Dunk" : /layup/i.test(e.shot && e.shot.kind) ? "Layup" : "Bucket"), tpm: () => "Three", reb: (e) => (e.off ? "Offensive board" : "Rebound"), ast: () => "Dime", stl: () => "Steal", blk: () => "Block" };
-  const PP_UNIT = { nba_pts: "pts", nba_3pm: "threes", nba_reb: "reb", nba_ast: "ast", nba_stl: "stl", nba_blk: "blk", nba_pra: "PRA" };
+  const PP_UNIT = { nba_pts: "pts", nba_3pm: "threes", nba_reb: "reb", nba_ast: "ast", nba_stl: "stl", nba_blk: "blk", nba_pra: "PRA", nba_pr: "P+R", nba_pa: "P+A", nba_ra: "R+A", nba_sb: "stocks" };
   function propShow(h) {
-    const { b, x, st, e, g } = h, l = Number(x.l ?? PP_DEF[st] ?? 0.5), after = PROP_VAL(st, e.tal), add = st === "nba_pra" || st === "nba_pts" ? e.d : 1, before = Math.max(0, after - add);
+    const { b, x, st, e, g } = h, l = Number(x.l ?? PP_DEF[st] ?? 0.5), after = PROP_VAL(st, e.tal), add = e.kind === "pts" ? e.d : 1, before = Math.max(0, after - add);
     const cleared = before <= l && after > l, F = b.kind === "parlay" ? null : flexOf(b), card = [...document.querySelectorAll(`.ob-bet[data-ids="${b.id}"], .pp-bet[data-ids="${b.id}"]`)].find((el) => { const r = el.getBoundingClientRect(); return r.width > 200 && r.top > 60 && r.bottom < innerHeight - 40; });
     if (cleared && b.kind !== "parlay") garbMark(b.id, g);
     const acc = (card && getComputedStyle(card).getPropertyValue("--fxk").trim()) || personCol(b), row = (BOX.get(g.id) || { names: new Map() }).names.get(normNm(x.p.nm)), tmx = String(g.a.id) === e.tm ? g.a : g.h;
@@ -8425,7 +8441,7 @@ body.tv .rb-games.primeg.mason > .rb-pcol { padding-top: 16px; -webkit-mask-imag
     him: ["He's him", "Different breed"], nba: ["Count it", "Ballgame", "Buckets"],
   };
   // the stories a cashed NBA bet can tell, worked out from the game when it settles (and kept on the bet after)
-  const HIM_BY = { nba_pts: 10, nba_reb: 5, nba_ast: 5, nba_3pm: 3, nba_pra: 12, nba_stl: 2, nba_blk: 2 };
+  const HIM_BY = { nba_pts: 10, nba_reb: 5, nba_ast: 5, nba_3pm: 3, nba_pra: 12, nba_stl: 2, nba_blk: 2, nba_pr: 10, nba_pa: 10, nba_ra: 7, nba_sb: 3 };
   function hoopStory(b, status) {
     if (Array.isArray(b.story)) return b.story.filter((k) => BT_NBA.has(k));
     if ((status || b.status) !== "won" || b.kind === "parlay" || !b.sel) return [];
@@ -8527,7 +8543,7 @@ body.tv .rb-games.primeg.mason > .rb-pcol { padding-top: 16px; -webkit-mask-imag
     if (st.startsWith("nba_")) {
       if (x.s === "u") return "brick";
       if (st === "nba_pts") return Number(x.l) >= 25.5 ? "cook" : "bucket";
-      return { nba_3pm: "splash", nba_reb: "glass", nba_ast: "dimes", nba_stl: "stocks", nba_blk: "stocks", nba_pra: "stuffer" }[st] || "bucket";
+      return { nba_3pm: "splash", nba_reb: "glass", nba_ast: "dimes", nba_stl: "stocks", nba_blk: "stocks", nba_sb: "stocks", nba_pra: "stuffer", nba_pr: "stuffer", nba_pa: "stuffer", nba_ra: "stuffer", nba_dd: "stuffer", nba_td: "stuffer", nba_to: "brick" }[st] || "bucket";
     }
     if (st === "mlb_k" && x.s !== "u") return "punchout";
     if (["fb_pyd", "fb_ruyd", "fb_ryd", "fb_rry"].includes(st) && x.s !== "u") return "chains";
@@ -10662,7 +10678,7 @@ body.tv .rb-games.primeg.mason > .rb-pcol { padding-top: 16px; -webkit-mask-imag
   // ---------- sheets ----------
   function openSheet(id) { $(id).hidden = false; }
   // keep every open screen current: when a new version is up, reload it (never mid-form or mid-animation)
-  const BUILD = "20261021005354";
+  const BUILD = "20261021024359";
   function checkBuild() {
     if (BUILD === "dev") return;
     fetch("version.json?t=" + Date.now(), { cache: "no-store" }).then((r) => (r.ok ? r.json() : null)).then((j) => {
@@ -10694,17 +10710,18 @@ body.tv .rb-games.primeg.mason > .rb-pcol { padding-top: 16px; -webkit-mask-imag
     mlb_h: ["hit", "hits"], mlb_hr: ["home run", "home runs"], mlb_rbi: ["RBI", "RBIs"], mlb_r: ["run", "runs"], mlb_bb: ["walk", "walks"], mlb_hrr: ["H+R+RBI", "H+R+RBI"],
     mlb_k: ["K", "Ks"], mlb_er: ["earned run", "ER"], mlb_ha: ["hit allowed", "hits allowed"], mlb_outs: ["out", "outs"],
     nba_pts: ["point", "pts"], nba_reb: ["rebound", "reb"], nba_ast: ["assist", "ast"], nba_3pm: ["three", "threes"], nba_stl: ["steal", "steals"], nba_blk: ["block", "blocks"], nba_pra: ["PRA", "PRA"],
+    nba_pr: ["pts+reb", "pts+reb"], nba_pa: ["pts+ast", "pts+ast"], nba_ra: ["reb+ast", "reb+ast"], nba_sb: ["stl+blk", "stl+blk"], nba_to: ["turnover", "turnovers"], nba_dd: ["double-double", "double-double"], nba_td: ["triple-double", "triple-double"],
     fb_pyd: ["pass yd", "pass yds"], fb_ptd: ["pass TD", "pass TDs"], fb_cmp: ["completion", "completions"], fb_int: ["INT", "INTs"], fb_ruyd: ["rush yd", "rush yds"], fb_rua: ["carry", "carries"],
     fb_ryd: ["rec yd", "rec yds"], fb_rec: ["catch", "catches"], fb_rry: ["rush+rec yd", "rush+rec yds"] };
   const PP_DEF = { g: 0.5, a: 0.5, pts: 0.5, sog: 2.5, sv: 24.5,
     mlb_h: 0.5, mlb_hr: 0.5, mlb_rbi: 0.5, mlb_r: 0.5, mlb_bb: 0.5, mlb_hrr: 1.5, mlb_k: 5.5, mlb_er: 2.5, mlb_ha: 5.5, mlb_outs: 17.5,
-    nba_pts: 19.5, nba_reb: 6.5, nba_ast: 4.5, nba_3pm: 2.5, nba_stl: 1.5, nba_blk: 1.5, nba_pra: 29.5,
+    nba_pts: 19.5, nba_reb: 6.5, nba_ast: 4.5, nba_3pm: 2.5, nba_stl: 1.5, nba_blk: 1.5, nba_pra: 29.5, nba_pr: 24.5, nba_pa: 24.5, nba_ra: 9.5, nba_sb: 1.5, nba_to: 2.5, nba_dd: 0.5, nba_td: 0.5,
     fb_pyd: 224.5, fb_ptd: 1.5, fb_cmp: 19.5, fb_int: 0.5, fb_ruyd: 54.5, fb_rua: 14.5, fb_ryd: 49.5, fb_rec: 4.5, fb_rry: 69.5 };
   // lines read as over / under (big numbers); the rest read "2+ hits"
-  const PP_OU = new Set(["sog", "sv", "mlb_k", "mlb_ha", "mlb_outs", "nba_pts", "nba_reb", "nba_ast", "nba_pra", "fb_pyd", "fb_cmp", "fb_ruyd", "fb_rua", "fb_ryd", "fb_rec", "fb_rry"]);
+  const PP_OU = new Set(["sog", "sv", "mlb_k", "mlb_ha", "mlb_outs", "nba_pts", "nba_reb", "nba_ast", "nba_pra", "nba_pr", "nba_pa", "nba_ra", "fb_pyd", "fb_cmp", "fb_ruyd", "fb_rua", "fb_ryd", "fb_rec", "fb_rry"]);
   const FB_MK = [["pp_fb_pyd", "Passing yards"], ["pp_fb_ptd", "Passing TDs"], ["pp_fb_cmp", "Completions"], ["pp_fb_int", "Interceptions"], ["pp_fb_ruyd", "Rushing yards"], ["pp_fb_rua", "Rush attempts"], ["pp_fb_ryd", "Receiving yards"], ["pp_fb_rec", "Receptions"], ["pp_fb_rry", "Rush + rec yards"]];
   const PP_MKS = { MLB: [["pp_mlb_h", "Hits"], ["pp_mlb_hr", "Home run"], ["pp_mlb_rbi", "RBIs"], ["pp_mlb_r", "Runs"], ["pp_mlb_hrr", "Hits + runs + RBIs"], ["pp_mlb_bb", "Walks"], ["pp_mlb_k", "Pitcher strikeouts"], ["pp_mlb_outs", "Pitcher outs"], ["pp_mlb_ha", "Hits allowed"], ["pp_mlb_er", "Earned runs allowed"]],
-    NBA: [["pp_nba_pts", "Points"], ["pp_nba_reb", "Rebounds"], ["pp_nba_ast", "Assists"], ["pp_nba_3pm", "Threes made"], ["pp_nba_pra", "Pts + reb + ast"], ["pp_nba_stl", "Steals"], ["pp_nba_blk", "Blocks"]],
+    NBA: [["pp_nba_pts", "Points"], ["pp_nba_reb", "Rebounds"], ["pp_nba_ast", "Assists"], ["pp_nba_3pm", "Threes made"], ["pp_nba_pra", "Pts + reb + ast"], ["pp_nba_pr", "Pts + reb"], ["pp_nba_pa", "Pts + ast"], ["pp_nba_ra", "Reb + ast"], ["pp_nba_stl", "Steals"], ["pp_nba_blk", "Blocks"], ["pp_nba_sb", "Steals + blocks"], ["pp_nba_dd", "Double-double"], ["pp_nba_td", "Triple-double"]],
     CBB: [["pp_nba_pts", "Points"], ["pp_nba_reb", "Rebounds"], ["pp_nba_ast", "Assists"], ["pp_nba_3pm", "Threes made"], ["pp_nba_pra", "Pts + reb + ast"]],
     NFL: FB_MK, CFB: FB_MK };
   // who shows up in the player list for a market
@@ -17674,44 +17691,98 @@ body.tv .rb-games.primeg.mason > .rb-pcol { padding-top: 16px; -webkit-mask-imag
   }
 
   // ---------- scan a bet slip (Gemini via Firebase AI Logic) ----------
-  const SLIP_MODELS = ["gemini-3.5-flash-lite", "gemini-3.8-flash"];
-  const SLIP_PROMPT = "You read screenshots of sportsbook bet slips (usually FanDuel, DraftKings or Polymarket) and extract each bet on them.\nRules:\n- One entry per bet. A parlay is ONE bet with several legs; a straight bet has exactly one leg.\n- odds: the American odds of the whole bet as an integer (e.g. -110, 250). For a parlay, the parlay's total odds.\n- stake: the dollar amount wagered. to_win: the dollar payout profit shown, if any.\n- For each leg: pick = the selection as written (team or player and line); team = the team or player name only;\n  market = \"ml\" (moneyline/to win), \"spread\" (point spread, run line, puck line, alt spread), \"total\" (over/under game total, alt total), \"anytime_td\" (anytime touchdown scorer, \"to score a TD\"), \"first_td\" (first touchdown scorer of the game) or \"prop\" (anything else);\n  player = for touchdown scorer bets, the player's full name exactly as written (e.g. \"Bucky Irving\"), else null; for those bets team = the player's team if shown;\n  side = \"over\" or \"under\" for totals, else null; line = the signed number for spreads (e.g. -6.5) or the total number (e.g. 48.5), else null;\n  away and home = the two teams of the game if shown (an \"A @ B\" matchup means A is away, B is home), else null;\n  sport = NFL, CFB, NBA, CBB, MLB, NHL or OTHER, judged from the teams and market.\n- Hockey player props (NHL): market = \"prop\", player = the player's full name, stat = \"goals\", \"assists\", \"points\", \"shots_on_goal\" or \"saves\", side = \"over\" or \"under\", line = the number (\"To score a goal\" / anytime goal scorer = stat goals, side over, line 0.5; \"2+ shots\" = side over, line 1.5; \"1+ point\" = stat points, over 0.5), sport = NHL.\n- Other player props: market = \"prop\", player = the player's full name, sport = MLB, NBA, CBB, NFL or CFB, side = \"over\" or \"under\", line = the number (\"2+ hits\" = over 1.5; \"to hit a home run\" = stat home_runs, over 0.5; \"25+ points\" = over 24.5), stat = MLB: \"hits\", \"home_runs\", \"rbis\", \"runs\", \"walks\", \"hits_runs_rbis\", \"strikeouts\" (pitcher), \"earned_runs\", \"hits_allowed\", \"outs\"; NBA / college basketball: \"points\", \"rebounds\", \"assists\", \"threes\", \"steals\", \"blocks\", \"pra\" (points + rebounds + assists); NFL / college football: \"passing_yards\", \"passing_tds\", \"completions\", \"interceptions\", \"rushing_yards\", \"rushing_attempts\", \"receiving_yards\", \"receptions\", \"rush_rec_yards\".\n- book = \"FD\" for FanDuel, \"DK\" for DraftKings, \"PM\" for Polymarket (a prediction market: prices in cents like 62¢, shares, avg price, Buy / Yes / No), null if you can't tell.\n- Polymarket: price = the price paid per share in cents (e.g. 62 for 62¢; the avg price if shown), and odds = null unless American odds are printed; stake = the amount spent (cost / total); to_win = the profit if it pays (payout minus cost) when shown. The pick is the outcome bought: a team for a moneyline market like \"Bills vs. Rams\", \"Rams -3.5\" for \"Spread: Rams (-3.5)\", \"Over 54.5\" for \"O/U 54.5\"; buying \"No\" on one team of a two-team game means the other team. Take market, line and side from the market title.\n- Use null for anything not visible. Never invent numbers.";
-  const SLIP_SCHEMA = {"type": "OBJECT", "properties": {"bets": {"type": "ARRAY", "items": {"type": "OBJECT", "properties": {"book": {"type": "STRING", "enum": ["FD", "DK", "PM"], "nullable": true}, "price": {"type": "NUMBER", "nullable": true}, "kind": {"type": "STRING", "enum": ["straight", "parlay"]}, "odds": {"type": "INTEGER", "nullable": true}, "stake": {"type": "NUMBER", "nullable": true}, "to_win": {"type": "NUMBER", "nullable": true}, "legs": {"type": "ARRAY", "items": {"type": "OBJECT", "properties": {"pick": {"type": "STRING"}, "team": {"type": "STRING", "nullable": true}, "market": {"type": "STRING", "enum": ["ml", "spread", "total", "anytime_td", "first_td", "prop"]}, "player": {"type": "STRING", "nullable": true}, "stat": {"type": "STRING", "enum": ["goals", "assists", "points", "shots_on_goal", "saves", "hits", "home_runs", "rbis", "runs", "walks", "hits_runs_rbis", "strikeouts", "earned_runs", "hits_allowed", "outs", "rebounds", "threes", "steals", "blocks", "pra", "passing_yards", "passing_tds", "completions", "interceptions", "rushing_yards", "rushing_attempts", "receiving_yards", "receptions", "rush_rec_yards"], "nullable": true}, "side": {"type": "STRING", "enum": ["over", "under"], "nullable": true}, "line": {"type": "NUMBER", "nullable": true}, "odds": {"type": "INTEGER", "nullable": true}, "price": {"type": "NUMBER", "nullable": true}, "away": {"type": "STRING", "nullable": true}, "home": {"type": "STRING", "nullable": true}, "sport": {"type": "STRING", "enum": ["NFL", "CFB", "NBA", "CBB", "MLB", "NHL", "OTHER"]}}, "required": ["pick", "market", "sport"]}}}, "required": ["kind", "legs"]}}}, "required": ["bets"]};
+  const SLIP_PROMPT = "You read screenshots of sportsbook bet slips and My Bets pages (usually FanDuel, DraftKings or Polymarket) and extract every bet on them, exactly as printed.\nRules:\n- One entry per bet. A parlay (\"Parlay\", \"N Leg Parlay\", \"N Pick Parlay\", a Same Game Parlay / SGP / SGP+) is ONE bet, and every selection row under it is its own leg, in order. Count the rows: never merge two selections into one leg and never drop one. A straight bet has exactly one leg.\n- odds: the American odds of the whole bet as printed (an integer, e.g. -115, 450). If the odds were boosted (\"Profit Boost\", a struck-through price next to a new one), use the new boosted odds.\n- stake: the amount wagered (\"Wager\", \"Stake\", \"Risk\", \"Bet\"). payout: the total paid back INCLUDING the stake (\"Total Payout\", \"To Pay\", \"Payout\", \"Potential Payout\", \"Returns\"). to_win: only when the slip prints the profit (\"To Win\", \"Profit\"). Copy every dollar amount digit for digit, cents included; never work them out.\n- For each leg: pick = the selection as written (team or player and line); line_text = the exact words on the slip that hold this leg's number (e.g. \"Over 27.5\", \"To Score 30+ Points\", \"40+ Pts + Reb + Ast\", \"Rebounds O 10.5\", \"-4.5\", \"Over 221.5\"), else null; team = the team name only (for a player bet, his team if shown); odds = this leg's own odds if printed;\n  market = \"ml\" (moneyline/to win), \"spread\" (point spread, run line, puck line, alt spread), \"total\" (over/under game total, alt total), \"anytime_td\" (anytime touchdown scorer, \"to score a TD\"), \"first_td\" (first touchdown scorer of the game) or \"prop\" (any player stat);\n  player = for player bets, the player's full name exactly as written, accents kept (e.g. \"Nikola Jokić\", \"Bucky Irving\"), else null;\n  side = \"over\" or \"under\" for totals and player stats, else null; line = the signed number for spreads (e.g. -6.5), the total, or the player's stat line. Never leave line null when the leg prints a number;\n  away and home = the game's two teams if shown (\"A @ B\": A away, B home); the legs of a Same Game Parlay all take the game printed on the card;\n  sport = NFL, CFB, NBA, CBB, MLB, NHL or OTHER, judged from the teams, players and market.\n- Milestones: \"N+ <stat>\" (\"30+ Points\", \"To Score 30+ Points\", \"40+ Pts + Reb + Ast\", \"3+ Made Threes\", \"10+ Rebounds\") means side over, line N - 0.5 (30+ is 29.5, 3+ is 2.5). \"Over X\" / \"O X\" is side over, line X; \"Under X\" / \"U X\" is side under, line X.\n- Basketball (NBA / college) player stats: \"points\", \"rebounds\", \"assists\", \"threes\" (made threes, 3-pointers made, 3PM), \"steals\", \"blocks\", \"pra\" (points + rebounds + assists, PRA), \"pts_reb\" (points + rebounds), \"pts_ast\" (points + assists), \"reb_ast\" (rebounds + assists), \"stl_blk\" (steals + blocks, stocks), \"turnovers\", \"double_double\", \"triple_double\" (those two: side over, line 0.5). Read a combined stat word by word: \"Rebounds + Assists\" is reb_ast, not pra.\n- Hockey player props (NHL): market = \"prop\", player = the player's full name, stat = \"goals\", \"assists\", \"points\", \"shots_on_goal\" or \"saves\", side = \"over\" or \"under\", line = the number (\"To score a goal\" / anytime goal scorer = stat goals, side over, line 0.5; \"2+ shots\" = side over, line 1.5; \"1+ point\" = stat points, over 0.5), sport = NHL.\n- Other player props: market = \"prop\", player = the player's full name, sport = MLB, NBA, CBB, NFL or CFB, side = \"over\" or \"under\", line = the number (\"2+ hits\" = over 1.5; \"to hit a home run\" = stat home_runs, over 0.5; \"25+ points\" = over 24.5), stat = MLB: \"hits\", \"home_runs\", \"rbis\", \"runs\", \"walks\", \"hits_runs_rbis\", \"strikeouts\" (pitcher), \"earned_runs\", \"hits_allowed\", \"outs\"; NBA / college basketball: see the basketball rule below; NFL / college football: \"passing_yards\", \"passing_tds\", \"completions\", \"interceptions\", \"rushing_yards\", \"rushing_attempts\", \"receiving_yards\", \"receptions\", \"rush_rec_yards\".\n- book = \"FD\" for FanDuel, \"DK\" for DraftKings, \"PM\" for Polymarket (a prediction market: prices in cents like 62¢, shares, avg price, Buy / Yes / No), null if you can't tell.\n- Polymarket: price = the price paid per share in cents (e.g. 62 for 62¢; the avg price if shown), and odds = null unless American odds are printed; stake = the amount spent (cost / total); to_win = the profit if it pays (payout minus cost) when shown. The pick is the outcome bought: a team for a moneyline market like \"Bills vs. Rams\", \"Rams -3.5\" for \"Spread: Rams (-3.5)\", \"Over 54.5\" for \"O/U 54.5\"; buying \"No\" on one team of a two-team game means the other team. Take market, line and side from the market title.\n- Use null for anything not visible. Never invent numbers.";
+  const SLIP_SCHEMA = {"type": "OBJECT", "properties": {"bets": {"type": "ARRAY", "items": {"type": "OBJECT", "properties": {"book": {"type": "STRING", "enum": ["FD", "DK", "PM"], "nullable": true}, "price": {"type": "NUMBER", "nullable": true}, "kind": {"type": "STRING", "enum": ["straight", "parlay"]}, "odds": {"type": "INTEGER", "nullable": true}, "stake": {"type": "NUMBER", "nullable": true}, "to_win": {"type": "NUMBER", "nullable": true}, "legs": {"type": "ARRAY", "items": {"type": "OBJECT", "properties": {"pick": {"type": "STRING"}, "team": {"type": "STRING", "nullable": true}, "market": {"type": "STRING", "enum": ["ml", "spread", "total", "anytime_td", "first_td", "prop"]}, "player": {"type": "STRING", "nullable": true}, "stat": {"type": "STRING", "enum": ["goals", "assists", "points", "shots_on_goal", "saves", "hits", "home_runs", "rbis", "runs", "walks", "hits_runs_rbis", "strikeouts", "earned_runs", "hits_allowed", "outs", "rebounds", "threes", "steals", "blocks", "pra", "passing_yards", "passing_tds", "completions", "interceptions", "rushing_yards", "rushing_attempts", "receiving_yards", "receptions", "rush_rec_yards", "pts_reb", "pts_ast", "reb_ast", "stl_blk", "turnovers", "double_double", "triple_double"], "nullable": true}, "side": {"type": "STRING", "enum": ["over", "under"], "nullable": true}, "line": {"type": "NUMBER", "nullable": true}, "odds": {"type": "INTEGER", "nullable": true}, "price": {"type": "NUMBER", "nullable": true}, "away": {"type": "STRING", "nullable": true}, "home": {"type": "STRING", "nullable": true}, "sport": {"type": "STRING", "enum": ["NFL", "CFB", "NBA", "CBB", "MLB", "NHL", "OTHER"]}, "line_text": {"type": "STRING", "nullable": true}}, "required": ["pick", "market", "sport"], "propertyOrdering": ["pick", "line_text", "market", "player", "team", "stat", "side", "line", "odds", "price", "away", "home", "sport"]}}, "payout": {"type": "NUMBER", "nullable": true}}, "required": ["kind", "legs"], "propertyOrdering": ["book", "kind", "legs", "odds", "stake", "payout", "to_win", "price"]}}}, "required": ["bets"]};
   async function shrink(file) {
     const url = URL.createObjectURL(file);
     try {
       const img = await new Promise((ok, bad) => { const i = new Image(); i.onload = () => ok(i); i.onerror = bad; i.src = url; });
-      const k = Math.min(1, 1600 / Math.max(img.naturalWidth, img.naturalHeight));
+      const k = Math.min(1, 2400 / Math.max(img.naturalWidth, img.naturalHeight));
       const c = document.createElement("canvas");
       c.width = Math.round(img.naturalWidth * k); c.height = Math.round(img.naturalHeight * k);
       c.getContext("2d").drawImage(img, 0, 0, c.width, c.height);
-      return c.toDataURL("image/jpeg", 0.85).split(",")[1];
+      return c.toDataURL("image/jpeg", 0.9).split(",")[1];
     } finally { URL.revokeObjectURL(url); }
   }
-  async function readSlip(b64) {
+  // the slip's own words settle what the reader missed: a milestone is over N - 0.5, "O 10.5" is over 10.5, a combined stat
+  // is the combo (not PRA), and the payout over the wager sets the odds (a boost, a misread digit)
+  const SLIP_STAT_TXT = [[/\bpra\b|(pts|points)\s*\+\s*(reb|rebs|rebounds)\s*\+\s*(ast|asts|assists)/i, "pra"], [/(pts|points)\s*\+\s*(reb|rebs|rebounds)/i, "pts_reb"], [/(pts|points)\s*\+\s*(ast|asts|assists)/i, "pts_ast"],
+    [/(reb|rebs|rebounds)\s*\+\s*(ast|asts|assists)/i, "reb_ast"], [/(stl|steals)\s*\+\s*(blk|blocks)|\bstocks\b/i, "stl_blk"], [/double[\s-]?double/i, "double_double"], [/triple[\s-]?double/i, "triple_double"],
+    [/made threes|three[\s-]?pointers?|3[\s-]?pointers?|\b3pm\b|\bthrees\b/i, "threes"], [/\brebounds?\b/i, "rebounds"], [/\bassists?\b/i, "assists"], [/\bsteals?\b/i, "steals"], [/\bblocks?\b/i, "blocks"], [/\bturnovers?\b/i, "turnovers"], [/\bpoints?\b|\bpts\b/i, "points"]];
+  const SLIP_COMBO = new Set(["pra", "pts_reb", "pts_ast", "reb_ast", "stl_blk", "double_double", "triple_double"]);
+  function slipFix(bets) {
+    for (const b of bets || []) {
+      for (const l of b.legs || []) {
+        if (!l) continue;
+        const t = [l.line_text, l.pick].filter(Boolean).join(" · ");
+        if (l.market === "prop" && (l.sport === "NBA" || l.sport === "CBB")) {
+          const hit = SLIP_STAT_TXT.find(([re]) => re.test(t)), ts = hit && hit[1];
+          if (ts && (!l.stat || (SLIP_COMBO.has(ts) && l.stat !== ts))) l.stat = ts;
+          if (l.stat === "double_double" || l.stat === "triple_double") { l.side = l.side || "over"; if (l.line == null) l.line = 0.5; }
+        }
+        const ms = t.match(/(\d+(?:\.\d+)?)\s*\+/);
+        if (ms && l.market !== "spread" && l.market !== "ml") { const n = Number(ms[1]); if (Number.isInteger(n) && n > 0) { l.side = "over"; if (l.line == null || Math.abs(Math.abs(l.line) - n) < 0.01) l.line = n - 0.5; } }
+        const ou = t.match(/\b(over|under|o|u)\s*(\d+(?:\.\d+)?)/i);
+        if (ou && (l.market === "prop" || l.market === "total")) { if (!l.side) l.side = /^o/i.test(ou[1]) ? "over" : "under"; if (l.line == null) l.line = Number(ou[2]); }
+        if (l.market === "spread" && l.line == null) { const sm = t.match(/([+-]\d+(?:\.\d+)?)/); if (sm) l.line = Number(sm[1]); }
+        if (l.market === "total" && l.line != null) l.line = Math.abs(l.line);
+      }
+      const st = Number(b.stake) > 0 ? Number(b.stake) : null, pay = Number(b.payout) > 0 ? Number(b.payout) : null;
+      if (st && pay && pay > st) { const tw = Math.round((pay - st) * 100) / 100; if (!(Number(b.to_win) > 0) || Math.abs(Number(b.to_win) - tw) > 0.02) b.to_win = tw; }
+      if (!st && pay && b.odds && Math.abs(b.odds) >= 100) b.stake = Math.round((pay / (1 + ppu(b.odds))) * 100) / 100;
+      const tw = Number(b.to_win), sk = Number(b.stake);
+      if (sk > 0 && tw > 0 && !b.price) {
+        const r = tw / sk, am = r >= 1 ? Math.round(r * 100) : Math.round(-100 / r), dv = b.odds && Math.abs(b.odds) >= 100 ? Math.abs(ppu(b.odds) - r) / r : 1;
+        if (!b.odds || Math.abs(b.odds) < 100 || (dv > 0.03 && dv < 0.55)) b.odds = am;   // way off (a bonus bet pays profit only): the printed odds stand
+      }
+    }
+    return bets || [];
+  }
+  // holes a read left: no odds or stake, a leg with no number, a player stat it couldn't name
+  const slipGaps = (bets) => (bets || []).reduce((n, b) => n + (b.odds ? 0 : 1) + (b.stake ? 0 : 1) + (b.legs || []).filter((l) => l && ((["spread", "total", "prop"].includes(l.market) && l.line == null) || (l.market === "prop" && (!l.stat || !l.side)))).length, 0);
+  // the readers, fastest first. Each has 25 s; the next joins in after 8 s without a clean read, or straight away when one
+  // fails or comes back with holes. The first clean read wins (the rest are cancelled); otherwise the read with fewest holes
+  const SLIP_MODELS = ["gemini-3.5-flash-lite", "gemini-3-flash-preview", "gemini-3.8-flash"], SLIP_TO = 25e3, SLIP_HEDGE = 8e3, SLIP_MAX = 45e3;
+  function slipCall(model, body, ctl) {
     const cfg = readCfg();
+    return fetch(`https://firebasevertexai.googleapis.com/v1beta/projects/${cfg.projectId}/models/${model}:generateContent`, { method: "POST", headers: { "content-type": "application/json", "x-goog-api-key": cfg.apiKey }, body, signal: ctl.signal })
+      .then(async (r) => {
+        const j = await r.json().catch(() => ({}));
+        if (!r.ok) throw new Error((j.error && j.error.message) || "HTTP " + r.status);
+        const txt = ((j.candidates && j.candidates[0] && j.candidates[0].content && j.candidates[0].content.parts) || []).map((p) => p.text || "").join("");
+        return slipFix((JSON.parse(txt || "{}").bets || []).filter((x) => x && Array.isArray(x.legs) && x.legs.length));
+      });
+  }
+  function readSlip(b64) {
+    const cfg = readCfg(); if (!cfg) return Promise.reject(new Error("this screen isn't connected to the board's Firebase"));
     const body = JSON.stringify({
       contents: [{ role: "user", parts: [{ inlineData: { mimeType: "image/jpeg", data: b64 } }, { text: "Extract the bets on this slip." }] }],
       systemInstruction: { parts: [{ text: SLIP_PROMPT }] },
       generationConfig: { responseMimeType: "application/json", responseSchema: SLIP_SCHEMA, temperature: 0 },
     });
-    let last = "";
-    for (const m of SLIP_MODELS) {
-      const r = await fetch(`https://firebasevertexai.googleapis.com/v1beta/projects/${cfg.projectId}/models/${m}:generateContent`, {
-        method: "POST", headers: { "content-type": "application/json", "x-goog-api-key": cfg.apiKey }, body,
-      });
-      const j = await r.json().catch(() => ({}));
-      if (r.ok) {
-        const parts = (j.candidates && j.candidates[0] && j.candidates[0].content && j.candidates[0].content.parts) || [];
-        const txt = parts.map((p) => p.text || "").join("");
-        return JSON.parse(txt).bets || [];
-      }
-      last = (j.error && j.error.message) || "HTTP " + r.status;
-      if (r.status !== 404 && r.status !== 400) break;
-    }
-    throw new Error(last);
+    return new Promise((resolve, reject) => {
+      let best = null, empty = false, err = "", next = 0, running = 0, over = false, hedge = 0;
+      const ctls = [];
+      const end = () => { if (over) return; over = true; clearTimeout(hedge); clearTimeout(cap); ctls.forEach((c) => { try { c.abort(); } catch (e) {} }); if (best) resolve(best.bets); else if (empty) resolve([]); else reject(new Error(err || "the slip reader didn't answer")); };
+      const cap = setTimeout(end, SLIP_MAX);
+      const launch = () => {
+        if (over) return;
+        if (next >= SLIP_MODELS.length) { if (!running) end(); return; }
+        const model = SLIP_MODELS[next++], c = new AbortController(), tm = setTimeout(() => c.abort(), SLIP_TO); ctls.push(c); running++;
+        clearTimeout(hedge); hedge = setTimeout(launch, SLIP_HEDGE);
+        slipCall(model, body, c).then((bets) => {
+          if (!bets.length) { empty = true; return; }
+          const gaps = slipGaps(bets);
+          if (!best || gaps < best.gaps) best = { bets, gaps, model };
+        }, (e) => { err = e && e.name === "AbortError" ? "the slip reader took too long" : String((e && e.message) || e); })
+          .finally(() => { clearTimeout(tm); running--; if (over) return; if (best && best.gaps === 0) end(); else launch(); });
+      };
+      launch();
+    });
   }
-  const normName = (s) => String(s || "").toLowerCase().replace(/\bstate\b/g, "st").replace(/[^a-z0-9 ]/g, " ").replace(/\s+/g, " ").trim();
+  window.__slip = { read: readSlip, fix: slipFix, gaps: slipGaps };
+  const TEAM_NICK = [[/\bsixers\b/g, "76ers"], [/\b(trail )?blazers\b/g, "trail blazers"], [/\bcavs\b/g, "cavaliers"], [/\bmavs\b/g, "mavericks"], [/\b(t ?wolves|wolves)\b/g, "timberwolves"], [/\bnugs\b/g, "nuggets"], [/\bgrizz\b/g, "grizzlies"], [/\bpels\b/g, "pelicans"], [/\bdubs\b/g, "warriors"], [/\bcs\b/g, "celtics"]];
+  const normName = (s) => { let x = foldNm(s).toLowerCase().replace(/\bstate\b/g, "st").replace(/[^a-z0-9 ]/g, " ").replace(/\s+/g, " ").trim(); for (const [re, to] of TEAM_NICK) x = x.replace(re, to); return x; };
   function nameHit(slip, t) {
     if (!slip || !t) return 0;
     const s = " " + normName(slip) + " ";
@@ -17748,12 +17819,12 @@ body.tv .rb-games.primeg.mason > .rb-pcol { padding-top: 16px; -webkit-mask-imag
   // TD scorer legs: find the game (from the matchup, or by finding him on the football rosters) and the player
   const sameName = (a, b) => {
     if (normNm(a) && normNm(a) === normNm(b)) return true;
-    const w = (x) => String(x || "").toLowerCase().replace(/\b(jr|sr|ii|iii|iv)\b\.?/g, "").replace(/[^a-z\s.]/g, "").split(/[\s.]+/).filter(Boolean);
+    const w = (x) => foldNm(x).toLowerCase().replace(/\b(jr|sr|ii|iii|iv)\b\.?/g, "").replace(/[^a-z\s.]/g, "").split(/[\s.]+/).filter(Boolean);
     const x = w(a), y = w(b); return x.length > 1 && y.length > 1 && x[x.length - 1] === y[y.length - 1] && x[0][0] === y[0][0];
   };
   const PP_SLIP = { goals: "pp_g", assists: "pp_a", points: "pp_pts", shots_on_goal: "pp_sog", saves: "pp_sv",
     hits: "pp_mlb_h", home_runs: "pp_mlb_hr", rbis: "pp_mlb_rbi", runs: "pp_mlb_r", walks: "pp_mlb_bb", hits_runs_rbis: "pp_mlb_hrr", strikeouts: "pp_mlb_k", earned_runs: "pp_mlb_er", hits_allowed: "pp_mlb_ha", outs: "pp_mlb_outs",
-    rebounds: "pp_nba_reb", threes: "pp_nba_3pm", steals: "pp_nba_stl", blocks: "pp_nba_blk", pra: "pp_nba_pra",
+    rebounds: "pp_nba_reb", threes: "pp_nba_3pm", steals: "pp_nba_stl", blocks: "pp_nba_blk", pra: "pp_nba_pra", pts_reb: "pp_nba_pr", pts_ast: "pp_nba_pa", reb_ast: "pp_nba_ra", stl_blk: "pp_nba_sb", turnovers: "pp_nba_to", double_double: "pp_nba_dd", triple_double: "pp_nba_td",
     passing_yards: "pp_fb_pyd", passing_tds: "pp_fb_ptd", completions: "pp_fb_cmp", interceptions: "pp_fb_int", rushing_yards: "pp_fb_ruyd", rushing_attempts: "pp_fb_rua", receiving_yards: "pp_fb_ryd", receptions: "pp_fb_rec", rush_rec_yards: "pp_fb_rry" };
   // the slip's stat in its sport (points and assists are hockey's or basketball's depending on the sport)
   function ppSlipMk(leg) {
@@ -17766,13 +17837,13 @@ body.tv .rb-games.primeg.mason > .rb-pcol { padding-top: 16px; -webkit-mask-imag
   const ppSport = (m, leg) => (/^pp_mlb_/.test(m) ? "MLB" : /^pp_nba_/.test(m) ? (leg.sport === "CBB" ? "CBB" : "NBA") : /^pp_fb_/.test(m) ? (leg.sport === "CFB" ? "CFB" : "NFL") : "NHL");
   async function resolvePPLeg(leg) {
     const m = ppSlipMk(leg), sp = ppSport(m, leg), base = matchLeg({ ...leg, market: "ml", team: leg.team || leg.away || leg.home });
-    const games = base ? [S.games.get(base.g)] : pickable().filter((g) => g.sport === sp);
+    const pair = !base && (leg.away || leg.home) ? matchLeg({ ...leg, market: "ml", team: leg.away || leg.home }) : null;
+    const games = base ? [S.games.get(base.g)] : pair ? [S.games.get(pair.g)] : pickable().filter((g) => g.sport === sp && g.st !== "post");
     const side = leg.side === "under" ? "u" : "o", l = leg.line == null ? PP_DEF[ppStat(m)] : Math.abs(leg.line);
-    for (const g of games) {
-      if (!g) continue;
-      const rs = await Promise.all(["a", "h"].map((sd) => loadRoster(g.sport, g[sd].id)));
-      for (const r of rs) { const pl = (Array.isArray(r) ? r : []).find((x) => sameName(x.nm, leg.player)); if (pl) { leg._td = { g: g.id, m, s: side, l, o: leg.odds, sport: g.sport, p: pl }; return; } }
-    }
+    const pool = (await Promise.all(games.filter(Boolean).flatMap((g) => ["a", "h"].map((sd) => Promise.resolve(loadRoster(g.sport, g[sd].id)).catch(() => []).then((r) => (Array.isArray(r) ? r : []).map((p) => ({ p, g }))))))).flat();
+    let hit = pool.find((x) => sameName(x.p.nm, leg.player));
+    if (!hit) { const last = (n) => normNm(String(n || "").replace(/\b(jr|sr|ii|iii|iv)\b\.?/gi, "").trim().split(/\s+/).pop()), ln = last(leg.player), same = ln.length > 2 ? pool.filter((x) => last(x.p.nm) === ln) : []; if (same.length === 1) hit = same[0]; }
+    if (hit) leg._td = { g: hit.g.id, m, s: side, l, o: leg.odds, sport: hit.g.sport, p: hit.p };
   }
   async function resolveTdLegs(bets) {
     for (const pb of bets) for (const leg of pb.legs || []) {
@@ -17837,39 +17908,51 @@ body.tv .rb-games.primeg.mason > .rb-pcol { padding-top: 16px; -webkit-mask-imag
   let slipBets = [];
   function scanNote(html) { const n = $("#scanNote"); n.innerHTML = html; n.hidden = !html; }
   $("#scanFile").addEventListener("change", async (e) => {
-    const f = e.target.files && e.target.files[0]; e.target.value = "";
-    if (!f) return;
+    const files = [...((e.target.files) || [])]; e.target.value = "";
+    if (!files.length) return;
     const btn = $("#scanBtn");
     btn.classList.add("busy"); $("#scanLbl").textContent = "Reading your slip…"; scanNote(""); $("#f-err").textContent = "";
     try {
-      const [b64] = await Promise.all([shrink(f), loadPickerGames()]);
-      const bets = (await readSlip(b64)).filter((b) => b && Array.isArray(b.legs) && b.legs.length);
+      const [shots] = await Promise.all([Promise.all(files.map(shrink)), loadPickerGames()]);
+      const bets = [];
+      for (const b64 of shots) bets.push(...(await readSlip(b64)));
       // a Polymarket price in cents becomes American odds (62¢ -> -163)
       const c2o = (c) => (c > 0 && c < 100 ? pmAm(c / 100) : null);
       for (const b of bets) { if (!b.odds && c2o(b.price)) b.odds = c2o(b.price); for (const l of b.legs) if (l && !l.odds && c2o(l.price)) l.odds = c2o(l.price); if (!b.odds && b.legs.length === 1 && b.legs[0].odds) b.odds = b.legs[0].odds; if (b.price && !b.book) b.book = "PM"; }
       if (!bets.length) { scanNote("Couldn't find a bet on that image. Try a screenshot of the slip or the bet in My Bets."); return; }
-      if (bets.some((b) => b.legs.some((l) => l && (l.market === "anytime_td" || l.market === "first_td" || ppSlipMk(l))))) { $("#scanLbl").textContent = "Finding the players…"; await resolveTdLegs(bets); }
-      slipBets = bets;
-      fillFromSlip(bets[0]);
-      const missing = [];
-      if (!bets[0].odds) missing.push("odds"); if (!bets[0].stake) missing.push("stake");
-      scanNote(`<span><b>Filled in from your slip.</b> Check it, then hit Add bet.${missing.length ? " Couldn't read the " + missing.join(" or ") + "." : ""}</span>` +
-        (bets.length > 1 ? `<button type="button" class="btn sm primary" id="addAllSlip">Add all ${bets.length} bets</button>` : ""));
+      $("#scanLbl").textContent = "Finding the games…";
+      const legs = bets.flatMap((b) => b.legs.filter(Boolean));
+      const far = legs.filter((l) => !gsFound(l)); if (far.length) await gsMore(far);
+      if (legs.some(gsTdish)) await resolveTdLegs(bets);
+      const book = (document.querySelector('input[name="book"]:checked') || {}).value || "FD", who = whoFields();
+      const added = [], dupes = [];
+      for (const pb of bets) {
+        const r = gsBuild({ ...pb, book: pb.book || book }); if (!r) continue;
+        Object.assign(r.d, who); r.d.placedAt = Date.now();
+        const amt = (x) => (x.usd > 0 ? x.usd : x.units * S.unit), d = r.d;
+        const dup = [...S.bets.values()].find((x) => x.status !== "void" && Date.now() - (x.placedAt || 0) < 3 * 864e5 && ((x.slip && x.slip === d.slip) || (x.kind === d.kind && x.odds === d.odds && (x.who || "") === (d.who || "") && Math.abs(amt(x) - amt(d)) < 0.01 && x.pick === d.pick && JSON.stringify(x.legs || []) === JSON.stringify(d.legs || []))));
+        if (dup) { dupes.push(dup); continue; }
+        const id = "b" + Date.now().toString(36) + Math.random().toString(36).slice(2, 6);
+        if (await putBet(id, r.d)) added.push({ id, r });
+      }
+      if (!added.length) { scanNote(dupes.length ? "<span><b>That slip's already on the board.</b></span>" : "Couldn't add that one. Try the screenshot again, or pick the game below."); return; }
+      closeSheets(); scanDone(added, dupes.length);
     } catch (err) {
-      scanNote("The slip reader didn't answer (" + esc(String(err.message || err).slice(0, 120)) + "). You can still pick the game below.");
+      scanNote("The slip reader didn't answer (" + esc(String(err.message || err).slice(0, 120)) + "). Try again, or pick the game below.");
     } finally { btn.classList.remove("busy"); $("#scanLbl").textContent = "Scan a bet slip screenshot"; }
   });
-  $("#scanNote").addEventListener("click", async (e) => {
-    if (e.target.id !== "addAllSlip") return;
-    const book = document.querySelector('input[name="book"]:checked').value;
-    const ready = slipBets.map((b) => betFromSlip(b, book)).map((d) => (d ? Object.assign(d, whoFields()) : d));
-    if (ready.some((d) => !d)) { toast("One of those bets is missing its odds or stake. Add them one at a time."); return; }
-    e.target.disabled = true;
-    let n = 0;
-    for (const d of ready) { const id = "b" + Date.now().toString(36) + Math.random().toString(36).slice(2, 6); if (await putBet(id, d)) n++; }
-    closeSheets(); toast(`Added ${n} bets from your slip`);
-  });
-
+  // what went on the board: each bet, what it couldn't read or link, and an undo
+  function scanDone(added, dupes) {
+    let el = $("#scanToast"); if (!el) { document.body.insertAdjacentHTML("beforeend", '<div id="scanToast" class="sct" hidden></div>'); el = $("#scanToast"); }
+    const row = ({ id, r }) => { const b = S.bets.get(id) || r.d, stake = b.usd > 0 ? b.usd : b.units * S.unit, n = (r.unl || []).length, f = r.flags || [];
+      const warn = [n ? (b.kind === "parlay" ? n + " leg" + (n > 1 ? "s" : "") + " not on a game yet" : "not on a game yet") : "", f.includes("odds") ? "odds guessed" : "", f.includes("stake") ? "stake guessed" : ""].filter(Boolean).join(" · ");
+      return `<div class="sct-r${warn ? " warn" : ""}"><b>${esc(b.pick)}</b><span>${esc(fOdds(b.odds))} · ${esc(fUSD(stake))} to win ${esc(fUSD(stake * ppu(b.odds)))}</span>${warn ? `<em>${esc(warn)} · tap the bet to fix</em>` : ""}</div>`; };
+    el.innerHTML = `<div class="sct-h"><i>✓</i><b>${added.length === 1 ? "On the board" : added.length + " bets on the board"}</b>${dupes ? `<small>${dupes} already there</small>` : ""}<button type="button" id="sctUndo">Undo</button><button type="button" id="sctX" aria-label="Close">✕</button></div>${added.map(row).join("")}`;
+    el.hidden = false; el.classList.remove("sct-out", "sct-in"); void el.offsetWidth; el.classList.add("sct-in");
+    clearTimeout(scanDone.t); scanDone.t = setTimeout(() => { el.classList.add("sct-out"); setTimeout(() => (el.hidden = true), 350); }, added.some((x) => (x.r.unl || []).length || (x.r.flags || []).length) ? 12000 : 7000);
+    $("#sctUndo").onclick = async () => { clearTimeout(scanDone.t); el.hidden = true; for (const x of added) await delBet(x.id); toast(added.length === 1 ? "Took it off the board" : "Took those off the board"); };
+    $("#sctX").onclick = () => { clearTimeout(scanDone.t); el.hidden = true; };
+  }
 
   const GS = { auth: null, ga: null, gated: false, fail: "", busy: false, res: [], pick: null, side: null, sure: null };
   const gsSleep = (ms) => new Promise((r) => setTimeout(r, ms));
@@ -17910,8 +17993,9 @@ body.tv .rb-games.primeg.mason > .rb-pcol { padding-top: 16px; -webkit-mask-imag
       try { await GS.auth.signInAnonymously(); }
       catch (e) { if (e && e.code === "auth/operation-not-allowed") await GS.auth.signInWithPopup(new firebase.auth.GoogleAuthProvider()); else throw e; }
     }
-    for (let i = 0; i < 80; i++) {
+    for (let i = 0; i < 200; i++) {
       if (S.canWrite && S.db && GUEST.uid) return;
+      if (i === 90 && GS.auth.currentUser && GS.ga) GS.ga();   // still not in after 13 s: check in again
       if (GS.fail) throw new Error(GS.fail);
       if (i === 4 && GS.gated && GS.auth.currentUser && GS.ga) GS.ga();   // signed in before the name was in: check in now
       await gsSleep(150);
