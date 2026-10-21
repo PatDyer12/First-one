@@ -5267,20 +5267,20 @@ body.tv .rb-games.primeg.mason > .rb-pcol { padding-top: 16px; -webkit-mask-imag
 .bf-lt::before { top: -75%; left: 22%; width: 56%; height: 150%; border-radius: 50%; background: radial-gradient(closest-side, var(--l1), color-mix(in srgb, var(--fxk) 16%, transparent) 62%, transparent); animation: bfPan 10s ease-in-out var(--d, 0s) infinite alternate; }
 @keyframes bfPan { from { transform: translateX(-62%); } to { transform: translateX(62%); } }
 /* heat: a glow rising off the bottom edge, breathing */
-.bt-nuke .bf-lt::before, .bt-six .bf-lt::before, .bt-dinger .bf-lt::before, .bt-shootout .bf-lt::before, .bt-cook .bf-lt::before, .bt-lamp .bf-lt::before, .bt-bucket .bf-lt::before, .bt-rivalry .bf-lt::before, .bt-punchout .bf-lt::before { left: -25%; right: -25%; top: auto; bottom: -62%; width: auto; height: 100%; border-radius: 50%; transform-origin: 50% 100%;
+.bt-nuke .bf-lt::before, .bt-six .bf-lt::before, .bt-dinger .bf-lt::before, .bt-shootout .bf-lt::before, .bt-cook .bf-lt::before, .bt-lamp .bf-lt::before, .bt-bucket .bf-lt::before, .bt-rivalry .bf-lt::before, .bt-punchout .bf-lt::before, .bt-hatty .bf-lt::before { left: -25%; right: -25%; top: auto; bottom: -62%; width: auto; height: 100%; border-radius: 50%; transform-origin: 50% 100%;
   background: radial-gradient(50% 50% at 50% 50%, color-mix(in srgb, var(--fxk) 66%, transparent), color-mix(in srgb, var(--fxk) 22%, transparent) 55%, transparent 72%); animation: bfHeat 2.6s ease-in-out var(--d, 0s) infinite alternate; }
-.bt-nuke .bf-lt::after, .bt-six .bf-lt::after, .bt-dinger .bf-lt::after, .bt-shootout .bf-lt::after, .bt-cook .bf-lt::after, .bt-lamp .bf-lt::after, .bt-bucket .bf-lt::after, .bt-rivalry .bf-lt::after, .bt-punchout .bf-lt::after { left: 35%; right: -35%; bottom: -70%; height: 100%; border-radius: 50%; transform-origin: 50% 100%; background: radial-gradient(50% 50% at 50% 50%, rgba(255,226,170,.34), transparent 70%); animation: bfHeat 1.9s ease-in-out calc(var(--d, 0s) - 1s) infinite alternate; }
+.bt-nuke .bf-lt::after, .bt-six .bf-lt::after, .bt-dinger .bf-lt::after, .bt-shootout .bf-lt::after, .bt-cook .bf-lt::after, .bt-lamp .bf-lt::after, .bt-bucket .bf-lt::after, .bt-rivalry .bf-lt::after, .bt-punchout .bf-lt::after, .bt-hatty .bf-lt::after { left: 35%; right: -35%; bottom: -70%; height: 100%; border-radius: 50%; transform-origin: 50% 100%; background: radial-gradient(50% 50% at 50% 50%, rgba(255,226,170,.34), transparent 70%); animation: bfHeat 1.9s ease-in-out calc(var(--d, 0s) - 1s) infinite alternate; }
 @keyframes bfHeat { from { transform: scaleY(.78); opacity: .6; } to { transform: scaleY(1.12); opacity: 1; } }
 /* aurora: two ribbons of color drifting along the top and bottom edges */
-.bt-whale .bf-lt::before, .bt-opal .bf-lt::before, .bt-prime .bf-lt::before, .bt-long .bf-lt::before, .bt-pink .bf-lt::before, .bt-splash .bf-lt::before, .bt-glass .bf-lt::before, .bt-freehoops .bf-lt::before { top: -24%; left: 0; width: 300%; height: 72%; border-radius: 0; background: linear-gradient(90deg, transparent, var(--l1) 10%, transparent 22%, var(--l2) 36%, transparent 50%, var(--l1) 63%, transparent 76%, var(--l2) 89%, transparent);
+.bt-whale .bf-lt::before, .bt-opal .bf-lt::before, .bt-prime .bf-lt::before, .bt-long .bf-lt::before, .bt-pink .bf-lt::before, .bt-splash .bf-lt::before, .bt-glass .bf-lt::before, .bt-freehoops .bf-lt::before, .bt-tour .bf-lt::before, .bt-degen .bf-lt::before, .bt-nosweat .bf-lt::before { top: -24%; left: 0; width: 300%; height: 72%; border-radius: 0; background: linear-gradient(90deg, transparent, var(--l1) 10%, transparent 22%, var(--l2) 36%, transparent 50%, var(--l1) 63%, transparent 76%, var(--l2) 89%, transparent);
   -webkit-mask-image: linear-gradient(180deg, #000, transparent); mask-image: linear-gradient(180deg, #000, transparent); animation: bfFlow 22s linear var(--d, 0s) infinite; }
-.bt-whale .bf-lt::after, .bt-opal .bf-lt::after, .bt-prime .bf-lt::after, .bt-long .bf-lt::after, .bt-pink .bf-lt::after, .bt-splash .bf-lt::after, .bt-glass .bf-lt::after, .bt-freehoops .bf-lt::after { bottom: -24%; left: -200%; width: 300%; height: 72%; background: linear-gradient(90deg, transparent, var(--l2) 12%, transparent 26%, var(--l1) 40%, transparent 54%, var(--l2) 68%, transparent 82%, var(--l1) 92%, transparent);
+.bt-whale .bf-lt::after, .bt-opal .bf-lt::after, .bt-prime .bf-lt::after, .bt-long .bf-lt::after, .bt-pink .bf-lt::after, .bt-splash .bf-lt::after, .bt-glass .bf-lt::after, .bt-freehoops .bf-lt::after, .bt-tour .bf-lt::after, .bt-degen .bf-lt::after, .bt-nosweat .bf-lt::after { bottom: -24%; left: -200%; width: 300%; height: 72%; background: linear-gradient(90deg, transparent, var(--l2) 12%, transparent 26%, var(--l1) 40%, transparent 54%, var(--l2) 68%, transparent 82%, var(--l1) 92%, transparent);
   -webkit-mask-image: linear-gradient(0deg, #000, transparent); mask-image: linear-gradient(0deg, #000, transparent); animation: bfFlow 30s linear var(--d, 0s) infinite reverse; }
 @keyframes bfFlow { to { transform: translateX(-66.66%); } }
 .bt-whale .bf-lt { --l1: rgba(51,224,255,.55); --l2: rgba(30,110,255,.6); } .bt-opal .bf-lt { --l1: rgba(255,186,236,.52); --l2: rgba(140,236,255,.5); }
 .bt-prime .bf-lt { --l1: rgba(140,80,255,.62); --l2: rgba(255,181,71,.4); } .bt-long .bf-lt { --l1: rgba(25,227,198,.55); --l2: rgba(124,245,255,.38); }
 /* pulse: the frame breathes light inward, like a lock-on */
-.bt-snipe .bf-lt::before, .bt-dart .bf-lt::before, .bt-lockdown .bf-lt::before, .bt-chains .bf-lt::before, .bt-stocks .bf-lt::before, .bt-dimes .bf-lt::before, .bt-brick .bf-lt::before, .bt-rockfight .bf-lt::before, .bt-backdoor .bf-lt::before, .bt-doubt .bf-lt::before { inset: 0; top: 0; left: 0; width: auto; height: auto; border-radius: 9px; background: none; box-shadow: inset 0 0 34px 4px color-mix(in srgb, var(--fxk) 58%, transparent); animation: bfPulse 2.2s ease-in-out var(--d, 0s) infinite; }
+.bt-snipe .bf-lt::before, .bt-dart .bf-lt::before, .bt-lockdown .bf-lt::before, .bt-chains .bf-lt::before, .bt-stocks .bf-lt::before, .bt-dimes .bf-lt::before, .bt-brick .bf-lt::before, .bt-rockfight .bf-lt::before, .bt-backdoor .bf-lt::before, .bt-doubt .bf-lt::before, .bt-cardiac .bf-lt::before, .bt-fade .bf-lt::before, .bt-script .bf-lt::before { inset: 0; top: 0; left: 0; width: auto; height: auto; border-radius: 9px; background: none; box-shadow: inset 0 0 34px 4px color-mix(in srgb, var(--fxk) 58%, transparent); animation: bfPulse 2.2s ease-in-out var(--d, 0s) infinite; }
 @keyframes bfPulse { 50% { opacity: .3; } }
 /* metals: a slow sheen across the face, kept faint */
 .bt-metal .bf-lt::after { inset: 0; background: linear-gradient(110deg, transparent 36%, rgba(255,255,255,.1) 46%, rgba(255,255,255,.22) 50%, rgba(255,255,255,.08) 54%, transparent 64%) 0 0 / 300% 100%; animation: bfSheen 6s ease-in-out var(--d, 0s) infinite; }
@@ -5297,6 +5297,26 @@ body.tv .rb-games.primeg.mason > .rb-pcol { padding-top: 16px; -webkit-mask-imag
 .bt-lotto :is(.pp-pick, .ob-pick) .t, .slip.bt-lotto .sl-pick { background: none; color: #fff; -webkit-text-fill-color: #fff; }
 /* cards that aren't live or hype hold their light still */
 .bt:not(.bt-hype):not(.bt-islive) .bf-lt::before, .bt:not(.bt-hype):not(.bt-islive) .bf-lt::after { animation-play-state: paused; }
+
+/* ---------- the culture's types: the frame tells you which one ---------- */
+.bt-chip:is(.bt-c-receipt, .bt-c-script, .bt-c-tour, .bt-c-chalk, .bt-c-fade, .bt-c-degen, .bt-c-cardiac, .bt-c-hook, .bt-c-nosweat, .bt-c-hatty, .bt-c-garbage) { color: #0b0c0e; background: linear-gradient(135deg, color-mix(in srgb, var(--fxk) 55%, #fff), var(--fxk) 60%); box-shadow: 0 0 14px color-mix(in srgb, var(--fxk) 45%, transparent); }
+.bt-chip:is(.bt-c-receipt, .bt-c-script, .bt-c-tour, .bt-c-chalk, .bt-c-fade, .bt-c-degen, .bt-c-cardiac, .bt-c-hook, .bt-c-nosweat, .bt-c-hatty, .bt-c-garbage) .bt-ico { stroke-width: 2.4; }
+.bt-chip.bt-c-script { color: #f4f4f4; background: linear-gradient(135deg, #2a2a2e, #0d0d0f); box-shadow: inset 0 0 0 1.5px #ffd23f, 0 0 12px rgba(255,210,63,.4); }
+.bt-chip.bt-c-fade { background: linear-gradient(90deg, #ff9be3 0 50%, #8be3ff 50% 100%); }
+.bt-chip.bt-c-hatty { color: #fff; background: linear-gradient(135deg, #e0283e, #9e0b20); }
+.bt-receipt { --fxk: #ff4f6d; --fxb: repeating-linear-gradient(90deg, #ff4f6d 0 7px, #fff1f3 7px 10px, #ff4f6d 10px 12px, #fff1f3 12px 18px); --fxbs: 300% 100%; --fxg: color-mix(in srgb, #ff4f6d 30%, transparent); animation: fxFoil 8s linear var(--d, 0s) infinite; } .bt-c-receipt { --fxk: #ff4f6d; }
+.bt-script { --fxk: #ffd23f; --fxb: repeating-linear-gradient(135deg, #0d0d0f 0 9px, #f4f4f4 9px 18px); --fxbs: 300% 100%; --fxg: color-mix(in srgb, #ffd23f 30%, transparent); animation: fxFoil 10s linear var(--d, 0s) infinite; } .bt-c-script { --fxk: #ffd23f; }
+.bt-tour { --fxk: #5fb8ff; --fxb: linear-gradient(120deg, #1b3a8a, #5fb8ff 25%, #ffd23f 40%, #3ddc97 55%, #5fb8ff 70%, #1b3a8a); --fxbs: 300% 100%; --fxg: color-mix(in srgb, #5fb8ff 30%, transparent); animation: fxFoil 9s linear var(--d, 0s) infinite; } .bt-c-tour { --fxk: #5fb8ff; }
+.bt-chalk { --fxk: #eef2f7; --fxb: linear-gradient(135deg, #ffffff, #c6ced8 30%, #f7f9fb 55%, #9aa5b3 80%, #ffffff); --fxbs: 100% 100%; --fxg: color-mix(in srgb, #eef2f7 30%, transparent); } .bt-c-chalk { --fxk: #eef2f7; }
+.bt-fade { --fxk: #ff7ad9; --fxb: linear-gradient(90deg, #ff7ad9 0 50%, #59d6ff 50% 100%); --fxbs: 100% 100%; --fxg: color-mix(in srgb, #ff7ad9 30%, transparent); } .bt-c-fade { --fxk: #ff7ad9; }
+.bt-degen { --fxk: #9b87ff; --fxb: linear-gradient(135deg, #2a1d6b, #9b87ff 30%, #ff7ad9 50%, #9b87ff 70%, #2a1d6b); --fxbs: 300% 100%; --fxg: color-mix(in srgb, #9b87ff 30%, transparent); animation: fxFoil 14s linear var(--d, 0s) infinite; } .bt-c-degen { --fxk: #9b87ff; }
+.bt-cardiac { --fxk: #ff3b5c; --fxb: repeating-linear-gradient(90deg, #ff3b5c 0 30px, #3a0710 30px 34px); --fxbs: 300% 100%; --fxg: color-mix(in srgb, #ff3b5c 30%, transparent); animation: fxFoil 3s linear var(--d, 0s) infinite; } .bt-c-cardiac { --fxk: #ff3b5c; }
+.bt-hook { --fxk: #7fe3b6; --fxb: linear-gradient(135deg, #0f5f45, #7fe3b6 40%, #eafff6 50%, #7fe3b6 60%, #0f5f45); --fxbs: 300% 100%; --fxg: color-mix(in srgb, #7fe3b6 30%, transparent); animation: fxFoil 7s linear var(--d, 0s) infinite; } .bt-c-hook { --fxk: #7fe3b6; }
+.bt-nosweat { --fxk: #a8ecff; --fxb: linear-gradient(135deg, #e8fbff, #a8ecff 30%, #4aa8d8 55%, #e8fbff 75%, #a8ecff); --fxbs: 300% 100%; --fxg: color-mix(in srgb, #a8ecff 30%, transparent); animation: fxFoil 12s linear var(--d, 0s) infinite; } .bt-c-nosweat { --fxk: #a8ecff; }
+.bt-hatty { --fxk: #ff4a4a; --fxb: linear-gradient(135deg, #c8102e 0 33%, #f4f4f4 33% 66%, #0b2a5b 66%); --fxbs: 100% 100%; --fxg: color-mix(in srgb, #ff4a4a 30%, transparent); } .bt-c-hatty { --fxk: #ff4a4a; }
+.bt-garbage { --fxk: #b5c48a; --fxb: linear-gradient(135deg, #3d4733, #b5c48a 45%, #6b7a5a 70%, #3d4733); --fxbs: 300% 100%; --fxg: color-mix(in srgb, #b5c48a 30%, transparent); animation: fxFoil 10s linear var(--d, 0s) infinite; } .bt-c-garbage { --fxk: #b5c48a; }
+.bt-cardiac.bt-hype .bf-lt::before { animation-duration: .9s; }
+.bt-fade .bf::before { box-shadow: inset 0 0 0 1px rgba(255,255,255,.12); }
 </style>
 </head>
 <body>
@@ -7414,6 +7434,7 @@ body.tv .rb-games.primeg.mason > .rb-pcol { padding-top: 16px; -webkit-mask-imag
   function propShow(h) {
     const { b, x, st, e, g } = h, l = Number(x.l ?? PP_DEF[st] ?? 0.5), after = PROP_VAL(st, e.tal), add = st === "nba_pra" || st === "nba_pts" ? e.d : 1, before = Math.max(0, after - add);
     const cleared = before <= l && after > l, F = b.kind === "parlay" ? null : flexOf(b), card = [...document.querySelectorAll(`.ob-bet[data-ids="${b.id}"], .pp-bet[data-ids="${b.id}"]`)].find((el) => { const r = el.getBoundingClientRect(); return r.width > 200 && r.top > 60 && r.bottom < innerHeight - 40; });
+    if (cleared && b.kind !== "parlay") garbMark(b.id, g);
     const acc = (card && getComputedStyle(card).getPropertyValue("--fxk").trim()) || personCol(b), row = (BOX.get(g.id) || { names: new Map() }).names.get(normNm(x.p.nm)), tmx = String(g.a.id) === e.tm ? g.a : g.h;
     const hs = row && row.id ? `https://a.espncdn.com/combiner/i?img=/i/headshots/${g.sport === "CBB" ? "mens-college-basketball" : "nba"}/players/full/${row.id}.png&w=200&h=146` : "";
     const word = (PP_WORDS[e.kind] || (() => "Play"))(e), plus = e.kind === "pts" ? `+${e.d}` : `+1`, unit = PP_UNIT[st] || "", pct = (v) => Math.max(0, Math.min(100, (v / Math.max(l + 1, after) ) * 100));
@@ -8417,7 +8438,51 @@ body.tv .rb-games.primeg.mason > .rb-pcol { padding-top: 16px; -webkit-mask-imag
     if (isPP(x.m) && x.s !== "u" && ev && ev.v != null) { const st = ppStat(x.m), l = Number(x.l ?? PP_DEF[st] ?? 0.5); if (HIM_BY[st] && ev.v - l >= HIM_BY[st]) out.push("him"); }
     return out;
   }
-  const hoopStoryPatch = (b, status) => { try { const st = status === "won" ? hoopStory({ ...b, story: undefined }, "won") : []; return st.length ? { story: st } : {}; } catch (e) { return {}; } };
+  const hoopStoryPatch = (b, status) => { try { const nb = { ...b, story: undefined }, st = status === "won" ? [...hoopStory(nb, "won"), ...sweatStory(nb, "won")] : []; return st.length ? { story: st } : {}; } catch (e) { return {}; } };
+
+  // the culture's types: icons, names, what the room yells
+  const BT_X = new Set(["receipt", "script", "tour", "chalk", "fade", "degen", "cardiac", "hook", "nosweat", "hatty", "garbage"]);
+  Object.assign(BT_DEF, { receipt: ["<svg class=\"bt-ico\" viewBox=\"0 0 24 24\" aria-hidden=\"true\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\" stroke-linecap=\"round\" stroke-linejoin=\"round\"><path d=\"M6 2.8h12v18.4l-2-1.4-2 1.4-2-1.4-2 1.4-2-1.4-2 1.4z\"/><path d=\"M9 7h6M9 10.5h6M9 14h4\"/></svg>", "CVS receipt"], script: ["<svg class=\"bt-ico\" viewBox=\"0 0 24 24\" aria-hidden=\"true\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\" stroke-linecap=\"round\" stroke-linejoin=\"round\"><path d=\"M3.5 9.5h17v11h-17z\"/><path d=\"M3.5 9.5l1.2-5.6 16.4 3.4-1.2 2.2\"/><path d=\"M8.2 4.9l2 4.6M13.4 6l2 3.5\"/></svg>", "Screenwriter"], tour: ["<svg class=\"bt-ico\" viewBox=\"0 0 24 24\" aria-hidden=\"true\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\" stroke-linecap=\"round\" stroke-linejoin=\"round\"><circle cx=\"12\" cy=\"12\" r=\"9\"/><path d=\"M3 12h18M12 3c3 3.2 3 14.8 0 18M12 3c-3 3.2-3 14.8 0 18\"/></svg>", "World tour"], chalk: ["<svg class=\"bt-ico\" viewBox=\"0 0 24 24\" aria-hidden=\"true\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\" stroke-linecap=\"round\" stroke-linejoin=\"round\"><path d=\"M4 17.5l11-11 3.5 3.5-11 11H4z\"/><path d=\"M13 8.5l3.5 3.5M4 21h8\"/></svg>", "Chalk eater"], fade: ["<svg class=\"bt-ico\" viewBox=\"0 0 24 24\" aria-hidden=\"true\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\" stroke-linecap=\"round\" stroke-linejoin=\"round\"><path d=\"M4 8h13l-3-3M20 16H7l3 3\"/></svg>", "Fade the room"], degen: ["<svg class=\"bt-ico\" viewBox=\"0 0 24 24\" aria-hidden=\"true\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\" stroke-linecap=\"round\" stroke-linejoin=\"round\"><path d=\"M20 14.5A8 8 0 1 1 9.5 4a6.5 6.5 0 0 0 10.5 10.5z\"/><path d=\"M15 3.5h3l-3 3h3\"/></svg>", "Degen hours"], cardiac: ["<svg class=\"bt-ico\" viewBox=\"0 0 24 24\" aria-hidden=\"true\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\" stroke-linecap=\"round\" stroke-linejoin=\"round\"><path d=\"M2.5 12.5h4l2-4 3 8 2.5-6 1.5 2h6\"/></svg>", "Cardiac cash"], hook: ["<svg class=\"bt-ico\" viewBox=\"0 0 24 24\" aria-hidden=\"true\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\" stroke-linecap=\"round\" stroke-linejoin=\"round\"><path d=\"M14 3v10a4.5 4.5 0 1 1-9 0v-1.5l2.5 2\"/><circle cx=\"14\" cy=\"3.5\" r=\"1.2\"/></svg>", "Off the hook"], nosweat: ["<svg class=\"bt-ico\" viewBox=\"0 0 24 24\" aria-hidden=\"true\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\" stroke-linecap=\"round\" stroke-linejoin=\"round\"><path d=\"M12 2.5v19M3.8 7.2l16.4 9.6M20.2 7.2L3.8 16.8\"/><path d=\"M9.5 4.5L12 6.5l2.5-2M9.5 19.5L12 17.5l2.5 2\"/></svg>", "No sweat"], hatty: ["<svg class=\"bt-ico\" viewBox=\"0 0 24 24\" aria-hidden=\"true\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\" stroke-linecap=\"round\" stroke-linejoin=\"round\"><path d=\"M4 16.5c0-5 3.6-9 8-9s8 4 8 9\"/><path d=\"M2.5 16.5h19v2.5h-19z\"/></svg>", "Hatty"], garbage: ["<svg class=\"bt-ico\" viewBox=\"0 0 24 24\" aria-hidden=\"true\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\" stroke-linecap=\"round\" stroke-linejoin=\"round\"><path d=\"M4.5 6.5h15M9.5 6.5V4h5v2.5M6.5 6.5l1 14h9l1-14\"/><path d=\"M10 10v7M14 10v7\"/></svg>", "Garbage time"] });
+  Object.assign(BT_CALL, { receipt: ["CVS receipt", "Print the receipt", "Longest slip in the building", "Receipt cashed"], script: ["Wrote the script", "Screenwriter", "Scripted", "Called the whole game"], tour: ["World tour", "Passport stamped", "Around the world", "Globetrotter"], chalk: ["Free money", "Chalk eater", "Laid the juice", "Easy money"], fade: ["Faded the room", "Inverse the group chat", "Contrarian king", "Told y'all"], degen: ["Degen hours", "West coast lock", "Past bedtime", "Up all night"], cardiac: ["Cardiac cash", "Heart attack", "Down bad to paid", "Never a doubt"], hook: ["Off the hook", "By the hook", "Half a point", "Hook city"], nosweat: ["No sweat", "Ice cold", "Cashed by halftime", "Never sweated it"], hatty: ["Hatty", "Hat trick", "Hats on the ice", "Three piece"], garbage: ["Garbage time merchant", "Stats are stats", "Padded it", "Garbage time legend"] });
+  // the sweat: an open side that was losing going into its game's last period (kept, so the comeback counts when it cashes)
+  const SWEAT_LAST = { NFL: 4, CFB: 4, NBA: 4, CBB: 2, MLB: 9, NHL: 3 }, SWEAT_BY = { NFL: 17, CFB: 17, NBA: 20, CBB: 20, MLB: 5, NHL: 3 };
+  const BT_SWEAT = new Set(["cardiac", "hook", "nosweat", "hatty", "garbage"]);
+  const loadSet = (k) => { try { return new Set(JSON.parse(localStorage.getItem(k) || "[]")); } catch (e) { return new Set(); } };
+  const keepSet = (k, set) => { try { localStorage.setItem(k, JSON.stringify([...set].slice(-300))); } catch (e) {} };
+  const LATE_L = loadSet("sb-latel"), GARB = loadSet("sb-garb");
+  function sweatTrack() {
+    let ch = false;
+    for (const b of S.bets.values()) {
+      if (b.status !== "open" || b.kind === "parlay" || !b.sel || !["ml", "sp"].includes(b.sel.m) || LATE_L.has(b.id)) continue;
+      const g = gameOf(b.sel); if (!g || g.st !== "in" || !SWEAT_LAST[g.sport] || Number(g.pd) < SWEAT_LAST[g.sport]) continue;
+      const ev = evalSel(b.sel); if (ev && ev.m < 0) { LATE_L.add(b.id); ch = true; }
+    }
+    if (ch) keepSet("sb-latel", LATE_L);
+  }
+  setInterval(sweatTrack, 20e3);
+  window.__sweat = { track: sweatTrack, late: LATE_L, garb: GARB, story: (b, st) => sweatStory(b, st) };
+  // an NBA prop that crossed its line in the 4th with the game out of reach
+  const garbMark = (id, g) => { if (Number(g.pd) >= 4 && Math.abs((g.a.sc || 0) - (g.h.sc || 0)) >= 18 && !GARB.has(id)) { GARB.add(id); keepSet("sb-garb", GARB); } };
+  function sweatStory(b, status) {
+    if (Array.isArray(b.story)) return b.story.filter((k) => BT_SWEAT.has(k));
+    if ((status || b.status) !== "won" || b.kind === "parlay" || !b.sel) return [];
+    const x = b.sel, g = gameOf(x); if (!g || g.st === "pre") return [];
+    const ev = evalSel(x), out = [];
+    if (LATE_L.has(b.id) && (x.m === "ml" || x.m === "sp")) out.push("cardiac");
+    if ((x.m === "sp" || x.m === "tot") && ev && Math.abs(ev.m - 0.5) < 1e-6) out.push("hook");
+    if (["ml", "sp", "tot"].includes(x.m) && ev && !out.length && ev.m >= (SWEAT_BY[g.sport] || 99)) out.push("nosweat");
+    if (isPP(x.m) && ppStat(x.m) === "g" && x.s !== "u" && ev && Number(ev.v) >= 3) out.push("hatty");
+    if (GARB.has(b.id)) out.push("garbage");
+    return out;
+  }
+  // the other side of 2+ different people's bets on the same game (sides with sides, totals with totals)
+  function btFade(b) {
+    const x = b.sel; if (b.kind === "parlay" || !x || !["ml", "sp", "tot"].includes(x.m) || x.g == null) return false;
+    const fam = (m) => (m === "tot" ? "t" : "s"), me = personKey(b), who = new Set();
+    for (const o of S.bets.values()) { const y = o.sel; if (o === b || o.kind === "parlay" || o.status === "void" || !y || String(y.g) !== String(x.g) || fam(y.m) !== fam(x.m) || y.s === x.s) continue; const k = personKey(o); if (k !== me) who.add(k); }
+    return who.size >= 2;
+  }
+  const btDegen = (b, t0) => { const h0 = t0 ? etHr(t0) % 24 : null, hp = b.placedAt ? etHr(b.placedAt) % 24 : null; return (h0 != null && (h0 >= 22 || h0 < 4)) || (hp != null && hp < 5); };
   const fxUSD = (v) => "$" + (Math.abs(v - Math.round(v)) < 0.005 ? Math.round(v).toLocaleString() : v.toFixed(2));
   const ET_DAY = new Intl.DateTimeFormat("en-CA", { timeZone: "America/New_York" }), ET_HR = new Intl.DateTimeFormat("en-US", { timeZone: "America/New_York", hour: "numeric", hourCycle: "h23" });
   const etDayOf = (t) => ET_DAY.format(new Date(t)), etHr = (t) => Number(ET_HR.format(new Date(t)));
@@ -8480,12 +8545,17 @@ body.tv .rb-games.primeg.mason > .rb-pcol { padding-top: 16px; -webkit-mask-imag
     // the sport's own: a home run, a goal, a bucket, strikeouts, a TD scorer, yardage (a parlay of all one kind counts)
     let sk = par ? ((b.legSel || []).length && b.legSel.every((x) => btSport(x) && btSport(x) === btSport(b.legSel[0])) ? btSport(b.legSel[0]) : "") : btSport(b.sel);
     if (!sk && !par && !b.sel) { const t = b.pick || ""; sk = /\b(hr|home ?runs?|homers?|dingers?)\b/i.test(t) && b.sport !== "NHL" ? "dinger" : /\banytime (td|touchdown)\b/i.test(t) ? "six" : /\b(anytime goal|goal ?scorer)\b/i.test(t) ? "lamp" : ""; }
-    for (const st of hoopStory(b)) k.push(st);
+    for (const st of [...hoopStory(b), ...sweatStory(b)]) k.push(st);
     if (sk) k.push(sk);
     if (!par && o > 100 && usd >= 40 - 0.005) k.push("opal");
+    if (par && n >= 8) k.push("receipt");
     if (par && o >= 1000) k.push("lotto");
     if (!par && o >= SNIPER_ODDS) k.push("snipe");
+    if (par && n >= 2 && (b.legSel || []).length === n && b.legSel.every((x) => x && x.g != null && String(x.g) === String(b.legSel[0].g))) k.push("script");
+    if (par && new Set((b.legSel || []).filter((x) => x && x.sp).map((x) => x.sp)).size >= 2) k.push("tour");
     if (par && o >= 400 && o < 1000) k.push("long");
+    if (!par && o < 0 && o <= -250) k.push("chalk");
+    if (btFade(b)) k.push("fade");
     // the game: a side in a division rivalry (1u+), a shootout (an over on a big total), a lockdown (a 1u+ under)
     if (!par && b.sel && ["ml", "sp"].includes(m) && u >= 1 - 0.005 && (b.sel.sp || b.sport) === "NFL") { const g = gameOf(b.sel); if (g && NFL_DIV[g.a.ab] && NFL_DIV[g.a.ab] === NFL_DIV[g.h.ab]) k.push("rivalry"); }
     if (!par && m === "tot") {
@@ -8494,6 +8564,7 @@ body.tv .rb-games.primeg.mason > .rb-pcol { padding-top: 16px; -webkit-mask-imag
       if (b.sel.s === "o" && big && l >= big) k.push(nb ? "matador" : "shootout");
       if (b.sel.s === "u" && u >= 1 - 0.005) k.push(nb ? "rockfight" : "lockdown");
     }
+    if (btDegen(b, t0)) k.push("degen");
     if (night && (m === "ml" || m === "sp")) k.push("prime");
     if (!par && m === "ml" && o > 100) k.push("dawg");
     // the medals by stake (a whale or a nuke already says how big it is)
@@ -8503,7 +8574,7 @@ body.tv .rb-games.primeg.mason > .rb-pcol { padding-top: 16px; -webkit-mask-imag
   function flexOf(b, units) {
     const ks = betTypes(b, units), k = ks[0] || null, usd = (units != null ? units : Number(b.units) || 0) * S.unit;
     const name = k === "dawg" && btDaily(b.placedAt).dawg === b.id ? "Dawg of the day" : k ? BT_DEF[k][1] : "";
-    const side = ["bronze", "silver", "prime", "six", "chains", "dinger", "punchout", "lamp", "bucket", "shootout", "lockdown", "rivalry", "cook", "splash", "glass", "dimes", "stocks", "stuffer", "brick", "matador", "rockfight"].includes(k) || (k === "dawg" && name === "Dawg"), live = !!k && btLive(b);
+    const side = ["bronze", "silver", "prime", "six", "chains", "dinger", "punchout", "lamp", "bucket", "shootout", "lockdown", "rivalry", "cook", "splash", "glass", "dimes", "stocks", "stuffer", "brick", "matador", "rockfight", "chalk", "degen", "fade", "hook", "nosweat", "garbage"].includes(k) || (k === "dawg" && name === "Dawg"), live = !!k && btLive(b);
     const hype = !!k && ((Number(b.odds) || 0) >= 1000 || usd >= 50 - 0.005);
     // the team: its colors (and both teams' for a rivalry), its logo when the pick is a side or one of its players
     const vars = {}, g = b.kind !== "parlay" && b.sel ? gameOf(b.sel) : null, hex = (c) => (/^#[0-9a-f]{6}$/i.test(c || "") ? c : "");
@@ -8518,7 +8589,7 @@ body.tv .rb-games.primeg.mason > .rb-pcol { padding-top: 16px; -webkit-mask-imag
         const cs = [hex(tm.col), hex(tm.alt)].filter(Boolean).sort((x, y) => lum(y) - lum(x));
         if (cs[0]) vars["--tca"] = lum(cs[0]) < 70 ? "#c9d1dc" : cs[0]; if (/^https:\/\/[^\s"'()<>]+$/.test(tm.lg || "")) tlg = tm.lg; }
     }
-    const team = !!k && k !== "rivalry" && b.kind !== "parlay" && !!b.sel && (b.sel.m === "ml" || b.sel.m === "sp") && !!vars["--tc1"];
+    const team = !!k && k !== "rivalry" && !BT_X.has(k) && b.kind !== "parlay" && !!b.sel && (b.sel.m === "ml" || b.sel.m === "sp") && !!vars["--tc1"];
     const sty = "--d:" + btT(b.id) + Object.entries(vars).map(([a, v]) => ";" + a + ":" + v).join("");
     return { k, odds: k, more: ks.slice(1, 4), name, usd, win: usd * ppu(Number(b.odds) || 0), winU: (usd / S.unit) * ppu(Number(b.odds) || 0), cls: k ? " fx bt bt-" + k + (live ? " bt-islive" : "") + (["bronze", "silver", "gold"].includes(k) ? " bt-metal" : "") + (BT_NBA.has(k) ? " bt-nb" : "") + (hype ? " bt-hype" : "") + (team ? " bt-team" : "") : "", live, hype, vars, sty, tlg, tn: b.sel && b.sel.m === "td" ? tn : "", team, big: !!k && (!side || hype) };
   }
@@ -8543,6 +8614,7 @@ body.tv .rb-games.primeg.mason > .rb-pcol { padding-top: 16px; -webkit-mask-imag
     long: "Cash a +400 parlay", dinger: "Cash a home run", lamp: "Cash an anytime goal", bucket: "Cash a points or threes over", punchout: "Cash a strikeout over",
     six: "Cash an anytime TD scorer", chains: "Cash a yardage over", rivalry: "Cash a 1u+ side in a division game", shootout: "Cash an over on a big total", lockdown: "Cash a 1u+ under", prime: "Night game ML or spread", dawg: "Cash an underdog ML", gold: "Cash a 3u bet", silver: "Cash a 2u bet", bronze: "Cash a 1u parlay" };
   Object.assign(BT_HOW, { bucket: "Cash a points over", cook: "Cash a 25.5+ points over", splash: "Cash a threes over", glass: "Cash a rebounds over", dimes: "Cash an assists over", stocks: "Cash a steals or blocks over", stuffer: "Cash a points + rebounds + assists over", brick: "Cash a player under: he bricked it", matador: "Cash an NBA over at 230+", rockfight: "Cash a 1u+ NBA under", freehoops: "Cash a bet in an overtime game", backdoor: "Cash a spread by 2 or less", doubt: "Cash a side that trailed by 15+", him: "A player over cleared by a mile" });
+  Object.assign(BT_HOW, { receipt: "Cash a parlay of 8 legs or more", script: "Cash a same-game parlay", tour: "Cash a parlay across 2+ sports", chalk: "Cash a straight bet at -250 or shorter", fade: "Cash the other side of 2+ people in the room", degen: "Cash a 10 PM+ game, or a bet placed after midnight", cardiac: "Cash a side that was losing in the final period", hook: "Win a spread or total by half a point", nosweat: "Cover by a mile: 17+ NFL, 20+ NBA, 5+ MLB, 3+ NHL", hatty: "A player you backed scores 3 goals", garbage: "Clear an NBA prop in a 4th-quarter blowout (18+)" });
   const pfName = (pr) => (pr.id === "me" ? meName() : pr.nm);
   const pfDate = (t) => (t ? new Date(t).toLocaleDateString("en-US", { month: "short", day: "numeric" }) : "");
   function pfOf(b) {
@@ -8906,7 +8978,8 @@ body.tv .rb-games.primeg.mason > .rb-pcol { padding-top: 16px; -webkit-mask-imag
   function flStep() { const a = flQ.shift(); if (!a) { flT = 0; return; } flash(...a); flT = setTimeout(flStep, 2900); }
 
   const CASH = { q: [], t: 0 };
-  const CASH_LV = { nuke: 5, botd: 4, whale: 4, lotto: 4, opal: 3, dart: 3, snipe: 3, long: 3, gold: 3, dinger: 3, lamp: 3, cook: 3, splash: 3, him: 3, doubt: 3, freehoops: 3, backdoor: 3 };
+  const CASH_LV_X = { receipt: 4, script: 3, tour: 3, chalk: 1, fade: 3, degen: 2, cardiac: 4, hook: 3, nosweat: 2, hatty: 4, garbage: 3 };
+  const CASH_LV = { ...CASH_LV_X, nuke: 5, botd: 4, whale: 4, lotto: 4, opal: 3, dart: 3, snipe: 3, long: 3, gold: 3, dinger: 3, lamp: 3, cook: 3, splash: 3, him: 3, doubt: 3, freehoops: 3, backdoor: 3 };
   function cashLevel(b, F) {
     const usd = (Number(b.units) || 0) * S.unit, o = Number(b.odds) || 0;
     let lv = F.k ? CASH_LV[F.k] || 2 : 1;
@@ -10589,7 +10662,7 @@ body.tv .rb-games.primeg.mason > .rb-pcol { padding-top: 16px; -webkit-mask-imag
   // ---------- sheets ----------
   function openSheet(id) { $(id).hidden = false; }
   // keep every open screen current: when a new version is up, reload it (never mid-form or mid-animation)
-  const BUILD = "20261020233746";
+  const BUILD = "20261021005354";
   function checkBuild() {
     if (BUILD === "dev") return;
     fetch("version.json?t=" + Date.now(), { cache: "no-store" }).then((r) => (r.ok ? r.json() : null)).then((j) => {
@@ -11699,7 +11772,7 @@ body.tv .rb-games.primeg.mason > .rb-pcol { padding-top: 16px; -webkit-mask-imag
     return SND.loading[name];
   }
   function loadSounds() { loadBuf("sounds/" + S.winSound); loadBuf("loss"); loadBuf("sounds/nukeplace"); for (const x of ["bolt", "shot", "shatter", "whoosh", "slam", "bc_sting", "bc_check", "bc_tick", "bc_out"]) loadBuf("sounds/sniper/" + x); loadMe(); loadBuf("sounds/nuke"); loadBuf("sounds/nj"); loadBuf("sounds/whale"); loadBuf("sounds/splash"); loadBuf("sounds/chop"); loadBuf("sounds/lockin"); loadBuf("sounds/leg1"); loadVid("#pipVid", "sounds/chop"); loadCrew(); loadWhale(); setTimeout(quickPre, 4000); }
-  function playBuf(c, buf, vol, at) { const s = c.createBufferSource(), g = c.createGain(); g.gain.value = vol; s.buffer = buf; s.connect(g).connect(c.destination); s.start(0, at || 0); return s; }
+  function playBuf(c, buf, vol, at) { const s = c.createBufferSource(), g = c.createGain(); g.gain.value = vol; s.buffer = buf; s.connect(g).connect(c.destination); s.start(0, at || 0); s.gn = g; return s; }
   function unlock() {
     const wasLive = !!SND.ctx && SND.ctx.state === "running";
     const c = audio();
@@ -12131,9 +12204,9 @@ body.tv .rb-games.primeg.mason > .rb-pcol { padding-top: 16px; -webkit-mask-imag
     });
   }
   const anyOpen = () => [...S.bets.values()].find((b) => b.status === "open" && isMe(b)) || { id: "preview" };
-  $("#goodTest").addEventListener("click", () => { closeSheets(); react(anyOpen(), "good"); });
-  $("#badTest").addEventListener("click", () => { closeSheets(); react(anyOpen(), "bad"); });
-  $("#firstTest").addEventListener("click", () => { closeSheets(); react([...S.bets.values()].find((b) => b.status === "open" && b.kind === "parlay") || anyOpen(), "first"); });
+  $("#goodTest").addEventListener("click", () => { closeSheets(); clipNow(() => react(anyOpen(), "good")); });
+  $("#badTest").addEventListener("click", () => { closeSheets(); clipNow(() => react(anyOpen(), "bad")); });
+  $("#firstTest").addEventListener("click", () => { closeSheets(); clipNow(() => react([...S.bets.values()].find((b) => b.status === "open" && b.kind === "parlay") || anyOpen(), "first")); });
   $("#whaleTest").addEventListener("click", () => { closeSheets(); whaleAlert({ pick: "Florida −3.5", units: 1.5, odds: -110 }, "place"); });
   $("#whaleWinTest").addEventListener("click", () => { closeSheets(); whaleSplash({ pick: "Florida −3.5", units: 1.5, odds: -110 }, 1.36); });
 
@@ -12570,7 +12643,7 @@ body.tv .rb-games.primeg.mason > .rb-pcol { padding-top: 16px; -webkit-mask-imag
         spStop();
         SP.err = "Spotify didn't play on this screen, so that one used a backup track."; spShow();
         if (!c || P.ext || !P.base) return;
-        (P.lib ? clipBuf(P.base) : loadBuf(P.base)).then((buf) => { if (!buf || go !== pipGo) return; statusSrc = playBuf(c, buf, 0.95); clearTimeout(pipT); pipT = setTimeout(() => { if (go === pipGo) stopStatus(); }, Math.min(P.ms, buf.duration * 1000)); });
+        (P.lib ? clipBuf(P.base) : loadBuf(P.base)).then((buf) => { if (!buf || go !== pipGo) return; statusSrc = playBuf(c, buf, 0.95); clearTimeout(pipT); pipT = setTimeout(() => { if (go === pipGo) stopStatus(); }, Math.min(CLIP_MAX, P.ms, buf.duration * 1000)); });
       }).catch(() => {});
     }, 4000);
   }
@@ -12802,7 +12875,7 @@ body.tv .rb-games.primeg.mason > .rb-pcol { padding-top: 16px; -webkit-mask-imag
       if (P.dj) lastDj = Date.now();
       const song = sp ? sp.name : swap ? swap.song : P.song, artist = sp ? sp.artist : swap ? swap.artist : P.artist;
       const fly = !!(dj && D.intro && !loopOne);
-      const AL = fly && !sp && !pre ? djAlign(P, D) : { so: 0, x0: 0 }, msL = ms - AL.so * 1000;
+      const AL = fly && !sp && !pre ? djAlign(P, D) : { so: 0, x0: 0 }, msL = Math.min(CLIP_MAX, ms - AL.so * 1000);
       const xs0 = fly && !sp ? (AL.so + 0.08 - (P.b0 || 0)) * r - AL.x0 : 0;     // where the clip starts (below 0: it holds for the downbeat)
       if (fly) djLapText(song, artist, sp ? sp.art : P.cover);
       if (song) { $("#npSong").textContent = song; $("#npArtist").textContent = artist || ""; np.hidden = false; npT = setTimeout(() => np.classList.add("on"), fly && !pre ? Math.max(700, ((7.6 - xs0) / r) * 1000) : 700); } else np.hidden = true;
@@ -12832,6 +12905,7 @@ body.tv .rb-games.primeg.mason > .rb-pcol { padding-top: 16px; -webkit-mask-imag
       clearInterval(djT);
       if (dj && c && !sp && !loopOne) { const t0 = c.currentTime - off / 1000; djT = setInterval(() => { if (go !== pipGo) { clearInterval(djT); return; } if (c.state !== "running") return; const want = djPos(P, c.currentTime - t0 - avDelay() / 1000 + AL.so, D, AL.x0), d = djGap(D, want, v.currentTime); if (d > 0.12) { try { v.currentTime = want; bg.currentTime = want; } catch (e) {} } }, 1500); }
       jumboBets(); clearInterval(jbTick); jbTick = setInterval(() => { jumboBets(); jbBug(b); }, 5000);
+      clearTimeout(clipFadeT); if (ms - AL.so * 1000 > CLIP_MAX + 500) clipFadeT = setTimeout(() => { if (go === pipGo) clipFade(c); }, Math.max(0, msL - off - 1100));
       pipT = setTimeout(() => { if (statusBet === betId) stopStatus(); }, msL - off);
     });
   }
@@ -13074,7 +13148,7 @@ body.tv .rb-games.primeg.mason > .rb-pcol { padding-top: 16px; -webkit-mask-imag
   });
   $("#spConnect").addEventListener("click", () => { spConnect().catch((e) => toast("Couldn't start the Spotify sign-in: " + e.message)); });
   $("#spOff").addEventListener("click", () => { if (statusSrc && SP.on) stopStatus(); spForget(""); toast("Spotify's off on this screen"); });
-  $("#spTest").addEventListener("click", () => { closeSheets(); const P = pickClip(CLIPS.filter((c) => c.dj)); if (P) react(anyOpen(), "mid", P, "DJ " + gName()); });
+  $("#spTest").addEventListener("click", () => { closeSheets(); const P = pickClip(CLIPS.filter((c) => c.dj)); if (P) clipNow(() => react(anyOpen(), "mid", P, "DJ " + gName())); });
   spCallback(); if (SP.tok) spBoot(); spShow();
   function lockIn(b) {
     if (PHONE()) return;
@@ -13122,8 +13196,8 @@ body.tv .rb-games.primeg.mason > .rb-pcol { padding-top: 16px; -webkit-mask-imag
     // something fresh: a random one of the fresher ones. Everything's been on lately: the one that's gone longest
     const fresh = sorted.filter(isFresh);
     const p = fresh.length ? fresh[Math.floor(Math.random() * Math.max(1, Math.ceil(fresh.length * 0.6)))] : sorted[0];
-    played.set(key(p), Date.now()); if (songKey(p)) played.set(songKey(p), Date.now());
-    try { localStorage.setItem("sb-played", JSON.stringify([...played])); } catch (e) {}
+    if (clipFree()) { played.set(key(p), Date.now()); if (songKey(p)) played.set(songKey(p), Date.now());
+    try { localStorage.setItem("sb-played", JSON.stringify([...played])); } catch (e) {} }
     return p;
   }
   const sportOf = (b) => (b.sel && b.sel.sp) || b.sport;
@@ -13198,18 +13272,31 @@ body.tv .rb-games.primeg.mason > .rb-pcol { padding-top: 16px; -webkit-mask-imag
   // play a reaction for one bet. `P` picks the clip; otherwise it comes from the library by how the bet's going
   const moodOf = (kind, P) => (kind === "good" || kind === "first" ? "up" : kind === "bad" ? "down" : P.mood.includes("game") || P.mood.includes("hype") ? "hype" : P.mood.includes("vibe") ? "vibe" : P.mood.split(" ")[0]);
   // the play card starts the clip's sound under it; when the card leaves, the video comes in at that same moment
+
+  const CLIP_MAX = 30e3, CLIP_EVERY = 5 * 60e3;
+  let clipAt = Date.now() - CLIP_EVERY + 90e3, clipForce = false, clipClaim = null, clipTurn = 0, clipFadeT = 0;   // the first one a minute and a half in
+  const clipFree = () => { if (clipForce || Date.now() - clipAt >= CLIP_EVERY) return true; try { return !!AIR.on; } catch (e) { return false; } };
+  const clipNow = (f) => { clipForce = true; try { f(); } finally { clipForce = false; } };
+  // the last second of a clip cut at 30: the sound fades instead of stopping dead
+  function clipFade(c) {
+    try { const sN = statusSrc; if (sN && sN.gn && c) sN.gn.gain.setTargetAtTime(0, c.currentTime, 0.3); } catch (e) {}
+    const v = $("#pipVid"); if (v && !v.muted) { const v0 = v.volume; let k = 0; const iv = setInterval(() => { k++; try { v.volume = Math.max(0, v0 * (1 - k / 10)); } catch (e) {} if (k >= 10) clearInterval(iv); }, 100); }
+  }
   function preAudio(b, P) {
     const c = ready(); if (!c || !P || P === "lockin" || !P.base || P.dj) return null;
+    if (!clipFree()) return null;
+    clipAt = Date.now(); clipClaim = b.id;
     stopStatus(); statusBet = b.id;
     const pre = { at: 0, src: null, dead: false };
     (P.lib ? clipBuf(P.base) : loadBuf(P.base)).then((buf) => { if (!buf || pre.dead || statusBet !== b.id) return; pre.at = performance.now(); pre.src = statusSrc = playBuf(c, buf, 0.95); });
     return pre;
   }
-  function reactPre(b, kind, P, why, pre) { glow(b.id, kind); render(); statusBet = b.id; showPip(b, P, moodOf(kind, P), why, pre); }
+  function reactPre(b, kind, P, why, pre) { clipAt = Date.now(); clipClaim = null; glow(b.id, kind); render(); statusBet = b.id; showPip(b, P, moodOf(kind, P), why, pre); }
   function react(b, kind, P, why) {
     if (PHONE()) { render(); return; }
     { const v = vibeTake(b, kind, P); if (v) { b = v.b; P = v.P; why = v.why; } }
     { const spx = (gameFor(b) || {}).sport || sportOf(b); if (spx && !sset(spx, "clips")) { render(); return; } }
+    if (!clipFree() && clipClaim !== b.id) { glow(b.id, kind); render(); return; }
     glow(b.id, kind);
     render();
     if (!P) {
@@ -13217,6 +13304,7 @@ body.tv .rb-games.primeg.mason > .rb-pcol { padding-top: 16px; -webkit-mask-imag
       else P = pickClip(poolFor(b, kind === "good" ? "good" : kind === "bad" ? "bad" : "hype"));
     }
     if (!P) return;
+    clipAt = Date.now(); clipClaim = null;
     stopStatus();
     statusBet = b.id;
     if (P === "lockin") { lockIn(b); return; }
@@ -13752,6 +13840,7 @@ body.tv .rb-games.primeg.mason > .rb-pcol { padding-top: 16px; -webkit-mask-imag
     return kind ? g.id + ":" + (lp && lp.id ? lp.id : d) : null;
   };
   function houseOn(b, why) {
+    if (!clipFree()) return false;
     const P = pickClip(houseEdits()); if (!P) return false;
     lastAny = Date.now(); lastKind = "pop";
     react(b, "mid", Object.assign({}, P, { ms: Math.min(P.ms || 75e3, 75e3) }), why);
@@ -13817,7 +13906,7 @@ body.tv .rb-games.primeg.mason > .rb-pcol { padding-top: 16px; -webkit-mask-imag
     let P = dj ? pickClip(newSong(CLIPS.filter((c) => c.dj))) : null;
     if (!P) { P = pickClip(houseEdits()); if (P) P = Object.assign({}, P, { ms: Math.min(P.ms || 75e3, 75e3) }); }
     if (!P) return false;
-    fillAt = now; fillEnd = now + Math.min(P.ms || 30e3, 75e3); lastAny = now; lastKind = "pop"; if (dj) lastDj = now;
+    fillAt = now; fillEnd = now + Math.min(P.ms || 30e3, CLIP_MAX); lastAny = now; lastKind = "pop"; if (dj) lastDj = now;
     react(b, "mid", P, "Music break");
     return true;
   }
@@ -14044,7 +14133,7 @@ body.tv .rb-games.primeg.mason > .rb-pcol { padding-top: 16px; -webkit-mask-imag
     hlSeen.add(v.id); keep("sb-hl", hlSeen);
     const t = who ? (String(g.a.id) === who.tm ? g.a : g.h) : hlTeam(g, v); if (t) pipTeam = { t, word: why || "Highlight", pl: who ? who.nm : "" };
     lastAny = Date.now(); lastKind = "pop";
-    hlUntil = Date.now() + v.ms; react(b, "mid", { base: "espn/" + v.id, ext: v.src, label: v.hl, mood: "hype", ms: v.ms + 300, hl: true }, why || "ESPN highlight");
+    if (!clipFree()) return; hlUntil = Date.now() + Math.min(CLIP_MAX, v.ms); react(b, "mid", { base: "espn/" + v.id, ext: v.src, label: v.hl, mood: "hype", ms: v.ms + 300, hl: true }, why || "ESPN highlight");
     return true;
   }
   // a fresh highlight for the dead air: the queue first (halftime and the final run a reel), then anything new from the last 40 minutes
@@ -14217,6 +14306,7 @@ body.tv .rb-games.primeg.mason > .rb-pcol { padding-top: 16px; -webkit-mask-imag
     // a live game's own clip comes on now; a game that's over waits for a break
     const br = hlBreak(), k = HL2Q.findIndex((j) => hlLiveBet(j.g.id)), i = k >= 0 ? k : br ? 0 : -1;
     if (i < 0 || (!br && now - hlLiveAt < HL_GAP)) return;
+    if (!clipFree()) return;
     if (statusSrc || !$("#jumbo").hidden) { if (lastKind !== "pop" || Date.now() < hlUntil) return; stopStatus(); }   // a filler / DJ break makes way (not another highlight)
     const [j] = HL2Q.splice(i, 1), g = S.games.get(j.g.id) || j.g, at = g.st === "in" && hlAtBrk(g) ? g : br && br.g;
     if (!playHL(g, j.v, at ? hlBrkName(at) + (at.sport === "MLB" ? "" : " highlights") : "Highlight")) { HL2Q.splice(i, 0, j); return; }
@@ -14305,6 +14395,7 @@ body.tv .rb-games.primeg.mason > .rb-pcol { padding-top: 16px; -webkit-mask-imag
     if (now - VQ.at > 4 * 60e3 || VQ.b.status !== "open" || g.st !== "in" || (x && g[x].sc - g[x === "a" ? "h" : "a"].sc < 0)) { VQ = null; return; }
     if (!clipsOn() || PHONE() || trial || now - VQ.at < 6e3) return;   // give the play card a moment to claim it
     if (cardBusy || fxBusy) return;
+    if (!clipFree()) return;
     if (statusSrc || !$("#jumbo").hidden) { if (lastKind !== "pop") return; stopStatus(); }
     if (now - vbLast < vbGap()) { VQ = null; return; }
     const q = VQ; VQ = null; vbMark(q.g.id); vbLast = now;
@@ -14383,7 +14474,8 @@ body.tv .rb-games.primeg.mason > .rb-pcol { padding-top: 16px; -webkit-mask-imag
     return null;
   }
   function hlxPlay(x, b, why) {
-    hlSeen.add(x.id); keep("sb-hl", hlSeen); hlxLast = Date.now(); hlUntil = Date.now() + x.ms;
+    if (!clipFree()) return false;
+    hlSeen.add(x.id); keep("sb-hl", hlSeen); hlxLast = Date.now(); hlUntil = Date.now() + Math.min(CLIP_MAX, x.ms);
     lastAny = Date.now(); lastKind = "pop";
     const bet = b || { id: "hlx:" + x.id, status: "open", kind: "straight", legs: [], sport: x.sp };
     react(bet, "mid", { base: "espn/" + x.id, ext: x.src, label: x.hl, mood: "hype", ms: x.ms + 300, hl: true }, why);
@@ -14396,6 +14488,7 @@ body.tv .rb-games.primeg.mason > .rb-pcol { padding-top: 16px; -webkit-mask-imag
     const mine = list.map((x) => [x, hlxBet(x)]).find(([x, b]) => b && (br || (x.gid ? hlLiveBet(x.gid) : phase(b) === "live")));
     if (mine) {
       if (!br && now - hlLiveAt < HL_GAP) return;
+      if (!clipFree()) return;
       if (statusSrc || !$("#jumbo").hidden) { if (lastKind !== "pop" || Date.now() < hlUntil) return; stopStatus(); }
       hlxPlay(mine[0], mine[1], (br && br.g ? hlBrkName(br.g) + " · " : "Highlight · ") + mine[0].lg);
       if (!br) hlLiveAt = now;
@@ -15271,6 +15364,31 @@ body.tv .rb-games.primeg.mason > .rb-pcol { padding-top: 16px; -webkit-mask-imag
     react(pick.b, pick.state === "W" ? "good" : "mid", P, pick.state === "W" ? "Cashing" : pick.state === "C" ? "Comeback" : null);
   }
   setInterval(autoReact, 30e3);
+  // ---------- the clip heartbeat: 5 minutes since the last clip and nothing claimed the slot, one goes on now ----------
+  // in turn: an edit for how your live bet's going (cashing, a comeback, a filler), a house edit, the DJ, one of his scenes
+  function clipBeat() {
+    const now = Date.now();
+    if (!S.ready || PHONE() || trial || !clipsOn() || AIR.on || !document.body.classList.contains("tv")) return;
+    if (now - clipAt < CLIP_EVERY + 12e3 || clipBusy() || SHOW.on) return;
+    if (fbDay() && slateMode() === "prime" && now - clipAt < CLIP_EVERY + 90e3) return;   // one game on: give the broadcast up to 90 s to go to a commercial
+    const open = [...S.bets.values()].filter((b) => b.status === "open"), live = open.filter((b) => phase(b) === "live");
+    if (!live.length && ![...S.games.values()].some((g) => g.st === "in")) return;   // nothing on: the board rests
+    const b = live.sort((x, y) => (lastFeat.get(x.id) || 0) - (lastFeat.get(y.id) || 0))[0] || open[0] || oaBet(focusLeague() || "Other");
+    const spot = live.includes(b) ? liveSpot(b) : null, st = spot ? spot.state : "", sp = (gameFor(b) || {}).sport || sportOf(b);
+    const turn = clipTurn++ % 4;
+    let P = null, why = null, kind = "mid";
+    if (turn === 0) { P = pickClip(poolFor(b, st === "W" ? "rap" : st === "C" ? "comeback" : "fill")); why = st === "W" ? "Cashing" : st === "C" ? "Comeback" : null; if (st === "W") kind = "good"; }
+    else if (turn === 1) { P = pickClip(houseEdits().filter((c) => fits(c, b))); why = "House"; }
+    else if (turn === 2) { P = pickClip(newSong(CLIPS.filter((c) => c.dj))); why = "DJ " + gName(); }
+    else { const sc = CLIPS.filter((c) => c.base.startsWith("sounds/aura/") && !c.dj && fits(c, b) && forSport(c, sp)); P = pickClip(sc.length ? newSong(sc) : poolFor(b, "fill")); }
+    if (!P) P = pickClip(poolFor(b, "fill"));
+    if (!P) return;
+    lastAny = now; lastKind = "pop"; lastFeat.set(b.id, now); if (P.dj) lastDj = now;
+    react(b, kind, P, why);
+  }
+  setInterval(clipBeat, 10e3);
+  window.__clip = { at: () => clipAt, set: (v) => { clipAt = v; }, beat: clipBeat, free: clipFree, MAX: CLIP_MAX, EVERY: CLIP_EVERY };
+
   setInterval(() => {
     for (const id of awLooked) {
       const g = S.games.get(id), c = SUMM.get(id);
@@ -15287,7 +15405,7 @@ body.tv .rb-games.primeg.mason > .rb-pcol { padding-top: 16px; -webkit-mask-imag
   $("#clipLib").addEventListener("click", (e) => {
     const btn = e.target.closest("button[data-i]"); if (!btn) return;
     const P = CLIPS[Number(btn.dataset.i)], m = P.mood.split(" ")[0];
-    closeSheets(); react(anyOpen(), m === "up" ? "good" : m === "down" ? "bad" : "mid", P);
+    closeSheets(); clipNow(() => react(anyOpen(), m === "up" ? "good" : m === "down" ? "bad" : "mid", P));
   });
   $("#tvSafe").value = tvSafe(); $("#tvSafeVal").textContent = tvSafe() + "%";
   $("#tvSafe").addEventListener("input", (e) => setSafe(parseFloat(e.target.value) || 0, true));
@@ -18685,7 +18803,8 @@ window.SB3D = {
 // clock) behind the words
 const SIG_OF = { lotto: "reels", glass: "shatter", cook: "fire", nuke: "nuke", dart: "dart", snipe: "scope", whale: "water", splash: "water", brick: "bricks", lamp: "lamp",
   six: "fireworks", dinger: "fireworks", long: "fireworks", shootout: "fireworks", opal: "galaxy", him: "lightning", freehoops: "ot", matador: "cape", botd: "coins", dimes: "coins", gold: "coins",
-  stocks: "chart", doubt: "chart", rockfight: "rocks", bucket: "fire", stuffer: "fireworks", backdoor: "lightning" };
+  stocks: "chart", doubt: "chart", rockfight: "rocks", bucket: "fire", stuffer: "fireworks", backdoor: "lightning",
+  receipt: "receipt", script: "clapper", tour: "globe", chalk: "coins", fade: "lightning", degen: "galaxy", cardiac: "heartbeat", hook: "dart", nosweat: "shatter", hatty: "hats", garbage: "chart" };
 const SIG = {
   // three reels spin up and land, one by one, on sevens; the bulbs chase; coins pour
   reels(st, t0) {
@@ -18870,7 +18989,7 @@ const SIG = {
   },
   // coins: a rain of them, spinning, catching the light
   coins(st, t0, o) {
-    const { THREE } = st, n = (o && o.n) || 220, mesh = S3add(st, new THREE.InstancedMesh(new THREE.CylinderGeometry(0.22, 0.22, 0.04, 32), st.info.k === "dimes" ? st.mats.chrome : st.mats.gold, n));
+    const { THREE } = st, n = (o && o.n) || 220, mesh = S3add(st, new THREE.InstancedMesh(new THREE.CylinderGeometry(0.22, 0.22, 0.04, 32), ["dimes", "chalk"].includes(st.info.k) ? st.mats.chrome : st.mats.gold, n));
     const P = [], M = new THREE.Matrix4(), Q = new THREE.Quaternion(), E = new THREE.Euler(), V = new THREE.Vector3(), S = new THREE.Vector3(1, 1, 1);
     for (let i = 0; i < n; i++) P.push({ x: (Math.random() - 0.5) * 14, y: 5 + Math.random() * 8, z: -1 - Math.random() * 6, vy: -(3 + Math.random() * 3), rx: Math.random() * 6, ry: Math.random() * 6, s: 4 + Math.random() * 8 });
     mesh.frustumCulled = false;
@@ -18887,6 +19006,89 @@ const SIG = {
     const grid = S3add(st, new THREE.GridHelper(14, 14, 0x2a3340, 0x1a2028)); grid.rotation.x = Math.PI / 2; grid.position.z = -4.3;
     const total = tube.geometry.index.count;
     st.tick.push((t) => { const k = t - t0; tube.visible = head.visible = grid.visible = k >= 0; if (k < 0) return; const q = ez.io(seg(k, 0, 1.6)); tube.geometry.setDrawRange(0, Math.floor(total * q / 6) * 6); head.position.copy(curve.getPoint(Math.max(0.001, q))); if (q >= 1 && !tube.userData.done) { tube.userData.done = 1; S3ring(st, 6, 3.2, -4, 2.5, color); st.flash = 0.6; } });
+  },
+  // the CVS receipt: a slip prints out of the top of the screen, every leg on it with its check, the payout at the bottom
+  receipt(st, t0) {
+    const { L, THREE } = st, I = st.info, legs = (I.legs || []).slice(0, 14), H = 11, rows = Math.max(10, legs.length + 6);
+    const tex = canvasTex(L, 420, 1400, (x, w, h) => { x.fillStyle = "#f6f3ec"; x.fillRect(0, 0, w, h);
+      x.fillStyle = "#1a1a1a"; x.textAlign = "center"; x.font = "900 34px 'Azeret Mono', monospace"; x.fillText("THE SWEAT BOARD", w / 2, 70); x.font = "600 18px 'Azeret Mono', monospace"; x.fillText("*** PARLAY RECEIPT ***", w / 2, 104);
+      x.fillRect(30, 124, w - 60, 2); x.textAlign = "left"; let y = 168;
+      const L2 = legs.length ? legs : Array.from({ length: 9 }, (_, i) => ({ t: "LEG " + (i + 1) }));
+      L2.forEach((l, i) => { x.font = "700 20px 'Azeret Mono', monospace"; x.fillStyle = "#1a1a1a"; let t = String(l.t).toUpperCase(); while (x.measureText(t).width > w - 120 && t.length > 4) t = t.slice(0, -2); x.fillText(t, 34, y); x.fillStyle = "#1f8a4c"; x.font = "900 22px sans-serif"; x.fillText("✓", w - 58, y); y += 46; });
+      x.fillStyle = "#1a1a1a"; x.fillRect(30, y, w - 60, 2); y += 44; x.font = "900 26px 'Azeret Mono', monospace"; x.fillText(L2.length + " FOR " + L2.length, 34, y); y += 40; x.fillText("PAID", 34, y);
+      x.font = "600 16px 'Azeret Mono', monospace"; x.textAlign = "center"; y += 70; for (let i = 0; i < 46; i++) x.fillRect(40 + i * 7.5, y, i % 3 ? 3 : 5, 50); y += 90; x.fillText("THANK YOU · COME AGAIN", w / 2, y);
+      x.fillStyle = "#e6e0d2"; for (let yy = 0; yy < h; yy += 4) if (Math.random() < 0.08) x.fillRect(0, yy, w, 1); });
+    tex.wrapT = THREE.ClampToEdgeWrapping;
+    const geo = new THREE.PlaneGeometry(3, H); geo.translate(0, -H / 2, 0);
+    const paper = S3add(st, new THREE.Mesh(geo, new THREE.MeshBasicMaterial({ map: tex, color: 0xc9c5bc, side: THREE.DoubleSide })));
+    const slot = S3add(st, new THREE.Mesh(new THREE.BoxGeometry(3.8, 0.5, 0.6), new THREE.MeshStandardMaterial({ color: 0x1c1d21, metalness: 0.6, roughness: 0.4 })));
+    const x0 = -4.8; paper.position.set(x0, 3.55, -3.4); slot.position.set(x0, 3.7, -3.3); paper.rotation.z = 0.04;
+    st.tick.push((t) => { const k = t - t0; paper.visible = slot.visible = k >= 0; if (k < 0) return;
+      const q = ez.out(seg(k, 0, 2.2)); paper.scale.y = Math.max(0.001, q); tex.repeat.set(1, Math.max(0.001, q)); tex.offset.set(0, 1 - q);
+      paper.rotation.x = Math.sin(k * 2.4) * 0.06 * q; paper.position.z = -3.4 + Math.sin(k * 1.7) * 0.15; if (q >= 1 && !paper.userData.done) { paper.userData.done = 1; S3ring(st, x0, -2, -3.2, 3, 0xff4f6d); st.flash = 0.5; } });
+  },
+  // the screenwriter: the clapperboard comes up, opens, and claps shut on SCRIPTED
+  clapper(st, t0) {
+    const { L, THREE } = st, I = st.info, g = new THREE.Group(); S3add(st, g); g.position.set(0, -0.9, -4.2);
+    const face = canvasTex(L, 640, 420, (x, w, h) => { x.fillStyle = "#121214"; x.fillRect(0, 0, w, h); x.strokeStyle = "#e9e9e9"; x.lineWidth = 3; x.strokeRect(14, 14, w - 28, h - 28);
+      x.beginPath(); x.moveTo(14, 150); x.lineTo(w - 14, 150); x.moveTo(14, 280); x.lineTo(w - 14, 280); x.moveTo(w / 2, 150); x.lineTo(w / 2, 280); x.stroke();
+      x.fillStyle = "#e9e9e9"; x.font = "600 22px 'Azeret Mono', monospace"; x.fillText("PRODUCTION", 32, 52); x.fillText("SCENE", 32, 186); x.fillText("TAKE", w / 2 + 18, 186); x.fillText("DIRECTOR", 32, 316);
+      x.font = "900 66px 'Big Shoulders Display', Inter, sans-serif"; x.fillText("SCRIPTED", 32, 126); x.font = "900 60px Inter, sans-serif"; x.fillText((I.legs || []).length || 1, 40, 258); x.fillText("1", w / 2 + 26, 258);
+      x.font = "800 44px Inter, sans-serif"; let nm = String(I.name || "").toUpperCase(); while (x.measureText(nm).width > w - 80 && nm.length > 3) nm = nm.slice(0, -1); x.fillText(nm, 32, 380); });
+    const board = new THREE.Mesh(new THREE.BoxGeometry(4.2, 2.75, 0.12), [0, 0, 0, 0, 0, 0].map((_, i) => (i === 4 ? new THREE.MeshBasicMaterial({ map: face, color: 0xbdbdbd }) : new THREE.MeshStandardMaterial({ color: 0x121214, roughness: 0.8, envMapIntensity: 0.3 })))); g.add(board);
+    const stripes = canvasTex(L, 512, 64, (x, w, h) => { x.fillStyle = "#f2f2f2"; x.fillRect(0, 0, w, h); x.fillStyle = "#111"; for (let i = -2; i < 12; i++) { x.beginPath(); x.moveTo(i * 56, h); x.lineTo(i * 56 + 28, h); x.lineTo(i * 56 + 56, 0); x.lineTo(i * 56 + 28, 0); x.fill(); } }, "clapstripe");
+    const smat = new THREE.MeshBasicMaterial({ map: stripes, color: 0x9c9c9c });
+    const base = new THREE.Mesh(new THREE.BoxGeometry(4.2, 0.42, 0.14), smat); base.position.set(0, 1.6, 0); g.add(base);
+    const hinge = new THREE.Group(); hinge.position.set(-2.1, 1.82, 0); g.add(hinge);
+    const arm = new THREE.Mesh(new THREE.BoxGeometry(4.2, 0.42, 0.14), smat); arm.position.set(2.1, 0.21, 0); hinge.add(arm);
+    let clap = false;
+    st.tick.push((t) => { const k = t - t0; g.visible = k >= 0; if (k < 0) return;
+      const up = ez.back(seg(k, 0, 0.5)); g.position.y = -0.9 - (1 - up) * 6; g.rotation.y = Math.sin(k * 0.9) * 0.12;
+      hinge.rotation.z = k < 0.55 ? 0.55 * seg(k, 0.1, 0.4) : Math.max(0, 0.55 * (1 - seg(k, 0.55, 0.09)));
+      if (!clap && k >= 0.64) { clap = true; st.flash = 1; st.shake = 0.5; S3ring(st, 0, 0.9, -4, 6, 0xffd23f); S3ring(st, 0, 0.9, -4, 3.5, 0xffffff); } });
+  },
+  // cardiac: the monitor. It flatlines, then the spike, then it races
+  heartbeat(st, t0) {
+    const { THREE } = st, pts = [], beat = (x0, a) => [[x0, 0], [x0 + 0.15, 0.25 * a], [x0 + 0.3, 0], [x0 + 0.42, -0.35 * a], [x0 + 0.55, 2.2 * a], [x0 + 0.7, -0.9 * a], [x0 + 0.85, 0], [x0 + 1.1, 0.4 * a], [x0 + 1.35, 0]];
+    let x = -7.5; pts.push([x, 0]); for (const b0 of [-6.6, -5.1]) pts.push(...beat(b0, 0.7)); pts.push([-1.4, 0]); pts.push(...beat(-0.4, 1.6)); for (let b0 = 1.6; b0 < 6.6; b0 += 1.25) pts.push(...beat(b0, 1)); pts.push([7.5, 0]);
+    const path = new THREE.CurvePath(); for (let i = 1; i < pts.length; i++) path.add(new THREE.LineCurve3(new THREE.Vector3(pts[i - 1][0], pts[i - 1][1] - 0.6, -4), new THREE.Vector3(pts[i][0], pts[i][1] - 0.6, -4)));
+    const color = 0xff3b5c, tube = S3add(st, new THREE.Mesh(new THREE.TubeGeometry(path, 900, 0.05, 6), new THREE.MeshBasicMaterial({ color, toneMapped: false })));
+    const head = S3add(st, new THREE.Mesh(new THREE.SphereGeometry(0.13, 16, 12), new THREE.MeshBasicMaterial({ color: 0xffffff })));
+    const grid = S3add(st, new THREE.GridHelper(16, 16, 0x3a1a20, 0x221015)); grid.rotation.x = Math.PI / 2; grid.position.z = -4.3;
+    const total = tube.geometry.index.count, xs = pts.map((p) => p[0]); let spiked = false;
+    st.tick.push((t) => { const k = t - t0; tube.visible = head.visible = grid.visible = k >= 0; if (k < 0) return;
+      // steady, then it hangs on the flat line, then the spike and it races to the end
+      const q = k < 0.9 ? 0.4 * (k / 0.9) : k < 1.6 ? 0.4 + 0.06 * ((k - 0.9) / 0.7) : Math.min(1, 0.46 + 0.54 * ez.out(seg(k, 1.6, 1.1)));
+      tube.geometry.setDrawRange(0, Math.floor((total * q) / 6) * 6); head.position.copy(path.getPointAt(Math.max(0.001, Math.min(0.999, q))));
+      if (!spiked && q >= 0.5) { spiked = true; st.flash = 1; st.shake = 0.6; S3ring(st, head.position.x, head.position.y, -4, 4, color); } });
+  },
+  // the hat trick: hats come down onto the ice
+  hats(st, t0) {
+    const { THREE } = st, n = 90, cols = [0xb00e28, 0xb9bdc4, 0x14366e, 0x1a1a1c, 0xc98e12];
+    const crown = S3add(st, new THREE.InstancedMesh(new THREE.SphereGeometry(0.34, 18, 10, 0, Math.PI * 2, 0, Math.PI / 2), new THREE.MeshStandardMaterial({ roughness: 0.85, envMapIntensity: 0.35 }), n));
+    const brim = S3add(st, new THREE.InstancedMesh(new THREE.CylinderGeometry(0.5, 0.5, 0.04, 24), new THREE.MeshStandardMaterial({ roughness: 0.85, envMapIntensity: 0.35 }), n));
+    const ice = S3add(st, new THREE.Mesh(new THREE.PlaneGeometry(30, 12), new THREE.MeshBasicMaterial({ color: 0x6f9fc4, transparent: true, opacity: 0.1, depthWrite: false }))); ice.rotation.x = -Math.PI / 2; ice.position.set(0, -3.9, -5); ice.material.opacity = 0;
+    const P = [], M = new THREE.Matrix4(), M2 = new THREE.Matrix4(), Q = new THREE.Quaternion(), E = new THREE.Euler(), V = new THREE.Vector3(), S = new THREE.Vector3(1, 1, 1), OFF = new THREE.Matrix4().makeTranslation(0, 0.02, 0), C = new THREE.Color();
+    for (let i = 0; i < n; i++) { P.push({ x: (Math.random() - 0.5) * 14, y: 4.5 + Math.random() * 7, z: -2.5 - Math.random() * 5, vy: -2 - Math.random() * 2, rx: (Math.random() - 0.5) * 2, rz: (Math.random() - 0.5) * 2, sx: (Math.random() - 0.5) * 5, sz: (Math.random() - 0.5) * 5, landed: false }); C.setHex(cols[i % cols.length]); crown.setColorAt(i, C); brim.setColorAt(i, C); }
+    crown.frustumCulled = brim.frustumCulled = false; let first = false;
+    st.tick.push((t, dt) => { const k = t - t0; crown.visible = brim.visible = ice.visible = k >= 0; if (k < 0) return;
+      P.forEach((p, i) => { if (!p.landed) { p.vy -= 9 * dt; p.y += p.vy * dt; p.rx += p.sx * dt; p.rz += p.sz * dt; if (p.y < -3.85) { p.y = -3.85; p.landed = true; p.rx = 0; p.rz = 0; if (!first) { first = true; st.shake = 0.25; } } }
+        E.set(p.rx, 0, p.rz); Q.setFromEuler(E); V.set(p.x, p.y, p.z); M.compose(V, Q, S); brim.setMatrixAt(i, M); M2.multiplyMatrices(M, OFF); crown.setMatrixAt(i, M2); });
+      crown.instanceMatrix.needsUpdate = brim.instanceMatrix.needsUpdate = true; });
+  },
+  // the world tour: a globe turning, routes arcing from city to city, a stamp where each one lands
+  globe(st, t0) {
+    const { THREE } = st, g = new THREE.Group(); S3add(st, g); g.position.set(0, -0.6, -5);
+    const R = 2.6, wire = new THREE.LineSegments(new THREE.WireframeGeometry(new THREE.SphereGeometry(R, 28, 18)), new THREE.LineBasicMaterial({ color: 0x5fb8ff, transparent: true, opacity: 0.35 })); g.add(wire);
+    const core = new THREE.Mesh(new THREE.SphereGeometry(R * 0.985, 48, 32), new THREE.MeshStandardMaterial({ color: 0x0a1630, roughness: 0.5, metalness: 0.2, transparent: true, opacity: 0.85 })); g.add(core);
+    const spot = () => { const u = Math.random() * Math.PI * 2, v = Math.acos(2 * Math.random() - 1) * 0.7 + 0.45; return new THREE.Vector3(R * Math.sin(v) * Math.cos(u), R * Math.cos(v), R * Math.sin(v) * Math.sin(u)); };
+    const arcs = []; for (let i = 0; i < 6; i++) { const a = spot(), b = spot(), mid = a.clone().add(b).multiplyScalar(0.5).normalize().multiplyScalar(R * 1.55);
+      const c = new THREE.QuadraticBezierCurve3(a, mid, b), col = [0xffd23f, 0x3ddc97, 0xff7ad9, 0x5fb8ff][i % 4];
+      const m = new THREE.Mesh(new THREE.TubeGeometry(c, 80, 0.035, 6), new THREE.MeshBasicMaterial({ color: col, toneMapped: false })); g.add(m);
+      const pin = new THREE.Mesh(new THREE.RingGeometry(0.1, 0.17, 24), new THREE.MeshBasicMaterial({ color: col, side: THREE.DoubleSide, toneMapped: false })); pin.position.copy(b); pin.lookAt(b.clone().multiplyScalar(2)); pin.visible = false; g.add(pin);
+      arcs.push({ m, pin, n: m.geometry.index.count, t: 0.35 + i * 0.32 }); }
+    st.tick.push((t) => { const k = t - t0; g.visible = k >= 0; if (k < 0) return; g.scale.setScalar(ez.back(seg(k, 0, 0.6))); g.rotation.y = k * 0.35; g.rotation.x = 0.25;
+      arcs.forEach((a) => { const q = ez.io(seg(k, a.t, 0.6)); a.m.geometry.setDrawRange(0, Math.floor((a.n * q) / 6) * 6); if (q >= 1 && !a.pin.visible) { a.pin.visible = true; st.flash = Math.max(st.flash, 0.3); } a.pin.scale.setScalar(a.pin.visible ? 1 + Math.max(0, 1 - (k - a.t - 0.6) * 3) : 1); }); });
   },
   // a rock slide: stones tumbling down through the light
   rocks(st, t0) {
