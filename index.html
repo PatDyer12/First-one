@@ -10786,7 +10786,7 @@ img.tl { animation: none; }
   // ---------- sheets ----------
   function openSheet(id) { $(id).hidden = false; }
   // keep every open screen current: when a new version is up, reload it (never mid-form or mid-animation)
-  const BUILD = "20261021201707";
+  const BUILD = "20261021232908";
   function checkBuild() {
     if (BUILD === "dev") return;
     fetch("version.json?t=" + Date.now(), { cache: "no-store" }).then((r) => (r.ok ? r.json() : null)).then((j) => {
@@ -17955,15 +17955,28 @@ img.tl { animation: none; }
   }
   const ppSport = (m, leg) => (/^pp_mlb_/.test(m) ? "MLB" : /^pp_nba_/.test(m) ? (leg.sport === "CBB" ? "CBB" : "NBA") : /^pp_fb_/.test(m) ? (leg.sport === "CFB" ? "CFB" : "NFL") : "NHL");
   async function resolvePPLeg(leg) {
-    const m = ppSlipMk(leg), sp = ppSport(m, leg), base = matchLeg({ ...leg, market: "ml", team: leg.team || leg.away || leg.home });
-    const pair = !base && (leg.away || leg.home) ? matchLeg({ ...leg, market: "ml", team: leg.away || leg.home }) : null;
-    const games = base ? [S.games.get(base.g)] : pair ? [S.games.get(pair.g)] : pickable().filter((g) => g.sport === sp && g.st !== "post");
-    const side = leg.side === "under" ? "u" : "o", l = leg.line == null ? PP_DEF[ppStat(m)] : Math.abs(leg.line);
-    const pool = (await Promise.all(games.filter(Boolean).flatMap((g) => ["a", "h"].map((sd) => Promise.resolve(loadRoster(g.sport, g[sd].id)).catch(() => []).then((r) => (Array.isArray(r) ? r : []).map((p) => ({ p, g }))))))).flat();
-    let hit = pool.find((x) => sameName(x.p.nm, leg.player));
-    if (!hit) { const last = (n) => normNm(String(n || "").replace(/\b(jr|sr|ii|iii|iv)\b\.?/gi, "").trim().split(/\s+/).pop()), ln = last(leg.player), same = ln.length > 2 ? pool.filter((x) => last(x.p.nm) === ln) : []; if (same.length === 1) hit = same[0]; }
+    const m = ppSlipMk(leg), sp = ppSport(m, leg), side = leg.side === "under" ? "u" : "o", l = leg.line == null ? PP_DEF[ppStat(m)] : Math.abs(leg.line);
+    const hoop = (x) => x === "NBA" || x === "CBB", now = Date.now();
+    const all = [...S.games.values()].filter((g) => g.sport === sp || (hoop(sp) && hoop(g.sport))).sort((x, y) => (x.st === "post" ? 1 : 0) - (y.st === "post" ? 1 : 0) || Math.abs(x.t - now) - Math.abs(y.t - now));
+    const near = all.filter((g) => g.t > now - 20 * 36e5 && g.t < now + 40 * 36e5);
+    // the matchup printed on the slip: the game(s) it names best
+    const mscore = (g) => Math.max(nameHit(leg.away, g.a) + nameHit(leg.home, g.h), nameHit(leg.away, g.h) + nameHit(leg.home, g.a));
+    const top = leg.away || leg.home ? Math.max(0, ...all.map(mscore)) : 0, mu = top >= 2 ? all.filter((g) => mscore(g) === top).slice(0, 4) : [];
+    // the team the reader puts him on
+    const tm = leg.team ? matchLeg({ ...leg, market: "ml", away: null, home: null }) : null, tg = tm && S.games.get(tm.g);
+    const look = async (gs) => (await Promise.all(gs.flatMap((g) => ["a", "h"].map((sd) => Promise.resolve(loadRoster(g.sport, g[sd].id)).catch(() => []).then((r) => (Array.isArray(r) ? r : []).map((p) => ({ p, g }))))))).flat();
+    const last = (n) => normNm(String(n || "").replace(/\b(jr|sr|ii|iii|iv)\b\.?/gi, "").trim().split(/\s+/).pop());
+    const find = (pool) => {
+      let hit = pool.find((x) => normNm(x.p.nm) === normNm(leg.player)) || pool.find((x) => sameName(x.p.nm, leg.player));
+      if (!hit) { const ln = last(leg.player), same = ln.length > 2 ? pool.filter((x) => last(x.p.nm) === ln) : []; if (same.length === 1) hit = same[0]; }
+      return hit;
+    };
+    let hit = null;
+    for (const gs of [mu, tg ? [tg] : [], near]) { if (!gs.length) continue; hit = find(await look(gs)); if (hit) break; }
     if (hit) leg._td = { g: hit.g.id, m, s: side, l, o: leg.odds, sport: hit.g.sport, p: hit.p };
+    else if (mu.length === 1 && top >= 4 && leg.player) leg._td = { g: mu[0].id, m, s: side, l, o: leg.odds, sport: mu[0].sport, p: { nm: leg.player, hs: "", j: "", pos: "" } };
   }
+
   async function resolveTdLegs(bets) {
     for (const pb of bets) for (const leg of pb.legs || []) {
       if (ppSlipMk(leg)) { await resolvePPLeg(leg); continue; }
@@ -17999,7 +18012,7 @@ img.tl { animation: none; }
     } else {
       data.legs = legs.map((l, i) => { const m = ms[i], g = m && S.games.get(m.g); return g && !(m.m !== "ml" && !isTd(m.m) && m.l == null) ? mkLabel(g, m.m, m.s, m.l, m.p) : l.pick.slice(0, 80); });
       data.legSel = ms.map((m) => { const g = m && S.games.get(m.g); if (!g || (m.m !== "ml" && !isTd(m.m) && m.l == null)) return null; starts.push(g.t); const o = { g: g.id, m: m.m, s: m.s, l: m.l, sp: g.sport, t: g.t }; if (m.p) o.p = m.p; if (m.o) o.o = m.o; return o; });
-      const sp = [...new Set(legs.map((l) => l.sport).filter((s) => s && s !== "OTHER"))];
+      const sp = [...new Set(legs.map((l, i) => (data.legSel[i] && data.legSel[i].sp) || l.sport).filter((s) => s && s !== "OTHER"))];
       data.sport = sp.length === 1 ? sp[0] : sp.length ? "Mixed" : "";
       data.pick = data.legs.length + "-leg parlay";
     }
@@ -18025,6 +18038,20 @@ img.tl { animation: none; }
     renderPicker(); updatePreview();
   }
   let slipBets = [];
+  const legsLinked = (x) => (x.kind === "parlay" ? (x.legSel || []).filter(Boolean).length : x.sel ? 1 : 0);
+  function slipTwin(d, mine) {
+    const words = (t) => new Set(foldNm(String(t || "")).toLowerCase().split(/[^a-z]+/).filter((w) => w.length > 3));
+    const agree = (x) => { const a = x.legs || [], b = d.legs || []; if (a.length !== b.length || !a.length) return false;
+      let n = 0; a.forEach((t, i) => { const A = words(t), B = words(b[i]); if ([...A].some((w) => B.has(w))) n++; }); return n >= a.length * 0.8; };
+    return [...S.bets.values()].find((x) => x.status === "open" && mine(x) && Date.now() - (x.placedAt || 0) < 3 * 864e5 && x.kind === d.kind && x.odds === d.odds
+      && legsLinked(x) < legsLinked(d) && ((x.slip && x.slip === d.slip) || (d.kind === "parlay" && agree(x))));
+  }
+  function slipRelink(x, d) {
+    const patch = d.kind === "parlay" ? { legs: d.legs, legSel: d.legSel, sport: d.sport } : { sel: d.sel, pick: d.pick, sport: d.sport };
+    if (d.startAt) patch.startAt = d.startAt;
+    if (d.slip) patch.slip = d.slip;
+    return patchBet(x.id, patch);
+  }
   function scanNote(html) { const n = $("#scanNote"); n.innerHTML = html; n.hidden = !html; }
   $("#scanFile").addEventListener("change", async (e) => {
     const files = [...((e.target.files) || [])]; e.target.value = "";
@@ -18044,18 +18071,22 @@ img.tl { animation: none; }
       const far = legs.filter((l) => !gsFound(l)); if (far.length) await gsMore(far);
       if (legs.some(gsTdish)) await resolveTdLegs(bets);
       const book = (document.querySelector('input[name="book"]:checked') || {}).value || "FD", who = whoFields();
-      const added = [], dupes = [];
+      const added = [], dupes = [], fixed = [];
       for (const pb of bets) {
         const r = gsBuild({ ...pb, book: pb.book || book }); if (!r) continue;
         Object.assign(r.d, who); r.d.placedAt = Date.now();
+        const tw = slipTwin(r.d, (x) => r.d.kind === "parlay" || ((x.who || "") === (r.d.who || "") && (x.whoName || "") === (r.d.whoName || "")));
+        if (tw) { const n = legsLinked(r.d) - legsLinked(tw); if (await slipRelink(tw, r.d)) { fixed.push({ b: tw, n }); continue; } }
         const amt = (x) => (x.usd > 0 ? x.usd : x.units * S.unit), d = r.d;
         const dup = [...S.bets.values()].find((x) => x.status !== "void" && Date.now() - (x.placedAt || 0) < 3 * 864e5 && ((x.slip && x.slip === d.slip) || (x.kind === d.kind && x.odds === d.odds && (x.who || "") === (d.who || "") && Math.abs(amt(x) - amt(d)) < 0.01 && x.pick === d.pick && JSON.stringify(x.legs || []) === JSON.stringify(d.legs || []))));
         if (dup) { dupes.push(dup); continue; }
         const id = "b" + Date.now().toString(36) + Math.random().toString(36).slice(2, 6);
         if (await putBet(id, r.d)) added.push({ id, r });
       }
+      const fixMsg = fixed.length ? fixed.map((x) => `Connected ${x.n} more leg${x.n > 1 ? "s" : ""} on the ${x.b.pick}`).join(" · ") : "";
+      if (!added.length && fixed.length) { closeSheets(); render(); toast(fixMsg); return; }
       if (!added.length) { scanNote(dupes.length ? "<span><b>That slip's already on the board.</b></span>" : "Couldn't add that one. Try the screenshot again, or pick the game below."); return; }
-      closeSheets(); scanDone(added, dupes.length);
+      closeSheets(); scanDone(added, dupes.length); if (fixMsg) toast(fixMsg);
     } catch (err) {
       scanNote("The slip reader didn't answer (" + esc(String(err.message || err).slice(0, 120)) + "). Try again, or pick the game below.");
     } finally { btn.classList.remove("busy"); $("#scanLbl").textContent = "Scan a bet slip screenshot"; }
@@ -18171,6 +18202,8 @@ img.tl { animation: none; }
       for (const pb of all) {
         const r = gsBuild(pb); if (!r) continue;
         r.d.placedAt = Date.now();
+        const tw = slipTwin(r.d, isMe);
+        if (tw && (await slipRelink(tw, r.d))) { GS.res = GS.res.filter((x) => x.id !== tw.id); GS.res.unshift({ ...r, id: tw.id, dupe: true, flags: [] }); continue; }
         const dup = gsDupe(r.d); if (dup) { const was = GS.res.find((x) => x.id === dup.id); GS.res = GS.res.filter((x) => x !== was); GS.res.unshift(was ? { ...was, dupe: true } : { ...r, id: dup.id, dupe: true, flags: [] }); continue; }
         const id = "b" + Date.now().toString(36) + Math.random().toString(36).slice(2, 6);
         if (await putBet(id, r.d)) { r.id = id; GS.res.unshift(r); n++; }
