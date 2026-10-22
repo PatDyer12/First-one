@@ -5393,6 +5393,50 @@ img.tl { animation: none; }
 .x3-ring > b { font: 900 120px/.9 var(--f-display); text-transform: uppercase; color: #fff; }
 .x3-ring > p { margin: 0; font: 600 24px/1.3 Inter, sans-serif; color: rgba(255,255,255,.75); }
 .x3-rst { display: flex; gap: 14px; margin-top: 22px; }
+
+/* ---------- the new stories' words ---------- */
+.x3-burn, .x3-ride { position: absolute; inset: 0; }
+.x3-bh { position: absolute; left: 0; right: 0; top: 96px; display: grid; justify-items: center; gap: 8px; text-align: center; animation: x3Up .5s .3s both; }
+.x3-bh em, .x3-rdh em, .x3-heat em, .x3-vault em, .x3-bl em { font: 600 13px/1 "Azeret Mono", monospace; font-style: normal; letter-spacing: .26em; text-transform: uppercase; color: var(--fxk); }
+.x3-bh b { font: 900 82px/.95 var(--f-display); text-transform: uppercase; color: #fff; text-shadow: 0 4px 30px rgba(0,0,0,.8); }
+.x3-bh span { font: 700 22px/1.2 Inter, sans-serif; color: rgba(255,255,255,.85); }
+.x3-bh span i { font-style: normal; font-weight: 900; } .x3-bh span i.ok { color: #3ddc97; } .x3-bh span i.no { color: #ff5a6a; }
+.x3-bh span s { text-decoration: none; margin: 0 10px; color: rgba(255,255,255,.45); font: 700 14px/1 "Azeret Mono", monospace; letter-spacing: .2em; text-transform: uppercase; }
+.x3-bl { position: absolute; left: 0; right: 0; bottom: 86px; display: flex; justify-content: center; align-items: center; gap: 14px; animation: x3Up .5s 2.2s both; }
+.x3-bl span { display: flex; align-items: center; gap: 10px; padding: 10px 16px; border-radius: 12px; background: rgba(8,9,12,.74); box-shadow: inset 0 0 0 1px rgba(255,90,106,.35); }
+.x3-bl b { font: 800 18px/1 Inter, sans-serif; color: #fff; } .x3-bl small { font: 600 14px/1 Inter, sans-serif; color: rgba(255,255,255,.6); }
+.x3-bl .rb-av, .x3-rdl .rb-av { width: 30px; height: 30px; font-size: 14px; }
+.x3-rdh { position: absolute; left: 0; right: 0; top: 100px; display: grid; justify-items: center; gap: 8px; text-align: center; animation: x3Up .5s .2s both; }
+.x3-rdh b { font: 900 92px/.92 var(--f-display); text-transform: uppercase; color: #fff; }
+.x3-rdh span { font: 700 22px/1.2 Inter, sans-serif; color: rgba(255,255,255,.8); }
+.x3-rdl { position: absolute; left: 0; right: 0; bottom: 92px; margin: 0; padding: 0; list-style: none; display: flex; justify-content: center; gap: 12px; }
+.x3-rdl li { display: flex; align-items: center; gap: 10px; padding: 12px 16px; border-radius: 12px; background: rgba(8,9,12,.74); box-shadow: inset 0 0 0 1px rgba(255,255,255,.1); animation: x3Up .4s calc(.6s + var(--i) * .26s) both; }
+.x3-rdl b { font: 800 18px/1 Inter, sans-serif; color: #fff; } .x3-rdl strong { font: 900 24px/1 var(--f-display); color: #3ddc97; }
+.x3-heat { position: absolute; left: 0; right: 0; top: 92px; display: grid; justify-items: center; gap: 6px; text-align: center; animation: x3Up .5s .2s both; }
+.x3-heat b { font: 900 150px/.86 var(--f-display); color: #fff; text-shadow: 0 0 40px rgba(255,120,40,.55); }
+.x3-heat p { margin: 0; font: 700 22px/1.2 Inter, sans-serif; color: rgba(255,255,255,.82); }
+.x3-heat span { font: 900 30px/1 var(--f-display); color: #ffb35c; }
+.x3-vault { position: absolute; left: 80px; top: 104px; display: grid; gap: 8px; animation: x3Up .5s .3s both; }
+.x3-vault b { font: 900 104px/.9 var(--f-display); color: #ffd36b; text-shadow: 0 4px 30px rgba(0,0,0,.7); }
+.x3-vault span { font: 700 22px/1.2 Inter, sans-serif; color: rgba(255,255,255,.82); }
+.x3-vault small { font: 700 13px/1.2 "Azeret Mono", monospace; letter-spacing: .16em; text-transform: uppercase; color: rgba(255,255,255,.55); }
+/* the rafters on a profile */
+.pf-raf { flex: none; display: flex; gap: 12px; overflow-x: auto; padding: 22px 4px 16px; align-items: flex-start; scrollbar-width: thin; min-height: 176px; }
+.pf-bnr, .pf-jer { position: relative; flex: none; display: grid; justify-items: center; align-content: start; gap: 6px; text-align: center; }
+.pf-bnr::before, .pf-jer::before { content: ""; position: absolute; left: 50%; top: -22px; width: 1px; height: 22px; background: rgba(255,255,255,.25); }
+.pf-bnr { width: 96px; min-height: 148px; padding: 14px 8px 12px; box-sizing: border-box; border-radius: 3px; color: #fff;
+  background: linear-gradient(180deg, color-mix(in srgb, var(--fxk, var(--c)) 85%, #000), color-mix(in srgb, var(--fxk, var(--c)) 35%, #050608));
+  box-shadow: inset 0 0 0 2px rgba(255,255,255,.85), inset 0 0 0 5px color-mix(in srgb, var(--fxk, var(--c)) 70%, #000), inset 0 0 0 6px rgba(255,255,255,.4), 0 10px 22px rgba(0,0,0,.45); }
+.pf-bnr em { font: 700 8px/1 Inter, sans-serif; font-style: normal; letter-spacing: .14em; text-transform: uppercase; opacity: .75; }
+.pf-bnr b { font: 900 30px/.95 var(--f-display); }
+.pf-bnr span { font: 700 11px/1.2 Inter, sans-serif; opacity: .9; overflow-wrap: anywhere; }
+.pf-bnr small { margin-top: auto; font: 700 8.5px/1.2 Inter, sans-serif; letter-spacing: .08em; text-transform: uppercase; opacity: .65; }
+.pf-jer { width: 108px; height: 132px; padding-top: 22px; box-sizing: border-box; color: #fff; background: linear-gradient(180deg, var(--c), color-mix(in srgb, var(--c) 55%, #000));
+  clip-path: polygon(32% 0, 68% 0, 90% 9%, 100% 32%, 83% 39%, 83% 100%, 17% 100%, 17% 39%, 0 32%, 10% 9%); }
+.pf-jer::before { top: -22px; }
+.pf-jer em { font: 900 12px/1 var(--f-display); font-style: normal; letter-spacing: .06em; text-transform: uppercase; }
+.pf-jer b { font: 900 54px/.9 var(--f-display); text-shadow: 0 2px 0 rgba(0,0,0,.25); }
+.pf-jer small { font: 800 8px/1 Inter, sans-serif; letter-spacing: .16em; text-transform: uppercase; opacity: .8; }
 </style>
 </head>
 <body>
@@ -8809,6 +8853,15 @@ img.tl { animation: none; }
       top: won.reduce((m, b) => Math.max(m, netOf(b)), 0), longest: won.reduce((m, b) => Math.max(m, Number(b.odds) || 0), 0) };
   }
   const PF = { id: "me", sig: "" };
+  // the rafters on a profile: their jersey, then a banner for every cash, the biggest first
+  function pfRaf(d, nm, col) {
+    const W = d.done.filter((b) => outcome(b) === "W").sort((x, y) => netOf(y) - netOf(x));
+    if (!W.length) return "";
+    const ban = (b) => { const F = flexOf(b);
+      return `<div class="pf-bnr${F.k ? " bt-c-" + F.k : ""}" title="${esc(b.pick || "")}"><em>Sweat Board</em><b class="num">${fU(netOf(b), true)}</b><span>${esc(String(b.pick || "").slice(0, 34))}</span><small>${esc(F.k ? BT_DEF[F.k][1] : "Cashed")} · ${esc(pfDate(b.settledAt || b.placedAt))}</small></div>`; };
+    return `<h3 class="pf-sec">The rafters<small>${W.length} banner${W.length > 1 ? "s" : ""} · one for every cash</small></h3>
+      <div class="pf-raf"><div class="pf-jer" style="--c:${col}"><em>${esc(nm)}</em><b class="num">${W.length}</b><small>Retired</small></div>${W.map(ban).join("")}</div>`;
+  }
   function pfOpen(id) {
     const el = $("#pf"); if (!el) return;
     PF.id = id || PF.id; PF.sig = ""; el.hidden = false; pfRender(true);
@@ -8840,6 +8893,7 @@ img.tl { animation: none; }
         <header class="pf-h"><span class="pf-av">${esc(nm.slice(0, 1).toUpperCase())}</span><div class="pf-id"><b>${esc(nm)}</b><small>${[isFinite(d.first) ? "Betting since " + pfDate(d.first) : "", d.all.length + " bets", d.open ? d.open + " open now" : ""].filter(Boolean).join(" · ")}</small></div>
           <div class="pf-net num ${d.net > 0.004 ? "up" : d.net < -0.004 ? "dn" : ""}">${fU(d.net, true)}<small>${fUSD(d.net * S.unit, true)} all-time</small></div></header>
         <div class="pf-stats">${stats.map(([k, v]) => `<div><b class="num">${esc(v)}</b><em>${k}</em></div>`).join("")}</div>
+        ${pfRaf(d, nm, col)}
         <h3 class="pf-sec">Achievements</h3><div class="pf-ach">${keys.map((k) => tile(k, false)).join("")}</div>
         <h3 class="pf-sec lv">⚡ Live achievements<small>the same, on a bet put in during the game</small></h3><div class="pf-ach">${keys.map((k) => tile(k, true)).join("")}</div>
         <div class="pf-two"><section><h3 class="pf-sec">Best bets</h3>${d.wins.map((b) => row(b, true)).join("") || '<p class="pf-none">No wins yet.</p>'}</section>
@@ -10314,15 +10368,22 @@ img.tl { animation: none; }
   // ---- the show, v3: clean, in 3D ----
   const SHOW3_ACTS = {
     1: [["cash", 6600]],
-    2: [["cash", 7400], ["play", 4600], ["out", 3800]],
-    3: [["drop", 2600], ["cash", 8000], ["play", 5200], ["rec", 4800], ["ring", 4800], ["career", 5000], ["out", 4600]],
-    4: [["drop", 3400], ["cash", 8600], ["play", 5600], ["troph", 5600], ["rec", 5000], ["ring", 5000], ["stand", 4600], ["career", 5400], ["party", 7000], ["out", 5400]],
-    5: [["drop", 4600], ["cash", 9600], ["play", 6400], ["troph", 6000], ["rec", 5200], ["ring", 5200], ["stand", 5000], ["career", 6000], ["party", 9000], ["out", 6400]],
+    2: [["cash", 7400], ["play", 4600], ["burn", 4400], ["ride", 4400], ["out", 4000]],
+    3: [["drop", 2600], ["cash", 8000], ["play", 5200], ["burn", 4600], ["ride", 4600], ["rec", 4800], ["ring", 4800], ["heat", 4600], ["career", 5000], ["out", 4800]],
+    4: [["drop", 3400], ["cash", 8600], ["play", 5600], ["burn", 4800], ["ride", 4800], ["troph", 5600], ["rec", 5000], ["ring", 5000], ["heat", 4800], ["stand", 4600], ["career", 5400], ["vault", 5400], ["party", 7000], ["out", 5600]],
+    5: [["drop", 4600], ["cash", 9600], ["play", 6400], ["burn", 5200], ["ride", 5200], ["troph", 6000], ["rec", 5200], ["ring", 5200], ["heat", 5200], ["stand", 5000], ["career", 6000], ["vault", 6000], ["party", 9000], ["out", 6400]],
   };
-  // the acts that only play when they have something to say (their time doesn't go to the party when they don't)
-  const SHOW3_OPT = new Set(["rec", "ring", "career"]);
-  const SHOW3_LAB = { drop: "The drop", cash: "Cashed", play: "How it hit", troph: "Trophy case", stand: "Standings", party: "Party", out: "The rafters", career: "Career", rec: "Record board", ring: "Ring ceremony" };
-  const SHOW3_SHORT = { drop: "Drop", cash: "Cashed", play: "The play", troph: "Case", stand: "Standings", party: "Party", out: "Rafters", career: "Career", rec: "Records", ring: "Ring" };
+  // the acts that only play when they have something to say (their time doesn't go to the party when they don't), the best
+  // stories first, and how many of them a show of each size tells
+  const SHOW3_OPT = new Set(["rec", "ring", "career", "burn", "ride", "heat", "vault"]);
+  const SHOW3_PRI = ["burn", "ring", "rec", "ride", "heat", "vault", "career"], SHOW3_CAP = { 1: 0, 2: 1, 3: 3, 4: 3, 5: 4 };
+  function s3acts(lvl, c) {
+    const all = SHOW3_ACTS[lvl].map(([k, ms]) => ({ k, ms })).filter((a) => !SH3[a.k].ok || SH3[a.k].ok(c));
+    const keep = new Set(all.filter((a) => SHOW3_OPT.has(a.k)).sort((x, y) => SHOW3_PRI.indexOf(x.k) - SHOW3_PRI.indexOf(y.k)).slice(0, SHOW3_CAP[lvl] || 0).map((a) => a.k));
+    return all.filter((a) => !SHOW3_OPT.has(a.k) || keep.has(a.k));
+  }
+  const SHOW3_LAB = { drop: "The drop", cash: "Cashed", play: "How it hit", troph: "Trophy case", stand: "Standings", party: "Party", out: "The rafters", career: "Career", rec: "Record board", ring: "Ring ceremony", burn: "Cooked", ride: "The ride", heat: "Heater", vault: "The vault" };
+  const SHOW3_SHORT = { drop: "Drop", cash: "Cashed", play: "The play", troph: "Case", stand: "Standings", party: "Party", out: "Rafters", career: "Career", rec: "Records", ring: "Ring", burn: "Cooked", ride: "Ride", heat: "Heater", vault: "Vault" };
   Object.assign(BT_CALL, { nuke: ["Nuke", "Tactical nuke"], botd: ["Bet of the day"], whale: ["Whale alert"], dart: ["Bullseye"], opal: ["Galaxy opal"], lotto: ["Jackpot"], snipe: ["Sniped"], long: ["Long shot"], dinger: ["Gone"],
     lamp: ["Light the lamp"], punchout: ["Punched out"], six: ["Touchdown"], chains: ["Move the chains"], rivalry: ["Rivalry win"], shootout: ["Shootout"], lockdown: ["Lockdown"], prime: ["Primetime"], dawg: ["Dawg"] });
   const show3Off = () => { try { return localStorage.getItem("sb-3d") === "off"; } catch (e) { return false; } };
@@ -10340,7 +10401,7 @@ img.tl { animation: none; }
     const done = [...S.bets.values()].filter((x) => x.id !== b.id && x.status !== "open" && x.status !== "void");
     const dt = (t) => new Date(t || Date.now()).toLocaleDateString("en-US", { month: "short", day: "numeric", timeZone: "America/New_York" }).toUpperCase();
     const typeOf = (x) => { try { const F = flexOf(x); return F && F.k && BT_DEF[F.k] ? F.k : ""; } catch (e) { return ""; } };
-    const cell = (x, n, at, k) => ({ nm: personName(x), col: personCol(x), pk: personKey(x), n, amt: fU(n, true), usd: fUSD(n * U), at, d: dt(at), w: k ? BT_DEF[k][1] : "Cashed", pick: String(x.pick || "").slice(0, 60) });
+    const cell = (x, n, at, k) => ({ nm: personName(x), col: personCol(x), pk: personKey(x), n, amt: fU(n, true), usd: fUSD(n * U), at, d: dt(at), k, w: k ? BT_DEF[k][1] : "Cashed", odds: fOdds(x.odds), pick: String(x.pick || "").slice(0, 60) });
     const wins = done.filter((x) => outcome(x) === "W").map((x) => cell(x, netOf(x), x.settledAt || x.placedAt || 0, typeOf(x)));
     const now = Object.assign(cell(b, c.n, b.settledAt || Date.now(), c.F.k && BT_DEF[c.F.k] ? c.F.k : ""), { isNew: true });
     wins.push(now); wins.sort((x, y) => x.at - y.at);
@@ -10368,7 +10429,35 @@ img.tl { animation: none; }
     const cs = Object.keys(BT_DEF).map((k) => { pr.className = "bt-c-" + k; const ic = String(BT_DEF[k][0]);
       return { k, name: BT_DEF[k][1], col: s3col(getComputedStyle(pr).getPropertyValue("--fxk"), "#ffd23f"), icon: ic.startsWith("<svg") ? ic : null, glyph: ic.startsWith("<svg") ? null : ic, n: had.get(k) || 0, cur: k === curK }; });
     pr.remove();
-    return { wins, jerseys, rank, roomN: wins.length, pb, mineN: mine.length, rec, ring, career, case: cs, caseN: cs.filter((x) => x.n > 0).length,
+    // their rafters: their banners alone, each in its type's colors (theirs when it has no type), and their jersey
+    const kcol = new Map(cs.map((x) => [x.k, x.col]));
+    const raf = mine.map((w) => ({ ...w, col: (w.k && kcol.get(w.k)) || w.col }));
+    const jersey = { nm: c.name, col: c.col, num: mine.length, best: mineBy[0] ? mineBy[0].amt : "" };
+    // the heater: straight cashes, pushes don't break it
+    let hn = 0, hw = 0, hs = 0; const hl = [];
+    for (let i = career.length - 1; i >= 0; i--) { const x = career[i]; if (x.o === "P") continue; if (x.o !== "W") break; hn++; hw += x.n; hs = x.at; hl.unshift(fU(x.n, true)); }
+    const heat = hn >= 3 ? { n: hn, won: fU(hw, true), since: dt(hs), list: hl.slice(-12) } : null;
+    // the vault: everything they've cashed, in bars
+    const gross = mine.reduce((x, w) => x + w.n, 0), per = [0.5, 1, 2, 5, 10, 25, 50, 100].find((k) => gross / k <= 120) || 250;
+    const vault = { gross: fU(gross, true), usd: fUSD(gross * U), per, bars: Math.max(1, Math.round(gross / per)), fresh: Math.max(1, Math.round(c.n / per)), n: mine.length };
+    // cooked: somebody else in the room on the other side, and it lost
+    const t = b.sel, pp = t && isPP(t.m);
+    const other = (x) => {
+      if (b.kind === "parlay" || x.kind === "parlay" || !t || !x.sel || String(x.sel.g) !== String(t.g)) return false;
+      if (pp) return x.sel.m === t.m && normNm(x.sel.p && x.sel.p.nm) === normNm(t.p && t.p.nm) && ((t.s === "o" && x.sel.s === "u" && Number(x.sel.l) <= Number(t.l)) || (t.s === "u" && x.sel.s === "o" && Number(x.sel.l) >= Number(t.l)));
+      return against(x, b);
+    };
+    const dead = (x) => { if (x.status !== "open") return outcome(x) === "L"; if (pp) return true; const gx = gameOf(x.sel); if (!gx || gx.st !== "post") return false;
+      return x.sel.m === "ml" || (x.sel.m === "tot" && Number(x.sel.l) === Number(t.l)) || (x.sel.m === "sp" && t.m === "sp" && Number(x.sel.l) === -Number(t.l)); };
+    const burn = [...S.bets.values()].filter((x) => x.id !== b.id && personKey(x) !== pk && other(x) && dead(x))
+      .sort((x, y) => (Number(y.units) || 0) - (Number(x.units) || 0)).slice(0, 4)
+      .map((x) => ({ nm: personName(x), col: personCol(x), pick: String(x.pick || "").slice(0, 40), odds: fOdds(x.odds), lost: fU(Number(x.units) || 0), usd: fUSD((Number(x.units) || 0) * U) }));
+    // the ride: everyone else on the same bet
+    const rk = rideKey(b), riders = [...S.bets.values()].filter((x) => x.id !== b.id && personKey(x) !== pk && rideKey(x) === rk && (x.status === "open" || outcome(x) === "W"))
+      .map((x) => { const n = (Number(x.units) || 0) * ppu(x.odds); return { nm: personName(x), col: personCol(x), n, amt: fU(n, true), usd: fUSD(n * U) }; }).slice(0, 7);
+    const ride = riders.length ? { riders, total: fU(riders.reduce((x, r) => x + r.n, c.n), true), usd: fUSD(riders.reduce((x, r) => x + r.n, c.n) * U) } : null;
+    return { raf, jersey, heat, vault, burn, ride,
+      wins, jerseys, rank, roomN: wins.length, pb, mineN: mine.length, rec, ring, career, case: cs, caseN: cs.filter((x) => x.n > 0).length,
       total: { n: wins.length, usd: fUSD(wins.reduce((x, w) => x + w.n, 0) * U) } };
   }
   const legOf = (c) => c.hist || (c.hist = cashLegacy(c));
@@ -10487,9 +10576,9 @@ img.tl { animation: none; }
       },
     },
     out: {
-      html: (c) => { const H = legOf(c), me = H.jerseys.find((j) => j.me), n = H.roomN;
+      html: (c) => { const H = legOf(c), n = H.raf.length, big = [...H.raf].sort((x, y) => y.n - x.n)[0];
         return `<div class="x3-out"><div class="x3-fb x3-plq"><em>Hall of fame</em><b>${esc(c.who.join(" + "))}</b><span>${esc(fU(c.n, true))} · ${esc(fUSD(c.usd))}</span><small>${esc(c.b.pick)}</small></div>
-          <div class="x3-raf"><em>The rafters</em><b>Banner #${n}</b><span>${n} cash${n === 1 ? "" : "es"} hanging · ${esc(H.total.usd)} won</span><small>${esc(c.name)}'s ${ordN(me ? me.num : 1)}${n >= 6 && H.rank <= 10 ? ` · #${H.rank} all-time` : ""}${H.jerseys.length > 1 ? ` · ${H.jerseys.length} jerseys retired` : ""}</small></div><span class="x3-sign">Sweat Board</span></div>`; },
+          <div class="x3-raf"><em>${esc(c.name)}'s rafters</em><b>Banner #${n}</b><span>${n === 1 ? "The first one up there" : `${n} cashes hanging · ${esc(H.vault.usd)} won`}</span><small>${n > 1 && big ? `Biggest: ${esc(big.amt)} ${esc(big.pick)} · ` : ""}No. ${n} retired</small></div><span class="x3-sign">Sweat Board</span></div>`; },
       go: (c) => { if (c.lvl >= 4) { shSfx("sniper/slam", 0.75, 520); shSfx("clink", 0.6, 950); } else shSfx("sniper/bc_out", 0.6, 0); },
     },
   };
@@ -10522,6 +10611,35 @@ img.tl { animation: none; }
       go: () => { shSfx("sniper/launch", 0.6, 0); shSfx("clink", 0.8, 1300); shSfx("sniper/bc_check", 0.8, 1420); },
     },
   });
+  const s3av = (nm, col) => `<span class="rb-av" style="--c:${col}">${esc(String(nm || "?").slice(0, 1).toUpperCase())}</span>`;
+  Object.assign(SH3, {
+    burn: {
+      ok: (c) => legOf(c).burn.length > 0,
+      html: (c) => { const L = legOf(c).burn, x = L[0];
+        return `<div class="x3-burn"><div class="x3-bh"><em>Cooked</em><b>${esc(c.name)} cooked ${esc(x.nm)}</b><span>${esc(c.b.pick)} <i class="ok">✓</i> <s>vs</s> ${esc(x.pick)} <i class="no">✗</i></span></div>
+          ${L.length > 1 ? `<div class="x3-bl"><em>Also on the wrong side</em>${L.slice(1).map((y) => `<span>${s3av(y.nm, y.col)}<b>${esc(y.nm)}</b><small>${esc(y.pick)} · −${esc(y.lost)}</small></span>`).join("")}</div>` : ""}</div>`; },
+      go: () => { shSfx("sniper/whoosh", 0.6, 0); shSfx("sniper/slam", 0.8, 700); shSfx("sniper/bc_out", 0.7, 1650); shSfx("sniper/launch", 0.5, 1700); },
+    },
+    ride: {
+      ok: (c) => !!legOf(c).ride,
+      html: (c) => { const R = legOf(c).ride, P = [{ nm: c.name, col: c.col, amt: fU(c.n, true), usd: fUSD(c.usd) }, ...R.riders];
+        return `<div class="x3-ride"><div class="x3-rdh"><em>The ride</em><b>${P.length} on it</b><span>${esc(R.total)} for the room · ${esc(R.usd)}</span></div>
+          <ul class="x3-rdl">${P.map((p, i) => `<li style="--i:${i}">${s3av(p.nm, p.col)}<b>${esc(p.nm)}</b><strong>${esc(p.amt)}</strong></li>`).join("")}</ul></div>`; },
+      go: (c) => { const n = 1 + legOf(c).ride.riders.length; for (let i = 0; i < n; i++) shSfx("clink", 0.55, 500 + i * 260); shSfx("coins", 0.5, 600 + n * 260); },
+    },
+    heat: {
+      ok: (c) => !!legOf(c).heat,
+      html: (c) => { const h = legOf(c).heat;
+        return `<div class="x3-heat"><em>Heater</em><b>W${h.n}</b><p>${h.n} straight cashes since ${esc(h.since)}</p><span>${esc(h.won)} in the run</span></div>`; },
+      go: (c) => { const n = Math.min(12, legOf(c).heat.n); for (let i = 0; i < n; i++) shSfx("sniper/bc_tick", 0.45, 400 + i * 180); shSfx("sniper/launch", 0.6, 450 + n * 180); },
+    },
+    vault: {
+      ok: (c) => legOf(c).vault.n >= 5,
+      html: (c) => { const v = legOf(c).vault;
+        return `<div class="x3-vault"><em>The vault · ${esc(c.name)}</em><b>${esc(v.gross)}</b><span>cashed all-time · ${esc(v.usd)}</span><small>${v.bars} bars · each one ${trim(v.per)}u · ${v.fresh} from this one</small></div>`; },
+      go: (c, d, a) => { for (let i = 0; i < 6; i++) shSfx("clink", 0.35, 300 + i * 260); shSfx("coins", 0.6, a.ms * 0.62); shSfx("sniper/slam", 0.6, a.ms * 0.66); },
+    },
+  });
   // the rafters' sounds: up off the floor, the flight up, the landing in its place
   SH3.out.go = (c, d, a) => { shSfx("sniper/bc_out", 0.5, 0); shSfx("sniper/whoosh", 0.5, a.ms * 0.28); shSfx("sniper/slam", c.lvl >= 4 ? 0.75 : 0.6, a.ms * 0.8); shSfx("clink", 0.55, a.ms * 0.8 + 140); };
   function showAct3(el, c, a, i) {
@@ -10548,7 +10666,7 @@ img.tl { animation: none; }
     c.tile = tile || null; c.v = null;
     const sp = (c.g && c.g.sport) || b.sport || "", calls = (F.k && BT_CALL[F.k]) || (/^(NBA|CBB)$/.test(sp) ? BT_CALL.nba : null);
     c.call = calls ? calls[Math.floor(Math.random() * calls.length)] : lvl >= 5 ? "Nuke" : "Cashed";
-    const acts = SHOW3_ACTS[lvl].map(([k, ms]) => ({ k, ms })).filter((a) => !SH3[a.k].ok || SH3[a.k].ok(c));
+    const acts = s3acts(lvl, c);
     const lost = SHOW3_ACTS[lvl].filter(([k]) => !acts.some((a) => a.k === k) && !SHOW3_OPT.has(k)).reduce((x, a) => x + a[1], 0);
     (acts.find((a) => a.k === "party") || acts.find((a) => a.k === "cash")).ms += lost;
     let T = 0; for (const a of acts) { a.t0 = T; T += a.ms; }
@@ -10900,7 +11018,7 @@ img.tl { animation: none; }
   // ---------- sheets ----------
   function openSheet(id) { $(id).hidden = false; }
   // keep every open screen current: when a new version is up, reload it (never mid-form or mid-animation)
-  const BUILD = "20261022025555";
+  const BUILD = "20261022032503";
   function checkBuild() {
     if (BUILD === "dev") return;
     fetch("version.json?t=" + Date.now(), { cache: "no-store" }).then((r) => (r.ok ? r.json() : null)).then((j) => {
@@ -19122,7 +19240,7 @@ async function S3warm() {
   const L = await s3lib(); if (S3.warm) return; S3.warm = true;
   const st = S3build(L, { lvl: 5, sport: "NBA", hoops: true, acc: "#ff7a1a", col: "#4fb3ff", name: "Warm", word: "Cashed", call: "Bang!", pick: "Warm up", n: 1, amt: "+1u", usd: "$15", date: "", lite: false, hist: L3demo() });
   st.info.legs = [{ t: "Warm" }, { t: "Up" }];
-  for (const k of ["drop", "cash", "troph", "party", "out", "play", "career", "rec", "ring", ...Object.keys(SIG).map((x) => "sig:" + x)]) {
+  for (const k of ["drop", "cash", "troph", "party", "out", "play", "career", "rec", "ring", "burn", "ride", "heat", "vault", ...Object.keys(SIG).map((x) => "sig:" + x)]) {
     if (k.startsWith("sig:")) SIG[k.slice(4)](st, 0); else ACT3[k](st, { t: 0, ms: 4000 }); st.t = 0;
     for (const t of [0.4, 1.0, 2.0]) { st.t = t; for (const f of st.tick.slice()) { try { f(t, 0.016); } catch (e) {} } }
     st.r.compile(st.scene, st.cam); st.comp.render(0.016); S3clear(st);
@@ -19502,7 +19620,9 @@ function L3demo() {
   const wins = Array.from({ length: 30 }, (_, i) => { const [nm, col] = P[i % 5]; return { nm, col, amt: "+" + (1 + (i % 5)) + "u", usd: "$" + 15 * (1 + (i % 5)), n: 1 + (i % 5), d: "OCT " + (1 + (i % 28)), w: "Cashed", me: i % 5 === 3 }; });
   wins[29].isNew = true;
   return { wins, jerseys: P.map(([nm, col], i) => ({ nm, col, num: 5 + i * 3, best: "+4u", me: i === 3 })), rank: 3, roomN: 30, career: Array.from({ length: 40 }, (_, i) => ({ n: i % 3 ? 1.1 : -1, o: i % 3 ? "W" : "L", isNew: i === 39 })),
-    case: Array.from({ length: 46 }, (_, i) => ({ k: "t" + i, name: "Type " + i, col: P[i % 5][1], n: i % 4 ? 0 : 2, cur: i === 8 })), caseN: 12, ring: { num: 25 }, rec: { rank: 3 } };
+    case: Array.from({ length: 46 }, (_, i) => ({ k: "t" + i, name: "Type " + i, col: P[i % 5][1], n: i % 4 ? 0 : 2, cur: i === 8 })), caseN: 12, ring: { num: 25 }, rec: { rank: 3 },
+    raf: wins.filter((w) => w.me || w.isNew), jersey: { nm: "Drew", col: "#ff6fae", num: 7, best: "+4u" }, heat: { n: 5, list: ["+1u", "+2u", "+1u", "+3u", "+1u"] },
+    vault: { bars: 40, fresh: 4, per: 1 }, burn: [{ nm: "Mike", col: "#ff9f43", pick: "Hornets ML", odds: "+130", lost: "2u" }], ride: { riders: [{ nm: "Tyler", col: "#4fb3ff", amt: "+1u" }, { nm: "Chris", col: "#b18cff", amt: "+2u" }] } };
 }
 // one canvas, n cells of cw x ch, each drawn by draw(ctx, i, w, h) in its own clip; uv(i) gives the cell's [u0, v0, u1, v1]
 function L3atlas(n, cw, ch, draw) {
@@ -19520,17 +19640,21 @@ function L3fit(x, s, maxW, size, weight, fam) { let fs = size; x.font = `${weigh
 const L3D = '"Big Shoulders Display", Impact, sans-serif', L3I = "Inter, sans-serif";
 // a banner's face: the person's color, a white double border, their name, what it paid, the type and the date
 function L3banFace(x, it, w, h) {
-  const k = w / 160;
+  const k = w / 160, pick = String(it.pick || "").toUpperCase();
   x.fillStyle = it.col || "#3a3f4a"; x.fillRect(0, 0, w, h);
-  const g = x.createLinearGradient(0, 0, 0, h); g.addColorStop(0, "rgba(0,0,0,.18)"); g.addColorStop(1, "rgba(0,0,0,.78)"); x.fillStyle = g; x.fillRect(0, 0, w, h);
+  const g = x.createLinearGradient(0, 0, 0, h); g.addColorStop(0, "rgba(0,0,0,.2)"); g.addColorStop(1, "rgba(0,0,0,.8)"); x.fillStyle = g; x.fillRect(0, 0, w, h);
   x.strokeStyle = "rgba(255,255,255,.9)"; x.lineWidth = 3 * k; x.strokeRect(7 * k, 7 * k, w - 14 * k, h - 14 * k); x.lineWidth = 1.2 * k; x.strokeRect(12 * k, 12 * k, w - 24 * k, h - 24 * k);
   x.textAlign = "center"; x.fillStyle = "#fff"; x.textBaseline = "alphabetic";
-  x.globalAlpha = 0.8; x.font = `700 ${Math.round(10 * k)}px ${L3I}`; x.fillText("SWEAT BOARD", w / 2, 32 * k); x.globalAlpha = 1;
-  L3fit(x, String(it.nm || "").toUpperCase(), w - 34 * k, Math.round(44 * k), 900, L3D); x.fillText(String(it.nm || "").toUpperCase(), w / 2, 84 * k);
-  L3fit(x, it.amt || "", w - 30 * k, Math.round(50 * k), 900, L3D); x.fillText(it.amt || "", w / 2, 142 * k);
-  x.globalAlpha = 0.85; x.font = `700 ${Math.round(13 * k)}px ${L3I}`; x.fillText(it.usd || "", w / 2, 162 * k);
-  x.globalAlpha = 0.75; L3fit(x, String(it.w || "").toUpperCase(), w - 30 * k, Math.round(12 * k), 700, L3I); x.fillText(String(it.w || "").toUpperCase(), w / 2, 190 * k);
-  x.globalAlpha = 0.6; x.font = `700 ${Math.round(11 * k)}px ${L3I}`; x.fillText(it.d || "", w / 2, h - 20 * k); x.globalAlpha = 1;
+  x.globalAlpha = 0.8; L3fit(x, String(it.nm || "").toUpperCase() + " · SWEAT BOARD", w - 30 * k, Math.round(10 * k), 800, L3I); x.fillText(String(it.nm || "").toUpperCase() + " · SWEAT BOARD", w / 2, 30 * k);
+  x.globalAlpha = 0.9; L3fit(x, String(it.w || "").toUpperCase(), w - 30 * k, Math.round(12 * k), 800, L3I); x.fillText(String(it.w || "").toUpperCase(), w / 2, 50 * k); x.globalAlpha = 1;
+  L3fit(x, it.amt || "", w - 26 * k, Math.round(54 * k), 900, L3D); x.fillText(it.amt || "", w / 2, 104 * k);
+  x.globalAlpha = 0.85; x.font = `700 ${Math.round(12 * k)}px ${L3I}`; x.fillText(it.usd || "", w / 2, 122 * k); x.globalAlpha = 1;
+  // the pick, on two lines if it needs them
+  const words = pick.split(/\s+/), maxW = w - 30 * k; let fs = Math.round(20 * k), lines;
+  for (;;) { x.font = `900 ${fs}px ${L3D}`; lines = []; let ln = ""; for (const wd of words) { const t = ln ? ln + " " + wd : wd; if (x.measureText(t).width > maxW && ln) { lines.push(ln); ln = wd; } else ln = t; } if (ln) lines.push(ln);
+    if ((lines.length <= 2 && lines.every((l) => x.measureText(l).width <= maxW)) || fs <= 9) break; fs--; }
+  lines.slice(0, 2).forEach((l, n) => x.fillText(l, w / 2, 152 * k + n * fs * 1.05));
+  x.globalAlpha = 0.6; x.font = `700 ${Math.round(10 * k)}px ${L3I}`; x.fillText([it.odds, it.d].filter(Boolean).join(" · "), w / 2, h - 20 * k); x.globalAlpha = 1;
 }
 // a retired jersey (cut out): the name across the shoulders, their cash count as the number, their best under it
 function L3jersey(x, it, w, h) {
@@ -19592,14 +19716,14 @@ const L3finish = (a) => { if (a) while (a.done < a.n) a.one(a.done++); };
 // the rest newest first. Each row hangs where its banners clear the row in front, so from down here every one shows
 const L3CAM = { x: 0, y: -2, z: 3 }, L3CZ = -16;
 function L3rafLayout(H) {
-  const wins = H.wins || [], cur = wins.find((w) => w.isNew) || null;
-  const cap0 = Math.floor((6.5 * 1.75 * 2) / (1.9 * 1.22)), nLeg = wins.length >= 8 ? Math.min(cap0, Math.floor(wins.length / 3)) : 0;
+  const wins = H.raf || H.wins || [], cur = wins.find((w) => w.isNew) || null, W0 = wins.length <= 6 ? 2.5 : wins.length <= 14 ? 2.15 : 1.9;
+  const cap0 = Math.floor((6.5 * 1.75 * 2) / (W0 * 1.22)), nLeg = wins.length >= 8 ? Math.min(cap0, Math.floor(wins.length / 3)) : 0;
   const byN = wins.map((w, i) => ({ w, i })).sort((a, b) => b.w.n - a.w.n || b.i - a.i), leg = byN.slice(0, nLeg).map((x) => x.w);
   const rest = wins.filter((w) => !leg.includes(w)).reverse();   // newest first
   const C = L3CAM, dzOf = (r) => C.z - (L3CZ - r);
   const out = { leg: [], rest: [], jer: [], rows: [], cur: null, more: 0 };
   // the jerseys, lowest and closest
-  const jer = (H.jerseys || []).slice(0, 9), jr = 4.2, jw = 1.15, jh = 1.35;
+  const jer = (H.jersey ? [H.jersey] : H.jerseys || []).slice(0, 9), one = jer.length === 1, jr = 4.2, jw = one ? 1.5 : 1.15, jh = one ? 1.76 : 1.35;
   let ang = 0.218;
   { const dz = dzOf(jr), yb = C.y + dz * Math.tan(ang), top = yb + jh; ang = Math.atan2(top - C.y, dz);
     jer.forEach((it, j) => { const q = j === 0 ? 0 : Math.ceil(j / 2) * (j % 2 ? 1 : -1), th = Math.PI + (q * jw * 1.3) / jr; out.jer.push({ it, ...L3slot(jr, th, top), w: jw, h: jh }); });
@@ -19608,7 +19732,7 @@ function L3rafLayout(H) {
   const need = wins.length; let placed = 0, row = 0;
   const lists = nLeg ? [leg, rest] : [rest]; let li = 0, k = 0;
   while (placed < need && row < 14) {
-    const r = 6.5 + row * 3.1, w = Math.max(0.72, 1.9 * Math.pow(0.87, row)), h = w * 1.5, dz = dzOf(r);
+    const r = 6.5 + row * 3.1, w = Math.max(0.72, W0 * Math.pow(0.87, row)), h = w * 1.5, dz = dzOf(r);
     const yb = C.y + dz * Math.tan(ang + 0.012), top = yb + h; ang = Math.atan2(top - C.y, dz);
     const span = 1.75, cap = Math.max(1, Math.floor((r * span * 2) / (w * 1.22)));
     out.rows.push({ r, w, h, top, span });
@@ -19835,6 +19959,170 @@ ACT3.ring = function (st, a) {
     g.position.y = 0.25 + (1 - ez.out(q)) * -4; g.rotation.y = k * 0.9 + (1 - ez.out(q)) * 6; stone.rotation.y = -k * 0.6;
     if (!hit && q >= 1) { hit = true; S3ring(st, -3.4, 0.25, -0.5, 5); sp.burst(-3.4, 0.6, 0.4, 260, 6); st.flash = 0.9; }
     tw += dt; if (hit && tw > 0.5) { tw = 0; sp.burst(-3.4 + (Math.random() - 0.5) * 2, 0.4 + Math.random() * 1.6, 0.6, 14, 2.2, "#ffffff"); } });
+};
+
+// ---- fire: soft flames rising off a few sources, white-yellow at the base, orange, deep red at the tips ----
+function L3flames(st, n) {
+  const { THREE } = st, mesh = S3add(st, new THREE.InstancedMesh(new THREE.PlaneGeometry(1, 1), new THREE.MeshBasicMaterial({ map: spriteTex(st.L), transparent: true, blending: THREE.AdditiveBlending, depthWrite: false, toneMapped: false }), n));
+  mesh.frustumCulled = false;
+  const P = [], src = [], M = new THREE.Matrix4(), Q = new THREE.Quaternion(), V = new THREE.Vector3(), S = new THREE.Vector3(), C = new THREE.Color();
+  for (let i = 0; i < n; i++) { P.push({ on: false }); M.makeScale(0, 0, 0); mesh.setMatrixAt(i, M); mesh.setColorAt(i, C.setRGB(0, 0, 0)); }
+  let nx = 0;
+  const add = (x, y, z, rate, w, size) => { const s = { x, y, z, rate, w: w || 0.3, size: size || 0.5, acc: 0 }; src.push(s); return s; };
+  st.tick.push((t, dt) => {
+    for (const s of src) { s.acc += s.rate * dt; while (s.acc >= 1) { s.acc--; const p = P[nx++ % n];
+      Object.assign(p, { on: true, x: s.x + (Math.random() - 0.5) * s.w, y: s.y, z: s.z + (Math.random() - 0.5) * 0.1, vy: 1.1 + Math.random() * 1.3, life: 0, max: 0.55 + Math.random() * 0.6, sz: s.size * (0.6 + Math.random() * 0.6), ph: Math.random() * 6 }); } }
+    for (let i = 0; i < n; i++) { const p = P[i]; if (!p.on) continue; p.life += dt; const f = p.life / p.max;
+      if (f >= 1) { p.on = false; M.makeScale(0, 0, 0); mesh.setMatrixAt(i, M); continue; }
+      p.y += p.vy * dt; p.x += Math.sin(t * 6 + p.ph) * 0.25 * dt; const sc = p.sz * (f < 0.2 ? f / 0.2 : 1 - (f - 0.2) * 0.8);
+      V.set(p.x, p.y, p.z); S.set(sc * 0.62, sc * 1.75, 1); M.compose(V, Q, S); mesh.setMatrixAt(i, M);
+      if (f < 0.22) C.setRGB(1, 0.74, 0.32); else if (f < 0.55) C.setRGB(1, 0.42, 0.08); else C.setRGB(0.72, 0.14, 0.03); C.multiplyScalar((1 - f) * 0.8); mesh.setColorAt(i, C); }
+    mesh.instanceMatrix.needsUpdate = true; mesh.instanceColor.needsUpdate = true;
+  });
+  return { add };
+}
+// a medallion with a face drawn on it
+function L3coin(st, r, draw, rim) {
+  const { THREE } = st, face = canvasTex(st.L, 512, 512, draw); face.center.set(0.5, 0.5); face.rotation = Math.PI / 2;
+  const fm = new THREE.MeshStandardMaterial({ map: face, metalness: 0.55, roughness: 0.32, emissive: 0xff7a22, emissiveMap: face, emissiveIntensity: 0 });
+  const coin = new THREE.Mesh(new THREE.CylinderGeometry(r, r, r * 0.16, 72), [rim || st.mats.gold, fm, fm]); coin.rotation.x = Math.PI / 2;
+  const g = new THREE.Group(); g.add(coin); g.userData.fm = fm; return g;
+}
+
+// ---- cooked: their ticket against the one on the other side, and the other one shatters and burns ----
+function L3loser(st, X) {
+  const { L, THREE } = st, W = 5.6, H = 2.9;
+  const face = canvasTex(L, 1120, 580, (x, w, h) => {
+    const g = x.createLinearGradient(0, 0, 0, h); g.addColorStop(0, "#1c1012"); g.addColorStop(1, "#090506"); x.fillStyle = g; x.fillRect(0, 0, w, h);
+    x.fillStyle = X.col || "#ff5a6a"; x.fillRect(0, 0, 14, h);
+    x.font = "800 30px Inter, sans-serif"; x.fillStyle = "#ff5a6a"; x.fillText("ON THE OTHER SIDE", 60, 86);
+    x.font = "700 28px Inter, sans-serif"; x.fillStyle = "rgba(255,255,255,.62)"; x.fillText(String(X.nm || "").toUpperCase(), 60, 140);
+    let fs = 78; x.font = `900 ${fs}px Inter, sans-serif`; while (x.measureText(X.pick || "").width > w - 120 && fs > 40) { fs -= 4; x.font = `900 ${fs}px Inter, sans-serif`; }
+    x.fillStyle = "#ffffff"; x.fillText(X.pick || "", 60, 246);
+    x.strokeStyle = "rgba(255,255,255,.12)"; x.lineWidth = 2; x.beginPath(); x.moveTo(60, 360); x.lineTo(w - 60, 360); x.stroke();
+    const cell = (lab, val, cx) => { x.font = "700 22px Inter, sans-serif"; x.fillStyle = "rgba(255,255,255,.45)"; x.fillText(lab.toUpperCase(), cx, 420); x.font = "800 40px Inter, sans-serif"; x.fillStyle = "#fff"; x.fillText(val, cx, 472); };
+    cell("Odds", X.odds || "", 60); cell("Risked", X.lost || "", 330); cell("Paid", "0u", 620);
+    x.fillStyle = "#ff5a6a"; x.beginPath(); x.roundRect ? x.roundRect(w - 300, 404, 240, 76, 38) : x.rect(w - 300, 404, 240, 76); x.fill();
+    x.font = "900 34px Inter, sans-serif"; x.fillStyle = "#1a0306"; x.textAlign = "center"; x.fillText("LOST ✗", w - 180, 455); x.textAlign = "start";
+  });
+  const g = new THREE.Group();
+  g.add(new THREE.Mesh(new L.RoundedBoxGeometry(W + 0.14, H + 0.14, 0.14, 4, 0.12), new THREE.MeshStandardMaterial({ color: 0x5a1c22, metalness: 0.75, roughness: 0.32 })));
+  const pl = new THREE.Mesh(new THREE.PlaneGeometry(W, H), new THREE.MeshStandardMaterial({ map: face, roughness: 0.35, metalness: 0.15, envMapIntensity: 0.5 })); pl.position.z = 0.072; g.add(pl);
+  g.userData.face = face;
+  return g;
+}
+function L3shatter(st, g) {
+  const { THREE } = st, W = 5.6, H = 2.9, cx = 8, cy = 4, out = [];
+  g.updateMatrixWorld(true);
+  const mat = new THREE.MeshStandardMaterial({ map: g.userData.face, roughness: 0.4, metalness: 0.2, side: THREE.DoubleSide, emissive: 0xff4a14, emissiveIntensity: 0 });
+  for (let j = 0; j < cy; j++) for (let i = 0; i < cx; i++) {
+    const w = W / cx, h = H / cy, geo = new THREE.PlaneGeometry(w * 0.97, h * 0.97), uv = geo.attributes.uv;
+    for (let v = 0; v < uv.count; v++) uv.setXY(v, (i + uv.getX(v)) / cx, (j + uv.getY(v)) / cy);
+    const m = new THREE.Mesh(geo, mat), lp = new THREE.Vector3(-W / 2 + w * (i + 0.5), -H / 2 + h * (j + 0.5), 0.08);
+    m.position.copy(g.localToWorld(lp.clone())); m.quaternion.copy(g.quaternion); m.scale.copy(g.scale); S3add(st, m);
+    const d = lp.clone().normalize();
+    out.push({ m, v: new THREE.Vector3(d.x * (1.2 + Math.random() * 2.4) + (Math.random() - 0.5), 1.6 + Math.random() * 3 + d.y * 1.5, 1 + Math.random() * 3), r: [(Math.random() - 0.5) * 9, (Math.random() - 0.5) * 9, (Math.random() - 0.5) * 9] });
+  }
+  st.tick.push((t, dt) => { mat.emissiveIntensity = Math.min(0.9, mat.emissiveIntensity + dt * 1.2);
+    for (const s of out) { s.v.y -= 9 * dt; s.m.position.addScaledVector(s.v, dt); s.m.rotation.x += s.r[0] * dt; s.m.rotation.y += s.r[1] * dt; s.m.rotation.z += s.r[2] * dt; } });
+  return out;
+}
+ACT3.burn = function (st, a) {
+  const I = st.info, H = L3hist(st), X = (H.burn || [])[0] || { nm: "?", col: "#ff5a6a", pick: "", odds: "", lost: "" }, A = a.t;
+  const win = S3add(st, S3ticket(st)); win.scale.setScalar(0.56); win.position.set(-9, 0.05, 0); win.rotation.y = 0.32;
+  const lose = S3add(st, L3loser(st, X)); lose.scale.setScalar(0.56); lose.position.set(9, 0.05, 0); lose.rotation.y = -0.32;
+  const vs = S3text(st, "VS", 0.8, st.mats.chrome, 0.3); S3add(st, vs); vs.position.set(0, 0.05, -20); vs.visible = false;
+  const fl = L3flames(st, 460), sp = S3sparks(st, 520, "#ff6a2a"); let vsHit = false, crack = false;
+  st.camTo.p.set(0, 0, 12); st.camTo.l.set(0, 0, 0);
+  st.tick.push((t) => {
+    const k = t - A, q = ez.out(seg(k, 0.05, 0.6));
+    win.position.x = -9 + 5.9 * q; if (!crack) lose.position.x = 9 - 5.9 * q;
+    if (k > 0.55) { vs.visible = true; const v = seg(k, 0.55, 0.35); vs.position.z = -20 + ez.outx(v) * 21.2; vs.rotation.y = Math.sin(k * 1.4) * 0.2;
+      if (!vsHit && v >= 1) { vsHit = true; S3ring(st, 0, 0.05, 0.9, 3); st.shake = 0.3; st.flash = 0.5; } }
+    if (!crack && k > 1.6) { crack = true; L3shatter(st, lose); lose.visible = false; sp.burst(lose.position.x, 0.05, 0.4, 340, 8); st.shake = 0.65; st.flash = 0.85; fl.add(lose.position.x, -1.5, 0.3, 190, 3.0, 0.48); fl.add(lose.position.x, -2.3, 0.3, 110, 4.2, 0.6); }
+    if (crack) { const m = ez.io(seg(k, 2.1, 1.0)); win.position.x = -3.1 + 3.1 * m; win.rotation.y = 0.32 * (1 - m); win.scale.setScalar(0.56 + 0.12 * m); vs.scale.setScalar(Math.max(0.001, 1 - m)); win.userData.glint(-0.6 + seg(k, 2.3, 1.3) * 2.4); }
+  });
+};
+
+// ---- the ride: a medallion for everyone who rode it, each dropping in with what they got ----
+ACT3.ride = function (st, a) {
+  const I = st.info, H = L3hist(st), R = H.ride || { riders: [] }, A = a.t;
+  const P = [{ nm: I.name, col: I.col, amt: I.amt }, ...R.riders].slice(0, 8), N = P.length;
+  const gap = Math.min(2.4, 11.4 / Math.max(1, N - 1)), r = Math.min(0.95, gap * 0.42);
+  const sp = S3sparks(st, 520, I.acc), cf = S3confetti(st, 180, P.map((p) => p.col).concat(["#ffffff", "#ffd23f"]));
+  const coins = P.map((p, i) => {
+    const g = L3coin(st, r, (x, w) => { const c = w / 2, gr = x.createRadialGradient(c * 0.8, c * 0.7, 10, c, c, c); gr.addColorStop(0, "#ffffff"); gr.addColorStop(0.35, p.col || "#888"); gr.addColorStop(1, "#111"); x.fillStyle = gr; x.beginPath(); x.arc(c, c, c, 0, Math.PI * 2); x.fill();
+      x.strokeStyle = "rgba(255,255,255,.85)"; x.lineWidth = 12; x.beginPath(); x.arc(c, c, c - 22, 0, Math.PI * 2); x.stroke();
+      x.textAlign = "center"; x.fillStyle = "#fff"; x.font = `900 230px ${L3D}`; x.fillText(String(p.nm || "?").slice(0, 1).toUpperCase(), c, c + 70);
+      L3fit(x, String(p.nm || "").toUpperCase(), w * 0.62, 46, 900, L3D); x.fillText(String(p.nm || "").toUpperCase(), c, c + 140);
+      x.font = `900 52px ${L3D}`; x.fillText(p.amt || "", c, c - 120); });
+    S3add(st, g); const x0 = N === 1 ? 0 : -((N - 1) * gap) / 2 + i * gap; g.position.set(x0, 9, 0); g.userData.x = x0; g.userData.hit = false; g.userData.col = p.col; return g;
+  });
+  st.camTo.p.set(0, 0.2, 12); st.camTo.l.set(0, 0.2, 0);
+  st.tick.push((t) => {
+    const k = t - A;
+    coins.forEach((g, i) => { const t0 = 0.5 + i * 0.26, q = seg(k, t0, 0.55);
+      g.position.y = 9 - (9 - 0.25) * ez.back(q) + (q >= 1 ? Math.sin(k * 1.6 + i) * 0.08 : 0); g.rotation.y = (1 - ez.out(q)) * Math.PI * 4 + (q >= 1 ? Math.sin(k * 0.9 + i) * 0.15 : 0);
+      if (!g.userData.hit && q >= 1) { g.userData.hit = true; S3ring(st, g.userData.x, 0.25, -0.3, r * 3.2, g.userData.col); sp.burst(g.userData.x, 0.25, 0.3, 90, 5, g.userData.col); st.flash = Math.max(st.flash, 0.35); if (i === N - 1) { cf.dump(140); cf.go(14); st.shake = 0.3; } } });
+  });
+};
+
+// ---- the heater: a chain of W's, lit one after another, the newest one blazing ----
+ACT3.heat = function (st, a) {
+  const { THREE } = st, H = L3hist(st), h = H.heat || { n: 3, list: ["+1u", "+1u", "+1u"] }, L = h.list.slice(-12), N = L.length, A = a.t;
+  const gap = Math.min(1.75, 9.6 / Math.max(1, N - 1 + 0.8)), r = Math.min(0.66, gap * 0.4), y = -1.15, fl = L3flames(st, 900), sp = S3sparks(st, 520, "#ff8a2a");
+  const xs = (i) => (N === 1 ? 0 : -((N - 1) * gap) / 2 + i * gap);
+  const coins = L.map((amt, i) => { const last = i === N - 1, rr = last ? r * 1.38 : r;
+    const g = L3coin(st, rr, (x, w) => { const c = w / 2, gr = x.createRadialGradient(c * 0.8, c * 0.7, 10, c, c, c); gr.addColorStop(0, "#fff1c4"); gr.addColorStop(0.5, "#d2741c"); gr.addColorStop(1, "#2a0e04"); x.fillStyle = gr; x.beginPath(); x.arc(c, c, c, 0, Math.PI * 2); x.fill();
+      x.textAlign = "center"; x.fillStyle = "#1c0902"; x.font = `900 300px ${L3D}`; x.fillText("W", c, c + 90); x.font = `900 64px ${L3D}`; x.fillText(amt, c, c + 180); });
+    S3add(st, g); g.position.set(xs(i), y, 0); g.userData.on = false; g.userData.last = last; g.userData.r = rr; return g; });
+  // the chain between them
+  const link = new THREE.MeshStandardMaterial({ color: 0xc9a24a, metalness: 1, roughness: 0.3 });
+  for (let i = 0; i < N - 1; i++) { const m = S3add(st, new THREE.Mesh(new THREE.TorusGeometry(0.14, 0.035, 8, 24), link)); m.position.set((xs(i) + xs(i + 1)) / 2, y, -0.1); m.rotation.y = i % 2 ? Math.PI / 2 : 0; m.scale.set(1.8, 1, 1); }
+  st.camTo.p.set(0, 0.4, 12); st.camTo.l.set(0, -0.2, 0);
+  st.tick.push((t) => {
+    const k = t - A;
+    coins.forEach((g, i) => { const t0 = 0.4 + i * 0.18; g.rotation.y = Math.sin(k * 1.2 + i * 0.7) * 0.25;
+      if (!g.userData.on && k >= t0) { g.userData.on = true; const R = g.userData.r;
+        fl.add(xs(i), y + R * 0.55, 0.15, g.userData.last ? 170 : 48, R * 1.1, g.userData.last ? R * 1.05 : R * 0.62);
+        sp.burst(xs(i), y, 0.3, g.userData.last ? 260 : 40, g.userData.last ? 7 : 3);
+        if (g.userData.last) { S3ring(st, xs(i), y, -0.2, 4, 0xff7a22); st.flash = 0.8; st.shake = 0.45; } }
+      if (g.userData.on) g.userData.fm.emissiveIntensity = Math.min(g.userData.last ? 1.1 : 0.7, g.userData.fm.emissiveIntensity + 0.04); });
+  });
+};
+
+// ---- the vault: a gold bar for every few units they've ever cashed, the ones from this cash dropping on top ----
+ACT3.vault = function (st, a) {
+  const { THREE } = st, H = L3hist(st), v = H.vault || { bars: 20, fresh: 3 }, A = a.t, T = a.ms / 1000;
+  const N = Math.min(150, v.bars), F = Math.min(N, Math.max(1, v.fresh)), layers = N > 60 ? 2 : 1, BW = 0.62, BH = 0.2, BD = 0.3, sx = BW + 0.05;
+  // a pyramid per layer, filled from the bottom row up
+  const perL = Math.ceil(N / layers); let b = 1; while ((b * (b + 1)) / 2 < perL) b++;
+  const spots = [];
+  for (let L = 0; L < layers; L++) { let n = 0; for (let row = 0; row < b && n < perL; row++) for (let c = 0; c < b - row && n < perL; c++, n++) spots.push({ L, row, x: (c - (b - row - 1) / 2) * sx, y: row * (BH + 0.015), z: -L * (BD + 0.06) }); }
+  spots.sort((p, q) => p.row - q.row || p.L - q.L);
+  const base = -1.9, geo = new THREE.BoxGeometry(BW, BH, BD), pos = geo.attributes.position, UP = new THREE.Vector3(0, 1, 0);
+  for (let i = 0; i < pos.count; i++) if (pos.getY(i) > 0) { pos.setX(i, pos.getX(i) * 0.82); pos.setZ(i, pos.getZ(i) * 0.78); }
+  geo.computeVertexNormals();
+  const bars = S3add(st, new THREE.InstancedMesh(geo, new THREE.MeshStandardMaterial({ color: 0xffffff, metalness: 1, roughness: 0.26, envMapIntensity: 1.2 }), N));
+  bars.frustumCulled = false; const M = new THREE.Matrix4(), Q = new THREE.Quaternion(), V = new THREE.Vector3(), S = new THREE.Vector3(1, 1, 1), C = new THREE.Color();
+  for (let i = 0; i < N; i++) bars.setColorAt(i, C.set(i >= N - F ? "#fff0b8" : "#e9b04a")); bars.instanceColor.needsUpdate = true;
+  const floor = S3add(st, new THREE.Mesh(new THREE.CircleGeometry(7, 64), new THREE.MeshStandardMaterial({ color: 0x0b0c0f, metalness: 0.6, roughness: 0.22 }))); floor.rotation.x = -Math.PI / 2; floor.position.y = base - BH / 2 - 0.005;
+  const glow = S3add(st, new THREE.Mesh(new THREE.RingGeometry(b * sx * 0.55, b * sx * 0.6, 96), new THREE.MeshBasicMaterial({ color: 0xffc94a, transparent: true, opacity: 0.4, blending: THREE.AdditiveBlending, depthWrite: false, side: THREE.DoubleSide }))); glow.rotation.x = -Math.PI / 2; glow.position.y = base - BH / 2;
+  const spot = new THREE.SpotLight(0xffe2a0, 60, 30, 0.5, 0.6, 1.2); spot.position.set(0, 7, 4); spot.target = floor; S3add(st, spot);
+  const sp = S3sparks(st, 420, "#ffd36b"), tOld = 0.5 * T, t1 = 0.58 * T, tF = 0.2 * T; const hit = new Uint8Array(N);
+  const topY = base + (b - 1) * (BH + 0.015);
+  st.tick.push((t) => {
+    const k = t - A;
+    for (let i = 0; i < N; i++) {
+      const s = spots[i], fresh = i >= N - F, t0 = fresh ? t1 + ((i - (N - F)) / Math.max(1, F)) * tF : 0.1 + (i / Math.max(1, N - F)) * (tOld - 0.1), q = seg(k, t0, fresh ? 0.42 : 0.3);
+      V.set(s.x, base + s.y + (1 - ez.out(q)) * (fresh ? 7 : 4), s.z); Q.setFromAxisAngle(UP, (1 - q) * (fresh ? 1.6 : 0.6));
+      S.setScalar(q > 0 ? 1 : 0.0001); M.compose(V, Q, S); bars.setMatrixAt(i, M);
+      if (fresh && !hit[i] && q >= 1) { hit[i] = 1; sp.burst(s.x, base + s.y, s.z + 0.3, 60, 4); st.flash = Math.max(st.flash, 0.35); if (i === N - 1) { S3ring(st, 0, topY + 0.2, 0.3, 3.5, 0xffd36b); st.shake = 0.35; } }
+    }
+    bars.instanceMatrix.needsUpdate = true;
+    glow.material.opacity = 0.25 + 0.2 * Math.sin(k * 2.2);
+    const o = k * 0.22, mid = base + (topY - base) * 0.45; st.camTo.p.set(Math.sin(o) * 2.2 + 1.4, topY + 1.0, 6.4 + b * 0.18 + Math.cos(o) * 0.6); st.camTo.l.set(0.7, mid, -0.2);
+  });
 };
 
 </script>
