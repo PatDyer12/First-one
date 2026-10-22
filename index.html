@@ -5497,6 +5497,7 @@ img.tl { animation: none; }
 .lx-beat .lx-tag, .lx-bust .lx-tag, .lx-yard .lx-tag { position: absolute; left: 50%; top: 104px; translate: -50% 0; animation: x3Up .4s .2s both; }
 .lx-beat > b, .lx-bust > b { position: absolute; left: 0; right: 0; top: 700px; text-align: center; font: 900 92px/1 var(--f-display); text-transform: uppercase; color: #fff; text-shadow: 0 0 30px rgba(255,77,94,.4); animation: x3Up .5s 2.6s both; }
 .lx-beat > small, .lx-bust > small { position: absolute; left: 0; right: 0; top: 810px; text-align: center; font: 600 24px/1.2 Inter, sans-serif; color: rgba(255,255,255,.7); animation: x3Up .5s 2.8s both; }
+.cs.lx.has3d .lx-beat .lx-tag { display: none; }
 .lx-bust > b { top: 660px; animation-delay: 1.4s; } .lx-bust > small { top: 760px; animation-delay: 1.6s; }
 .lx-bust ul { position: absolute; left: 0; right: 0; top: 806px; margin: 0; padding: 0; list-style: none; display: grid; justify-items: center; gap: 6px; animation: x3Up .5s 1.8s both; }
 .lx-bust li { font: 700 20px/1.2 Inter, sans-serif; color: #ff8a96; }
@@ -11290,7 +11291,7 @@ img.tl { animation: none; }
   // ---------- sheets ----------
   function openSheet(id) { $(id).hidden = false; }
   // keep every open screen current: when a new version is up, reload it (never mid-form or mid-animation)
-  const BUILD = "20261022213226";
+  const BUILD = "20261022213915";
   function checkBuild() {
     if (BUILD === "dev") return;
     fetch("version.json?t=" + Date.now(), { cache: "no-store" }).then((r) => (r.ok ? r.json() : null)).then((j) => {
@@ -20587,7 +20588,7 @@ ACT3.lbeat = function (st, a) {
   const ln = new THREE.Mesh(new THREE.TorusGeometry(0.56, 0.06, 14, 48), st.mats.gold); ln.rotation.y = Math.PI / 2; ln.position.set(X(B.l), -0.3, 0); S3add(st, ln);
   const lt = S3text(st, "LINE " + B.lt, 0.32, st.mats.gold, 0.25); S3add(st, lt); lt.position.set(X(B.l), 0.75, 0);
   const gap = new THREE.Mesh(new THREE.BoxGeometry(1, 1.25, 1.25), new THREE.MeshBasicMaterial({ color: 0xff2a3c, transparent: true, opacity: 0, blending: THREE.AdditiveBlending, depthWrite: false })); S3add(st, gap); gap.position.y = -0.3;
-  const word = S3text(st, B.word || "SO CLOSE", 0.9, LXred(st), 0.3); S3add(st, word); word.position.set(0, 2.4, -30); word.visible = false;
+  const word = S3text(st, B.word || "SO CLOSE", 0.8, LXred(st), 0.3); S3add(st, word); word.position.set(0, 1.7, -30); word.visible = false;
   const sp = S3sparks(st, 260, LX.red); let stop = false;
   st.camTo.p.set(-2.5, 0.6, 11); st.camTo.l.set(-0.5, -0.1, 0);
   const vEnd = B.v, v0 = B.lo;
@@ -20597,7 +20598,7 @@ ACT3.lbeat = function (st, a) {
     if (!stop && u >= 1) { stop = true; sp.burst(x1, -0.3, 0.3, 120, 4); st.shake = 0.3; st.flash = 0.4; }
     if (stop) { const a0 = Math.min(x1, X(B.l)), a1 = Math.max(x1, X(B.l)); gap.scale.x = Math.max(0.05, a1 - a0); gap.position.x = (a0 + a1) / 2; gap.material.opacity = 0.18 + 0.12 * Math.sin(k * 9); }
     if (k > 2.5) { word.visible = true; const w2 = seg(k, 2.5, 0.3); word.position.z = -30 + ez.outx(w2) * 30; word.rotation.y = Math.sin(k * 0.6) * 0.08; }
-    st.camTo.p.set(-2.5 + Math.min(1, u) * 2.5 + (stop ? (X(B.l) * 0.3) : 0), 0.6, 11 - (stop ? Math.min(2.4, (k - 2.4) * 1.2) : 0)); st.camTo.l.set(stop ? X(B.l) * 0.6 : -0.5 + u * 0.5, -0.1, 0);
+    st.camTo.p.set(-2.5 + Math.min(1, u) * 2.5 + (stop ? (X(B.l) * 0.3) : 0), 0.6, 11 - (stop ? Math.min(1.4, (k - 2.4) * 1.0) : 0)); st.camTo.l.set(stop ? X(B.l) * 0.6 : -0.5 + u * 0.5, -0.1, 0);
   });
 };
 // ---- the parlay that died on a leg: the chain lights up to the leg that broke, that one cracks, the rest falls ----
