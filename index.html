@@ -5508,6 +5508,13 @@ img.tl { animation: none; }
 /* a touchdown's field: the 3D end zone takes the panel's place */
 .cs.v3.has3d .xp-tdp .xp-ez { visibility: hidden; }
 .cs.v3.has3d .xp-tdp .xp-who { top: 820px; }
+
+.snd-wake { position: fixed; left: 50%; bottom: 96px; z-index: 95; translate: -50% 0; display: grid; gap: 6px; justify-items: center; padding: 22px 40px; border-radius: 22px; border: 0; cursor: pointer;
+  background: rgba(8,10,16,.92); box-shadow: inset 0 0 0 2px rgba(255,210,63,.75), 0 20px 60px rgba(0,0,0,.6); color: #fff; animation: sndWake 1.6s ease-in-out infinite; }
+.snd-wake b { font: 900 46px/1 var(--f-display), Inter, sans-serif; letter-spacing: .02em; text-transform: uppercase; color: #ffd23f; }
+.snd-wake span { font: 600 18px/1.3 Inter, sans-serif; color: rgba(255,255,255,.75); }
+.snd-wake[hidden] { display: none; }
+@keyframes sndWake { 50% { box-shadow: inset 0 0 0 2px rgba(255,210,63,.25), 0 20px 60px rgba(0,0,0,.6); } }
 </style>
 </head>
 <body>
@@ -11291,11 +11298,12 @@ img.tl { animation: none; }
   // ---------- sheets ----------
   function openSheet(id) { $(id).hidden = false; }
   // keep every open screen current: when a new version is up, reload it (never mid-form or mid-animation)
-  const BUILD = "20261022213915";
+  const BUILD = "20261024013115";
   function checkBuild() {
     if (BUILD === "dev") return;
     fetch("version.json?t=" + Date.now(), { cache: "no-store" }).then((r) => (r.ok ? r.json() : null)).then((j) => {
       if (!j || !j.v || j.v === BUILD) return;
+      if (document.body.classList.contains("tv") && SND.on && SND.ctx && SND.ctx.state === "running" && [...S.games.values()].some((g) => g.st === "in") && Date.now() - (window.__sbLoad || 0) < 10 * 3600e3) { setTimeout(checkBuild, 5 * 60e3); return; }
       if (fxBusy || !$("#addSheet").hidden || !$("#setSheet").hidden || !$("#jumbo").hidden) { setTimeout(checkBuild, 20000); return; }
       // one try per version every 5 minutes, so a slow CDN can't cause a reload loop
       let tried = ""; try { tried = sessionStorage.getItem("sb-upd") || ""; } catch (e) {}
@@ -12397,6 +12405,7 @@ img.tl { animation: none; }
     const b = $("#sndBtn"), live = SND.ctx && SND.ctx.state === "running";
     b.textContent = !SND.on ? "Sound off" : live ? "Sound on" : "Tap for sound";
     b.classList.toggle("wake", SND.on && !live);
+    const w = document.getElementById("sndWake"); if (w) w.hidden = !(SND.on && !live && document.body.classList.contains("tv") && !PHONE());
     b.setAttribute("aria-pressed", String(SND.on));
   }
   function loadBuf(name) {
@@ -12417,6 +12426,11 @@ img.tl { animation: none; }
     loadSounds(); sndChip();
     try { if (SP.player) SP.player.activateElement(); } catch (e) {}
   }
+
+  window.__sbLoad = Date.now();
+  document.body.insertAdjacentHTML("beforeend", '<button type="button" id="sndWake" class="snd-wake" hidden><b>Tap anywhere for sound</b><span>The board reloaded, and the browser needs one tap before it can play music</span></button>');
+  document.getElementById("sndWake").addEventListener("click", () => { unlock(); sndChip(); });
+  setInterval(() => { if (!document.body.classList.contains("tv") || PHONE() || !SND.on) { sndChip(); return; } const c = audio(); if (c && c.state !== "running") c.resume().catch(() => {}); sndChip(); }, 4000);
   document.addEventListener("pointerdown", unlock, true);
   document.addEventListener("keydown", unlock, true);
   $("#sndBtn").addEventListener("click", () => {
@@ -13512,7 +13526,7 @@ img.tl { animation: none; }
       if (P.dj) lastDj = Date.now();
       const song = sp ? sp.name : swap ? swap.song : P.song, artist = sp ? sp.artist : swap ? swap.artist : P.artist;
       const fly = !!(dj && D.intro && !loopOne);
-      const AL = fly && !sp && !pre ? djAlign(P, D) : { so: 0, x0: 0 }, msL = Math.min(CLIP_MAX, ms - AL.so * 1000);
+      const AL = fly && !sp && !pre ? djAlign(P, D) : { so: 0, x0: 0 }, msL = P.full ? ms - AL.so * 1000 : Math.min(CLIP_MAX, ms - AL.so * 1000);
       const xs0 = fly && !sp ? (AL.so + 0.08 - (P.b0 || 0)) * r - AL.x0 : 0;     // where the clip starts (below 0: it holds for the downbeat)
       if (fly) djLapText(song, artist, sp ? sp.art : P.cover);
       if (song) { $("#npSong").textContent = song; $("#npArtist").textContent = artist || ""; np.hidden = false; npT = setTimeout(() => np.classList.add("on"), fly && !pre ? Math.max(700, ((7.6 - xs0) / r) * 1000) : 700); } else np.hidden = true;
@@ -13542,7 +13556,7 @@ img.tl { animation: none; }
       clearInterval(djT);
       if (dj && c && !sp && !loopOne) { const t0 = c.currentTime - off / 1000; djT = setInterval(() => { if (go !== pipGo) { clearInterval(djT); return; } if (c.state !== "running") return; const want = djPos(P, c.currentTime - t0 - avDelay() / 1000 + AL.so, D, AL.x0), d = djGap(D, want, v.currentTime); if (d > 0.12) { try { v.currentTime = want; bg.currentTime = want; } catch (e) {} } }, 1500); }
       jumboBets(); clearInterval(jbTick); jbTick = setInterval(() => { jumboBets(); jbBug(b); }, 5000);
-      clearTimeout(clipFadeT); if (ms - AL.so * 1000 > CLIP_MAX + 500) clipFadeT = setTimeout(() => { if (go === pipGo) clipFade(c); }, Math.max(0, msL - off - 1100));
+      clearTimeout(clipFadeT); if (!P.full && ms - AL.so * 1000 > CLIP_MAX + 500) clipFadeT = setTimeout(() => { if (go === pipGo) clipFade(c); }, Math.max(0, msL - off - 1100));
       pipT = setTimeout(() => { if (statusBet === betId) stopStatus(); }, msL - off);
     });
   }
@@ -13941,7 +13955,7 @@ img.tl { animation: none; }
       else P = pickClip(poolFor(b, kind === "good" ? "good" : kind === "bad" ? "bad" : "hype"));
     }
     if (!P) return;
-    clipAt = Date.now(); clipClaim = null;
+    if (!(P && P.full)) clipAt = Date.now(); clipClaim = null;
     stopStatus();
     statusBet = b.id;
     if (P === "lockin") { lockIn(b); return; }
@@ -14472,16 +14486,30 @@ img.tl { animation: none; }
     return P ? Object.assign({}, P, { ms: Math.min(P.ms || max, max) }) : null;
   }
   let tvOn = null, idleAt = 0;
-  const tvKey = (g) => {
+  const BRK_HOOP = /^(full timeout|official timeout|timeout|tv timeout|end period)$/i;
+  function brkOf(g) {
+    if (!g || g.st !== "in") return null;
+    const lp = g.sit && g.sit.lp, d = String(g.d || ""), fb = g.sport === "NFL" || g.sport === "CFB", hoop = /^(NBA|CBB|WNBA)$/.test(g.sport);
+    let kind = null;
+    if (/^halftime/i.test(d)) kind = "end of half";
+    else if (g.sport === "MLB" && /^(mid|middle|end)\b/i.test(d)) kind = "inning";
+    else if (/^(end of|end \d)/i.test(d)) kind = g.sport === "NHL" ? "intermission" : "end period";
+    else if (lp && ((fb && TV_STOP.test(lp.type)) || (hoop && BRK_HOOP.test(lp.type)))) kind = lp.type.toLowerCase();
+    return kind ? { kind, key: g.id + ":" + (kind === "inning" || !lp || !lp.id ? d : lp.id) } : null;
+  }
+  const BRK_LONG = { "end of half": 14 * 60e3, intermission: 16 * 60e3 };
+  const tvKeyOld = (g) => {
     const lp = g.sit && g.sit.lp, d = String(g.d || "");
     const kind = lp && TV_STOP.test(lp.type) ? lp.type.toLowerCase() : /^halftime/i.test(d) ? "end of half" : /^end of/i.test(d) ? "end period" : null;
     return kind ? g.id + ":" + (lp && lp.id ? lp.id : d) : null;
   };
+  const tvKey = (g) => { const k = brkOf(g); return k ? k.key : null; };
+  // a music break: the whole edit, and it doesn't take the clip slot
   function houseOn(b, why) {
-    if (!clipFree()) return false;
+    if (!b) return false;
     const P = pickClip(houseEdits()); if (!P) return false;
-    lastAny = Date.now(); lastKind = "pop";
-    react(b, "mid", Object.assign({}, P, { ms: Math.min(P.ms || 75e3, 75e3) }), why);
+    lastAny = Date.now(); lastKind = "pop"; clipClaim = b.id;
+    react(b, "mid", Object.assign({}, P, { ms: Math.min(P.ms || 75e3, 75e3), full: true }), why);
     return true;
   }
   function houseTick() {
@@ -14490,14 +14518,14 @@ img.tl { animation: none; }
     if (tvOn) {
       const g = S.games.get(tvOn.gid), cur = g && g.st === "in" ? tvKey(g) : null;
       if (cur !== tvOn.key) {
-        if (cur && fbDay() && slateMode() === "prime" && tvBreak(now)) return;   // straight into the next break
+        if (cur && tvBreak(now)) return;   // straight into the next break
         if (tvOn && statusSrc && tvOn.mine) stopStatus(); tvOn = null; return;   // the game's back: the music goes
       }
-      if (!clipBusy() && now - tvOn.t0 < 4 * 60e3 && now - lastAny > 4e3) tvOn.mine = houseOn(tvOn.b, tvOn.why);
+      if (!clipBusy() && now - tvOn.t0 < (BRK_LONG[tvOn.kind] || 4 * 60e3) && now - lastAny > 2500) tvOn.mine = houseOn(tvOn.b, tvOn.why);
       else if (clipBusy() && !statusSrc) tvOn.mine = false;   // something else took the screen
       return;
     }
-    if (fbDay() && slateMode() === "prime" && tvBreak(now)) return;
+    if (tvBreak(now)) return;
     // nothing on yet (or between windows): house on a loop, unless the off-air channel has the room
     if (!fbDay() || AIR.on || clipBusy()) return;
     if ([...S.games.values()].some((g) => (g.sport === "NFL" || g.sport === "CFB") && g.st === "in")) return;
@@ -14507,31 +14535,30 @@ img.tl { animation: none; }
   }
   setInterval(houseTick, 3000);
   function tvBreak(now) {
-    if (!fbDay() || !clipsOn() || PHONE() || trial) return false;
+    if (!clipsOn() || PHONE() || trial) return false;
+    const mine = new Set(); for (const b of S.bets.values()) if (b.status === "open") for (const x of selsOf(b)) mine.add(String(x.g));
+    const live = [...S.games.values()].filter((g) => g.st === "in" && mine.has(String(g.id)));
+    if (!live.length) return false;
+    const at = live.map((g) => ({ g, k: brkOf(g) }));
+    if (at.some((x) => !x.k)) { if (tvOn && !at.some((x) => x.k && x.k.key === tvOn.key)) tvOn = null; return false; }   // something you're on is in play
     let hit = null;
-    for (const g of S.games.values()) {
-      if ((g.sport !== "NFL" && g.sport !== "CFB") || g.st !== "in") continue;
-      const lp = g.sit && g.sit.lp, d = String(g.d || "");
-      const kind = lp && TV_STOP.test(lp.type) ? lp.type.toLowerCase() : /^halftime/i.test(d) ? "end of half" : /^end of/i.test(d) ? "end period" : null;
-      if (!kind) continue;
-      const key = g.id + ":" + (lp && lp.id ? lp.id : d);
-      if (tvSeen.has(key)) continue;
-      if (now - tvAt < 75e3) { tvSeen.add(key); continue; }   // too soon after the last one: let this break go
-      if (!hit) hit = { g, kind, key };
+    for (const { g, k } of at) {
+      if (tvSeen.has(k.key)) continue;
+      if (now - tvAt < 75e3 && !BRK_LONG[k.kind]) { tvSeen.add(k.key); continue; }   // too soon after the last one: let this break go
+      if (!hit) hit = { g, kind: k.kind, key: k.key };
     }
-    // something just played: look again next time (the break's on till the next play shows up)
-    // a new break while the last one's still marked on: that one's over
-    // our own music still up from it: go straight into this one, no gap
     const held = !!(tvOn && hit && hit.key !== tvOn.key && tvOn.mine && statusSrc);
     if (tvOn && hit && hit.key !== tvOn.key) tvOn = null;
-    if (!hit || tvOn || (!held && (now - lastAny < 15e3 || clipBusy()))) return false;
+    if (!hit || tvOn || (!held && (now - lastAny < 8e3 || clipBusy()))) return false;
     const open = [...S.bets.values()].filter((x) => x.status === "open"), b = open.find((x) => selsOf(x).some((y) => String(y.g) === String(hit.g.id))) || open[0] || oaBet(hit.g.sport);
-    const why = { "end of half": "Halftime", "two-minute warning": "Two-minute warning", "end period": "End of the quarter" }[hit.kind] || "Commercial break";
+    const why = { "end of half": "Halftime", "two-minute warning": "Two-minute warning", "end period": hit.g.sport === "NBA" || hit.g.sport === "CBB" || hit.g.sport === "NFL" || hit.g.sport === "CFB" ? "End of the quarter" : "End of the period", intermission: "Intermission", inning: "Between innings" }[hit.kind] || (/timeout/.test(hit.kind) && !/official/.test(hit.kind) ? "Timeout" : "Commercial break");
     if (!houseOn(b, why)) { if (held) stopStatus(); return false; }
     tvSeen.add(hit.key); tvAt = now; driveAt = now;
-    tvOn = { gid: hit.g.id, key: hit.key, t0: now, b, why, mine: true };
+    tvOn = { gid: hit.g.id, key: hit.key, kind: hit.kind, t0: now, b, why, mine: true };
     return true;
   }
+  window.__brk = () => ({ on: tvOn ? { key: tvOn.key, kind: tvOn.kind, why: tvOn.why, mine: tvOn.mine } : null, at: [...S.games.values()].filter((g) => g.st === "in").map((g) => { const k = brkOf(g); return g.id + "|" + (k ? k.key : "-") + "|" + ((g.sit && g.sit.lp && g.sit.lp.type) || "") + "|" + g.d; }) });
+
   let fillAt = 0, fillEnd = 0;
   function houseFill(now) {
     if (!fbDay() || slateMode() !== "feature" || !clipsOn() || PHONE() || trial || clipBusy()) return false;
