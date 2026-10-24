@@ -11310,7 +11310,7 @@ body:not(.tv) .bgm-np { display: none; }
   // ---------- sheets ----------
   function openSheet(id) { $(id).hidden = false; }
   // keep every open screen current: when a new version is up, reload it (never mid-form or mid-animation)
-  const BUILD = "20261024023737";
+  const BUILD = "20261024024642";
   function checkBuild() {
     if (BUILD === "dev") return;
     fetch("version.json?t=" + Date.now(), { cache: "no-store" }).then((r) => (r.ok ? r.json() : null)).then((j) => {
@@ -13979,7 +13979,10 @@ body:not(.tv) .bgm-np { display: none; }
   const moodOf = (kind, P) => (kind === "good" || kind === "first" ? "up" : kind === "bad" ? "down" : P.mood.includes("game") || P.mood.includes("hype") ? "hype" : P.mood.includes("vibe") ? "vibe" : P.mood.split(" ")[0]);
   // the play card starts the clip's sound under it; when the card leaves, the video comes in at that same moment
 
-  const CLIP_MAX = 30e3, CLIP_EVERY = 5 * 60e3;
+  const CLIP_DAYS = new Set([1, 2, 3, 5]);   // Mon, Tue, Wed, Fri
+  const clipEveryNow = () => { const d = ({ Sun: 0, Mon: 1, Tue: 2, Wed: 3, Thu: 4, Fri: 5, Sat: 6 })[new Intl.DateTimeFormat("en-US", { timeZone: "America/New_York", weekday: "short" }).format(new Date(Date.now() - 4 * 3600e3))]; return CLIP_DAYS.has(d) ? 2 * 60e3 : 5 * 60e3; };
+  const CLIP_MAX = 30e3; let CLIP_EVERY = clipEveryNow();
+  setInterval(() => { CLIP_EVERY = clipEveryNow(); }, 60e3);
   let clipAt = Date.now() - CLIP_EVERY + 90e3, clipForce = false, clipClaim = null, clipTurn = 0, clipFadeT = 0;   // the first one a minute and a half in
   const clipFree = () => { if (clipForce || Date.now() - clipAt >= CLIP_EVERY) return true; try { return !!AIR.on; } catch (e) { return false; } };
   const clipNow = (f) => { clipForce = true; try { f(); } finally { clipForce = false; } };
@@ -16108,7 +16111,7 @@ body:not(.tv) .bgm-np { display: none; }
     react(b, kind, P, why);
   }
   setInterval(clipBeat, 10e3);
-  window.__clip = { at: () => clipAt, set: (v) => { clipAt = v; }, beat: clipBeat, free: clipFree, MAX: CLIP_MAX, EVERY: CLIP_EVERY };
+  window.__clip = { at: () => clipAt, set: (v) => { clipAt = v; }, beat: clipBeat, free: clipFree, MAX: CLIP_MAX, get EVERY() { return CLIP_EVERY; } };
 
   setInterval(() => {
     for (const id of awLooked) {
