@@ -63,9 +63,9 @@ logged,tier,game_id,game,market,side,book,bet,line,odds,win_prob,ev,stake,placed
 2026-10-16 19:28,Blowout over,401858261,Charleston Southern @ Clemson,total,over,FanDuel,Over 57.5,57.5,-106,0.0,0.0,0.01,yes,53.5,,-4.0,,L,-1.0
 2026-10-16 19:28,Blowout over,401856725,The Citadel @ Texas A&M,total,over,FanDuel,Over 56.5,56.5,-115,0.0,0.0,0.01,yes,56.5,,0.0,,L,-1.0
 2026-10-16 19:28,Blowout over,401858262,Elon @ Stanford,total,over,FanDuel,Over 56.5,56.5,-106,0.0,0.0,0.01,yes,55.5,,-1.0,,L,-1.0
-2026-10-23 20:50,Over-streak fade,401862808,Army @ Tulsa,total,under,DraftKings,Under 53.5,53.5,-112,0.0,0.0,0.005,yes,53.5,-112.0,0.0,,,
-2026-10-23 20:50,Over-streak fade,401858274,Pittsburgh @ Miami,total,under,DraftKings,Under 48.5,48.5,-112,0.0,0.0,0.005,yes,48.5,-112.0,0.0,,,
-2026-10-23 20:50,Over-streak fade,401858498,Rutgers @ Northwestern,total,under,DraftKings,Under 58.5,58.5,-110,0.0,0.0,0.005,yes,58.5,-110.0,0.0,,,
-2026-10-23 20:50,Over-streak fade,401862810,North Texas @ Navy,total,under,DraftKings,Under 62.5,62.5,-112,0.0,0.0,0.005,yes,62.5,-112.0,0.0,,,
-2026-10-23 20:50,Over-streak fade,401860905,San Diego State @ Colorado State,total,under,DraftKings,Under 61.5,61.5,-108,0.0,0.0,0.005,yes,61.5,-108.0,0.0,,,
-2026-10-23 20:50,Over-streak fade,401856729,Vanderbilt @ Kentucky,total,under,DraftKings,Under 52.5,52.5,-115,0.0,0.0,0.005,yes,52.5,-115.0,0.0,,,
+2026-10-23 20:50,Over-streak fade,401862808,Army @ Tulsa,total,under,DraftKings,Under 53.5,53.5,-112,0.0,0.0,0.005,yes,,,,,,
+2026-10-23 20:50,Over-streak fade,401858274,Pittsburgh @ Miami,total,under,DraftKings,Under 48.5,48.5,-112,0.0,0.0,0.005,yes,50.5,-102.0,-2.0,,,
+2026-10-23 20:50,Over-streak fade,401858498,Rutgers @ Northwestern,total,under,DraftKings,Under 58.5,58.5,-110,0.0,0.0,0.005,yes,59.5,-115.0,-1.0,,,
+2026-10-23 20:50,Over-streak fade,401862810,North Texas @ Navy,total,under,DraftKings,Under 62.5,62.5,-112,0.0,0.0,0.005,yes,60.5,-108.0,2.0,,,
+2026-10-23 20:50,Over-streak fade,401860905,San Diego State @ Colorado State,total,under,DraftKings,Under 61.5,61.5,-108,0.0,0.0,0.005,yes,59.5,-112.0,2.0,,,
+2026-10-23 20:50,Over-streak fade,401856729,Vanderbilt @ Kentucky,total,under,DraftKings,Under 52.5,52.5,-115,0.0,0.0,0.005,yes,50.5,-102.0,2.0,,,
