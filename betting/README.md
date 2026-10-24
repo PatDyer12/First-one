@@ -30,6 +30,7 @@ python3 betting/fetch.py && python3 betting/model.py --week
 python3 betting/cfb_fetch.py && python3 betting/cfb_rankings.py && python3 betting/cfb_weather.py && python3 betting/cfb_model.py --week
 python3 betting/final.py            # decision layer -> data/final_nfl.json, data/cfb/final_cfb.json (+ tracker)
 python3 betting/props.py            # NFL player props (after final.py; ~4 Odds API requests per game)
+python3 betting/teasers.py          # NFL 6-point teasers (after final.py)
 python3 betting/share/cards.py      # -> betting/share/nfl_week<N>.pdf, cfb_week<N>.pdf
 ```
 `angles.py` has separate NFL and college angle books, each defined up front with a reason and graded on 2011–2026
@@ -72,6 +73,26 @@ Run the models first. Each card has these sections:
   line has already moved as much as we think the drop-off is worth. College: passer changes from play-by-play.
 - **Streaks & Trends**: straight-up, against-the-spread and over/under streaks.
 - **Oddball Matchup of the Week**: write it each week in `betting/share/oddball_nfl.json` / `oddball_cfb.json`.
+
+## Edge hunt, October 2026 (`luck.py`, `teasers.py`, new angles in `angles.py`)
+Every idea written down with its threshold before testing, graded against closing lines 2011–2026.
+
+| Idea | NFL | College | Verdict |
+|---|---|---|---|
+| Close-game luck: fade teams +3 or better in one-score games | 370-358, −1.5% | 453-514, **−10.4%** (t −3.5) | Dead. College teams that win close games keep winning them |
+| …and back teams −3 or worse | −2.1% | +0.7% | Dead |
+| Scoreboard luck: margin minus EPA margin, fade/back at ±5 (NFL) / ±8 (CFB) pts a game | −10.3% / −4.9% | +3.8% (Weak) / −11.1% | Dead. The college "luck" measure mostly tracks garbage time |
+| Turnover luck: fade/back teams ±1 a game in turnover margin | −5.8% / −5.1% | (no turnover data) | Dead: the market already prices turnover regression |
+| Injury clusters: 3+ non-QB starters out (snap counts + injury report) | fade −0.9% (48), under −19.6% (48), 2+ OL out +4.0% (134, t 0.5) | — | Too few games, no edge |
+| Referee crews: prior-3-season over rate 58%+ / 42% or less | −0.6% / −3.8% | — | Dead |
+| Thursday night under | −4.0% | — | Dead |
+| Bad team (≤ .300, week 12+) as underdog | −1.1% | — | Dead |
+| Record vs stats: 75%+ record but not out-playing opponents / losing record but out-playing them | — | 32 and 43 games | Too few |
+| **Wong teasers: dogs +1.5 to +2.5 teased to +7.5/+8.5, total ≤ 49** | **77.4% of 496 legs** (need 73.9% at −120), 13/16 seasons, 77.2% since 2022 | — | **Real: about +10% per 2-team teaser at −120. 0.5u** |
+| Wong favorites −7.5 to −8.5 teased down | 72.5% of 247 | — | Below break-even since the 2015 extra-point rule |
+
+The lesson: against closing lines the market already prices public information (luck, injuries, refs, records).
+What's left is structural: key numbers (teasers), weather the totals under-react to, and blowout overs in college.
 
 ## NFL player props (`props.py`)
 Passing yards, rushing yards, receiving yards and receptions, priced against FanDuel/DraftKings prop lines.

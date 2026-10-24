@@ -76,6 +76,9 @@ def long_form(df, sport):
     if sport == "cfb":
         L["prev_opp_fcs"] = g["opp_fcs"].shift(1)
     L["d"] = pd.to_datetime(L["date"])
+    import luck  # season-to-date luck measures (luck.py)
+    L = L.merge(luck.team_luck(sport), on=["game_id", "team"], how="left")
+    L["weekday"] = L["d"].dt.day_of_week
     m = L.groupby(["team", "opp"], sort=False)
     L["last_meet_margin"] = m["margin"].shift(1)
     L["last_meet_days"] = (L["d"] - m["d"].shift(1)).dt.days
@@ -132,6 +135,35 @@ def nfl_angles(L):
         "Cold-weather under": ((L["dome"] == 0) & (L["cold"] >= 8), "total", "under",
                                "Kickoff below 32°F: ball harder to throw and kick.",
                                lambda r: "Sub-freezing kickoff forecast."),
+        # luck regression (luck.py): records and scoreboards that run ahead of, or behind, how a team plays
+        "Close-game luck fade": ((L["close_net"] >= 3) & (L["n"] >= 4), "spread", "opp",
+                                 "One-score games are close to coin flips. A team that keeps winning them is rated "
+                                 "on a record its play hasn't earned.",
+                                 lambda r: f"{r.name} is {r.close_net:+.0f} in one-score games this season."),
+        "Close-game bad-luck back": ((L["close_net"] <= -3) & (L["n"] >= 4), "spread", "team",
+                                     "The reverse: a team that keeps losing coin flips is better than its record.",
+                                     lambda r: f"{r.name} is {r.close_net:+.0f} in one-score games this season."),
+        "Scoreboard luck fade": ((L["luck_pg"] >= 5) & (L["n"] >= 4), "spread", "opp",
+                                 "Outscoring its own play-by-play by 5+ points a game (special teams, red-zone "
+                                 "bounces, late scores): that part doesn't repeat.",
+                                 lambda r: f"{r.name}'s scoreboard is running {r.luck_pg:+.1f} pts/game ahead of its play."),
+        "Scoreboard bad-luck back": ((L["luck_pg"] <= -5) & (L["n"] >= 4), "spread", "team",
+                                     "Playing better than the scoreboard shows by 5+ points a game.",
+                                     lambda r: f"{r.name}'s scoreboard is running {r.luck_pg:+.1f} pts/game behind its play."),
+        "Turnover luck fade": ((L["to_pg"] >= 1.0) & (L["n"] >= 4), "spread", "opp",
+                               "A turnover margin of +1 a game or better: takeaways barely carry over from one game "
+                               "to the next, but records and lines are built on them.",
+                               lambda r: f"{r.name} is {r.to_pg:+.1f} a game in turnover margin."),
+        "Turnover bad-luck back": ((L["to_pg"] <= -1.0) & (L["n"] >= 4), "spread", "team",
+                                   "A turnover margin of -1 a game or worse: the giveaways won't keep coming at this rate.",
+                                   lambda r: f"{r.name} is {r.to_pg:+.1f} a game in turnover margin."),
+        "Thursday night under": ((L["weekday"] == 3) & (L["week"] >= 2) & (L["playoff"] == 0), "total", "under",
+                                 "Short week for both teams: less practice, simpler game plans, sloppier offense.",
+                                 lambda r: "Thursday game on a short week."),
+        "Late-season bad team dog": ((L["week"] >= 12) & (L["wpct"] <= 0.3) & (L["n"] >= 9) & (L["line"] < 0)
+                                     & (L["playoff"] == 0), "spread", "team",
+                                     "Nobody wants to bet a 3-9 team in December, so their numbers get too big.",
+                                     lambda r: f"{r.name} is {r.w:.0f}-{r.l:.0f} and getting {-r.line:g}."),
     }
 
 
@@ -175,6 +207,26 @@ def cfb_angles(L):
         "Huge total under": (L["total_line"] >= 65, "total", "under",
                              "Totals of 65+ price in a shootout; the market leans too hard into it.",
                              lambda r: f"Total of {r.total_line:g}."),
+        # luck regression (luck.py)
+        "Close-game luck fade": ((L["close_net"] >= 3) & (L["n"] >= 4), "spread", "opp",
+                                 "One-score games are close to coin flips. A team that keeps winning them is rated "
+                                 "on a record its play hasn't earned.",
+                                 lambda r: f"{r.name} is {r.close_net:+.0f} in one-score games this season."),
+        "Close-game bad-luck back": ((L["close_net"] <= -3) & (L["n"] >= 4), "spread", "team",
+                                     "The reverse: a team that keeps losing coin flips is better than its record.",
+                                     lambda r: f"{r.name} is {r.close_net:+.0f} in one-score games this season."),
+        "Scoreboard luck fade": ((L["luck_pg"] >= 8) & (L["n"] >= 4), "spread", "opp",
+                                 "Outscoring its own play-by-play by 8+ points a game: that part doesn't repeat.",
+                                 lambda r: f"{r.name}'s scoreboard is running {r.luck_pg:+.1f} pts/game ahead of its play."),
+        "Scoreboard bad-luck back": ((L["luck_pg"] <= -8) & (L["n"] >= 4), "spread", "team",
+                                     "Playing better than the scoreboard shows by 8+ points a game.",
+                                     lambda r: f"{r.name}'s scoreboard is running {r.luck_pg:+.1f} pts/game behind its play."),
+        "Record-vs-stats trap": ((L["wpct"] >= 0.75) & (L["n"] >= 5) & (L["epa_pg"] <= 0), "spread", "opp",
+                                 "A great record from a team that isn't out-playing opponents snap to snap.",
+                                 lambda r: f"{r.name} is {r.w:.0f}-{r.l:.0f} but even or worse on a per-play basis."),
+        "Underrated loser": ((L["wpct"] <= 0.34) & (L["n"] >= 5) & (L["epa_pg"] >= 3), "spread", "team",
+                             "A losing record from a team that out-plays opponents snap to snap.",
+                             lambda r: f"{r.name} is {r.w:.0f}-{r.l:.0f} but plus {r.epa_pg:.1f} a game on a per-play basis."),
     }
 
 

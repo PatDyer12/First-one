@@ -485,6 +485,38 @@ def props_block(S):
     return h
 
 
+def teaser_block(S):
+    """Wong teasers (teasers.py): this week's qualifying legs, the pair to bet, and the history behind it."""
+    path = os.path.join(BET, "data", "teasers.json")
+    if not os.path.exists(path):
+        return ["<p class='empty'>Teasers not run this week (python3 betting/teasers.py).</p>"]
+    T = json.load(open(path))
+    H = T["history"]
+    h = [f"<div class='propnote'><b>Why teasers.</b> {H['margin_3_8%']:g}% of NFL games end with a margin of 3 to 8, so "
+         f"teasing an underdog of +1.5 to +2.5 up six points (to +7.5 / +8.5) crosses both 3 and 7. Since 2011 those legs "
+         f"won <b>{H['dog_win%']:g}%</b> of {H['dog_legs']} times in games with a total of 49 or less; a two-team 6-point "
+         f"teaser at -120 needs 73.9%. Above break-even in {H['dog_seasons_up']} seasons, {H['dog_recent']} since 2022 "
+         f"(about {H['dog_roi_120%']:+g}% per teaser at -120). The favorite version won only {H['fav_win%']:g}% (not bet), "
+         f"and dog legs in higher-scoring games only {H['high_total_win%']:g}%. <b>0.5u per teaser; take it at -130 or "
+         f"better.</b></div>"]
+    if T["pairs"]:
+        for pr in T["pairs"]:
+            h.append(f"<div class='slip'><div class='stripe'></div><div class='main'><div class='top'><div>"
+                     f"<div class='pk'>{E(' / '.join(pr['legs']))}<span class='odds'>2-team 6-pt</span></div>"
+                     f"<div class='meta'>{E(' · '.join(pr['games']))}</div></div></div></div>"
+                     f"<div class='stub'><div class='units'>{pr['units']:g}U</div><div class='usd'>{money(pr['units'])}</div>"
+                     f"<div class='tier play'>Teaser</div></div></div>")
+    legs = "".join(f"<li><b>{E(l['team'])} +{l['line']:g} → +{l['teased']:g}</b> ({E(l['game'])}, total {l['total']:g})</li>"
+                   for l in T["legs"])
+    skip = "".join(f"<li><b>{E(l['team'])} +{l['line']:g} → +{l['teased']:g}</b>: skipped, {E(l['skip'])}. If he's active "
+                   f"at inactives, this leg is back on.</li>" for l in T["skipped"])
+    if not T["pairs"]:
+        h.append("<p class='empty'>Fewer than two qualifying legs this week, so no teaser.</p>")
+    if legs or skip:
+        h.append(f"<ul class='wl'>{legs}{skip}</ul>")
+    return h
+
+
 def render_nfl():
     S, F = W.Sport("nfl"), load_final("nfl")
     plays = [p for p in F["plays"] if S.upcoming(p["game"])]
@@ -511,6 +543,7 @@ def render_nfl():
     h += ["<h2>Sides</h2>", "<div class='note'>Spread or moneyline, one per team: situational spots and road-team systems, "
           "half units unless stacked.</div>"]
     h += [play_card(S, p) for p in sides] or ["<p class='empty'>No side plays.</p>"]
+    h += ["<h2>Teasers</h2>"] + teaser_block(S)
     h += ["<h2>Player Props</h2>"] + props_block(S)
     h += ["<h2>QB Watch · Injury Report</h2>", "<div class='note'>Starters on the injury report or already replaced. "
           "<b>Avoid</b>: don't bet on that team. <b>Bet against</b>: the line hasn't caught up to the drop-off.</div>"]

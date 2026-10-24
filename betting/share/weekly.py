@@ -30,7 +30,15 @@ ASSETS = os.path.join(HERE, "assets")
 LOGOS = os.path.join(ASSETS, "logos")
 ET = ZoneInfo("America/New_York")
 ESPN = "https://site.api.espn.com/apis/site/v2/sports/football/{}/{}"
-CHROME = "/opt/pw-browsers/chromium-1194/chrome-linux/chrome"
+def _chrome():
+    """Headless Chromium for PDF printing: whichever Playwright build the container has, else one on PATH."""
+    import glob
+    import shutil
+    found = sorted(glob.glob("/opt/pw-browsers/chromium-*/chrome-linux*/chrome"))
+    return found[-1] if found else shutil.which("chromium") or shutil.which("google-chrome") or "chromium"
+
+
+CHROME = _chrome()
 NFL_ABBR = {"WSH": "WAS", "LAR": "LA"}
 KEY3 = 14.4  # % of NFL games since 2011 decided by exactly 3
 QB_REPL, QB_PRIOR, QB_DB = -0.10, 250.0, 36.0
