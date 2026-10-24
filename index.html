@@ -5527,6 +5527,71 @@ body:not(.tv) .bgm-np { display: none; }
 .bgm-np span { font: 600 14px/1.1 Inter, sans-serif; color: rgba(255,255,255,.65); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
 .bgm-np > i { width: 18px; height: 18px; flex: none; background: linear-gradient(#1ed760, #1ed760) 0 100% / 4px 60% no-repeat, linear-gradient(#1ed760, #1ed760) 7px 100% / 4px 100% no-repeat, linear-gradient(#1ed760, #1ed760) 14px 100% / 4px 40% no-repeat; animation: bgmEq .9s ease-in-out infinite alternate; }
 @keyframes bgmEq { to { background-size: 4px 30%, 4px 55%, 4px 95%; } }
+
+/* a group ride: one box, the pick once up top, each person's own ticket under it */
+.ob-grp { position: relative; display: grid; gap: 10px; padding: 14px 14px 12px 22px; border-radius: 16px; background: linear-gradient(180deg, rgba(255,255,255,.065), rgba(255,255,255,.02)), rgba(10,13,18,.9); isolation: isolate; }
+.ob-grp::before { content: ""; position: absolute; inset: 0; border-radius: inherit; padding: 2px; background: var(--gb); -webkit-mask: linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0); -webkit-mask-composite: xor; mask-composite: exclude; pointer-events: none; opacity: .85; }
+.ob-grp::after { content: ""; position: absolute; left: 0; top: 0; bottom: 0; width: 7px; border-radius: 16px 0 0 16px; background: var(--gs); pointer-events: none; }
+.ob-grp.k-w { box-shadow: 0 0 26px rgba(61,220,151,.16); } .ob-grp.k-l { box-shadow: 0 0 26px rgba(255,90,90,.14); } .ob-grp.k-won { box-shadow: 0 0 30px rgba(61,220,151,.28); }
+.ob-grp.on { box-shadow: 0 0 0 2px var(--gold), 0 0 22px rgba(79,157,255,.35); }
+.ob-grp[class*="pop-"], .ob-gm[class*="pop-"] { animation: rbPop 1.2s ease-in-out 2; }
+.ob-gh { display: grid; grid-template-columns: minmax(0, 1fr) auto; align-items: center; column-gap: 14px; }
+.ob-gt { min-width: 0; }
+.ob-gtag { display: inline-flex; align-items: center; gap: 10px; font: 800 13px/1 Inter, sans-serif; letter-spacing: .16em; text-transform: uppercase; color: #fff; }
+.ob-gavs { display: inline-flex; }
+.ob-gavs .rb-av { width: 26px; height: 26px; font-size: 12px; box-shadow: 0 0 0 2px #0d1117; }
+.ob-gavs .rb-av + .rb-av { margin-left: -7px; }
+.ob-grp > .meter { margin: 0 0 2px; height: 8px; }
+.ob-gl { display: grid; gap: 6px; }
+.ob-gm { position: relative; display: grid; grid-template-columns: auto minmax(0, 1fr) auto; align-items: center; column-gap: 12px; padding: 9px 13px 9px 14px; border-radius: 11px; background: rgba(255,255,255,.045); border: 1px solid rgba(255,255,255,.07); box-shadow: inset 4px 0 0 var(--c); }
+.ob-gm > .rb-av { width: 36px; height: 36px; font-size: 16px; }
+.ob-gmw { min-width: 0; }
+.ob-gmn { display: flex; align-items: center; gap: 8px; min-width: 0; white-space: nowrap; overflow: hidden; }
+.ob-gmn > b { font: 800 16px/1.1 Inter, sans-serif; letter-spacing: .08em; text-transform: uppercase; color: var(--c); }
+.ob-gmn small { flex: none; font: 800 10px/1 Inter, sans-serif; letter-spacing: .14em; text-transform: uppercase; color: #d8e6ff; background: rgba(79,157,255,.2); border: 1px solid rgba(79,157,255,.4); border-radius: 5px; padding: 3px 6px; }
+.ob-gmn .bt-chip { font-size: 10px; padding: 2px 8px; }
+.ob-gmp { margin-top: 4px; font: 600 14px/1.2 Inter, sans-serif; color: #9aa4b5; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.ob-gmp b { color: #eef2f7; font-weight: 800; }
+.ob-gmr { display: grid; justify-items: end; gap: 4px; text-align: right; }
+.ob-gmr em { font: 800 10px/1 Inter, sans-serif; font-style: normal; letter-spacing: .16em; text-transform: uppercase; color: #8d97a8; }
+.ob-gmr b { font: 800 20px/1 Inter, sans-serif; color: #eef2f7; white-space: nowrap; }
+.ob-gm.won { background: rgba(61,220,151,.08); } .ob-gm.won .ob-gmr b { color: #3ddc97; }
+.ob-gm.lost { opacity: .72; } .ob-gm.lost .ob-gmr b { color: #ff6b6b; }
+body.tv.nflday .ob-grp, body.tv.cfb .ob-grp { background-color: rgba(10,13,18,.92); }
+@media (max-height: 820px), (max-width: 1500px) {
+  .ob-grp { padding: 11px 11px 10px 18px; gap: 8px; }
+  .ob-gm { padding: 7px 10px 7px 12px; } .ob-gm > .rb-av { width: 30px; height: 30px; font-size: 14px; }
+  .ob-gmn > b { font-size: 14px; } .ob-gmp { font-size: 13px; } .ob-gmr b { font-size: 17px; }
+}
+
+/* what an act means, in plain words, under the chapters */
+.x3-why { position: absolute; left: 50%; top: 70px; z-index: 21; transform: translateX(-50%); max-width: 1240px; padding: 10px 26px; border-radius: 999px; background: rgba(6,8,12,.8); box-shadow: inset 0 0 0 1px rgba(255,255,255,.14), 0 10px 30px rgba(0,0,0,.45);
+  font: 600 25px/1.25 Inter, sans-serif; color: rgba(255,255,255,.94); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; animation: x3Why .55s .2s both; }
+.x3-why b { margin-right: 12px; font: 800 19px/1 Inter, sans-serif; letter-spacing: .14em; text-transform: uppercase; color: var(--fxk, #ffd23f); }
+.cs.lx .x3-why b { color: #ff6b78; }
+@keyframes x3Why { from { opacity: 0; transform: translate(-50%, -10px); } }
+.cs.v3 .x3-cth { top: 146px; } .cs.v3 .x3-rh { top: 150px; } .cs.v3 .x3-bh { top: 138px; } .cs.v3 .x3-rdh { top: 140px; } .cs.v3 .x3-heat { top: 134px; } .cs.v3 .x3-vault { top: 142px; }
+.cs.v3 .x3-np { top: 132px; } .cs.v3 .lx-amt { top: 146px; } .cs.lx.has3d .act-lgrave .lx-amt { top: 150px; }
+
+/* the group's show */
+.cs.grp .x3-gdw { bottom: 70px; }
+.x3-gavs { display: flex; flex-wrap: wrap; justify-content: center; gap: 10px 22px; max-width: 1500px; }
+.x3-gavs > span { display: inline-flex; align-items: center; gap: 10px; padding: 6px 16px 6px 6px; border-radius: 999px; background: rgba(8,10,14,.7); box-shadow: inset 0 0 0 2px color-mix(in srgb, var(--c) 70%, transparent); }
+.x3-gavs .rb-av { width: 40px; height: 40px; font-size: 18px; }
+.x3-gavs b { font: 800 26px/1 Inter, sans-serif; color: #fff; }
+.x3-gsh { position: absolute; left: 0; right: 0; top: 136px; display: grid; justify-items: center; gap: 6px; text-align: center; animation: x3Up .5s .15s both; }
+.x3-gsh em, .x3-gteam em { font: 600 13px/1 "Azeret Mono", monospace; font-style: normal; letter-spacing: .26em; text-transform: uppercase; color: var(--fxk); }
+.x3-gsh b { font: 900 52px/1 var(--f-display); letter-spacing: .01em; text-transform: uppercase; color: #fff; }
+.x3-gsh span, .x3-gteam span { font: 600 20px/1.25 Inter, sans-serif; color: rgba(255,255,255,.75); }
+.x3-gteam { position: absolute; left: 64px; bottom: 64px; display: grid; gap: 6px; max-width: 620px; padding: 18px 24px; border-radius: 18px; background: rgba(6,8,12,.72); box-shadow: inset 0 0 0 1px rgba(255,255,255,.1); animation: x3L .5s .2s both; }
+.cs.v3:not(.has3d) .x3-gteam { left: 0; right: 0; bottom: auto; top: 136px; margin: 0 auto; justify-items: center; text-align: center; background: none; box-shadow: none; }
+.x3-gteam b { font: 900 54px/1 var(--f-display); letter-spacing: .01em; text-transform: uppercase; color: #fff; }
+.x3-gsl { position: absolute; left: 0; right: 0; top: 330px; display: flex; flex-wrap: wrap; justify-content: center; gap: 18px; margin: 0; padding: 0 80px; list-style: none; }
+.x3-gsl li { display: grid; grid-template-columns: auto 1fr; column-gap: 12px; row-gap: 6px; align-items: center; width: 270px; padding: 18px 20px; border-radius: 18px; background: rgba(10,12,16,.82); box-shadow: inset 0 4px 0 var(--c), inset 0 0 0 1px rgba(255,255,255,.1); animation: x3Up .45s calc(.35s + var(--i) * .3s) both; }
+.x3-gsl li b { font: 800 24px/1 Inter, sans-serif; color: #fff; text-transform: uppercase; letter-spacing: .04em; }
+.x3-gsl li small { grid-column: 1 / -1; font: 600 16px/1 Inter, sans-serif; color: rgba(255,255,255,.6); }
+.x3-gsl li strong { grid-column: 1 / -1; font: 900 54px/1 var(--f-display); color: #5ef0a0; }
+.x3-gsl li em { grid-column: 1 / -1; font: 700 18px/1 Inter, sans-serif; font-style: normal; color: rgba(255,255,255,.75); }
 </style>
 </head>
 <body>
@@ -7711,7 +7776,7 @@ body:not(.tv) .bgm-np { display: none; }
   const PP_UNIT = { nba_pts: "pts", nba_3pm: "threes", nba_reb: "reb", nba_ast: "ast", nba_stl: "stl", nba_blk: "blk", nba_pra: "PRA", nba_pr: "P+R", nba_pa: "P+A", nba_ra: "R+A", nba_sb: "stocks" };
   function propShow(h) {
     const { b, x, st, e, g } = h, l = Number(x.l ?? PP_DEF[st] ?? 0.5), after = PROP_VAL(st, e.tal), add = e.kind === "pts" ? e.d : 1, before = Math.max(0, after - add);
-    const cleared = before <= l && after > l, F = b.kind === "parlay" ? null : flexOf(b), card = [...document.querySelectorAll(`.ob-bet[data-ids="${b.id}"], .pp-bet[data-ids="${b.id}"]`)].find((el) => { const r = el.getBoundingClientRect(); return r.width > 200 && r.top > 60 && r.bottom < innerHeight - 40; });
+    const cleared = before <= l && after > l, F = b.kind === "parlay" ? null : flexOf(b), card = [...document.querySelectorAll(`.ob-bet[data-ids="${b.id}"], .ob-gm[data-ids="${b.id}"], .pp-bet[data-ids="${b.id}"]`)].find((el) => { const r = el.getBoundingClientRect(); return r.width > 200 && r.top > 60 && r.bottom < innerHeight - 40; });
     if (cleared && b.kind !== "parlay") garbMark(b.id, g);
     const acc = (card && getComputedStyle(card).getPropertyValue("--fxk").trim()) || personCol(b), row = (BOX.get(g.id) || { names: new Map() }).names.get(normNm(x.p.nm)), tmx = String(g.a.id) === e.tm ? g.a : g.h;
     const hs = row && row.id ? `https://a.espncdn.com/combiner/i?img=/i/headshots/${g.sport === "CBB" ? "mens-college-basketball" : "nba"}/players/full/${row.id}.png&w=200&h=146` : "";
@@ -8502,7 +8567,7 @@ body:not(.tv) .bgm-np { display: none; }
   }
   // two people on opposite sides of the same game: both tickets, a VS between them
   function obH2h(l, r, g) {
-    return `<div class="ob-h2h" style="--lc:${personCol(l.entries[0].b)};--rc:${personCol(r.entries[0].b)}"><span class="ob-vsl">Head to head</span>${obTicket(l, g)}<span class="ob-vs">VS</span>${obTicket(r, g)}</div>`;
+    return `<div class="ob-h2h" style="--lc:${personCol(l.entries[0].b)};--rc:${personCol(r.entries[0].b)}"><span class="ob-vsl">Head to head</span>${obPos(l, g)}<span class="ob-vs">VS</span>${obPos(r, g)}</div>`;
   }
   // a parlay: whose, how many legs at what price, legs hit so far, and every leg with where it stands
   function obParlay(b) {
@@ -8566,8 +8631,40 @@ body:not(.tv) .bgm-np { display: none; }
     const b = e.b, pre = phase(b) === "pre", p = { entries: [e], pick: e.pick, sel: e.sel };
     return obTicket(p, null, pre ? { cls: "pre", txt: startLabel(startOf(b)) } : { cls: "e", txt: "Open" });
   }
-  // one game's open bets as tickets (a ride is one ticket; opposite sides pair up head to head)
-  const obRows = (G) => gamePositions(G.entries).map((r) => (r.h2h ? obH2h(r.h2h[0], r.h2h[1], G.g) : obTicket(r.p, G.g))).join("");
+
+  // ---- a group ride: everybody on the same pick in one box, each with their own ticket ----
+  function obGroup(p, g, st) {
+    st = st || posState(p, g);
+    const by = new Map();
+    for (const e of p.entries) { const k = personKey(e.b); if (!by.has(k)) by.set(k, []); by.get(k).push(e); }
+    const R = [...by.values()].map((es) => ({ b: es[0].b, es, t: Math.min(...es.map((e) => e.b.placedAt || Infinity)) })).sort((x, y) => Number(isMe(y.b)) - Number(isMe(x.b)) || x.t - y.t);
+    const first = R.reduce((a, r) => (r.t < a.t ? r : a), R[0]), prop = !!(p.sel && (isTd(p.sel.m) || isPP(p.sel.m)));
+    const hb = p.sel && g ? hasBall(p.sel) : null;
+    const meter = st.ev && !st.ev.fin && g && g.st === "in" && p.sel && !isTd(p.sel.m) ? (isPP(p.sel.m) ? ppMeter(p.sel, st.ev) : meterHtml(p.sel, st.ev)) : "";
+    const hs = p.sel && p.sel.p && p.sel.p.hs ? `<img class="ob-hs" src="${esc(p.sel.p.hs)}" alt="" loading="lazy" referrerpolicy="no-referrer" onerror="this.remove()">` : "";
+    const st0 = p.entries.filter((e) => e.leg == null), inU = st0.reduce((a, e) => a + (Number(e.b.units) || 0), 0), winU = st0.reduce((a, e) => a + (Number(e.b.units) || 0) * ppu(e.b.odds), 0);
+    const cols = R.map((r) => personCol(r.b)), stripe = cols.map((c, i) => `${c} ${((i * 100) / cols.length).toFixed(1)}% ${(((i + 1) * 100) / cols.length).toFixed(1)}%`).join(", ");
+    const row = (r) => {
+      const b = r.b, es = r.es.filter((e) => e.leg == null), u = es.reduce((a, e) => a + (Number(e.b.units) || 0), 0), w = es.reduce((a, e) => a + (Number(e.b.units) || 0) * ppu(e.b.odds), 0);
+      const odds = [...new Set(es.map((e) => fOdds(e.b.odds)))].join(" / "), books = [...new Set(es.map((e) => BOOK[bookKey(e.b)]))].join(" / ");
+      const done = es.length > 0 && es.every((e) => e.b.status !== "open"), o = done ? outcome(es[0].b) : null, n = done ? es.reduce((a, e) => a + netOf(e.b), 0) : 0;
+      const F = es.length ? flexOf(es[0].b, u) : null, tail = es.map((e) => e.b.tail).find(Boolean);
+      const right = done ? `<em>${o === "W" ? "Won" : o === "L" ? "Lost" : "Push"}</em><b>${fU(n, true)}</b>` : `<em>To win</em><b>${fU(w)}</b>`;
+      return `<div class="ob-gm${done ? (o === "W" ? " won" : o === "L" ? " lost" : " push") : ""}${popCls({ entries: r.es })}" style="--c:${personCol(b)}"${tapAttrs(r.es.map((e) => e.b.id), personName(b) + " · " + p.pick)}>${avHtml(b)}
+        <div class="ob-gmw"><div class="ob-gmn"><b>${esc(personName(b))}</b>${r === first ? "<small>Started it</small>" : ""}${F && F.k ? `<span class="bt-chip bt-c-${F.k}">${BT_DEF[F.k][0]} ${esc(F.name)}</span>` : ""}</div>
+        <div class="ob-gmp"><b>${esc(odds)}</b> · ${fU(u)} in · ${esc(books)}${tail ? ` · ${tail.kind === "fade" ? "fading" : "tailing"} ${esc(tail.name)}` : ""}</div></div>
+        <div class="ob-gmr">${right}</div></div>`;
+    };
+    return `<div class="ob-grp k-${st.cls}${popCls(p)}${onAir(idsOf(p))}" style="--c:${cols[0]};--gs:linear-gradient(180deg, ${stripe});--gb:linear-gradient(90deg, ${cols.length > 1 ? cols.join(", ") : cols[0] + ", " + cols[0]})"${tapAttrs(idsOf(p), p.pick)}>
+      <div class="ob-gh"><div class="ob-gt"><span class="ob-gtag"><span class="ob-gavs">${R.map((r) => avHtml(r.b)).join("")}</span>Group ride · ${R.length} people</span>
+        <div class="ob-pick">${hs}<span class="t">${esc(p.sel && isTd(p.sel.m) && p.sel.p && p.sel.p.nm ? p.sel.p.nm : p.pick)}</span>${ballTag(hb)}</div>
+        <div class="ob-meta">${[mktName(p.sel), st0.length ? `together ${fU(inU)} in · ${fU(winU)} to win` : ""].filter(Boolean).join(" · ")}</div></div>
+        ${obPill(st, prop)}</div>
+      ${meter}<div class="ob-gl">${R.map(row).join("")}</div></div>`;
+  }
+  const obPos = (p, g) => (p.people && p.people.size > 1 ? obGroup(p, g) : obTicket(p, g));
+  // one game's open bets as tickets (a group ride is a box of its own; opposite sides pair up head to head)
+  const obRows = (G) => gamePositions(G.entries).map((r) => (r.h2h ? obH2h(r.h2h[0], r.h2h[1], G.g) : obPos(r.p, G.g))).join("");
   // the whole column: how many bets are open, then game by game (live first, then by kickoff), the parlays, the rest.
   // Each game's block is one piece, so the roll holds as each comes up
   const obCard = (t, n, body) => (n ? `<article class="rb-g rb-card ob-card"><header class="rb-ch"><h3>${esc(t)}</h3><span>${n} open</span></header><div class="rb-rows ob-list">${body}</div></article>` : "");
@@ -10729,7 +10826,7 @@ body:not(.tv) .bgm-np { display: none; }
       const box = el.querySelector(".cs-acts"); if (!box) return;
       [...box.children].forEach((x) => { x.classList.add("gone"); setTimeout(() => x.remove(), 520); });
       const d = document.createElement("div"); d.className = "cs-act x3 act-" + a.k; d.style.setProperty("--T", a.ms / 1000 + "s"); el.dataset.act = a.k;
-      d.innerHTML = (HT[a.k] || HT.main)(); box.appendChild(d);
+      d.innerHTML = (HT[a.k] || HT.main)() + lxWhy(a.k, { b, n, nm, beat, legs, list, tot, towin }); box.appendChild(d);
       el.querySelectorAll(".cs-ch > span").forEach((x, j) => { x.classList.toggle("done", j < i); x.classList.toggle("on", j === i); });
       cur = { k: a.k, ms: a.ms, at: performance.now() }; if (st3) SB3D.act(a.k, a.ms);
       shSfx("sniper/whoosh", 0.45, 0);
@@ -10939,7 +11036,7 @@ body:not(.tv) .bgm-np { display: none; }
     SHOW.onBeat = null;
     const d = document.createElement("div");
     d.className = "cs-act x3 act-" + a.k; d.style.setProperty("--T", a.ms / 1000 + "s"); el.dataset.act = a.k;
-    d.innerHTML = SH3[a.k].html(c, a);
+    d.innerHTML = SH3[a.k].html(c, a) + s3why(a.k, c);
     box.appendChild(d);
     el.querySelectorAll(".cs-ch > span").forEach((x, j) => { x.classList.toggle("done", j < i); x.classList.toggle("on", j === i); });
     if (i > 0) shSfx("sniper/whoosh", 0.4, 0);
@@ -10951,6 +11048,138 @@ body:not(.tv) .bgm-np { display: none; }
   }
   // the 3D library waits until the board's on the TV, then loads quietly so the first show doesn't wait for it
   setInterval(() => { if (!window.__s3pre && window.SB3D && document.body.classList.contains("tv") && !PHONE() && !GUEST && !show3Off() && SB3D.ok()) { window.__s3pre = 1; SB3D.preload(); } }, 12000);
+
+  // ---- the group's show ----
+  const GRP_TEAM = ["grush", "gspike", "ghuddle", "gpush"];
+  const GRP_LAB = { gdrop: "Group win", gsplit: "The split", play: "How it hit", grush: "Storm the field", gspike: "The spike", ghuddle: "Huddle break", gpush: "The push" };
+  let grpBag = [], grpLast = "";
+  function grpTeam() { if (!grpBag.length) { grpBag = shuffled(GRP_TEAM); if (grpBag[grpBag.length - 1] === grpLast) grpBag.unshift(grpBag.pop()); } return (grpLast = grpBag.pop()); }
+  // a crowd going up: filtered noise swelling in and out
+  function shCrowd(at, dur, vol) {
+    shAt(at, () => {
+      const c = ready(); if (!c) return;
+      const n = Math.floor(c.sampleRate * (dur / 1000 + 0.6)), buf = c.createBuffer(2, n, c.sampleRate);
+      for (let ch = 0; ch < 2; ch++) { const d = buf.getChannelData(ch); let b0 = 0, b1 = 0; for (let i = 0; i < n; i++) { const w = Math.random() * 2 - 1; b0 = 0.97 * b0 + 0.03 * w; b1 = 0.55 * b1 + 0.45 * w; d[i] = (b0 * 2.4 + b1 * 0.45) * (0.8 + 0.2 * Math.sin((i / c.sampleRate) * 6.3 + ch * 2)); } }
+      const s = c.createBufferSource(), bp = c.createBiquadFilter(), g = c.createGain(), t0 = c.currentTime, T = dur / 1000;
+      s.buffer = buf; bp.type = "bandpass"; bp.frequency.value = 950; bp.Q.value = 0.55;
+      g.gain.setValueAtTime(0.0001, t0); g.gain.exponentialRampToValueAtTime(vol, t0 + Math.min(0.9, T * 0.3)); g.gain.setValueAtTime(vol, t0 + Math.max(0.9, T - 0.7)); g.gain.exponentialRampToValueAtTime(0.0001, t0 + T + 0.4);
+      s.connect(bp).connect(g).connect(c.destination); s.start(); SHOW.src.push({ s, g, c });
+    });
+  }
+  const grpAv = (r) => `<span class="rb-av" style="--c:${r.col}">${esc(String(r.nm || "?").slice(0, 1).toUpperCase())}</span>`;
+  const grpNames = (G) => { const n = G.R.map((r) => r.nm); return n.length > 1 ? n.slice(0, -1).join(", ") + " and " + n[n.length - 1] : n[0]; };
+  const grpList = (G) => `<ul class="x3-gsl x3-fb">${G.R.map((r, i) => `<li style="--c:${r.col};--i:${i}">${grpAv(r)}<b>${esc(r.nm)}</b><small>${esc(r.odds)} · ${esc(r.risk)} in</small><strong>${esc(r.amt)}</strong><em>${esc(r.usd)}</em></li>`).join("")}</ul>`;
+  const grpTeamSH = (lab, go) => ({
+    html: (c) => { const G = c.grp; return `<div class="x3-gteam"><em>${lab}</em><b>${G.N} of you · ${esc(G.totS)}</b><span>${esc(G.usd)} won together on ${esc(G.pick)}</span></div>${grpList(G)}`; },
+    go,
+  });
+  Object.assign(SH3, {
+    gdrop: {
+      html: (c) => { const G = c.grp;
+        return `<div class="x3-drop x3-gdrop"><b class="x3-call x3-fb">Group win</b><div class="x3-dw x3-gdw"><span class="x3-tag">Group ride · ${G.N} people · same pick</span>
+          <div class="x3-gavs">${G.R.map((r) => `<span style="--c:${r.col}">${grpAv(r)}<b>${esc(r.nm)}</b></span>`).join("")}</div><div class="x3-pk">${esc(G.pick)} <i>${esc(G.totS)} together</i></div></div></div>`; },
+      go: (c) => { shSfx("sniper/whoosh", 0.6, 0); shSfx("sniper/bc_sting", 0.7, 80); shSfx("sniper/slam", 0.9, 550); shCrowd(450, 2500, 0.14); for (let i = 0; i < Math.min(6, c.grp.N); i++) shSfx("clink", 0.45, 950 + i * 120); },
+    },
+    gsplit: {
+      html: (c) => { const G = c.grp; return `<div class="x3-gsplit"><div class="x3-gsh"><em>The split</em><b>${G.N} tickets · ${esc(G.totS)} together</b><span>${esc(G.usd)} · everyone on ${esc(G.pick)}</span></div>${grpList(G)}</div>`; },
+      go: (c) => { const n = Math.min(6, c.grp.N), tT = (0.45 + n * 0.36 + 0.45) * 1000; for (let i = 0; i < n; i++) shSfx("sniper/slam", 0.42, 870 + i * 360); shSfx("coins", 0.6, tT); shSfx("payout", 0.4, tT + 100); shSfx("sniper/bc_check", 0.7, tT + 1250); },
+    },
+    grush: grpTeamSH("Storm the field", (c, d, a) => { shCrowd(150, a.ms - 300, 0.2); const tj = Math.min(4100, a.ms * 0.56); for (let i = 0; i < 8; i++) shSfx("sniper/bc_tick", 0.22, 450 + i * 430); shSfx("sniper/launch", 0.85, tj + 660); shSfx("sniper/slam", 0.8, tj + 660); shSfx("coins", 0.6, tj + 2500); shSfx("sniper/bc_check", 0.7, tj + 2550); }),
+    gspike: grpTeamSH("The spike", () => { shCrowd(100, 7200, 0.15); shSfx("sniper/bc_tick", 0.6, 1250); shSfx("sniper/whoosh", 0.6, 1620); shSfx("sniper/slam", 0.95, 2080); shSfx("sniper/launch", 0.7, 2320); shSfx("sniper/launch", 0.7, 3750); shSfx("coins", 0.6, 5200); shSfx("sniper/bc_check", 0.7, 5250); }),
+    ghuddle: grpTeamSH("Huddle break", () => { shCrowd(100, 7200, 0.13); [2450, 2950, 3450].forEach((t) => shSfx("sniper/bc_tick", 0.85, t)); shSfx("sniper/slam", 0.95, 4200); shSfx("sniper/launch", 0.85, 4220); shSfx("coins", 0.6, 5900); shSfx("sniper/bc_check", 0.7, 5950); }),
+    gpush: grpTeamSH("The push", () => { shCrowd(100, 7200, 0.17); for (let i = 0; i < 7; i++) shSfx("sniper/bc_tick", 0.3, 800 + i * 330); shSfx("sniper/slam", 0.95, 2970); shSfx("sniper/launch", 0.85, 3000); shSfx("coins", 0.6, 6000); shSfx("sniper/bc_check", 0.7, 6050); }),
+  });
+  function grpChrome(c) {
+    const G = c.grp;
+    return `<div class="x3-hud"><span class="l"><i></i>Group win · ${G.N} cashed · ${esc(etClock(c.b.settledAt || Date.now()))}</span><span class="r">${esc(G.pick)}</span></div>`
+      + `<div class="cs-ch x3-ch">${c.acts.map((a) => `<span style="--ms:${a.ms}ms;flex-grow:${(a.ms / 1000 + 7).toFixed(1)}"><em>${GRP_LAB[a.k] || SHOW3_LAB[a.k] || a.k}</em><i></i></span>`).join("")}</div><span class="cs-skip x3-skip">Tap to skip</span>`;
+  }
+  // the music: one house edit, its drop landing as the team celebration gets going
+  function grpMusic(c) {
+    const team = c.acts.find((a) => GRP_TEAM.includes(a.k)), split = c.acts.find((a) => a.k === "gsplit"), pool = houseEdits().filter(hbOf);
+    if (!team || !split || !pool.length) return;
+    const hit = team.t0 + 400, cand = pool.filter((x) => { const h = hbOf(x); return h[2] && h[3] - h[2] >= (c.T - hit) / 1000; });
+    const A = pickClip(cand.length ? cand : pool); if (!A) return;
+    const h = hbOf(A), drop = h[2] || 0, t = Math.max(split.t0, hit - drop * 1000), p = { c: A, t, off: Math.max(0, drop - (hit - t) / 1000), end: c.T, peak: c.lvl >= 5 ? 0.92 : 0.82 };
+    SHOW.beatFrom = split.t0;
+    const a = new Audio(), tr = { a, bpm: h[0], b0: h[1], p, go: false };
+    a.preload = "auto";
+    a.addEventListener("loadedmetadata", () => { try { a.currentTime = p.off + (tr.go ? Math.max(0, performance.now() - SHOW.t0 - p.t) / 1000 : 0); } catch (e) {} }, { once: true });
+    a.src = A.base + ".mp3"; SHOW.tr.push(tr); c.ptr = tr;
+    shAt(p.t, () => { tr.go = true; if (!SND.on) return; try { if (a.readyState >= 1) a.currentTime = p.off + Math.max(0, performance.now() - SHOW.t0 - p.t) / 1000; } catch (e) {} a.volume = 0; a.play().catch(() => {}); });
+  }
+  function grpRun(list) {
+    showClear();
+    // each person once (their bets on the pick added up), the biggest cash first
+    const by = new Map();
+    for (const x of list) { const k = personKey(x.b), r = by.get(k) || { b: x.b, n: 0, u: 0, bets: [] }; r.n += Number(x.n) || 0; r.u += Number(x.b.units) || 0; r.bets.push(x.b); by.set(k, r); }
+    const R = [...by.values()].sort((x, y) => y.n - x.n || (x.b.placedAt || 0) - (y.b.placedAt || 0));
+    const lead = R[0].b, tot = R.reduce((a, r) => a + r.n, 0), names = R.map((r) => personName(r.b)), U = S.unit;
+    const el = cashEl(), F = flexOf(lead), lvl = Math.max(3, showLevel(lead, F, tot)), c = showCtx(lead, R[0].n, names, F, lvl);
+    c.grp = { R: R.map((r) => ({ nm: personName(r.b), col: s3col(personCol(r.b), "#4fb3ff"), n: r.n, amt: fU(r.n, true), usd: fUSD(r.n * U), odds: [...new Set(r.bets.map((b) => fOdds(b.odds)))].join(" / "), risk: fU(r.u), me: isMe(r.b) })),
+      tot, totS: fU(tot, true), usd: fUSD(tot * U), pick: lead.pick, N: R.length };
+    c.tile = null; c.v = null; c.call = "Group win";
+    const acts = [{ k: "gdrop", ms: 3000 }, { k: "gsplit", ms: 4600 + Math.min(6, R.length) * 420 }];
+    if (SH3.play.ok(c)) acts.push({ k: "play", ms: 5200 });
+    acts.push({ k: grpTeam(), ms: 7600 });
+    let T = 0; for (const a of acts) { a.t0 = T; T += a.ms; }
+    c.acts = acts; c.T = T;
+    const want3 = !!(window.SB3D && SB3D.ok() && !show3Off()), ready3 = want3 && SB3D.ready();
+    el.className = "cs show v3 grp " + (lvl >= 4 ? "big" : "mid") + " lv" + lvl + " ck-" + (F.k || "cash") + (F.k ? " bt-c-" + F.k : "") + (ready3 ? " wait3d" : "");
+    el.style.setProperty("--c", c.grp.R[0].col); el.style.setProperty("--pk", "0");
+    el.innerHTML = `<div class="cs-bg"></div><div class="cs-box">${grpChrome(c)}<div class="cs-acts"></div></div>`;
+    showFit(el); SHOW.fr = { n: 0, t: 0 };
+    el.hidden = false; void el.offsetWidth; el.classList.add("on");
+    SHOW.on = true; SHOW.t0 = performance.now(); SHOW.fxId = fxRun; SHOW.slot = 0; document.body.classList.add("cs-live");
+    el.style.pointerEvents = "auto"; el.onclick = showSkip; document.addEventListener("keydown", showKey, true);
+    grpMusic(c);
+    if (want3) {
+      const id = SHOW.id, giveUp = setTimeout(() => el.classList.remove("wait3d"), 2500);
+      SB3D.start(el.querySelector(".cs-box"), Object.assign(show3Info(c, el), { grp: c.grp, call: "Group win", name: names.join(" + ") })).then((st) => {
+        clearTimeout(giveUp);
+        if (!SHOW.on || SHOW.id !== id) { SB3D.stop(); return; }
+        c.s3 = st; el.classList.remove("wait3d"); el.classList.add("has3d");
+        if (c.curAct) SB3D.act(c.curAct.k, c.curAct.ms - (performance.now() - c.curAct.at));
+      }).catch(() => { clearTimeout(giveUp); el.classList.remove("wait3d"); });
+    }
+    acts.forEach((a, i) => shAt(a.t0, () => showAct3(el, c, a, i)));
+    showLoop(el);
+    el._t = setTimeout(() => { el.classList.add("out"); el._t2 = setTimeout(() => { showClear(); el.hidden = true; el.innerHTML = ""; el.style.pointerEvents = ""; el.onclick = null; }, 600); }, T - 600);
+    return T;
+  }
+  window.__grp = { run: grpRun, take: (b) => grpTake(b), Q: () => GQ, done: () => grpDone, team: (k) => { grpBag = [k]; } };
+
+  // ---- what each act means, in plain words, under the chapters ----
+  const whyLine = (h) => `<div class="x3-why">${h}</div>`;
+  const WHY3 = {
+    drop: (c) => `<b>Bet hit</b>${esc(c.name)}'s bet on ${esc(c.b.pick)} (${esc(fOdds(c.o))}) just won`,
+    cash: (c) => `<b>What it paid</b>${esc(c.name)} put in ${esc(fU(c.b.units))} at ${esc(fOdds(c.o))} and got ${esc(fU(c.b.units + c.n))} back: ${esc(fU(c.n, true))} profit (${esc(fUSD(c.usd))})`,
+    play: (c) => (c.legs.length >= 2 ? `<b>How it hit</b>all ${c.legs.length} legs of the parlay, in order. Every one had to hit for it to pay` : c.sel && isTd(c.sel.m) ? `<b>How it hit</b>the touchdown that won it` : c.sel && isPP(c.sel.m) ? `<b>How it hit</b>the player's number against the line` : `<b>How it hit</b>the final score against the line`),
+    troph: (c) => { const top = c.ach[0]; return top ? `<b>Trophy case</b>every kind of bet ${esc(c.name)} has hit. ${top.isNew ? "New" : "This one"}: ${esc(BT_DEF[top.k][1])}${BT_HOW[top.k] ? " = " + esc(BT_HOW[top.k]) : ""}` : `<b>Trophy case</b>every kind of bet ${esc(c.name)} has hit`; },
+    stand: () => `<b>Standings</b>where everybody in the room stands today, with this win counted`,
+    party: (c) => `<b>Victory lap</b>${esc(c.name)} won ${esc(fU(c.n, true))} (${esc(fUSD(c.usd))}) on ${esc(c.b.pick)}`,
+    out: (c) => `<b>The rafters</b>every bet ${esc(c.name)} has ever cashed hangs up here as a banner. This one is #${legOf(c).raf.length}`,
+    career: (c) => `<b>Career</b>all ${legOf(c).career.length} of ${esc(c.name)}'s settled bets, oldest to newest: wins go up, losses go down`,
+    rec: (c) => { const R = legOf(c).rec; return R.kind === "room" ? `<b>Record board</b>the biggest wins anyone in the room has ever had. This one is #${R.rank} of ${R.of}` : `<b>Personal best</b>the biggest of ${esc(c.name)}'s ${R.of} wins`; },
+    ring: (c) => `<b>Milestone</b>that's ${esc(c.name)}'s ${ordN(legOf(c).ring.num)} winning bet ever`,
+    burn: (c) => { const x = legOf(c).burn[0]; return `<b>Cooked</b>${esc(x.nm)} bet the other side (${esc(x.pick)}) and lost ${esc(x.lost)}`; },
+    ride: (c) => `<b>The ride</b>${legOf(c).ride.riders.length + 1} people made this same bet. Here's what each one won`,
+    heat: (c) => `<b>Heater</b>${esc(c.name)} has won ${legOf(c).heat.n} bets in a row (a push doesn't break it)`,
+    vault: (c) => `<b>The vault</b>everything ${esc(c.name)} has ever won, in gold bars: 1 bar = ${trim(legOf(c).vault.per)}u. The bright ones are from this win`,
+    gdrop: (c) => `<b>Group win</b>${esc(grpNames(c.grp))} all bet ${esc(c.grp.pick)}, and it hit. Everybody on it gets paid`,
+    gsplit: () => `<b>The split</b>each person's own ticket: what they put in and what they won`,
+  };
+  for (const k of GRP_TEAM) WHY3[k] = (c) => `<b>Team celebration</b>${c.grp.N} of you on ${esc(c.grp.pick)}: ${esc(c.grp.totS)} won together (${esc(c.grp.usd)})`;
+  const s3why = (k, c) => { try { const f = WHY3[k]; return f ? whyLine(f(c)) : ""; } catch (e) { return ""; } };
+  function lxWhy(k, x) {
+    try {
+      const nm = esc(x.nm), pk = esc(x.b.pick);
+      if (k === "lbeat") return whyLine(`<b>Bad beat</b>${pk} missed by ${esc(x.beat.by)}. That close`);
+      if (k === "lbust") { const hit = x.legs.filter((l) => l.ok).length; return whyLine(`<b>The parlay died</b>${hit} of ${x.legs.length} legs hit, but every leg has to hit to get paid`); }
+      if (k === "lyard") return whyLine(`<b>The graveyard</b>every bet the room just lost: ${x.list.length} bets, ${esc(fU(x.tot, true))} gone`);
+      return whyLine(`<b>Lost</b>${nm} put ${esc(fU(Number(x.b.units) || 0))} on ${pk}. It missed: would've paid ${esc(fU(x.towin))}, lost ${esc(fU(x.n, true))}`);
+    } catch (e) { return ""; }
+  }
   function cashRun({ b, n, names, tile }) {
     showClear();
     const el = cashEl(), F = flexOf(b), lvl = showLevel(b, F, n), c = showCtx(b, n, names, F, lvl);
@@ -11027,7 +11256,33 @@ body:not(.tv) .bgm-np { display: none; }
     el._t = setTimeout(() => { el.classList.add("out"); el._t2 = setTimeout(() => { el.hidden = true; el.innerHTML = ""; }, 600); }, T - 600);
     return T;
   }
-  function celebrate(b) {
+
+  // ---- a group ride cashes together: wait a beat for everybody's bet on the pick to settle, then one show for all of them ----
+  const GQ = new Map(), grpDone = new Map();
+  const grpMates = (b) => { const k = rideKey(b), t = Date.now(); return [...S.bets.values()].filter((x) => x.id !== b.id && personKey(x) !== personKey(b) && rideKey(x) === k && (x.status === "open" || (outcome(x) === "W" && t - (x.settledAt || 0) < 3 * 3600e3))); };
+  function grpTake(b) {
+    if (PHONE() || b.status !== "won") return false;
+    const k = rideKey(b), mates = grpMates(b); if (!mates.length) return false;
+    // the group's show already went: whoever settled late gets their own flash
+    if (Date.now() - (grpDone.get(k) || 0) < 20 * 60e3) { const n = netOf(b); qFlash("W", `${personName(b).toUpperCase()} HIT TOO`, b.pick, `${fOdds(b.odds)} · ${fU(n, true)} (${fUSD(n * S.unit, true)})`); return true; }
+    let q = GQ.get(k); if (!q) { q = { list: [], t: 0, t0: Date.now() }; GQ.set(k, q); }
+    if (!q.list.some((x) => x.b.id === b.id)) q.list.push({ b, n: netOf(b) });
+    clearTimeout(q.t); q.t = setTimeout(() => grpFlush(k), 2600);
+    return true;
+  }
+  function grpFlush(k) {
+    const q = GQ.get(k); if (!q) return;
+    // somebody's bet on the pick still open: give it a few more seconds to settle too
+    const open = grpMates(q.list[0].b).filter((x) => x.status === "open" && !q.list.some((y) => y.b.id === x.id));
+    if (open.length && Date.now() - q.t0 < 12e3) { q.t = setTimeout(() => grpFlush(k), 1500); return; }
+    GQ.delete(k);
+    if (new Set(q.list.map((x) => personKey(x.b))).size < 2) { for (const x of q.list) celebrate(x.b, true); return; }
+    grpDone.set(k, Date.now()); rideFx.set(k, Date.now());
+    try { if (window.sbCrowd) window.sbCrowd.pop(2); } catch (e) {}
+    fx(afterCard(() => grpRun(q.list)));
+  }
+  function celebrate(b, solo) {
+    if (!solo && grpTake(b)) return;
     try { if (window.sbCrowd) window.sbCrowd.pop(); } catch (e) {}
     try { if (document.body.classList.contains("hoops")) HC.boost = Math.min(1.6, HC.boost + 1); } catch (e) {}
     const o = outcome(b), n = netOf(b), k = rideKey(b);
@@ -11035,12 +11290,12 @@ body:not(.tv) .bgm-np { display: none; }
       const mates = rideMates(b), withMe = [...S.bets.values()].some((m) => isMe(m) && m.id !== b.id && rideKey(m) === k && (m.status === "open" || Date.now() - (m.settledAt || 0) < 3 * 3600e3));
       const dup = Date.now() - (rideFx.get(k) || 0) < 120e3;
       // their win gets the cash (riding with yours, yours carries their names)
-      if (o === "W" && !withMe && !dup) { rideFx.set(k, Date.now()); cashQ(b, n, [personName(b), ...mates]); return; }
+      if (o === "W" && !withMe && !dup) { rideFx.set(k, Date.now()); cashQ(b, n, [personName(b)]); return; }
       if (o === "L") lossQ(b, n);
       qFlash(o, `${personName(b).toUpperCase()} ${o === "W" ? (withMe ? "HIT TOO" : "HIT") : o === "L" ? "LOST" : b.status === "cashout" ? "CASHED" : "PUSH"}`, b.pick, `${fOdds(b.odds)} · ${fU(n, true)} (${fUSD(n * S.unit, true)})`);
       return;
     }
-    if (o === "W") { rideFx.set(k, Date.now()); cashQ(b, n, [personName(b), ...rideMates(b)]); return; }
+    if (o === "W") { rideFx.set(k, Date.now()); cashQ(b, n, [personName(b)]); return; }
     if (o === "L") { playLoss(); if (!lossQ(b, n) && !fxRush()) { fxLog.push(Date.now()); lossReact(b, n); } }
     const word = b.status === "cashout" ? "CASHED" : o === "W" ? "WINNER" : o === "L" ? "LOSS" : "PUSH";
     qFlash(o, word, b.pick, `${BOOK[bookKey(b)]} · ${fOdds(b.odds)} · ${fU(n, true)} (${fUSD(n * S.unit, true)})`);
@@ -11310,7 +11565,7 @@ body:not(.tv) .bgm-np { display: none; }
   // ---------- sheets ----------
   function openSheet(id) { $(id).hidden = false; }
   // keep every open screen current: when a new version is up, reload it (never mid-form or mid-animation)
-  const BUILD = "20261024024642";
+  const BUILD = "20261024081534";
   function checkBuild() {
     if (BUILD === "dev") return;
     fetch("version.json?t=" + Date.now(), { cache: "no-store" }).then((r) => (r.ok ? r.json() : null)).then((j) => {
@@ -19605,7 +19860,7 @@ async function S3warm() {
   st.info.legs = [{ t: "Warm" }, { t: "Up" }];
   st.info.beat = { v: 22, l: 24.5, lo: 14, hi: 30, lt: "O 24.5" }; st.info.xlegs = [{ t: "A", ok: true }, { t: "B", ok: false }, { t: "C", ok: true }];
   st.info.yard = [{ name: "A", pick: "Warm", amt: "-1u", date: "" }, { name: "B", pick: "Up", amt: "-1u", date: "" }];
-  for (const k of ["drop", "cash", "troph", "party", "out", "play", "career", "rec", "ring", "burn", "ride", "heat", "vault", "lburn", "lshred", "lgrave", "lbeat", "lbust", "lyard", "fbf", ...Object.keys(SIG).map((x) => "sig:" + x)]) {
+  for (const k of ["drop", "cash", "troph", "party", "out", "play", "career", "rec", "ring", "burn", "ride", "heat", "vault", "lburn", "lshred", "lgrave", "lbeat", "lbust", "lyard", "fbf", "gdrop", "gsplit", "grush", "gspike", "ghuddle", "gpush", ...Object.keys(SIG).map((x) => "sig:" + x)]) {
     if (k.startsWith("sig:")) SIG[k.slice(4)](st, 0); else if (k === "fbf") FBfield(st, { t: 0, ms: 4000 }); else ACT3[k](st, { t: 0, ms: 4000 }); st.t = 0;
     for (const t of [0.4, 1.0, 2.0]) { st.t = t; for (const f of st.tick.slice()) { try { f(t, 0.016); } catch (e) {} } }
     st.r.compile(st.scene, st.cam); st.comp.render(0.016); S3clear(st);
@@ -20799,6 +21054,369 @@ function FBfield(st, a) {
 // how it hit: the field for a touchdown bet, otherwise what it was
 const S3playBase = ACT3.play;
 ACT3.play = function (st, a) { const I = st.info; if ((I.legs || []).length < 2 && I.fld) return FBfield(st, a); return S3playBase.call(ACT3, st, a); };
+
+// ---------- group rides: the team celebrations ----------
+// When everybody who rode the same pick cashes, the show is the group's. Every rider is a figure in their own color (a
+// chrome athlete in a jersey with their initial, their name and what they won floating over them), and they do it
+// together: storm the field, a volleyball spike, a huddle that breaks, the ticket pushed over the goal line. Before that,
+// the split: each person's own ticket side by side. The group's total counts up at the end
+const GR = { geo: (k, f) => S3.cache["gr:" + k] || (S3.cache["gr:" + k] = f()) };
+function GRgrp(st) {
+  const g = st.info.grp;
+  if (g && g.R && g.R.length) return g;
+  const R = [["You", "#ffd23f", "+0.91u"], ["Tyler", "#ff6fa8", "+0.91u"], ["Chris", "#b48cff", "+0.95u"]].map(([nm, col, amt]) => ({ nm, col, amt, odds: "−110", risk: "1u", usd: "$13.64" }));
+  return { R, tot: 2.77, totS: "+2.77u", usd: "$41.55", pick: "Bears −3", N: 3 };
+}
+const GRrr = (x, X, y, w, h, r) => { x.beginPath(); if (x.roundRect) x.roundRect(X, y, w, h, r); else x.rect(X, y, w, h); };
+// the name over a rider's head: their color, their name, what they won
+function GRlabel(st, p) {
+  const { THREE } = st, W = 600, H = 200;
+  const tex = canvasTex(st.L, W, H, (x, w, h) => {
+    GRrr(x, 8, 8, w - 16, h - 16, 40); x.fillStyle = "rgba(7,9,13,.9)"; x.fill(); x.lineWidth = 7; x.strokeStyle = p.col; x.stroke();
+    x.fillStyle = p.col; x.beginPath(); x.arc(96, h / 2, 56, 0, Math.PI * 2); x.fill();
+    x.fillStyle = "#0a0c10"; x.textAlign = "center"; x.textBaseline = "middle"; x.font = `900 70px ${L3D}`; x.fillText(String(p.nm || "?").slice(0, 1).toUpperCase(), 96, h / 2 + 4);
+    x.textAlign = "left"; x.textBaseline = "alphabetic"; x.fillStyle = "#ffffff"; L3fit(x, String(p.nm || "").toUpperCase(), w - 200, 66, 900, L3D); x.fillText(String(p.nm || "").toUpperCase(), 172, 92);
+    x.fillStyle = "#5ef0a0"; L3fit(x, p.amt || "", w - 200, 64, 900, L3D); x.fillText(p.amt || "", 172, 160);
+  });
+  const m = new THREE.Sprite(new THREE.SpriteMaterial({ map: tex, transparent: true, depthTest: false, depthWrite: false, toneMapped: false, color: 0xe2e2e2 }));
+  m.renderOrder = 10; m.scale.set(1.8, (1.8 * H) / W, 1);
+  return m;
+}
+// a soft dark spot under each figure, so they stand on the floor
+function GRshadow(st) {
+  const { THREE } = st, tex = canvasTex(st.L, 128, 128, (x, w) => { const g = x.createRadialGradient(w / 2, w / 2, 0, w / 2, w / 2, w / 2); g.addColorStop(0, "rgba(0,0,0,.6)"); g.addColorStop(1, "rgba(0,0,0,0)"); x.fillStyle = g; x.fillRect(0, 0, w, w); }, "grshadow");
+  const m = new THREE.Mesh(GR.geo("shp", () => new THREE.PlaneGeometry(1, 1)), new THREE.MeshBasicMaterial({ map: tex, transparent: true, depthWrite: false }));
+  m.rotation.x = -Math.PI / 2; m.scale.set(1.1, 1.1, 1); return m;
+}
+// a rider: hips, a torso that leans, arms and legs with elbows and knees, a helmet in their color
+function GRfig(st, p) {
+  const { THREE } = st, col = new THREE.Color(p.col);
+  const jer = new THREE.MeshStandardMaterial({ color: col, roughness: 0.34, metalness: 0.32, emissive: col, emissiveIntensity: 0.16, envMapIntensity: 0.9 });
+  const dark = new THREE.MeshStandardMaterial({ color: 0x15181f, roughness: 0.42, metalness: 0.55, envMapIntensity: 0.7 }), chr = st.mats.chrome;
+  const cap = (r, l) => GR.geo(`c${r}:${l}`, () => new THREE.CapsuleGeometry(r, l, 6, 14)), sph = (r) => GR.geo(`s${r}`, () => new THREE.SphereGeometry(r, 24, 16));
+  const root = new THREE.Group(), body = new THREE.Group(); root.add(body);
+  const hip = new THREE.Group(); hip.position.y = 0.98; body.add(hip);
+  const pel = new THREE.Mesh(sph(0.2), dark); pel.scale.set(1.2, 0.72, 0.9); hip.add(pel);
+  const torso = new THREE.Group(); hip.add(torso);
+  const chest = new THREE.Mesh(cap(0.235, 0.32), jer); chest.position.y = 0.37; chest.scale.set(1.15, 1, 0.8); torso.add(chest);
+  const tex = canvasTex(st.L, 128, 128, (x, w, h) => { x.fillStyle = "#ffffff"; x.textAlign = "center"; x.textBaseline = "middle"; x.font = `900 108px ${L3D}`; x.fillText(String(p.nm || "?").slice(0, 1).toUpperCase(), w / 2, h / 2 + 6); });
+  const dm = new THREE.MeshBasicMaterial({ map: tex, transparent: true, depthWrite: false, color: 0xe8e8e8 });
+  for (const z of [0.2, -0.2]) { const d = new THREE.Mesh(GR.geo("dec", () => new THREE.PlaneGeometry(0.28, 0.28)), dm); d.position.set(0, 0.42, z); if (z < 0) d.rotation.y = Math.PI; torso.add(d); }
+  const neck = new THREE.Mesh(cap(0.06, 0.08), chr); neck.position.y = 0.72; torso.add(neck);
+  const head = new THREE.Group(); head.position.y = 0.9; torso.add(head);
+  head.add(new THREE.Mesh(sph(0.16), chr));
+  const helm = new THREE.Mesh(GR.geo("helm", () => new THREE.SphereGeometry(0.174, 24, 12, 0, Math.PI * 2, 0, Math.PI * 0.52)), jer); helm.rotation.x = -0.28; head.add(helm);
+  const arm = (sx) => { const sh = new THREE.Group(); sh.position.set(sx * 0.31, 0.6, 0); torso.add(sh); const up = new THREE.Mesh(cap(0.078, 0.24), jer); up.position.y = -0.15; sh.add(up);
+    const el = new THREE.Group(); el.position.y = -0.34; sh.add(el); const fo = new THREE.Mesh(cap(0.066, 0.22), chr); fo.position.y = -0.14; el.add(fo);
+    const hd = new THREE.Mesh(sph(0.075), chr); hd.position.y = -0.32; el.add(hd); return { sh, el }; };
+  const leg = (sx) => { const th = new THREE.Group(); th.position.set(sx * 0.12, -0.04, 0); hip.add(th); const tm = new THREE.Mesh(cap(0.1, 0.34), dark); tm.position.y = -0.2; th.add(tm);
+    const kn = new THREE.Group(); kn.position.y = -0.44; th.add(kn); const sm = new THREE.Mesh(cap(0.082, 0.32), chr); sm.position.y = -0.2; kn.add(sm);
+    const ft = new THREE.Mesh(GR.geo("foot", () => new THREE.BoxGeometry(0.13, 0.08, 0.27)), dark); ft.position.set(0, -0.44, 0.06); kn.add(ft); return { th, kn }; };
+  const A = { l: arm(-1), r: arm(1) }, Lg = { l: leg(-1), r: leg(1) };
+  const lab = GRlabel(st, p); lab.position.y = 2.62 + (p.i % 2) * 0.62; body.add(lab);
+  const P0 = { pitch: 0, lean: 0, twist: 0, hl: 0, hr: 0, kl: 0.1, kr: 0.1, al: 0.05, ar: 0.05, azl: 0.12, azr: 0.12, el: 0.3, er: 0.3, y: 0, tilt: 0 };
+  const set = (P) => { const q = Object.assign({}, P0, P);
+    torso.rotation.x = q.lean; torso.rotation.y = q.twist; body.position.y = q.y; body.rotation.z = q.tilt; body.rotation.x = q.pitch;
+    Lg.l.th.rotation.x = -q.hl; Lg.r.th.rotation.x = -q.hr; Lg.l.kn.rotation.x = q.kl; Lg.r.kn.rotation.x = q.kr;
+    A.l.sh.rotation.x = -q.al; A.r.sh.rotation.x = -q.ar; A.l.sh.rotation.z = -q.azl; A.r.sh.rotation.z = q.azr;
+    A.l.el.rotation.x = -q.el; A.r.el.rotation.x = -q.er; };
+  set({});
+  return { root, body, set, lab, jer, p };
+}
+// poses: a sprint, a cheer with both arms up, the crouch before a jump
+const GRrun = (ph, amp, lean) => { const s = Math.sin(ph), c = Math.cos(ph); amp = amp == null ? 1 : amp;
+  return { hl: 0.85 * s * amp, hr: -0.85 * s * amp, kl: 0.2 + 1.15 * Math.max(0, c) * amp, kr: 0.2 + 1.15 * Math.max(0, -c) * amp, al: -0.8 * s * amp, ar: 0.8 * s * amp, el: 1.4, er: 1.4, azl: 0.14, azr: 0.14, lean: lean == null ? 0.3 : lean, y: 0.08 * Math.abs(Math.sin(ph)) * amp }; };
+const GRcheer = (k, air) => ({ al: 2.75 + 0.2 * Math.sin(k * 9), ar: 2.75 + 0.2 * Math.sin(k * 9 + 1.3), azl: 0.45, azr: 0.45, el: 0.12, er: 0.12, hl: air ? 0.5 : 0.08, hr: air ? 0.2 : -0.05, kl: air ? 1.3 : 0.15, kr: air ? 0.9 : 0.15, lean: -0.1 });
+const GRcrouch = (q) => ({ hl: 0.9 * q, hr: 0.9 * q, kl: 1.5 * q, kr: 1.5 * q, lean: 0.55 * q, al: -0.9 * q, ar: -0.9 * q, el: 0.4, er: 0.4, y: -0.3 * q });
+const GRjump = (u, h) => (u <= 0 || u >= 1 ? 0 : h * 4 * u * (1 - u));
+const GRlock = (st) => { st.cam.position.copy(st.camTo.p); st.look.copy(st.camTo.l); };
+// a shockwave lying flat on the floor
+function GRring(st, x, y, z, s, c) {
+  const { THREE } = st, m = new THREE.MeshBasicMaterial({ color: c || st.acc, transparent: true, blending: THREE.AdditiveBlending, depthWrite: false, side: THREE.DoubleSide });
+  const ring = S3add(st, new THREE.Mesh(GR.geo("ring", () => new THREE.RingGeometry(0.88, 1, 96)), m)); ring.rotation.x = -Math.PI / 2; ring.position.set(x, y, z);
+  const t0 = st.t; st.tick.push((t) => { const k = (t - t0) / 1.1; if (k > 1) { ring.visible = false; return; } ring.scale.setScalar(0.3 + ez.out(k) * s); m.opacity = (1 - k) * 0.95; });
+}
+// the riders on the floor, spread out, each with a shadow
+function GRcast(st, max) {
+  const G = GRgrp(st), R = G.R.slice(0, max || 6);
+  return R.map((p, i) => { const f = GRfig(st, Object.assign({}, p, { i })); S3add(st, f.root); const sh = GRshadow(st); S3add(st, sh); f.sh = sh; f.i = i; f.n = R.length; return f; });
+}
+const GRplace = (f, x, z, ry) => { f.root.position.set(x, 0, z); if (ry != null) f.root.rotation.y = ry; f.sh.position.set(x, 0.01, z); const s = Math.max(0.35, 1.1 - f.body.position.y * 0.35); f.sh.scale.set(s, s, 1); };
+// the group's number, counting up in gold
+function GRtotal(st, x, y, z, size) {
+  const G = GRgrp(st), num = S3num(st, size || 0.8, st.mats.gold); S3add(st, num.grp); num.grp.position.set(x, y, z); num.grp.visible = false;
+  const word = S3text(st, "TOGETHER", (size || 0.8) * 0.36, st.mats.chrome, 0.25); S3add(st, word); word.position.set(x, y + (size || 0.8) * 0.95, z); word.visible = false;
+  const sp = S3sparks(st, 300, "#ffd23f"); let done = false;
+  const run = (k, t0) => { if (k < t0) return; num.grp.visible = word.visible = true; const c = ez.out(seg(k, t0, 1.2)); num.set(c >= 1 ? G.totS : "+" + (G.tot * c).toFixed(2) + "u");
+    const s = 0.55 + 0.45 * ez.back(seg(k, t0, 0.5)); num.grp.scale.setScalar(s); word.scale.setScalar(s); num.grp.rotation.y = Math.sin(k * 0.9) * 0.1;
+    if (!done && c >= 1) { done = true; S3ring(st, x, y, z - 0.2, 5, 0xffd23f); sp.burst(x, y, z + 0.3, 200, 7, "#ffd23f"); st.flash = Math.max(st.flash, 0.7); st.shake = Math.max(st.shake, 0.3); } };
+  return { run, num };
+}
+// the crowd: the stands far back, flashbulbs going off
+function GRcrowd(st, z, w) {
+  const { THREE } = st, I = st.info, G = GRgrp(st), cols = G.R.map((p) => p.col).concat([I.acc, "#ffffff", "#9aa6b8"]);
+  const tex = canvasTex(st.L, 2048, 400, (x, W, H) => { const g = x.createLinearGradient(0, 0, 0, H); g.addColorStop(0, "#030406"); g.addColorStop(1, "#11141b"); x.fillStyle = g; x.fillRect(0, 0, W, H);
+    for (let i = 0; i < 9000; i++) { const yy = Math.random() * H, k = yy / H; x.globalAlpha = 0.15 + k * 0.5; x.fillStyle = cols[i % cols.length]; x.fillRect(Math.random() * W, yy, 3 + k * 3, 4 + k * 4); } x.globalAlpha = 1; });
+  const m = S3add(st, new THREE.Mesh(new THREE.PlaneGeometry(w || 110, 20), new THREE.MeshBasicMaterial({ map: tex, toneMapped: true, color: 0x7a7a7a, fog: false }))); m.position.set(0, 7, z);
+  const fl = S3add(st, new THREE.InstancedMesh(new THREE.PlaneGeometry(0.5, 0.5), new THREE.MeshBasicMaterial({ map: spriteTex(st.L), transparent: true, blending: THREE.AdditiveBlending, depthWrite: false, toneMapped: false, fog: false }), 40));
+  fl.frustumCulled = false; const M = new THREE.Matrix4(), V = new THREE.Vector3(), Q = new THREE.Quaternion(), S = new THREE.Vector3(), life = new Float32Array(40), P = [];
+  for (let i = 0; i < 40; i++) P.push([(Math.random() - 0.5) * (w || 110) * 0.8, 1 + Math.random() * 12]);
+  let rate = 6;
+  st.tick.push((t, dt) => { for (let i = 0; i < 40; i++) { life[i] -= dt * 5; if (life[i] <= 0 && Math.random() < rate * dt / 40 * 6) { life[i] = 1; P[i] = [(Math.random() - 0.5) * (w || 110) * 0.8, 1 + Math.random() * 12]; }
+    const s = Math.max(0, life[i]) * 2.2; V.set(P[i][0], P[i][1], z + 0.2); S.set(s, s, 1); M.compose(V, Q, S); fl.setMatrixAt(i, M); } fl.instanceMatrix.needsUpdate = true; });
+  return { roar: (r) => { rate = r; } };
+}
+// stadium light from above
+function GRlights(st, target, at) {
+  const { THREE } = st, s = new THREE.SpotLight(0xffffff, 40, 60, 0.75, 0.55, 1.1); s.position.set(at ? at[0] : 0, 16, at ? at[2] : 4); s.target = target; S3add(st, s);
+  return s;
+}
+// a football field, its length along z (or along x when it's turned), the end zone in the team's colors
+function GRturf(st, len, wid, ezAt, turned) {
+  const { THREE } = st, I = st.info, ec = I.ban1 || I.acc;
+  const tex = canvasTex(st.L, 1024, 2048, (x, W, H) => {
+    const yd = H / len;
+    for (let i = 0; i * yd * 2.5 < H; i++) { x.fillStyle = i % 2 ? "#2f6b2c" : "#367a32"; x.fillRect(0, i * yd * 2.5, W, yd * 2.5); }
+    for (let i = 0; i < 26000; i++) { x.fillStyle = Math.random() < 0.5 ? "rgba(0,0,0,.07)" : "rgba(255,255,255,.04)"; x.fillRect(Math.random() * W, Math.random() * H, 2, 3); }
+    if (ezAt != null) { const y0 = ezAt * yd; const g = x.createLinearGradient(0, 0, 0, y0); g.addColorStop(0, ec); g.addColorStop(1, ec); x.globalAlpha = 0.85; x.fillStyle = g; x.fillRect(0, 0, W, y0); x.globalAlpha = 1;
+      x.fillStyle = "#f4f4ee"; x.fillRect(0, y0 - 6, W, 12); }
+    x.fillStyle = "rgba(244,244,238,.9)";
+    for (let i = (ezAt || 0) + 5; i * yd < H; i += 5) x.fillRect(0, i * yd - 2, W, 4);
+    for (let i = (ezAt || 0) + 1; i * yd < H; i++) if (i % 5) { x.fillRect(W * 0.36 - 10, i * yd - 1, 20, 3); x.fillRect(W * 0.64 - 10, i * yd - 1, 20, 3); }
+    x.fillRect(0, 0, 8, H); x.fillRect(W - 8, 0, 8, H);
+  });
+  const m = S3add(st, new THREE.Mesh(new THREE.PlaneGeometry(wid, len), new THREE.MeshStandardMaterial({ map: tex, roughness: 0.9, metalness: 0, emissive: 0xffffff, emissiveMap: tex, emissiveIntensity: 0.06 })));
+  m.rotation.set(-Math.PI / 2, 0, turned ? Math.PI / 2 : 0);
+  return m;
+}
+
+// ---- the call: GROUP WIN slams in, then a chip for every rider pops in under it ----
+ACT3.gdrop = function (st, a) {
+  ACT3.drop(st, a);
+  const { THREE } = st, G = GRgrp(st), R = G.R.slice(0, 6), N = R.length, A = a.t, tc = 0.55, gap = Math.min(1.7, 8.4 / Math.max(1, N - 1));
+  const chips = R.map((p, i) => { const tex = canvasTex(st.L, 256, 256, (x, w) => { const c = w / 2; x.fillStyle = p.col; x.beginPath(); x.arc(c, c, c, 0, Math.PI * 2); x.fill(); x.strokeStyle = "rgba(255,255,255,.85)"; x.lineWidth = 10; x.beginPath(); x.arc(c, c, c - 14, 0, Math.PI * 2); x.stroke();
+      x.fillStyle = "#0a0c10"; x.textAlign = "center"; x.textBaseline = "middle"; x.font = `900 150px ${L3D}`; x.fillText(String(p.nm || "?").slice(0, 1).toUpperCase(), c, c + 8); });
+    tex.center.set(0.5, 0.5); tex.rotation = Math.PI / 2;
+    const fm = new THREE.MeshStandardMaterial({ map: tex, metalness: 0.4, roughness: 0.35 }), m = new THREE.Mesh(GR.geo("chip", () => new THREE.CylinderGeometry(0.6, 0.6, 0.12, 48)), [st.mats.gold, fm, fm]);
+    m.rotation.x = Math.PI / 2; const g = new THREE.Group(); g.add(m); S3add(st, g); const x0 = N === 1 ? 0 : -((N - 1) * gap) / 2 + i * gap; g.position.set(x0, -1.5, 0); g.scale.setScalar(0.001); g.userData = { x: x0, hit: false, col: p.col }; return g; });
+  const sp = S3sparks(st, 300, st.info.acc);
+  st.tick.push((t) => { const k = t - A; chips.forEach((g, i) => { const q = seg(k, tc + 0.35 + i * 0.12, 0.45); g.scale.setScalar(Math.max(0.001, ez.back(q))); g.rotation.y = (1 - ez.out(q)) * Math.PI * 3 + (q >= 1 ? Math.sin(k * 1.5 + i) * 0.2 : 0);
+    if (!g.userData.hit && q >= 1) { g.userData.hit = true; sp.burst(g.userData.x, -1.5, 0.3, 50, 4, g.userData.col); } }); });
+};
+
+// ---- the split: everyone's own ticket, dealt in side by side, then the group's total ----
+ACT3.gsplit = function (st, a) {
+  const { THREE } = st, G = GRgrp(st), R = G.R.slice(0, 6), N = R.length, A = a.t;
+  const W = N <= 3 ? 2.5 : N === 4 ? 2.25 : 1.8, H = W * 1.3, gap = W + 0.3, x0 = -((N - 1) * gap) / 2, y0 = -0.05;
+  const sp = S3sparks(st, 500, st.info.acc), cf = S3confetti(st, 220, R.map((p) => p.col).concat(["#ffffff", "#ffd23f"]));
+  const slabs = R.map((p, i) => {
+    const face = canvasTex(st.L, 520, 676, (x, w, h) => {
+      const g = x.createLinearGradient(0, 0, 0, h); g.addColorStop(0, "#171b22"); g.addColorStop(1, "#07080b"); x.fillStyle = g; x.fillRect(0, 0, w, h);
+      x.fillStyle = p.col; x.fillRect(0, 0, w, 150); x.fillStyle = "rgba(0,0,0,.28)"; x.fillRect(0, 142, w, 8);
+      x.fillStyle = "#0b0d11"; x.beginPath(); x.arc(84, 75, 50, 0, Math.PI * 2); x.fill();
+      x.fillStyle = p.col; x.textAlign = "center"; x.textBaseline = "middle"; x.font = `900 70px ${L3D}`; x.fillText(String(p.nm || "?").slice(0, 1).toUpperCase(), 84, 80);
+      x.textAlign = "left"; x.textBaseline = "alphabetic"; x.fillStyle = "#0b0d11"; L3fit(x, String(p.nm || "").toUpperCase(), w - 190, 78, 900, L3D); x.fillText(String(p.nm || "").toUpperCase(), 156, 104);
+      x.fillStyle = "rgba(255,255,255,.5)"; x.font = `700 28px ${L3I}`; x.fillText("THEIR BET", 40, 214);
+      x.fillStyle = "#ffffff"; L3fit(x, `${p.odds || ""} · ${p.risk || ""} in`, w - 80, 44, 800, L3I); x.fillText(`${p.odds || ""} · ${p.risk || ""} in`, 40, 266);
+      x.fillStyle = "rgba(255,255,255,.14)"; x.fillRect(40, 312, w - 80, 3);
+      x.fillStyle = "rgba(255,255,255,.5)"; x.font = `700 28px ${L3I}`; x.fillText("THEY WON", 40, 380);
+      x.fillStyle = "#5ef0a0"; L3fit(x, p.amt || "", w - 80, 150, 900, L3D); x.fillText(p.amt || "", 40, 520);
+      x.fillStyle = "rgba(255,255,255,.78)"; x.font = `700 42px ${L3I}`; x.fillText(p.usd || "", 40, 594);
+    });
+    const g = new THREE.Group();
+    g.add(new THREE.Mesh(new st.L.RoundedBoxGeometry(W + 0.1, H + 0.1, 0.12, 4, 0.08), new THREE.MeshStandardMaterial({ color: new THREE.Color(p.col), metalness: 0.8, roughness: 0.3, envMapIntensity: 0.8 })));
+    const pl = new THREE.Mesh(new THREE.PlaneGeometry(W, H), new THREE.MeshStandardMaterial({ map: face, roughness: 0.4, metalness: 0.1, emissive: 0xffffff, emissiveMap: face, emissiveIntensity: 0.22 })); pl.position.z = 0.065; g.add(pl);
+    S3add(st, g); g.position.set(x0 + i * gap, 9, -1); g.userData = { x: x0 + i * gap, hit: false, col: p.col }; return g;
+  });
+  const bar = S3add(st, new THREE.Mesh(new THREE.BoxGeometry(1, 0.05, 0.05), st.mats.gold)); bar.position.set(0, y0 - H / 2 - 0.25, -1); bar.scale.x = 0.001;
+  const tot = GRtotal(st, 0, y0 - H / 2 - 0.95, 0.2, 0.55), tT = 0.45 + N * 0.36 + 0.45;
+  st.camTo.p.set(0, -0.15, N > 4 ? 13.4 : 12); st.camTo.l.set(0, -0.15, 0);
+  st.tick.push((t) => {
+    const k = t - A;
+    slabs.forEach((g, i) => { const q = seg(k, 0.35 + i * 0.36, 0.55), d = g.userData;
+      g.position.y = 9 - (9 - y0) * ez.back(q) + (q >= 1 ? Math.sin(k * 1.4 + i) * 0.05 : 0); g.rotation.z = (1 - ez.out(q)) * (i % 2 ? -0.6 : 0.6); g.rotation.y = (1 - ez.out(q)) * Math.PI * 2 + (q >= 1 ? Math.sin(k * 0.8 + i * 0.9) * 0.1 : 0);
+      if (!d.hit && q >= 1) { d.hit = true; S3ring(st, d.x, y0, -1.2, W * 1.1, d.col); sp.burst(d.x, y0 - 0.6, -0.6, 90, 5, d.col); st.flash = Math.max(st.flash, 0.35); st.shake = Math.max(st.shake, 0.15); } });
+    bar.scale.x = Math.max(0.001, ez.out(seg(k, tT - 0.25, 0.5)) * N * gap);
+    tot.run(k, tT); if (k > tT + 1.2 && !cf.on) { cf.on = true; cf.dump(150); cf.go(14); }
+  });
+};
+
+// ---- storm the field: they come sprinting out of the far end zone together, converge and leap, the stands going off ----
+ACT3.grush = function (st, a) {
+  const { THREE } = st, I = st.info, A = a.t, T = a.ms / 1000, F = GRcast(st), N = F.length;
+  const turf = GRturf(st, 60, 34, 10); turf.position.set(0, 0, -14);
+  if (st.scene.fog) { st.scene.fog.near = 16; st.scene.fog.far = 58; }
+  const crowd = GRcrowd(st, -54, 120); GRlights(st, turf, [0, 0, 2]);
+  const dust = S3sparks(st, 500, "#d9f2c8"), sp = S3sparks(st, 700, I.acc), cf = S3confetti(st, 420, F.map((f) => f.p.col).concat(["#ffffff", "#ffd23f"]));
+  const tot = GRtotal(st, 0, 4.6, -2.2, 0.85);
+  const tR = 0.35, tC = Math.min(4.1, T * 0.56), tJ = tC + 0.3, sx = (i) => (N === 1 ? 0 : (i - (N - 1) / 2) * Math.min(1.9, 9 / N)), cx = (i) => (N === 1 ? 0 : (i - (N - 1) / 2) * 0.95);
+  const z0 = -33, z1 = -0.6, ph = F.map((f, i) => Math.random() * 6 + i), del = F.map((f, i) => (i % 2) * 0.12 + Math.random() * 0.12);
+  let boom = false;
+  st.tick.push((t, dt) => {
+    const k = t - A;
+    F.forEach((f, i) => {
+      const u = ez.io(seg(k, tR + del[i], tC - tR - del[i])), x = sx(i) + (cx(i) - sx(i)) * ez.io(seg(k, tC - 1.1, 1.1)), z = z0 + (z1 - z0) * u + (i % 2 ? -0.5 : 0.3) * u;
+      if (k < tC) { ph[i] += dt * 13; f.set(Object.assign(GRrun(ph[i], k < tR + del[i] ? 0.2 : 1, 0.3), { pitch: 0.1 })); if (k > tR && Math.random() < 0.35) dust.burst(x, 0.08, z - 0.2, 2, 1.1); }
+      else { const j = k - tJ - (i % 3) * 0.08, u2 = seg(j, 0, 0.75), air = u2 > 0 && u2 < 1; f.set(Object.assign(j < 0 ? GRcrouch(ez.out(seg(k, tC, 0.3))) : GRcheer(k + i, air), { y: j < 0 ? -0.3 * ez.out(seg(k, tC, 0.3)) : GRjump(u2, 1.25) + (u2 >= 1 ? GRjump(seg(j, 0.85, 0.5), 0.45) : 0) })); }
+      GRplace(f, x, z, 0);
+    });
+    if (!boom && k >= tJ + 0.36) { boom = true; GRring(st, 0, 0.05, -0.6, 9, I.acc); GRring(st, 0, 0.06, -0.6, 5, 0xffffff); F.forEach((f) => sp.burst(f.root.position.x, 2.2, f.root.position.z, 90, 7, f.p.col)); cf.dump(240); cf.go(60); st.flash = 1; st.shake = 0.7; crowd.roar(40); }
+    tot.run(k, tJ + 1.0);
+    // the camera backs up ahead of them, low, then rises to take in the leap and the number
+    const lead = Math.max(...F.map((f) => f.root.position.z)), q = ez.io(seg(k, tC - 0.4, 1.6));
+    st.camTo.p.set(Math.sin(k * 0.35) * 0.8, 1.45 + q * 0.9, Math.min(11, lead + 8.5) + q * 1.4); st.camTo.l.set(0, 1.2 + q * 1.6, lead - 4 + q * 1.5);
+    if (k < tC - 0.3) GRlock(st);
+  });
+  st.camTo.p.set(0, 1.5, z0 + 9); st.camTo.l.set(0, 1.2, z0 - 3); st.cam.position.set(0, 1.5, z0 + 9);
+};
+
+// ---- the spike: a set, the biggest winner skies and hammers it into the floor, then the whole group piles together ----
+ACT3.gspike = function (st, a) {
+  const { THREE } = st, I = st.info, A = a.t, F = GRcast(st), N = F.length, nz = -3, NH = 2.55;
+  const court = canvasTex(st.L, 1024, 1024, (x, W, H) => { x.fillStyle = "#1d4f9a"; x.fillRect(0, 0, W, H); for (let i = 0; i < 9000; i++) { x.fillStyle = Math.random() < 0.5 ? "rgba(0,0,0,.05)" : "rgba(255,255,255,.04)"; x.fillRect(Math.random() * W, Math.random() * H, 2, 2); }
+    x.fillStyle = "#d9762b"; x.fillRect(W * 0.18, H * 0.1, W * 0.64, H * 0.8); x.strokeStyle = "#f6f3ea"; x.lineWidth = 8; x.strokeRect(W * 0.18, H * 0.1, W * 0.64, H * 0.8);
+    x.fillStyle = "#f6f3ea"; x.fillRect(W * 0.18, H * 0.5 - 4, W * 0.64, 8); x.fillRect(W * 0.18, H * 0.38 - 3, W * 0.64, 6); x.fillRect(W * 0.18, H * 0.62 - 3, W * 0.64, 6); });
+  const floor = S3add(st, new THREE.Mesh(new THREE.PlaneGeometry(26, 26), new THREE.MeshStandardMaterial({ map: court, roughness: 0.35, metalness: 0.1, envMapIntensity: 0.5 }))); floor.rotation.x = -Math.PI / 2; floor.position.set(0, 0, nz);
+  // the net: posts, the mesh, the white tape across the top
+  const netTex = canvasTex(st.L, 512, 64, (x, W, H) => { x.strokeStyle = "rgba(240,240,240,.75)"; x.lineWidth = 2; for (let i = 0; i <= W; i += 16) { x.beginPath(); x.moveTo(i, 0); x.lineTo(i, H); x.stroke(); } for (let j = 0; j <= H; j += 16) { x.beginPath(); x.moveTo(0, j); x.lineTo(W, j); x.stroke(); } }, "grnet");
+  netTex.wrapS = netTex.wrapT = THREE.RepeatWrapping; netTex.repeat.set(4, 1);
+  const net = S3add(st, new THREE.Mesh(new THREE.PlaneGeometry(10.4, 0.95), new THREE.MeshBasicMaterial({ map: netTex, transparent: true, side: THREE.DoubleSide, depthWrite: false }))); net.position.set(0, NH - 0.48, nz);
+  const tape = S3add(st, new THREE.Mesh(new THREE.BoxGeometry(10.4, 0.08, 0.03), new THREE.MeshStandardMaterial({ color: 0xffffff, roughness: 0.6, emissive: 0x333333 }))); tape.position.set(0, NH, nz);
+  for (const s of [-1, 1]) { const p = S3add(st, new THREE.Mesh(new THREE.CylinderGeometry(0.07, 0.07, NH + 0.3, 16), st.mats.chrome)); p.position.set(s * 5.3, (NH + 0.3) / 2, nz); }
+  const crowd = GRcrowd(st, -26, 80); GRlights(st, floor, [0, 0, 0]);
+  const ball = S3add(st, new THREE.Mesh(new THREE.SphereGeometry(0.2, 32, 24), new THREE.MeshStandardMaterial({ map: canvasTex(st.L, 512, 256, (x, W, H) => { x.fillStyle = "#f4f1e6"; x.fillRect(0, 0, W, H); x.fillStyle = "#ffd23f"; x.fillRect(0, H * 0.1, W, H * 0.22); x.fillStyle = "#1d4f9a"; x.fillRect(0, H * 0.62, W, H * 0.22); }, "grvb"), roughness: 0.45 })));
+  const trail = S3sparks(st, 400, "#ffffff"), boomS = S3sparks(st, 700, I.acc), cf = S3confetti(st, 380, F.map((f) => f.p.col).concat(["#ffffff", "#ffd23f"]));
+  const tot = GRtotal(st, 0, 5.0, nz - 0.4, 0.8);
+  // who's where: the hitter (the biggest winner) in the middle at the net, the setter beside them, everyone else behind
+  const hit = F[0], set = F[1] || null, rest = F.slice(2);
+  const spot = (f, i) => f === hit ? [0.2, 1.8] : f === set ? [1.7, nz + 1.1] : [(i % 2 ? 1 : -1) * (1.2 + Math.floor(i / 2) * 1.4), 1.2 + (i % 3) * 0.6];
+  const tToss = 0.5, tSetHit = 1.25, tJump = 1.62, tHit = 2.08, tLand = 2.32, tGo = 2.9, tCheer = 3.7;
+  const pApex = new THREE.Vector3(0.15, 4.0, nz + 0.75), pHit = new THREE.Vector3(0.1, 3.55, nz + 0.55), pFloor = new THREE.Vector3(0.9, 0.2, nz - 5.2), pToss = new THREE.Vector3(1.55, 1.6, nz + 1.25);
+  let smash = false;
+  st.tick.push((t, dt) => {
+    const k = t - A;
+    // the ball: up to the setter, set up high, then the spike straight down into the floor across the net
+    if (k < tSetHit) { const u = seg(k, tToss, tSetHit - tToss); ball.position.set(pToss.x + 2.4 * (1 - u), 0.9 + u * 0.7 + GRjump(u, 2.6), pToss.z + 1.2 * (1 - u)); }
+    else if (k < tHit) { const u = seg(k, tSetHit, tHit - tSetHit); ball.position.set(pToss.x + (pHit.x - pToss.x) * u, pToss.y + (pHit.y - pToss.y) * u + GRjump(u, 1.6), pToss.z + (pHit.z - pToss.z) * u); }
+    else { const u = ez.out(seg(k, tHit, tLand - tHit)); ball.position.lerpVectors(pHit, pFloor, u); if (k > tLand) ball.position.y = 0.2 + GRjump(seg(k, tLand, 0.9), 1.6); if (k < tLand) trail.burst(ball.position.x, ball.position.y, ball.position.z, 8, 0.6); }
+    ball.rotation.x += dt * (k > tHit ? 30 : 8); ball.visible = k > tToss - 0.05;
+    if (!smash && k >= tLand) { smash = true; GRring(st, pFloor.x, 0.05, pFloor.z, 8, I.acc); GRring(st, pFloor.x, 0.06, pFloor.z, 4, 0xffffff); boomS.burst(pFloor.x, 0.3, pFloor.z, 420, 10); st.flash = 1; st.shake = 0.85; crowd.roar(30); }
+    // the hitter: the approach, the jump, the arm swing; landing; then everyone runs to them and they all go up together
+    F.forEach((f, i) => {
+      let [x, z] = spot(f, i), P;
+      const gx = (N === 1 ? 0 : (i - (N - 1) / 2) * 0.9), gz = 1.0 + (i % 2) * 0.5, g = ez.io(seg(k, tGo, 0.8));
+      if (f === hit && k < tGo) {
+        const ap = ez.io(seg(k, 0.6, tJump - 0.6)); z = 1.8 + (nz + 1.15 - 1.8) * ap; x = 0.2 - 0.1 * ap;
+        const ju = seg(k, tJump, tLand + 0.15 - tJump), sw = seg(k, tHit - 0.28, 0.32);
+        if (k < tJump - 0.15) P = GRrun(k * 12, ap > 0 ? 0.8 : 0.1, 0.3);
+        else if (ju <= 0) P = GRcrouch(1);
+        else P = { y: GRjump(ju, 1.55), hl: 0.4, hr: 0.1, kl: 1.0, kr: 0.6, lean: -0.25 + 0.75 * sw, ar: 3.1 - 2.2 * ez.out(sw), azr: 0.3, er: 0.8 * (1 - sw), al: 1.7, azl: 0.35, el: 0.5 };
+      } else if (f === set && k < tGo) {
+        const ju = seg(k, tSetHit - 0.25, 0.6); P = { y: GRjump(ju, 0.35), al: 2.9, ar: 2.9, azl: 0.25, azr: 0.25, el: 0.9 - 0.7 * ju, er: 0.9 - 0.7 * ju, hl: 0.25, hr: 0.25, kl: 0.6 - 0.4 * ju, kr: 0.6 - 0.4 * ju, lean: 0.05 };
+      } else if (k < tGo) P = Object.assign(GRcrouch(0.45), { al: 0.9 + 0.15 * Math.sin(k * 6 + i), ar: 0.9, el: 0.6, er: 0.6 });
+      if (k >= tGo) {
+        const ru = seg(k, tGo, 0.8); x += (gx - x) * g; z += (gz - z) * g;
+        if (ru < 1) P = GRrun(k * 13 + i, 1, 0.25);
+        else { const j = seg(k, tCheer + (i % 3) * 0.07, 0.7), j2 = seg(k, tCheer + 0.85 + (i % 2) * 0.06, 0.6); P = Object.assign(GRcheer(k + i, (j > 0 && j < 1) || (j2 > 0 && j2 < 1)), { y: GRjump(j, 1.1) + GRjump(j2, 0.7) }); }
+      }
+      f.set(P); GRplace(f, x, z, (f === set ? -2.4 : Math.PI) * (1 - ez.io(seg(k, tGo, 0.55))));
+    });
+    if (k >= tCheer + 0.4 && !cf.on) { cf.on = true; cf.dump(220); cf.go(50); F.forEach((f) => boomS.burst(f.root.position.x, 2.4, f.root.position.z, 60, 6, f.p.col)); st.flash = Math.max(st.flash, 0.6); }
+    tot.run(k, tCheer + 0.3);
+    // the camera: from the side for the spike, a punch in on the hit, then around to the front for the celebration
+    const sd = 1 - ez.io(seg(k, tGo - 0.2, 1.2)), pn = k > tHit - 0.1 && k < tLand + 0.4 ? 0.8 : 0;
+    st.camTo.p.set(6.8 * sd + Math.sin(k * 0.3) * 0.5, 2.7 + 0.6 * (1 - sd), 4.2 + 5.4 * (1 - sd) - pn); st.camTo.l.set(-0.4 * sd, 2.0 + 1.0 * (1 - sd), nz + 0.6 + 2.2 * (1 - sd));
+  });
+  st.camTo.p.set(6.8, 2.7, 4.2); st.camTo.l.set(0, 2.0, nz + 0.6); st.cam.position.set(7.4, 2.9, 5);
+};
+
+// ---- the huddle: they run in from all over, lock up, three beats, BREAK, everybody up and out ----
+ACT3.ghuddle = function (st, a) {
+  const { THREE } = st, I = st.info, A = a.t, F = GRcast(st), N = F.length;
+  const stage = canvasTex(st.L, 1024, 1024, (x, W) => { const c = W / 2, g = x.createRadialGradient(c, c, 0, c, c, c); g.addColorStop(0, "#1b2029"); g.addColorStop(1, "#06070a"); x.fillStyle = g; x.fillRect(0, 0, W, W);
+    x.strokeStyle = I.acc; x.lineWidth = 10; x.beginPath(); x.arc(c, c, W * 0.2, 0, Math.PI * 2); x.stroke(); x.lineWidth = 4; x.globalAlpha = 0.5; x.beginPath(); x.arc(c, c, W * 0.38, 0, Math.PI * 2); x.stroke(); x.globalAlpha = 1;
+    x.fillStyle = "rgba(255,255,255,.6)"; x.textAlign = "center"; x.textBaseline = "middle"; x.font = `900 50px ${L3D}`; x.fillText("SWEAT BOARD", c, c - 4); x.font = `700 22px ${L3I}`; x.fillStyle = "rgba(255,255,255,.4)"; x.fillText("GROUP RIDE", c, c + 38); });
+  const floor = S3add(st, new THREE.Mesh(new THREE.CircleGeometry(9, 96), new THREE.MeshStandardMaterial({ map: stage, roughness: 0.25, metalness: 0.5, envMapIntensity: 0.6 }))); floor.rotation.x = -Math.PI / 2;
+  const glow = S3add(st, new THREE.Mesh(new THREE.RingGeometry(1.75, 1.85, 96), new THREE.MeshBasicMaterial({ color: st.acc, transparent: true, opacity: 0.5, blending: THREE.AdditiveBlending, depthWrite: false, side: THREE.DoubleSide }))); glow.rotation.x = -Math.PI / 2; glow.position.y = 0.02;
+  GRlights(st, floor, [0, 0, 0]); const crowd = GRcrowd(st, -24, 80);
+  const sp = S3sparks(st, 800, I.acc), cf = S3confetti(st, 420, F.map((f) => f.p.col).concat(["#ffffff", "#ffd23f"]));
+  const tot = GRtotal(st, 0, 4.7, 0, 0.85);
+  const ang = (i) => Math.PI / 2 + (i / N) * Math.PI * 2 + (N === 2 ? Math.PI / 2 : 0), r0 = 6.5, rH = N <= 2 ? 0.55 : N <= 4 ? 0.72 : 0.9, rB = 2.6;
+  const tIn = 0.3, tLock = 1.9, tB = [2.45, 2.95, 3.45], tBreak = 4.0;
+  let broke = false; const beat = [0, 0, 0];
+  st.tick.push((t, dt) => {
+    const k = t - A;
+    F.forEach((f, i) => {
+      const an = ang(i), u = ez.io(seg(k, tIn + i * 0.06, tLock - tIn - 0.2)), ub = ez.out(seg(k, tBreak, 0.6));
+      const r = k < tBreak ? r0 + (rH - r0) * u : rH + (rB - rH) * ub, x = Math.cos(an) * r, z = Math.sin(an) * r, face = Math.atan2(-x, -z);
+      let P;
+      if (k < tLock - 0.15) P = GRrun(k * 13 + i * 1.7, u < 1 ? 1 : 0.2, 0.3);
+      else if (k < tBreak) { const bob = tB.some((b) => k > b && k < b + 0.25) ? 0.12 : 0; P = { lean: 0.62, hl: 0.55, hr: 0.55, kl: 0.95, kr: 0.95, y: -0.24 - bob, al: 1.55, ar: 1.55, azl: 1.05, azr: 1.05, el: 0.35, er: 0.35 }; }
+      else { const j = seg(k, tBreak + (i % 2) * 0.05, 0.8), j2 = seg(k, tBreak + 1.05, 0.6); P = Object.assign(GRcheer(k + i, (j > 0 && j < 1) || (j2 > 0 && j2 < 1)), { y: GRjump(j, 1.35) + GRjump(j2, 0.6) }); }
+      f.set(P); GRplace(f, x, z, k < tBreak + 0.3 ? face : face + Math.PI * ez.io(seg(k, tBreak + 0.3, 0.6)));
+    });
+    tB.forEach((b, j) => { if (!beat[j] && k >= b) { beat[j] = 1; GRring(st, 0, 0.04, 0, 2.2 + j * 0.8, new THREE.Color(F[j % N].p.col)); st.flash = Math.max(st.flash, 0.25); } });
+    glow.material.opacity = 0.35 + 0.25 * Math.sin(k * 5);
+    if (!broke && k >= tBreak + 0.2) { broke = true; GRring(st, 0, 0.05, 0, 10, I.acc); GRring(st, 0, 0.06, 0, 6, 0xffffff); sp.burst(0, 1.2, 0, 420, 10); F.forEach((f) => sp.burst(f.root.position.x, 2.3, f.root.position.z, 70, 6, f.p.col)); cf.dump(240); cf.go(55); st.flash = 1; st.shake = 0.75; crowd.roar(40); }
+    tot.run(k, tBreak + 0.7);
+    // the camera: high over the huddle, circling; it drops to the front for the break
+    const o = k * 0.32, dn = ez.io(seg(k, tBreak - 0.3, 1.0));
+    st.camTo.p.set(Math.sin(o) * 5.0 * (1 - dn), 6.2 - 3.6 * dn, Math.cos(o) * 5.0 * (1 - dn) + 10.5 * dn + 1.2); st.camTo.l.set(0, 1.5 + 1.1 * dn, 0);
+  });
+  st.camTo.p.set(0, 6.2, 6.2); st.camTo.l.set(0, 1.5, 0); st.cam.position.set(0, 7.5, 8.5);
+};
+
+// ---- the push: shoulder to shoulder behind a sled with the ticket on it, driving it into the end zone ----
+ACT3.gpush = function (st, a) {
+  const { THREE } = st, I = st.info, G = GRgrp(st), A = a.t, F = GRcast(st), N = F.length, line = 2.2;
+  const turf = GRturf(st, 40, 20, null, true); turf.position.set(0, 0, -1.5);
+  // the end zone past the goal line, in the team's color, and the line itself, ready to light up
+  const ez0 = S3add(st, new THREE.Mesh(new THREE.PlaneGeometry(12, 20), new THREE.MeshStandardMaterial({ color: new THREE.Color(I.ban1 || I.acc), roughness: 0.85, transparent: true, opacity: 0.8 }))); ez0.rotation.x = -Math.PI / 2; ez0.position.set(line + 6, 0.01, -1.5);
+  const glm = new THREE.MeshBasicMaterial({ color: 0xffffff, transparent: true, opacity: 0.9, toneMapped: false }), gl = S3add(st, new THREE.Mesh(new THREE.PlaneGeometry(0.22, 20), glm)); gl.rotation.x = -Math.PI / 2; gl.position.set(line, 0.02, -1.5);
+  const crowd = GRcrowd(st, -22, 80); GRlights(st, turf, [0, 0, 2]);
+  if (st.scene.fog) { st.scene.fog.near = 18; st.scene.fog.far = 50; }
+  // the sled: a block with the ticket on its face
+  const SW = 2.6, SH = 2.0, SD = 1.6;
+  const face = canvasTex(st.L, 780, 600, (x, w, h) => {
+    const g = x.createLinearGradient(0, 0, 0, h); g.addColorStop(0, "#171b22"); g.addColorStop(1, "#07080b"); x.fillStyle = g; x.fillRect(0, 0, w, h);
+    x.fillStyle = I.acc; x.fillRect(0, 0, w, 14); x.fillStyle = "rgba(255,255,255,.55)"; x.font = `700 30px ${L3I}`; x.fillText(`GROUP RIDE · ${G.R.length} PEOPLE`, 44, 76);
+    x.fillStyle = "#fff"; L3fit(x, G.pick || "", w - 88, 96, 900, L3I); x.fillText(G.pick || "", 44, 190);
+    x.fillStyle = "rgba(255,255,255,.14)"; x.fillRect(44, 236, w - 88, 3);
+    G.R.slice(0, 6).forEach((p, i) => { const cx = 44 + (i % 3) * ((w - 88) / 3), cy = 300 + Math.floor(i / 3) * 70; x.fillStyle = p.col; x.beginPath(); x.arc(cx + 22, cy - 12, 20, 0, Math.PI * 2); x.fill(); x.fillStyle = "#fff"; L3fit(x, String(p.nm || "").toUpperCase(), (w - 88) / 3 - 60, 34, 800, L3I); x.fillText(String(p.nm || "").toUpperCase(), cx + 52, cy); });
+    x.fillStyle = "#5ef0a0"; L3fit(x, G.totS || "", w - 88, 130, 900, L3D); x.fillText(G.totS || "", 44, h - 60);
+    x.fillStyle = "rgba(255,255,255,.6)"; x.font = `700 30px ${L3I}`; x.textAlign = "right"; x.fillText("TOGETHER", w - 44, h - 70);
+  });
+  const sled = new THREE.Group(), box = new THREE.Mesh(new st.L.RoundedBoxGeometry(SW, SH, SD, 4, 0.08), new THREE.MeshStandardMaterial({ color: 0x1a1d24, metalness: 0.7, roughness: 0.35, envMapIntensity: 0.8 })); sled.add(box);
+  const fp = new THREE.Mesh(new THREE.PlaneGeometry(SW - 0.14, SH - 0.14), new THREE.MeshStandardMaterial({ map: face, roughness: 0.4, emissive: 0xffffff, emissiveMap: face, emissiveIntensity: 0.25 })); fp.position.z = SD / 2 + 0.005; sled.add(fp);
+  const trim = new THREE.Mesh(new THREE.BoxGeometry(SW + 0.06, 0.12, SD + 0.06), st.mats.gold); trim.position.y = -SH / 2 + 0.06; sled.add(trim);
+  const pad = new THREE.Mesh(new st.L.RoundedBoxGeometry(0.22, SH * 0.6, SD - 0.2, 3, 0.06), new THREE.MeshStandardMaterial({ color: new THREE.Color(I.acc), roughness: 0.5, metalness: 0.2 })); pad.position.set(-SW / 2 - 0.1, 0.05, 0); sled.add(pad);
+  S3add(st, sled);
+  const dust = S3sparks(st, 500, "#d9f2c8"), sp = S3sparks(st, 800, "#ffd23f"), cf = S3confetti(st, 420, F.map((f) => f.p.col).concat(["#ffffff", "#ffd23f"]));
+  const tot = GRtotal(st, line + 1.4, 3.55, -0.4, 0.75);
+  const gapX = 1.05, chain = (N - 1) * gapX, xs1 = line + 1.2, xs0 = Math.min(-2.6, xs1 - 6.4), tP = 0.7, tX = 3.9, zs = (i) => (i % 2 ? 0.16 : -0.12);
+  const ext = SW + 1.7 + chain + 0.8, dist = Math.max(9.6, (ext / 2 / 0.51) * 1.12);
+  let over = false;
+  st.tick.push((t, dt) => {
+    const k = t - A, u = ez.io(seg(k, tP, tX - tP + 0.35)) , wob = Math.sin(k * 9) * 0.02 * (u > 0 && u < 1 ? 1 : 0);
+    const sx = xs0 + (xs1 - xs0) * u; sled.position.set(sx, SH / 2, -0.2); sled.rotation.z = wob; sled.rotation.y = -0.18;
+    if (u > 0 && u < 1 && Math.random() < 0.6) dust.burst(sx - SW / 2, 0.06, -0.2 + (Math.random() - 0.5) * SD, 3, 1.6);
+    F.forEach((f, i) => {
+      const back = sx - SW / 2 - 1.62 - i * gapX, z = -0.2 + zs(i); let P, x = back, ry = Math.PI / 2;
+      if (k < tP) { const q = ez.out(seg(k, 0, tP)); P = Object.assign(GRcrouch(0.6 * q), { pitch: 0.5 * q, lean: 0.35 * q, al: 2.25 * q, ar: 2.3 * q, el: 0.6, er: 0.6 }); }
+      else if (k < tX + 0.25) { const g = GRrun(k * 11 + i * 2.1, 0.7, 0.35); P = Object.assign(g, { pitch: 0.5, al: 2.25, ar: 2.3, el: 0.6, er: 0.6, azl: 0.2, azr: 0.2, y: -0.08 + g.y * 0.5 }); }
+      else { const j = seg(k, tX + 0.45 + (i % 3) * 0.07, 0.75), j2 = seg(k, tX + 1.4, 0.6); P = Object.assign(GRcheer(k + i, (j > 0 && j < 1) || (j2 > 0 && j2 < 1)), { y: GRjump(j, 1.25) + GRjump(j2, 0.6) }); ry = Math.PI / 2 * (1 - ez.io(seg(k, tX + 0.3, 0.6))); x = back + 0.9 * ez.out(seg(k, tX + 0.3, 0.6)); }
+      f.set(P); GRplace(f, x, z, ry);
+    });
+    if (!over && sx >= line) { over = true; glm.color.set(0xffd23f); GRring(st, line, 0.04, -0.2, 7, 0xffd23f); for (let zz = -6; zz <= 4; zz += 1.2) sp.burst(line, 0.15, zz, 30, 5); cf.dump(220); cf.go(55); st.flash = 1; st.shake = 0.8; crowd.roar(40); }
+    if (over) gl.scale.x = 1 + 0.6 * Math.abs(Math.sin(k * 6));
+    tot.run(k, tX + 0.9);
+    // the camera: out in front a little to the side, tracking the sled, pulling back for the celebration
+    const cq = ez.io(seg(k, tX, 1.2)), mid = sx - 0.55 - chain / 2;
+    st.camTo.p.set(mid - 0.4, 2.4 + 0.8 * cq, dist + 1.0 * cq); st.camTo.l.set(mid, 1.25 + 1.0 * cq, -0.4);
+    if (k < tX) GRlock(st);
+  });
+  { const mid = xs0 - 0.55 - chain / 2; st.camTo.p.set(mid - 0.4, 2.4, dist); st.camTo.l.set(mid, 1.25, -0.4); st.cam.position.set(mid - 0.4, 2.4, dist); }
+};
 
 </script>
 </body>
