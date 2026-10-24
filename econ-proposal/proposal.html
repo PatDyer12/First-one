@@ -1,0 +1,81 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>MLB Payroll Research Proposal</title>
+<style>
+  @page { size: Letter; margin: 0.75in 0.9in; }
+  body {
+    font-family: "Times New Roman", "Liberation Serif", Times, serif;
+    font-size: 11pt;
+    line-height: 1.15;
+    color: #000;
+    background: #fff;
+    margin: 0;
+  }
+  .header { margin-bottom: 4pt; }
+  .header p { margin: 0; }
+  h1 {
+    font-size: 13pt;
+    text-align: center;
+    margin: 6pt 0 8pt;
+  }
+  h2 {
+    font-size: 11pt;
+    margin: 8pt 0 2pt;
+  }
+  p { margin: 0 0 5pt; text-align: justify; }
+  ul { margin: 2pt 0 5pt; padding-left: 18pt; }
+  li { margin-bottom: 2.5pt; text-align: justify; }
+  .refs { page-break-before: always; }
+  .refs p {
+    text-align: left;
+    padding-left: 24pt;
+    text-indent: -24pt;
+    margin-bottom: 6pt;
+  }
+  .refs a { color: #000; text-decoration: none; word-break: break-all; }
+</style>
+</head>
+<body>
+
+<div class="header">
+  <p>Patrick Dyer</p>
+  <p>Econometrics Term Project: Stage 1 Research Proposal</p>
+  <p>October 2026</p>
+</div>
+
+<h1>Does Money Buy Wins? MLB Payrolls and the Salary Cap Debate, 2006&ndash;2025</h1>
+
+<h2>1. Research Question</h2>
+<p>Over the last 20 MLB seasons (2006&ndash;2025), how much does a team&rsquo;s payroll explain its winning percentage once market size and past performance are accounted for, and has the link between spending and winning gotten stronger over time? MLB is the only major U.S. league without a salary cap, so the answer tests the main claim in the current labor fight: that big-market, big-spending teams have an advantage only a cap can fix.</p>
+
+<h2>2. Variables of Interest</h2>
+<p><b>Dependent variable:</b> team regular-season winning percentage for each team-season (30 teams &times; 20 seasons = 600 observations). I use winning percentage instead of total wins because the 2020 season was only 60 games. A secondary outcome is making the playoffs (yes/no), which is the focus of the league&rsquo;s argument.</p>
+<p><b>Explanatory variables:</b></p>
+<ul>
+  <li><b>Relative payroll</b> (team opening-day payroll &divide; league average that season). The average MLB salary rose from about $2.87 million in 2006 to a record $5.34 million on opening day 2026, so raw dollars are not comparable across years; what buys talent is spending relative to competitors. I expect a positive effect, since more money lets a team sign and keep better players.</li>
+  <li><b>Market size</b> (metro-area population or TV market rank). Bigger markets bring in more local revenue. Including market size alongside payroll tests whether large-market teams win more for reasons beyond player spending, like bigger scouting and analytics budgets. If it has no effect once payroll is controlled for, market size matters only through payroll, which is exactly what a cap would equalize.</li>
+  <li><b>Prior-season winning percentage.</b> Team quality carries over through young players and front-office skill, so this keeps payroll from getting credit for talent a team already had. It also matters because winning teams often raise payroll to chase a title, so spending can follow winning rather than cause it.</li>
+  <li><b>Payroll concentration</b> (share of payroll paid to the team&rsquo;s highest-paid player). The owners&rsquo; proposal would limit any one player to 15% of team payroll. The expected sign is unclear: stars win games, but tying up a big share of the budget in one contract can leave the rest of the roster thin.</li>
+  <li><b>Time period</b> (an indicator for more recent seasons, combined with relative payroll). This tests the &ldquo;last 20 years&rdquo; part of the question: whether the payoff from spending has grown as payroll gaps widened.</li>
+</ul>
+
+<h2>3. Economic Relevance and Motivation</h2>
+<p>MLB&rsquo;s collective bargaining agreement expires December 1, 2026. Owners have made their first formal salary-cap proposal since the 1994&ndash;95 strike: a $245.3 million cap, a $171.2 million floor, and a 50-50 revenue split starting in 2027. The players&rsquo; union called it a &ldquo;nuclear bomb,&rdquo; and a lockout is widely expected. Commissioner Rob Manfred argues that a larger-market team&rsquo;s chance of making the playoffs is &ldquo;dramatically higher,&rdquo; and 2026 opening-day payrolls ranged from $352.2 million (Mets) to $62.3 million (Guardians), a five-fold gap. The union points to this year&rsquo;s World Series between Milwaukee (baseball&rsquo;s smallest TV market) and Tampa Bay, the first Series between two bottom-half payrolls since 1991. Both sides are arguing from anecdotes; this project asks what the data show.</p>
+<p>The question connects to core ideas in sports economics. Rottenberg&rsquo;s (1956) &ldquo;uncertainty of outcome&rdquo; idea says fans want competitive games, so a league has an economic reason to limit imbalance. But a cap is also a limit on what employers can pay workers: if payroll only weakly predicts winning, a cap looks less like a competitive-balance tool and more like a way to shift revenue from players to owners. The results would be useful to both sides at the bargaining table, to small-market front offices deciding how to spend a limited budget (the &ldquo;Moneyball&rdquo; question studied by Hakes and Sauer, 2006), to cities weighing taxpayer-funded stadiums sold on the promise of a winning team, and to the fans, stadium workers, and local businesses who lose out if a lockout cancels games.</p>
+
+<div class="refs">
+  <h2>References</h2>
+  <p>Associated Press. &ldquo;AP Study: MLB Average Salary Hits a Record $5.34M as the Mets Lead Spending Again.&rdquo; April 9, 2026. <a href="https://www.ksl.com/article/51481304/ap-study-mlb-average-salary-hits-a-record-534m-as-the-mets-lead-spending-again">https://www.ksl.com/article/51481304/ap-study-mlb-average-salary-hits-a-record-534m-as-the-mets-lead-spending-again</a></p>
+  <p>Associated Press. &ldquo;Major League Baseball Opening Day Average Salaries&rdquo; (year-by-year table, source of the 2006 average of $2,866,544). <a href="https://www.smdailyjournal.com/ap/sports/agate/major-league-baseball-opening-day-average-salaries/article_23e6489f-b175-5d89-8365-1c9b34250152.html">https://www.smdailyjournal.com/ap/sports/agate/major-league-baseball-opening-day-average-salaries/article_23e6489f-b175-5d89-8365-1c9b34250152.html</a></p>
+  <p>Associated Press. &ldquo;Union Head Calls MLB&rsquo;s Salary Cap Proposal &lsquo;Nuclear Bomb&rsquo; Ahead of World Series Opener.&rdquo; ABC News, October 23, 2026. <a href="https://abcnews.com/Sports/wireStory/union-head-calls-mlbs-salary-cap-proposal-nuclear-137526876">https://abcnews.com/Sports/wireStory/union-head-calls-mlbs-salary-cap-proposal-nuclear-137526876</a></p>
+  <p>Blum, Ronald. &ldquo;Two of MLB&rsquo;s Smallest Spenders Will Meet in the World Series for First Time Since 1991.&rdquo; Associated Press, October 16, 2026. <a href="https://worldbaseball.com/news/two-of-mlbs-smallest-spenders-will-meet-in-the-world-series-for-first-time-since-1991">https://worldbaseball.com/news/two-of-mlbs-smallest-spenders-will-meet-in-the-world-series-for-first-time-since-1991</a></p>
+  <p>Fox Sports. &ldquo;Commissioner Rob Manfred Defends Salary Cap Push, Says Owners Unified Amid CBA Talks.&rdquo; July 14, 2026. <a href="https://www.foxsports.com/stories/mlb/commissioner-manfred-defends-salary-cap-push-owners-unified-cba-talks">https://www.foxsports.com/stories/mlb/commissioner-manfred-defends-salary-cap-push-owners-unified-cba-talks</a></p>
+  <p>Hakes, Jahn K., and Raymond D. Sauer. 2006. &ldquo;An Economic Evaluation of the Moneyball Hypothesis.&rdquo; <i>Journal of Economic Perspectives</i> 20(3): 173&ndash;185.</p>
+  <p>Perry, Dayn. &ldquo;MLB Officially Proposes Salary Cap and Floor in Latest CBA Negotiations with Players Union.&rdquo; CBS Sports, May 28, 2026. <a href="https://www.cbssports.com/mlb/news/mlb-proposes-salary-cap-floor-cba-negotiations-mlbpa/">https://www.cbssports.com/mlb/news/mlb-proposes-salary-cap-floor-cba-negotiations-mlbpa/</a></p>
+  <p>Rottenberg, Simon. 1956. &ldquo;The Baseball Players&rsquo; Labor Market.&rdquo; <i>Journal of Political Economy</i> 64(3): 242&ndash;258.</p>
+</div>
+
+</body>
+</html>
