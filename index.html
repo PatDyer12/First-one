@@ -1849,7 +1849,7 @@ body.tv .rb-pl .pl-legs .t { font-size: 16px; }
 .rb-g.hero { container-type: inline-size; }
 .rb-g.hero .rb-gh { gap: clamp(8px, 2cqw, 18px); padding: clamp(16px, 3.4cqw, 30px) clamp(16px, 3.4cqw, 30px) clamp(12px, 2.4cqw, 22px); }
 .rb-g.hero .rb-gh .tm { gap: clamp(6px, 1.4cqw, 12px); }
-.rb-g.hero .tl { width: clamp(36px, 8.5cqw, 76px); height: clamp(36px, 8.5cqw, 76px); }
+.rb-g.hero .tl { width: clamp(44px, 10.5cqw, 92px); height: clamp(44px, 10.5cqw, 92px); }
 .rb-g.hero .ab { font-size: clamp(17px, 3.6cqw, 34px); }
 .rb-g.hero .sc { font-size: clamp(36px, 9.5cqw, 84px); margin: 0 clamp(2px, 1.2cqw, 14px); }
 .rb-g.hero .clk { font-size: clamp(12px, 2.3cqw, 22px); }
@@ -2314,7 +2314,7 @@ body.tv .rb-games.primeg > .rb-pcol.duo { display: grid; grid-template-columns: 
   .rb-g.hero .rb-gh { grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); row-gap: 6px; }
   .rb-g.hero .rb-gh .mid { grid-column: 1 / -1; grid-row: 2; }
   .rb-g.hero .rb-gh .sc { font-size: 44px; }
-  .rb-g.hero .rb-gh .tl { width: 34px; height: 34px; }
+  .rb-g.hero .rb-gh .tl { width: 46px; height: 46px; }
   .rb-scp .r { grid-template-columns: 22px 62px minmax(0, 1fr); }
   .rb-scp .r .s { display: none; }
   .fo-ls { font-size: 12px; letter-spacing: 0; }
@@ -5074,8 +5074,8 @@ body.tv .rb-main { -webkit-mask-image: linear-gradient(180deg, transparent 0, #0
 @keyframes gxPing { 0% { box-shadow: 0 0 0 0 rgba(255,77,94,.55); } 70%, 100% { box-shadow: 0 0 0 7px rgba(255,77,94,0); } }
 .gx-meta .st.s-pre { color: #cfe0ff; background: rgba(59,140,255,.12); }
 .gx-meta .st.s-fin { color: #c9c4ba; }
-.gx-tm { display: grid; grid-template-columns: 34px auto minmax(0, max-content) auto auto 1fr auto; align-items: center; column-gap: 10px; min-height: 44px; }
-.gx-tm .tl { width: 34px; height: 34px; object-fit: contain; grid-column: 1; filter: drop-shadow(0 2px 4px rgba(0,0,0,.45)); }
+.gx-tm { display: grid; grid-template-columns: 40px auto minmax(0, max-content) auto auto 1fr auto; align-items: center; column-gap: 10px; min-height: 44px; }
+.gx-tm .tl { width: 40px; height: 40px; object-fit: contain; grid-column: 1; filter: drop-shadow(0 2px 4px rgba(0,0,0,.45)); }
 .gx-tm .rk { grid-column: 2; font: 800 13px/1 var(--f-num); font-style: normal; color: #0a0d12; background: #cfe0ff; border-radius: 5px; padding: 4px 6px 3px; }
 .gx-tm:not(:has(.rk)) .nm { grid-column: 2 / 4; }
 .gx-tm .nm { grid-column: 3; font: 700 23px/1.1 var(--f-ui); letter-spacing: -.01em; color: #9aa3b2; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
@@ -5170,7 +5170,7 @@ body.tv .rb-g .rb-pk .hasball em { display: none; }   /* the block says red zone
   .rb-g.hero .rb-gh .tm.a .sc { margin-left: auto; }
   .rb-g.hero .rb-gh .tm.h .sc { margin-right: auto; }
   .rb-g.hero .sc { font-size: clamp(36px, 8cqw, 84px); }
-  .rb-g.hero .tl { width: clamp(34px, 7cqw, 76px); height: clamp(34px, 7cqw, 76px); }
+  .rb-g.hero .tl { width: clamp(42px, 10cqw, 84px); height: clamp(42px, 10cqw, 84px); }
   .rb-g.hero .ab { font-size: clamp(17px, 3.4cqw, 34px); }
   .rb-g.hero .clk { font-size: clamp(12px, 2.3cqw, 22px); }
   .rb-gh .nmx .nf { display: none; }
@@ -5592,6 +5592,27 @@ body.tv.nflday .ob-grp, body.tv.cfb .ob-grp { background-color: rgba(10,13,18,.9
 .x3-gsl li small { grid-column: 1 / -1; font: 600 16px/1 Inter, sans-serif; color: rgba(255,255,255,.6); }
 .x3-gsl li strong { grid-column: 1 / -1; font: 900 54px/1 var(--f-display); color: #5ef0a0; }
 .x3-gsl li em { grid-column: 1 / -1; font: 700 18px/1 Inter, sans-serif; font-style: normal; color: rgba(255,255,255,.75); }
+
+/* ---------- team logos: bare marks, no badge behind them ---------- */
+img.tl, .tl.tlg { background: none; box-shadow: none; border-radius: 0; margin: 0; animation: none; vertical-align: middle; }
+:where(img.tlg) { object-fit: contain; filter: drop-shadow(0 1px 1.5px rgba(0,0,0,.6)); }
+/* the hero: the team's own color glowing behind its logo */
+.rb-gh .tm.a img.tlg { filter: drop-shadow(0 2px 3px rgba(0,0,0,.6)) drop-shadow(0 0 18px color-mix(in srgb, var(--ra, var(--tgc)) 60%, transparent)); }
+.rb-gh .tm.h img.tlg { filter: drop-shadow(0 2px 3px rgba(0,0,0,.6)) drop-shadow(0 0 18px color-mix(in srgb, var(--rh, var(--tgc)) 60%, transparent)); }
+.gx-tm img.tlg, .rb-gs img.tlg, .fo-bug img.tlg { filter: drop-shadow(0 2px 3px rgba(0,0,0,.55)) drop-shadow(0 0 9px color-mix(in srgb, var(--tgc, #8a94a8) 38%, transparent)); }
+.ob-strip img.tlg, .lt-m img.tlg, img.sc-lg.tlg { filter: drop-shadow(0 1px 2px rgba(0,0,0,.7)); }
+/* no logo: a monogram tile in the team's color */
+:where(.tlg-mono) { width: 1.6em; height: 1.6em; }
+.tlg-mono, .tl.tlg-mono { display: inline-grid; place-items: center; flex: none; container-type: size; overflow: hidden; border-radius: 24%; vertical-align: middle; animation: none;
+  background: linear-gradient(150deg, color-mix(in srgb, var(--tmc, #3a4252) 72%, #fff) 0%, var(--tmc, #3a4252) 48%, color-mix(in srgb, var(--tmc, #3a4252) 62%, #000) 100%);
+  box-shadow: inset 0 0 0 1px rgba(255,255,255,.18), inset 0 1px 0 rgba(255,255,255,.3), 0 2px 6px rgba(0,0,0,.45); }
+.tlg-mono b { font: 900 calc(100cqw * var(--k, .34))/1 var(--f-num, Inter, sans-serif); letter-spacing: -.02em; color: #fff; text-shadow: 0 1px 2px rgba(0,0,0,.5); white-space: nowrap; }
+.tn-tm .tlg-mono { width: 46px; height: 46px; }
+/* a person's ticket strip: the teams keep their width, so the score never slides under the live dot; when the clock
+   doesn't fit beside them it drops under them, on the right */
+.pp-bet .ob-strip { flex-wrap: wrap; row-gap: 3px; }
+.pp-bet .ob-strip .ob-tm { flex: none; }
+.pp-bet .ob-strip .ob-at:empty { display: none; }
 </style>
 </head>
 <body>
@@ -7063,7 +7084,28 @@ body.tv.nflday .ob-grp, body.tv.cfb .ob-grp { background-color: rgba(10,13,18,.9
     const el = e.target, a = el && el.tagName === "IMG" ? "src" : el && el.tagName === "image" ? "href" : "", u = a ? el.getAttribute(a) || "" : "";
     if (u.includes("/500-dark/")) { e.stopPropagation(); el.setAttribute(a, u.replace("/500-dark/", "/500/")); }   // before its own onerror drops it
   }, true);
-  const logo = (t, cls) => (t && t.lg ? `<img class="${cls || "lgo"}" src="${esc(t.lg)}" alt="" loading="lazy" referrerpolicy="no-referrer" onerror="this.remove()">` : "");
+  // a team's mark: its logo, or a monogram tile in its color when it has none (or it won't load, dark and light both)
+  const LGBAD = new Set(), LGK = [0, 0.5, 0.44, 0.34, 0.27];
+  function lgAb(ab, nm) {
+    ab = String(ab || "").trim(); if (ab.length <= 4) return ab;
+    const w = String(nm || ab).split(/\s+/).filter(Boolean);
+    return (w.length > 1 ? w.map((x) => x[0]).join("") : ab).slice(0, 3).toUpperCase();
+  }
+  const lgTone = (t) => `--tmc:${esc(t.col || "#3a4252")};--tgc:${esc(typeof bright === "function" ? bright(t) : t.col || "#8a94a8")}`;
+  function lgMono(t, cls) {
+    const ab = lgAb(t.ab, t.nm);
+    return ab ? `<span class="${cls || "lgo"} tlg tlg-mono" style="${lgTone(t)}" aria-hidden="true"><b style="--k:${LGK[ab.length] || 0.27}">${esc(ab)}</b></span>` : "";
+  }
+  window.lgFail = (im) => {
+    if (!im || !im.parentNode) return;
+    LGBAD.add(im.dataset.u || "");
+    const ab = lgAb(im.dataset.ab, im.dataset.nm);
+    if (!ab) { im.remove(); return; }
+    const sp = document.createElement("span"), b = document.createElement("b");
+    sp.className = im.className + " tlg-mono"; sp.setAttribute("style", im.getAttribute("style") || ""); sp.setAttribute("aria-hidden", "true");
+    b.textContent = ab; b.style.setProperty("--k", String(LGK[ab.length] || 0.27)); sp.appendChild(b); im.replaceWith(sp);
+  };
+  const logo = (t, cls) => (!t ? "" : t.lg && !LGBAD.has(t.lg) ? `<img class="${cls || "lgo"} tlg" src="${esc(t.lg)}" alt="" loading="lazy" referrerpolicy="no-referrer" style="${lgTone(t)}" data-u="${esc(t.lg)}" data-ab="${esc(t.ab || "")}" data-nm="${esc(t.nm || "")}" onerror="lgFail(this)">` : lgMono(t, cls));
   // a little football: shows next to your bet when your side has the ball (ML and spread), and on the scorebug for whoever has it
   const BALL = '<svg class="ball" viewBox="0 0 26 15" aria-label="has the ball"><ellipse cx="13" cy="7.5" rx="12" ry="6.6" fill="#9a5424" stroke="#3a1c08" stroke-width="1.2"/><path d="M8 7.5h10M10 5.7v3.6M12.3 5.4v4.2M14.6 5.4v4.2M17 5.7v3.6" stroke="#fff" stroke-width="1.2" stroke-linecap="round"/><path d="M3.4 4.6c1.6-.4 2.7-.2 2.7 2.9s-1.1 3.3-2.7 2.9M22.6 4.6c-1.6-.4-2.7-.2-2.7 2.9s1.1 3.3 2.7 2.9" stroke="#fff" stroke-width="1" fill="none"/></svg>';
   function hasBall(sel) {
@@ -11565,7 +11607,7 @@ body.tv.nflday .ob-grp, body.tv.cfb .ob-grp { background-color: rgba(10,13,18,.9
   // ---------- sheets ----------
   function openSheet(id) { $(id).hidden = false; }
   // keep every open screen current: when a new version is up, reload it (never mid-form or mid-animation)
-  const BUILD = "20261024142357";
+  const BUILD = "20261024163817";
   function checkBuild() {
     if (BUILD === "dev") return;
     fetch("version.json?t=" + Date.now(), { cache: "no-store" }).then((r) => (r.ok ? r.json() : null)).then((j) => {
