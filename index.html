@@ -5770,6 +5770,36 @@ body.tv:has(#roomTvQr:not([hidden])) .rb-rail { padding-bottom: calc((max(96px, 
 
 /* ---------- the river ---------- */
 .rv-m > * { translate: none !important; }
+
+/* ---------- parlay legs: dots, not counts ---------- */
+.lpips { display: inline-flex; align-items: center; flex-wrap: wrap; gap: 5px; }
+.lpips i { width: 12px; height: 12px; border-radius: 50%; background: rgba(255,255,255,.1); box-shadow: inset 0 0 0 1.5px rgba(255,255,255,.3); }
+.lpips i.hit { background: #3ddc97; box-shadow: 0 0 8px rgba(61,220,151,.55); }
+.lpips i.miss { background: #ff5a6a; box-shadow: none; }
+.lpips i.lw { background: rgba(61,220,151,.22); box-shadow: inset 0 0 0 2px #3ddc97; }
+.lpips i.ll { background: rgba(255,138,91,.22); box-shadow: inset 0 0 0 2px #ff8a5b; }
+.lpips i.le { box-shadow: inset 0 0 0 2px #c9d1dc; }
+.ob-st .lpips { margin-top: 6px; justify-content: center; }
+.pp-mid .ob-st .lpips { margin-top: 0; }
+.rb-st .lpips i { width: 10px; height: 10px; }
+.ob-bet.ob-legt .ob-pick { display: flex; align-items: center; gap: 10px; }
+.ob-legt .ob-lgl { display: inline-flex; gap: 3px; flex: none; }
+.ob-legt .ob-lgl > * { width: 32px; height: 32px; object-fit: contain; }
+.ob-legt .ob-lck { flex: none; width: 22px; height: 22px; border-radius: 50%; display: grid; place-items: center; font: 900 12px/1 Inter, sans-serif; font-style: normal; color: #06080c; background: #3ddc97; }
+.ob-legt.k-lost .ob-lck { background: #ff5a6a; }
+.ob-legt.k-lost .ob-pick .t { text-decoration: line-through; text-decoration-color: rgba(255,90,106,.7); opacity: .6; }
+#lcCount:empty { display: none; }
+
+/* ---------- the leaderboard, a little narrower again ---------- */
+body.tv .rb { grid-template-columns: minmax(0, 1fr) 286px; }
+body.tv #rbLb .rb-sec.lb { padding: 10px 8px 8px; gap: 5px; }
+body.tv #rbLb .rb-lr { grid-template-columns: 12px 26px minmax(0, 1fr) auto; column-gap: 8px; padding: 5px 9px 5px 7px; }
+body.tv #rbLb .rb-lr .rk { font-size: 13px; }
+body.tv #rbLb .rb-lr > .rb-av { width: 26px; height: 26px; font-size: 12.5px; }
+body.tv #rbLb .rb-lr .nm b { font-size: 15px; }
+body.tv #rbLb .rb-lr .net { font-size: 17px; }
+body.tv #rbLb .rb-lr .op { font-size: 10.5px; gap: 4px; }
+body.tv #rbLb .rb-lr .lv em { font-size: 9.5px; letter-spacing: .06em; }
 </style>
 </head>
 <body>
@@ -8588,7 +8618,7 @@ body.tv:has(#roomTvQr:not([hidden])) .rb-rail { padding-bottom: calc((max(96px, 
       const b = e.b, L = legsOf(b), l = L[e.leg] || {}, live = l.ev && !l.ev.fin && G.g.st === "in";
       const cls = l.st === "hit" ? "won" : l.st === "miss" ? "lost" : live ? (l.ev.res === "W" ? "w" : l.ev.res === "L" ? "l" : "e") : "e";
       const txt = l.st === "hit" ? "Hit" : l.st === "miss" ? "Missed" : live ? l.ev.txt || "" : "";
-      return `<div class="rb-pos st-${cls} legrow"${tapAttrs([b.id], personName(b) + "'s parlay")}><div class="rb-avs">${avHtml(b)}</div><div class="rb-pk"><b><span class="t">${esc(l.t || (b.legs || [])[e.leg] || "")}</span></b><div class="rb-wls"><span class="lgw" style="color:${personCol(b)}">${esc(personName(b))}</span><span>Leg ${e.leg + 1} of ${L.length} · ${fOdds(b.odds)} parlay</span></div></div><div class="rb-st">${esc(txt)}</div></div>`;
+      return `<div class="rb-pos st-${cls} legrow"${tapAttrs([b.id], personName(b) + "'s parlay")}><div class="rb-avs">${avHtml(b)}</div><div class="rb-pk"><b><span class="t">${esc(l.t || (b.legs || [])[e.leg] || "")}</span></b><div class="rb-wls"><span class="lgw" style="color:${personCol(b)}">${esc(personName(b))}</span><span>Parlay leg</span></div></div><div class="rb-st">${l.st === "hit" ? "✓" : l.st === "miss" ? "✕" : ""}</div></div>`;
     }).join("");
   }
   // the best games on that nobody in the room is on
@@ -8641,7 +8671,7 @@ body.tv:has(#roomTvQr:not([hidden])) .rb-rail { padding-bottom: calc((max(96px, 
     const legs = G.legs || []; if (!legs.length) return "";
     const by = new Map();
     for (const e of legs) { const k = personKey(e.b); if (!by.has(k)) by.set(k, { b: e.b, ids: new Set() }); by.get(k).ids.add(e.b.id); }
-    return `<div class="rb-inpar"><span class="lbl">Parlay legs on this game</span>${[...by.values()].map(({ b, ids }) => `<span class="who">${avHtml(b, "sm")}<b style="color:${personCol(b)}">${esc(personName(b))}</b>${ids.size > 1 ? ` ×${ids.size}` : ""}</span>`).join("")}</div>`;
+    return `<div class="rb-inpar"><span class="lbl">Parlay legs on this game</span>${[...by.values()].map(({ b, ids }) => `<span class="who">${avHtml(b, "sm")}<b style="color:${personCol(b)}">${esc(personName(b))}</b></span>`).join("")}</div>`;
   }
   function parlayCard(list) {
     if (!list.length) return "";
@@ -8656,8 +8686,8 @@ body.tv:has(#roomTvQr:not([hidden])) .rb-rail { padding-bottom: calc((max(96px, 
         return `<li class="pl-${cls}"><i>${l.st === "hit" ? "✓" : l.st === "miss" ? "✕" : ""}</i><span class="t">${sel ? legLogo(sel) : ""}<span>${esc(l.t)}</span></span></li>`;
       }).join("");
       return `<div class="rb-pl${dead ? " dead" : all ? " won" : ""}${onAir([b.id])}"${tapAttrs([b.id], personName(b) + "'s parlay")}>
-        <div class="pl-h">${avHtml(b)}<div class="pl-t"><b>${legs.length}-leg parlay <span class="num">${fOdds(b.odds)}</span></b><span class="rb-wl" style="--c:${personCol(b)}"><b>${esc(personName(b))}</b> ${fU(b.units)} to win ${fU(b.units * ppu(b.odds))}${pre1 ? ` · ${esc(startLabel(g1.t))}` : ""}</span></div>
-        <div class="rb-st ${dead ? "st-lost" : all ? "st-won" : ""}">${dead ? "Dead" : `${hit}/${legs.length}`}</div></div>
+        <div class="pl-h">${avHtml(b)}<div class="pl-t"><b>Parlay <span class="num">${fOdds(b.odds)}</span></b><span class="rb-wl" style="--c:${personCol(b)}"><b>${esc(personName(b))}</b> ${fU(b.units)} to win ${fU(b.units * ppu(b.odds))}${pre1 ? ` · ${esc(startLabel(g1.t))}` : ""}</span></div>
+        <div class="rb-st ${dead ? "st-lost" : all ? "st-won" : ""}">${dead ? "Dead" : all ? "All hit" : legPips(legs)}</div></div>
         <ol class="pl-legs">${lis}</ol></div>`;
     };
     return `<article class="rb-g rb-card"><header class="rb-ch"><h3>Parlays</h3><span>${list.length} open</span></header><div class="rb-rows">${list.map(row).join("")}</div></article>`;
@@ -8847,6 +8877,10 @@ body.tv:has(#roomTvQr:not([hidden])) .rb-rail { padding-bottom: calc((max(96px, 
     return `<div class="ob-h2h" style="--lc:${personCol(l.entries[0].b)};--rc:${personCol(r.entries[0].b)}"><span class="ob-vsl">Head to head</span>${obPos(l, g)}<span class="ob-vs">VS</span>${obPos(r, g)}</div>`;
   }
   // a parlay: whose, how many legs at what price, legs hit so far, and every leg with where it stands
+
+  // a parlay's legs as dots: hit, winning, losing, even, missed, not started
+  const legPips = (legs) => `<span class="lpips" aria-hidden="true">${legs.map((l) => `<i class="${l.st || (l.ev && !l.ev.fin ? (l.ev.res === "W" ? "lw" : l.ev.res === "L" ? "ll" : "le") : "")}"></i>`).join("")}</span>`;
+  const parWord = (dead, all, down) => (dead ? "Dead" : all ? "All hit" : down ? "Sweating" : "Alive");
   function obParlay(b) {
     const legs = legsOf(b), n = legs.length, hit = legs.filter((l) => l.st === "hit").length, dead = legs.some((l) => l.st === "miss"), all = n && hit === n;
     const live = legs.filter((l) => !l.st && l.ev && !l.ev.fin), down = live.some((l) => l.ev.res === "L");
@@ -8856,9 +8890,9 @@ body.tv:has(#roomTvQr:not([hidden])) .rb-rail { padding-bottom: calc((max(96px, 
     return `<div class="ob-bet ob-par k-${cls}${F.cls} ed-${edgeOf(b, F)}${popCls({ entries: [{ b }] })}${onAir([b.id])}" style="--c:${personCol(b)}${F.k ? ";" + F.sty : ""}"${tapAttrs([b.id], personName(b) + "'s parlay")}>${fxRow(F)}${EDGE}
       <div class="ob-avs">${avHtml(b)}</div>
       <div class="ob-main"><div class="ob-who"><b style="--c:${personCol(b)}">${esc(personName(b))}</b><span class="ob-tag">Parlay</span></div>
-        <div class="ob-pick"><span class="t">${n}-leg parlay</span><span class="ob-odds num">${fOdds(b.odds)}</span></div>
+        <div class="ob-pick"><span class="t">Parlay</span><span class="ob-odds num">${fOdds(b.odds)}</span></div>
         <div class="ob-meta">${fU(b.units)} to win ${fU(b.units * ppu(b.odds))}</div></div>
-      <div class="ob-st k-${cls}">${tlHtml(tlPar(cls, legs))}<em>${dead ? "Dead" : all ? "All hit" : "Legs hit"}</em><b class="num">${hit}/${n}</b></div>
+      <div class="ob-st k-${cls}">${tlHtml(tlPar(cls, legs))}<em>${parWord(dead, all, down)}</em>${legPips(legs)}</div>
       <ol class="ob-legs">${lis}</ol></div>`;
   }
   function obLegTxt(l) {
@@ -8902,6 +8936,18 @@ body.tv:has(#roomTvQr:not([hidden])) .rb-rail { padding-bottom: calc((max(96px, 
   }
   // a game the room only has parlay legs on: each leg as a ticket of its own
   function obLegRows(G) {
+    const g = G.g;
+    return (G.legs || []).map((e) => {
+      const b = e.b, l = legsOf(b)[e.leg] || {}, s = l.sel || e.sel, live = l.ev && !l.ev.fin && g.st === "in";
+      const cls = l.st === "hit" ? "won" : l.st === "miss" ? "lost" : live ? (l.ev.res === "W" ? "w" : l.ev.res === "L" ? "l" : "e") : g.st === "pre" ? "pre" : "e";
+      const T = s ? legTeams(s, g) : [];
+      return `<div class="ob-bet ob-legt k-${cls}${popCls({ entries: [e] })}${onAir([b.id])}" style="--c:${personCol(b)}"${tapAttrs([b.id], personName(b) + "'s parlay")}>
+        <div class="ob-avs">${avHtml(b)}</div>
+        <div class="ob-main"><div class="ob-who"><span class="nms"><b style="--c:${personCol(b)}">${esc(personName(b))}</b></span><span class="ob-tag">Parlay leg</span></div>
+          <div class="ob-pick"><span class="ob-lgl">${T.map((t) => logo(t, "lg")).join("")}</span><span class="t">${esc(l.t || (b.legs || [])[e.leg] || "")}</span>${l.st ? `<i class="ob-lck">${l.st === "hit" ? "✓" : "✕"}</i>` : ""}</div></div></div>`;
+    }).join("");
+  }
+  function obLegRowsFull(G) {
     const g = G.g;
     return (G.legs || []).map((e) => {
       const b = e.b, L = legsOf(b), l = L[e.leg] || {}, live = l.ev && !l.ev.fin && g.st === "in";
@@ -9579,8 +9625,8 @@ body.tv:has(#roomTvQr:not([hidden])) .rb-rail { padding-bottom: calc((max(96px, 
     const lis = legs.map((l, i) => legRow(l, i)).join("");
     const F = flexOf(b);
     return `<div class="pp-bet pp-par k-${c}${F.cls} ed-${edgeOf(b, F)}${popCls({ entries: [{ b }] })}${onAir([b.id])}"${F.k ? ` style="${F.sty}"` : ""}${tapAttrs([b.id], personName(b) + "'s parlay")}>${fxRow(F)}${EDGE}
-      <div class="pp-top"><span class="pp-pick"><span class="t">${n}-leg parlay</span></span><span class="pp-odds num">${fOdds(b.odds)}</span></div>
-      <div class="pp-mid"><div class="ob-st k-${c}">${tlHtml(tlPar(c, legs))}<em>${dead ? "Dead" : all ? "All hit" : "Legs hit"}</em><b class="num">${hit} of ${n}</b>${live.length ? `<small>${live.length} live${down ? " · one's losing" : ""}</small>` : ""}</div></div>
+      <div class="pp-top"><span class="pp-pick"><span class="t">Parlay</span></span><span class="pp-odds num">${fOdds(b.odds)}</span></div>
+      <div class="pp-mid"><div class="ob-st k-${c}">${tlHtml(tlPar(c, legs))}<em>${parWord(dead, all, down)}</em>${legPips(legs)}</div></div>
       <div class="pp-meta">${esc(`Parlay · ${fU(b.units)} to win ${fU(b.units * ppu(b.odds))}`)}</div><ol class="ob-legs">${lis}</ol></div>`;
   }
   // the top of someone's column: who, where they rank, today in units and dollars, then the detail
@@ -11837,13 +11883,13 @@ body.tv:has(#roomTvQr:not([hidden])) .rb-rail { padding-bottom: calc((max(96px, 
     $("#lcWin").textContent = `To win ${fU(b.units * ppu(b.odds))}`;
     $("#lcTitle").textContent = miss ? "Leg missed" : left === 0 ? "Parlay hit" : "Leg hit";
     $("#lcMark").setAttribute("d", miss ? "M17 17l18 18M35 17L17 35" : "M14 27l8 8 16-17");
-    $("#lcCount").innerHTML = miss ? "" : `<span class="roll"><i>${hits - 1}</i><i>${hits}</i></span><small>/${legs.length}</small>`;
+    $("#lcCount").innerHTML = "";
     $("#lcLeg").innerHTML = `${hs(legs[i]) ? `<img src="${esc(hs(legs[i]))}" alt="" referrerpolicy="no-referrer" onerror="this.remove()">` : ""}<div>${esc(legs[i].t)}</div>`;
     $("#lcProg").innerHTML = legs.map((x, j) => `<span class="${x.st || ""}${j === i ? " new" : ""}"></span>`).join("");
     $("#lcList").className = "lc-list" + (legs.length > 6 ? " many" : "");
     $("#lcList").innerHTML = legs.map((x, j) => `<li class="${x.st || ""}${j === i ? " new" : ""}" style="--i:${j}"><i>${x.st === "hit" ? "✓" : x.st === "miss" ? "✕" : ""}</i><span class="lgpic">${x.sel ? legLogo(x.sel) : ""}</span><span>${esc(x.t)}</span></li>`).join("");
     const f = $("#lcFoot"); f.className = "lc-foot" + (left === 1 && !miss ? " one" : left === 0 ? " all" : "");
-    f.textContent = miss ? "Parlay's dead" : left === 0 ? "Every leg hit. Cash it." : left === 1 ? "One leg away" : `${hits} down · ${left} to go`;
+    f.textContent = miss ? "Parlay's dead" : left === 0 ? "Every leg hit. Cash it." : left === 1 ? "One leg away" : "Still alive";
     ov.classList.remove("out"); ov.hidden = false;
     for (const el of [ov, ...ov.querySelectorAll("*")]) { el.style.animation = "none"; void el.offsetWidth; el.style.animation = ""; }
     snSound("bc_sting", 0.85, 0); snSound("bc_check", 0.8, 1000);
@@ -11987,7 +12033,7 @@ body.tv:has(#roomTvQr:not([hidden])) .rb-rail { padding-bottom: calc((max(96px, 
   // ---------- sheets ----------
   function openSheet(id) { $(id).hidden = false; }
   // keep every open screen current: when a new version is up, reload it (never mid-form or mid-animation)
-  const BUILD = "20261024220651";
+  const BUILD = "20261024222321";
   function checkBuild() {
     if (BUILD === "dev") return;
     fetch("version.json?t=" + Date.now(), { cache: "no-store" }).then((r) => (r.ok ? r.json() : null)).then((j) => {
