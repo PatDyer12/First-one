@@ -5728,6 +5728,48 @@ body.tv.pplb .roomtv:not([hidden]) canvas { width: max(76px, 7vh); height: max(7
 .wxi { width: 1.1em; height: 1.1em; flex: none; align-self: center; overflow: visible; }
 /* a group ride's row: a long type name ends in an ellipsis instead of being cut mid-letter */
 .ob-gmn .bt-chip { display: inline-block; flex: 0 1 auto; min-width: 0; overflow: hidden; text-overflow: ellipsis; letter-spacing: .06em; }
+
+/* ---------- parlay legs: the play and the logo ---------- */
+.ob-legs li.lg.lgx { grid-template-columns: auto minmax(0, 1fr); padding-block: 7px; }
+.ob-legs li.lg.lgx .lg-p { grid-row: 1; width: auto; min-width: 34px; height: 34px; padding: 0 3px; border-radius: 17px; display: flex; align-items: center; justify-content: center; gap: 1px; overflow: visible; }
+.ob-legs li.lg.lgx .lg-p > :not(b) { position: static; width: 28px; height: 28px; padding: 2px; box-sizing: border-box; object-fit: contain; flex: none; }
+.ob-legs li.lg.lgx.two .lg-p > :not(b) { width: 25px; height: 25px; }
+.ob-legs li.lg.lgx .lg-p > b { position: absolute; right: -4px; bottom: -4px; width: 16px; height: 16px; border-radius: 50%; display: grid; place-items: center; font-size: 9px; background: var(--lc); color: #06080c; box-shadow: 0 0 0 2px #0d0f13; }
+.ob-legs li.lg.lgx.np .lg-p > b { position: static; width: auto; height: auto; background: none; box-shadow: none; font-size: 14px; }
+.ob-legs li.lg.lgx .lg-p { position: relative; }
+.ob-legs li.lg.lgx .lg-p .tlg-mono b { color: #fff; }
+.pp-bet .ob-legs li.lg.lgx { grid-template-columns: auto minmax(0, 1fr); padding: 6px 8px; }
+.pp-bet .ob-legs li.lg.lgx .lg-p { min-width: 28px; height: 28px; }
+.pp-bet .ob-legs li.lg.lgx .lg-p > :not(b) { width: 24px; height: 24px; }
+.rb-pl .pl-legs li { grid-template-areas: "i t"; grid-template-columns: 22px minmax(0, 1fr); }
+.rb-pl .pl-legs li .t { display: flex; align-items: center; gap: 8px; min-width: 0; }
+.rb-pl .pl-legs li .t > img, .rb-pl .pl-legs li .t > .tlg-mono { width: 22px; height: 22px; object-fit: contain; flex: none; }
+.lgpic { display: grid; place-items: center; }
+.lgpic > * { width: 100%; height: 100%; object-fit: contain; }
+.sl-legs li { grid-template-columns: 30px 30px minmax(0, 1fr); }
+.sl-legs .lgpic { width: 30px; height: 30px; }
+.xp-par li { grid-template-columns: 60px 1fr 64px; }
+.xp-par li .lgpic { width: 52px; height: 52px; }
+.lc-list li::before { content: none; display: none; }
+.lc-list li { grid-template-columns: 3.6vh 3.6vh minmax(0, 1fr); }
+.lc-list .lgpic { width: 3.6vh; height: 3.6vh; }
+
+/* ---------- the leaderboard: narrower, each row one tight band ---------- */
+body.tv .rb { grid-template-columns: minmax(0, 1fr) 318px; gap: 14px; }
+body.tv #rbLb .rb-sec.lb { padding: 12px 10px 10px; gap: 6px; border-radius: 16px; }
+body.tv #rbLb .rb-sec.lb h3 { font-size: 12px; padding: 0 4px 2px; }
+body.tv #rbLb .rb-lr { grid-template-columns: 14px 30px minmax(0, 1fr) auto; grid-template-areas: "rk av nm net" "rk av ft ft"; column-gap: 9px; row-gap: 1px; padding: 6px 10px 6px 8px; border-radius: 11px; }
+body.tv #rbLb .rb-lr .rk { font-size: 14px; }
+body.tv #rbLb .rb-lr > .rb-av { width: 30px; height: 30px; font-size: 14px; }
+body.tv #rbLb .rb-lr .nm b { font-size: 16px; }
+body.tv #rbLb .rb-lr .net { font-size: 18px; display: flex; align-items: baseline; gap: 6px; }
+body.tv #rbLb .rb-lr .net small, body.tv #rbLb .rb-lr .ln, body.tv #rbLb .rb-lr .l5:empty { display: none; }
+body.tv #rbLb .rb-lr .ft { margin-top: 0; }
+body.tv #rbLb .rb-lr .op { font-size: 11px; }
+body.tv:has(#roomTvQr:not([hidden])) .rb-rail { padding-bottom: calc((max(96px, 10.5vh) + max(63px, 5.8vh) + max(2.4vh, 18px) + 6px) / var(--zm, 1)); }
+
+/* ---------- the river ---------- */
+.rv-m > * { translate: none !important; }
 </style>
 </head>
 <body>
@@ -6379,7 +6421,7 @@ body.tv.pplb .roomtv:not([hidden]) canvas { width: max(76px, 7vh); height: max(7
     const st = phState(b), par = b.kind === "parlay", open = b.status === "open", o = open ? "" : outcome(b), net = open ? 0 : netOf(b);
     // a parlay's legs, each with how it's doing right now
     const legs = par ? legsOf(b) : [];
-    const lg = legs.length ? `<ol class="ph-legs">${legs.map((l) => `<li class="${l.st || ""}"><i>${l.st === "hit" ? "✓" : l.st === "miss" ? "✕" : ""}</i><span>${esc(l.t)}</span>${!l.st && l.ev && !l.ev.fin ? `<em class="${l.ev.res === "W" ? "w" : l.ev.res === "L" ? "l" : ""}">${esc(l.ev.txt)}</em>` : ""}</li>`).join("")}</ol>` : "";
+    const lg = legs.length ? `<ol class="ph-legs">${legs.map((l) => `<li class="${l.st || ""}"><i>${l.st === "hit" ? "✓" : l.st === "miss" ? "✕" : ""}</i><span>${esc(l.t)}</span></li>`).join("")}</ol>` : "";
     const meta = [esc(personName(b)), par ? "" : fOdds(b.odds), phBook(b)].filter(Boolean).join(" · ");
     const gm = phGame(b), line = open || gm ? `<div class="ln">${gm ? `<span class="gm num">${esc(gm)}</span>` : ""}${open ? `<span class="st">${esc(st.t)}</span>` : ""}</div>` : "";
     const right = open ? `<b class="num">${fU(b.units)}</b><small class="num">to win ${fU(b.units * ppu(b.odds))}</small>`
@@ -6713,9 +6755,10 @@ body.tv.pplb .roomtv:not([hidden]) canvas { width: max(76px, 7vh); height: max(7
     app.style.zoom = z.toFixed(4); document.body.style.setProperty("--zm", z.toFixed(4));
     const tk = $("#ticker"), tkh = tk && !tk.hidden ? tk.offsetHeight : 0;
     app.style.height = Math.floor((innerHeight - 2 * sy - tkh) / z) + "px";
-    loopDrop();
+    rivMeasure(true); loopDrop();
     densify(); primeFit();
     for (const st of ASC) if (st.el.id !== "jbBets") loopSync(st);
+    rivMeasure(false);
   }
   let dens = 0;
   function densify() {
@@ -6735,7 +6778,7 @@ body.tv.pplb .roomtv:not([hidden]) canvas { width: max(76px, 7vh); height: max(7
   function autoScroll(el, speed) {
     if (!el || ASC.some((s) => s.el === el)) return;
     const st = { el, pos: 0, user: 0, last: performance.now(), hold: performance.now() + 4000, clone: null, period: 0, speed: speed || 30 };
-    const poke = () => { st.user = performance.now(); st.pos = el.scrollTop; };
+    const poke = () => { if (st.rvOn) rivStop(st, rivPos(st, performance.now())); st.user = performance.now(); st.pos = el.scrollTop; };
     LOOPMO.observe(el, { childList: true, subtree: true, characterData: true, attributes: true, attributeOldValue: true });
     for (const ev of ["wheel", "touchstart", "keydown"]) el.addEventListener(ev, poke, { passive: true });
     ASC.push(st);
@@ -6744,7 +6787,7 @@ body.tv.pplb .roomtv:not([hidden]) canvas { width: max(76px, 7vh); height: max(7
   function loopDrop(all) { for (const st of ASC) { if (st.el.id === "jbBets" && !all) continue; if (st.clone) { st.kept = st.clone; st.clone.remove(); st.clone = null; } st.period = 0; } }
   // what changed in a rolling column since its copy was made: anything but the copy itself going in and out, or a card
   // pausing / resuming its animations off screen
-  const apCls = (v) => String(v || "").split(/\s+/).filter((x) => x && x !== "offv").join(" ");
+  const apCls = (v) => String(v || "").split(/\s+/).filter((x) => x && x !== "offv" && x !== "rv-m").join(" ");
   const LOOPMO = new MutationObserver((r) => loopMark(r));
   function loopMark(recs) {
     for (const r of recs) {
@@ -6759,6 +6802,17 @@ body.tv.pplb .roomtv:not([hidden]) canvas { width: max(76px, 7vh); height: max(7
   }
   function loopSync(st) {
     if (!st) return;
+    if (!RIV || !st.rvOn) return loopSync0(st);
+    const t = performance.now(), p = rivPos(st, t), was = st.rvP, mine = !st.el.classList.contains("rv-m");
+    if (mine) st.el.classList.add("rv-m");
+    loopSync0(st);
+    if (mine) st.el.classList.remove("rv-m");
+    if (!st.period) { rivStop(st, 0); return; }
+    if (st.rvHeld != null) { st.rvHeld = p % st.period; rivHold(st, st.rvHeld); return; }
+    if (st.period !== was) st.rv0 = t - ((p % st.period) / rivSpeed(st)) * 1000;
+    rivApply(st);
+  }
+  function loopSync0(st) {
     loopMark(LOOPMO.takeRecords());
     const el = st.el;
     if (st.clone) { st.kept = st.clone; st.clone.remove(); st.clone = null; }
@@ -6811,11 +6865,70 @@ body.tv.pplb .roomtv:not([hidden]) canvas { width: max(76px, 7vh); height: max(7
     }
   }
   const apSoon = () => { if (!apT) apT = requestAnimationFrame(apScan); };
+
+  // ---- the roll, run by the graphics card ----
+  const RIV = !!(Element.prototype.animate && window.CSS && CSS.supports("translate", "0 1px")), RIV_MAX = 20;
+  const rivSpeed = (st) => Math.min(RIV_MAX, st.speed || 16);
+  // where a column is in its loop at a moment, in px (from the time the river was anchored at)
+  function rivPos(st, now) { const P = st.rvP; if (st.rvHeld != null) return st.rvHeld; if (!st.rvOn || !P) return st.pos || 0; return ((((now - st.rv0) / 1000) * rivSpeed(st)) % P + P) % P; }
+  // every card in the column (and the copy) on the same endless slide, all anchored to one start time
+  function rivApply(st) {
+    const P = st.period, dur = (P / rivSpeed(st)) * 1000; st.rvP = P;
+    for (const k of st.el.children) {
+      let a = k.__riv;
+      if (a && k.__rivD === dur && k.__rv0 === st.rv0 && a.playState === "running") continue;
+      if (!a || k.__rivD !== dur || a.playState === "idle" || a.playState === "finished") {
+        if (a) a.cancel();
+        a = k.animate([{ translate: "0 0" }, { translate: `0 ${-P}px` }], { duration: dur, iterations: Infinity, easing: "linear" });
+        k.__riv = a; k.__rivD = dur;
+      }
+      a.startTime = st.rv0; k.__rv0 = st.rv0;
+    }
+  }
+  // stop the river where it is: the cards go back in place and the column scrolls to the same spot
+  function rivStop(st, p) {
+    for (const k of st.el.children) if (k.__riv) { k.__riv.cancel(); k.__riv = null; k.__rivD = 0; k.__rv0 = null; }
+    st.rvOn = false; st.rv0 = null; st.rvP = 0; st.rvHeld = null; st.pos = p || 0;
+    if (st.el.isConnected) st.el.scrollTop = p || 0;
+  }
+  // while a celebration covers the board the river holds still where it is (nobody can see it, and the show gets the
+  // whole machine), then flows on from the same spot
+  function rivHold(st, p) {
+    const t = (p / rivSpeed(st)) * 1000;
+    rivApply(st);
+    for (const k of st.el.children) { const a = k.__riv; if (a) { a.pause(); a.currentTime = t; } }
+  }
+  const rivCover = () => { const c = document.getElementById("cash"); return !!(c && !c.hidden); };   // a show on, or fading out
+  function rivTick(st, now, on) {
+    const el = st.el;
+    if (!on || !el.isConnected || el.offsetParent === null || !st.period) {
+      if (st.rvOn) rivStop(st, 0);
+      if (on && el.isConnected && !st.period && el.scrollTop) el.scrollTop = 0;
+      return;
+    }
+    // somebody's scrolling it by hand (or a test is holding it): a plain scroll, until they leave it alone
+    if (now - st.user < 15000) { if (st.rvOn) rivStop(st, rivPos(st, now)); return; }
+    if (st.rvOn && (document.body.classList.contains("cs-live") || rivCover())) {
+      if (st.rvHeld == null) st.rvHeld = rivPos(st, now) % st.period;
+      for (const k of el.children) if (!k.__riv || k.__riv.playState !== "paused") { rivHold(st, st.rvHeld); break; }
+      return;
+    }
+    if (st.rvHeld != null) { st.rv0 = now - (st.rvHeld / rivSpeed(st)) * 1000; st.rvHeld = null; }
+    if (!st.rvOn) {
+      if (now < st.hold) return;   // its first start, a beat after the board comes up
+      const p = ((el.scrollTop || st.pos || 0) % st.period + st.period) % st.period; el.scrollTop = 0;
+      st.rv0 = now - (p / rivSpeed(st)) * 1000; st.rvOn = true;
+    }
+    rivApply(st);
+  }
+  // measuring a column while it flows: the cards' slide is set aside for the moment (it's never painted that way)
+  function rivMeasure(on) { for (const st of ASC) if (st.rvOn && st.el.isConnected) st.el.classList.toggle("rv-m", on); }
   const DWELL = 2600;
   function ascTick(now) {
     const on = document.body.classList.contains("tv");
     for (const st of ASC) {
       const el = st.el, dt = Math.min(0.1, (now - st.last) / 1000); st.last = now;
+      if (RIV) { rivTick(st, now, on); continue; }
       if (!on || !el.isConnected || el.offsetParent === null) continue;
       if (!st.period) { if (el.scrollTop) el.scrollTop = 0; continue; }
       if (now - st.user < 15000 || now < st.hold) continue;
@@ -7237,9 +7350,16 @@ body.tv.pplb .roomtv:not([hidden]) canvas { width: max(76px, 7vh); height: max(7
     const pos = (t) => (g.st === "in" && g.sit && g.sit.pos && String(t.id) === String(g.sit.pos) ? BALL : "");
     return `<div class="bug"><span class="tm${me("a")}">${logo(g.a)}${esc(g.a.ab)} ${sc(g.a)}${pos(g.a)}</span><span class="tm${me("h")}">${logo(g.h)}${esc(g.h.ab)} ${sc(g.h)}${pos(g.h)}</span><span class="clk${g.st === "in" ? " on" : ""}">${esc(clk)}</span></div>`;
   }
+  // the team(s) a leg is on: its side, the player's team for a prop or a TD, both teams for a total
+  function legTeams(sel, g) {
+    if (!sel || !g) return [];
+    if (sel.s === "a" || sel.s === "h") return [g[sel.s]];
+    if (sel.p && sel.p.tm != null) { const t = String(g.a.id) === String(sel.p.tm) ? g.a : String(g.h.id) === String(sel.p.tm) ? g.h : null; if (t) return [t]; }
+    return sel.m === "tot" ? [g.a, g.h] : [g.h];
+  }
   function legLogo(sel) {
     const g = gameOf(sel); if (!g) return "";
-    return sel.m === "tot" ? logo(g.h) : logo(sel.s === "a" ? g.a : g.h);
+    return logo(sel.m === "tot" ? g.h : legTeams(sel, g)[0]);
   }
   const scoreTxt = (g) => `${g.a.ab} ${g.a.sc} – ${g.h.ab} ${g.h.sc} · ${g.st === "post" ? "Final" : g.d}`;
   function linkedGames(b) {
@@ -7329,7 +7449,7 @@ body.tv.pplb .roomtv:not([hidden]) canvas { width: max(76px, 7vh); height: max(7
     const st = dead ? "dead" : manual || derived;
     const verdict = ev && ev.fin ? ev.res : legs.length && ph === "final" ? (dead ? "L" : allHit ? "W" : "") : "";
     const lr = S.room && S.room.legRide && S.room.legRide.get(b.id);
-    const legsHtml = legs.length ? `<ul class="legs">${legs.map((l, i) => { const lc = l.st || (l.ev && !l.ev.fin ? (l.ev.res === "W" ? "lw" : l.ev.res === "L" ? "ll" : "le") : ""); return `<li class="leg${lc ? " " + lc : ""}${can ? " tap" : ""}" data-leg="${i}"${can ? ' title="Tap to mark hit / missed"' : ""}><span class="mk">${l.st === "hit" ? "✓" : l.st === "miss" ? "✕" : ""}</span>${l.sel ? legLogo(l.sel) : ""}<span class="lt">${esc(l.t)}${!l.st && l.sel ? ballTag(hasBall(l.sel)) : ""}</span>${lr && lr.has(i) ? `<em class="lride">Ride · ${esc(lr.get(i).join(" + "))}</em>` : ""}${legDetail(l)}</li>`; }).join("")}</ul>` : "";
+    const legsHtml = legs.length ? `<ul class="legs">${legs.map((l, i) => { const lc = l.st || (l.ev && !l.ev.fin ? (l.ev.res === "W" ? "lw" : l.ev.res === "L" ? "ll" : "le") : ""); return `<li class="leg${lc ? " " + lc : ""}${can ? " tap" : ""}" data-leg="${i}"${can ? ' title="Tap to mark hit / missed"' : ""}><span class="mk">${l.st === "hit" ? "✓" : l.st === "miss" ? "✕" : ""}</span>${l.sel ? legLogo(l.sel) : ""}<span class="lt">${esc(l.t)}${!l.st && l.sel ? ballTag(hasBall(l.sel)) : ""}</span>${lr && lr.has(i) ? `<em class="lride">Ride · ${esc(lr.get(i).join(" + "))}</em>` : ""}</li>`; }).join("")}</ul>` : "";
     const chips = [
       vsB,
       ph === "live" ? '<span class="live">LIVE</span>' : ph === "final" ? '<span class="final">FINAL</span>' : ph === "pre" ? `<span class="soon">${startLabel(startOf(b))}</span>` : "",
@@ -8533,7 +8653,7 @@ body.tv.pplb .roomtv:not([hidden]) canvas { width: max(76px, 7vh); height: max(7
         const live = l.ev && !l.ev.fin && g && g.st === "in";
         const [cls, txt] = l.st === "hit" ? ["hit", "Hit"] : l.st === "miss" ? ["miss", "Missed"] : live ? [l.ev.res === "W" ? "w" : l.ev.res === "L" ? "l" : "e", l.ev.txt] : g && g.st === "pre" ? ["pre", pre1 ? "" : startLabel(g.t)] : ["e", l.ev && l.ev.txt ? l.ev.txt : ""];
         const hs = sel && sel.p && sel.p.hs ? `<img class="rb-hs" src="${esc(sel.p.hs)}" alt="" loading="lazy" referrerpolicy="no-referrer" onerror="this.remove()">` : "";
-        return `<li class="pl-${cls}"><i>${l.st === "hit" ? "✓" : l.st === "miss" ? "✕" : i + 1}</i><span class="t">${hs}<span>${esc(l.t)}</span></span><em class="o num${saved ? "" : " now"}"${saved ? "" : ' title="Current line"'}>${od ? fOdds(od) : ""}</em>${txt ? `<span class="s">${esc(txt)}</span>` : ""}</li>`;
+        return `<li class="pl-${cls}"><i>${l.st === "hit" ? "✓" : l.st === "miss" ? "✕" : ""}</i><span class="t">${sel ? legLogo(sel) : ""}<span>${esc(l.t)}</span></span></li>`;
       }).join("");
       return `<div class="rb-pl${dead ? " dead" : all ? " won" : ""}${onAir([b.id])}"${tapAttrs([b.id], personName(b) + "'s parlay")}>
         <div class="pl-h">${avHtml(b)}<div class="pl-t"><b>${legs.length}-leg parlay <span class="num">${fOdds(b.odds)}</span></b><span class="rb-wl" style="--c:${personCol(b)}"><b>${esc(personName(b))}</b> ${fU(b.units)} to win ${fU(b.units * ppu(b.odds))}${pre1 ? ` · ${esc(startLabel(g1.t))}` : ""}</span></div>
@@ -8752,6 +8872,12 @@ body.tv.pplb .roomtv:not([hidden]) canvas { width: max(76px, 7vh); height: max(7
   }
 
   function legRow(l, i) {
+    const s = l.sel, g = s ? gameOf(s) : null, ev = l.ev, st = l.st, live = !!g && g.st === "in";
+    const state = st === "hit" ? "hit" : st === "miss" ? "miss" : live && ev ? (ev.res === "W" ? "lw" : ev.res === "L" ? "ll" : "le") : g && g.st === "post" ? "le" : "pre";
+    const T = g && s ? legTeams(s, g) : [], pic = T.map((t) => logo(t, "lg")).join("");
+    return `<li class="lg lgx ${state}${T.length > 1 ? " two" : ""}${pic ? "" : " np"}"><span class="lg-p">${pic}${st === "hit" ? "<b>✓</b>" : st === "miss" ? "<b>✕</b>" : ""}</span><span class="lg-t">${esc(l.t)}</span></li>`;
+  }
+  function legRowFull(l, i) {
     const s = l.sel, g = s ? gameOf(s) : null, ev = l.ev, st = l.st, pp = !!s && isPP(s.m), td = !!s && isTd(s.m);
     const tm = s && g && (s.s === "a" || s.s === "h") && !pp && !td ? g[s.s] : null;
     const live = !!g && g.st === "in", state = st === "hit" ? "hit" : st === "miss" ? "miss" : live && ev ? (ev.res === "W" ? "lw" : ev.res === "L" ? "ll" : "le") : g && g.st === "post" ? "le" : "pre";
@@ -9931,7 +10057,7 @@ body.tv.pplb .roomtv:not([hidden]) canvas { width: max(76px, 7vh); height: max(7
       const N = c.legs.length, gap = Math.min(0.5, Math.max(0.2, (a.ms / 1000 - 2.6) / N)); c.legGap = gap;
       const res = (l) => { const e = l.ev, x = l.sel; if (!e) return "Hit"; if (x && (isPP(x.m) || isTd(x.m))) return e.txt; const gg = e.g; return gg ? `${gg.a.ab} ${gg.a.sc}–${gg.h.sc} ${gg.h.ab}${gg.st === "post" ? " · Final" : ""}` : e.txt; };
       return `<div class="xp xp-par">${shHead("The play", `${N}-leg parlay · ${esc(fOdds(c.o))}`)}
-        <ul class="${N > 6 ? "sm" : ""}">${c.legs.map((l, i) => `<li style="--i:${i};--t:${(0.7 + i * gap).toFixed(2)}s">${l.sel ? legLogo(l.sel) : ""}<b>${esc(l.t)}</b><small>${esc(res(l))}</small><i class="xck">✓</i></li>`).join("")}</ul>
+        <ul class="${N > 6 ? "sm" : ""}">${c.legs.map((l, i) => `<li style="--i:${i};--t:${(0.7 + i * gap).toFixed(2)}s"><span class="lgpic">${l.sel ? legLogo(l.sel) : ""}</span><b>${esc(l.t)}</b><i class="xck">✓</i></li>`).join("")}</ul>
         <div class="xp-cnt"><b class="num">0</b><span>for ${N}</span></div><b class="xp-v" style="--t:${(0.9 + N * gap).toFixed(2)}s">All ${N} hit</b></div>`;
     }
     if (!g || !sel) return "";
@@ -11664,7 +11790,7 @@ body.tv.pplb .roomtv:not([hidden]) canvas { width: max(76px, 7vh); height: max(7
     for (const v of ["--ta", "--th", "--tc1", "--tc2"]) el.style.removeProperty(v);
     for (const [v, c] of Object.entries(F.vars || {})) el.style.setProperty(v, c);
     $("#slFx").innerHTML = F.k ? fxRow(F) : "";
-    $("#slLegs").innerHTML = big && b.kind === "parlay" ? legsOf(b).map((l, i) => `<li style="--i:${i}"><i>${i + 1}</i><span>${esc(l.t)}</span><em>${esc(obLegTxt(l).txt)}</em></li>`).join("") : "";
+    $("#slLegs").innerHTML = big && b.kind === "parlay" ? legsOf(b).map((l, i) => `<li style="--i:${i}"><i>${l.st === "hit" ? "✓" : l.st === "miss" ? "✕" : ""}</i><span class="lgpic">${l.sel ? legLogo(l.sel) : ""}</span><span>${esc(l.t)}</span></li>`).join("") : "";
     $("#slWin").innerHTML = big ? `<em>To win</em><b>0u</b>` : "";
     el.className = "slip" + (ride ? " ride" : vs ? " vs" : "") + (squad ? " squad" : "") + (big ? " big" : "") + F.cls; el.hidden = false; void el.offsetWidth; el.classList.add("on");
     if (big) {
@@ -11712,10 +11838,10 @@ body.tv.pplb .roomtv:not([hidden]) canvas { width: max(76px, 7vh); height: max(7
     $("#lcTitle").textContent = miss ? "Leg missed" : left === 0 ? "Parlay hit" : "Leg hit";
     $("#lcMark").setAttribute("d", miss ? "M17 17l18 18M35 17L17 35" : "M14 27l8 8 16-17");
     $("#lcCount").innerHTML = miss ? "" : `<span class="roll"><i>${hits - 1}</i><i>${hits}</i></span><small>/${legs.length}</small>`;
-    $("#lcLeg").innerHTML = `${hs(legs[i]) ? `<img src="${esc(hs(legs[i]))}" alt="" referrerpolicy="no-referrer" onerror="this.remove()">` : ""}<div>${esc(legs[i].t)}<small>${esc(gl(legs[i]))}</small></div>`;
+    $("#lcLeg").innerHTML = `${hs(legs[i]) ? `<img src="${esc(hs(legs[i]))}" alt="" referrerpolicy="no-referrer" onerror="this.remove()">` : ""}<div>${esc(legs[i].t)}</div>`;
     $("#lcProg").innerHTML = legs.map((x, j) => `<span class="${x.st || ""}${j === i ? " new" : ""}"></span>`).join("");
     $("#lcList").className = "lc-list" + (legs.length > 6 ? " many" : "");
-    $("#lcList").innerHTML = legs.map((x, j) => `<li class="${x.st || ""}${j === i ? " new" : ""}" style="--i:${j}"><i>${x.st === "hit" ? "✓" : x.st === "miss" ? "✕" : ""}</i><span>${esc(x.t)}</span><em>${esc(gl(x))}</em></li>`).join("");
+    $("#lcList").innerHTML = legs.map((x, j) => `<li class="${x.st || ""}${j === i ? " new" : ""}" style="--i:${j}"><i>${x.st === "hit" ? "✓" : x.st === "miss" ? "✕" : ""}</i><span class="lgpic">${x.sel ? legLogo(x.sel) : ""}</span><span>${esc(x.t)}</span></li>`).join("");
     const f = $("#lcFoot"); f.className = "lc-foot" + (left === 1 && !miss ? " one" : left === 0 ? " all" : "");
     f.textContent = miss ? "Parlay's dead" : left === 0 ? "Every leg hit. Cash it." : left === 1 ? "One leg away" : `${hits} down · ${left} to go`;
     ov.classList.remove("out"); ov.hidden = false;
@@ -11861,7 +11987,7 @@ body.tv.pplb .roomtv:not([hidden]) canvas { width: max(76px, 7vh); height: max(7
   // ---------- sheets ----------
   function openSheet(id) { $(id).hidden = false; }
   // keep every open screen current: when a new version is up, reload it (never mid-form or mid-animation)
-  const BUILD = "20261024210440";
+  const BUILD = "20261024220651";
   function checkBuild() {
     if (BUILD === "dev") return;
     fetch("version.json?t=" + Date.now(), { cache: "no-store" }).then((r) => (r.ok ? r.json() : null)).then((j) => {
