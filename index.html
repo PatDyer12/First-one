@@ -7531,7 +7531,7 @@ body.tv.nflday .ob-grp, body.tv.cfb .ob-grp { background-color: rgba(10,13,18,.9
     if (g.st === "pre" || !ESPN[g.sport] || (c && (c.busy || t - c.at < (g.st === "post" ? 600e3 : 45e3)))) return c ? c.plays : null;
     SUMM.set(g.id, { ...(c || {}), plays: c ? c.plays : null, at: t, busy: true });
     fetch(`https://site.api.espn.com/apis/site/v2/sports/${ESPN[g.sport]}/summary?event=${g.eid || g.id}`).then((r) => r.json()).then((j) => {
-      const plays = (j.scoringPlays || []).map((p) => ({ q: p.period && p.period.number, clk: (p.clock && p.clock.displayValue) || "", tm: p.team && String(p.team.id), type: (p.type && p.type.text) || "", text: p.text || "", a: p.awayScore, h: p.homeScore }));
+      const plays = (j.scoringPlays || []).map((p) => ({ q: p.period && p.period.number, clk: (p.clock && p.clock.displayValue) || "", tm: p.team && String(p.team.id), type: p.scoringType && p.scoringType.name === "touchdown" ? tdKind(p) : (p.type && p.type.text) || "", text: p.text || "", a: p.awayScore, h: p.homeScore }));
       const dg = digest(j, g);
       setTimeout(() => { const v = { plays, ...dg, at: Date.now(), busy: false }; SUMM.set(g.id, v); renderRB(); awardWatch(g, v); }, g.st === "post" ? 0 : tvDelay() * 1000);
     }).catch(() => SUMM.set(g.id, { ...(c || {}), plays: c ? c.plays : null, at: Date.now(), busy: false }));
@@ -7543,7 +7543,7 @@ body.tv.nflday .ob-grp, body.tv.cfb .ob-grp { background-color: rgba(10,13,18,.9
     const plays = heroPlays(g); if (!plays || !plays.length) return "";
     const tmOf = (id) => (String(g.a.id) === id ? g.a : String(g.h.id) === id ? g.h : null);
     return `<div class="rb-scp"><h4>Scoring</h4>${plays.slice(-4).reverse().map((p, i) => { const t = tmOf(p.tm);
-      return `<div class="r${i === 0 ? " new" : ""}" style="--c:${esc(t ? bright(t) : "#8a94a8")}">${t && t.lg ? `<img src="${esc(t.lg)}" alt="" referrerpolicy="no-referrer">` : "<span></span>"}<span class="q num">Q${esc(p.q ?? "")} ${esc(p.clk)}</span><span class="tx"><b>${esc(p.type)}</b>${esc(p.text)}</span><span class="s num">${esc(g.a.ab)} ${p.a ?? ""} · ${esc(g.h.ab)} ${p.h ?? ""}</span></div>`; }).join("")}</div>`;
+      return `<div class="r${i === 0 ? " new" : ""}" style="--c:${esc(t ? bright(t) : "#8a94a8")}">${t && t.lg ? `<img src="${esc(t.lg)}" alt="" referrerpolicy="no-referrer">` : "<span></span>"}<span class="q num">${p.q > 4 ? (p.q === 5 ? "OT" : p.q - 4 + "OT") : "Q" + esc(p.q ?? "")} ${p.q > 4 ? "" : esc(p.clk)}</span><span class="tx"><b>${esc(p.type)}</b>${esc(p.text)}</span><span class="s num">${esc(g.a.ab)} ${p.a ?? ""} · ${esc(g.h.ab)} ${p.h ?? ""}</span></div>`; }).join("")}</div>`;
   }
 
   const HOOP = new Map();
@@ -10751,7 +10751,7 @@ body.tv.nflday .ob-grp, body.tv.cfb .ob-grp { background-color: rgba(10,13,18,.9
     if (!(window.SB3D && SB3D.ok() && !show3Off())) return false;
     if (LQ.list.some((x) => x.b.id === b.id)) return true;
     LQ.list.push({ b, n }); clearTimeout(LQ.t);
-    LQ.t = setTimeout(() => { const L = LQ.list.splice(0); if (L.length) fx(() => lossRun(L)); }, 2600);
+    LQ.t = setTimeout(() => { const L = LQ.list.splice(0); if (L.length) fx(afterCard(() => lossRun(L))); }, 2600);
     return true;
   }
   const etDay = (t) => new Date(t).toLocaleDateString("en-US", { timeZone: "America/New_York" });
@@ -11565,7 +11565,7 @@ body.tv.nflday .ob-grp, body.tv.cfb .ob-grp { background-color: rgba(10,13,18,.9
   // ---------- sheets ----------
   function openSheet(id) { $(id).hidden = false; }
   // keep every open screen current: when a new version is up, reload it (never mid-form or mid-animation)
-  const BUILD = "20261024081534";
+  const BUILD = "20261024142357";
   function checkBuild() {
     if (BUILD === "dev") return;
     fetch("version.json?t=" + Date.now(), { cache: "no-store" }).then((r) => (r.ok ? r.json() : null)).then((j) => {
@@ -11744,7 +11744,7 @@ body.tv.nflday .ob-grp, body.tv.cfb .ob-grp { background-color: rgba(10,13,18,.9
   const posOf = (sport) => (sport === "NHL" ? NHL_POS : sport === "MLB" ? MLB_POS : sport === "NBA" || sport === "CBB" ? NBA_POS : TD_POS);
   function loadRoster(sport, tid) {
     const k = sport + "|" + tid; if (ROSTER.has(k)) return ROSTER.get(k);
-    const pr = fetch(`https://site.api.espn.com/apis/site/v2/sports/${ESPN[sport]}/teams/${tid}/roster`).then((r) => r.json()).then((j) => {
+    const pr = fetch(`https://site.api.espn.com/apis/site/v2/sports/${ESPN[sport]}/teams/${tid}/roster?limit=300`).then((r) => r.json()).then((j) => {
       const items = []; for (const grp of j.athletes || []) for (const a of grp.items || (grp.displayName ? [grp] : [])) {
         const pos = (a.position && a.position.abbreviation) || ""; if (!posOf(sport).includes(pos)) continue;
         items.push({ id: String(a.id), nm: a.displayName || a.fullName || "", j: a.jersey || "", pos, hs: (a.headshot && a.headshot.href) || "", tm: String(tid) });
@@ -14551,6 +14551,18 @@ body.tv.nflday .ob-grp, body.tv.cfb .ob-grp { background-color: rgba(10,13,18,.9
     showPlayCard(g, { ev: "td", side: "a", tag: "Touchdown UGA" }, anyOpen(), () => {});
   });
   // ---------- TD scorer tracking ----------
+  const isTdPlay = (p) => (p.scoringType && p.scoringType.name === "touchdown") || /touchdown/i.test((p.type && p.type.text) || "");
+  function tdKind(p) {
+    const t = (p.type && p.type.text) || "", x = String(p.text || "").split("(")[0];
+    if (/touchdown/i.test(t)) return t;
+    if (/pass from|pass reception|reception/i.test(x + " " + t)) return "Receiving Touchdown";
+    if (/\b(run|rush)\b/i.test(x)) return "Rushing Touchdown";
+    if (/interception/i.test(x)) return "Interception Return Touchdown";
+    if (/fumble/i.test(x)) return "Fumble Return Touchdown";
+    if (/punt/i.test(x)) return "Punt Return Touchdown";
+    if (/kickoff|kick return/i.test(x)) return "Kickoff Return Touchdown";
+    return "Touchdown";
+  }
   async function loadTdPlays() {
     const want = new Map();
     for (const b of S.bets.values()) {
@@ -14564,7 +14576,7 @@ body.tv.nflday .ob-grp, body.tv.cfb .ob-grp { background-color: rgba(10,13,18,.9
     for (const g of want.values()) {
       try {
         const j = await fetch(`https://site.api.espn.com/apis/site/v2/sports/${ESPN[g.sport]}/summary?event=${g.eid || g.id}`).then((r) => r.json());
-        const plays = (j.scoringPlays || []).filter((p) => /touchdown/i.test((p.type && p.type.text) || "")).map((p) => { const nm = scorerOf(p.text); return { who: normNm(nm), name: nm, text: p.text || "", type: (p.type && p.type.text) || "", team: p.team && String(p.team.id), pd: p.period ? p.period.number : null, c: p.clock ? clockSec(p.clock.displayValue) : null }; });
+        const plays = (j.scoringPlays || []).filter(isTdPlay).map((p) => { const nm = scorerOf(p.text); return { who: normNm(nm), name: nm, text: p.text || "", type: tdKind(p), team: p.team && String(p.team.id), pd: p.period ? p.period.number : null, c: p.clock ? clockSec(p.clock.displayValue) : null }; });
         const c = j.header && j.header.competitions && j.header.competitions[0], final = !!(c && c.status && c.status.type && c.status.type.completed);
         const apply = () => { const prev = TDP.get(g.id); TDP.set(g.id, { plays, final, at: Date.now() }); tdCheck(g, prev ? prev.plays : null, plays); render(); if (!cardBusy) autoSettle(); };
         if (final || g.id.startsWith("trial-")) apply(); else setTimeout(apply, tvDelay() * 1000);
@@ -14615,7 +14627,10 @@ body.tv.nflday .ob-grp, body.tv.cfb .ob-grp { background-color: rgba(10,13,18,.9
     clearTimeout(crewTdT);
     const job = crewTdQ[0]; if (!job) return;
     const late = Date.now() - job.at > 45e3;
-    if (mineBusy() && !late) { crewTdT = setTimeout(crewTdNext, 1000); return; }
+    if (mineBusy() && !late) {
+      if (!cardBusy && !fxBusy && statusSrc && lastKind === "play" && Date.now() - job.at > 4e3) stopStatus();
+      else { crewTdT = setTimeout(crewTdNext, 1000); return; }
+    }
     crewTdQ.shift();
     const grp = job.grp.filter((x) => { const b = S.bets.get(x.b.id); return b && b.status === "open"; }); // another screen may have settled it already
     const release = () => { for (const x of job.grp) { tdHold.delete(x.b.id); tdCard.delete(x.b.id); } };
@@ -14651,6 +14666,7 @@ body.tv.nflday .ob-grp, body.tv.cfb .ob-grp { background-color: rgba(10,13,18,.9
     go();
   }
   setInterval(loadTdPlays, 30e3);
+  window.__td = { load: () => loadTdPlays(), TDP, kind: tdKind, isTd: isTdPlay, find: (n, sp) => playerGame(n, sp), edit: (sel) => tdEditPick(sel), resolve: (bets) => resolveTdLegs(bets), roster: (sp, t) => loadRoster(sp, t) };
 
   // ---------- Trial: replay the latest finished NFL game, play by play, through the live pipeline ----------
   // a temporary bet on the winner (never saved), real scoring plays and turnovers fed in as the scoreboard would, then the win
@@ -14772,6 +14788,13 @@ body.tv.nflday .ob-grp, body.tv.cfb .ob-grp { background-color: rgba(10,13,18,.9
   const TD_EDIT_MS = 12e3, TD_EDIT_GAP = 4 * 60e3; let tdEditAt = 0;
   function tdEditPick(sel) {
     const g = sel ? gameOf(sel) : null, t = g && (sel.s === "a" || sel.s === "h") ? g[sel.s] : null, nm = normNm(sel && sel.p && sel.p.nm);
+    if (g && g.sport === "CFB") {
+      const cfb = CLIPS.filter((c) => c.sport === "CFB" && !c.dj && c.pl !== "simpson" && /hype|up/.test(c.mood) && !/\bdown\b/.test(c.mood));
+      const team = t ? cfb.filter((c) => c.fan === t.ab) : [], after = cfb.filter((c) => !c.fan && !c.teams && /touchdown/i.test(c.label || ""));
+      const gen = cfb.filter((c) => !c.fan && !c.teams);
+      const P = pickClip(team.length && Math.random() < 0.7 ? team : after.length && Math.random() < 0.45 ? after : gen.length ? gen : after);
+      return P ? Object.assign({}, P, { ms: Math.min(P.ms || TD_EDIT_MS, TD_EDIT_MS) }) : null;
+    }
     const nfl = CLIPS.filter((c) => (c.sport === "NFL" || /^sounds\/nfl\//.test(c.base)) && c.pl !== "simpson");
     const own = nm ? nfl.filter((c) => c.pl && PL_NAMES[c.pl] && normNm(PL_NAMES[c.pl]) === nm) : [];
     const team = t ? nfl.filter((c) => c.fan === t.ab && /\btd\b|hype/.test(c.mood)) : [];
@@ -14794,7 +14817,7 @@ body.tv.nflday .ob-grp, body.tv.cfb .ob-grp { background-color: rgba(10,13,18,.9
     let P = dj ? pickClip(newSong(CLIPS.filter((c) => c.dj))) : null;
     if (P) return P;
     const fb = CLIPS.filter((c) => (c.sport === sport || /^sounds\/nfl\//.test(c.base)) && c.pl !== "simpson" && /hype|up|vibe/.test(c.mood));
-    const own = team ? fb.filter((c) => c.fan === team.ab) : [], E = pickClip(own.length ? own : fb.filter((c) => !c.fan)), H = pickClip(houseEdits());
+    const own = team ? fb.filter((c) => c.fan === team.ab && (!c.sport || c.sport === sport)) : [], E = pickClip(own.length ? own : fb.filter((c) => !c.fan)), H = pickClip(houseEdits());
     P = driveTurn++ % 2 === 0 ? H || E : E || H;
     return P ? Object.assign({}, P, { ms: Math.min(P.ms || max, max) }) : null;
   }
@@ -18635,10 +18658,11 @@ body.tv.nflday .ob-grp, body.tv.cfb .ob-grp { background-color: rgba(10,13,18,.9
       toast("Back on the board");
     }
   });
+  const tdWait = (b) => crewTdQ.length > 0 && selsOf(b).some((x) => x && isTd(x.m) && crewTdQ.some((j) => String(j.g.id) === String(x.g) && Date.now() - j.at < 45e3));
   function autoSettle() {
     if (!S.db || !S.canWrite || !S.ready || GUEST) return;
     for (const b of [...S.bets.values(), ...S.goneBets.values()]) {
-      if (b.status !== "open" || b.noAuto || b.trial || settling.has(b.id) || tdHold.has(b.id)) continue;
+      if (b.status !== "open" || b.noAuto || b.trial || settling.has(b.id) || tdHold.has(b.id) || tdWait(b)) continue;
       if (cardBusy && b.sel && isTd(b.sel.m)) continue; // let his touchdown card play first
       let status = null;
       if (b.kind === "parlay") {
@@ -18788,8 +18812,8 @@ body.tv.nflday .ob-grp, body.tv.cfb .ob-grp { background-color: rgba(10,13,18,.9
   // TD scorer legs: find the game (from the matchup, or by finding him on the football rosters) and the player
   const sameName = (a, b) => {
     if (normNm(a) && normNm(a) === normNm(b)) return true;
-    const w = (x) => foldNm(x).toLowerCase().replace(/\b(jr|sr|ii|iii|iv)\b\.?/g, "").replace(/[^a-z\s.]/g, "").split(/[\s.]+/).filter(Boolean);
-    const x = w(a), y = w(b); return x.length > 1 && y.length > 1 && x[x.length - 1] === y[y.length - 1] && x[0][0] === y[0][0];
+    const w = (x) => foldNm(x).toLowerCase().replace(/\b(jr|sr|ii|iii|iv)\b\.?/g, "").replace(/-/g, " ").replace(/[^a-z\s.]/g, "").split(/[\s.]+/).filter(Boolean);
+    const x = w(a), y = w(b); return x.length > 1 && y.length > 1 && x[0][0] === y[0][0] && (x[x.length - 1] === y[y.length - 1] || (x.length !== y.length && (x.slice(1).includes(y[y.length - 1]) || y.slice(1).includes(x[x.length - 1]))));
   };
   const PP_SLIP = { goals: "pp_g", assists: "pp_a", points: "pp_pts", shots_on_goal: "pp_sog", saves: "pp_sv",
     hits: "pp_mlb_h", home_runs: "pp_mlb_hr", rbis: "pp_mlb_rbi", runs: "pp_mlb_r", walks: "pp_mlb_bb", hits_runs_rbis: "pp_mlb_hrr", strikeouts: "pp_mlb_k", earned_runs: "pp_mlb_er", hits_allowed: "pp_mlb_ha", outs: "pp_mlb_outs",
@@ -18822,11 +18846,34 @@ body.tv.nflday .ob-grp, body.tv.cfb .ob-grp { background-color: rgba(10,13,18,.9
       return hit;
     };
     let hit = null;
-    for (const gs of [mu, tg ? [tg] : [], near]) { if (!gs.length) continue; hit = find(await look(gs)); if (hit) break; }
+    const pg = !mu.length && !tg && leg.player && /^pp_fb_/.test(m || "") ? await playerGame(leg.player, sp) : null;
+    for (const gs of [mu, tg ? [tg] : [], pg ? [pg.g] : [], near]) { if (!gs.length) continue; hit = find(await look(gs)); if (hit) break; }
     if (hit) leg._td = { g: hit.g.id, m, s: side, l, o: leg.odds, sport: hit.g.sport, p: hit.p };
     else if (mu.length === 1 && top >= 4 && leg.player) leg._td = { g: mu[0].id, m, s: side, l, o: leg.odds, sport: mu[0].sport, p: { nm: leg.player, hs: "", j: "", pos: "" } };
   }
 
+
+  // who a player plays for, from ESPN's player search: [{ nm, sport, tid, id }] (football only; college or NFL)
+  const PSRCH = new Map();
+  function playerTeams(name, sport) {
+    const k = normNm(name) + "|" + (sport || ""); if (!normNm(name)) return Promise.resolve([]);
+    if (PSRCH.has(k)) return PSRCH.get(k);
+    const lgOf = (x) => (x === "college-football" ? "CFB" : x === "nfl" ? "NFL" : null);
+    const pr = fetch(`https://site.web.api.espn.com/apis/common/v3/search?query=${encodeURIComponent(String(name).trim())}&limit=12&type=player&sport=football`).then((r) => r.json()).then((j) =>
+      (j.items || []).map((it) => { const t = (it.teamRelationships || []).find((x) => x.type === "team"); return { nm: it.displayName || "", sport: lgOf(it.league), tid: t && t.core ? String(t.core.id) : "", id: String(it.id || "") }; })
+        .filter((x) => x.sport && x.tid && (!sport || x.sport === sport) && (normNm(x.nm) === normNm(name) || sameName(x.nm, name))))
+      .catch(() => { PSRCH.delete(k); return []; });
+    PSRCH.set(k, pr); return pr;
+  }
+  // the game today (or live) his team is in
+  async function playerGame(name, sport) {
+    const fb = (g) => g.sport === "NFL" || g.sport === "CFB";
+    for (const c of await playerTeams(name, sport)) {
+      const g = pickable().find((x) => fb(x) && x.sport === c.sport && (String(x.a.id) === c.tid || String(x.h.id) === c.tid));
+      if (g) return { g, s: String(g.a.id) === c.tid ? "a" : "h", c };
+    }
+    return null;
+  }
   async function resolveTdLegs(bets) {
     for (const pb of bets) for (const leg of pb.legs || []) {
       if (ppSlipMk(leg)) { await resolvePPLeg(leg); continue; }
@@ -18835,7 +18882,10 @@ body.tv.nflday .ob-grp, body.tv.cfb .ob-grp { background-color: rgba(10,13,18,.9
       const base = matchLeg({ ...leg, market: "ml", team: leg.team || leg.away || leg.home });
       const fb = (g) => g.sport === "NFL" || g.sport === "CFB";
       let games = base ? [S.games.get(base.g)] : pickable().filter((g) => fb(g) && (leg.sport === "NFL" || leg.sport === "CFB" ? g.sport === leg.sport : true));
-      if (!base && games.length > 40) games = games.filter((g) => g.sport === "NFL");   // a college Saturday is too many rosters to search
+      // no matchup on the slip: ask who he plays for first (a college Saturday is too many rosters to search one by one)
+      const pg = !base && who ? await playerGame(who, leg.sport === "NFL" || leg.sport === "CFB" ? leg.sport : null) : null;
+      if (pg) games = [pg.g];
+      else if (!base && games.length > 40) games = games.filter((g) => g.sport === (leg.sport === "CFB" ? "CFB" : "NFL") && (g.st === "in" || g.t < Date.now() + 14 * 36e5));
       let found = null;
       for (const g of games) {
         if (!g) continue;
@@ -18843,6 +18893,7 @@ body.tv.nflday .ob-grp, body.tv.cfb .ob-grp { background-color: rgba(10,13,18,.9
         ["a", "h"].forEach((sd, i) => { if (found) return; const pl = (Array.isArray(rs[i]) ? rs[i] : []).find((x) => sameName(x.nm, who)); if (pl) found = { g: g.id, m, s: sd, l: null, o: leg.odds, sport: g.sport, p: pl }; });
         if (found) break;
       }
+      if (!found && pg) found = { g: pg.g.id, m, s: pg.s, l: null, o: leg.odds, sport: pg.g.sport, p: { nm: pg.c.nm || who, id: pg.c.id, hs: pg.c.id ? `https://a.espncdn.com/i/headshots/${pg.g.sport === "CFB" ? "college-football" : "nfl"}/players/full/${pg.c.id}.png` : "", j: "", pos: "" } };
       if (!found && base && who) found = { g: base.g, m, s: base.s, l: null, o: leg.odds, sport: base.sport, p: { nm: who, hs: "", j: "", pos: "" } };
       if (found) leg._td = found;
     }
