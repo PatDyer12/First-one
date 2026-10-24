@@ -5696,6 +5696,18 @@ img.tl, .tl.tlg { background: none; box-shadow: none; border-radius: 0; margin: 
 @keyframes grpChain { 0% { top: 20px; opacity: 0; } 15% { opacity: .9; } 85% { opacity: .9; } 100% { top: calc(100% - 50px); opacity: 0; } }
 .ob-gm { z-index: 1; }
 .ob-gm > .rb-av { box-shadow: 0 0 0 3px #0e1117, 0 0 14px color-mix(in srgb, var(--c) 55%, transparent); }
+
+/* the busy board: the scores on the left, the bets (a little wider) on the right */
+.rb-games.primeg.split2 { grid-template-columns: minmax(0, 1fr) minmax(0, 1.15fr); }
+.rb-games.split2 > .rb-pcol.pl > .rb-g.gx { flex: none; }
+/* the scores column on a busy board: each game tighter (no stat leaders), so more of them fit */
+.rb-games.split2 .gx-ldr { display: none; }
+.ob-strip.ob-mu .ob-clk { font-size: 12px; letter-spacing: .14em; color: #8d97a8; }
+.ob-strip.ob-mu .ob-clk.s-live { color: #ff8a95; }
+/* the badges: flat tiles in their type's color; live ones get a small corner mark */
+.bt-bdg { border-radius: 7px; background: color-mix(in srgb, var(--fxk) 16%, #0d1016); box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--fxk) 55%, transparent); }
+.bt-bdg.lv::after { content: ""; left: auto; right: -2px; top: -2px; width: 7px; height: 7px; border-radius: 50%; background: #ffe14d; box-shadow: 0 0 0 2px #0d1016; filter: none; font-size: 0; }
+.bt-bdg.bt-c-opal::before, .bt-bdg.bt-c-pink::before, .bt-bdg.bt-c-dart::before { display: none; }
 </style>
 </head>
 <body>
@@ -8611,7 +8623,7 @@ img.tl, .tl.tlg { background: none; box-shadow: none; border-radius: 0; margin: 
       return `<div class="rb-lr${p.heat ? " " + p.heat : ""}${p.k === lead ? " lead" : ""}" data-k="${esc(p.k)}" style="--c:${p.col}"${pids.length ? tapAttrs(pids, p.name + (p.me ? "" : "'s bets")) : ""}>
         <span class="rk num">${i + 1}</span>
         <span class="rb-av big" style="--c:${p.col}">${esc(p.name.slice(0, 1).toUpperCase())}${p.k === lead ? '<s class="crown">👑</s>' : ""}</span>
-        <div class="nm"><b>${esc(p.name)}</b>${heatTag(p)}${btBadges(p.done, 2)}</div>
+        <div class="nm"><b>${esc(p.name)}</b>${heatTag(p)}</div>
         <div class="net num ${cls(p.net)}">${fU(p.net, true)}<small>${fUSD(p.net * S.unit, true)}</small></div>
         <div class="ln num">${p.w + p.l + p.p ? `${p.w}-${p.l}${p.p ? "-" + p.p : ""} · ${pct(p.hit)} hit · ROI ${p.roi == null ? "–" : (p.roi > 0 ? "+" : "") + Math.round(p.roi * 100) + "%"}` : "No results yet"}</div>
         <div class="ft"><div class="l5">${p.last5.map((o) => `<i class="${o === "W" ? "w" : "l"}"></i>`).join("")}</div>
@@ -8796,12 +8808,17 @@ img.tl, .tl.tlg { background: none; box-shadow: none; border-radius: 0; margin: 
   // Each game's block is one piece, so the roll holds as each comes up
   const obCard = (t, n, body) => (n ? `<article class="rb-g rb-card ob-card"><header class="rb-ch"><h3>${esc(t)}</h3><span>${n} open</span></header><div class="rb-rows ob-list">${body}</div></article>` : "");
   const obCount = (list, parlays, other) => list.reduce((a, G) => a + G.entries.length, 0) + parlays.length + other.length;
-  function obColumn(list, parlays, other, noHd) {
+  // a game's label over its bets: the two teams, and whether it's on, still to come or over
+  function obLbl(g) {
+    const t = (x) => `<span class="ob-tm">${logo(x, "ob-lg")}<b>${esc(x.ab)}</b></span>`;
+    return `<div class="ob-strip ob-mu g-${g.st}">${t(g.a)}<i class="ob-at">@</i>${t(g.h)}<span class="ob-clk${g.st === "in" ? " s-live" : ""}">${g.st === "pre" ? esc(startLabel(g.t)) : g.st === "post" ? "Final" : "Live"}</span></div>`;
+  }
+  function obColumn(list, parlays, other, noHd, lbl) {
     const games = list.filter((G) => G.entries.length), n = obCount(games, parlays, other);
     if (!n) return "";
     const hd = noHd ? "" : `<header class="ob-hd"><b>Open bets</b><span class="num">${n}</span></header>`, out = [];
     const sec = (cls, head, body) => `<section class="ob-g ${cls}">${out.length ? "" : hd}${head}<div class="ob-list">${body}</div></section>`;
-    for (const G of games) out.push(sec("g-" + G.g.st, obStrip(G.g), obRows(G)));
+    for (const G of games) out.push(sec("g-" + G.g.st, lbl ? obLbl(G.g) : obStrip(G.g), obRows(G)));
     if (parlays.length) out.push(sec("g-par", `<div class="ob-strip ob-lbl"><b>Parlays</b><span class="num">${parlays.length}</span></div>`, parlays.map(obParlay).join("")));
     if (other.length) out.push(sec("g-oth", `<div class="ob-strip ob-lbl"><b>Other bets</b><span class="num">${other.length}</span></div>`, other.map(obOther).join("")));
     return out.join("");
@@ -9490,10 +9507,12 @@ img.tl, .tl.tlg { background: none; box-shadow: none; border-radius: 0; margin: 
     const roomLive = list.filter((G) => G.g.st === "in" && (G.entries.length || (G.legs && G.legs.length))).length;
     const roomN = list.filter((G) => G.entries.length || (G.legs && G.legs.length && G.g.st === "in")).length + (parlays.length ? 1 : 0) + (other.length ? 1 : 0);
     const nowG = !tv ? [] : heroes.length ? onNowGames(list, heroes.length === 1 ? 2 : 0) : onNowGames(list, Math.max(4 - roomLive, 7 - roomN));
-    const rest = heroes.length ? obColumn((split ? list : list.filter((G) => !heroes.includes(G))).map(openOnly), parlays, other.filter((e) => e.b.status === "open")) : "";
+    const two = tv && !pplOn && !heroes.length && list.length > 0;
+    const rest = heroes.length || two ? obColumn((split || two ? list : list.filter((G) => !heroes.includes(G))).map(openOnly), parlays, other.filter((e) => e.b.status === "open"), false, true) : "";
     const fol = followCards();
-    $("#rbGames").classList.toggle("primeg", heroes.length > 0); $("#rbGames").classList.toggle("h1", heroes.length === 1); $("#rbGames").classList.toggle("solo", heroes.length > 0 && !rest);
-    if (heroes.length) {
+    $("#rbGames").classList.toggle("primeg", heroes.length > 0 || two); $("#rbGames").classList.toggle("h1", heroes.length === 1); $("#rbGames").classList.toggle("solo", (heroes.length > 0 || two) && !rest);
+    $("#rbGames").classList.toggle("split2", two); if (two) $("#rbGames").classList.remove("mason");
+    if (heroes.length || two) {
       let L = $("#rbColL"), R = $("#rbColR");
       if (!L || L.parentNode !== $("#rbGames")) {
         $("#rbGames").innerHTML = '<div class="rb-pcol pl" id="rbColL"></div><div class="rb-pcol pr" id="rbColR"></div>';
@@ -9501,9 +9520,15 @@ img.tl, .tl.tlg { background: none; box-shadow: none; border-radius: 0; margin: 
         for (let i = ASC.length - 1; i >= 0; i--) if (!ASC[i].el.isConnected) ASC.splice(i, 1);
         autoScroll(L, 13); autoScroll(R, 14);
       }
+      if (two) {
+        // the scores: live first, then the ones still to come, then the finals; the other games on now after them
+        const rk = (G) => (G.g.st === "in" ? 0 : G.g.st === "pre" ? 1 : 2), ord = [...list].sort((x, y) => rk(x) - rk(y) || (x.g.t || 0) - (y.g.t || 0));
+        L.dataset.n = "0"; L.innerHTML = ord.map((G) => gameCard(G, false, true)).join("") + nowG.map(onNowCard).join("") + fol; R.innerHTML = rest; R.hidden = !rest;
+      } else {
       L.dataset.n = String(heroes.length); L.innerHTML = heroes.map((G) => gameCard(G, true, split)).join("") + fol; R.innerHTML = rest; R.hidden = !rest;
       primeFit();
       if (heroes.length <= 2) laterFit(L);
+      }
       loopSyncEl(L); loopSyncEl(R);
     } else {
     const oth = tv ? other.filter((e) => e.b.status === "open") : other;
@@ -10994,6 +11019,7 @@ img.tl, .tl.tlg { background: none; box-shadow: none; border-radius: 0; margin: 
     const dec = b.odds > 0 ? b.odds / 100 : 100 / -b.odds, towin = (Number(b.units) || 0) * (Number.isFinite(dec) ? dec : 1);
     const acts = one ? [{ k: lossVar(), ms: Math.abs(n) >= 2 ? 6000 : 5200 }] : [{ k: "lyard", ms: 5400 + Math.min(6, list.length) * 380 }];
     if (beat) acts.push({ k: "lbeat", ms: 4800 }); if (legs) acts.push({ k: "lbust", ms: 4400 + Math.min(1600, legs.length * 140) });
+    s3hold(acts);
     let T = 0; for (const a of acts) { a.t0 = T; T += a.ms; }
     const tot = list.reduce((x, y) => x + (Number(y.n) || 0), 0), date = new Date(b.settledAt || Date.now()).toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric", timeZone: "America/New_York" }).toUpperCase();
     const info = { loss: true, lvl: 2, sport: (g && g.sport) || b.sport || "", acc: "#ff4d5e", col: s3col(col, "#ff4d5e"), name: nm, word: "Lost", call: "Lost", pick: b.pick,
@@ -11320,6 +11346,7 @@ img.tl, .tl.tlg { background: none; box-shadow: none; border-radius: 0; margin: 
     const acts = [{ k: "gdrop", ms: 3000 }, { k: "gsplit", ms: 4600 + Math.min(6, R.length) * 420 }];
     if (SH3.play.ok(c)) acts.push({ k: "play", ms: 5200 });
     acts.push({ k: grpTeam(), ms: 7600 });
+    s3hold(acts);
     let T = 0; for (const a of acts) { a.t0 = T; T += a.ms; }
     c.acts = acts; c.T = T;
     const want3 = !!(window.SB3D && SB3D.ok() && !show3Off()), ready3 = want3 && SB3D.ready();
@@ -11420,6 +11447,11 @@ img.tl, .tl.tlg { background: none; box-shadow: none; border-radius: 0; margin: 
   // party when it doesn't
   for (const [lv, ms] of [[2, 5200], [3, 5600], [4, 6000], [5, 6600]]) { const A = SHOW3_ACTS[lv], at = A.findIndex((x) => x[0] === "cash"); if (at >= 0 && !A.some((x) => x[0] === "cfb")) A.splice(at + 1, 0, ["cfb", ms]); }
   SHOW3_LAB.cfb = "Saturday"; SHOW3_SHORT.cfb = "Saturday";
+
+  // how long each act holds still at its end, to read it
+  const S3_HOLD = { drop: 1400, gdrop: 1400, cash: 1800, play: 2000, cfb: 1600, burn: 2000, ride: 2200, rec: 2600, ring: 1800, heat: 1800, career: 2200, vault: 2000,
+    troph: 2200, stand: 2200, party: 0, out: 1600, gsplit: 2400, grush: 1200, gspike: 1200, ghuddle: 1200, gpush: 1200, lburn: 1600, lshred: 1600, lgrave: 1600, lbeat: 1800, lbust: 2000, lyard: 2200 };
+  const s3hold = (acts) => { for (const a of acts) a.ms += S3_HOLD[a.k] ?? 1500; return acts; };
   function cashRun({ b, n, names, tile }) {
     showClear();
     const el = cashEl(), F = flexOf(b), lvl = showLevel(b, F, n), c = showCtx(b, n, names, F, lvl);
@@ -11429,6 +11461,7 @@ img.tl, .tl.tlg { background: none; box-shadow: none; border-radius: 0; margin: 
     const acts = s3acts(lvl, c);
     const lost = SHOW3_ACTS[lvl].filter(([k]) => !acts.some((a) => a.k === k) && !SHOW3_OPT.has(k) && k !== "cfb").reduce((x, a) => x + a[1], 0);
     (acts.find((a) => a.k === "party") || acts.find((a) => a.k === "cash")).ms += lost;
+    s3hold(acts);
     let T = 0; for (const a of acts) { a.t0 = T; T += a.ms; }
     c.acts = acts; c.T = T;
     const want3 = !!(window.SB3D && SB3D.ok() && !show3Off()), ready3 = want3 && SB3D.ready();
@@ -11464,6 +11497,7 @@ img.tl, .tl.tlg { background: none; box-shadow: none; border-radius: 0; margin: 
     // an act with nothing to show gives its time to the party (or the stamp)
     const lost = SHOW_ACTS[lvl].filter(([k]) => !acts.some((a) => a.k === k)).reduce((x, a) => x + a[1], 0);
     (acts.find((a) => a.k === "party") || acts.find((a) => a.k === "cash")).ms += lost;
+    s3hold(acts);
     let T = 0; for (const a of acts) { a.t0 = T; T += a.ms; }
     c.acts = acts; c.T = T;
     el.className = "cs show " + (lvl >= 4 ? "big" : lvl >= 2 ? "mid" : "small") + " lv" + lvl + " ck-" + (F.k || "cash") + (F.k ? " bt-c-" + F.k : "");
@@ -11805,7 +11839,7 @@ img.tl, .tl.tlg { background: none; box-shadow: none; border-radius: 0; margin: 
   // ---------- sheets ----------
   function openSheet(id) { $(id).hidden = false; }
   // keep every open screen current: when a new version is up, reload it (never mid-form or mid-animation)
-  const BUILD = "20261024200551";
+  const BUILD = "20261024202049";
   function checkBuild() {
     if (BUILD === "dev") return;
     fetch("version.json?t=" + Date.now(), { cache: "no-store" }).then((r) => (r.ok ? r.json() : null)).then((j) => {
@@ -20132,7 +20166,7 @@ function S3loop(st) {
     for (const f of st.tick.slice()) { try { f(st.t, dt); } catch (e) { console.warn("3d", e); } }
     st.shake = Math.max(0, st.shake - dt * 1.6); st.flash = Math.max(0, st.flash - dt * 2.2);
     const c = st.cam, j = st.shake * st.shake;
-    c.position.lerp(st.camTo.p, 1 - Math.pow(0.02, dt)); st.look.lerp(st.camTo.l, 1 - Math.pow(0.02, dt));
+    const cdt = Math.min(0.25, rdt); c.position.lerp(st.camTo.p, 1 - Math.pow(0.02, cdt)); st.look.lerp(st.camTo.l, 1 - Math.pow(0.02, cdt));
     c.position.x += (Math.random() - 0.5) * j * 0.6; c.position.y += (Math.random() - 0.5) * j * 0.6; c.lookAt(st.look);
     st.bgMat.uniforms.t.value = st.t; st.bgMat.uniforms.k.value = st.flash * 0.8 + (st.pk || 0) * 0.4;
     st.bloom.strength = 0.42 + st.flash * 0.5; st.key.intensity = 1.6 + st.flash * 1.2;
@@ -21847,7 +21881,7 @@ ACT3.cfstorm = function (st, a) {
   const n = 140, cols = [CFhex(C.col, "#8a1020"), CFhex(C.alt, "#ffffff"), "#f2f2f2", CFhex(C.col, "#8a1020"), "#2a2d35"], fans = CFfans(st, n, cols);
   const P = []; for (let i = 0; i < n; i++) { const ang = Math.random() * Math.PI * 2, r = 2.2 + Math.random() * 6.4; P.push({ x0: (Math.random() - 0.5) * 30, z0: -40 - Math.random() * 6, x1: Math.cos(ang) * r * 1.3, z1: -8.6 + Math.sin(ang) * r * 0.55, d: Math.random() * 1.1, sp: 0.85 + Math.random() * 0.4, ph: Math.random() * 6 }); }
   const hero = CFhero(st, C), dust = S3sparks(st, 500, "#d9f2c8"), sp = S3sparks(st, 600, CFhex(C.br, "#ffd23f")), cf = S3confetti(st, 380, [CFhex(C.col, "#8a1020"), CFhex(C.alt, "#ffffff"), "#ffffff", "#ffd23f"]);
-  const tArr = Math.min(3.1, T * 0.48), tFall = tArr + 0.5, words = CFwords(st, C, 5.0, -5.5, 0, 1.4);
+  const tArr = Math.min(3.1, T * 0.48), tFall = tArr + 0.5, words = CFwords(st, C, 3.7, -5.5, 0, 1.25);
   let fell = false;
   st.tick.push((t, dt) => {
     const k = t - A;
