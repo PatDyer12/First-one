@@ -5613,6 +5613,41 @@ img.tl, .tl.tlg { background: none; box-shadow: none; border-radius: 0; margin: 
 .pp-bet .ob-strip { flex-wrap: wrap; row-gap: 3px; }
 .pp-bet .ob-strip .ob-tm { flex: none; }
 .pp-bet .ob-strip .ob-at:empty { display: none; }
+
+/* ---------- college football: a varsity patch. Dark felt, the type's line art stitched on, a stitch inside the edge ---------- */
+.bt-cf, :is(.pp-bet, .ob-bet, .slip).fx.bt.bt-cf { --fxi: var(--art), url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='160' height='160'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.85' numOctaves='2' stitchTiles='stitch'/%3E%3CfeColorMatrix values='0 0 0 0 1  0 0 0 0 1  0 0 0 0 1  0 0 0 .07 0'/%3E%3C/filter%3E%3Crect width='160' height='160' filter='url%28%23n%29'/%3E%3C/svg%3E"), radial-gradient(110% 170% at 100% 0%, color-mix(in srgb, var(--fxk) 20%, transparent), transparent 60%), radial-gradient(80% 120% at 0% 100%, color-mix(in srgb, var(--fxk) 8%, transparent), transparent 60%), linear-gradient(180deg, #17171b, #0c0c0f); }
+.bt-cf { --fxb: linear-gradient(135deg, color-mix(in srgb, var(--fxk) 80%, #fff), var(--fxk) 35%, color-mix(in srgb, var(--fxk) 45%, #000) 70%, var(--fxk)); --fxbs: 100% 100%;
+  --fxg: color-mix(in srgb, var(--fxk) 24%, transparent); --fxr: 0 0 0 1px color-mix(in srgb, var(--fxk) 26%, transparent); }
+.bt-cf.bt-hype { --fxg: color-mix(in srgb, var(--fxk) 44%, transparent); }
+:is(.pp-bet, .ob-bet).fx.bt-cf, .slip.bt-cf:not(.big) .sl-card { background-size: 70px 70px, 160px 160px, 100% 100%, 100% 100%, 100% 100%, 100% 100%; background-repeat: no-repeat, repeat, no-repeat, no-repeat, no-repeat, no-repeat;
+  background-position: right 8px bottom 7px, 0 0, 0 0, 0 0, 0 0, 0 0; background-origin: padding-box, padding-box, padding-box, padding-box, padding-box, border-box; background-clip: padding-box, padding-box, padding-box, padding-box, padding-box, border-box;
+  outline: 1.5px dashed color-mix(in srgb, var(--fxk) 46%, transparent); outline-offset: -7px; }
+.slip.big.bt-cf .sl-card { outline: 2px dashed color-mix(in srgb, var(--fxk) 46%, transparent); outline-offset: -10px; }
+.bt-cf :is(.pp-pick, .ob-pick) .t, .slip.bt-cf .sl-pick { color: #fff; text-shadow: 0 0 16px color-mix(in srgb, var(--fxk) 40%, transparent); }
+.bt-cf .fx-glint { display: none; }
+/* the chip: a chenille letter patch, its stitching inside the edge */
+.bt-chip:is(.bt-c-maction, .bt-c-funbelt, .bt-c-sickos, .bt-c-cupcake, .bt-c-direct, .bt-c-afterdark, .bt-c-big12, .bt-c-airraid, .bt-c-b1g, .bt-c-punting, .bt-c-storm, .bt-c-hate, .bt-c-bowl, .bt-c-heisman, .bt-c-freefb, .bt-c-satslip) { color: #0b0c0e; background: linear-gradient(160deg, color-mix(in srgb, var(--fxk) 70%, #fff), var(--fxk) 55%, color-mix(in srgb, var(--fxk) 80%, #000)); box-shadow: inset 0 0 0 1.5px color-mix(in srgb, var(--fxk) 55%, #000), 0 0 14px color-mix(in srgb, var(--fxk) 40%, transparent); font-family: "Big Shoulders Display", Inter, sans-serif; font-size: 12.5px; letter-spacing: .1em; outline: 1px dashed rgba(10,10,14,.42); outline-offset: -4px; }
+.slip.big .bt-chip:is(.bt-c-maction, .bt-c-funbelt, .bt-c-sickos, .bt-c-cupcake, .bt-c-direct, .bt-c-afterdark, .bt-c-big12, .bt-c-airraid, .bt-c-b1g, .bt-c-punting, .bt-c-storm, .bt-c-hate, .bt-c-bowl, .bt-c-heisman, .bt-c-freefb, .bt-c-satslip) { font-size: 19px; outline-offset: -5px; }
+.bt-chip:is(.bt-c-maction, .bt-c-funbelt, .bt-c-sickos, .bt-c-cupcake, .bt-c-direct, .bt-c-afterdark, .bt-c-big12, .bt-c-airraid, .bt-c-b1g, .bt-c-punting, .bt-c-storm, .bt-c-hate, .bt-c-bowl, .bt-c-heisman, .bt-c-freefb, .bt-c-satslip) .bt-ico { stroke-width: 2.4; }
+.bt-maction { --fxk: #3fc1ff; --art: url("data:image/svg+xml,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22 width=%2296%22 height=%2296%22 viewBox=%220 0 24 24%22 fill=%22none%22 stroke=%22%233fc1ff%22 stroke-opacity=%220.22%22 stroke-width=%220.46%22 stroke-linecap=%22round%22 stroke-linejoin=%22round%22%3E%3Cpath d=%22M9 21l1.6-11h2.8L15 21M7.8 21h8.4%22/%3E%3Crect x=%224.5%22 y=%223%22 width=%2215%22 height=%227%22 rx=%221.2%22/%3E%3Cpath d=%22M8 6.5h.01M12 6.5h.01M16 6.5h.01%22/%3E%3C/svg%3E"); } .bt-c-maction { --fxk: #3fc1ff; }
+.bt-funbelt { --fxk: #ffb020; --art: url("data:image/svg+xml,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22 width=%2296%22 height=%2296%22 viewBox=%220 0 24 24%22 fill=%22none%22 stroke=%22%23ffb020%22 stroke-opacity=%220.22%22 stroke-width=%220.46%22 stroke-linecap=%22round%22 stroke-linejoin=%22round%22%3E%3Ccircle cx=%2212%22 cy=%2212%22 r=%224.2%22/%3E%3Cpath d=%22M12 2.5v2.6M12 18.9v2.6M2.5 12h2.6M18.9 12h2.6M5.3 5.3l1.8 1.8M16.9 16.9l1.8 1.8M5.3 18.7l1.8-1.8M16.9 7.1l1.8-1.8%22/%3E%3C/svg%3E"); } .bt-c-funbelt { --fxk: #ffb020; }
+.bt-sickos { --fxk: #b6ff3d; --art: url("data:image/svg+xml,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22 width=%2296%22 height=%2296%22 viewBox=%220 0 24 24%22 fill=%22none%22 stroke=%22%23b6ff3d%22 stroke-opacity=%220.22%22 stroke-width=%220.46%22 stroke-linecap=%22round%22 stroke-linejoin=%22round%22%3E%3Crect x=%223%22 y=%223%22 width=%2218%22 height=%2218%22 rx=%221.6%22/%3E%3Cpath d=%22M3 7.5h18M3 16.5h18M3 20h18%22/%3E%3Ccircle cx=%229.2%22 cy=%2211.6%22 r=%221.4%22/%3E%3Ccircle cx=%2214.8%22 cy=%2211.6%22 r=%221.4%22/%3E%3C/svg%3E"); } .bt-c-sickos { --fxk: #b6ff3d; }
+.bt-cupcake { --fxk: #ff8fc7; --art: url("data:image/svg+xml,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22 width=%2296%22 height=%2296%22 viewBox=%220 0 24 24%22 fill=%22none%22 stroke=%22%23ff8fc7%22 stroke-opacity=%220.22%22 stroke-width=%220.46%22 stroke-linecap=%22round%22 stroke-linejoin=%22round%22%3E%3Cpath d=%22M6 12.5h12l-1.6 8.5H7.6z%22/%3E%3Cpath d=%22M9.5 12.5l.6 8.5M14.5 12.5l-.6 8.5%22/%3E%3Cpath d=%22M5.5 12.5c-.6-3.2 2.2-4.4 3.6-4 .4-2.6 5.4-2.6 5.8 0 1.4-.4 4.2.8 3.6 4%22/%3E%3Ccircle cx=%2212%22 cy=%224.6%22 r=%221.4%22/%3E%3C/svg%3E"); } .bt-c-cupcake { --fxk: #ff8fc7; }
+.bt-direct { --fxk: #5fe0cf; --art: url("data:image/svg+xml,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22 width=%2296%22 height=%2296%22 viewBox=%220 0 24 24%22 fill=%22none%22 stroke=%22%235fe0cf%22 stroke-opacity=%220.22%22 stroke-width=%220.46%22 stroke-linecap=%22round%22 stroke-linejoin=%22round%22%3E%3Ccircle cx=%2212%22 cy=%2212%22 r=%229%22/%3E%3Cpath d=%22M12 5.5l2.4 6.5L12 18.5 9.6 12z%22/%3E%3Cpath d=%22M12 1.8v1.6M12 20.6v1.6M1.8 12h1.6M20.6 12h1.6%22/%3E%3C/svg%3E"); } .bt-c-direct { --fxk: #5fe0cf; }
+.bt-afterdark { --fxk: #c37bff; --art: url("data:image/svg+xml,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22 width=%2296%22 height=%2296%22 viewBox=%220 0 24 24%22 fill=%22none%22 stroke=%22%23c37bff%22 stroke-opacity=%220.22%22 stroke-width=%220.46%22 stroke-linecap=%22round%22 stroke-linejoin=%22round%22%3E%3Cpath d=%22M17.5 14.6A7.4 7.4 0 0 1 9.4 4.2a7.4 7.4 0 1 0 8.1 10.4z%22/%3E%3Cpath d=%22M17 3.2l.6 1.6 1.6.6-1.6.6-.6 1.6-.6-1.6-1.6-.6 1.6-.6zM20.4 9l.4 1 1 .4-1 .4-.4 1-.4-1-1-.4 1-.4z%22/%3E%3C/svg%3E"); } .bt-c-afterdark { --fxk: #c37bff; }
+.bt-big12 { --fxk: #ff5a36; --art: url("data:image/svg+xml,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22 width=%2296%22 height=%2296%22 viewBox=%220 0 24 24%22 fill=%22none%22 stroke=%22%23ff5a36%22 stroke-opacity=%220.22%22 stroke-width=%220.46%22 stroke-linecap=%22round%22 stroke-linejoin=%22round%22%3E%3Cpath d=%22M12 2.8l7.6 3v5.6c0 4.8-3.2 8.4-7.6 9.8-4.4-1.4-7.6-5-7.6-9.8V5.8z%22/%3E%3Cpath d=%22M12.6 3.2l-1.8 5.4 2.6 2.4-2.4 4 1.4 6%22/%3E%3C/svg%3E"); } .bt-c-big12 { --fxk: #ff5a36; }
+.bt-airraid { --fxk: #ffd23f; --art: url("data:image/svg+xml,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22 width=%2296%22 height=%2296%22 viewBox=%220 0 24 24%22 fill=%22none%22 stroke=%22%23ffd23f%22 stroke-opacity=%220.22%22 stroke-width=%220.46%22 stroke-linecap=%22round%22 stroke-linejoin=%22round%22%3E%3Cellipse cx=%2214%22 cy=%2210%22 rx=%226.4%22 ry=%223.6%22 transform=%22rotate%28-28 14 10%29%22/%3E%3Cpath d=%22M11.8 10.6l4.4-2.4M2.5 15.5h5M4 19h6M2.5 12h3.5%22/%3E%3C/svg%3E"); } .bt-c-airraid { --fxk: #ffd23f; }
+.bt-b1g { --fxk: #a9b6c6; --art: url("data:image/svg+xml,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22 width=%2296%22 height=%2296%22 viewBox=%220 0 24 24%22 fill=%22none%22 stroke=%22%23a9b6c6%22 stroke-opacity=%220.22%22 stroke-width=%220.46%22 stroke-linecap=%22round%22 stroke-linejoin=%22round%22%3E%3Cpath d=%22M3.5 18.5h17%22/%3E%3Ccircle cx=%228%22 cy=%2214.2%22 r=%223%22/%3E%3Ccircle cx=%2212.6%22 cy=%2212.6%22 r=%223.6%22/%3E%3Ccircle cx=%2216.8%22 cy=%2214.8%22 r=%222.6%22/%3E%3Cpath d=%22M4 9.5h2.5M5 6.5h3M9.5 8h2%22/%3E%3C/svg%3E"); } .bt-c-b1g { --fxk: #a9b6c6; }
+.bt-punting { --fxk: #7fd0ff; --art: url("data:image/svg+xml,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22 width=%2296%22 height=%2296%22 viewBox=%220 0 24 24%22 fill=%22none%22 stroke=%22%237fd0ff%22 stroke-opacity=%220.22%22 stroke-width=%220.46%22 stroke-linecap=%22round%22 stroke-linejoin=%22round%22%3E%3Cpath d=%22M3.5 19.5C7 6 17 6 20.5 19.5%22 stroke-dasharray=%222 2.6%22/%3E%3Cellipse cx=%2212%22 cy=%227.6%22 rx=%222.6%22 ry=%221.5%22 transform=%22rotate%28-20 12 7.6%29%22/%3E%3C/svg%3E"); } .bt-c-punting { --fxk: #7fd0ff; }
+.bt-storm { --fxk: #ff3d6e; --art: url("data:image/svg+xml,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22 width=%2296%22 height=%2296%22 viewBox=%220 0 24 24%22 fill=%22none%22 stroke=%22%23ff3d6e%22 stroke-opacity=%220.22%22 stroke-width=%220.46%22 stroke-linecap=%22round%22 stroke-linejoin=%22round%22%3E%3Cpath d=%22M5 21V8.5M19 21V8.5M5 12.5h14M5 8.5L3.5 3M19 8.5l1.5-5.5%22/%3E%3Cpath d=%22M8 21l1.6-4M12 21v-4.4M16 21l-1.6-4%22/%3E%3C/svg%3E"); } .bt-c-storm { --fxk: #ff3d6e; }
+.bt-hate { --fxk: #ff2a2a; --art: url("data:image/svg+xml,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22 width=%2296%22 height=%2296%22 viewBox=%220 0 24 24%22 fill=%22none%22 stroke=%22%23ff2a2a%22 stroke-opacity=%220.22%22 stroke-width=%220.46%22 stroke-linecap=%22round%22 stroke-linejoin=%22round%22%3E%3Cpath d=%22M5 19l11-11M8 21l-3-2-2-3M19 5l-11 11M16 21l3-2 2-3%22/%3E%3Cpath d=%22M14.5 6.5l3-3.5 3.5 3.5-3.5 3M9.5 6.5l-3-3.5L3 6.5l3.5 3%22/%3E%3C/svg%3E"); } .bt-c-hate { --fxk: #ff2a2a; }
+.bt-bowl { --fxk: #4fe3a0; --art: url("data:image/svg+xml,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22 width=%2296%22 height=%2296%22 viewBox=%220 0 24 24%22 fill=%22none%22 stroke=%22%234fe3a0%22 stroke-opacity=%220.22%22 stroke-width=%220.46%22 stroke-linecap=%22round%22 stroke-linejoin=%22round%22%3E%3Cellipse cx=%2212%22 cy=%228.5%22 rx=%229%22 ry=%223.4%22/%3E%3Cpath d=%22M3 8.5c0 6.4 4 11 9 11s9-4.6 9-11%22/%3E%3Cellipse cx=%2212%22 cy=%229%22 rx=%224.6%22 ry=%221.4%22/%3E%3C/svg%3E"); } .bt-c-bowl { --fxk: #4fe3a0; }
+.bt-heisman { --fxk: #f0cf7a; --art: url("data:image/svg+xml,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22 width=%2296%22 height=%2296%22 viewBox=%220 0 24 24%22 fill=%22none%22 stroke=%22%23f0cf7a%22 stroke-opacity=%220.22%22 stroke-width=%220.46%22 stroke-linecap=%22round%22 stroke-linejoin=%22round%22%3E%3Ccircle cx=%2214.6%22 cy=%223.6%22 r=%221.9%22/%3E%3Cpath d=%22M14.2 6l-2.8 5.6 2.2 3.4-.8 6M11.4 11.6l-4.4 1.8 1 3.6M13.2 7.4l5.4 1.6M12.6 9.2l-2.4-1.6-2 .4%22/%3E%3Cellipse cx=%2210.6%22 cy=%227.8%22 rx=%221.6%22 ry=%221%22 transform=%22rotate%28-25 10.6 7.8%29%22/%3E%3C/svg%3E"); } .bt-c-heisman { --fxk: #f0cf7a; }
+.bt-freefb { --fxk: #ffe14d; --art: url("data:image/svg+xml,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22 width=%2296%22 height=%2296%22 viewBox=%220 0 24 24%22 fill=%22none%22 stroke=%22%23ffe14d%22 stroke-opacity=%220.22%22 stroke-width=%220.46%22 stroke-linecap=%22round%22 stroke-linejoin=%22round%22%3E%3Ccircle cx=%2212%22 cy=%2213.4%22 r=%227.8%22/%3E%3Cpath d=%22M9.6 2.6h4.8M12 2.6v3M19 6.4l1.4-1.4%22/%3E%3Cellipse cx=%2212%22 cy=%2213.4%22 rx=%223.4%22 ry=%222%22 transform=%22rotate%28-35 12 13.4%29%22/%3E%3Cpath d=%22M11 13.4l2-1.2%22/%3E%3C/svg%3E"); } .bt-c-freefb { --fxk: #ffe14d; }
+.bt-satslip { --fxk: #ff9a3d; --art: url("data:image/svg+xml,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22 width=%2296%22 height=%2296%22 viewBox=%220 0 24 24%22 fill=%22none%22 stroke=%22%23ff9a3d%22 stroke-opacity=%220.22%22 stroke-width=%220.46%22 stroke-linecap=%22round%22 stroke-linejoin=%22round%22%3E%3Crect x=%223.5%22 y=%224.5%22 width=%2217%22 height=%2216%22 rx=%222%22/%3E%3Cpath d=%22M3.5 9h17M8 2.8v3.4M16 2.8v3.4%22/%3E%3Cellipse cx=%2212%22 cy=%2214.8%22 rx=%223.6%22 ry=%222.2%22 transform=%22rotate%28-30 12 14.8%29%22/%3E%3Cpath d=%22M11 15l2-1.2%22/%3E%3C/svg%3E"); } .bt-c-satslip { --fxk: #ff9a3d; }
+
+/* the Saturday act's words: the moment's name over the team (or the rivalry, or the player) */
+.x3-cfb em { color: var(--fxk, #ffd23f); }
 </style>
 </head>
 <body>
@@ -8965,7 +9000,7 @@ img.tl, .tl.tlg { background: none; box-shadow: none; border-radius: 0; margin: 
     if (isPP(x.m) && x.s !== "u" && ev && ev.v != null) { const st = ppStat(x.m), l = Number(x.l ?? PP_DEF[st] ?? 0.5); if (HIM_BY[st] && ev.v - l >= HIM_BY[st]) out.push("him"); }
     return out;
   }
-  const hoopStoryPatch = (b, status) => { try { const nb = { ...b, story: undefined }, st = status === "won" ? [...hoopStory(nb, "won"), ...sweatStory(nb, "won")] : []; return st.length ? { story: st } : {}; } catch (e) { return {}; } };
+  const hoopStoryPatch = (b, status) => { try { const nb = { ...b, story: undefined }, st = status === "won" ? [...hoopStory(nb, "won"), ...sweatStory(nb, "won"), ...cfbStory(nb, "won")] : []; return st.length ? { story: st } : {}; } catch (e) { return {}; } };
 
   // the culture's types: icons, names, what the room yells
   const BT_X = new Set(["receipt", "script", "tour", "chalk", "fade", "degen", "cardiac", "hook", "nosweat", "hatty", "garbage"]);
@@ -9010,6 +9045,65 @@ img.tl, .tl.tlg { background: none; box-shadow: none; border-radius: 0; margin: 
     return who.size >= 2;
   }
   const btDegen = (b, t0) => { const h0 = t0 ? etHr(t0) % 24 : null, hp = b.placedAt ? etHr(b.placedAt) % 24 : null; return (h0 != null && (h0 >= 22 || h0 < 4)) || (hp != null && hp < 5); };
+
+  // ---------- college football's own types: the conferences, the jokes, the rivalries ----------
+  const BT_CF = new Set(["maction", "funbelt", "sickos", "cupcake", "direct", "afterdark", "big12", "airraid", "b1g", "punting", "storm", "hate", "bowl", "heisman", "freefb", "satslip"]);
+  Object.assign(BT_DEF, { maction: ["<svg class=\"bt-ico\" viewBox=\"0 0 24 24\" aria-hidden=\"true\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\" stroke-linecap=\"round\" stroke-linejoin=\"round\"><path d=\"M9 21l1.6-11h2.8L15 21M7.8 21h8.4\"/><rect x=\"4.5\" y=\"3\" width=\"15\" height=\"7\" rx=\"1.2\"/><path d=\"M8 6.5h.01M12 6.5h.01M16 6.5h.01\"/></svg>", "MACtion"], funbelt: ["<svg class=\"bt-ico\" viewBox=\"0 0 24 24\" aria-hidden=\"true\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\" stroke-linecap=\"round\" stroke-linejoin=\"round\"><circle cx=\"12\" cy=\"12\" r=\"4.2\"/><path d=\"M12 2.5v2.6M12 18.9v2.6M2.5 12h2.6M18.9 12h2.6M5.3 5.3l1.8 1.8M16.9 16.9l1.8 1.8M5.3 18.7l1.8-1.8M16.9 7.1l1.8-1.8\"/></svg>", "Fun Belt"], sickos: ["<svg class=\"bt-ico\" viewBox=\"0 0 24 24\" aria-hidden=\"true\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\" stroke-linecap=\"round\" stroke-linejoin=\"round\"><rect x=\"3\" y=\"3\" width=\"18\" height=\"18\" rx=\"1.6\"/><path d=\"M3 7.5h18M3 16.5h18M3 20h18\"/><circle cx=\"9.2\" cy=\"11.6\" r=\"1.4\"/><circle cx=\"14.8\" cy=\"11.6\" r=\"1.4\"/></svg>", "Sickos"], cupcake: ["<svg class=\"bt-ico\" viewBox=\"0 0 24 24\" aria-hidden=\"true\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\" stroke-linecap=\"round\" stroke-linejoin=\"round\"><path d=\"M6 12.5h12l-1.6 8.5H7.6z\"/><path d=\"M9.5 12.5l.6 8.5M14.5 12.5l-.6 8.5\"/><path d=\"M5.5 12.5c-.6-3.2 2.2-4.4 3.6-4 .4-2.6 5.4-2.6 5.8 0 1.4-.4 4.2.8 3.6 4\"/><circle cx=\"12\" cy=\"4.6\" r=\"1.4\"/></svg>", "Cupcake game"], direct: ["<svg class=\"bt-ico\" viewBox=\"0 0 24 24\" aria-hidden=\"true\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\" stroke-linecap=\"round\" stroke-linejoin=\"round\"><circle cx=\"12\" cy=\"12\" r=\"9\"/><path d=\"M12 5.5l2.4 6.5L12 18.5 9.6 12z\"/><path d=\"M12 1.8v1.6M12 20.6v1.6M1.8 12h1.6M20.6 12h1.6\"/></svg>", "Directional school"], afterdark: ["<svg class=\"bt-ico\" viewBox=\"0 0 24 24\" aria-hidden=\"true\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\" stroke-linecap=\"round\" stroke-linejoin=\"round\"><path d=\"M17.5 14.6A7.4 7.4 0 0 1 9.4 4.2a7.4 7.4 0 1 0 8.1 10.4z\"/><path d=\"M17 3.2l.6 1.6 1.6.6-1.6.6-.6 1.6-.6-1.6-1.6-.6 1.6-.6zM20.4 9l.4 1 1 .4-1 .4-.4 1-.4-1-1-.4 1-.4z\"/></svg>", "After Dark"], big12: ["<svg class=\"bt-ico\" viewBox=\"0 0 24 24\" aria-hidden=\"true\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\" stroke-linecap=\"round\" stroke-linejoin=\"round\"><path d=\"M12 2.8l7.6 3v5.6c0 4.8-3.2 8.4-7.6 9.8-4.4-1.4-7.6-5-7.6-9.8V5.8z\"/><path d=\"M12.6 3.2l-1.8 5.4 2.6 2.4-2.4 4 1.4 6\"/></svg>", "Big 12 defense"], airraid: ["<svg class=\"bt-ico\" viewBox=\"0 0 24 24\" aria-hidden=\"true\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\" stroke-linecap=\"round\" stroke-linejoin=\"round\"><ellipse cx=\"14\" cy=\"10\" rx=\"6.4\" ry=\"3.6\" transform=\"rotate(-28 14 10)\"/><path d=\"M11.8 10.6l4.4-2.4M2.5 15.5h5M4 19h6M2.5 12h3.5\"/></svg>", "Air raid"], b1g: ["<svg class=\"bt-ico\" viewBox=\"0 0 24 24\" aria-hidden=\"true\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\" stroke-linecap=\"round\" stroke-linejoin=\"round\"><path d=\"M3.5 18.5h17\"/><circle cx=\"8\" cy=\"14.2\" r=\"3\"/><circle cx=\"12.6\" cy=\"12.6\" r=\"3.6\"/><circle cx=\"16.8\" cy=\"14.8\" r=\"2.6\"/><path d=\"M4 9.5h2.5M5 6.5h3M9.5 8h2\"/></svg>", "Big Ten football"], punting: ["<svg class=\"bt-ico\" viewBox=\"0 0 24 24\" aria-hidden=\"true\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\" stroke-linecap=\"round\" stroke-linejoin=\"round\"><path d=\"M3.5 19.5C7 6 17 6 20.5 19.5\" stroke-dasharray=\"2 2.6\"/><ellipse cx=\"12\" cy=\"7.6\" rx=\"2.6\" ry=\"1.5\" transform=\"rotate(-20 12 7.6)\"/></svg>", "Punting is winning"], storm: ["<svg class=\"bt-ico\" viewBox=\"0 0 24 24\" aria-hidden=\"true\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\" stroke-linecap=\"round\" stroke-linejoin=\"round\"><path d=\"M5 21V8.5M19 21V8.5M5 12.5h14M5 8.5L3.5 3M19 8.5l1.5-5.5\"/><path d=\"M8 21l1.6-4M12 21v-4.4M16 21l-1.6-4\"/></svg>", "Storm the field"], hate: ["<svg class=\"bt-ico\" viewBox=\"0 0 24 24\" aria-hidden=\"true\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\" stroke-linecap=\"round\" stroke-linejoin=\"round\"><path d=\"M5 19l11-11M8 21l-3-2-2-3M19 5l-11 11M16 21l3-2 2-3\"/><path d=\"M14.5 6.5l3-3.5 3.5 3.5-3.5 3M9.5 6.5l-3-3.5L3 6.5l3.5 3\"/></svg>", "Hate week"], bowl: ["<svg class=\"bt-ico\" viewBox=\"0 0 24 24\" aria-hidden=\"true\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\" stroke-linecap=\"round\" stroke-linejoin=\"round\"><ellipse cx=\"12\" cy=\"8.5\" rx=\"9\" ry=\"3.4\"/><path d=\"M3 8.5c0 6.4 4 11 9 11s9-4.6 9-11\"/><ellipse cx=\"12\" cy=\"9\" rx=\"4.6\" ry=\"1.4\"/></svg>", "Bowl szn"], heisman: ["<svg class=\"bt-ico\" viewBox=\"0 0 24 24\" aria-hidden=\"true\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\" stroke-linecap=\"round\" stroke-linejoin=\"round\"><circle cx=\"14.6\" cy=\"3.6\" r=\"1.9\"/><path d=\"M14.2 6l-2.8 5.6 2.2 3.4-.8 6M11.4 11.6l-4.4 1.8 1 3.6M13.2 7.4l5.4 1.6M12.6 9.2l-2.4-1.6-2 .4\"/><ellipse cx=\"10.6\" cy=\"7.8\" rx=\"1.6\" ry=\"1\" transform=\"rotate(-25 10.6 7.8)\"/></svg>", "Heisman pose"], freefb: ["<svg class=\"bt-ico\" viewBox=\"0 0 24 24\" aria-hidden=\"true\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\" stroke-linecap=\"round\" stroke-linejoin=\"round\"><circle cx=\"12\" cy=\"13.4\" r=\"7.8\"/><path d=\"M9.6 2.6h4.8M12 2.6v3M19 6.4l1.4-1.4\"/><ellipse cx=\"12\" cy=\"13.4\" rx=\"3.4\" ry=\"2\" transform=\"rotate(-35 12 13.4)\"/><path d=\"M11 13.4l2-1.2\"/></svg>", "Free football"], satslip: ["<svg class=\"bt-ico\" viewBox=\"0 0 24 24\" aria-hidden=\"true\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\" stroke-linecap=\"round\" stroke-linejoin=\"round\"><rect x=\"3.5\" y=\"4.5\" width=\"17\" height=\"16\" rx=\"2\"/><path d=\"M3.5 9h17M8 2.8v3.4M16 2.8v3.4\"/><ellipse cx=\"12\" cy=\"14.8\" rx=\"3.6\" ry=\"2.2\" transform=\"rotate(-30 12 14.8)\"/><path d=\"M11 15l2-1.2\"/></svg>", "Saturday special"] });
+  Object.assign(BT_CALL, { maction: ["MACtion", "MACtion baby", "Weeknight MACtion", "Sickos rejoice", "Tuesday night lights"], funbelt: ["Fun Belt", "Fun Belt chaos", "Never sleep on the Fun Belt", "Sun Belt so fun"], sickos: ["Sickos", "Ha ha... yes", "Sickos committee approved", "For the sickos", "Built for the sickos"], cupcake: ["Cupcake szn", "Body bag game", "Paid to lose", "Free square", "Cupcake eaten"], direct: ["Directional school", "Never doubt the directionals", "Compass cash", "Point it on the map"], afterdark: ["After Dark", "Pac-12 After Dark", "Hawaii time", "Sickos only", "Up past midnight"], big12: ["Big 12 defense", "Who needs defense", "Basketball on grass", "Points for everybody"], airraid: ["Air raid", "Throw it every down", "Scoreboard broke", "Track meet"], b1g: ["Big Ten football", "13-10 ballgame", "Three yards and a cloud of dust", "Rock fight"], punting: ["Punting is winning", "Punt God", "Field position game", "Ugly is beautiful"], storm: ["Storm the field", "Rush the field", "Goalposts are coming down", "Upset city", "Ranked teams fear us"], hate: ["Hate week", "Bragging rights", "Rivalry week", "Hate never takes a week off"], bowl: ["Bowl szn", "Bowl season baby", "Bowl game cash", "Gift bag"], heisman: ["Heisman pose", "Strike the pose", "Heisman moment", "Stiff-arm the book"], freefb: ["Free football", "College overtime", "Two-point shootout", "More football"], satslip: ["Saturday special", "College football Saturday", "Swept the slate", "Saturdays are for the boys"] });
+  const CF_FBS = new Set(["1", "4", "5", "8", "9", "12", "15", "17", "18", "37", "151"]), CF_P4 = new Set(["1", "4", "5", "8"]);
+  const CF_RIV = new Map(); for (const [a, h, nm] of [["333", "2", "Iron Bowl"], ["194", "130", "The Game"], ["251", "201", "Red River"], ["61", "57", "The Cocktail Party"], ["145", "344", "Egg Bowl"], ["264", "265", "Apple Cup"], ["228", "2579", "Palmetto Bowl"], ["52", "57", "Sunshine Showdown"], ["52", "2390", "FSU vs Miami"], ["2390", "57", "Miami vs Florida"], ["30", "87", "USC vs Notre Dame"], ["30", "26", "Crosstown Showdown"], ["349", "2426", "Army-Navy"], ["135", "275", "Paul Bunyan's Axe"], ["2294", "66", "Cy-Hawk"], ["2305", "2306", "Sunflower Showdown"], ["201", "197", "Bedlam"], ["252", "254", "Holy War"], ["2483", "204", "Oregon vs Oregon State"], ["251", "245", "Lone Star Showdown"], ["153", "150", "Victory Bell"], ["259", "258", "Commonwealth Clash"], ["221", "277", "Backyard Brawl"], ["96", "97", "Governor's Cup"], ["59", "61", "Clean Old-Fashioned Hate"], ["2633", "333", "Third Saturday in October"], ["130", "127", "Paul Bunyan Trophy"], ["84", "2509", "Old Oaken Bucket"], ["24", "25", "The Big Game"], ["12", "9", "Territorial Cup"], ["38", "36", "Rocky Mountain Showdown"], ["158", "2294", "Heroes Game"], ["135", "2294", "Floyd of Rosedale"], ["356", "77", "Land of Lincoln"], ["8", "99", "Golden Boot"], ["2", "61", "Deep South's Oldest Rivalry"], ["142", "2305", "Border War"], ["2628", "2567", "Iron Skillet"], ["248", "242", "Bayou Bucket"], ["2649", "189", "Battle of I-75"], ["2117", "2711", "Michigan MAC Trophy"], ["195", "193", "Battle of the Bricks"], ["2439", "2440", "Fremont Cannon"], ["2751", "36", "Border War"], ["2026", "290", "Deeper Than Hate"], ["2005", "349", "Commander-in-Chief's Trophy"], ["2005", "2426", "Commander-in-Chief's Trophy"], ["221", "213", "Keystone Classic"], ["2633", "96", "Tennessee vs Kentucky"], ["99", "333", "LSU vs Alabama"]]) { CF_RIV.set(a + ":" + h, nm); CF_RIV.set(h + ":" + a, nm); }
+  const CF_DIR = /^(north|south|east|west|northern|southern|eastern|western|central)\s/i, CF_STATE = /^(north|south) (carolina|dakota)\b(?!\s*a&t)|^west virginia\b/i;
+  const cfGame = (x) => { const g = x && x.g != null ? gameOf(x) : null; return g && g.sport === "CFB" ? g : null; };
+  const cfConf = (t) => String((t && t.cf) || "");
+  const cfFcs = (t) => { const c = cfConf(t); return !!c && !CF_FBS.has(c); };
+  const cfDir = (t) => { const l = String((t && (t.loc || t.fn)) || ""); return CF_DIR.test(l) && !CF_STATE.test(l); };
+  const cfRiv = (g) => (g ? CF_RIV.get(String(g.a.id) + ":" + String(g.h.id)) || "" : "");
+  // a star's line: 100+ on the ground or catching it, 275+ throwing it
+  const cfBigLine = (x, st) => (x.sp === "CFB" || (gameOf(x) || {}).sport === "CFB") && Number(x.l) >= (st === "fb_pyd" ? 274.5 : st === "fb_rry" ? 124.5 : 99.5);
+  // the side: an unranked team taking on a ranked one (to win it, or giving points), a rivalry
+  function cfbLead(b) {
+    const x = b.sel; if (b.kind === "parlay" || !x) return [];
+    const g = cfGame(x); if (!g || !(x.s === "a" || x.s === "h") || !(x.m === "ml" || x.m === "sp")) return [];
+    const me = g[x.s], op = g[x.s === "a" ? "h" : "a"], out = [];
+    if (!me.rk && op.rk && (x.m === "ml" || Number(x.l) <= 0)) out.push("storm");
+    if (cfRiv(g)) out.push("hate");
+    return out;
+  }
+  // the game: a bowl, an FCS team on the schedule, the MAC, the Sun Belt, the rest of the Group of Five, a directional school
+  function cfbFlavor(b) {
+    const x = b.sel; if (b.kind === "parlay" || !x) return [];
+    const g = cfGame(x); if (!g) return [];
+    const out = [], ca = cfConf(g.a), ch = cfConf(g.h), side = x.s === "a" || x.s === "h" ? g[x.s] : null;
+    if (g.sty === 3) out.push("bowl");
+    if (cfFcs(g.a) || cfFcs(g.h)) out.push("cupcake");
+    else if (ca === "15" && ch === "15") out.push("maction");
+    else if (ca === "37" && ch === "37") out.push("funbelt");
+    else if (ca && ch && !CF_P4.has(ca) && !CF_P4.has(ch) && ca !== "18" && ch !== "18") out.push("sickos");
+    if (side ? cfDir(side) : cfDir(g.a) || cfDir(g.h)) out.push("direct");
+    return out;
+  }
+  const cfOver = (g) => (cfConf(g.a) === "4" || cfConf(g.h) === "4" ? "big12" : "airraid");
+  const cfUnder = (g) => (cfConf(g.a) === "5" || cfConf(g.h) === "5" ? "b1g" : "punting");
+  const cfbLate = (b, t0) => { if (!t0 || b.kind === "parlay" || !cfGame(b.sel)) return false; const h = etHr(t0) % 24; return h >= 22 || h < 4; };
+  // a parlay of three or more different college games
+  const cfbSlate = (b) => { const L = b.legSel || []; if (L.length < 3 || L.length !== (b.legs || []).length || !L.every((x) => x && (x.sp === "CFB" || (x.g != null && (gameOf(x) || {}).sport === "CFB")))) return false; return new Set(L.map((x) => String(x.g))).size >= 3; };
+  // the finish, saved on the bet when it settles: overtime, and an unranked team's cover that won it outright
+  function cfbStory(b, status) {
+    if (Array.isArray(b.story)) return b.story.filter((k) => BT_CF.has(k));
+    if ((status || b.status) !== "won" || b.kind === "parlay" || !b.sel) return [];
+    const x = b.sel, g = cfGame(x); if (!g || g.st === "pre") return [];
+    const out = [];
+    if (Number(g.pd) > 4) out.push("freefb");
+    if (x.m === "sp" && (x.s === "a" || x.s === "h") && Number(x.l) > 0) { const me = g[x.s], op = g[x.s === "a" ? "h" : "a"]; if (!me.rk && op.rk && g.st === "post" && me.sc > op.sc) out.push("storm"); }
+    return out;
+  }
+  // what the room yells: a rivalry by its name, a playoff game as playoff football
+  function cfbCalls(b, k) {
+    const g = b.kind !== "parlay" && b.sel ? cfGame(b.sel) : null; if (!g) return null;
+    if (k === "hate") { const nm = cfRiv(g); return nm ? [nm, nm, "Hate week", "Bragging rights"] : null; }
+    if (k === "bowl" && /playoff/i.test(g.nt || "")) return ["Playoff football", "Natty run", "Playoff cash"];
+    return null;
+  }
   const fxUSD = (v) => "$" + (Math.abs(v - Math.round(v)) < 0.005 ? Math.round(v).toLocaleString() : v.toFixed(2));
   const ET_DAY = new Intl.DateTimeFormat("en-CA", { timeZone: "America/New_York" }), ET_HR = new Intl.DateTimeFormat("en-US", { timeZone: "America/New_York", hour: "numeric", hourCycle: "h23" });
   const etDayOf = (t) => ET_DAY.format(new Date(t)), etHr = (t) => Number(ET_HR.format(new Date(t)));
@@ -9057,7 +9151,7 @@ img.tl, .tl.tlg { background: none; box-shadow: none; border-radius: 0; margin: 
       return { nba_3pm: "splash", nba_reb: "glass", nba_ast: "dimes", nba_stl: "stocks", nba_blk: "stocks", nba_sb: "stocks", nba_pra: "stuffer", nba_pr: "stuffer", nba_pa: "stuffer", nba_ra: "stuffer", nba_dd: "stuffer", nba_td: "stuffer", nba_to: "brick" }[st] || "bucket";
     }
     if (st === "mlb_k" && x.s !== "u") return "punchout";
-    if (["fb_pyd", "fb_ruyd", "fb_ryd", "fb_rry"].includes(st) && x.s !== "u") return "chains";
+    if (["fb_pyd", "fb_ruyd", "fb_ryd", "fb_rry"].includes(st) && x.s !== "u") return cfBigLine(x, st) ? "heisman" : "chains";
     return "";
   }
   // every type a bet fits, its look first
@@ -9072,14 +9166,16 @@ img.tl, .tl.tlg { background: none; box-shadow: none; border-radius: 0; margin: 
     // the sport's own: a home run, a goal, a bucket, strikeouts, a TD scorer, yardage (a parlay of all one kind counts)
     let sk = par ? ((b.legSel || []).length && b.legSel.every((x) => btSport(x) && btSport(x) === btSport(b.legSel[0])) ? btSport(b.legSel[0]) : "") : btSport(b.sel);
     if (!sk && !par && !b.sel) { const t = b.pick || ""; sk = /\b(hr|home ?runs?|homers?|dingers?)\b/i.test(t) && b.sport !== "NHL" ? "dinger" : /\banytime (td|touchdown)\b/i.test(t) ? "six" : /\b(anytime goal|goal ?scorer)\b/i.test(t) ? "lamp" : ""; }
-    for (const st of [...hoopStory(b), ...sweatStory(b)]) k.push(st);
+    for (const st of [...hoopStory(b), ...sweatStory(b), ...cfbStory(b)]) k.push(st);
     if (sk) k.push(sk);
+    for (const x of cfbLead(b)) if (!k.includes(x)) k.push(x);
     if (!par && o > 100 && usd >= 40 - 0.005) k.push("opal");
     if (par && n >= 8) k.push("receipt");
     if (par && o >= 1000) k.push("lotto");
     if (!par && o >= SNIPER_ODDS) k.push("snipe");
     if (par && n >= 2 && (b.legSel || []).length === n && b.legSel.every((x) => x && x.g != null && String(x.g) === String(b.legSel[0].g))) k.push("script");
     if (par && new Set((b.legSel || []).filter((x) => x && x.sp).map((x) => x.sp)).size >= 2) k.push("tour");
+    if (par && cfbSlate(b)) k.push("satslip");
     if (par && o >= 400 && o < 1000) k.push("long");
     if (!par && o < 0 && o <= -250) k.push("chalk");
     if (btFade(b)) k.push("fade");
@@ -9088,10 +9184,13 @@ img.tl, .tl.tlg { background: none; box-shadow: none; border-radius: 0; margin: 
     if (!par && m === "tot") {
       const l = Number(b.sel.l), big = { NFL: 49.5, CFB: 55.5, NBA: 230, CBB: 150, MLB: 9.5, NHL: 6.5 }[b.sel.sp || b.sport];
       const nb = (b.sel.sp || b.sport) === "NBA" || (gameOf(b.sel) || {}).sport === "NBA";
-      if (b.sel.s === "o" && big && l >= big) k.push(nb ? "matador" : "shootout");
-      if (b.sel.s === "u" && u >= 1 - 0.005) k.push(nb ? "rockfight" : "lockdown");
+      const cg = cfGame(b.sel);
+      if (b.sel.s === "o" && big && l >= big) k.push(nb ? "matador" : cg ? cfOver(cg) : "shootout");
+      if (b.sel.s === "u" && u >= 1 - 0.005) k.push(nb ? "rockfight" : cg ? cfUnder(cg) : "lockdown");
     }
-    if (btDegen(b, t0)) k.push("degen");
+    if (cfbLate(b, t0)) k.push("afterdark");
+    for (const x of cfbFlavor(b)) k.push(x);
+    if (btDegen(b, t0) && !cfbLate(b, t0)) k.push("degen");
     if (night && (m === "ml" || m === "sp")) k.push("prime");
     if (!par && m === "ml" && o > 100) k.push("dawg");
     // the medals by stake (a whale or a nuke already says how big it is)
@@ -9101,7 +9200,7 @@ img.tl, .tl.tlg { background: none; box-shadow: none; border-radius: 0; margin: 
   function flexOf(b, units) {
     const ks = betTypes(b, units), k = ks[0] || null, usd = (units != null ? units : Number(b.units) || 0) * S.unit;
     const name = k === "dawg" && btDaily(b.placedAt).dawg === b.id ? "Dawg of the day" : k ? BT_DEF[k][1] : "";
-    const side = ["bronze", "silver", "prime", "six", "chains", "dinger", "punchout", "lamp", "bucket", "shootout", "lockdown", "rivalry", "cook", "splash", "glass", "dimes", "stocks", "stuffer", "brick", "matador", "rockfight", "chalk", "degen", "fade", "hook", "nosweat", "garbage"].includes(k) || (k === "dawg" && name === "Dawg"), live = !!k && btLive(b);
+    const side = ["bronze", "silver", "prime", "six", "chains", "dinger", "punchout", "lamp", "bucket", "shootout", "lockdown", "rivalry", "cook", "splash", "glass", "dimes", "stocks", "stuffer", "brick", "matador", "rockfight", "maction", "funbelt", "sickos", "cupcake", "direct", "afterdark", "big12", "airraid", "b1g", "punting", "satslip", "chalk", "degen", "fade", "hook", "nosweat", "garbage"].includes(k) || (k === "dawg" && name === "Dawg"), live = !!k && btLive(b);
     const hype = !!k && ((Number(b.odds) || 0) >= 1000 || usd >= 50 - 0.005);
     // the team: its colors (and both teams' for a rivalry), its logo when the pick is a side or one of its players
     const vars = {}, g = b.kind !== "parlay" && b.sel ? gameOf(b.sel) : null, hex = (c) => (/^#[0-9a-f]{6}$/i.test(c || "") ? c : "");
@@ -9116,9 +9215,9 @@ img.tl, .tl.tlg { background: none; box-shadow: none; border-radius: 0; margin: 
         const cs = [hex(tm.col), hex(tm.alt)].filter(Boolean).sort((x, y) => lum(y) - lum(x));
         if (cs[0]) vars["--tca"] = lum(cs[0]) < 70 ? "#c9d1dc" : cs[0]; if (/^https:\/\/[^\s"'()<>]+$/.test(tm.lg || "")) tlg = tm.lg; }
     }
-    const team = !!k && k !== "rivalry" && !BT_X.has(k) && b.kind !== "parlay" && !!b.sel && (b.sel.m === "ml" || b.sel.m === "sp") && !!vars["--tc1"];
+    const team = !!k && k !== "rivalry" && !BT_X.has(k) && !BT_CF.has(k) && b.kind !== "parlay" && !!b.sel && (b.sel.m === "ml" || b.sel.m === "sp") && !!vars["--tc1"];
     const sty = "--d:" + btT(b.id) + Object.entries(vars).map(([a, v]) => ";" + a + ":" + v).join("");
-    return { k, odds: k, more: ks.slice(1, 4), name, usd, win: usd * ppu(Number(b.odds) || 0), winU: (usd / S.unit) * ppu(Number(b.odds) || 0), cls: k ? " fx bt bt-" + k + (live ? " bt-islive" : "") + (["bronze", "silver", "gold"].includes(k) ? " bt-metal" : "") + (BT_NBA.has(k) ? " bt-nb" : "") + (hype ? " bt-hype" : "") + (team ? " bt-team" : "") : "", live, hype, vars, sty, tlg, tn: b.sel && b.sel.m === "td" ? tn : "", team, big: !!k && (!side || hype) };
+    return { k, odds: k, more: ks.slice(1, 4), name, usd, win: usd * ppu(Number(b.odds) || 0), winU: (usd / S.unit) * ppu(Number(b.odds) || 0), cls: k ? " fx bt bt-" + k + (live ? " bt-islive" : "") + (["bronze", "silver", "gold"].includes(k) ? " bt-metal" : "") + (BT_NBA.has(k) ? " bt-nb" : "") + (BT_CF.has(k) ? " bt-cf" : "") + (hype ? " bt-hype" : "") + (team ? " bt-team" : "") : "", live, hype, vars, sty, tlg, tn: b.sel && b.sel.m === "td" ? tn : "", team, big: !!k && (!side || hype) };
   }
   const btHash = (id) => { let h = 0; for (const ch of String(id || "")) h = (h * 31 + ch.charCodeAt(0)) | 0; return Math.abs(h); };
   const btT = (id) => "-" + ((Date.now() / 1000 + (id != null ? btHash(id) % 60 : 0)) % 120).toFixed(2) + "s";
@@ -9142,6 +9241,7 @@ img.tl, .tl.tlg { background: none; box-shadow: none; border-radius: 0; margin: 
     six: "Cash an anytime TD scorer", chains: "Cash a yardage over", rivalry: "Cash a 1u+ side in a division game", shootout: "Cash an over on a big total", lockdown: "Cash a 1u+ under", prime: "Night game ML or spread", dawg: "Cash an underdog ML", gold: "Cash a 3u bet", silver: "Cash a 2u bet", bronze: "Cash a 1u parlay" };
   Object.assign(BT_HOW, { bucket: "Cash a points over", cook: "Cash a 25.5+ points over", splash: "Cash a threes over", glass: "Cash a rebounds over", dimes: "Cash an assists over", stocks: "Cash a steals or blocks over", stuffer: "Cash a points + rebounds + assists over", brick: "Cash a player under: he bricked it", matador: "Cash an NBA over at 230+", rockfight: "Cash a 1u+ NBA under", freehoops: "Cash a bet in an overtime game", backdoor: "Cash a spread by 2 or less", doubt: "Cash a side that trailed by 15+", him: "A player over cleared by a mile" });
   Object.assign(BT_HOW, { receipt: "Cash a parlay of 8 legs or more", script: "Cash a same-game parlay", tour: "Cash a parlay across 2+ sports", chalk: "Cash a straight bet at -250 or shorter", fade: "Cash the other side of 2+ people in the room", degen: "Cash a 10 PM+ game, or a bet placed after midnight", cardiac: "Cash a side that was losing in the final period", hook: "Win a spread or total by half a point", nosweat: "Cover by a mile: 17+ NFL, 20+ NBA, 5+ MLB, 3+ NHL", hatty: "A player you backed scores 3 goals", garbage: "Clear an NBA prop in a 4th-quarter blowout (18+)" });
+  Object.assign(BT_HOW, { maction: "Cash a bet on a MAC game", funbelt: "Cash a bet on a Sun Belt game", sickos: "Cash a bet on a Group of Five game", cupcake: "Cash a bet on a game against an FCS team", direct: "Cash a bet on a directional school (Western Michigan, North Texas...)", afterdark: "Cash a college game that kicked off 10 PM ET or later", big12: "Cash an over on a big total in a Big 12 game", airraid: "Cash an over on a big college total", b1g: "Cash a 1u+ under in a Big Ten game", punting: "Cash a 1u+ college under", storm: "Cash an unranked team against a ranked one", hate: "Cash a side in a rivalry game (Iron Bowl, The Game, Red River...)", bowl: "Cash a bowl game", heisman: "Cash a big college yardage over (100+ rush or receiving, 275+ passing)", freefb: "Cash a college bet in an overtime game", satslip: "Cash a parlay of 3+ college games" });
   const pfName = (pr) => (pr.id === "me" ? meName() : pr.nm);
   const pfDate = (t) => (t ? new Date(t).toLocaleDateString("en-US", { month: "short", day: "numeric" }) : "");
   function pfOf(b) {
@@ -9516,7 +9616,7 @@ img.tl, .tl.tlg { background: none; box-shadow: none; border-radius: 0; margin: 
 
   const CASH = { q: [], t: 0 };
   const CASH_LV_X = { receipt: 4, script: 3, tour: 3, chalk: 1, fade: 3, degen: 2, cardiac: 4, hook: 3, nosweat: 2, hatty: 4, garbage: 3 };
-  const CASH_LV = { ...CASH_LV_X, nuke: 5, botd: 4, whale: 4, lotto: 4, opal: 3, dart: 3, snipe: 3, long: 3, gold: 3, dinger: 3, lamp: 3, cook: 3, splash: 3, him: 3, doubt: 3, freehoops: 3, backdoor: 3 };
+  const CASH_LV = { ...CASH_LV_X, maction: 2, funbelt: 2, sickos: 2, cupcake: 1, direct: 2, afterdark: 2, big12: 2, airraid: 2, b1g: 2, punting: 2, storm: 3, hate: 3, bowl: 3, heisman: 3, freefb: 3, satslip: 2, nuke: 5, botd: 4, whale: 4, lotto: 4, opal: 3, dart: 3, snipe: 3, long: 3, gold: 3, dinger: 3, lamp: 3, cook: 3, splash: 3, him: 3, doubt: 3, freehoops: 3, backdoor: 3 };
   function cashLevel(b, F) {
     const usd = (Number(b.units) || 0) * S.unit, o = Number(b.odds) || 0;
     let lv = F.k ? CASH_LV[F.k] || 2 : 1;
@@ -10899,7 +10999,7 @@ img.tl, .tl.tlg { background: none; box-shadow: none; border-radius: 0; margin: 
       icon: top && BT_DEF[top.k] && String(BT_DEF[top.k][0]).startsWith("<svg") ? BT_DEF[top.k][0] : null, achName: top ? BT_DEF[top.k][1] : "",
       ban1: s3col(tm && tm.col, acc), ban2: "#0b0c0e", vid: c.vid || null, k: c.F.k || "", legs: c.legs.map(s3leg), hist: legOf(c), legGap: c.legGap || 0.35, lite: (!!SHOW.slow && !fxFull()) || s3pref("lite"), low: s3pref("low") };
   }
-  function show3Info(c, el) { const I = show3InfoBase(c, el); try { I.fld = fbFld(c); } catch (e) {} return I; }
+  function show3Info(c, el) { const I = show3InfoBase(c, el); try { I.fld = fbFld(c); } catch (e) {} I.cf = cfOfC(c); return I; }
   function show3Chrome(c) {
     const b = c.b, lvl = c.lvl;
     let h = `<div class="x3-hud"><span class="l"><i></i>${lvl >= 5 ? "Nuke" : lvl >= 4 ? "Big cash" : "Cashed"} · ${esc(etClock(b.settledAt || Date.now()))}</span><span class="r">${esc(BOOK[bookKey(b)])} · #${esc(String(b.id).slice(-4).toUpperCase())}</span></div>`;
@@ -11222,14 +11322,56 @@ img.tl, .tl.tlg { background: none; box-shadow: none; border-radius: 0; margin: 
       return whyLine(`<b>Lost</b>${nm} put ${esc(fU(Number(x.b.units) || 0))} on ${pk}. It missed: would've paid ${esc(fU(x.towin))}, lost ${esc(fU(x.n, true))}`);
     } catch (e) { return ""; }
   }
+
+  // ---- college football: the Saturday moment ----
+  const CFV_LAB = { band: "The band", storm: "Storm the field", flag: "Plant the flag", pose: "Heisman pose" };
+  function cfbShow(c) {
+    const b = c.b, x = c.sel, g = c.g, par = b.kind === "parlay";
+    if (par ? !cfbSlate(b) : !(g && g.sport === "CFB")) return null;
+    const ks = betTypes(b), k = (c.F && c.F.k) || "";
+    let tm = null;
+    if (g && x && (x.s === "a" || x.s === "h")) tm = g[x.s];
+    else if (g && x && x.p && x.p.tm) tm = String(g.a.id) === String(x.p.tm) ? g.a : String(g.h.id) === String(x.p.tm) ? g.h : null;
+    if (!tm && g) tm = g.h;
+    const v = ks.includes("storm") ? "storm" : k === "heisman" || ks.includes("heisman") ? "pose" : ks.includes("hate") ? "flag" : par || (x && x.m === "tot") ? "band" : btHash(b.id) % 2 ? "flag" : "band";
+    const hex = (h) => (/^#[0-9a-f]{6}$/i.test(h || "") ? h : "");
+    return { v, ab: tm ? tm.ab : "CFB", nm: tm ? tm.nm : "College", col: hex(tm && tm.col) || "#8a1020", alt: hex(tm && tm.alt) || "#ffffff", br: tm ? bright(tm) : "#ffd23f",
+      riv: g ? cfRiv(g) : "", player: x && x.p ? String(x.p.nm || "") : "" };
+  }
+  const cfOfC = (c) => { if (c.cf === undefined) { try { c.cf = cfbShow(c); } catch (e) { c.cf = null; } } return c.cf; };
+  // when each one lands (the 3D's own clock, from the act's length)
+  const cfHit = (v, T) => (v === "band" ? Math.min(1.9, T * 0.3) + Math.min(1.6, T * 0.26) + 0.15 : v === "storm" ? Math.min(3.1, T * 0.48) + 1.4 : v === "flag" ? Math.min(2.6, T * 0.42) + 0.55 : Math.min(2.2, T * 0.38) + 0.2);
+  SH3.cfb = {
+    ok: (c) => !!cfOfC(c),
+    html: (c) => { const C = cfOfC(c), head = C.v === "flag" && C.riv ? C.riv : C.v === "pose" && C.player ? C.player : C.v === "pose" ? c.name : C.nm;
+      return `<div class="x3-gteam x3-cfb"><em>${esc(CFV_LAB[C.v])}</em><b>${esc(head)}</b><span>${esc(c.name)} · ${esc(fU(c.n, true))} (${esc(fUSD(c.usd))}) on ${esc(c.b.pick)}</span></div>`; },
+    go: (c, d, a) => {
+      const C = cfOfC(c), T = a.ms / 1000, hit = cfHit(C.v, T) * 1000;
+      shCrowd(150, a.ms - 300, C.v === "storm" ? 0.22 : 0.15);
+      if (C.v === "band") for (let t = 250; t < hit; t += 290) shSfx("sniper/bc_tick", t % 580 < 290 ? 0.45 : 0.25, t);
+      if (C.v === "storm") for (let i = 0; i < 9; i++) shSfx("sniper/bc_tick", 0.2, 300 + i * 320);
+      if (C.v === "flag") { shSfx("sniper/whoosh", 0.5, 300); for (let i = 0; i < 6; i++) shSfx("sniper/bc_tick", 0.22, 450 + i * 330); }
+      if (C.v === "pose") { shSfx("sniper/whoosh", 0.5, 400); shSfx("sniper/bc_sting", 0.6, hit - 250); }
+      shSfx("sniper/slam", 0.9, hit); shSfx("sniper/launch", 0.75, hit + 30); shSfx("coins", 0.55, hit + 700); shSfx("sniper/bc_check", 0.7, hit + 760);
+    },
+  };
+  WHY3.cfb = (c) => { const C = cfOfC(c), nm = c.name === "You" ? "you" : c.name;
+    if (C.v === "storm") return `<b>Storm the field</b>an unranked team took down a ranked one, so the fans rush the field and the goalposts come down. ${esc(c.name)} won ${esc(fU(c.n, true))}`;
+    if (C.v === "pose") return `<b>Heisman pose</b>${C.player ? esc(C.player) + " cleared a star's yardage line" : "a star's line cashed"}, so ${esc(c.name)} gets the statue: ${esc(fU(c.n, true))}`;
+    if (C.v === "flag") return C.riv ? `<b>Plant the flag</b>${esc(C.riv)}: ${esc(c.name)} won the rivalry bet (${esc(fU(c.n, true))}) and plants ${esc(C.nm)}'s flag at midfield` : `<b>Plant the flag</b>${esc(c.name)} won with ${esc(C.nm)} and plants the flag at midfield: ${esc(fU(c.n, true))}`;
+    return `<b>The band</b>the marching band spells out what ${esc(nm)} won on the field: ${esc(fU(c.n, true))} (${esc(fUSD(c.usd))})`; };
+  // right after the cash, in every show from size 2 up; it only plays for a college bet, and its time isn't handed to the
+  // party when it doesn't
+  for (const [lv, ms] of [[2, 5200], [3, 5600], [4, 6000], [5, 6600]]) { const A = SHOW3_ACTS[lv], at = A.findIndex((x) => x[0] === "cash"); if (at >= 0 && !A.some((x) => x[0] === "cfb")) A.splice(at + 1, 0, ["cfb", ms]); }
+  SHOW3_LAB.cfb = "Saturday"; SHOW3_SHORT.cfb = "Saturday";
   function cashRun({ b, n, names, tile }) {
     showClear();
     const el = cashEl(), F = flexOf(b), lvl = showLevel(b, F, n), c = showCtx(b, n, names, F, lvl);
     c.tile = tile || null; c.v = null;
-    const sp = (c.g && c.g.sport) || b.sport || "", calls = (F.k && BT_CALL[F.k]) || (/^(NBA|CBB)$/.test(sp) ? BT_CALL.nba : null);
+    const sp = (c.g && c.g.sport) || b.sport || "", calls = (F.k && (cfbCalls(b, F.k) || BT_CALL[F.k])) || (/^(NBA|CBB)$/.test(sp) ? BT_CALL.nba : null);
     c.call = calls ? calls[Math.floor(Math.random() * calls.length)] : lvl >= 5 ? "Nuke" : "Cashed";
     const acts = s3acts(lvl, c);
-    const lost = SHOW3_ACTS[lvl].filter(([k]) => !acts.some((a) => a.k === k) && !SHOW3_OPT.has(k)).reduce((x, a) => x + a[1], 0);
+    const lost = SHOW3_ACTS[lvl].filter(([k]) => !acts.some((a) => a.k === k) && !SHOW3_OPT.has(k) && k !== "cfb").reduce((x, a) => x + a[1], 0);
     (acts.find((a) => a.k === "party") || acts.find((a) => a.k === "cash")).ms += lost;
     let T = 0; for (const a of acts) { a.t0 = T; T += a.ms; }
     c.acts = acts; c.T = T;
@@ -11607,7 +11749,7 @@ img.tl, .tl.tlg { background: none; box-shadow: none; border-radius: 0; margin: 
   // ---------- sheets ----------
   function openSheet(id) { $(id).hidden = false; }
   // keep every open screen current: when a new version is up, reload it (never mid-form or mid-animation)
-  const BUILD = "20261024163817";
+  const BUILD = "20261024194520";
   function checkBuild() {
     if (BUILD === "dev") return;
     fetch("version.json?t=" + Date.now(), { cache: "no-store" }).then((r) => (r.ok ? r.json() : null)).then((j) => {
@@ -12365,8 +12507,8 @@ img.tl, .tl.tlg { background: none; box-shadow: none; border-radius: 0; margin: 
     const c = e.competitions[0], t = {};
     for (const x of c.competitors) t[x.homeAway] = x;
     const st = e.status.type;
-    const team = (k) => { const x = t[k], tm = x.team; return { id: tm.id, rec: (((x.records || [])[0] || {}).summary || "").replace(/^0-0(-0)?$/, ""), rk: x.curatedRank && x.curatedRank.current <= 25 ? x.curatedRank.current : 0, ab: tm.abbreviation || "", nm: tm.shortDisplayName || tm.name || "", fn: tm.displayName || "", lg: dkLg(tm.logo), col: tm.color ? "#" + tm.color : "", alt: tm.alternateColor ? "#" + tm.alternateColor : "", sc: /^\d+$/.test(String(x.score)) ? Number(x.score) : null }; };
-    const g = { id: String(e.id), sport, t: Date.parse(e.date), st: st.state || "pre", d: st.shortDetail || "", a: team("away"), h: team("home"), pd: e.status.period || 0, clk: e.status.clock };
+    const team = (k) => { const x = t[k], tm = x.team; return { id: tm.id, rec: (((x.records || [])[0] || {}).summary || "").replace(/^0-0(-0)?$/, ""), rk: x.curatedRank && x.curatedRank.current <= 25 ? x.curatedRank.current : 0, ab: tm.abbreviation || "", nm: tm.shortDisplayName || tm.name || "", fn: tm.displayName || "", loc: tm.location || "", cf: tm.conferenceId != null ? String(tm.conferenceId) : "", lg: dkLg(tm.logo), col: tm.color ? "#" + tm.color : "", alt: tm.alternateColor ? "#" + tm.alternateColor : "", sc: /^\d+$/.test(String(x.score)) ? Number(x.score) : null }; };
+    const g = { id: String(e.id), sport, t: Date.parse(e.date), st: st.state || "pre", d: st.shortDetail || "", a: team("away"), h: team("home"), pd: e.status.period || 0, clk: e.status.clock, sty: (e.season && e.season.type) || 0, nt: ((c.notes || [])[0] || {}).headline || "" };
     g.net = ((((c.broadcasts || [])[0] || {}).names) || [])[0] || "";
     g.city = (c.venue && c.venue.address && c.venue.address.city) || ""; g.abroad = !!(c.venue && c.venue.address && c.venue.address.country && c.venue.address.country !== "USA");
     const si = c.situation, lp = si && si.lastPlay;
@@ -19953,7 +20095,7 @@ async function S3warm() {
   st.info.legs = [{ t: "Warm" }, { t: "Up" }];
   st.info.beat = { v: 22, l: 24.5, lo: 14, hi: 30, lt: "O 24.5" }; st.info.xlegs = [{ t: "A", ok: true }, { t: "B", ok: false }, { t: "C", ok: true }];
   st.info.yard = [{ name: "A", pick: "Warm", amt: "-1u", date: "" }, { name: "B", pick: "Up", amt: "-1u", date: "" }];
-  for (const k of ["drop", "cash", "troph", "party", "out", "play", "career", "rec", "ring", "burn", "ride", "heat", "vault", "lburn", "lshred", "lgrave", "lbeat", "lbust", "lyard", "fbf", "gdrop", "gsplit", "grush", "gspike", "ghuddle", "gpush", ...Object.keys(SIG).map((x) => "sig:" + x)]) {
+  for (const k of ["drop", "cash", "troph", "party", "out", "play", "career", "rec", "ring", "burn", "ride", "heat", "vault", "lburn", "lshred", "lgrave", "lbeat", "lbust", "lyard", "fbf", "gdrop", "gsplit", "grush", "gspike", "ghuddle", "gpush", "cfband", "cfstorm", "cfflag", "cfpose", ...Object.keys(SIG).map((x) => "sig:" + x)]) {
     if (k.startsWith("sig:")) SIG[k.slice(4)](st, 0); else if (k === "fbf") FBfield(st, { t: 0, ms: 4000 }); else ACT3[k](st, { t: 0, ms: 4000 }); st.t = 0;
     for (const t of [0.4, 1.0, 2.0]) { st.t = t; for (const f of st.tick.slice()) { try { f(t, 0.016); } catch (e) {} } }
     st.r.compile(st.scene, st.cam); st.comp.render(0.016); S3clear(st);
@@ -21510,6 +21652,259 @@ ACT3.gpush = function (st, a) {
   });
   { const mid = xs0 - 0.55 - chain / 2; st.camTo.p.set(mid - 0.4, 2.4, dist); st.camTo.l.set(mid, 1.25, -0.4); st.cam.position.set(mid - 0.4, 2.4, dist); }
 };
+
+
+// ---------- college football: the Saturday moment ----------
+// After a college bet cashes, one of college football's own celebrations, in the team's colors: the marching band
+// spelling out what it paid on the field, the fans storming the field and taking the goalposts down, the winner planting
+// the flag at midfield (a rivalry's name over it), or the winner as a gold statue striking the Heisman pose on a plinth
+// with their name on it. The variant comes from the bet's type (st.info.cf.v)
+const CF = { geo: (k, f) => S3.cache["cf:" + k] || (S3.cache["cf:" + k] = f()) };
+function CFinfo(st) {
+  const I = st.info, c = I.cf || {};
+  return { v: c.v || "band", ab: c.ab || "TEAM", nm: c.nm || "Team", col: c.col || I.ban1 || I.acc || "#c8102e", alt: c.alt || "#ffffff", br: c.br || I.acc || "#ffd23f",
+    riv: c.riv || "", who: I.name || "You", pcol: I.col || "#ffd23f", amt: I.amt || "+1u", usd: I.usd || "", pick: I.pick || "", player: c.player || "" };
+}
+const CFhex = (c, d) => (/^#[0-9a-f]{6}$/i.test(c || "") ? c : d);
+// a turf with a painted midfield: the team's circle and its letters
+function CFturf(st, C, mid) {
+  const { THREE } = st, len = 70, wid = 36;
+  const tex = canvasTex(st.L, 1024, 2048, (x, W, H) => {
+    const yd = H / len;
+    for (let i = 0; i * yd * 2.5 < H; i++) { x.fillStyle = i % 2 ? "#2f6b2c" : "#367a32"; x.fillRect(0, i * yd * 2.5, W, yd * 2.5); }
+    for (let i = 0; i < 26000; i++) { x.fillStyle = Math.random() < 0.5 ? "rgba(0,0,0,.07)" : "rgba(255,255,255,.04)"; x.fillRect(Math.random() * W, Math.random() * H, 2, 3); }
+    x.fillStyle = "rgba(244,244,238,.9)";
+    for (let i = 5; i * yd < H; i += 5) x.fillRect(0, i * yd - 2, W, 4);
+    for (let i = 1; i * yd < H; i++) if (i % 5) { x.fillRect(W * 0.36 - 10, i * yd - 1, 20, 3); x.fillRect(W * 0.64 - 10, i * yd - 1, 20, 3); }
+    x.fillRect(0, 0, 8, H); x.fillRect(W - 8, 0, 8, H);
+    if (mid) { const cy = H / 2; x.save(); x.globalAlpha = 0.92; x.fillStyle = CFhex(C.col, "#8a1020"); x.beginPath(); x.arc(W / 2, cy, W * 0.2, 0, 7); x.fill();
+      x.lineWidth = 10; x.strokeStyle = CFhex(C.alt, "#ffffff"); x.stroke(); x.fillStyle = "#ffffff"; x.textAlign = "center"; x.textBaseline = "middle";
+      L3fit(x, String(C.ab).toUpperCase(), W * 0.32, 150, 900, L3D); x.translate(W / 2, cy); x.rotate(Math.PI); x.fillText(String(C.ab).toUpperCase(), 0, 4); x.restore(); }
+  });
+  const m = S3add(st, new THREE.Mesh(new THREE.PlaneGeometry(wid, len), new THREE.MeshStandardMaterial({ map: tex, roughness: 0.9, metalness: 0, emissive: 0xffffff, emissiveMap: tex, emissiveIntensity: 0.06 })));
+  m.rotation.x = -Math.PI / 2; return m;
+}
+// yellow goalposts, standing on a pivot at the base
+function CFposts(st) {
+  const { THREE } = st, y = new THREE.MeshStandardMaterial({ color: 0xffd400, metalness: 0.4, roughness: 0.35, emissive: 0x332200 }), cyl = (h, r) => new THREE.Mesh(new THREE.CylinderGeometry(r, r, h, 16), y);
+  const g = new THREE.Group(), up = cyl(3, 0.09); up.position.y = 1.5; g.add(up);
+  const cb = cyl(5.6, 0.08); cb.rotation.z = Math.PI / 2; cb.position.y = 3; g.add(cb);
+  for (const s of [-1, 1]) { const u = cyl(6, 0.07); u.position.set(s * 2.8, 6, 0); g.add(u); }
+  const pad = new THREE.Mesh(new THREE.CylinderGeometry(0.22, 0.22, 1.6, 16), new THREE.MeshStandardMaterial({ color: 0x1b2a4a, roughness: 0.7 })); pad.position.y = 0.8; g.add(pad);
+  return S3add(st, g);
+}
+// a crowd that runs: instanced bodies and heads in the team's colors
+function CFfans(st, n, cols) {
+  const { THREE } = st, body = S3add(st, new THREE.InstancedMesh(CF.geo("fb", () => new THREE.CapsuleGeometry(0.2, 0.62, 4, 10)), new THREE.MeshStandardMaterial({ roughness: 0.6, metalness: 0.1 }), n));
+  const head = S3add(st, new THREE.InstancedMesh(CF.geo("fh", () => new THREE.SphereGeometry(0.15, 14, 10)), new THREE.MeshStandardMaterial({ color: 0xc89a78, roughness: 0.7 }), n));
+  const arms = S3add(st, new THREE.InstancedMesh(CF.geo("fa", () => new THREE.CapsuleGeometry(0.06, 0.5, 3, 6)), new THREE.MeshStandardMaterial({ roughness: 0.6, metalness: 0.1 }), n * 2));
+  body.frustumCulled = head.frustumCulled = arms.frustumCulled = false;
+  const C = new THREE.Color();
+  for (let i = 0; i < n; i++) { C.set(cols[i % cols.length]); body.setColorAt(i, C); arms.setColorAt(i * 2, C); arms.setColorAt(i * 2 + 1, C); }
+  body.instanceColor.needsUpdate = true; arms.instanceColor.needsUpdate = true;
+  const M = new THREE.Matrix4(), Q = new THREE.Quaternion(), E = new THREE.Euler(), V = new THREE.Vector3(), S = new THREE.Vector3(1, 1, 1);
+  // put fan i at x,z, lifted by y, facing ry, arms up by a (0 down, 1 straight up)
+  const put = (i, x, y, z, ry, a, lean) => {
+    E.set(lean || 0, ry, 0); Q.setFromEuler(E); V.set(x, y + 0.52, z); M.compose(V, Q, S); body.setMatrixAt(i, M);
+    V.set(x - Math.sin(ry) * (lean || 0) * 0.5, y + 1.1, z - Math.cos(ry) * (lean || 0) * 0.5); M.compose(V, Q, S); head.setMatrixAt(i, M);
+    for (const sd of [-1, 1]) { const up = a * 2.7; E.set(lean || 0, ry, sd * (0.25 + up * 0.35)); Q.setFromEuler(E); V.set(x + Math.cos(ry) * sd * 0.26, y + 0.68 + up * 0.18, z - Math.sin(ry) * sd * 0.26); M.compose(V, Q, S); arms.setMatrixAt(i * 2 + (sd > 0 ? 1 : 0), M); }
+  };
+  const done = () => { body.instanceMatrix.needsUpdate = true; head.instanceMatrix.needsUpdate = true; arms.instanceMatrix.needsUpdate = true; };
+  return { put, done };
+}
+// the bettor, in front of it all, their name and what they won over their head
+function CFhero(st, C) {
+  const f = GRfig(st, { nm: C.who, col: C.pcol, amt: C.amt, i: 0 }); S3add(st, f.root); const sh = GRshadow(st); S3add(st, sh); f.sh = sh; return f;
+}
+// the payout and the name in chrome/gold, standing up over the field
+function CFwords(st, C, y, z, x, size) {
+  x = x || 0; size = size || 1.15;
+  const amt = S3text(st, String(C.amt).toUpperCase(), size, st.mats.gold, 0.3); S3add(st, amt); amt.position.set(x, y, z); amt.visible = false;
+  const nm = S3text(st, String(C.who).toUpperCase(), size * 0.44, st.mats.chrome, 0.28); S3add(st, nm); nm.position.set(x, y + size * 1.08, z); nm.visible = false;
+  const sp = S3sparks(st, 400, "#ffd23f"); let on = false;
+  const run = (k, t0) => { if (k < t0) return; amt.visible = nm.visible = true; const q = ez.back(seg(k, t0, 0.55)); amt.scale.setScalar(0.4 + 0.6 * q); nm.scale.setScalar(0.4 + 0.6 * q); amt.rotation.y = nm.rotation.y = Math.sin(k * 0.8) * 0.1;
+    if (!on) { on = true; S3ring(st, x, y, z - 0.2, 6, 0xffd23f); sp.burst(x, y, z + 0.4, 240, 8, "#ffd23f"); st.flash = Math.max(st.flash, 0.8); st.shake = Math.max(st.shake, 0.35); } };
+  return { run };
+}
+
+// ---- the band: a block of the band marches out and turns into the payout, spelled on the field ----
+ACT3.cfband = function (st, a) {
+  const { THREE } = st, A = a.t, T = a.ms / 1000, C = CFinfo(st);
+  const turf = CFturf(st, C, false); turf.position.set(0, 0, -16);
+  if (st.scene.fog) { st.scene.fog.near = 22; st.scene.fog.far = 70; }
+  GRcrowd(st, -50, 130); GRlights(st, turf, [0, 0, -6]);
+  // where each of them ends up: the payout, sampled off a canvas, laid on the field (the top of the text farthest away)
+  const txt = String(C.amt).toUpperCase().replace(/\s+/g, ""), cv = document.createElement("canvas"), cw = 360, ch = 110; cv.width = cw; cv.height = ch;
+  const x2 = cv.getContext("2d"); x2.fillStyle = "#fff"; x2.textAlign = "center"; x2.textBaseline = "middle"; L3fit(x2, txt, cw - 20, 100, 900, L3D); x2.fillText(txt, cw / 2, ch / 2 + 4);
+  const px = x2.getImageData(0, 0, cw, ch).data, pts = [];
+  for (let step = 7; step >= 4 && pts.length < 120; step--) { pts.length = 0; for (let yy = 0; yy < ch; yy += step) for (let xx = 0; xx < cw; xx += step) if (px[(yy * cw + xx) * 4 + 3] > 140) pts.push([xx, yy]); }
+  while (pts.length > 260) pts.splice(Math.floor(Math.random() * pts.length), 1);
+  const N = pts.length, FW = 22, FD = FW * ch / cw;
+  const tgt = pts.map(([xx, yy]) => [(xx / cw - 0.5) * FW, -9 + (yy / ch - 0.5) * FD]);
+  // where they start: a block at the far end of the field, rows of 12
+  const cols = 12, st0 = tgt.map((_, i) => [((i % cols) - (cols - 1) / 2) * 0.7, -34 - Math.floor(i / cols) * 0.7]);
+  // the march: up the field in their rows, then each peels off to its spot
+  const body = S3add(st, new THREE.InstancedMesh(CF.geo("bb", () => new THREE.CylinderGeometry(0.15, 0.17, 0.75, 10)), new THREE.MeshStandardMaterial({ roughness: 0.45, metalness: 0.25, emissive: 0xffffff, emissiveIntensity: 0.04 }), N));
+  const hat = S3add(st, new THREE.InstancedMesh(CF.geo("bh", () => new THREE.CylinderGeometry(0.13, 0.12, 0.3, 10)), new THREE.MeshStandardMaterial({ color: 0xf2f2f2, roughness: 0.4, metalness: 0.2 }), N));
+  const plume = S3add(st, new THREE.InstancedMesh(CF.geo("bp", () => new THREE.ConeGeometry(0.07, 0.34, 8)), new THREE.MeshBasicMaterial({ color: new THREE.Color(CFhex(C.br, "#ffd23f")), toneMapped: false }), N));
+  const legs = S3add(st, new THREE.InstancedMesh(CF.geo("bl", () => new THREE.CapsuleGeometry(0.06, 0.4, 3, 6)), new THREE.MeshStandardMaterial({ color: 0xf4f4f4, roughness: 0.5 }), N * 2));
+  for (const m of [body, hat, plume, legs]) m.frustumCulled = false;
+  const jc = new THREE.Color(CFhex(C.col, "#8a1020")), ac = new THREE.Color(CFhex(C.alt, "#ffffff"));
+  for (let i = 0; i < N; i++) body.setColorAt(i, (Math.floor(i / cols) % 4 === 3 ? ac : jc));
+  body.instanceColor.needsUpdate = true;
+  const del = tgt.map((_, i) => Math.floor(i / cols) * 0.06 + Math.random() * 0.05), M = new THREE.Matrix4(), Q = new THREE.Quaternion(), E = new THREE.Euler(), V = new THREE.Vector3(), S = new THREE.Vector3(1, 1, 1);
+  const tMarch = Math.min(1.9, T * 0.3), tForm = tMarch + Math.min(1.6, T * 0.26), tLock = tForm + 0.15;
+  const cf = S3confetti(st, 300, [CFhex(C.col, "#8a1020"), CFhex(C.alt, "#ffffff"), "#ffffff", "#ffd23f"]), sp = S3sparks(st, 500, CFhex(C.br, "#ffd23f"));
+  const words = CFwords(st, C, 3.0, -12, 0, 1.9);
+  let locked = false;
+  st.tick.push((t, dt) => {
+    const k = t - A;
+    for (let i = 0; i < N; i++) {
+      const s0 = st0[i], g = tgt[i], u1 = ez.io(seg(k, del[i] * 0.4, tMarch)), u2 = ez.io(seg(k, tMarch + del[i], tForm - tMarch));
+      const zA = s0[1] + (g[1] - 6 - s0[1]) * u1, x = s0[0] + (g[0] - s0[0]) * u2, z = zA + (g[1] - zA) * u2;
+      const moving = k < tForm + 0.2, ph = k * 11 + (i % 2) * Math.PI, step = moving ? Math.abs(Math.sin(ph)) * 0.06 : 0;
+      const hop = locked ? Math.max(0, Math.sin((k - tLock) * 6 + i * 0.05)) * 0.12 * Math.max(0, 1 - (k - tLock) * 0.35) : 0, y = step + hop;
+      E.set(0, 0, 0); Q.setFromEuler(E);
+      V.set(x, y + 0.82, z); M.compose(V, Q, S); body.setMatrixAt(i, M);
+      V.set(x, y + 1.36, z); M.compose(V, Q, S); hat.setMatrixAt(i, M);
+      V.set(x, y + 1.66, z); M.compose(V, Q, S); plume.setMatrixAt(i, M);
+      for (const sd of [-1, 1]) { const sw = moving ? Math.sin(ph) * 0.7 * sd : 0; E.set(sw, 0, 0); Q.setFromEuler(E); V.set(x + sd * 0.08, y + 0.28, z); M.compose(V, Q, S); legs.setMatrixAt(i * 2 + (sd > 0 ? 1 : 0), M); }
+    }
+    body.instanceMatrix.needsUpdate = hat.instanceMatrix.needsUpdate = plume.instanceMatrix.needsUpdate = legs.instanceMatrix.needsUpdate = true;
+    if (!locked && k >= tLock) { locked = true; st.flash = 1; st.shake = 0.45; GRring(st, 0, 0.05, -9, 13, CFhex(C.br, "#ffd23f")); for (let j = 0; j < 6; j++) sp.burst((Math.random() - 0.5) * 18, 1.6, -9 + (Math.random() - 0.5) * 5, 50, 6); cf.dump(200); cf.go(40); }
+    words.run(k, tLock + 0.5);
+    // the camera: behind the block as it marches off, then craned up and over to the front, high, to read it
+    const q = ez.io(seg(k, tMarch * 0.5, tForm - tMarch * 0.5 + 0.5));
+    st.camTo.p.set(Math.sin(k * 0.3) * 0.6, 8 + q * 6.2 + Math.sin(q * Math.PI) * 2.5, -54 + q * 61); st.camTo.l.set(0, 0.6 + q * 0.8, -26 + q * 16.5);
+    GRlock(st);   // on its path every frame, however slow the frames come
+  });
+  st.cam.position.set(0, 8, -54); st.camTo.p.set(0, 8, -54); st.camTo.l.set(0, 0.6, -26); GRlock(st);
+};
+
+// ---- storm the field: the stands empty onto the field, the goalposts come down, the winner up front ----
+ACT3.cfstorm = function (st, a) {
+  const { THREE } = st, A = a.t, T = a.ms / 1000, C = CFinfo(st);
+  const turf = CFturf(st, C, false); turf.position.set(0, 0, -14);
+  if (st.scene.fog) { st.scene.fog.near = 18; st.scene.fog.far = 62; }
+  const crowd = GRcrowd(st, -48, 130); GRlights(st, turf, [0, 0, -2]);
+  const posts = CFposts(st); posts.position.set(0, 0, -6);
+  const n = 140, cols = [CFhex(C.col, "#8a1020"), CFhex(C.alt, "#ffffff"), "#f2f2f2", CFhex(C.col, "#8a1020"), "#2a2d35"], fans = CFfans(st, n, cols);
+  const P = []; for (let i = 0; i < n; i++) { const ang = Math.random() * Math.PI * 2, r = 2.2 + Math.random() * 6.4; P.push({ x0: (Math.random() - 0.5) * 30, z0: -40 - Math.random() * 6, x1: Math.cos(ang) * r * 1.3, z1: -8.6 + Math.sin(ang) * r * 0.55, d: Math.random() * 1.1, sp: 0.85 + Math.random() * 0.4, ph: Math.random() * 6 }); }
+  const hero = CFhero(st, C), dust = S3sparks(st, 500, "#d9f2c8"), sp = S3sparks(st, 600, CFhex(C.br, "#ffd23f")), cf = S3confetti(st, 380, [CFhex(C.col, "#8a1020"), CFhex(C.alt, "#ffffff"), "#ffffff", "#ffd23f"]);
+  const tArr = Math.min(3.1, T * 0.48), tFall = tArr + 0.5, words = CFwords(st, C, 5.0, -5.5, 0, 1.4);
+  let fell = false;
+  st.tick.push((t, dt) => {
+    const k = t - A;
+    for (let i = 0; i < n; i++) { const p = P[i], u = ez.out(seg(k, p.d * 0.6, (tArr - p.d * 0.6) * p.sp)), x = p.x0 + (p.x1 - p.x0) * u, z = p.z0 + (p.z1 - p.z0) * u, run = u < 1;
+      const y = run ? Math.abs(Math.sin(k * 12 + p.ph)) * 0.12 : Math.max(0, Math.sin(k * 7 + p.ph)) * 0.32, ry = run ? Math.atan2(p.x1 - p.x0, p.z1 - p.z0) : Math.PI + Math.sin(k + p.ph) * 0.4;
+      fans.put(i, x, y, z, ry, run ? 0.15 + 0.1 * Math.sin(k * 12 + p.ph) : 0.75 + 0.25 * Math.sin(k * 7 + p.ph), run ? 0.35 : 0);
+      if (run && k > 0.3 && Math.random() < 0.04) dust.burst(x, 0.1, z, 2, 1); }
+    fans.done();
+    // the posts go: rocked, then over backward
+    if (k > tArr - 0.4 && !fell) posts.rotation.x = -Math.sin((k - tArr + 0.4) * 18) * 0.05;
+    if (k >= tFall) { const q = ez.io(seg(k, tFall, 0.9)); posts.rotation.x = -q * 1.45; if (!fell && q >= 1) { fell = true; st.shake = 0.8; st.flash = 1; GRring(st, 0, 0.05, -8, 10, CFhex(C.br, "#ffd23f")); dust.burst(0, 0.3, -9, 160, 5); sp.burst(0, 2, -8, 260, 8); cf.dump(240); cf.go(55); crowd.roar(40); } }
+    // the winner: up front, arms up, jumping
+    const j = seg(k, 0.4, 0.75); hero.set(Object.assign(GRcheer(k, j > 0 && j < 1), { y: GRjump(j, 0.9) + (k > tFall ? GRjump(seg(k, tFall + 0.9, 0.6), 0.5) : 0) })); GRplace(hero, 0, 2.2, 0);
+    words.run(k, tFall + 1.0);
+    // the camera: low behind the winner looking up the field at the stands, then up as the posts come down
+    const q = ez.io(seg(k, tArr - 0.6, 1.6));
+    st.camTo.p.set(Math.sin(k * 0.35) * 0.8, 2.2 + q * 0.6, 8.2 + q * 2.8); st.camTo.l.set(0, 1.8 + q * 0.8, -12 + q * 7);
+    GRlock(st);
+  });
+  st.cam.position.set(0, 2.2, 8.2); st.camTo.p.set(0, 2.2, 8.2); st.camTo.l.set(0, 1.8, -12); GRlock(st);
+};
+
+// ---- plant the flag: the winner runs the team's flag out and drives it into midfield ----
+ACT3.cfflag = function (st, a) {
+  const { THREE } = st, A = a.t, T = a.ms / 1000, C = CFinfo(st);
+  const turf = CFturf(st, C, true); turf.position.set(0, 0, 0); turf.rotation.z = Math.PI / 2;
+  if (st.scene.fog) { st.scene.fog.near = 20; st.scene.fog.far = 66; }
+  const crowd = GRcrowd(st, -30, 130); GRlights(st, turf, [0, 0, 2]);
+  const hero = CFhero(st, C);
+  // the flag: a pole and a cloth in the team's colors with its letters, the cloth rippling
+  const ftex = canvasTex(st.L, 768, 480, (x, w, h) => { x.fillStyle = CFhex(C.col, "#8a1020"); x.fillRect(0, 0, w, h); x.fillStyle = CFhex(C.alt, "#ffffff"); x.fillRect(0, h * 0.78, w, h * 0.1); x.fillRect(0, h * 0.06, w, h * 0.04);
+    x.fillStyle = "#ffffff"; x.textAlign = "center"; x.textBaseline = "middle"; L3fit(x, String(C.ab).toUpperCase(), w * 0.8, 230, 900, L3D); x.lineWidth = 14; x.strokeStyle = "rgba(0,0,0,.35)"; x.strokeText(String(C.ab).toUpperCase(), w / 2, h * 0.44); x.fillText(String(C.ab).toUpperCase(), w / 2, h * 0.44); });
+  const flag = new THREE.Group(), pole = new THREE.Mesh(new THREE.CylinderGeometry(0.045, 0.045, 4.4, 12), st.mats.chrome); pole.position.y = 2.2; flag.add(pole);
+  const knob = new THREE.Mesh(new THREE.SphereGeometry(0.1, 16, 12), st.mats.gold); knob.position.y = 4.45; flag.add(knob);
+  const cg = new THREE.PlaneGeometry(2.6, 1.6, 30, 14), base = cg.attributes.position.array.slice(); cg.translate(1.3, 0, 0);
+  const b2 = cg.attributes.position.array.slice();
+  const cloth = new THREE.Mesh(cg, new THREE.MeshStandardMaterial({ map: ftex, side: THREE.DoubleSide, roughness: 0.75, metalness: 0.05, emissive: 0xffffff, emissiveMap: ftex, emissiveIntensity: 0.12 })); cloth.position.set(0.05, 3.55, 0); flag.add(cloth);
+  S3add(st, flag);
+  const riv = C.riv ? S3text(st, C.riv.toUpperCase(), C.riv.length > 16 ? 0.42 : 0.55, st.mats.gold, 0.28) : null; if (riv) { S3add(st, riv); riv.position.set(0, 4.9, -1.5); riv.visible = false; }
+  const sp = S3sparks(st, 600, CFhex(C.br, "#ffd23f")), dust = S3sparks(st, 300, "#d9f2c8"), cf = S3confetti(st, 320, [CFhex(C.col, "#8a1020"), CFhex(C.alt, "#ffffff"), "#ffffff", "#ffd23f"]);
+  const words = CFwords(st, C, 2.3, -1.2, -3.7, 0.85);
+  const x0 = -15, tRun = Math.min(2.6, T * 0.42), tPlant = tRun + 0.55;
+  let planted = false, ph = 0;
+  const f = (P) => hero.set(P);
+  st.tick.push((t, dt) => {
+    const k = t - A, u = ez.io(seg(k, 0.15, tRun)), hx = x0 + (-0.9 - x0) * u;
+    // running with it held high, then the plant: both hands, down hard
+    if (k < tRun + 0.1) { ph += dt * 12; const r = GRrun(ph, k < 0.15 ? 0.2 : 1, 0.25); f(Object.assign(r, { ar: 2.5, er: 0.25, azr: 0.15, al: r.al })); }
+    else { const q = seg(k, tRun + 0.1, 0.45); f({ al: 2.2 - q * 0.9, ar: 2.3 - q * 1.0, el: 0.4, er: 0.4, azl: 0.2, azr: 0.2, lean: 0.25 * q, hl: 0.3 * q, kl: 0.5 * q, kr: 0.2, y: -0.12 * q });
+      if (k > tPlant + 0.6) f(Object.assign(GRcheer(k, false), { y: 0 })); }
+    GRplace(hero, hx, 0, Math.PI / 2);
+    // the flag rides in the right hand, then stands in the turf where it went in
+    if (!planted) { flag.position.set(hx + 0.32, k < tRun + 0.1 ? 0.9 : 0.9 - seg(k, tRun + 0.1, 0.45) * 1.25, 0.15); flag.rotation.z = k < tRun ? -0.22 : -0.22 * (1 - seg(k, tRun, 0.4)); }
+    if (!planted && k >= tPlant) { planted = true; flag.position.set(-0.58, -0.35, 0.15); flag.rotation.z = 0; st.shake = 0.75; st.flash = 1; GRring(st, -0.58, 0.05, 0.15, 9, CFhex(C.br, "#ffd23f")); GRring(st, -0.58, 0.06, 0.15, 5, 0xffffff); dust.burst(-0.58, 0.2, 0.15, 160, 5); sp.burst(-0.58, 3.5, 0.15, 260, 8); cf.dump(220); cf.go(45); crowd.roar(40); }
+    // the cloth: rippling from the pole out, harder while running
+    const pa = cg.attributes.position.array, amp = (k < tRun ? 0.28 : 0.2), w = 2.6;
+    for (let i = 0; i < pa.length; i += 3) { const xx = b2[i], yy = b2[i + 1], s = xx / w; pa[i + 2] = Math.sin(xx * 2.6 - k * 7.5 + yy * 0.6) * amp * s; pa[i + 1] = yy - s * s * 0.12; }
+    cg.attributes.position.needsUpdate = true; cg.computeVertexNormals();
+    if (riv && k > tPlant + 0.3) { riv.visible = true; const q = ez.back(seg(k, tPlant + 0.3, 0.5)); riv.scale.setScalar(0.4 + 0.6 * q); riv.rotation.y = Math.sin(k * 0.7) * 0.08; }
+    words.run(k, tPlant + (riv ? 1.1 : 0.8));
+    // the camera: running alongside, then around in front of the flag
+    const q = ez.io(seg(k, tRun - 0.3, 1.4)), cx = Math.min(hx, -0.9) * (1 - q);
+    st.camTo.p.set(cx + 0.5 + q * 1.5, 1.9 + q * 1.8, 8 + q * 1.6); st.camTo.l.set(cx * 0.95 + q * -0.4, 1.7 + q * 1.4, 0);
+    GRlock(st);
+  });
+  st.cam.position.set(x0 + 0.5, 1.9, 8); st.camTo.p.set(x0 + 0.5, 1.9, 8); st.camTo.l.set(x0, 1.7, 0); GRlock(st);
+};
+
+// ---- the pose: a gold statue of the winner, stiff arm out and a knee up, rising onto a plinth with their name ----
+ACT3.cfpose = function (st, a) {
+  const { THREE } = st, A = a.t, T = a.ms / 1000, C = CFinfo(st);
+  st.dim = 0.25;
+  const floor = S3add(st, new THREE.Mesh(new THREE.CircleGeometry(9, 64), new THREE.MeshStandardMaterial({ color: 0x0b0c10, roughness: 0.32, metalness: 0.6 }))); floor.rotation.x = -Math.PI / 2; floor.position.y = -2.6;
+  const ptex = canvasTex(st.L, 1024, 400, (x, w, h) => { const g = x.createLinearGradient(0, 0, 0, h); g.addColorStop(0, "#2a2c33"); g.addColorStop(1, "#14151a"); x.fillStyle = g; x.fillRect(0, 0, w, h);
+    for (let i = 0; i < 40; i++) { x.strokeStyle = `rgba(255,255,255,${0.02 + Math.random() * 0.04})`; x.lineWidth = 1 + Math.random() * 2; x.beginPath(); x.moveTo(Math.random() * w, 0); x.bezierCurveTo(Math.random() * w, h * 0.3, Math.random() * w, h * 0.7, Math.random() * w, h); x.stroke(); }
+    x.strokeStyle = "#c9a24a"; x.lineWidth = 6; x.strokeRect(26, 26, w - 52, h - 52);
+    x.textAlign = "center"; x.textBaseline = "middle"; x.fillStyle = "#e9c46a"; L3fit(x, String(C.who).toUpperCase(), w - 140, 120, 900, L3D); x.fillText(String(C.who).toUpperCase(), w / 2, h * 0.42);
+    x.fillStyle = "#c8ccd4"; x.font = `800 46px ${L3D}`; const sub = (C.player ? C.player.toUpperCase() + "  ·  " : "") + String(C.amt).toUpperCase(); L3fit(x, sub, w - 160, 46, 800, L3D); x.fillText(sub, w / 2, h * 0.76); });
+  const plinth = new THREE.Group(), pm = new THREE.MeshStandardMaterial({ color: 0x1c1d22, roughness: 0.28, metalness: 0.55 });
+  const blk = new THREE.Mesh(new THREE.BoxGeometry(3.2, 1.4, 2.2), [pm, pm, pm, pm, new THREE.MeshStandardMaterial({ map: ptex, roughness: 0.35, metalness: 0.4 }), pm]); blk.position.y = -1.9; plinth.add(blk);
+  const cap = new THREE.Mesh(new THREE.BoxGeometry(3.5, 0.18, 2.5), st.mats.gold); cap.position.y = -1.11; plinth.add(cap);
+  S3add(st, plinth);
+  // the statue: the winner's figure, all of it gold, standing on the plinth
+  const fig = GRfig(st, { nm: C.who, col: "#e9b04a", amt: "", i: 0 }); fig.lab.visible = false;
+  fig.root.traverse((m) => { if (m.isMesh && !m.isSprite) m.material = st.mats.gold; });
+  fig.set({ hl: 1.35, kl: 1.75, hr: -0.08, kr: 0.04, ar: 1.6, er: 0.02, azr: 0.04, al: 0.5, el: 2.1, azl: 0.35, lean: 0.18, twist: -0.2, pitch: 0 });
+  const ball = S3ball(st, "CFB"); ball.scale.multiplyScalar(0.34); ball.material && (ball.material = st.mats.gold); fig.root.add(ball); ball.position.set(-0.36, 1.62, 0.12); ball.rotation.set(0.3, 0.2, 1.1);
+  const stat = new THREE.Group(); stat.add(fig.root); plinth.add(stat); stat.position.y = -1.02; stat.rotation.y = -0.75;
+  // the light: a spot from above that snaps on, a team-colored rim behind
+  const spot = new THREE.SpotLight(0xfff2d6, 0, 30, 0.42, 0.45, 1.2); spot.position.set(0, 12, 3); spot.target = plinth; S3add(st, spot);
+  const rim = new THREE.PointLight(new THREE.Color(CFhex(C.br, "#ffd23f")), 0, 20, 1.6); rim.position.set(0, 2, -3); S3add(st, rim);
+  const beam = S3add(st, new THREE.Mesh(new THREE.ConeGeometry(2.4, 12, 48, 1, true), new THREE.MeshBasicMaterial({ color: 0xfff1cc, transparent: true, opacity: 0, blending: THREE.AdditiveBlending, depthWrite: false, side: THREE.DoubleSide }))); beam.position.set(0, 3.4, 0);
+  const sp = S3sparks(st, 500, "#ffd23f"), cf = S3confetti(st, 260, ["#e9b04a", "#ffffff", "#fff4c2", CFhex(C.br, "#ffd23f")]);
+  const tUp = Math.min(2.2, T * 0.38), tHit = tUp + 0.2;
+  let hit = false;
+  st.tick.push((t, dt) => {
+    const k = t - A, u = ez.out(seg(k, 0.3, tUp));
+    plinth.position.y = -(1 - u) * 4.6; plinth.rotation.y = (1 - u) * 2.4 + Math.sin(k * 0.4) * 0.05;
+    if (k > 0.3 && k < tUp && Math.random() < 0.6) sp.burst((Math.random() - 0.5) * 3.4, -2.5, (Math.random() - 0.5) * 2.4, 6, 3);
+    if (!hit && k >= tHit) { hit = true; st.flash = 1; st.shake = 0.5; spot.intensity = 70; rim.intensity = 30; S3ring(st, 0, -1.0, 0, 7, 0xffd23f); sp.burst(0, 1.5, 0, 300, 8); cf.dump(160); cf.go(30); }
+    if (hit) { const q = seg(k, tHit, 0.5); beam.material.opacity = 0.09 * q + Math.sin(k * 3) * 0.01; }
+    // the camera: low, circling up to the statue as it rises
+    const o = 0.9 - k * 0.12, r = 8.2 - ez.io(seg(k, 0, tUp + 1)) * 1.3;
+    st.camTo.p.set(Math.sin(o) * r, -0.6 + ez.io(seg(k, 0, tUp + 1.2)) * 1.2, Math.cos(o) * r); st.camTo.l.set(0, -1.4 + u * 0.75, 0);
+    GRlock(st);
+  });
+  st.cam.position.set(Math.sin(0.9) * 8.2, -0.6, Math.cos(0.9) * 8.2); st.camTo.p.copy(st.cam.position); st.camTo.l.set(0, -1.4, 0); GRlock(st);
+};
+// the act the show asks for: the variant from the bet's type
+ACT3.cfb = function (st, a) { const v = (st.info.cf && st.info.cf.v) || "band"; return (ACT3["cf" + v] || ACT3.cfband)(st, a); };
+// each college type's moment behind the words in the drop and the cash
+Object.assign(SIG_OF, { maction: "lightning", funbelt: "fireworks", sickos: "galaxy", cupcake: "coins", direct: "globe", afterdark: "galaxy", big12: "fireworks", airraid: "fireworks",
+  b1g: "rocks", punting: "rocks", storm: "lightning", hate: "fire", bowl: "fireworks", heisman: "coins", freefb: "ot", satslip: "receipt" });
 
 </script>
 </body>
