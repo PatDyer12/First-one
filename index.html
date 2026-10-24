@@ -2408,13 +2408,13 @@ body.tv .rb-pcol.pr .rb-hs-side.r .rb-st { justify-self: start; }
 .jumbo.hz .jb-screen #jbBg { filter: blur(36px) brightness(.5) saturate(.85) sepia(.2); }
 .jumbo.lux #pipVid { transition: opacity .25s ease; }
 .dj-cv { position: absolute; inset: 0; width: 100%; height: 100%; pointer-events: none; }
-body.tv.nflday #cfield { display: block; position: fixed; inset: 0; z-index: 0; pointer-events: none; background: #05070b url(img/field_nfl.jpg?v=1) center bottom / cover no-repeat; opacity: .62; }
+body.tv.nflday #cfield { display: block; position: fixed; inset: 0; z-index: 0; pointer-events: none; background: #05070b url(img/field_nfl.jpg?v=2) center bottom / cover no-repeat; opacity: .62; }
 body.tv.nflday #cfield svg { display: none; }
 body.tv.nflday #cfield::after { content: ""; position: absolute; inset: 0; background: radial-gradient(1300px 760px at 50% 40%, rgba(4,6,10,.1), rgba(4,6,10,.62) 100%); }
 body.tv.nflday #cfCrowd { display: block; position: absolute; inset: 0; width: 100%; height: 100%; }
 #nflTeam { display: none; }
 body.tv.nflday #nflTeam { display: block; position: absolute; inset: 0; width: 100%; height: 100%; }
-body.tv.nflday #cfield.teamf { background-image: url(img/field_nfl_plain.jpg?v=1); }
+body.tv.nflday #cfield.teamf { background-image: url(img/field_nfl_plain.jpg?v=2); }
 body.tv.nflday::before { background: linear-gradient(180deg, #05080d, #0a1a10) !important; }
 body.tv.nflday .rb-g, body.tv.nflday .rb-sec, body.tv.nflday .rb-card { background: linear-gradient(180deg, rgba(12,16,22,.88), rgba(7,10,14,.93)) !important; border-color: rgba(190,210,240,.14); box-shadow: inset 0 1px 0 rgba(255,255,255,.07), 0 18px 40px rgba(0,0,0,.45); }
 body.tv.nflday .modechip { background: rgba(232,25,44,.16) !important; color: #ffe2e4 !important; border-color: rgba(255,150,155,.55) !important; }
@@ -5232,7 +5232,7 @@ em, i { font-style: normal; }
 .rb-g, .rb-sec { background: linear-gradient(180deg, #111720 0%, #0c1016 100%); border-color: rgba(255,255,255,.07); }
 /* the stadium behind the board: a rendered night game, not flat shapes */
 body.tv.cfb #cfield svg { display: none; }
-body.tv.cfb #cfield { background: #05070b url(img/field.jpg) center bottom / cover no-repeat; opacity: .62; }
+body.tv.cfb #cfield { background: #05070b url(img/field.jpg?v=2) center bottom / cover no-repeat; opacity: .62; }
 /* rank: a white chip, the way the broadcast does it */
 .gx-tm .rk, .rb-gh .rk { background: #e9eef5; color: #0a0d12; }
 #cfCrowd { display: none; }
@@ -5708,6 +5708,26 @@ img.tl, .tl.tlg { background: none; box-shadow: none; border-radius: 0; margin: 
 .bt-bdg { border-radius: 7px; background: color-mix(in srgb, var(--fxk) 16%, #0d1016); box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--fxk) 55%, transparent); }
 .bt-bdg.lv::after { content: ""; left: auto; right: -2px; top: -2px; width: 7px; height: 7px; border-radius: 50%; background: #ffe14d; box-shadow: 0 0 0 2px #0d1016; filter: none; font-size: 0; }
 .bt-bdg.bt-c-opal::before, .bt-bdg.bt-c-pink::before, .bt-bdg.bt-c-dart::before { display: none; }
+
+/* ---------- 4K and clean ---------- */
+.rb-rsc.tiny { visibility: hidden; }
+/* the ticker: the board's condensed numerals, even widths, and it grows with the screen (it used to stop at 22 px) */
+body.tv .ticker { height: max(40px, 4.6vh); font-size: max(15px, 2vh); }
+.tk-g, .tk-a { font: 700 1.12em var(--f-num); letter-spacing: .03em; font-variant-numeric: tabular-nums; }
+.ticker b { letter-spacing: .02em; }
+.ticker em { font-size: .9em; letter-spacing: .04em; }
+.ticker .wx { display: inline-flex; align-items: center; gap: .28em; font: 700 .92em var(--f-num); letter-spacing: .02em; }
+.ticker .rz, .tk-a u { font-family: var(--f-num); letter-spacing: .08em; }
+/* the "add your bets" code grows with the screen too (it stopped at 124 px), kept sharp */
+body.tv .roomtv:not([hidden]) { padding: max(12px, 1.1vh) max(12px, 1.1vh) max(10px, .93vh); gap: max(6px, .56vh); }
+body.tv.has-ticker .roomtv:not([hidden]) { bottom: calc(var(--sy, 0px) + max(40px, 4.6vh) + max(2.4vh, 18px)); }
+.roomtv canvas { width: max(96px, 10.5vh); height: max(96px, 10.5vh); image-rendering: pixelated; }
+.roomtv b { font-size: max(14px, 1.3vh); } .roomtv span { font-size: max(10px, .93vh); }
+body.tv.pplb .roomtv:not([hidden]) { top: calc(var(--sy, 0px) + max(86px, 8vh)); padding: max(7px, .65vh) max(10px, .93vh); }
+body.tv.pplb .roomtv:not([hidden]) canvas { width: max(76px, 7vh); height: max(76px, 7vh); }
+.wxi { width: 1.1em; height: 1.1em; flex: none; align-self: center; overflow: visible; }
+/* a group ride's row: a long type name ends in an ellipsis instead of being cut mid-letter */
+.ob-gmn .bt-chip { display: inline-block; flex: 0 1 auto; min-width: 0; overflow: hidden; text-overflow: ellipsis; letter-spacing: .06em; }
 </style>
 </head>
 <body>
@@ -9177,6 +9197,8 @@ img.tl, .tl.tlg { background: none; box-shadow: none; border-radius: 0; margin: 
   const ED_SPORT = { NFL: "fire", CFB: "fire", NBA: "fire", CBB: "fire", NHL: "ice", MLB: "volt" };
   function edgeOf(b, F) { const k = F && F.k; if (k && ED_KIND[k]) return ED_KIND[k]; const g = b && b.sel ? gameOf(b.sel) : null; return ED_SPORT[(g && g.sport) || (b && b.sport) || ""] || "volt"; }
   const EDGE = '<i class="edge" aria-hidden="true"><i></i><i></i></i>';
+  // the rail's scores under the leaderboard hide when there's only a sliver of room (a row cut in half reads as a glitch)
+  { const rsc = document.getElementById("rbRsc"); if (rsc && window.ResizeObserver) new ResizeObserver(() => rsc.classList.toggle("tiny", rsc.clientHeight < 150)).observe(rsc); }
   const fxUSD = (v) => "$" + (Math.abs(v - Math.round(v)) < 0.005 ? Math.round(v).toLocaleString() : v.toFixed(2));
   const ET_DAY = new Intl.DateTimeFormat("en-CA", { timeZone: "America/New_York" }), ET_HR = new Intl.DateTimeFormat("en-US", { timeZone: "America/New_York", hour: "numeric", hourCycle: "h23" });
   const etDayOf = (t) => ET_DAY.format(new Date(t)), etHr = (t) => Number(ET_HR.format(new Date(t)));
@@ -11839,7 +11861,7 @@ img.tl, .tl.tlg { background: none; box-shadow: none; border-radius: 0; margin: 
   // ---------- sheets ----------
   function openSheet(id) { $(id).hidden = false; }
   // keep every open screen current: when a new version is up, reload it (never mid-form or mid-animation)
-  const BUILD = "20261024202049";
+  const BUILD = "20261024210440";
   function checkBuild() {
     if (BUILD === "dev") return;
     fetch("version.json?t=" + Date.now(), { cache: "no-store" }).then((r) => (r.ok ? r.json() : null)).then((j) => {
@@ -16794,6 +16816,21 @@ img.tl, .tl.tlg { background: none; box-shadow: none; border-radius: 0; margin: 
     } catch (e) {} finally { WX.busy = false; }
     renderTicker();
   }
+
+  // the weather as small drawn icons (an emoji renders as a different picture on every screen, and fog as a gray box)
+  const WXCL = (dy, f) => `<path transform="translate(0 ${dy})" d="M7.4 18.2h9.4a3.9 3.9 0 0 0 .5-7.8 5.3 5.3 0 0 0-10.2-.9 4 4 0 0 0 .3 8.7z" fill="${f || "#c9d3e3"}"/>`;
+  const WXI = {
+    "☀️": '<circle cx="12" cy="12" r="4.4" fill="#ffc94d"/><path d="M12 2.4v2.4M12 19.2v2.4M2.4 12h2.4M19.2 12h2.4M5.2 5.2l1.7 1.7M17.1 17.1l1.7 1.7M5.2 18.8l1.7-1.7M17.1 6.9l1.7-1.7" stroke="#ffc94d" stroke-width="2" stroke-linecap="round"/>',
+    "🌙": '<path d="M19.6 14.6A8 8 0 0 1 9.4 4.4a8 8 0 1 0 10.2 10.2z" fill="#dfe6f5"/>',
+    "⛅": '<circle cx="8.6" cy="8.4" r="3.4" fill="#ffc94d"/><path d="M8.6 2.6v1.4M2.8 8.4h1.4M4.5 4.3l1 1M12.7 4.3l-1 1" stroke="#ffc94d" stroke-width="1.8" stroke-linecap="round"/>' + WXCL(2.2),
+    "☁️": WXCL(0),
+    "🌧️": WXCL(-3) + '<path d="M8.4 18.6l-1.1 2.6M12.4 18.6l-1.1 2.6M16.4 18.6l-1.1 2.6" stroke="#6cc0ff" stroke-width="2" stroke-linecap="round"/>',
+    "⛈️": WXCL(-3, "#aab6c8") + '<path d="M12.9 15.2l-3.3 4.6h2.6l-1.4 3.8 4.4-5.6h-2.7l1.5-2.8z" fill="#ffd84d"/>',
+    "🌨️": WXCL(-3) + '<g fill="#e6f4ff"><circle cx="8.2" cy="19.6" r="1.2"/><circle cx="12.2" cy="21.2" r="1.2"/><circle cx="16.2" cy="19.6" r="1.2"/></g>',
+    "🌫️": '<path d="M4 8.5h16M6.5 12.5h12M4 16.5h16" stroke="#aab4c4" stroke-width="2.2" stroke-linecap="round"/>',
+    "🌡️": '<path d="M10 13.6V4.8a2 2 0 0 1 4 0v8.8a4 4 0 1 1-4 0z" fill="none" stroke="#ff9a7a" stroke-width="1.8"/><circle cx="12" cy="16.8" r="2" fill="#ff9a7a"/>',
+  };
+  const wxSvg = (e) => `<svg class="wxi" viewBox="0 0 24 24" aria-hidden="true">${WXI[e] || WXI["🌡️"]}</svg>`;
   function wxIcon(txt, code) {
     const s = String(txt || "").toLowerCase();
     if (s && code != null) { const t = wxIcon(txt, null); if (t !== "🌡️") return t; }
@@ -16811,7 +16848,7 @@ img.tl, .tl.tlg { background: none; box-shadow: none; border-radius: 0; margin: 
     if (g.wx.dome) return { dome: true };
     const c = WX.cur.get(g.id), t = g.st === "in" && c ? c.t : g.wx.t != null ? g.wx.t : c ? c.t : null, txt = g.wx.txt || "";
     const wet = /rain|shower|storm|drizzle|snow|sleet|flurr/i.test(txt) || !!(c && c.pr >= 0.3);
-    return { t, txt, icon: wxIcon(txt, c ? c.code : null), wind: c ? c.wind : null, gust: c ? c.gust : null, wet, cold: t != null && t <= 32, windy: !!(c && c.wind >= 15) };
+    return { t, txt, icon: wxSvg(wxIcon(txt, c ? c.code : null)), wind: c ? c.wind : null, gust: c ? c.gust : null, wet, cold: t != null && t <= 32, windy: !!(c && c.wind >= 15) };
   }
   function wxTag(g) {
     const w = wxOf(g); if (!w) return "";
@@ -19684,7 +19721,7 @@ img.tl, .tl.tlg { background: none; box-shadow: none; border-radius: 0; margin: 
   for (let i = 0; i < 520; i++) { const low = i % 3 !== 0, band = low ? LOW : UP; lights.push({ x: R(0, IW), y: R(band[0] + 6, band[1] - 4), r: low ? R(1.6, 2.6) : R(1.1, 1.8), ph: R(0, 6.28), sp: R(0.4, 1.4), sw: R(2, 7), on: Math.random() < 0.55, t: R(2, 14) }); }
   const TC = ["#f4f7fb", "#f4f7fb", "#f4f7fb", "#3b8cff", "#ff7a1a", "#ffd447"];
   const TCN = ["#f4f7fb", "#f4f7fb", "#e8192c", "#e8192c", "#1d3f9e", "#f4f7fb"];
-  for (let i = 0; i < 70; i++) towels.push({ x: R(20, IW - 20), y: R(LOW[0] + 30, LOW[1] - 20), w: R(7, 11), h: R(9, 14), c: TC[i % TC.length], cn: TCN[i % TCN.length], ph: R(0, 6.28), sp: R(2.2, 4.2) });
+  if (false) for (let i = 0; i < 70; i++) towels.push({ x: R(20, IW - 20), y: R(LOW[0] + 30, LOW[1] - 20), w: R(7, 11), h: R(9, 14), c: TC[i % TC.length], cn: TCN[i % TCN.length], ph: R(0, 6.28), sp: R(2.2, 4.2) });
   let boost = 0, last = 0, W = 0, H = 0, s = 1, ox = 0, oy = 0, wave = -1, nextWave = performance.now() + 9000;
   const night = () => { const h = new Date().getHours(); return h >= 18 || h < 5; };
   function size() {
@@ -19729,15 +19766,7 @@ img.tl, .tl.tlg { background: none; box-shadow: none; border-radius: 0; margin: 
       g.addColorStop(0, `rgba(235,242,255,${a})`); g.addColorStop(1, "rgba(235,242,255,0)");
       cx.fillStyle = g; cx.fillRect(x - r, y - r, r * 2, r * 2);
     }
-    // towels waving in the lower bowl
-    cx.globalCompositeOperation = "source-over";
-    for (const T of towels) {
-      const [x, y] = P(T.x, T.y), sp = T.sp * (1 + b * 1.6), ang = Math.sin(t * sp + T.ph) * (0.5 + b * 0.5);
-      cx.save(); cx.translate(x, y); cx.rotate(ang); cx.globalAlpha = (nt ? 0.5 : 0.62) + b * 0.3;
-      cx.fillStyle = nfl ? T.cn : T.c; cx.fillRect(-T.w * s * 0.5, -T.h * s * 1.6, T.w * s, T.h * s);
-      cx.restore();
-    }
-    cx.globalAlpha = 1;
+    cx.globalCompositeOperation = "source-over"; cx.globalAlpha = 1;
   }
   requestAnimationFrame(frame);
   window.sbCrowd = { pop: (k) => { boost = Math.min(1.6, boost + (k || 1)); } };
@@ -19750,7 +19779,13 @@ img.tl, .tl.tlg { background: none; box-shadow: none; border-radius: 0; margin: 
 // thing (a swish through a real rim, a spiral through the uprights, a puck in the net, a ball out of the yard), sparks,
 // metallic confetti, a shockwave on the drop, a trophy under moving lights, a banner raised to the rafters. Everything is
 // timed off the show's own clock and beat; it lightens itself (no bloom, fewer bits) if the frame rate can't keep up
-const S3 = { lib: null, ld: null, R: null, run: null, cache: {} };
+const S3 = { lib: null, ld: null, R: null, run: null, cache: {}, tx: 1 };
+// how many device pixels the stage's 1920 x 1080 covers on this screen (1 on a 1080p TV, 2 on a 4K one)
+function S3pr(info) {
+  if (info && (info.lite || info.low)) return 1;
+  const k = (window.devicePixelRatio || 1) * Math.max(innerWidth / 1920, innerHeight / 1080);
+  return Math.max(1, Math.min(2, Math.round(k * 4) / 4));
+}
 async function s3lib() {
   if (S3.lib) return S3.lib;
   if (!S3.ld) S3.ld = (async () => {
@@ -19777,8 +19812,9 @@ const cl = (v, a, b) => Math.max(a, Math.min(b, v)), seg = (t, a, d) => cl((t - 
 // ---- textures drawn once ----
 function canvasTex(L, w, h, draw, key) {
   if (key && S3.cache[key]) return S3.cache[key];
-  const c = document.createElement("canvas"); c.width = w; c.height = h; draw(c.getContext("2d"), w, h);
-  const t = new L.THREE.CanvasTexture(c); t.colorSpace = L.THREE.SRGBColorSpace; t.anisotropy = 4;
+  const k = S3.tx > 1 && w * h <= 1100000 ? 2 : 1, c = document.createElement("canvas"); c.width = w * k; c.height = h * k;
+  const cx = c.getContext("2d"); if (k > 1) cx.scale(k, k); draw(cx, w, h);
+  const t = new L.THREE.CanvasTexture(c); t.colorSpace = L.THREE.SRGBColorSpace; t.anisotropy = S3.R ? Math.min(8, S3.R.r.capabilities.getMaxAnisotropy()) : 4;
   if (key) S3.cache[key] = t; return t;
 }
 function spriteTex(L) {
@@ -19823,7 +19859,10 @@ function S3build(L, info) {
   const key = new THREE.DirectionalLight(0xffffff, 1.6); key.position.set(4, 6, 8); scene.add(key);
   const rimA = new THREE.PointLight(acc, 22, 30, 2); rimA.position.set(-6, 2, 3); scene.add(rimA);
   const rimB = new THREE.PointLight(col, 14, 30, 2); rimB.position.set(6, -2, 3); scene.add(rimB);
-  const comp = new L.EffectComposer(r); comp.setSize(1920, 1080);
+  // the picture at the screen's own pixels, multisampled (the post effects otherwise draw it with no anti-aliasing)
+  const pr = S3pr(info); S3.tx = info.lite || info.low ? 1 : 2; r.setPixelRatio(pr); r.setSize(1920, 1080, false);
+  const comp = new L.EffectComposer(r, new THREE.WebGLRenderTarget(1920, 1080, { type: THREE.HalfFloatType, samples: info.lite || info.low ? 0 : pr > 1.5 ? 2 : 4 }));
+  comp.setPixelRatio(pr); comp.setSize(1920, 1080);
   comp.addPass(new L.RenderPass(scene, cam));
   const bloom = new L.UnrealBloomPass(new THREE.Vector2(960, 540), 0.45, 0.4, 0.86); comp.addPass(bloom);
   comp.addPass(new L.OutputPass());
@@ -19833,7 +19872,7 @@ function S3build(L, info) {
     acc: new THREE.MeshStandardMaterial({ color: acc, metalness: 0.85, roughness: 0.3, emissive: acc, emissiveIntensity: 0.05, envMapIntensity: 0.8 }),
     glow: new THREE.MeshBasicMaterial({ color: acc, transparent: true, blending: THREE.AdditiveBlending, depthWrite: false }),
   };
-  return { L, THREE, r, scene, cam, comp, bloom, bgMat, key, rimA, rimB, acc, col, mats, objs: [], tick: [], info, look: new THREE.Vector3(), camTo: { p: new THREE.Vector3(0, 0, 12), l: new THREE.Vector3() }, shake: 0, flash: 0, beat: 0 };
+  return { L, THREE, r, scene, cam, comp, bloom, bgMat, key, rimA, rimB, acc, col, mats, objs: [], tick: [], info, pr, look: new THREE.Vector3(), camTo: { p: new THREE.Vector3(0, 0, 12), l: new THREE.Vector3() }, shake: 0, flash: 0, beat: 0 };
 }
 function S3add(st, o) { st.scene.add(o); st.objs.push(o); return o; }
 function S3text(st, s, size, mat, deep) {
@@ -20174,7 +20213,7 @@ function S3loop(st) {
     st.r.toneMappingExposure = 0.92 + st.flash * 0.15 - (st.dim || 0) * 0.3;
     st.comp.render(dt);
     // keep up or lighten up: no bloom below ~32 fps, a smaller picture below ~22 (measured on real time)
-    if (st.t > 1.0 && !low) { fr[0]++; fr[1] += rdt; if (fr[1] > 1.5) { const fps = fr[0] / fr[1]; if (fps < 32 && !lite) { lite = true; st.bloom.enabled = false; } else if (fps < 22) shrink(); fr = [0, 0]; } }
+    if (st.t > 1.0 && !low) { fr[0]++; fr[1] += rdt; if (fr[1] > 1.5) { const fps = fr[0] / fr[1]; if (fps < 42 && st.pr > 1) { st.pr = 1; st.r.setPixelRatio(1); st.comp.setPixelRatio(1); } else if (fps < 32 && !lite) { lite = true; st.bloom.enabled = false; } else if (fps < 22) shrink(); fr = [0, 0]; } }
     requestAnimationFrame(step);
   };
   requestAnimationFrame(step);
