@@ -12010,7 +12010,7 @@ body.tv.has-ticker .jumbo { bottom: calc(var(--sy, 0px) + max(40px, 4.6vh)); }
   // ---------- sheets ----------
   function openSheet(id) { $(id).hidden = false; }
   // keep every open screen current: when a new version is up, reload it (never mid-form or mid-animation)
-  const BUILD = "20261025012909";
+  const BUILD = "20261025015018";
   function checkBuild() {
     if (BUILD === "dev") return;
     fetch("version.json?t=" + Date.now(), { cache: "no-store" }).then((r) => (r.ok ? r.json() : null)).then((j) => {
@@ -14264,7 +14264,7 @@ body.tv.has-ticker .jumbo { bottom: calc(var(--sy, 0px) + max(40px, 4.6vh)); }
       if (fly) djRun(v, bg, D, go);
       const bar = $("#jbProg"); bar.style.transition = "none"; bar.style.width = (100 * off) / msL + "%"; void bar.offsetWidth; bar.style.transition = `width ${msL - off}ms linear`; bar.style.width = "100%";
       if (P.ext) { if (c) { v.muted = false; v.volume = 1; } statusSrc = { stop: () => { try { v.muted = true; } catch (e) {} } }; }
-      else if (sp) { statusSrc = { stop: () => { if (SP.seq === sp.seq) spStop(); } }; spGuard(sp, go, P, c); }
+      else if (sp) { statusSrc = { sp: true, stop: () => { if (SP.seq === sp.seq) spStop(); } }; spGuard(sp, go, P, c); }
       else if (buf) statusSrc = playBuf(c, buf, 0.95, AL.so);
       // keep Goldie on the beat: the song clock is the audio context; nudge the loop back if it drifts (a Spotify song has no tempo to go by)
       clearInterval(djT);
@@ -14458,7 +14458,7 @@ body.tv.has-ticker .jumbo { bottom: calc(var(--sy, 0px) + max(40px, 4.6vh)); }
   // a DJ break: the next song, from its hook, faded in. Resolves to what's playing, or null (the built-in songs take it)
   async function spPlay() {
     if (!spUsable()) return null;
-    const p = SP.player, me = ++SP.seq; clearInterval(SP.fade);
+    const p = SP.player, me = ++SP.seq; clearInterval(SP.fade); SP.t0 = Date.now();
     try { p.activateElement(); } catch (e) {}
     for (let k = 0; k < 3; k++) {
       const hz = (SP.useHouse && SP.hlist.length > 0) || !SP.list.length, t = hz ? spPickH() : spPick(), at = spHook(t.dur);
@@ -14527,10 +14527,23 @@ body.tv.has-ticker .jumbo { bottom: calc(var(--sy, 0px) + max(40px, 4.6vh)); }
     bgmPlay();
   }, 1500);
   function spStop() {
-    if (!SP.on || !SP.player) return;
-    SP.on = false; const p = SP.player;
-    spFade(0.02, 1000, () => { if (!SP.on) p.pause().catch(() => {}); });
+    if (!SP.player) return;
+    const p = SP.player, was = SP.on, s0 = SP.seq; SP.on = false;
+    // after the fade: this screen's player pauses, and the account's player too; not if a new song has started since
+    const halt = () => { if (SP.on || SP.seq !== s0) return; p.pause().catch(() => {}); if (SP.dev) spApi(`/me/player/pause?device_id=${encodeURIComponent(SP.dev)}`, "PUT").catch(() => {}); };
+    if (was) spFade(0.02, 1000, halt); else halt();
   }
+  // a song plays only while something has it: a DJ break on the big screen, or Friday's music under the board (or one
+  // that's just starting). Anything Spotify is still playing here with nothing on is paused
+  setInterval(() => {
+    if (!SP.player || !SP.dev || document.hidden || typeof SP.player.getCurrentState !== "function") return;
+    const owned = () => { const jb = document.getElementById("jumbo"); return BGM.on || Date.now() - (SP.t0 || 0) < 15e3 || !!(statusSrc && statusSrc.sp && jb && !jb.hidden); };
+    if (owned()) return;
+    SP.player.getCurrentState().then((st) => {
+      if (!st || st.paused || owned()) return;
+      SP.on = false; clearInterval(SP.fade); SP.player.pause().catch(() => {}); spApi(`/me/player/pause?device_id=${encodeURIComponent(SP.dev)}`, "PUT").catch(() => {});
+    }).catch(() => {});
+  }, 3000);
   function spArt(url) { const i = $("#npImg"); if (url) { i.src = url; i.hidden = false; } else { i.hidden = true; i.removeAttribute("src"); } }
   function spShow() {
     const st = $("#spStatus"); if (!st) return;
