@@ -5800,6 +5800,23 @@ body.tv #rbLb .rb-lr .nm b { font-size: 15px; }
 body.tv #rbLb .rb-lr .net { font-size: 17px; }
 body.tv #rbLb .rb-lr .op { font-size: 10.5px; gap: 4px; }
 body.tv #rbLb .rb-lr .lv em { font-size: 9.5px; letter-spacing: .06em; }
+
+/* ---------- the big screen gets the whole machine ---------- */
+body.jb-full .app, body.jb-full #cfield, body.jb-full #bfield, body.jb-full #zam, body.jb-full #hcourt { visibility: hidden; }
+body.jb-full .app *, body.jb-full .app *::before, body.jb-full .app *::after, body.jb-full #hcourt * { animation-play-state: paused !important; }
+/* the ticker stays on under the big screen; the big screen stops where the ticker starts (it grows on a 4K screen) */
+body.has-ticker .jumbo { bottom: max(40px, 4.6vh); }
+body.tv.has-ticker .jumbo { bottom: calc(var(--sy, 0px) + max(40px, 4.6vh)); }
+/* the wash in place of the blurred copy; the house edits' color grade on the video itself is dropped (a filter on a
+   playing video costs the graphics card an extra pass every frame) */
+.jb-screen #jbBg { display: none !important; }
+#jbWash { position: absolute; inset: 0; width: 100%; height: 100%; opacity: 0; transition: opacity .5s ease; pointer-events: none; }
+#jbWash.on { opacity: .45; }
+.jumbo.hz #pipVid { filter: none; }
+/* solid, not a blur of what's behind */
+.jumbo { -webkit-backdrop-filter: none; backdrop-filter: none; }
+.jumbo:not(.lux) { background: linear-gradient(180deg, #04060a, #05070b); }
+.jb-np, .jumbo.lux .jb-np { -webkit-backdrop-filter: none; backdrop-filter: none; background: rgba(6,8,12,.86); }
 </style>
 </head>
 <body>
@@ -6254,7 +6271,7 @@ body.tv #rbLb .rb-lr .lv em { font-size: 9.5px; letter-spacing: .06em; }
 <div class="jumbo" id="jumbo" hidden title="Tap to close">
   <div class="jb-head"><span class="jb-logo">SWEAT<b>ZONE</b></span><span class="jb-tag" id="jbTag">Live</span><b id="jbLbl"></b><span class="jb-x" aria-hidden="true">×</span></div>
   <div class="jb-main">
-    <div class="jb-screen"><video id="jbBg" muted playsinline preload="none" aria-hidden="true"></video><video id="pipVid" muted playsinline preload="none"></video><canvas class="dj-cv" id="djCv" hidden aria-hidden="true"></canvas><div class="jb-bug" id="jbBug" hidden></div><div class="jb-team" id="jbTeam" hidden><img id="jbTeamLg" alt="" referrerpolicy="no-referrer"><div><b id="jbTeamNm"></b><span id="jbTeamEv"></span></div></div><div class="wk-card" id="wkCard" hidden></div><div class="oa-chy" id="oaChy" hidden></div><div class="jb-np" id="jbNp" hidden><div class="np-art" aria-hidden="true"><i></i><i></i><i></i><i></i><i></i><img id="npImg" alt="" hidden></div><div class="np-txt"><span>Now playing</span><b id="npSong"></b><em id="npArtist"></em></div></div></div>
+    <div class="jb-screen"><video id="jbBg" muted playsinline preload="none" aria-hidden="true"></video><canvas id="jbWash" width="192" height="108" aria-hidden="true"></canvas><video id="pipVid" muted playsinline preload="none"></video><canvas class="dj-cv" id="djCv" hidden aria-hidden="true"></canvas><div class="jb-bug" id="jbBug" hidden></div><div class="jb-team" id="jbTeam" hidden><img id="jbTeamLg" alt="" referrerpolicy="no-referrer"><div><b id="jbTeamNm"></b><span id="jbTeamEv"></span></div></div><div class="wk-card" id="wkCard" hidden></div><div class="oa-chy" id="oaChy" hidden></div><div class="jb-np" id="jbNp" hidden><div class="np-art" aria-hidden="true"><i></i><i></i><i></i><i></i><i></i><img id="npImg" alt="" hidden></div><div class="np-txt"><span>Now playing</span><b id="npSong"></b><em id="npArtist"></em></div></div></div>
     <div class="jb-prog"><i id="jbProg"></i></div>
   </div>
   <aside class="jb-side"><h3><i class="dot"></i><span id="jbSideH">The room's bets</span></h3><div id="jbBets"></div></aside>
@@ -6918,7 +6935,7 @@ body.tv #rbLb .rb-lr .lv em { font-size: 9.5px; letter-spacing: .06em; }
   // stop the river where it is: the cards go back in place and the column scrolls to the same spot
   function rivStop(st, p) {
     for (const k of st.el.children) if (k.__riv) { k.__riv.cancel(); k.__riv = null; k.__rivD = 0; k.__rv0 = null; }
-    st.rvOn = false; st.rv0 = null; st.rvP = 0; st.rvHeld = null; st.pos = p || 0;
+    st.rvOn = false; st.rv0 = null; st.rvP = 0; st.rvHeld = null; st.rvHA = null; st.rvA0 = null; st.rvDirty = true; st.pos = p || 0;
     if (st.el.isConnected) st.el.scrollTop = p || 0;
   }
   // while a celebration covers the board the river holds still where it is (nobody can see it, and the show gets the
@@ -6928,7 +6945,8 @@ body.tv #rbLb .rb-lr .lv em { font-size: 9.5px; letter-spacing: .06em; }
     rivApply(st);
     for (const k of st.el.children) { const a = k.__riv; if (a) { a.pause(); a.currentTime = t; } }
   }
-  const rivCover = () => { const c = document.getElementById("cash"); return !!(c && !c.hidden); };   // a show on, or fading out
+  // covered: a show on (or fading out), or a clip or DJ set on the big screen (except the big screen's own list)
+  const rivCover = (st) => { const c = document.getElementById("cash"), j = document.getElementById("jumbo"); return !!((c && !c.hidden) || (j && !j.hidden && !j.contains(st.el))); };
   function rivTick(st, now, on) {
     const el = st.el;
     if (!on || !el.isConnected || el.offsetParent === null || !st.period) {
@@ -6938,18 +6956,21 @@ body.tv #rbLb .rb-lr .lv em { font-size: 9.5px; letter-spacing: .06em; }
     }
     // somebody's scrolling it by hand (or a test is holding it): a plain scroll, until they leave it alone
     if (now - st.user < 15000) { if (st.rvOn) rivStop(st, rivPos(st, now)); return; }
-    if (st.rvOn && (document.body.classList.contains("cs-live") || rivCover())) {
+    // the cards only need touching when they change (a re-render) or the river's anchor moves; otherwise every frame
+    // here is a couple of comparisons and the graphics card does the rest
+    if (!st.rvMO) { st.rvDirty = true; st.rvMO = new MutationObserver(() => { st.rvDirty = true; }); st.rvMO.observe(el, { childList: true }); }
+    if (st.rvOn && (document.body.classList.contains("cs-live") || rivCover(st))) {
       if (st.rvHeld == null) st.rvHeld = rivPos(st, now) % st.period;
-      for (const k of el.children) if (!k.__riv || k.__riv.playState !== "paused") { rivHold(st, st.rvHeld); break; }
+      if (st.rvDirty || st.rvHA !== st.rvHeld) { st.rvDirty = false; st.rvHA = st.rvHeld; rivHold(st, st.rvHeld); }
       return;
     }
-    if (st.rvHeld != null) { st.rv0 = now - (st.rvHeld / rivSpeed(st)) * 1000; st.rvHeld = null; }
+    if (st.rvHeld != null) { st.rv0 = now - (st.rvHeld / rivSpeed(st)) * 1000; st.rvHeld = null; st.rvHA = null; }
     if (!st.rvOn) {
       if (now < st.hold) return;   // its first start, a beat after the board comes up
       const p = ((el.scrollTop || st.pos || 0) % st.period + st.period) % st.period; el.scrollTop = 0;
       st.rv0 = now - (p / rivSpeed(st)) * 1000; st.rvOn = true;
     }
-    rivApply(st);
+    if (st.rvDirty || st.rvA0 !== st.rv0) { st.rvDirty = false; st.rvA0 = st.rv0; rivApply(st); }
   }
   // measuring a column while it flows: the cards' slide is set aside for the moment (it's never painted that way)
   function rivMeasure(on) { for (const st of ASC) if (st.rvOn && st.el.isConnected) st.el.classList.toggle("rv-m", on); }
@@ -8304,7 +8325,7 @@ body.tv #rbLb .rb-lr .lv em { font-size: 9.5px; letter-spacing: .06em; }
   const hcEase = (k) => 1 - Math.pow(1 - Math.min(1, Math.max(0, k)), 3);
   function hcFrame(now) {
     requestAnimationFrame(hcFrame);
-    const bd = document.body; if (!bd.classList.contains("tv") || !bd.classList.contains("hoops") || document.hidden || now - HC.last < 33) return;
+    const bd = document.body; if (!bd.classList.contains("tv") || !bd.classList.contains("hoops") || bd.classList.contains("jb-full") || document.hidden || now - HC.last < 33) return;
     const dt = Math.min(0.1, (now - HC.last) / 1000); HC.last = now;
     const cv = $("#hcLive"), B = hcBox(); if (!cv || !B) return;
     if (cv.width !== B.Wc || cv.height !== B.Hc) { cv.width = B.Wc; cv.height = B.Hc; }
@@ -9371,6 +9392,33 @@ body.tv #rbLb .rb-lr .lv em { font-size: 9.5px; letter-spacing: .06em; }
   const EDGE = '<i class="edge" aria-hidden="true"><i></i><i></i></i>';
   // the rail's scores under the leaderboard hide when there's only a sliver of room (a row cut in half reads as a glitch)
   { const rsc = document.getElementById("rbRsc"); if (rsc && window.ResizeObserver) new ResizeObserver(() => rsc.classList.toggle("tiny", rsc.clientHeight < 150)).observe(rsc); }
+
+  // ---- a clip or a DJ set on the big screen: everything under it set aside until it leaves ----
+  const JBF = { t: 0 };
+  function jbFull() {
+    const jb = document.getElementById("jumbo"), up = !!(jb && !jb.hidden && !jb.classList.contains("out"));
+    clearTimeout(JBF.t);
+    if (!up) { document.body.classList.remove("jb-full"); return; }
+    // once its way in is done (the board shows through while it slides in)
+    if (!document.body.classList.contains("jb-full")) JBF.t = setTimeout(() => { const j = document.getElementById("jumbo"); if (j && !j.hidden && !j.classList.contains("out")) document.body.classList.add("jb-full"); }, 900);
+  }
+  { const jb = document.getElementById("jumbo"); if (jb) new MutationObserver(jbFull).observe(jb, { attributes: true, attributeFilter: ["hidden", "class"] }); }
+
+  // ---- the clip's backdrop: a wash of its own colors ----
+  { const bgv = document.getElementById("jbBg"); if (bgv) { bgv.play = () => Promise.resolve(); try { bgv.pause(); } catch (e) {} } }
+  const WASH = { on: false, fresh: true };
+  setInterval(() => {
+    const jb = document.getElementById("jumbo"), v = document.getElementById("pipVid"), cv = document.getElementById("jbWash");
+    if (!jb || !v || !cv) return;
+    const show = !jb.hidden && v.style.objectFit !== "cover" && v.readyState >= 2 && v.videoWidth > 0 && getComputedStyle(v).opacity !== "0";
+    if (show !== WASH.on) { WASH.on = show; cv.classList.toggle("on", show); if (!show) WASH.fresh = true; }
+    if (!show || v.paused) return;
+    // the clip, cropped to fill the wash, blended into what's there so it drifts instead of jumping
+    const x = cv.getContext("2d"), W = cv.width, H = cv.height, va = v.videoWidth / v.videoHeight, ca = W / H;
+    const sw = va > ca ? v.videoHeight * ca : v.videoWidth, sh = va > ca ? v.videoHeight : v.videoWidth / ca;
+    x.globalAlpha = WASH.fresh ? 1 : 0.35; WASH.fresh = false; x.filter = "blur(6px)";
+    try { x.drawImage(v, (v.videoWidth - sw) / 2, (v.videoHeight - sh) / 2, sw, sh, -14, -14, W + 28, H + 28); } catch (e) {}
+  }, 125);
   const fxUSD = (v) => "$" + (Math.abs(v - Math.round(v)) < 0.005 ? Math.round(v).toLocaleString() : v.toFixed(2));
   const ET_DAY = new Intl.DateTimeFormat("en-CA", { timeZone: "America/New_York" }), ET_HR = new Intl.DateTimeFormat("en-US", { timeZone: "America/New_York", hour: "numeric", hourCycle: "h23" });
   const etDayOf = (t) => ET_DAY.format(new Date(t)), etHr = (t) => Number(ET_HR.format(new Date(t)));
@@ -12033,7 +12081,7 @@ body.tv #rbLb .rb-lr .lv em { font-size: 9.5px; letter-spacing: .06em; }
   // ---------- sheets ----------
   function openSheet(id) { $(id).hidden = false; }
   // keep every open screen current: when a new version is up, reload it (never mid-form or mid-animation)
-  const BUILD = "20261024222321";
+  const BUILD = "20261025001412";
   function checkBuild() {
     if (BUILD === "dev") return;
     fetch("version.json?t=" + Date.now(), { cache: "no-store" }).then((r) => (r.ok ? r.json() : null)).then((j) => {
@@ -19904,7 +19952,7 @@ body.tv #rbLb .rb-lr .lv em { font-size: 9.5px; letter-spacing: .06em; }
   const P = (x, y) => [ox + x * s, oy + y * s];
   function frame(now) {
     requestAnimationFrame(frame);
-    const on = document.body.classList.contains("tv") && (document.body.classList.contains("cfb") || document.body.classList.contains("nflday")) && !document.hidden && !document.body.classList.contains("cs-live"), nfl = document.body.classList.contains("nflday");
+    const on = document.body.classList.contains("tv") && (document.body.classList.contains("cfb") || document.body.classList.contains("nflday")) && !document.hidden && !document.body.classList.contains("cs-live") && !document.body.classList.contains("jb-full"), nfl = document.body.classList.contains("nflday");
     if (!on || now - last < 33) return;
     const dt = Math.min(0.1, (now - last) / 1000); last = now; size();
     cx.clearRect(0, 0, W, H);
