@@ -5822,6 +5822,17 @@ body.tv.pplb.has-ticker .roomtv:not([hidden]), body.tv.pplb .roomtv:not([hidden]
 /* the leaderboard's "if it holds" line, alone */
 body.tv #rbLb .rb-lr .op:has(.lv) { font-size: 0; gap: 0; }
 body.tv #rbLb .rb-lr .op:has(.lv) > b { display: none; }
+
+/* ---------- a small room on NFL Sunday: the games, then a narrow column each ---------- */
+body.tv #rbGames.rb-games.primeg.pplg { grid-template-columns: minmax(0, 1fr) calc(var(--pn, 2) * var(--pw, 360px) + (var(--pn, 2) - 1) * 14px); }
+body.tv .rb-games.primeg.pplg > .rb-pcol.pr, body.tv.nflday #rbGames.rb-games.primeg.pplg > .rb-pcol.pr { overflow: hidden; -webkit-mask-image: none; mask-image: none; background: none; border-radius: 0; padding: 0; }
+body.tv .rb-games.pplg > .rb-pcol.pr > .pp-cols { height: 100%; }
+body.tv:has(#roomTvQr:not([hidden])) .rb-games.pplg .pp-col:last-child { margin-bottom: calc((max(76px, 7vh) + 2 * max(7px, .65vh) + 2px) / var(--zm, 1) + 14px); }
+body.tv.pplg .roomtv:not([hidden]), body.tv.pplg.has-ticker .roomtv:not([hidden]) { top: auto; left: auto; right: calc(var(--sx, 0px) + 18px * var(--zm, 1)); bottom: calc(var(--sy, 0px) + max(40px, 4.6vh) + 23px * var(--zm, 1)); width: calc(var(--pw, 360px) * var(--zm, 1)); box-sizing: border-box;
+  grid-template-columns: auto minmax(0, 1fr); justify-items: start; align-items: center; column-gap: max(12px, 1.1vh); row-gap: 4px; padding: max(7px, .65vh) max(10px, .93vh); }
+body.tv.pplg .roomtv:not([hidden]) canvas { width: max(76px, 7vh); height: max(76px, 7vh); grid-row: span 2; }
+body.tv.pplg .roomtv:not([hidden]) b { align-self: end; }
+body.tv.pplg .roomtv:not([hidden]) span { align-self: start; }
 </style>
 </head>
 <body>
@@ -9629,23 +9640,23 @@ body.tv #rbLb .rb-lr .op:has(.lv) > b { display: none; }
       <div class="pp-foot1">${p.open.length} open${later ? ` · ${later} later` : ""} · ${fU(risk)} to win ${fU(p.toWin)}</div>
       <div class="pp-foot"><span class="l5">${p.last5.map((o) => `<i class="${o === "W" ? "w" : "l"}"></i>`).join("")}</span><span class="pp-best">${best ? `Best hit: ${esc(best.kind === "parlay" ? (best.legs || []).length + "-leg parlay" : best.pick)} <b class="w num">${fU(netOf(best), true)}</b>` : p.done.length ? `${rec(p)} so far today` : "No results yet today"}</span></div>`;
   }
-  function peopleBoard() {
-    const G = $("#rbGames"); G.classList.remove("mason", "primeg", "h1", "solo");
+  function peopleBoard(host) {
+    const G = host || $("#rbGames"); if (!host) G.classList.remove("mason", "primeg", "h1", "solo");
     const rows = standings("day"), wk = new Map(standings("week").map((p) => [p.k, p]));
     const lead = rows[0] && rows[0].net > 0.004 && (!rows[1] || rows[0].net - rows[1].net > 0.004) ? rows[0].k : null, rank = new Map(rows.map((p, i) => [p.k, i + 1]));
     const first = (p) => Math.min(Infinity, ...[...p.open, ...p.done].map((b) => b.placedAt || Infinity));
     const ppl = rows.filter((p) => p.open.length || p.done.length).sort((x, y) => Number(y.me) - Number(x.me) || first(x) - first(y) || (x.k < y.k ? -1 : 1));
     const keys = ppl.map((p) => p.k).join("|");
     let SC = $("#ppScores"), C = $("#ppCols");
-    if (!SC || SC.parentNode !== G || !C || C.dataset.keys !== keys) {
-      G.innerHTML = `<div class="pp-scores" id="ppScores"></div><div class="pp-cols" id="ppCols" style="--n:${Math.max(1, ppl.length)}"></div>`;
+    if ((!host && (!SC || SC.parentNode !== G)) || !C || C.parentNode !== G || C.dataset.keys !== keys) {
+      G.innerHTML = `${host ? "" : '<div class="pp-scores" id="ppScores"></div>'}<div class="pp-cols" id="ppCols" style="--n:${Math.max(1, ppl.length)}"></div>`;
       SC = $("#ppScores"); C = $("#ppCols"); C.dataset.keys = keys;
       C.innerHTML = ppl.length ? ppl.map((p) => `<section class="pp-col" data-k="${esc(p.k)}" style="--c:${p.col}"><header class="pp-h"></header><div class="pp-list"></div></section>`).join("") : `<div class="rb-empty"><b>No bets on the board</b>Log a bet from your phone and it shows up here with everybody's.</div>`;
       for (let i = ASC.length - 1; i >= 0; i--) if (!ASC[i].el.isConnected) ASC.splice(i, 1);
       // each starts rolling a beat after the one before it, so the columns don't move in step
       C.querySelectorAll(".pp-list").forEach((el, i) => { const st = autoScroll(el, 16); if (st) st.hold = performance.now() + 4000 + i * 1900; });
     }
-    SC.innerHTML = ppScores();
+    if (!host) SC.innerHTML = ppScores();
     // in sections: live now (game by game, in kickoff order), the parlays, the ones that start later
     const t0 = (b) => startOf(b) || 0, gid = (b) => (b.sel && b.sel.g != null ? String(b.sel.g) : "");
     const byGame = (x, y) => t0(x) - t0(y) || (gid(x) < gid(y) ? -1 : gid(x) > gid(y) ? 1 : 0) || x.placedAt - y.placedAt;
@@ -9683,9 +9694,13 @@ body.tv #rbLb .rb-lr .op:has(.lv) > b { display: none; }
     } else if (rbPrime) { body.classList.remove("prime"); $("#rbMark").innerHTML = ""; rbPrime = null; }
     // one football game keeps its bets in the big card (the MNF look); everything else puts the bets in their own rolling column
     const split = heroes.length > 0;
-    const pplOn = pplWant() && heroes.length !== 1;
+    const pplN = pplWant() && heroes.length !== 1 ? standings("day").filter((p) => p.open.length || p.done.length).length : 0;
+    const pplG = pplN > 0 && pplN <= 3 && list.length > 0;
+    const pplOn = pplWant() && heroes.length !== 1 && !pplG;
     if (pplOn && heroes.length) { heroes = []; heroIds = new Set(); }
-    $("#rb").classList.toggle("people", pplOn); $("#rbGames").classList.toggle("people", pplOn); body.classList.toggle("pplb", pplOn);
+    $("#rb").classList.toggle("people", pplOn || pplG); $("#rbGames").classList.toggle("people", pplOn); body.classList.toggle("pplb", pplOn);
+    body.classList.toggle("pplg", pplG); $("#rbGames").classList.toggle("pplg", pplG);
+    if (pplG) { body.style.setProperty("--pn", String(pplN)); body.style.setProperty("--pw", ({ 1: 360, 2: 300, 3: 285 })[pplN] + "px"); }
     const roomLive = list.filter((G) => G.g.st === "in" && (G.entries.length || (G.legs && G.legs.length))).length;
     const roomN = list.filter((G) => G.entries.length || (G.legs && G.legs.length && G.g.st === "in")).length + (parlays.length ? 1 : 0) + (other.length ? 1 : 0);
     const nowG = !tv ? [] : heroes.length ? onNowGames(list, heroes.length === 1 ? 2 : 0) : onNowGames(list, Math.max(4 - roomLive, 7 - roomN));
@@ -9694,6 +9709,7 @@ body.tv #rbLb .rb-lr .op:has(.lv) > b { display: none; }
     const fol = followCards();
     $("#rbGames").classList.toggle("primeg", heroes.length > 0 || two); $("#rbGames").classList.toggle("h1", heroes.length === 1); $("#rbGames").classList.toggle("solo", (heroes.length > 0 || two) && !rest);
     $("#rbGames").classList.toggle("split2", two); if (two) $("#rbGames").classList.remove("mason");
+    if (pplG) $("#rbGames").classList.remove("solo");
     if (heroes.length || two) {
       let L = $("#rbColL"), R = $("#rbColR");
       if (!L || L.parentNode !== $("#rbGames")) {
@@ -9705,9 +9721,9 @@ body.tv #rbLb .rb-lr .op:has(.lv) > b { display: none; }
       if (two) {
         // the scores: live first, then the ones still to come, then the finals; the other games on now after them
         const rk = (G) => (G.g.st === "in" ? 0 : G.g.st === "pre" ? 1 : 2), ord = [...list].sort((x, y) => rk(x) - rk(y) || (x.g.t || 0) - (y.g.t || 0));
-        L.dataset.n = "0"; L.innerHTML = ord.map((G) => gameCard(G, false, true)).join("") + nowG.map(onNowCard).join("") + fol; R.innerHTML = rest; R.hidden = !rest;
+        L.dataset.n = "0"; L.innerHTML = ord.map((G) => gameCard(G, false, true)).join("") + nowG.map(onNowCard).join("") + fol; R.classList.toggle("ppr", pplG); if (pplG) { R.hidden = false; peopleBoard(R); } else { R.innerHTML = rest; R.hidden = !rest; }
       } else {
-      L.dataset.n = String(heroes.length); L.innerHTML = heroes.map((G) => gameCard(G, true, split)).join("") + fol; R.innerHTML = rest; R.hidden = !rest;
+      L.dataset.n = String(heroes.length); L.innerHTML = heroes.map((G) => gameCard(G, true, split)).join("") + fol; R.classList.toggle("ppr", pplG); if (pplG) { R.hidden = false; peopleBoard(R); } else { R.innerHTML = rest; R.hidden = !rest; }
       primeFit();
       if (heroes.length <= 2) laterFit(L);
       }
@@ -12021,7 +12037,7 @@ body.tv #rbLb .rb-lr .op:has(.lv) > b { display: none; }
   // ---------- sheets ----------
   function openSheet(id) { $(id).hidden = false; }
   // keep every open screen current: when a new version is up, reload it (never mid-form or mid-animation)
-  const BUILD = "20261025173721";
+  const BUILD = "20261025202404";
   function checkBuild() {
     if (BUILD === "dev") return;
     fetch("version.json?t=" + Date.now(), { cache: "no-store" }).then((r) => (r.ok ? r.json() : null)).then((j) => {
