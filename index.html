@@ -5815,6 +5815,9 @@ body.tv.has-ticker .jumbo { bottom: calc(var(--sy, 0px) + max(40px, 4.6vh)); }
 .jumbo { -webkit-backdrop-filter: none; backdrop-filter: none; }
 .jumbo:not(.lux) { background: linear-gradient(180deg, #04060a, #05070b); }
 .jb-np, .jumbo.lux .jb-np { -webkit-backdrop-filter: none; backdrop-filter: none; background: rgba(6,8,12,.86); }
+
+/* the "add your bets" code: a small box, never stretched top to bottom */
+body.tv.pplb.has-ticker .roomtv:not([hidden]), body.tv.pplb .roomtv:not([hidden]) { bottom: auto; }
 </style>
 </head>
 <body>
@@ -9162,7 +9165,7 @@ body.tv.has-ticker .jumbo { bottom: calc(var(--sy, 0px) + max(40px, 4.6vh)); }
     MB = { sig, A, html };
     loopSyncEl(A); loopSyncEl(B);
   }
-  const pplWant = () => document.body.classList.contains("tv") && document.body.classList.contains("nflday");
+  const pplWant = () => false;   // NFL Sunday uses the college Saturday board (games | bets | leaderboard)
   // the scores, small: every game on now, the ones about to start, the ones just finished; a game the room's on is outlined
   function ppScores() {
     const lg = focusLeague(), now = Date.now(), rank = (g) => (g.st === "in" ? 0 : g.st === "pre" ? 1 : 2);
@@ -12012,7 +12015,7 @@ body.tv.has-ticker .jumbo { bottom: calc(var(--sy, 0px) + max(40px, 4.6vh)); }
   // ---------- sheets ----------
   function openSheet(id) { $(id).hidden = false; }
   // keep every open screen current: when a new version is up, reload it (never mid-form or mid-animation)
-  const BUILD = "20261025020321";
+  const BUILD = "20261025170405";
   function checkBuild() {
     if (BUILD === "dev") return;
     fetch("version.json?t=" + Date.now(), { cache: "no-store" }).then((r) => (r.ok ? r.json() : null)).then((j) => {
