@@ -9327,8 +9327,10 @@ body.tv.has-ticker .jumbo { bottom: calc(var(--sy, 0px) + max(40px, 4.6vh)); }
   function covSync() {
     clearTimeout(COV.t);
     if (!covUp()) { document.body.classList.remove("covered"); return; }
-    // once its way in is done (the board shows through while it comes in)
-    if (!document.body.classList.contains("covered")) COV.t = setTimeout(() => { if (covUp()) document.body.classList.add("covered"); }, 900);
+    // once its way in is done (the board shows through while it comes in); for a celebration, after its drop (setting
+    // the board aside restyles it once, which shouldn't land on the drop)
+    const cs = document.getElementById("cash"), show = !!(cs && !cs.hidden && cs.classList.contains("show"));
+    if (!document.body.classList.contains("covered")) COV.t = setTimeout(() => { if (covUp()) document.body.classList.add("covered"); }, show ? 2600 : 900);
   }
   function covWatch(el) { if (el && !el.__cov) { el.__cov = 1; new MutationObserver(covSync).observe(el, { attributes: true, attributeFilter: ["hidden", "class"] }); } }
   covWatch(document.getElementById("jumbo")); covWatch(document.getElementById("cash"));   // the show's overlay is made at its first show (below)
@@ -12010,7 +12012,7 @@ body.tv.has-ticker .jumbo { bottom: calc(var(--sy, 0px) + max(40px, 4.6vh)); }
   // ---------- sheets ----------
   function openSheet(id) { $(id).hidden = false; }
   // keep every open screen current: when a new version is up, reload it (never mid-form or mid-animation)
-  const BUILD = "20261025015018";
+  const BUILD = "20261025020321";
   function checkBuild() {
     if (BUILD === "dev") return;
     fetch("version.json?t=" + Date.now(), { cache: "no-store" }).then((r) => (r.ok ? r.json() : null)).then((j) => {
