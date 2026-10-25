@@ -9640,12 +9640,13 @@ body.tv.pplg .roomtv:not([hidden]) span { align-self: start; }
       <div class="pp-foot1">${p.open.length} open${later ? ` · ${later} later` : ""} · ${fU(risk)} to win ${fU(p.toWin)}</div>
       <div class="pp-foot"><span class="l5">${p.last5.map((o) => `<i class="${o === "W" ? "w" : "l"}"></i>`).join("")}</span><span class="pp-best">${best ? `Best hit: ${esc(best.kind === "parlay" ? (best.legs || []).length + "-leg parlay" : best.pick)} <b class="w num">${fU(netOf(best), true)}</b>` : p.done.length ? `${rec(p)} so far today` : "No results yet today"}</span></div>`;
   }
+  function pplActive(rows) { const any = rows.filter((p) => p.open.length || p.done.length), on = any.filter((p) => p.open.length); return on.length ? on : any; }
   function peopleBoard(host) {
     const G = host || $("#rbGames"); if (!host) G.classList.remove("mason", "primeg", "h1", "solo");
     const rows = standings("day"), wk = new Map(standings("week").map((p) => [p.k, p]));
     const lead = rows[0] && rows[0].net > 0.004 && (!rows[1] || rows[0].net - rows[1].net > 0.004) ? rows[0].k : null, rank = new Map(rows.map((p, i) => [p.k, i + 1]));
     const first = (p) => Math.min(Infinity, ...[...p.open, ...p.done].map((b) => b.placedAt || Infinity));
-    const ppl = rows.filter((p) => p.open.length || p.done.length).sort((x, y) => Number(y.me) - Number(x.me) || first(x) - first(y) || (x.k < y.k ? -1 : 1));
+    const ppl = pplActive(rows).sort((x, y) => Number(y.me) - Number(x.me) || first(x) - first(y) || (x.k < y.k ? -1 : 1));
     const keys = ppl.map((p) => p.k).join("|");
     let SC = $("#ppScores"), C = $("#ppCols");
     if ((!host && (!SC || SC.parentNode !== G)) || !C || C.parentNode !== G || C.dataset.keys !== keys) {
@@ -9694,7 +9695,7 @@ body.tv.pplg .roomtv:not([hidden]) span { align-self: start; }
     } else if (rbPrime) { body.classList.remove("prime"); $("#rbMark").innerHTML = ""; rbPrime = null; }
     // one football game keeps its bets in the big card (the MNF look); everything else puts the bets in their own rolling column
     const split = heroes.length > 0;
-    const pplN = pplWant() && heroes.length !== 1 ? standings("day").filter((p) => p.open.length || p.done.length).length : 0;
+    const pplN = pplWant() && heroes.length !== 1 ? pplActive(standings("day")).length : 0;
     const pplG = pplN > 0 && pplN <= 3 && list.length > 0;
     const pplOn = pplWant() && heroes.length !== 1 && !pplG;
     if (pplOn && heroes.length) { heroes = []; heroIds = new Set(); }
@@ -12037,7 +12038,7 @@ body.tv.pplg .roomtv:not([hidden]) span { align-self: start; }
   // ---------- sheets ----------
   function openSheet(id) { $(id).hidden = false; }
   // keep every open screen current: when a new version is up, reload it (never mid-form or mid-animation)
-  const BUILD = "20261025202404";
+  const BUILD = "20261025202937";
   function checkBuild() {
     if (BUILD === "dev") return;
     fetch("version.json?t=" + Date.now(), { cache: "no-store" }).then((r) => (r.ok ? r.json() : null)).then((j) => {
