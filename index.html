@@ -5768,8 +5768,6 @@ body.tv #rbLb .rb-lr .ft { margin-top: 0; }
 body.tv #rbLb .rb-lr .op { font-size: 11px; }
 body.tv:has(#roomTvQr:not([hidden])) .rb-rail { padding-bottom: calc((max(96px, 10.5vh) + max(63px, 5.8vh) + max(2.4vh, 18px) + 6px) / var(--zm, 1)); }
 
-/* ---------- the river ---------- */
-.rv-m > * { translate: none !important; }
 
 /* ---------- parlay legs: dots, not counts ---------- */
 .lpips { display: inline-flex; align-items: center; flex-wrap: wrap; gap: 5px; }
@@ -5802,8 +5800,8 @@ body.tv #rbLb .rb-lr .op { font-size: 10.5px; gap: 4px; }
 body.tv #rbLb .rb-lr .lv em { font-size: 9.5px; letter-spacing: .06em; }
 
 /* ---------- the big screen gets the whole machine ---------- */
-body.jb-full .app, body.jb-full #cfield, body.jb-full #bfield, body.jb-full #zam, body.jb-full #hcourt { visibility: hidden; }
-body.jb-full .app *, body.jb-full .app *::before, body.jb-full .app *::after, body.jb-full #hcourt * { animation-play-state: paused !important; }
+body.covered .app, body.covered #cfield, body.covered #bfield, body.covered #zam, body.covered #hcourt { visibility: hidden; }
+body.covered .app *, body.covered .app *::before, body.covered .app *::after, body.covered #hcourt * { animation-play-state: paused !important; }
 /* the ticker stays on under the big screen; the big screen stops where the ticker starts (it grows on a 4K screen) */
 body.has-ticker .jumbo { bottom: max(40px, 4.6vh); }
 body.tv.has-ticker .jumbo { bottom: calc(var(--sy, 0px) + max(40px, 4.6vh)); }
@@ -6802,10 +6800,9 @@ body.tv.has-ticker .jumbo { bottom: calc(var(--sy, 0px) + max(40px, 4.6vh)); }
     app.style.zoom = z.toFixed(4); document.body.style.setProperty("--zm", z.toFixed(4));
     const tk = $("#ticker"), tkh = tk && !tk.hidden ? tk.offsetHeight : 0;
     app.style.height = Math.floor((innerHeight - 2 * sy - tkh) / z) + "px";
-    rivMeasure(true); loopDrop();
+    loopDrop();
     densify(); primeFit();
     for (const st of ASC) if (st.el.id !== "jbBets") loopSync(st);
-    rivMeasure(false);
   }
   let dens = 0;
   function densify() {
@@ -6825,7 +6822,7 @@ body.tv.has-ticker .jumbo { bottom: calc(var(--sy, 0px) + max(40px, 4.6vh)); }
   function autoScroll(el, speed) {
     if (!el || ASC.some((s) => s.el === el)) return;
     const st = { el, pos: 0, user: 0, last: performance.now(), hold: performance.now() + 4000, clone: null, period: 0, speed: speed || 30 };
-    const poke = () => { if (st.rvOn) rivStop(st, rivPos(st, performance.now())); st.user = performance.now(); st.pos = el.scrollTop; };
+    const poke = () => { st.user = performance.now(); st.pos = el.scrollTop; };
     LOOPMO.observe(el, { childList: true, subtree: true, characterData: true, attributes: true, attributeOldValue: true });
     for (const ev of ["wheel", "touchstart", "keydown"]) el.addEventListener(ev, poke, { passive: true });
     ASC.push(st);
@@ -6834,7 +6831,7 @@ body.tv.has-ticker .jumbo { bottom: calc(var(--sy, 0px) + max(40px, 4.6vh)); }
   function loopDrop(all) { for (const st of ASC) { if (st.el.id === "jbBets" && !all) continue; if (st.clone) { st.kept = st.clone; st.clone.remove(); st.clone = null; } st.period = 0; } }
   // what changed in a rolling column since its copy was made: anything but the copy itself going in and out, or a card
   // pausing / resuming its animations off screen
-  const apCls = (v) => String(v || "").split(/\s+/).filter((x) => x && x !== "offv" && x !== "rv-m").join(" ");
+  const apCls = (v) => String(v || "").split(/\s+/).filter((x) => x && x !== "offv").join(" ");
   const LOOPMO = new MutationObserver((r) => loopMark(r));
   function loopMark(recs) {
     for (const r of recs) {
@@ -6849,17 +6846,6 @@ body.tv.has-ticker .jumbo { bottom: calc(var(--sy, 0px) + max(40px, 4.6vh)); }
   }
   function loopSync(st) {
     if (!st) return;
-    if (!RIV || !st.rvOn) return loopSync0(st);
-    const t = performance.now(), p = rivPos(st, t), was = st.rvP, mine = !st.el.classList.contains("rv-m");
-    if (mine) st.el.classList.add("rv-m");
-    loopSync0(st);
-    if (mine) st.el.classList.remove("rv-m");
-    if (!st.period) { rivStop(st, 0); return; }
-    if (st.rvHeld != null) { st.rvHeld = p % st.period; rivHold(st, st.rvHeld); return; }
-    if (st.period !== was) st.rv0 = t - ((p % st.period) / rivSpeed(st)) * 1000;
-    rivApply(st);
-  }
-  function loopSync0(st) {
     loopMark(LOOPMO.takeRecords());
     const el = st.el;
     if (st.clone) { st.kept = st.clone; st.clone.remove(); st.clone = null; }
@@ -6913,82 +6899,21 @@ body.tv.has-ticker .jumbo { bottom: calc(var(--sy, 0px) + max(40px, 4.6vh)); }
   }
   const apSoon = () => { if (!apT) apT = requestAnimationFrame(apScan); };
 
-  // ---- the roll, run by the graphics card ----
-  const RIV = !!(Element.prototype.animate && window.CSS && CSS.supports("translate", "0 1px")), RIV_MAX = 20;
-  const rivSpeed = (st) => Math.min(RIV_MAX, st.speed || 16);
-  // where a column is in its loop at a moment, in px (from the time the river was anchored at)
-  function rivPos(st, now) { const P = st.rvP; if (st.rvHeld != null) return st.rvHeld; if (!st.rvOn || !P) return st.pos || 0; return ((((now - st.rv0) / 1000) * rivSpeed(st)) % P + P) % P; }
-  // every card in the column (and the copy) on the same endless slide, all anchored to one start time
-  function rivApply(st) {
-    const P = st.period, dur = (P / rivSpeed(st)) * 1000; st.rvP = P;
-    for (const k of st.el.children) {
-      let a = k.__riv;
-      if (a && k.__rivD === dur && k.__rv0 === st.rv0 && a.playState === "running") continue;
-      if (!a || k.__rivD !== dur || a.playState === "idle" || a.playState === "finished") {
-        if (a) a.cancel();
-        a = k.animate([{ translate: "0 0" }, { translate: `0 ${-P}px` }], { duration: dur, iterations: Infinity, easing: "linear" });
-        k.__riv = a; k.__rivD = dur;
-      }
-      a.startTime = st.rv0; k.__rv0 = st.rv0;
-    }
-  }
-  // stop the river where it is: the cards go back in place and the column scrolls to the same spot
-  function rivStop(st, p) {
-    for (const k of st.el.children) if (k.__riv) { k.__riv.cancel(); k.__riv = null; k.__rivD = 0; k.__rv0 = null; }
-    st.rvOn = false; st.rv0 = null; st.rvP = 0; st.rvHeld = null; st.rvHA = null; st.rvA0 = null; st.rvDirty = true; st.pos = p || 0;
-    if (st.el.isConnected) st.el.scrollTop = p || 0;
-  }
-  // while a celebration covers the board the river holds still where it is (nobody can see it, and the show gets the
-  // whole machine), then flows on from the same spot
-  function rivHold(st, p) {
-    const t = (p / rivSpeed(st)) * 1000;
-    rivApply(st);
-    for (const k of st.el.children) { const a = k.__riv; if (a) { a.pause(); a.currentTime = t; } }
-  }
+  // ---- the flow ----
+  const FLOW_MAX = 20;
   // covered: a show on (or fading out), or a clip or DJ set on the big screen (except the big screen's own list)
-  const rivCover = (st) => { const c = document.getElementById("cash"), j = document.getElementById("jumbo"); return !!((c && !c.hidden) || (j && !j.hidden && !j.contains(st.el))); };
-  function rivTick(st, now, on) {
-    const el = st.el;
-    if (!on || !el.isConnected || el.offsetParent === null || !st.period) {
-      if (st.rvOn) rivStop(st, 0);
-      if (on && el.isConnected && !st.period && el.scrollTop) el.scrollTop = 0;
-      return;
-    }
-    // somebody's scrolling it by hand (or a test is holding it): a plain scroll, until they leave it alone
-    if (now - st.user < 15000) { if (st.rvOn) rivStop(st, rivPos(st, now)); return; }
-    // the cards only need touching when they change (a re-render) or the river's anchor moves; otherwise every frame
-    // here is a couple of comparisons and the graphics card does the rest
-    if (!st.rvMO) { st.rvDirty = true; st.rvMO = new MutationObserver(() => { st.rvDirty = true; }); st.rvMO.observe(el, { childList: true }); }
-    if (st.rvOn && (document.body.classList.contains("cs-live") || rivCover(st))) {
-      if (st.rvHeld == null) st.rvHeld = rivPos(st, now) % st.period;
-      if (st.rvDirty || st.rvHA !== st.rvHeld) { st.rvDirty = false; st.rvHA = st.rvHeld; rivHold(st, st.rvHeld); }
-      return;
-    }
-    if (st.rvHeld != null) { st.rv0 = now - (st.rvHeld / rivSpeed(st)) * 1000; st.rvHeld = null; st.rvHA = null; }
-    if (!st.rvOn) {
-      if (now < st.hold) return;   // its first start, a beat after the board comes up
-      const p = ((el.scrollTop || st.pos || 0) % st.period + st.period) % st.period; el.scrollTop = 0;
-      st.rv0 = now - (p / rivSpeed(st)) * 1000; st.rvOn = true;
-    }
-    if (st.rvDirty || st.rvA0 !== st.rv0) { st.rvDirty = false; st.rvA0 = st.rv0; rivApply(st); }
-  }
-  // measuring a column while it flows: the cards' slide is set aside for the moment (it's never painted that way)
-  function rivMeasure(on) { for (const st of ASC) if (st.rvOn && st.el.isConnected) st.el.classList.toggle("rv-m", on); }
+  const flowCover = (st) => { const c = document.getElementById("cash"), j = document.getElementById("jumbo"); return !!((c && !c.hidden) || (j && !j.hidden && !j.contains(st.el))); };
   const DWELL = 2600;
   function ascTick(now) {
     const on = document.body.classList.contains("tv");
     for (const st of ASC) {
       const el = st.el, dt = Math.min(0.1, (now - st.last) / 1000); st.last = now;
-      if (RIV) { rivTick(st, now, on); continue; }
       if (!on || !el.isConnected || el.offsetParent === null) continue;
       if (!st.period) { if (el.scrollTop) el.scrollTop = 0; continue; }
       if (now - st.user < 15000 || now < st.hold) continue;
-      const was = st.pos;
-      st.pos += st.speed * dt;
-      // a card reaching the top holds there a moment; so does the top of the list coming back around
-      const stop = st.stops && st.stops.find((v) => v > was + 0.5 && v <= st.pos);
-      if (stop != null) { st.pos = stop; st.hold = now + (st.dwell || DWELL); }
-      if (st.pos >= st.period) { st.pos -= st.period; st.hold = now + (st.dwell || DWELL); }
+      if (document.body.classList.contains("cs-live") || flowCover(st)) continue;
+      // a steady crawl: no stop at each card, no pause at the top of the loop
+      st.pos = (st.pos + Math.min(FLOW_MAX, st.speed) * dt) % st.period;
       el.scrollTop = st.pos;
     }
     requestAnimationFrame(ascTick);
@@ -8325,7 +8250,7 @@ body.tv.has-ticker .jumbo { bottom: calc(var(--sy, 0px) + max(40px, 4.6vh)); }
   const hcEase = (k) => 1 - Math.pow(1 - Math.min(1, Math.max(0, k)), 3);
   function hcFrame(now) {
     requestAnimationFrame(hcFrame);
-    const bd = document.body; if (!bd.classList.contains("tv") || !bd.classList.contains("hoops") || bd.classList.contains("jb-full") || document.hidden || now - HC.last < 33) return;
+    const bd = document.body; if (!bd.classList.contains("tv") || !bd.classList.contains("hoops") || bd.classList.contains("covered") || document.hidden || now - HC.last < 33) return;
     const dt = Math.min(0.1, (now - HC.last) / 1000); HC.last = now;
     const cv = $("#hcLive"), B = hcBox(); if (!cv || !B) return;
     if (cv.width !== B.Wc || cv.height !== B.Hc) { cv.width = B.Wc; cv.height = B.Hc; }
@@ -9393,16 +9318,20 @@ body.tv.has-ticker .jumbo { bottom: calc(var(--sy, 0px) + max(40px, 4.6vh)); }
   // the rail's scores under the leaderboard hide when there's only a sliver of room (a row cut in half reads as a glitch)
   { const rsc = document.getElementById("rbRsc"); if (rsc && window.ResizeObserver) new ResizeObserver(() => rsc.classList.toggle("tiny", rsc.clientHeight < 150)).observe(rsc); }
 
-  // ---- a clip or a DJ set on the big screen: everything under it set aside until it leaves ----
-  const JBF = { t: 0 };
-  function jbFull() {
-    const jb = document.getElementById("jumbo"), up = !!(jb && !jb.hidden && !jb.classList.contains("out"));
-    clearTimeout(JBF.t);
-    if (!up) { document.body.classList.remove("jb-full"); return; }
-    // once its way in is done (the board shows through while it slides in)
-    if (!document.body.classList.contains("jb-full")) JBF.t = setTimeout(() => { const j = document.getElementById("jumbo"); if (j && !j.hidden && !j.classList.contains("out")) document.body.classList.add("jb-full"); }, 900);
+  // ---- a clip, a DJ set or a celebration covering the screen: everything under it set aside until it leaves ----
+  const COV = { t: 0 };
+  function covUp() {
+    const jb = document.getElementById("jumbo"), cs = document.getElementById("cash");
+    return !!((jb && !jb.hidden && !jb.classList.contains("out")) || (cs && !cs.hidden && cs.classList.contains("show") && !cs.classList.contains("out")));
   }
-  { const jb = document.getElementById("jumbo"); if (jb) new MutationObserver(jbFull).observe(jb, { attributes: true, attributeFilter: ["hidden", "class"] }); }
+  function covSync() {
+    clearTimeout(COV.t);
+    if (!covUp()) { document.body.classList.remove("covered"); return; }
+    // once its way in is done (the board shows through while it comes in)
+    if (!document.body.classList.contains("covered")) COV.t = setTimeout(() => { if (covUp()) document.body.classList.add("covered"); }, 900);
+  }
+  function covWatch(el) { if (el && !el.__cov) { el.__cov = 1; new MutationObserver(covSync).observe(el, { attributes: true, attributeFilter: ["hidden", "class"] }); } }
+  covWatch(document.getElementById("jumbo")); covWatch(document.getElementById("cash"));   // the show's overlay is made at its first show (below)
 
   // ---- the clip's backdrop: a wash of its own colors ----
   { const bgv = document.getElementById("jbBg"); if (bgv) { bgv.play = () => Promise.resolve(); try { bgv.pause(); } catch (e) {} } }
@@ -10033,7 +9962,7 @@ body.tv.has-ticker .jumbo { bottom: calc(var(--sy, 0px) + max(40px, 4.6vh)); }
   }
   function cashEl() {
     let el = $("#cash");
-    if (!el) { document.body.insertAdjacentHTML("beforeend", '<div class="cs" id="cash" hidden aria-live="polite"></div>'); el = $("#cash"); }
+    if (!el) { document.body.insertAdjacentHTML("beforeend", '<div class="cs" id="cash" hidden aria-live="polite"></div>'); el = $("#cash"); covWatch(el); }
     clearTimeout(el._t); clearTimeout(el._t2); el.className = "cs"; return el;
   }
   function cashCount(el, sel, to, at, dur) {
@@ -12081,7 +12010,7 @@ body.tv.has-ticker .jumbo { bottom: calc(var(--sy, 0px) + max(40px, 4.6vh)); }
   // ---------- sheets ----------
   function openSheet(id) { $(id).hidden = false; }
   // keep every open screen current: when a new version is up, reload it (never mid-form or mid-animation)
-  const BUILD = "20261025001412";
+  const BUILD = "20261025012909";
   function checkBuild() {
     if (BUILD === "dev") return;
     fetch("version.json?t=" + Date.now(), { cache: "no-store" }).then((r) => (r.ok ? r.json() : null)).then((j) => {
@@ -19952,7 +19881,7 @@ body.tv.has-ticker .jumbo { bottom: calc(var(--sy, 0px) + max(40px, 4.6vh)); }
   const P = (x, y) => [ox + x * s, oy + y * s];
   function frame(now) {
     requestAnimationFrame(frame);
-    const on = document.body.classList.contains("tv") && (document.body.classList.contains("cfb") || document.body.classList.contains("nflday")) && !document.hidden && !document.body.classList.contains("cs-live") && !document.body.classList.contains("jb-full"), nfl = document.body.classList.contains("nflday");
+    const on = document.body.classList.contains("tv") && (document.body.classList.contains("cfb") || document.body.classList.contains("nflday")) && !document.hidden && !document.body.classList.contains("cs-live") && !document.body.classList.contains("covered"), nfl = document.body.classList.contains("nflday");
     if (!on || now - last < 33) return;
     const dt = Math.min(0.1, (now - last) / 1000); last = now; size();
     cx.clearRect(0, 0, W, H);
@@ -19999,13 +19928,7 @@ body.tv.has-ticker .jumbo { bottom: calc(var(--sy, 0px) + max(40px, 4.6vh)); }
 // thing (a swish through a real rim, a spiral through the uprights, a puck in the net, a ball out of the yard), sparks,
 // metallic confetti, a shockwave on the drop, a trophy under moving lights, a banner raised to the rafters. Everything is
 // timed off the show's own clock and beat; it lightens itself (no bloom, fewer bits) if the frame rate can't keep up
-const S3 = { lib: null, ld: null, R: null, run: null, cache: {}, tx: 1 };
-// how many device pixels the stage's 1920 x 1080 covers on this screen (1 on a 1080p TV, 2 on a 4K one)
-function S3pr(info) {
-  if (info && (info.lite || info.low)) return 1;
-  const k = (window.devicePixelRatio || 1) * Math.max(innerWidth / 1920, innerHeight / 1080);
-  return Math.max(1, Math.min(2, Math.round(k * 4) / 4));
-}
+const S3 = { lib: null, ld: null, R: null, run: null, cache: {} };
 async function s3lib() {
   if (S3.lib) return S3.lib;
   if (!S3.ld) S3.ld = (async () => {
@@ -20032,9 +19955,8 @@ const cl = (v, a, b) => Math.max(a, Math.min(b, v)), seg = (t, a, d) => cl((t - 
 // ---- textures drawn once ----
 function canvasTex(L, w, h, draw, key) {
   if (key && S3.cache[key]) return S3.cache[key];
-  const k = S3.tx > 1 && w * h <= 1100000 ? 2 : 1, c = document.createElement("canvas"); c.width = w * k; c.height = h * k;
-  const cx = c.getContext("2d"); if (k > 1) cx.scale(k, k); draw(cx, w, h);
-  const t = new L.THREE.CanvasTexture(c); t.colorSpace = L.THREE.SRGBColorSpace; t.anisotropy = S3.R ? Math.min(8, S3.R.r.capabilities.getMaxAnisotropy()) : 4;
+  const c = document.createElement("canvas"); c.width = w; c.height = h; draw(c.getContext("2d"), w, h);
+  const t = new L.THREE.CanvasTexture(c); t.colorSpace = L.THREE.SRGBColorSpace; t.anisotropy = 4;
   if (key) S3.cache[key] = t; return t;
 }
 function spriteTex(L) {
@@ -20079,10 +20001,7 @@ function S3build(L, info) {
   const key = new THREE.DirectionalLight(0xffffff, 1.6); key.position.set(4, 6, 8); scene.add(key);
   const rimA = new THREE.PointLight(acc, 22, 30, 2); rimA.position.set(-6, 2, 3); scene.add(rimA);
   const rimB = new THREE.PointLight(col, 14, 30, 2); rimB.position.set(6, -2, 3); scene.add(rimB);
-  // the picture at the screen's own pixels, multisampled (the post effects otherwise draw it with no anti-aliasing)
-  const pr = S3pr(info); S3.tx = info.lite || info.low ? 1 : 2; r.setPixelRatio(pr); r.setSize(1920, 1080, false);
-  const comp = new L.EffectComposer(r, new THREE.WebGLRenderTarget(1920, 1080, { type: THREE.HalfFloatType, samples: info.lite || info.low ? 0 : pr > 1.5 ? 2 : 4 }));
-  comp.setPixelRatio(pr); comp.setSize(1920, 1080);
+  const comp = new L.EffectComposer(r); comp.setSize(1920, 1080);
   comp.addPass(new L.RenderPass(scene, cam));
   const bloom = new L.UnrealBloomPass(new THREE.Vector2(960, 540), 0.45, 0.4, 0.86); comp.addPass(bloom);
   comp.addPass(new L.OutputPass());
@@ -20092,7 +20011,7 @@ function S3build(L, info) {
     acc: new THREE.MeshStandardMaterial({ color: acc, metalness: 0.85, roughness: 0.3, emissive: acc, emissiveIntensity: 0.05, envMapIntensity: 0.8 }),
     glow: new THREE.MeshBasicMaterial({ color: acc, transparent: true, blending: THREE.AdditiveBlending, depthWrite: false }),
   };
-  return { L, THREE, r, scene, cam, comp, bloom, bgMat, key, rimA, rimB, acc, col, mats, objs: [], tick: [], info, pr, look: new THREE.Vector3(), camTo: { p: new THREE.Vector3(0, 0, 12), l: new THREE.Vector3() }, shake: 0, flash: 0, beat: 0 };
+  return { L, THREE, r, scene, cam, comp, bloom, bgMat, key, rimA, rimB, acc, col, mats, objs: [], tick: [], info, look: new THREE.Vector3(), camTo: { p: new THREE.Vector3(0, 0, 12), l: new THREE.Vector3() }, shake: 0, flash: 0, beat: 0 };
 }
 function S3add(st, o) { st.scene.add(o); st.objs.push(o); return o; }
 function S3text(st, s, size, mat, deep) {
@@ -20433,7 +20352,7 @@ function S3loop(st) {
     st.r.toneMappingExposure = 0.92 + st.flash * 0.15 - (st.dim || 0) * 0.3;
     st.comp.render(dt);
     // keep up or lighten up: no bloom below ~32 fps, a smaller picture below ~22 (measured on real time)
-    if (st.t > 1.0 && !low) { fr[0]++; fr[1] += rdt; if (fr[1] > 1.5) { const fps = fr[0] / fr[1]; if (fps < 42 && st.pr > 1) { st.pr = 1; st.r.setPixelRatio(1); st.comp.setPixelRatio(1); } else if (fps < 32 && !lite) { lite = true; st.bloom.enabled = false; } else if (fps < 22) shrink(); fr = [0, 0]; } }
+    if (st.t > 1.0 && !low) { fr[0]++; fr[1] += rdt; if (fr[1] > 1.5) { const fps = fr[0] / fr[1]; if (fps < 32 && !lite) { lite = true; st.bloom.enabled = false; } else if (fps < 22) shrink(); fr = [0, 0]; } }
     requestAnimationFrame(step);
   };
   requestAnimationFrame(step);
