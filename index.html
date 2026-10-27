@@ -2415,8 +2415,6 @@ body.tv.nflday #cfCrowd { display: block; position: absolute; inset: 0; width: 1
 #nflTeam { display: none; }
 body.tv.nflday #nflTeam { display: block; position: absolute; inset: 0; width: 100%; height: 100%; }
 body.tv.nflday #cfield.teamf { background-image: url(img/field_nfl_plain.jpg?v=2); }
-body.tv.cfb #nflTeam { display: block; position: absolute; inset: 0; width: 100%; height: 100%; }
-body.tv.cfb #cfield.teamf { background-image: url(img/field_nfl_plain.jpg?v=2); }
 body.tv.nflday::before { background: linear-gradient(180deg, #05080d, #0a1a10) !important; }
 body.tv.nflday .rb-g, body.tv.nflday .rb-sec, body.tv.nflday .rb-card { background: linear-gradient(180deg, rgba(12,16,22,.88), rgba(7,10,14,.93)) !important; border-color: rgba(190,210,240,.14); box-shadow: inset 0 1px 0 rgba(255,255,255,.07), 0 18px 40px rgba(0,0,0,.45); }
 body.tv.nflday .modechip { background: rgba(232,25,44,.16) !important; color: #ffe2e4 !important; border-color: rgba(255,150,155,.55) !important; }
@@ -16171,25 +16169,19 @@ body.tv.pplg .roomtv:not([hidden]) span { align-self: start; }
     return { W, H, FW, P };
   })();
   function fieldTeam() {
-    // Give the stadium the home team's identity for the featured game, not the side the room bet on.
-    const sport = document.body.classList.contains("cfb") ? "CFB" : "NFL";
-    const games = [...S.games.values()].filter((g) => g.sport === sport && g.st !== "post" && g.a && g.h);
-    const order = (a, b) => Number(b.st === "in") - Number(a.st === "in") || Math.abs((a.t || 0) - Date.now()) - Math.abs((b.t || 0) - Date.now());
-    if (rbPrime) {
-      const focused = games.filter((g) => g.a.ab === rbPrime || g.h.ab === rbPrime).sort(order)[0];
-      if (focused) return focused.h;
-    }
-    const weight = new Map();
+    // one game on: the team the prime-time look is already in (the board's colors and the field agree)
+    if (rbPrime) for (const g of S.games.values()) if (g.sport === "NFL" && g.st !== "post") for (const t of [g.a, g.h]) if (t.ab === rbPrime) return t;
+    const w = new Map();
     for (const b of S.bets.values()) {
       if (b.status !== "open") continue;
       for (const x of selsOf(b)) {
-        const g = gameOf(x); if (!g || g.sport !== sport || g.st === "post" || (x.s !== "a" && x.s !== "h") || x.m === "tot") continue;
-        const v = (isMe(b) ? 3 : 1) * (g.st === "in" ? 2 : 1) * (Number(b.units) || 1) * (b.kind === "parlay" ? 0.5 : 1);
-        weight.set(g.id, { g, v: ((weight.get(g.id) || {}).v || 0) + v });
+        const g = gameOf(x); if (!g || g.sport !== "NFL" || g.st === "post" || (x.s !== "a" && x.s !== "h") || x.m === "tot") continue;
+        const t = g[x.s], v = (isMe(b) ? 3 : 1) * (g.st === "in" ? 2 : 1) * (Number(b.units) || 1) * (b.kind === "parlay" ? 0.5 : 1);
+        w.set(t.ab, { t, v: ((w.get(t.ab) || {}).v || 0) + v });
       }
     }
-    const best = [...weight.values()].sort((a, b) => b.v - a.v || order(a.g, b.g))[0];
-    return best ? best.g.h : games.sort(order)[0]?.h || null;
+    let best = null; for (const x of w.values()) if (!best || x.v > best.v) best = x;
+    return best ? best.t : null;
   }
   // a picture onto the field: map(u, v) gives where its (u, v) in 0-1 lands on screen; flat triangles small enough to
   // follow the perspective, added up so their shared edges don't show
@@ -16210,7 +16202,7 @@ body.tv.pplg .roomtv:not([hidden]) span { align-self: start; }
   let fldKey = "", fldImg = null, fldLg = "";
   function drawField() {
     const cv = document.getElementById("nflTeam"), box = document.getElementById("cfield"); if (!cv || !box) return;
-    const on = document.body.classList.contains("tv") && (document.body.classList.contains("nflday") || document.body.classList.contains("cfb"));
+    const on = document.body.classList.contains("tv") && document.body.classList.contains("nflday");
     const t = on ? fieldTeam() : null;
     box.classList.toggle("teamf", !!t);
     if (!t) { if (fldKey) { cv.getContext("2d").clearRect(0, 0, cv.width, cv.height); fldKey = ""; } return; }
@@ -16238,9 +16230,10 @@ body.tv.pplg .roomtv:not([hidden]) span { align-self: start; }
     const tmp = document.createElement("canvas"); tmp.width = Wc; tmp.height = Hc; const tx = tmp.getContext("2d");
     fldWarp(tx, tc, (u, v) => at(5 - 3.3 + 6.6 * v, FLD.FW / 2 - 20 + 40 * u), 10);
     fldWarp(tx, tc, (u, v) => at(115 + 3.3 - 6.6 * v, FLD.FW / 2 + 20 - 40 * u), 10);
-    // the home team's logo at midfield; keep the 10 and 25-yard areas true to a real field.
+    // their logo at midfield, and a smaller one on each 25 (where the board leaves the field showing)
     if (fldImg && fldImg.complete && fldImg.naturalWidth) {
       fldWarp(tx, fldImg, (u, v) => at(60 - 6.5 + 13 * u, FLD.FW / 2 + 6.5 - 13 * v), 8);
+      for (const yd of [25, 95]) fldWarp(tx, fldImg, (u, v) => at(yd - 4.5 + 9 * u, FLD.FW / 2 + 4.5 - 9 * v), 6);
     }
     x.globalAlpha = 0.93; x.drawImage(tmp, 0, 0); x.globalAlpha = 1;
   }
@@ -19923,68 +19916,6 @@ body.tv.pplg .roomtv:not([hidden]) span { align-self: start; }
   const FGLOW = glow([[0, "rgba(255,255,255,1)"], [0.2, "rgba(255,255,255,.5)"], [1, "rgba(255,255,255,0)"]]);
   const R = (a, b) => a + Math.random() * (b - a);
   const lights = [], towels = [], flashes = [];
-  const seats = document.createElement("canvas"); seats.width = IW; seats.height = IH;
-  const seatCtx = seats.getContext("2d");
-  let seatKey = "", seatFans = [], nextSeatCheck = 0;
-  const tint = (hex, amount) => {
-    const n = parseInt(String(hex || "#315b86").replace("#", ""), 16), r = (n >> 16) & 255, g = (n >> 8) & 255, b = n & 255;
-    return `rgb(${Math.round(r * amount + 16 * (1 - amount))},${Math.round(g * amount + 20 * (1 - amount))},${Math.round(b * amount + 26 * (1 - amount))})`;
-  };
-  function stadiumGame() {
-    try {
-      const sport = document.body.classList.contains("cfb") ? "CFB" : "NFL";
-      const games = [...S.games.values()].filter((g) => g.sport === sport && g.st !== "post" && g.a && g.h);
-      const order = (a, b) => Number(b.st === "in") - Number(a.st === "in") || Math.abs((a.t || 0) - Date.now()) - Math.abs((b.t || 0) - Date.now());
-      if (rbPrime) { const g = games.filter((x) => x.a.ab === rbPrime || x.h.ab === rbPrime).sort(order)[0]; if (g) return g; }
-      const w = new Map();
-      for (const b of S.bets.values()) if (b.status === "open") for (const x of selsOf(b)) {
-        const g = gameOf(x); if (!g || g.sport !== sport || g.st === "post" || (x.s !== "a" && x.s !== "h") || x.m === "tot") continue;
-        const v = (isMe(b) ? 3 : 1) * (g.st === "in" ? 2 : 1) * (Number(b.units) || 1) * (b.kind === "parlay" ? 0.5 : 1);
-        w.set(g.id, { g, v: ((w.get(g.id) || {}).v || 0) + v });
-      }
-      const betGame = [...w.values()].sort((a, b) => b.v - a.v || order(a.g, b.g))[0];
-      return betGame ? betGame.g : games.sort(order)[0] || null;
-    } catch (_) { return null; }
-  }
-  function paintSeats(game) {
-    const home = game && game.h || {}, away = game && game.a || {};
-    const key = [game && game.id || "default", home.ab || "", home.col || "", home.alt || "", away.col || ""].join("|");
-    if (key === seatKey) return;
-    seatKey = key; seatFans = [];
-    let seed = 2166136261; for (const ch of key) seed = Math.imul(seed ^ ch.charCodeAt(0), 16777619);
-    const rand = () => { seed = (Math.imul(seed, 1664525) + 1013904223) >>> 0; return seed / 4294967296; };
-    const hc = [tint(home.col || "#24436c", .78), tint(home.alt || "#a8b7c7", .65), tint(home.col || "#24436c", .52)];
-    const ac = [tint(away.col || "#9a5430", .68), tint(away.alt || "#d2d5da", .62)];
-    const neutral = ["#35383d", "#48413a", "#77736b", "#29313a", "#5b5b58"];
-    const skin = ["#a56d4f", "#c48662", "#d39b75", "#8b5942", "#e0ad82", "#704735"];
-    const sections = Array.from({ length: 24 }, () => rand() < .68);
-    seatCtx.clearRect(0, 0, IW, IH);
-    // Two packed tiers of individual silhouettes follow the existing stadium's seat rows and perspective.
-    for (const tier of [{ y: 133, h: 146, rows: 10 }, { y: 321, h: 158, rows: 11 }]) {
-      for (let row = 0; row < tier.rows; row++) {
-        const rowY = tier.y + (row + .5) * tier.h / tier.rows;
-        const scale = .72 + .23 * (row / Math.max(1, tier.rows - 1));
-        const step = 7.2 + rand() * 1.15;
-        for (let x = -4 + (row % 2) * step / 2; x < IW + step; x += step) {
-          const section = Math.max(0, Math.min(sections.length - 1, Math.floor(x / IW * sections.length)));
-          const homeSection = sections[section], q = rand();
-          const shirt = homeSection ? (q < .72 ? hc[Math.floor(rand() * hc.length)] : q < .91 ? ac[Math.floor(rand() * ac.length)] : neutral[Math.floor(rand() * neutral.length)])
-            : (q < .58 ? ac[Math.floor(rand() * ac.length)] : q < .83 ? hc[Math.floor(rand() * hc.length)] : neutral[Math.floor(rand() * neutral.length)]);
-          const px = x + (rand() - .5) * 1.8, py = rowY + (rand() - .5) * 2.2, w = (5.3 + rand() * 1.7) * scale, h = (6.5 + rand() * 1.6) * scale, head = (1.15 + rand() * .45) * scale;
-          const opacity = .52 + rand() * .27;
-          seatCtx.globalAlpha = opacity;
-          // jersey and shoulders
-          seatCtx.fillStyle = shirt; seatCtx.beginPath(); seatCtx.moveTo(px - w * .52, py + h); seatCtx.lineTo(px - w * .43, py + 3 * scale); seatCtx.quadraticCurveTo(px, py + 1.8 * scale, px + w * .43, py + 3 * scale); seatCtx.lineTo(px + w * .52, py + h); seatCtx.closePath(); seatCtx.fill();
-          seatCtx.strokeStyle = "rgba(10,13,18,.48)"; seatCtx.lineWidth = .65 * scale; seatCtx.beginPath(); seatCtx.moveTo(px, py + 4 * scale); seatCtx.lineTo(px, py + h - .3); seatCtx.stroke();
-          // face, hair and an occasional cap catch just enough light to read as people in the seats
-          seatCtx.fillStyle = skin[Math.floor(rand() * skin.length)]; seatCtx.beginPath(); seatCtx.arc(px, py + 1.65 * scale, head, 0, Math.PI * 2); seatCtx.fill();
-          if (rand() < .42) { seatCtx.fillStyle = "rgba(18,20,23,.9)"; seatCtx.beginPath(); seatCtx.ellipse(px, py + .85 * scale, head * 1.08, head * .48, 0, Math.PI, Math.PI * 2); seatCtx.fill(); }
-          if (rand() < .055) seatFans.push({ x: px, y: py + 4.6 * scale, side: rand() < .5 ? -1 : 1, phase: rand() * Math.PI * 2, col: shirt, skin: skin[Math.floor(rand() * skin.length)], scale });
-        }
-      }
-    }
-    seatCtx.globalAlpha = 1;
-  }
   for (let i = 0; i < 520; i++) { const low = i % 3 !== 0, band = low ? LOW : UP; lights.push({ x: R(0, IW), y: R(band[0] + 6, band[1] - 4), r: low ? R(1.6, 2.6) : R(1.1, 1.8), ph: R(0, 6.28), sp: R(0.4, 1.4), sw: R(2, 7), on: Math.random() < 0.55, t: R(2, 14) }); }
   const TC = ["#f4f7fb", "#f4f7fb", "#f4f7fb", "#3b8cff", "#ff7a1a", "#ffd447"];
   const TCN = ["#f4f7fb", "#f4f7fb", "#e8192c", "#e8192c", "#1d3f9e", "#f4f7fb"];
@@ -20002,19 +19933,8 @@ body.tv.pplg .roomtv:not([hidden]) span { align-self: start; }
     const on = document.body.classList.contains("tv") && (document.body.classList.contains("cfb") || document.body.classList.contains("nflday")) && !document.hidden && !document.body.classList.contains("cs-live") && !document.body.classList.contains("covered"), nfl = document.body.classList.contains("nflday");
     if (!on || now - last < 33) return;
     const dt = Math.min(0.1, (now - last) / 1000); last = now; size();
-    if (now > nextSeatCheck) { paintSeats(stadiumGame()); nextSeatCheck = now + 1600; }
     cx.clearRect(0, 0, W, H);
-    cx.save(); cx.setTransform(s, 0, 0, s, ox, oy); cx.drawImage(seats, 0, 0); cx.restore();
     const nt = night(), t = now / 1000, b = boost; boost = Math.max(0, boost - dt * 0.18);
-    // A few fans wave an arm in the home section; the packed crowd plate itself stays crisp and still.
-    cx.save(); cx.setTransform(s, 0, 0, s, ox, oy); cx.lineCap = "round";
-    for (const f of seatFans) {
-      const sway = Math.sin(t * 2.15 + f.phase), lift = 1.2 + (sway + 1) * 1.2;
-      cx.globalAlpha = .75; cx.strokeStyle = f.col; cx.lineWidth = 1.35 * f.scale;
-      cx.beginPath(); cx.moveTo(f.x + f.side * 2.2 * f.scale, f.y); cx.quadraticCurveTo(f.x + f.side * (3.4 + sway) * f.scale, f.y - lift, f.x + f.side * (3.6 + sway) * f.scale, f.y - (4.4 + lift) * f.scale); cx.stroke();
-      cx.fillStyle = f.skin; cx.beginPath(); cx.arc(f.x + f.side * (3.6 + sway) * f.scale, f.y - (4.4 + lift) * f.scale, .8 * f.scale, 0, Math.PI * 2); cx.fill();
-    }
-    cx.restore(); cx.globalAlpha = 1;
     // a light-show wave across the stands every so often at night
     if (nt && now > nextWave) { wave = 0; nextWave = now + R(22000, 40000); }
     if (wave >= 0) { wave += dt * 0.32; if (wave > 1.25) wave = -1; }
