@@ -4,7 +4,7 @@
 <script type="importmap">{"imports": {"three": "./vendor/three/three.module.min.js", "three/addons/": "./vendor/three/jsm/"}}</script>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
-<meta name="theme-color" content="#080b0e">
+<meta name="theme-color" content="#0A0F17">
 <title>Sweat Board</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -2415,6 +2415,8 @@ body.tv.nflday #cfCrowd { display: block; position: absolute; inset: 0; width: 1
 #nflTeam { display: none; }
 body.tv.nflday #nflTeam { display: block; position: absolute; inset: 0; width: 100%; height: 100%; }
 body.tv.nflday #cfield.teamf { background-image: url(img/field_nfl_plain.jpg?v=2); }
+body.tv.cfb #nflTeam { display: block; position: absolute; inset: 0; width: 100%; height: 100%; }
+body.tv.cfb #cfield.teamf { background-image: url(img/field_nfl_plain.jpg?v=2); }
 body.tv.nflday::before { background: linear-gradient(180deg, #05080d, #0a1a10) !important; }
 body.tv.nflday .rb-g, body.tv.nflday .rb-sec, body.tv.nflday .rb-card { background: linear-gradient(180deg, rgba(12,16,22,.88), rgba(7,10,14,.93)) !important; border-color: rgba(190,210,240,.14); box-shadow: inset 0 1px 0 rgba(255,255,255,.07), 0 18px 40px rgba(0,0,0,.45); }
 body.tv.nflday .modechip { background: rgba(232,25,44,.16) !important; color: #ffe2e4 !important; border-color: rgba(255,150,155,.55) !important; }
@@ -5834,309 +5836,8 @@ body.tv.pplg .roomtv:not([hidden]) canvas { width: max(76px, 7vh); height: max(7
 body.tv.pplg .roomtv:not([hidden]) b { align-self: end; }
 body.tv.pplg .roomtv:not([hidden]) span { align-self: start; }
 </style>
-<style id="sweat-board-ui-v2">
-/* ===== SWEAT BOARD / BROADCAST UI V2 ===== */
-:root {
-  color-scheme: dark;
-  --ground: #080b0e;
-  --panel: rgba(14, 18, 20, .93);
-  --panel-2: #171d20;
-  --line: rgba(225, 235, 228, .11);
-  --line-2: rgba(225, 235, 228, .19);
-  --ink: #f1f4ed;
-  --ink-2: #aab3a9;
-  --ink-3: #727e76;
-  --accent: #c9f36a;
-  --accent-ink: #10160a;
-  --gold: #efb84d;
-  --win: #68dfa2;
-  --loss: #ff6475;
-  --push: #a2aab1;
-  --mood: rgba(196, 239, 121, .06);
-  --line-height: 1.45;
-  --r: 15px;
-  --v2-ease: cubic-bezier(.18,.82,.22,1);
-}
-html, body { background: #080b0e; color: var(--ink); }
-body { font-family: var(--f-ui); letter-spacing: -.012em; }
-body::before {
-  z-index: 0;
-  background-image: linear-gradient(180deg, rgba(5,8,10,.92) 0%, rgba(5,8,10,.58) 37%, rgba(5,8,10,.76) 100%),
-    radial-gradient(ellipse at 50% 8%, rgba(202,243,106,.09), transparent 34%),
-    url("img/field-v2.svg");
-  background-position: center, center, center bottom;
-  background-repeat: no-repeat;
-  background-size: cover, cover, cover;
-  opacity: .94;
-}
-body::after { content: ""; position: fixed; inset: 0; z-index: 0; pointer-events: none; background: radial-gradient(ellipse at center, transparent 35%, rgba(0,0,0,.46) 100%); }
-:focus-visible { outline: 2px solid var(--accent); outline-offset: 3px; box-shadow: 0 0 0 5px rgba(201,243,106,.13); }
-::selection { color: #09100a; background: var(--accent); }
-/* The dashboard frame */
-.app { max-width: 1920px; gap: 16px; padding: 18px clamp(18px, 2.5vw, 44px) 118px; }
-.top { position: relative; display: flex; align-items: center; flex-wrap: wrap; gap: 10px; padding: 12px 14px; border: 1px solid rgba(236,243,230,.12); border-radius: 17px; background: linear-gradient(115deg, rgba(11,15,17,.9), rgba(16,21,23,.78)); box-shadow: 0 14px 44px rgba(0,0,0,.26), inset 0 1px rgba(255,255,255,.045); backdrop-filter: blur(18px); }
-.top::before { content: ""; position: absolute; inset: 0 auto 0 14px; width: 54px; opacity: .38; pointer-events: none; background: linear-gradient(90deg, rgba(201,243,106,.2), transparent); mask: linear-gradient(90deg,#000,transparent); }
-.brand { position: relative; align-items: center; gap: 11px; }
-.brand h1 { font: 900 30px/.9 var(--f-display); letter-spacing: .045em; }
-.brand h1::before { content: ""; width: 11px; height: 20px; display: inline-block; background: linear-gradient(180deg,#e8ffad,var(--accent)); border-radius: 2px 8px 2px 8px; transform: skew(-13deg); box-shadow: 0 0 20px rgba(201,243,106,.38); }
-.brand h1 span { color: var(--accent); }
-.clock { padding-left: 10px; border-left: 1px solid var(--line-2); font: 600 12px var(--f-mono); color: var(--ink-2); }
-.status { color: var(--ink-3); }
-.status.live { color: var(--win); }
-.seg { padding: 3px; border-radius: 11px; background: rgba(0,0,0,.24); border-color: var(--line); }
-.seg button { min-height: 34px; border-radius: 8px; font-size: 12px; }
-.seg button[aria-pressed="true"] { background: var(--accent); color: var(--accent-ink); box-shadow: 0 3px 14px rgba(201,243,106,.17); }
-.chip { border-radius: 10px; padding: 8px 11px; font: 600 11px var(--f-ui); letter-spacing: .01em; background: rgba(255,255,255,.035); border-color: var(--line); color: var(--ink-2); transition: border-color .2s ease, background .2s ease, transform .2s ease; }
-button.chip:hover, .btn:hover { transform: translateY(-1px); border-color: rgba(201,243,106,.45); background-color: rgba(201,243,106,.08); color: var(--ink); }
-.chip.sample, .chip.wake { color: var(--accent); border-color: rgba(201,243,106,.35); }
-.btn { min-height: 38px; border-radius: 10px; font-size: 13px; transition: transform .2s ease, box-shadow .2s ease, background .2s ease; }
-.btn.primary, .fab { position: relative; overflow: hidden; color: var(--accent-ink) !important; background: linear-gradient(135deg,#e1ff98,var(--accent) 58%,#a7d94c) !important; border-color: transparent !important; box-shadow: 0 6px 22px rgba(177,224,89,.22), inset 0 1px rgba(255,255,255,.5); }
-.btn.primary::after { content: ""; position: absolute; inset: -20% auto -20% -45%; width: 30%; background: linear-gradient(90deg,transparent,rgba(255,255,255,.42),transparent); transform: skewX(-22deg); pointer-events: none; }
-.btn.primary:hover::after { animation: v2ButtonGlint .8s var(--v2-ease) both; }
-@keyframes v2ButtonGlint { to { left: 130%; } }
-.btn.primary:hover, .fab:hover { box-shadow: 0 9px 32px rgba(177,224,89,.32); }
-.btn.ghost { background: rgba(255,255,255,.035); }
-/* View selector and stats / results deck */
-.tabs { display: inline-flex; align-self: flex-start; gap: 5px; padding: 4px; border: 1px solid var(--line); border-radius: 12px; background: rgba(6,9,10,.56); }
-.tabs button { padding: 9px 15px; border: 0; border-radius: 8px; color: var(--ink-3); background: transparent; font: 700 11px var(--f-ui); letter-spacing: .1em; text-transform: uppercase; transition: .22s var(--v2-ease); }
-.tabs button[aria-pressed="true"] { color: #111609; background: var(--accent); box-shadow: 0 4px 18px rgba(201,243,106,.15); }
-.tabs button:hover:not([aria-pressed="true"]) { color: var(--ink); background: rgba(255,255,255,.06); }
-.grid { gap: 15px; }
-.col { gap: 15px; }
-.panel { position: relative; padding: clamp(15px,1.4vw,22px); border: 1px solid rgba(226,235,226,.105); border-radius: 16px; background: linear-gradient(150deg,rgba(18,24,24,.94),rgba(10,14,16,.91)); box-shadow: 0 18px 46px rgba(0,0,0,.26), inset 0 1px rgba(255,255,255,.045); backdrop-filter: blur(16px); }
-.panel::before { content: ""; position: absolute; pointer-events: none; inset: 0 0 auto; height: 1px; background: linear-gradient(90deg,transparent,rgba(201,243,106,.26),transparent); opacity: .75; }
-.ph { margin-bottom: 16px; }
-.ph h2 { gap: 9px; font-size: 11px; letter-spacing: .17em; color: #c4cbc3; }
-.ph h2::before { width: 4px; height: 15px; background: var(--accent); box-shadow: 0 0 13px rgba(201,243,106,.38); }
-.ph .sub { font: 600 11px var(--f-mono); color: var(--ink-3); }
-.empty { border: 1px dashed var(--line-2); border-radius: 13px; background: rgba(255,255,255,.022); }
-.hero.strip { position: relative; grid-template-columns: auto minmax(160px,1fr) auto auto auto; gap: 0; padding: 16px 20px; border-color: rgba(201,243,106,.18); background: linear-gradient(110deg,rgba(20,27,24,.96),rgba(13,18,19,.95) 44%,rgba(10,14,16,.94)); box-shadow: 0 18px 54px rgba(0,0,0,.32), inset 0 1px rgba(255,255,255,.06); }
-.hero.strip::after { content: ""; position: absolute; right: -60px; top: -100px; width: 310px; height: 240px; border: 1px solid rgba(201,243,106,.1); border-radius: 50%; box-shadow: 0 0 0 24px rgba(201,243,106,.025),0 0 0 54px rgba(201,243,106,.018); pointer-events: none; }
-.strip > * { padding: 0 clamp(12px,1.7vw,28px); }
-.strip > *:first-child { padding-left: 0; }
-.strip > * + * { border-left-color: rgba(226,235,226,.11); }
-.strip .label { color: var(--ink-3); font-size: 10px; letter-spacing: .18em; }
-.strip .big { font: 900 clamp(46px,5vw,82px)/.83 var(--f-display); letter-spacing: -.015em; }
-.strip .usd { font: 700 19px var(--f-num); color: var(--ink-2); }
-.strip .cell b { font: 800 40px/.9 var(--f-display); }
-.strip .cell small, .strip .kpi small, .strip .form small { font-size: 9px; letter-spacing: .15em; }
-.strip .kpis { gap: clamp(10px,1.3vw,22px); }
-.strip .kpi span { font: 800 29px/.95 var(--f-num); }
-.strip .dots { grid-template-columns: repeat(10,18px); gap: 4px; }
-.strip .dot { width: 18px; height: 18px; border-radius: 5px; font-size: 10px; }
-/* Bet tickets: clean broadcast cards, clear state color, bettor, odds and live context */
-.list { gap: 11px; }
-.bet { border-radius: 14px; padding: 14px 16px 14px 17px; gap: 6px 12px; background: linear-gradient(145deg,rgba(26,33,33,.98),rgba(13,18,19,.98)); border: 1px solid rgba(231,239,230,.1); box-shadow: 0 10px 30px rgba(0,0,0,.22), inset 0 1px rgba(255,255,255,.05); transition: transform .25s var(--v2-ease), border-color .25s, box-shadow .25s; }
-.bet:hover { transform: translateY(-2px); border-color: rgba(236,244,231,.22); box-shadow: 0 15px 38px rgba(0,0,0,.3), inset 0 1px rgba(255,255,255,.07); }
-.bet::after { width: 3px; box-shadow: 0 0 18px var(--rail,transparent); }
-.bet.st-cooking { --rail: var(--win); background: linear-gradient(130deg,rgba(30,64,49,.66),rgba(12,20,18,.97) 56%); border-color: rgba(104,223,162,.18); }
-.bet.st-sweating { --rail: var(--gold); background: linear-gradient(130deg,rgba(65,48,22,.6),rgba(17,18,17,.98) 56%); border-color: rgba(239,184,77,.17); }
-.bet.st-trouble, .bet.st-dead { --rail: var(--loss); background: linear-gradient(130deg,rgba(69,28,36,.62),rgba(19,15,18,.97) 56%); border-color: rgba(255,100,117,.18); }
-.book { border-radius: 9px; }
-.pick { font: 800 28px/1.03 var(--f-num); }
-.meta { font: 600 14px var(--f-num); color: #929d96; }
-.meta .tag { color: var(--accent); }
-.odds b { color: #f3f4ed; }
-.state { border-radius: 999px; padding: 4px 10px; font: 800 11px var(--f-ui); letter-spacing: .1em; text-transform: uppercase; }
-.state.cooking, .state.alive { color: #b9ffdb; background: rgba(104,223,162,.14); border: 1px solid rgba(104,223,162,.25); }
-.state.sweating { color: #ffe0a1; background: rgba(239,184,77,.14); border: 1px solid rgba(239,184,77,.24); }
-.state.trouble, .state.dead { color: #ffc2cb; background: rgba(255,100,117,.14); border: 1px solid rgba(255,100,117,.24); }
-.live::before { box-shadow: 0 0 10px rgba(255,100,117,.6); }
-.meter, .lmeter span { border-radius: 99px; }
-.meter i { border-radius: 99px; }
-.bug, .note-line { border-radius: 9px; }
-/* Scoreboards, game trackers, bet rows, standings, splits and history */
-.rb { gap: 16px; }
-.rb-main, .rb-rail { scrollbar-color: rgba(201,243,106,.3) transparent; }
-.rb-g, .rb-sec, .rb-card { border: 1px solid rgba(231,239,230,.11); border-radius: 15px; background: linear-gradient(155deg,rgba(21,28,28,.97),rgba(10,14,16,.98)); box-shadow: 0 14px 34px rgba(0,0,0,.27),inset 0 1px rgba(255,255,255,.045); }
-.rb-g::before { height: 3px; opacity: .85; }
-.rb-g.post { opacity: .78; }
-.rb-gh, .rb-gs { padding: 15px 16px 11px; }
-.rb-gh .tl, .rb-gs .tl { filter: drop-shadow(0 3px 6px rgba(0,0,0,.3)); }
-.rb-gh .ab, .rb-gs .ab { color: #bdc7bd; }
-.rb-gh .sc { font: 900 38px/1 var(--f-num); }
-.rb-gh .clk.on, .rb-gs .clk.on { color: #ff858d; }
-.rb-gh .clk.on::before, .rb-gs .clk.on::before { box-shadow: 0 0 12px rgba(255,100,117,.55); }
-.rb-gh .dd, .rb-gs .dd { color: #87938a; }
-.rb-pos, .ob-bet, .pp-bet, .slip { border-radius: 11px; background: rgba(255,255,255,.032); border-color: rgba(255,255,255,.07); transition: transform .22s var(--v2-ease), background .22s, border-color .22s; }
-.rb-pos:hover, .ob-bet:hover, .pp-bet:hover { transform: translateX(2px); background: rgba(255,255,255,.06); border-color: rgba(201,243,106,.2); }
-.rb-pos.on, .rb-pos.mine, .ob-bet.mine { background: rgba(201,243,106,.075); border-color: rgba(201,243,106,.23); }
-.rb-pk > b { color: #f4f5ee; }
-.rb-wl { color: #909a91; }
-.rb-av { box-shadow: 0 0 0 2px #111716; }
-.rb-fld, .rb-fld .fld { border-radius: 9px; }
-.rb-fld .fld { filter: saturate(.86) contrast(1.05); }
-.rb-fld .fi, .rb-fld .ddx { text-shadow: 0 2px 8px rgba(0,0,0,.65); }
-.lc { background: rgba(255,255,255,.035); border-color: rgba(255,255,255,.07); }
-.lc.mine { background: rgba(201,243,106,.08); border-color: rgba(201,243,106,.4); box-shadow: 0 0 20px rgba(201,243,106,.09); }
-.rb-sec h3, .rb-ch h3 { font: 800 11px var(--f-ui); letter-spacing: .16em; text-transform: uppercase; color: #c6cec4; }
-.rb-lr { border-radius: 10px; transition: background .2s ease; }
-.rb-lr:hover { background: rgba(255,255,255,.04); }
-.rb-lr .nm b { font-weight: 700; }
-.row { border-bottom-color: rgba(226,235,226,.08); }
-.row .t { color: #eef1eb; }
-.row .r { color: #f4f5ee; }
-.split .val { color: #eef2eb; }
-.chart { filter: drop-shadow(0 4px 12px rgba(201,243,106,.08)); }
-/* Navigation / bottom ticker / room controls */
-.ticker { background: linear-gradient(180deg,rgba(10,15,16,.94),rgba(5,8,9,.99)); border-top: 1px solid rgba(201,243,106,.25); box-shadow: 0 -12px 36px rgba(0,0,0,.36); backdrop-filter: blur(14px); }
-.tk-lbl { color: #10150a; background: var(--accent); }
-.tk-g.mine { background: rgba(201,243,106,.08); border-color: rgba(201,243,106,.4); }
-.tk-sep { background: rgba(201,243,106,.42); }
-.roomtv:not([hidden]) { border-color: rgba(201,243,106,.25); background: rgba(8,12,12,.93); box-shadow: 0 16px 42px rgba(0,0,0,.4),inset 0 1px rgba(255,255,255,.06); backdrop-filter: blur(18px); }
-/* Forms, popovers, modal sheets, settings and profile cards */
-.scrim, .gate { background: rgba(2,5,6,.78); backdrop-filter: blur(12px) saturate(.8); }
-.sheet, .gate-card { border: 1px solid rgba(231,239,230,.14); border-radius: 18px; background: linear-gradient(145deg,#171e1e,#0d1214); box-shadow: 0 35px 100px rgba(0,0,0,.66),inset 0 1px rgba(255,255,255,.055); }
-.sheet .field input, .sheet .field textarea, .gate-card textarea, .field input, .field textarea, .field select { border-radius: 10px; background: rgba(0,0,0,.28); border-color: rgba(231,239,230,.13); }
-.sheet .field input:focus, .sheet .field textarea:focus, .field input:focus, .field textarea:focus { border-color: var(--accent); box-shadow: 0 0 0 3px rgba(201,243,106,.1); }
-.sheet .field > label, .sheet .field > .lbl, .field > label, .field > .lbl { color: #8b978c; }
-.radios span { border-radius: 9px; background: rgba(255,255,255,.03); }
-.radios input:checked + span { border-color: var(--accent); color: var(--accent); background: rgba(201,243,106,.09); }
-.preview, .scan-note, .legrow, .sndrow { border-radius: 11px; background: rgba(255,255,255,.035); border-color: var(--line); }
-.scan { border-color: rgba(201,243,106,.38); color: var(--accent); background: rgba(201,243,106,.055); border-radius: 11px; }
-.gate-card { max-width: 470px; }
-.pf-tabs button[aria-pressed="true"], .pf-tabs button:hover { border-color: var(--accent); }
-.toast { border: 1px solid rgba(201,243,106,.25); background: #e7f4d0; color: #11170a; box-shadow: 0 12px 36px rgba(0,0,0,.38); }
-.flash { border-color: rgba(231,239,230,.17); background: linear-gradient(145deg,rgba(24,31,31,.98),rgba(11,15,16,.98)); box-shadow: 0 24px 70px rgba(0,0,0,.55),0 0 32px rgba(201,243,106,.09); }
-/* Existing win, loss, hit and highlight animations now share a stadium-light finish */
-.in { background: radial-gradient(ellipse at 50% 45%,#14241b,#060a0b 67%,#020304); }
-.in canvas { filter: saturate(1.16) contrast(1.06); }
-.in-cap { color: rgba(242,246,236,.78); text-shadow: 0 2px 22px #000; }
-.in-kick { color: var(--accent); text-shadow: 0 0 24px rgba(201,243,106,.56); }
-.in-big { filter: drop-shadow(0 0 30px rgba(239,184,77,.35)) drop-shadow(0 8px 0 rgba(0,0,0,.65)); }
-.lockin { background: radial-gradient(ellipse at 50% 52%,rgba(201,243,106,.14),rgba(3,6,7,.96) 68%); }
-.jumbo { background-color: #080b0e; }
-.jumbo .jb-head { border-bottom-color: rgba(201,243,106,.38); }
-.jumbo .jb-screen { box-shadow: 0 32px 88px rgba(0,0,0,.62),0 0 42px rgba(201,243,106,.11); }
-.sn-vig { background: radial-gradient(ellipse at center,transparent 43%,rgba(0,0,0,.7) 100%); }
-.nk-flash, .sn-flash { mix-blend-mode: screen; }
-.hrfx i { box-shadow: 0 0 14px currentColor,0 0 34px currentColor; }
-/* Football TV background: a half-field perspective with standard, even yard-line markings */
-body.tv:not(.phone) #cfield { background: #07100c url("img/field-v2.svg") center bottom / cover no-repeat !important; opacity: .72; }
-body.tv.nflday #cfield, body.tv.cfb #cfield { background-image: url("img/field-v2.svg") !important; background-position: center bottom; }
-body.tv.nflday #cfield svg, body.tv.cfb #cfield svg { display: none !important; }
-body.tv.nflday #cfield::after, body.tv.cfb #cfield::after { background: linear-gradient(180deg,rgba(4,7,8,.28),rgba(4,7,8,.02) 42%,rgba(3,6,5,.48)), radial-gradient(ellipse at center,transparent 24%,rgba(0,0,0,.48) 100%); }
-body.tv.nflday::before, body.tv.cfb::before { background: linear-gradient(180deg,rgba(4,7,8,.8),rgba(7,15,10,.38)) !important; }
-body.tv.nflday .rb-g, body.tv.nflday .rb-sec, body.tv.nflday .rb-card,
-body.tv.cfb .rb-g, body.tv.cfb .rb-sec, body.tv.cfb .rb-card { background: linear-gradient(145deg,rgba(13,20,18,.94),rgba(7,11,11,.96)) !important; border-color: rgba(231,239,230,.16); }
-body.tv.nflday .modechip, body.tv.cfb .modechip { color: #e8f1d6 !important; background: rgba(201,243,106,.1) !important; border-color: rgba(201,243,106,.3) !important; }
-body.tv.nflday #ticker, body.tv.cfb #ticker { background: linear-gradient(180deg,rgba(10,16,14,.96),rgba(4,7,7,.99)); border-top-color: rgba(201,243,106,.24); }
-body.tv .rb-games.primeg:not(.mason) > .rb-pcol.pr, body.tv.nflday .rb-games.primeg:not(.mason) > .rb-pcol.pr, body.tv.cfb .rb-games.primeg:not(.mason) > .rb-pcol.pr { background: rgba(6,10,9,.76); border: 1px solid rgba(231,239,230,.08); border-radius: 16px; padding: 12px; box-shadow: 0 14px 42px rgba(0,0,0,.22); }
-/* Phone dashboard */
-#ph.ph { border-radius: 19px; background: linear-gradient(160deg,#121a19,#0a1011); border: 1px solid rgba(231,239,230,.13); }
-.ph-top { border-bottom-color: rgba(231,239,230,.1); }
-.ph-brand b, .ph-brand span { color: var(--ink); }
-.ph-brand span { color: var(--accent); }
-.ph-range { background: rgba(255,255,255,.035); border-color: var(--line); border-radius: 11px; }
-.ph-range button[aria-pressed="true"] { color: var(--accent-ink); background: var(--accent); }
-.ph-bar { background: rgba(8,12,12,.96); border-top-color: rgba(231,239,230,.12); backdrop-filter: blur(16px); }
-.ph-bar button[aria-current="page"] { color: var(--accent); }
-/* Restrained card motion; reduced-motion preference is respected */
-@keyframes v2ScoreGlow { 0%,100% { box-shadow: 0 0 0 rgba(104,223,162,0); } 50% { box-shadow: 0 0 24px rgba(104,223,162,.13); } }
-@keyframes v2TickerLine { from { transform: translateX(-100%); } to { transform: translateX(100%); } }
-.bet.st-cooking:not(:hover) { animation: v2ScoreGlow 3.8s ease-in-out infinite; }
-.status.live i { background: var(--win); box-shadow: 0 0 0 0 rgba(104,223,162,.58); }
-@media (max-width: 1099px) {
-  .app { padding-inline: 14px; gap: 12px; }
-  .top { gap: 8px; padding: 10px; }
-  .brand { flex: 1 1 100%; }
-  .hero.strip { grid-template-columns: repeat(2,minmax(0,1fr)); gap: 12px 0; }
-  .strip > * { padding: 0 12px; }
-  .strip > *:nth-child(odd) { padding-left: 0; border-left: 0; }
-  .strip > *:nth-child(n+3) { border-top: 1px solid var(--line); padding-top: 10px; }
-}
-@media (max-width: 680px) {
-  .app { padding: 10px 10px 100px; gap: 11px; }
-  .top { border-radius: 14px; }
-  .brand h1 { font-size: 28px; }
-  .top .seg { order: 10; }
-  .top .chip, .top .btn { padding: 7px 9px; font-size: 11px; }
-  .tabs { align-self: stretch; }
-  .tabs button { flex: 1; }
-  .hero.strip { padding: 14px; grid-template-columns: 1fr 1fr; }
-  .strip .big { font-size: 50px; }
-  .strip .kpis { grid-template-columns: repeat(3,minmax(0,1fr)); }
-  .strip .kpi span { font-size: 23px; }
-  .strip .form { display: none; }
-  .panel { border-radius: 14px; padding: 14px; }
-  .list { grid-template-columns: 1fr; }
-  .bet { padding: 12px; }
-  .pick { font-size: 24px; }
-  body.tv .rb { gap: 9px; }
-}
-@media (prefers-reduced-motion: reduce) {
-  *, *::before, *::after { scroll-behavior: auto !important; animation-duration: .01ms !important; animation-iteration-count: 1 !important; transition-duration: .01ms !important; }
-}
-</style>
-<style id="stadium-v2">
-#stadiumCrowd { display:none; position:fixed; inset:0; z-index:.45; width:100%; height:100%; pointer-events:none; opacity:.88; }
-body.tv:not(.phone) #stadiumCrowd { display:block; }
-body.tv #cfCrowd { display:none !important; }
-.stadium-ui { display:none; position:fixed; inset:0; z-index:8; pointer-events:none; }
-body.tv:not(.phone) .stadium-ui { display:block; }
-.stadium-toggle, .stadium-tron { pointer-events:auto; }
-.stadium-toggle { position:absolute; right:clamp(14px,2vw,34px); bottom:clamp(66px,7vh,102px); display:flex; align-items:center; gap:10px; padding:10px 13px; border:1px solid rgba(207,225,255,.25); border-radius:9px; background:linear-gradient(180deg,rgba(17,24,35,.94),rgba(5,9,15,.96)); color:#eaf1fa; box-shadow:0 10px 32px rgba(0,0,0,.42),inset 0 1px rgba(255,255,255,.08); font:800 11px/1 var(--f-mono,monospace); letter-spacing:.15em; cursor:pointer; transition:transform .2s,border-color .2s,box-shadow .2s; }
-.stadium-toggle:hover { transform:translateY(-2px); border-color:rgba(119,182,255,.7); box-shadow:0 0 24px rgba(58,138,255,.18),0 10px 32px rgba(0,0,0,.42); }
-.stadium-toggle b { display:grid; place-items:center; width:20px; height:20px; border-radius:50%; background:rgba(79,155,255,.18); color:#91c2ff; font:700 16px/1 system-ui; }
-.stadium-toggle-light,.stadium-live-dot { display:inline-block; flex:0 0 auto; width:7px; height:7px; border-radius:50%; background:#52efa9; box-shadow:0 0 11px rgba(82,239,169,.8); }
-.stadium-tron { position:absolute; right:clamp(14px,2vw,34px); bottom:clamp(118px,13vh,172px); width:min(390px,calc(100vw - 28px)); overflow:hidden; border:1px solid rgba(175,205,244,.65); border-radius:12px; color:#eff5ff; background:linear-gradient(155deg,rgba(15,23,36,.98),rgba(4,7,12,.985) 67%); box-shadow:0 0 0 4px rgba(73,137,220,.11),0 24px 80px rgba(0,0,0,.72),0 0 40px rgba(56,128,220,.16); transform-origin:bottom right; animation:stadiumTronIn .24s cubic-bezier(.2,.8,.2,1) both; }
-@keyframes stadiumTronIn { from { opacity:0; transform:perspective(700px) rotateX(12deg) translateY(14px) scale(.97); } to { opacity:1; transform:perspective(700px) rotateX(0) translateY(0) scale(1); } }
-.stadium-tron::before { content:""; position:absolute; inset:0; pointer-events:none; opacity:.25; background:repeating-linear-gradient(0deg,transparent 0 3px,rgba(255,255,255,.035) 4px,transparent 5px); }
-.stadium-tron-head { position:relative; display:flex; justify-content:space-between; align-items:center; padding:10px 13px 8px; border-bottom:1px solid rgba(192,213,245,.14); color:#a9bbd5; font:800 10px/1 var(--f-mono,monospace); letter-spacing:.19em; }
-.stadium-tron-head div { display:flex; align-items:center; gap:8px; }
-.stadium-live-dot { width:6px; height:6px; }
-.stadium-tron-head button { border:0; background:transparent; color:#8596ae; font:400 23px/16px system-ui; cursor:pointer; }
-.stadium-matchup { position:relative; display:grid; grid-template-columns:1fr 30px 1fr; align-items:center; gap:5px; padding:15px 14px 8px; }
-.stadium-team { display:grid; grid-template-columns:27px minmax(0,1fr) auto; align-items:center; gap:7px; min-width:0; color:var(--stadium-away,#a9caff); }
-.stadium-team.home { color:var(--stadium-home,#f2c66d); }
-.stadium-team img { width:26px; height:26px; object-fit:contain; filter:drop-shadow(0 0 6px currentColor); }
-.stadium-team span { min-width:0; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; font:800 12px/1.05 var(--f-ui,system-ui); letter-spacing:.03em; }
-.stadium-team b { color:#fff; font:800 29px/.9 var(--f-num,system-ui); font-variant-numeric:tabular-nums; }
-.stadium-vs { color:#53647d; text-align:center; font:700 9px/1 var(--f-mono,monospace); letter-spacing:.14em; }
-.stadium-status { position:relative; padding:0 15px 10px; text-align:center; color:#93a2b7; font:700 10px/1.2 var(--f-mono,monospace); letter-spacing:.08em; text-transform:uppercase; }
-.stadium-message { position:relative; margin:0 12px 10px; padding:10px 12px; border:1px solid rgba(160,194,241,.15); border-radius:7px; background:linear-gradient(90deg,rgba(54,121,204,.13),rgba(255,255,255,.025)); }
-.stadium-message span { display:block; margin-bottom:4px; color:#86b7f6; font:800 9px/1 var(--f-mono,monospace); letter-spacing:.2em; }
-.stadium-message b { display:block; overflow:hidden; color:#f7f9fd; font:700 14px/1.2 var(--f-ui,system-ui); text-overflow:ellipsis; white-space:nowrap; }
-.stadium-tron-controls { position:relative; display:grid; grid-template-columns:1fr 1fr 1.2fr; gap:6px; padding:0 12px 13px; }
-.stadium-tron-controls button { min-width:0; padding:7px 5px; border:1px solid rgba(166,195,233,.18); border-radius:5px; background:rgba(255,255,255,.035); color:#b8c7dc; font:800 8px/1 var(--f-mono,monospace); letter-spacing:.06em; cursor:pointer; }
-.stadium-tron-controls button:hover,.stadium-tron-controls button:focus-visible { border-color:rgba(112,180,255,.7); background:rgba(59,140,255,.16); color:#fff; }
-.stadium-tron-controls button:last-child { color:#b8d6ff; }
-.stadium-tron-controls button span { font-size:12px; }
-.stadium-led { height:3px; background:linear-gradient(90deg,#47a3ff,#75eecc,#ffca65,#d87bff,#47a3ff); background-size:220% 100%; animation:stadiumLed 4s linear infinite; }
-@keyframes stadiumLed { to { background-position:220% 0; } }
-body.tv[data-stadium-sport="Soccer"]::before { background:radial-gradient(900px 430px at 50% 100%,rgba(23,142,79,.22),transparent 72%),linear-gradient(180deg,#081117,#07120e) !important; }
-body.tv[data-stadium-sport="UFC"]::before { background:radial-gradient(780px 500px at 50% 80%,rgba(176,64,48,.19),transparent 70%),linear-gradient(180deg,#101014,#08080a) !important; }
-body.tv[data-stadium-sport="Golf"]::before { background:radial-gradient(1100px 500px at 50% 90%,rgba(61,147,76,.2),transparent 72%),linear-gradient(180deg,#0a1318,#09130e) !important; }
-body.tv[data-stadium-sport="Tennis"]::before { background:radial-gradient(900px 430px at 50% 90%,rgba(65,145,203,.19),transparent 72%),linear-gradient(180deg,#09121a,#081018) !important; }
-body.tv[data-stadium-sport="Other"]::before { background:radial-gradient(1000px 500px at 50% 90%,rgba(80,133,182,.15),transparent 70%),linear-gradient(180deg,#0a1018,#070a10) !important; }
-@media (max-width:780px) { #stadiumCrowd,.stadium-ui { display:none !important; } }
-@media (prefers-reduced-motion:reduce) { .stadium-tron { animation:none; } .stadium-led { animation:none; } }
-</style>
 </head>
 <body>
-
-<canvas id="stadiumCrowd" aria-hidden="true"></canvas>
-<div class="stadium-ui" id="stadiumUi">
-  <button class="stadium-toggle" id="stadiumToggle" type="button" aria-expanded="false" aria-controls="stadiumTron">
-    <span class="stadium-toggle-light"></span><span class="stadium-toggle-label">JUMBO TRON</span><b>+</b>
-  </button>
-  <section class="stadium-tron" id="stadiumTron" aria-label="Live stadium board" hidden>
-    <header class="stadium-tron-head"><div><i class="stadium-live-dot"></i><span id="stadiumSportLabel">STADIUM FEED</span></div><button id="stadiumClose" type="button" aria-label="Close jumbo tron">×</button></header>
-    <div class="stadium-matchup" id="stadiumMatchup">
-      <div class="stadium-team"><img id="stadiumAwayLogo" alt="" hidden><span id="stadiumAway">AWAY</span><b id="stadiumAwayScore">—</b></div>
-      <i class="stadium-vs">VS</i>
-      <div class="stadium-team home"><img id="stadiumHomeLogo" alt="" hidden><span id="stadiumHome">HOME</span><b id="stadiumHomeScore">—</b></div>
-    </div>
-    <div class="stadium-status" id="stadiumStatus">Waiting for a live matchup</div>
-    <div class="stadium-message"><span id="stadiumModeLabel">LIVE GAME</span><b id="stadiumMessage">Room is getting ready</b></div>
-    <div class="stadium-tron-controls">
-      <button type="button" data-stadium-rally="a">RALLY AWAY</button>
-      <button type="button" data-stadium-rally="h">RALLY HOME</button>
-      <button type="button" id="stadiumCycle">NEXT SCREEN <span>↻</span></button>
-    </div>
-    <div class="stadium-led" aria-hidden="true"></div>
-  </section>
-</div>
 
 <div class="cfield" id="cfield" aria-hidden="true"><canvas id="nflTeam"></canvas><canvas id="cfCrowd"></canvas><svg viewBox="0 0 1600 900" preserveAspectRatio="xMidYMax slice" xmlns="http://www.w3.org/2000/svg"><defs><linearGradient id="cfTurf" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#0d2a17"/><stop offset="1" stop-color="#14401f"/></linearGradient><radialGradient id="cfLamp" cx="0.5" cy="0" r="0.9"><stop offset="0" stop-color="#eaf3ff" stop-opacity=".22"/><stop offset="1" stop-color="#eaf3ff" stop-opacity="0"/></radialGradient></defs><rect x="0" y="0" width="1600" height="900" fill="#05080d"/><path d="M0 420 Q800 330 1600 420 L1600 600 L0 600 Z" fill="#0b1018"/><ellipse cx="800" cy="470" rx="900" ry="120" fill="url(#cfLamp)"/><polygon points="-140.0,900.0 16.7,900.0 341.7,560.0 250.0,560.0" fill="#3a2c10"/><polygon points="16.7,900.0 95.0,900.0 387.5,560.0 341.7,560.0" fill="#123a1d"/><polygon points="95.0,900.0 173.3,900.0 433.3,560.0 387.5,560.0" fill="#0f3219"/><polygon points="173.3,900.0 251.7,900.0 479.2,560.0 433.3,560.0" fill="#123a1d"/><polygon points="251.7,900.0 330.0,900.0 525.0,560.0 479.2,560.0" fill="#0f3219"/><polygon points="330.0,900.0 408.3,900.0 570.8,560.0 525.0,560.0" fill="#123a1d"/><polygon points="408.3,900.0 486.7,900.0 616.7,560.0 570.8,560.0" fill="#0f3219"/><polygon points="486.7,900.0 565.0,900.0 662.5,560.0 616.7,560.0" fill="#123a1d"/><polygon points="565.0,900.0 643.3,900.0 708.3,560.0 662.5,560.0" fill="#0f3219"/><polygon points="643.3,900.0 721.7,900.0 754.2,560.0 708.3,560.0" fill="#123a1d"/><polygon points="721.7,900.0 800.0,900.0 800.0,560.0 754.2,560.0" fill="#0f3219"/><polygon points="800.0,900.0 878.3,900.0 845.8,560.0 800.0,560.0" fill="#123a1d"/><polygon points="878.3,900.0 956.7,900.0 891.7,560.0 845.8,560.0" fill="#0f3219"/><polygon points="956.7,900.0 1035.0,900.0 937.5,560.0 891.7,560.0" fill="#123a1d"/><polygon points="1035.0,900.0 1113.3,900.0 983.3,560.0 937.5,560.0" fill="#0f3219"/><polygon points="1113.3,900.0 1191.7,900.0 1029.2,560.0 983.3,560.0" fill="#123a1d"/><polygon points="1191.7,900.0 1270.0,900.0 1075.0,560.0 1029.2,560.0" fill="#0f3219"/><polygon points="1270.0,900.0 1348.3,900.0 1120.8,560.0 1075.0,560.0" fill="#123a1d"/><polygon points="1348.3,900.0 1426.7,900.0 1166.7,560.0 1120.8,560.0" fill="#0f3219"/><polygon points="1426.7,900.0 1505.0,900.0 1212.5,560.0 1166.7,560.0" fill="#123a1d"/><polygon points="1505.0,900.0 1583.3,900.0 1258.3,560.0 1212.5,560.0" fill="#0f3219"/><polygon points="1583.3,900.0 1740.0,900.0 1350.0,560.0 1258.3,560.0" fill="#3a2c10"/><line x1="16.7" y1="900.0" x2="341.7" y2="560.0" stroke="#eef2f7" stroke-opacity=".55" stroke-width="3"/><line x1="95.0" y1="900.0" x2="387.5" y2="560.0" stroke="#eef2f7" stroke-opacity=".26" stroke-width="1.6"/><line x1="173.3" y1="900.0" x2="433.3" y2="560.0" stroke="#eef2f7" stroke-opacity=".26" stroke-width="1.6"/><line x1="251.7" y1="900.0" x2="479.2" y2="560.0" stroke="#eef2f7" stroke-opacity=".26" stroke-width="1.6"/><line x1="330.0" y1="900.0" x2="525.0" y2="560.0" stroke="#eef2f7" stroke-opacity=".26" stroke-width="1.6"/><line x1="408.3" y1="900.0" x2="570.8" y2="560.0" stroke="#eef2f7" stroke-opacity=".26" stroke-width="1.6"/><line x1="486.7" y1="900.0" x2="616.7" y2="560.0" stroke="#eef2f7" stroke-opacity=".26" stroke-width="1.6"/><line x1="565.0" y1="900.0" x2="662.5" y2="560.0" stroke="#eef2f7" stroke-opacity=".26" stroke-width="1.6"/><line x1="643.3" y1="900.0" x2="708.3" y2="560.0" stroke="#eef2f7" stroke-opacity=".26" stroke-width="1.6"/><line x1="721.7" y1="900.0" x2="754.2" y2="560.0" stroke="#eef2f7" stroke-opacity=".26" stroke-width="1.6"/><line x1="800.0" y1="900.0" x2="800.0" y2="560.0" stroke="#eef2f7" stroke-opacity=".26" stroke-width="3"/><line x1="878.3" y1="900.0" x2="845.8" y2="560.0" stroke="#eef2f7" stroke-opacity=".26" stroke-width="1.6"/><line x1="956.7" y1="900.0" x2="891.7" y2="560.0" stroke="#eef2f7" stroke-opacity=".26" stroke-width="1.6"/><line x1="1035.0" y1="900.0" x2="937.5" y2="560.0" stroke="#eef2f7" stroke-opacity=".26" stroke-width="1.6"/><line x1="1113.3" y1="900.0" x2="983.3" y2="560.0" stroke="#eef2f7" stroke-opacity=".26" stroke-width="1.6"/><line x1="1191.7" y1="900.0" x2="1029.2" y2="560.0" stroke="#eef2f7" stroke-opacity=".26" stroke-width="1.6"/><line x1="1270.0" y1="900.0" x2="1075.0" y2="560.0" stroke="#eef2f7" stroke-opacity=".26" stroke-width="1.6"/><line x1="1348.3" y1="900.0" x2="1120.8" y2="560.0" stroke="#eef2f7" stroke-opacity=".26" stroke-width="1.6"/><line x1="1426.7" y1="900.0" x2="1166.7" y2="560.0" stroke="#eef2f7" stroke-opacity=".26" stroke-width="1.6"/><line x1="1505.0" y1="900.0" x2="1212.5" y2="560.0" stroke="#eef2f7" stroke-opacity=".26" stroke-width="1.6"/><line x1="1583.3" y1="900.0" x2="1258.3" y2="560.0" stroke="#eef2f7" stroke-opacity=".55" stroke-width="3"/><line x1="-140.0" y1="900.0" x2="1740.0" y2="900.0" stroke="#eef2f7" stroke-opacity=".4" stroke-width="3"/><line x1="250.0" y1="560.0" x2="1350.0" y2="560.0" stroke="#eef2f7" stroke-opacity=".4" stroke-width="3"/><line x1="143.2" y1="781.7" x2="150.8" y2="773.5" stroke="#eef2f7" stroke-opacity=".22" stroke-width="1.2"/><line x1="232.4" y1="686.5" x2="240.0" y2="678.3" stroke="#eef2f7" stroke-opacity=".22" stroke-width="1.2"/><line x1="156.6" y1="781.7" x2="164.1" y2="773.5" stroke="#eef2f7" stroke-opacity=".22" stroke-width="1.2"/><line x1="243.9" y1="686.5" x2="251.4" y2="678.3" stroke="#eef2f7" stroke-opacity=".22" stroke-width="1.2"/><line x1="170.0" y1="781.7" x2="177.3" y2="773.5" stroke="#eef2f7" stroke-opacity=".22" stroke-width="1.2"/><line x1="255.5" y1="686.5" x2="262.9" y2="678.3" stroke="#eef2f7" stroke-opacity=".22" stroke-width="1.2"/><line x1="183.4" y1="781.7" x2="190.6" y2="773.5" stroke="#eef2f7" stroke-opacity=".22" stroke-width="1.2"/><line x1="267.1" y1="686.5" x2="274.3" y2="678.3" stroke="#eef2f7" stroke-opacity=".22" stroke-width="1.2"/><line x1="210.2" y1="781.7" x2="217.1" y2="773.5" stroke="#eef2f7" stroke-opacity=".22" stroke-width="1.2"/><line x1="290.3" y1="686.5" x2="297.1" y2="678.3" stroke="#eef2f7" stroke-opacity=".22" stroke-width="1.2"/><line x1="223.6" y1="781.7" x2="230.3" y2="773.5" stroke="#eef2f7" stroke-opacity=".22" stroke-width="1.2"/><line x1="301.9" y1="686.5" x2="308.6" y2="678.3" stroke="#eef2f7" stroke-opacity=".22" stroke-width="1.2"/><line x1="237.0" y1="781.7" x2="243.6" y2="773.5" stroke="#eef2f7" stroke-opacity=".22" stroke-width="1.2"/><line x1="313.4" y1="686.5" x2="320.0" y2="678.3" stroke="#eef2f7" stroke-opacity=".22" stroke-width="1.2"/><line x1="250.4" y1="781.7" x2="256.8" y2="773.5" stroke="#eef2f7" stroke-opacity=".22" stroke-width="1.2"/><line x1="325.0" y1="686.5" x2="331.4" y2="678.3" stroke="#eef2f7" stroke-opacity=".22" stroke-width="1.2"/><line x1="277.2" y1="781.7" x2="283.3" y2="773.5" stroke="#eef2f7" stroke-opacity=".22" stroke-width="1.2"/><line x1="348.2" y1="686.5" x2="354.3" y2="678.3" stroke="#eef2f7" stroke-opacity=".22" stroke-width="1.2"/><line x1="290.6" y1="781.7" x2="296.6" y2="773.5" stroke="#eef2f7" stroke-opacity=".22" stroke-width="1.2"/><line x1="359.8" y1="686.5" x2="365.7" y2="678.3" stroke="#eef2f7" stroke-opacity=".22" stroke-width="1.2"/><line x1="304.0" y1="781.7" x2="309.8" y2="773.5" stroke="#eef2f7" stroke-opacity=".22" stroke-width="1.2"/><line x1="371.4" y1="686.5" x2="377.1" y2="678.3" stroke="#eef2f7" stroke-opacity=".22" stroke-width="1.2"/><line x1="317.4" y1="781.7" x2="323.0" y2="773.5" stroke="#eef2f7" stroke-opacity=".22" stroke-width="1.2"/><line x1="383.0" y1="686.5" x2="388.6" y2="678.3" stroke="#eef2f7" stroke-opacity=".22" stroke-width="1.2"/><line x1="344.2" y1="781.7" x2="349.5" y2="773.5" stroke="#eef2f7" stroke-opacity=".22" stroke-width="1.2"/><line x1="406.1" y1="686.5" x2="411.4" y2="678.3" stroke="#eef2f7" stroke-opacity=".22" stroke-width="1.2"/><line x1="357.6" y1="781.7" x2="362.8" y2="773.5" stroke="#eef2f7" stroke-opacity=".22" stroke-width="1.2"/><line x1="417.7" y1="686.5" x2="422.9" y2="678.3" stroke="#eef2f7" stroke-opacity=".22" stroke-width="1.2"/><line x1="371.1" y1="781.7" x2="376.0" y2="773.5" stroke="#eef2f7" stroke-opacity=".22" stroke-width="1.2"/><line x1="429.3" y1="686.5" x2="434.3" y2="678.3" stroke="#eef2f7" stroke-opacity=".22" stroke-width="1.2"/><line x1="384.5" y1="781.7" x2="389.3" y2="773.5" stroke="#eef2f7" stroke-opacity=".22" stroke-width="1.2"/><line x1="440.9" y1="686.5" x2="445.7" y2="678.3" stroke="#eef2f7" stroke-opacity=".22" stroke-width="1.2"/><line x1="411.3" y1="781.7" x2="415.8" y2="773.5" stroke="#eef2f7" stroke-opacity=".22" stroke-width="1.2"/><line x1="464.0" y1="686.5" x2="468.6" y2="678.3" stroke="#eef2f7" stroke-opacity=".22" stroke-width="1.2"/><line x1="424.7" y1="781.7" x2="429.0" y2="773.5" stroke="#eef2f7" stroke-opacity=".22" stroke-width="1.2"/><line x1="475.6" y1="686.5" x2="480.0" y2="678.3" stroke="#eef2f7" stroke-opacity=".22" stroke-width="1.2"/><line x1="438.1" y1="781.7" x2="442.3" y2="773.5" stroke="#eef2f7" stroke-opacity=".22" stroke-width="1.2"/><line x1="487.2" y1="686.5" x2="491.4" y2="678.3" stroke="#eef2f7" stroke-opacity=".22" stroke-width="1.2"/><line x1="451.5" y1="781.7" x2="455.5" y2="773.5" stroke="#eef2f7" stroke-opacity=".22" stroke-width="1.2"/><line x1="498.8" y1="686.5" x2="502.9" y2="678.3" stroke="#eef2f7" stroke-opacity=".22" stroke-width="1.2"/><line x1="478.3" y1="781.7" x2="482.0" y2="773.5" stroke="#eef2f7" stroke-opacity=".22" stroke-width="1.2"/><line x1="522.0" y1="686.5" x2="525.7" y2="678.3" stroke="#eef2f7" stroke-opacity=".22" stroke-width="1.2"/><line x1="491.7" y1="781.7" x2="495.3" y2="773.5" stroke="#eef2f7" stroke-opacity=".22" stroke-width="1.2"/><line x1="533.6" y1="686.5" x2="537.1" y2="678.3" stroke="#eef2f7" stroke-opacity=".22" stroke-width="1.2"/><line x1="505.1" y1="781.7" x2="508.5" y2="773.5" stroke="#eef2f7" stroke-opacity=".22" stroke-width="1.2"/><line x1="545.1" y1="686.5" x2="548.6" y2="678.3" stroke="#eef2f7" stroke-opacity=".22" stroke-width="1.2"/><line x1="518.5" y1="781.7" x2="521.8" y2="773.5" stroke="#eef2f7" stroke-opacity=".22" stroke-width="1.2"/><line x1="556.7" y1="686.5" x2="560.0" y2="678.3" stroke="#eef2f7" stroke-opacity=".22" stroke-width="1.2"/><line x1="545.3" y1="781.7" x2="548.3" y2="773.5" stroke="#eef2f7" stroke-opacity=".22" stroke-width="1.2"/><line x1="579.9" y1="686.5" x2="582.9" y2="678.3" stroke="#eef2f7" stroke-opacity=".22" stroke-width="1.2"/><line x1="558.7" y1="781.7" x2="561.5" y2="773.5" stroke="#eef2f7" stroke-opacity=".22" stroke-width="1.2"/><line x1="591.5" y1="686.5" x2="594.3" y2="678.3" stroke="#eef2f7" stroke-opacity=".22" stroke-width="1.2"/><line x1="572.1" y1="781.7" x2="574.8" y2="773.5" stroke="#eef2f7" stroke-opacity=".22" stroke-width="1.2"/><line x1="603.1" y1="686.5" x2="605.7" y2="678.3" stroke="#eef2f7" stroke-opacity=".22" stroke-width="1.2"/><line x1="585.5" y1="781.7" x2="588.0" y2="773.5" stroke="#eef2f7" stroke-opacity=".22" stroke-width="1.2"/><line x1="614.6" y1="686.5" x2="617.1" y2="678.3" stroke="#eef2f7" stroke-opacity=".22" stroke-width="1.2"/><line x1="612.3" y1="781.7" x2="614.5" y2="773.5" stroke="#eef2f7" stroke-opacity=".22" stroke-width="1.2"/><line x1="637.8" y1="686.5" x2="640.0" y2="678.3" stroke="#eef2f7" stroke-opacity=".22" stroke-width="1.2"/><line x1="625.7" y1="781.7" x2="627.8" y2="773.5" stroke="#eef2f7" stroke-opacity=".22" stroke-width="1.2"/><line x1="649.4" y1="686.5" x2="651.4" y2="678.3" stroke="#eef2f7" stroke-opacity=".22" stroke-width="1.2"/><line x1="639.1" y1="781.7" x2="641.0" y2="773.5" stroke="#eef2f7" stroke-opacity=".22" stroke-width="1.2"/><line x1="661.0" y1="686.5" x2="662.9" y2="678.3" stroke="#eef2f7" stroke-opacity=".22" stroke-width="1.2"/><line x1="652.5" y1="781.7" x2="654.3" y2="773.5" stroke="#eef2f7" stroke-opacity=".22" stroke-width="1.2"/><line x1="672.6" y1="686.5" x2="674.3" y2="678.3" stroke="#eef2f7" stroke-opacity=".22" stroke-width="1.2"/><line x1="679.4" y1="781.7" x2="680.8" y2="773.5" stroke="#eef2f7" stroke-opacity=".22" stroke-width="1.2"/><line x1="695.7" y1="686.5" x2="697.1" y2="678.3" stroke="#eef2f7" stroke-opacity=".22" stroke-width="1.2"/><line x1="692.8" y1="781.7" x2="694.0" y2="773.5" stroke="#eef2f7" stroke-opacity=".22" stroke-width="1.2"/><line x1="707.3" y1="686.5" x2="708.6" y2="678.3" stroke="#eef2f7" stroke-opacity=".22" stroke-width="1.2"/><line x1="706.2" y1="781.7" x2="707.3" y2="773.5" stroke="#eef2f7" stroke-opacity=".22" stroke-width="1.2"/><line x1="718.9" y1="686.5" x2="720.0" y2="678.3" stroke="#eef2f7" stroke-opacity=".22" stroke-width="1.2"/><line x1="719.6" y1="781.7" x2="720.5" y2="773.5" stroke="#eef2f7" stroke-opacity=".22" stroke-width="1.2"/><line x1="730.5" y1="686.5" x2="731.4" y2="678.3" stroke="#eef2f7" stroke-opacity=".22" stroke-width="1.2"/><line x1="746.4" y1="781.7" x2="747.0" y2="773.5" stroke="#eef2f7" stroke-opacity=".22" stroke-width="1.2"/><line x1="753.7" y1="686.5" x2="754.3" y2="678.3" stroke="#eef2f7" stroke-opacity=".22" stroke-width="1.2"/><line x1="759.8" y1="781.7" x2="760.3" y2="773.5" stroke="#eef2f7" stroke-opacity=".22" stroke-width="1.2"/><line x1="765.2" y1="686.5" x2="765.7" y2="678.3" stroke="#eef2f7" stroke-opacity=".22" stroke-width="1.2"/><line x1="773.2" y1="781.7" x2="773.5" y2="773.5" stroke="#eef2f7" stroke-opacity=".22" stroke-width="1.2"/><line x1="776.8" y1="686.5" x2="777.1" y2="678.3" stroke="#eef2f7" stroke-opacity=".22" stroke-width="1.2"/><line x1="786.6" y1="781.7" x2="786.8" y2="773.5" stroke="#eef2f7" stroke-opacity=".22" stroke-width="1.2"/><line x1="788.4" y1="686.5" x2="788.6" y2="678.3" stroke="#eef2f7" stroke-opacity=".22" stroke-width="1.2"/><line x1="813.4" y1="781.7" x2="813.2" y2="773.5" stroke="#eef2f7" stroke-opacity=".22" stroke-width="1.2"/><line x1="811.6" y1="686.5" x2="811.4" y2="678.3" stroke="#eef2f7" stroke-opacity=".22" stroke-width="1.2"/><line x1="826.8" y1="781.7" x2="826.5" y2="773.5" stroke="#eef2f7" stroke-opacity=".22" stroke-width="1.2"/><line x1="823.2" y1="686.5" x2="822.9" y2="678.3" stroke="#eef2f7" stroke-opacity=".22" stroke-width="1.2"/><line x1="840.2" y1="781.7" x2="839.7" y2="773.5" stroke="#eef2f7" stroke-opacity=".22" stroke-width="1.2"/><line x1="834.8" y1="686.5" x2="834.3" y2="678.3" stroke="#eef2f7" stroke-opacity=".22" stroke-width="1.2"/><line x1="853.6" y1="781.7" x2="853.0" y2="773.5" stroke="#eef2f7" stroke-opacity=".22" stroke-width="1.2"/><line x1="846.3" y1="686.5" x2="845.7" y2="678.3" stroke="#eef2f7" stroke-opacity=".22" stroke-width="1.2"/><line x1="880.4" y1="781.7" x2="879.5" y2="773.5" stroke="#eef2f7" stroke-opacity=".22" stroke-width="1.2"/><line x1="869.5" y1="686.5" x2="868.6" y2="678.3" stroke="#eef2f7" stroke-opacity=".22" stroke-width="1.2"/><line x1="893.8" y1="781.7" x2="892.7" y2="773.5" stroke="#eef2f7" stroke-opacity=".22" stroke-width="1.2"/><line x1="881.1" y1="686.5" x2="880.0" y2="678.3" stroke="#eef2f7" stroke-opacity=".22" stroke-width="1.2"/><line x1="907.2" y1="781.7" x2="906.0" y2="773.5" stroke="#eef2f7" stroke-opacity=".22" stroke-width="1.2"/><line x1="892.7" y1="686.5" x2="891.4" y2="678.3" stroke="#eef2f7" stroke-opacity=".22" stroke-width="1.2"/><line x1="920.6" y1="781.7" x2="919.2" y2="773.5" stroke="#eef2f7" stroke-opacity=".22" stroke-width="1.2"/><line x1="904.3" y1="686.5" x2="902.9" y2="678.3" stroke="#eef2f7" stroke-opacity=".22" stroke-width="1.2"/><line x1="947.5" y1="781.7" x2="945.7" y2="773.5" stroke="#eef2f7" stroke-opacity=".22" stroke-width="1.2"/><line x1="927.4" y1="686.5" x2="925.7" y2="678.3" stroke="#eef2f7" stroke-opacity=".22" stroke-width="1.2"/><line x1="960.9" y1="781.7" x2="959.0" y2="773.5" stroke="#eef2f7" stroke-opacity=".22" stroke-width="1.2"/><line x1="939.0" y1="686.5" x2="937.1" y2="678.3" stroke="#eef2f7" stroke-opacity=".22" stroke-width="1.2"/><line x1="974.3" y1="781.7" x2="972.2" y2="773.5" stroke="#eef2f7" stroke-opacity=".22" stroke-width="1.2"/><line x1="950.6" y1="686.5" x2="948.6" y2="678.3" stroke="#eef2f7" stroke-opacity=".22" stroke-width="1.2"/><line x1="987.7" y1="781.7" x2="985.5" y2="773.5" stroke="#eef2f7" stroke-opacity=".22" stroke-width="1.2"/><line x1="962.2" y1="686.5" x2="960.0" y2="678.3" stroke="#eef2f7" stroke-opacity=".22" stroke-width="1.2"/><line x1="1014.5" y1="781.7" x2="1012.0" y2="773.5" stroke="#eef2f7" stroke-opacity=".22" stroke-width="1.2"/><line x1="985.4" y1="686.5" x2="982.9" y2="678.3" stroke="#eef2f7" stroke-opacity=".22" stroke-width="1.2"/><line x1="1027.9" y1="781.7" x2="1025.2" y2="773.5" stroke="#eef2f7" stroke-opacity=".22" stroke-width="1.2"/><line x1="996.9" y1="686.5" x2="994.3" y2="678.3" stroke="#eef2f7" stroke-opacity=".22" stroke-width="1.2"/><line x1="1041.3" y1="781.7" x2="1038.5" y2="773.5" stroke="#eef2f7" stroke-opacity=".22" stroke-width="1.2"/><line x1="1008.5" y1="686.5" x2="1005.7" y2="678.3" stroke="#eef2f7" stroke-opacity=".22" stroke-width="1.2"/><line x1="1054.7" y1="781.7" x2="1051.7" y2="773.5" stroke="#eef2f7" stroke-opacity=".22" stroke-width="1.2"/><line x1="1020.1" y1="686.5" x2="1017.1" y2="678.3" stroke="#eef2f7" stroke-opacity=".22" stroke-width="1.2"/><line x1="1081.5" y1="781.7" x2="1078.2" y2="773.5" stroke="#eef2f7" stroke-opacity=".22" stroke-width="1.2"/><line x1="1043.3" y1="686.5" x2="1040.0" y2="678.3" stroke="#eef2f7" stroke-opacity=".22" stroke-width="1.2"/><line x1="1094.9" y1="781.7" x2="1091.5" y2="773.5" stroke="#eef2f7" stroke-opacity=".22" stroke-width="1.2"/><line x1="1054.9" y1="686.5" x2="1051.4" y2="678.3" stroke="#eef2f7" stroke-opacity=".22" stroke-width="1.2"/><line x1="1108.3" y1="781.7" x2="1104.7" y2="773.5" stroke="#eef2f7" stroke-opacity=".22" stroke-width="1.2"/><line x1="1066.4" y1="686.5" x2="1062.9" y2="678.3" stroke="#eef2f7" stroke-opacity=".22" stroke-width="1.2"/><line x1="1121.7" y1="781.7" x2="1118.0" y2="773.5" stroke="#eef2f7" stroke-opacity=".22" stroke-width="1.2"/><line x1="1078.0" y1="686.5" x2="1074.3" y2="678.3" stroke="#eef2f7" stroke-opacity=".22" stroke-width="1.2"/><line x1="1148.5" y1="781.7" x2="1144.5" y2="773.5" stroke="#eef2f7" stroke-opacity=".22" stroke-width="1.2"/><line x1="1101.2" y1="686.5" x2="1097.1" y2="678.3" stroke="#eef2f7" stroke-opacity=".22" stroke-width="1.2"/><line x1="1161.9" y1="781.7" x2="1157.7" y2="773.5" stroke="#eef2f7" stroke-opacity=".22" stroke-width="1.2"/><line x1="1112.8" y1="686.5" x2="1108.6" y2="678.3" stroke="#eef2f7" stroke-opacity=".22" stroke-width="1.2"/><line x1="1175.3" y1="781.7" x2="1171.0" y2="773.5" stroke="#eef2f7" stroke-opacity=".22" stroke-width="1.2"/><line x1="1124.4" y1="686.5" x2="1120.0" y2="678.3" stroke="#eef2f7" stroke-opacity=".22" stroke-width="1.2"/><line x1="1188.7" y1="781.7" x2="1184.2" y2="773.5" stroke="#eef2f7" stroke-opacity=".22" stroke-width="1.2"/><line x1="1136.0" y1="686.5" x2="1131.4" y2="678.3" stroke="#eef2f7" stroke-opacity=".22" stroke-width="1.2"/><line x1="1215.5" y1="781.7" x2="1210.7" y2="773.5" stroke="#eef2f7" stroke-opacity=".22" stroke-width="1.2"/><line x1="1159.1" y1="686.5" x2="1154.3" y2="678.3" stroke="#eef2f7" stroke-opacity=".22" stroke-width="1.2"/><line x1="1228.9" y1="781.7" x2="1224.0" y2="773.5" stroke="#eef2f7" stroke-opacity=".22" stroke-width="1.2"/><line x1="1170.7" y1="686.5" x2="1165.7" y2="678.3" stroke="#eef2f7" stroke-opacity=".22" stroke-width="1.2"/><line x1="1242.4" y1="781.7" x2="1237.2" y2="773.5" stroke="#eef2f7" stroke-opacity=".22" stroke-width="1.2"/><line x1="1182.3" y1="686.5" x2="1177.1" y2="678.3" stroke="#eef2f7" stroke-opacity=".22" stroke-width="1.2"/><line x1="1255.8" y1="781.7" x2="1250.5" y2="773.5" stroke="#eef2f7" stroke-opacity=".22" stroke-width="1.2"/><line x1="1193.9" y1="686.5" x2="1188.6" y2="678.3" stroke="#eef2f7" stroke-opacity=".22" stroke-width="1.2"/><line x1="1282.6" y1="781.7" x2="1277.0" y2="773.5" stroke="#eef2f7" stroke-opacity=".22" stroke-width="1.2"/><line x1="1217.0" y1="686.5" x2="1211.4" y2="678.3" stroke="#eef2f7" stroke-opacity=".22" stroke-width="1.2"/><line x1="1296.0" y1="781.7" x2="1290.2" y2="773.5" stroke="#eef2f7" stroke-opacity=".22" stroke-width="1.2"/><line x1="1228.6" y1="686.5" x2="1222.9" y2="678.3" stroke="#eef2f7" stroke-opacity=".22" stroke-width="1.2"/><line x1="1309.4" y1="781.7" x2="1303.4" y2="773.5" stroke="#eef2f7" stroke-opacity=".22" stroke-width="1.2"/><line x1="1240.2" y1="686.5" x2="1234.3" y2="678.3" stroke="#eef2f7" stroke-opacity=".22" stroke-width="1.2"/><line x1="1322.8" y1="781.7" x2="1316.7" y2="773.5" stroke="#eef2f7" stroke-opacity=".22" stroke-width="1.2"/><line x1="1251.8" y1="686.5" x2="1245.7" y2="678.3" stroke="#eef2f7" stroke-opacity=".22" stroke-width="1.2"/><line x1="1349.6" y1="781.7" x2="1343.2" y2="773.5" stroke="#eef2f7" stroke-opacity=".22" stroke-width="1.2"/><line x1="1275.0" y1="686.5" x2="1268.6" y2="678.3" stroke="#eef2f7" stroke-opacity=".22" stroke-width="1.2"/><line x1="1363.0" y1="781.7" x2="1356.4" y2="773.5" stroke="#eef2f7" stroke-opacity=".22" stroke-width="1.2"/><line x1="1286.6" y1="686.5" x2="1280.0" y2="678.3" stroke="#eef2f7" stroke-opacity=".22" stroke-width="1.2"/><line x1="1376.4" y1="781.7" x2="1369.7" y2="773.5" stroke="#eef2f7" stroke-opacity=".22" stroke-width="1.2"/><line x1="1298.1" y1="686.5" x2="1291.4" y2="678.3" stroke="#eef2f7" stroke-opacity=".22" stroke-width="1.2"/><line x1="1389.8" y1="781.7" x2="1382.9" y2="773.5" stroke="#eef2f7" stroke-opacity=".22" stroke-width="1.2"/><line x1="1309.7" y1="686.5" x2="1302.9" y2="678.3" stroke="#eef2f7" stroke-opacity=".22" stroke-width="1.2"/><line x1="1416.6" y1="781.7" x2="1409.4" y2="773.5" stroke="#eef2f7" stroke-opacity=".22" stroke-width="1.2"/><line x1="1332.9" y1="686.5" x2="1325.7" y2="678.3" stroke="#eef2f7" stroke-opacity=".22" stroke-width="1.2"/><line x1="1430.0" y1="781.7" x2="1422.7" y2="773.5" stroke="#eef2f7" stroke-opacity=".22" stroke-width="1.2"/><line x1="1344.5" y1="686.5" x2="1337.1" y2="678.3" stroke="#eef2f7" stroke-opacity=".22" stroke-width="1.2"/><line x1="1443.4" y1="781.7" x2="1435.9" y2="773.5" stroke="#eef2f7" stroke-opacity=".22" stroke-width="1.2"/><line x1="1356.1" y1="686.5" x2="1348.6" y2="678.3" stroke="#eef2f7" stroke-opacity=".22" stroke-width="1.2"/><line x1="1456.8" y1="781.7" x2="1449.2" y2="773.5" stroke="#eef2f7" stroke-opacity=".22" stroke-width="1.2"/><line x1="1367.6" y1="686.5" x2="1360.0" y2="678.3" stroke="#eef2f7" stroke-opacity=".22" stroke-width="1.2"/><text x="209.7" y="852.4" font-family="Barlow Condensed, Arial Narrow, sans-serif" font-weight="800" font-size="44" fill="#eef2f7" fill-opacity=".28" text-anchor="middle">10</text><text x="357.3" y="852.4" font-family="Barlow Condensed, Arial Narrow, sans-serif" font-weight="800" font-size="44" fill="#eef2f7" fill-opacity=".28" text-anchor="middle">20</text><text x="504.9" y="852.4" font-family="Barlow Condensed, Arial Narrow, sans-serif" font-weight="800" font-size="44" fill="#eef2f7" fill-opacity=".28" text-anchor="middle">30</text><text x="652.4" y="852.4" font-family="Barlow Condensed, Arial Narrow, sans-serif" font-weight="800" font-size="44" fill="#eef2f7" fill-opacity=".28" text-anchor="middle">40</text><text x="800.0" y="852.4" font-family="Barlow Condensed, Arial Narrow, sans-serif" font-weight="800" font-size="44" fill="#eef2f7" fill-opacity=".28" text-anchor="middle">50</text><text x="947.6" y="852.4" font-family="Barlow Condensed, Arial Narrow, sans-serif" font-weight="800" font-size="44" fill="#eef2f7" fill-opacity=".28" text-anchor="middle">40</text><text x="1095.1" y="852.4" font-family="Barlow Condensed, Arial Narrow, sans-serif" font-weight="800" font-size="44" fill="#eef2f7" fill-opacity=".28" text-anchor="middle">30</text><text x="1242.7" y="852.4" font-family="Barlow Condensed, Arial Narrow, sans-serif" font-weight="800" font-size="44" fill="#eef2f7" fill-opacity=".28" text-anchor="middle">20</text><text x="1390.3" y="852.4" font-family="Barlow Condensed, Arial Narrow, sans-serif" font-weight="800" font-size="44" fill="#eef2f7" fill-opacity=".28" text-anchor="middle">10</text><ellipse cx="800.0" cy="730.0" rx="110" ry="34" fill="none" stroke="#cfe0ff" stroke-opacity=".35" stroke-width="3"/><text x="800.0" y="740.0" font-family="Barlow Condensed, Arial Narrow, sans-serif" font-weight="800" font-size="30" letter-spacing="6" fill="#cfe0ff" fill-opacity=".45" text-anchor="middle">SATURDAY</text><text x="117.1" y="742.0" font-family="Barlow Condensed, Arial Narrow, sans-serif" font-weight="800" font-size="34" letter-spacing="4" fill="#cfe0ff" fill-opacity=".38" text-anchor="middle" transform="rotate(-90 117.1 730.0)">SWEAT</text><text x="1482.9" y="742.0" font-family="Barlow Condensed, Arial Narrow, sans-serif" font-weight="800" font-size="34" letter-spacing="4" fill="#cfe0ff" fill-opacity=".38" text-anchor="middle" transform="rotate(-90 1482.9 730.0)">ZONE</text><rect x="30" y="40" width="120" height="34" rx="4" fill="#eaf3ff" fill-opacity=".10"/><ellipse cx="90" cy="57" rx="420" ry="260" fill="url(#cfLamp)"/><rect x="1450" y="40" width="120" height="34" rx="4" fill="#eaf3ff" fill-opacity=".10"/><ellipse cx="1510" cy="57" rx="420" ry="260" fill="url(#cfLamp)"/></svg></div>
 <div class="upban" id="upBan" hidden aria-live="polite"><img class="ub-l" alt="" referrerpolicy="no-referrer"><div><span class="ub-k"></span><b class="ub-s"></b><i class="ub-d"></i></div></div>
@@ -16470,19 +16171,25 @@ body.tv[data-stadium-sport="Other"]::before { background:radial-gradient(1000px 
     return { W, H, FW, P };
   })();
   function fieldTeam() {
-    // one game on: the team the prime-time look is already in (the board's colors and the field agree)
-    if (rbPrime) for (const g of S.games.values()) if (g.sport === "NFL" && g.st !== "post") for (const t of [g.a, g.h]) if (t.ab === rbPrime) return t;
-    const w = new Map();
+    // Give the stadium the home team's identity for the featured game, not the side the room bet on.
+    const sport = document.body.classList.contains("cfb") ? "CFB" : "NFL";
+    const games = [...S.games.values()].filter((g) => g.sport === sport && g.st !== "post" && g.a && g.h);
+    const order = (a, b) => Number(b.st === "in") - Number(a.st === "in") || Math.abs((a.t || 0) - Date.now()) - Math.abs((b.t || 0) - Date.now());
+    if (rbPrime) {
+      const focused = games.filter((g) => g.a.ab === rbPrime || g.h.ab === rbPrime).sort(order)[0];
+      if (focused) return focused.h;
+    }
+    const weight = new Map();
     for (const b of S.bets.values()) {
       if (b.status !== "open") continue;
       for (const x of selsOf(b)) {
-        const g = gameOf(x); if (!g || g.sport !== "NFL" || g.st === "post" || (x.s !== "a" && x.s !== "h") || x.m === "tot") continue;
-        const t = g[x.s], v = (isMe(b) ? 3 : 1) * (g.st === "in" ? 2 : 1) * (Number(b.units) || 1) * (b.kind === "parlay" ? 0.5 : 1);
-        w.set(t.ab, { t, v: ((w.get(t.ab) || {}).v || 0) + v });
+        const g = gameOf(x); if (!g || g.sport !== sport || g.st === "post" || (x.s !== "a" && x.s !== "h") || x.m === "tot") continue;
+        const v = (isMe(b) ? 3 : 1) * (g.st === "in" ? 2 : 1) * (Number(b.units) || 1) * (b.kind === "parlay" ? 0.5 : 1);
+        weight.set(g.id, { g, v: ((weight.get(g.id) || {}).v || 0) + v });
       }
     }
-    let best = null; for (const x of w.values()) if (!best || x.v > best.v) best = x;
-    return best ? best.t : null;
+    const best = [...weight.values()].sort((a, b) => b.v - a.v || order(a.g, b.g))[0];
+    return best ? best.g.h : games.sort(order)[0]?.h || null;
   }
   // a picture onto the field: map(u, v) gives where its (u, v) in 0-1 lands on screen; flat triangles small enough to
   // follow the perspective, added up so their shared edges don't show
@@ -16503,7 +16210,7 @@ body.tv[data-stadium-sport="Other"]::before { background:radial-gradient(1000px 
   let fldKey = "", fldImg = null, fldLg = "";
   function drawField() {
     const cv = document.getElementById("nflTeam"), box = document.getElementById("cfield"); if (!cv || !box) return;
-    const on = document.body.classList.contains("tv") && document.body.classList.contains("nflday");
+    const on = document.body.classList.contains("tv") && (document.body.classList.contains("nflday") || document.body.classList.contains("cfb"));
     const t = on ? fieldTeam() : null;
     box.classList.toggle("teamf", !!t);
     if (!t) { if (fldKey) { cv.getContext("2d").clearRect(0, 0, cv.width, cv.height); fldKey = ""; } return; }
@@ -16531,7 +16238,7 @@ body.tv[data-stadium-sport="Other"]::before { background:radial-gradient(1000px 
     const tmp = document.createElement("canvas"); tmp.width = Wc; tmp.height = Hc; const tx = tmp.getContext("2d");
     fldWarp(tx, tc, (u, v) => at(5 - 3.3 + 6.6 * v, FLD.FW / 2 - 20 + 40 * u), 10);
     fldWarp(tx, tc, (u, v) => at(115 + 3.3 - 6.6 * v, FLD.FW / 2 + 20 - 40 * u), 10);
-    // Keep the matchup brand at midfield; the 25-yard marks stay clean like a broadcast field.
+    // the home team's logo at midfield; keep the 10 and 25-yard areas true to a real field.
     if (fldImg && fldImg.complete && fldImg.naturalWidth) {
       fldWarp(tx, fldImg, (u, v) => at(60 - 6.5 + 13 * u, FLD.FW / 2 + 6.5 - 13 * v), 8);
     }
@@ -20201,122 +19908,6 @@ body.tv[data-stadium-sport="Other"]::before { background:radial-gradient(1000px 
       }, onErr));
     });
   }
-
-  // A read-only stadium layer: live scores, ride spotlight and past win, separate from bet writes.
-  const stadiumSeen = new Map();
-  let stadiumMode = 0, stadiumMoment = null, stadiumRallyTimer = 0;
-  const stadiumNames = { NFL: "NFL", CFB: "COLLEGE FOOTBALL", NBA: "NBA", CBB: "COLLEGE HOOPS", MLB: "MLB", NHL: "NHL", Soccer: "SOCCER", UFC: "UFC", Golf: "GOLF", Tennis: "TENNIS", Other: "SPORTS" };
-  const stadiumText = (id, value) => { const el = document.getElementById(id); if (el) el.textContent = value == null ? "" : String(value); };
-  function stadiumSportNow() {
-    const roomSport = nightSport();
-    const s = (roomSport && stadiumNames[roomSport] ? roomSport : null) || (DIR && DIR.sport) || S.focus || "NFL";
-    return stadiumNames[s] ? s : "Other";
-  }
-  function stadiumRideBets(g) {
-    if (!g) return [];
-    return [...S.bets.values()].filter((b) => b.status === "open" && selsOf(b).some((x) => String(x.g) === String(g.id)));
-  }
-  function stadiumGameNow() {
-    const all = [...S.games.values()].filter((g) => g && g.a && g.h && g.sport);
-    const sport = stadiumSportNow();
-    const focused = all.filter((g) => g.sport === sport);
-    const pool = focused;
-    const rank = (g) => (g.st === "in" ? 3 : g.st === "pre" ? 2 : 1);
-    return pool.sort((a, b) => rank(b) - rank(a) || stadiumRideBets(b).length - stadiumRideBets(a).length || Math.abs((a.t || 0) - Date.now()) - Math.abs((b.t || 0) - Date.now()))[0] || null;
-  }
-  function stadiumTeamLogo(id, team) {
-    const el = document.getElementById(id); if (!el) return;
-    const src = team && team.lg;
-    if (!src) { el.hidden = true; el.removeAttribute("src"); return; }
-    try { const u = new URL(src, location.href); if (u.protocol !== "https:" && u.protocol !== "http:") throw 0; el.src = u.href; el.hidden = false; }
-    catch (e) { el.hidden = true; el.removeAttribute("src"); }
-  }
-  function stadiumBetSpotlight(g) {
-    const b = stadiumRideBets(g).sort((a, b) => Number(b.units || 0) - Number(a.units || 0))[0];
-    if (!b) return { label: "ROOM RIDES", message: "No open bets on this matchup" };
-    const odds = Number(b.odds), amount = Number(b.units || 0) * Number(S.unit || 1);
-    const toWin = odds ? Number(b.units || 0) * ppu(odds) * Number(S.unit || 1) : 0;
-    const pick = b.pick || b.player || (b.kind === "parlay" ? "Parlay on this matchup" : "Open room bet");
-    return { label: "BET SPOTLIGHT", message: `${pick} · ${fUSD(amount)} risk / ${fUSD(toWin)} to win` };
-  }
-  function stadiumHistorySpotlight() {
-    const last = (S.lastSettled || []).find((b) => b && b.status === "won") || (S.lastSettled || [])[0];
-    if (!last) return { label: "ROOM HISTORY", message: "The next win gets the big screen" };
-    const paid = typeof netOf === "function" ? fUSD(netOf(last) * Number(S.unit || 1), true) : "";
-    return { label: last.status === "won" ? "LAST ROOM HIT" : "LAST SETTLED", message: `${last.pick || last.player || "Room bet"} · ${last.status === "won" ? `CASHED ${paid}` : String(last.status || "SETTLED").toUpperCase()}` };
-  }
-  function stadiumSportLabel(sport) {
-    stadiumText("stadiumSportLabel", `${stadiumNames[sport] || "SPORTS"} · SWEAT STADIUM`);
-  }
-  function stadiumRender() {
-    const root = document.getElementById("stadiumUi"), panel = document.getElementById("stadiumTron");
-    if (!root || !panel) return;
-    const tv = document.body.classList.contains("tv") && !PHONE();
-    root.hidden = !tv;
-    if (!tv) { delete document.body.dataset.stadiumSport; return; }
-    const sport = stadiumSportNow();
-    document.body.dataset.stadiumSport = sport;
-    stadiumSportLabel(sport);
-    const g = stadiumGameNow();
-    if (!g) {
-      stadiumText("stadiumAway", "SWEAT"); stadiumText("stadiumHome", "STADIUM");
-      stadiumText("stadiumAwayScore", "—"); stadiumText("stadiumHomeScore", "—");
-      stadiumTeamLogo("stadiumAwayLogo", null); stadiumTeamLogo("stadiumHomeLogo", null);
-      stadiumText("stadiumStatus", "No live matchup on this screen");
-    } else {
-      const away = g.a, home = g.h;
-      stadiumText("stadiumAway", away.ab || away.nm || "AWAY"); stadiumText("stadiumHome", home.ab || home.nm || "HOME");
-      stadiumText("stadiumAwayScore", away.sc == null ? "—" : away.sc); stadiumText("stadiumHomeScore", home.sc == null ? "—" : home.sc);
-      stadiumTeamLogo("stadiumAwayLogo", away); stadiumTeamLogo("stadiumHomeLogo", home);
-      const status = g.st === "pre" ? (typeof startLabel === "function" ? startLabel(g.t) : "UP NEXT") : g.st === "post" ? (g.fin || g.d || "FINAL") : (g.d || "LIVE");
-      stadiumText("stadiumStatus", `${status}${stadiumRideBets(g).length ? ` · ${stadiumRideBets(g).length} ROOM RIDES` : ""}`);
-      const aColor = away.col || "#79b7ff", hColor = home.col || "#f3c85e";
-      panel.style.setProperty("--stadium-away", aColor); panel.style.setProperty("--stadium-home", hColor);
-    }
-    if (!panel.hidden) {
-      let card = { label: "LIVE GAME", message: "Room is getting ready" };
-      if (stadiumMode === 1) card = stadiumBetSpotlight(g);
-      else if (stadiumMode === 2) card = stadiumHistorySpotlight();
-      if (stadiumMoment && Date.now() - stadiumMoment.at < 7000 && stadiumMode === 0) card = { label: "SCOREBOARD MOMENT", message: stadiumMoment.text };
-      stadiumText("stadiumModeLabel", card.label);
-      stadiumText("stadiumMessage", card.message);
-    }
-    for (const game of S.games.values()) {
-      if (!game || !game.a || !game.h || game.a.sc == null || game.h.sc == null) continue;
-      const sig = `${game.a.sc}:${game.h.sc}`;
-      const prev = stadiumSeen.get(String(game.id)); stadiumSeen.set(String(game.id), sig);
-      if (prev && prev !== sig && game.st !== "pre") {
-        const [pa, ph] = prev.split(":").map(Number), da = Number(game.a.sc) - pa, dh = Number(game.h.sc) - ph;
-        const side = da > dh ? "a" : dh > da ? "h" : "a";
-        const team = game[side];
-        stadiumMoment = { at: Date.now(), text: `SCORE UPDATE · ${team.ab || team.nm}` };
-        try { if (window.sbCrowd) window.sbCrowd.pop(1.15, side); } catch (e) {}
-      }
-    }
-    while (stadiumSeen.size > 180) stadiumSeen.delete(stadiumSeen.keys().next().value);
-  }
-  const stadiumToggle = document.getElementById("stadiumToggle"), stadiumPanel = document.getElementById("stadiumTron");
-  if (stadiumToggle && stadiumPanel) stadiumToggle.addEventListener("click", () => {
-    stadiumPanel.hidden = !stadiumPanel.hidden;
-    stadiumToggle.setAttribute("aria-expanded", String(!stadiumPanel.hidden));
-    stadiumToggle.querySelector("b").textContent = stadiumPanel.hidden ? "+" : "−";
-    if (!stadiumPanel.hidden) stadiumRender();
-  });
-  document.getElementById("stadiumClose")?.addEventListener("click", () => {
-    if (stadiumPanel) stadiumPanel.hidden = true;
-    if (stadiumToggle) { stadiumToggle.setAttribute("aria-expanded", "false"); stadiumToggle.querySelector("b").textContent = "+"; stadiumToggle.focus(); }
-  });
-  document.getElementById("stadiumCycle")?.addEventListener("click", () => { stadiumMode = (stadiumMode + 1) % 3; stadiumRender(); });
-  document.querySelectorAll("[data-stadium-rally]").forEach((button) => button.addEventListener("click", () => {
-    const side = button.dataset.stadiumRally, g = stadiumGameNow(), team = g && g[side];
-    stadiumMoment = { at: Date.now(), text: `FAN CAM · ${team ? team.ab || team.nm : side === "a" ? "AWAY" : "HOME"} SIDE` };
-    document.body.dataset.stadiumRally = side;
-    clearTimeout(stadiumRallyTimer); stadiumRallyTimer = setTimeout(() => delete document.body.dataset.stadiumRally, 2400);
-    try { if (window.sbCrowd) window.sbCrowd.pop(1.5, side); } catch (e) {}
-    stadiumRender();
-  }));
-  document.addEventListener("keydown", (e) => { if (e.key === "Escape" && stadiumPanel && !stadiumPanel.hidden) { stadiumPanel.hidden = true; stadiumToggle?.setAttribute("aria-expanded", "false"); if (stadiumToggle) stadiumToggle.querySelector("b").textContent = "+"; } });
-  stadiumRender(); setInterval(stadiumRender, 1800);
 })();
 </script>
 <script>
@@ -20324,7 +19915,7 @@ body.tv[data-stadium-sport="Other"]::before { background:radial-gradient(1000px 
   "use strict";
   // the background picture's stands, in its own pixels (2560 x 1440, drawn cover / bottom)
   const IW = 2560, IH = 1440, UP = [168, 370], LOW = [392, 626], TOWERS = [0.12, 0.37, 0.63, 0.88].map((x) => x * IW), TY = 58;
-  const cv = document.getElementById("stadiumCrowd"); if (!cv) return;
+  const cv = document.getElementById("cfCrowd"); if (!cv) return;
   const cx = cv.getContext("2d");
   // one glow for every light and one for every flash, drawn once and stamped at each one's brightness
   const glow = (stops) => { const c = document.createElement("canvas"); c.width = c.height = 64; const x = c.getContext("2d"), g = x.createRadialGradient(32, 32, 0, 32, 32, 32); stops.forEach(([o, col]) => g.addColorStop(o, col)); x.fillStyle = g; x.fillRect(0, 0, 64, 64); return c; };
@@ -20332,58 +19923,98 @@ body.tv[data-stadium-sport="Other"]::before { background:radial-gradient(1000px 
   const FGLOW = glow([[0, "rgba(255,255,255,1)"], [0.2, "rgba(255,255,255,.5)"], [1, "rgba(255,255,255,0)"]]);
   const R = (a, b) => a + Math.random() * (b - a);
   const lights = [], towels = [], flashes = [];
+  const seats = document.createElement("canvas"); seats.width = IW; seats.height = IH;
+  const seatCtx = seats.getContext("2d");
+  let seatKey = "", seatFans = [], nextSeatCheck = 0;
+  const tint = (hex, amount) => {
+    const n = parseInt(String(hex || "#315b86").replace("#", ""), 16), r = (n >> 16) & 255, g = (n >> 8) & 255, b = n & 255;
+    return `rgb(${Math.round(r * amount + 16 * (1 - amount))},${Math.round(g * amount + 20 * (1 - amount))},${Math.round(b * amount + 26 * (1 - amount))})`;
+  };
+  function stadiumGame() {
+    try {
+      const sport = document.body.classList.contains("cfb") ? "CFB" : "NFL";
+      const games = [...S.games.values()].filter((g) => g.sport === sport && g.st !== "post" && g.a && g.h);
+      const order = (a, b) => Number(b.st === "in") - Number(a.st === "in") || Math.abs((a.t || 0) - Date.now()) - Math.abs((b.t || 0) - Date.now());
+      if (rbPrime) { const g = games.filter((x) => x.a.ab === rbPrime || x.h.ab === rbPrime).sort(order)[0]; if (g) return g; }
+      const w = new Map();
+      for (const b of S.bets.values()) if (b.status === "open") for (const x of selsOf(b)) {
+        const g = gameOf(x); if (!g || g.sport !== sport || g.st === "post" || (x.s !== "a" && x.s !== "h") || x.m === "tot") continue;
+        const v = (isMe(b) ? 3 : 1) * (g.st === "in" ? 2 : 1) * (Number(b.units) || 1) * (b.kind === "parlay" ? 0.5 : 1);
+        w.set(g.id, { g, v: ((w.get(g.id) || {}).v || 0) + v });
+      }
+      const betGame = [...w.values()].sort((a, b) => b.v - a.v || order(a.g, b.g))[0];
+      return betGame ? betGame.g : games.sort(order)[0] || null;
+    } catch (_) { return null; }
+  }
+  function paintSeats(game) {
+    const home = game && game.h || {}, away = game && game.a || {};
+    const key = [game && game.id || "default", home.ab || "", home.col || "", home.alt || "", away.col || ""].join("|");
+    if (key === seatKey) return;
+    seatKey = key; seatFans = [];
+    let seed = 2166136261; for (const ch of key) seed = Math.imul(seed ^ ch.charCodeAt(0), 16777619);
+    const rand = () => { seed = (Math.imul(seed, 1664525) + 1013904223) >>> 0; return seed / 4294967296; };
+    const hc = [tint(home.col || "#24436c", .78), tint(home.alt || "#a8b7c7", .65), tint(home.col || "#24436c", .52)];
+    const ac = [tint(away.col || "#9a5430", .68), tint(away.alt || "#d2d5da", .62)];
+    const neutral = ["#35383d", "#48413a", "#77736b", "#29313a", "#5b5b58"];
+    const skin = ["#a56d4f", "#c48662", "#d39b75", "#8b5942", "#e0ad82", "#704735"];
+    const sections = Array.from({ length: 24 }, () => rand() < .68);
+    seatCtx.clearRect(0, 0, IW, IH);
+    // Two packed tiers of individual silhouettes follow the existing stadium's seat rows and perspective.
+    for (const tier of [{ y: 133, h: 146, rows: 10 }, { y: 321, h: 158, rows: 11 }]) {
+      for (let row = 0; row < tier.rows; row++) {
+        const rowY = tier.y + (row + .5) * tier.h / tier.rows;
+        const scale = .72 + .23 * (row / Math.max(1, tier.rows - 1));
+        const step = 7.2 + rand() * 1.15;
+        for (let x = -4 + (row % 2) * step / 2; x < IW + step; x += step) {
+          const section = Math.max(0, Math.min(sections.length - 1, Math.floor(x / IW * sections.length)));
+          const homeSection = sections[section], q = rand();
+          const shirt = homeSection ? (q < .72 ? hc[Math.floor(rand() * hc.length)] : q < .91 ? ac[Math.floor(rand() * ac.length)] : neutral[Math.floor(rand() * neutral.length)])
+            : (q < .58 ? ac[Math.floor(rand() * ac.length)] : q < .83 ? hc[Math.floor(rand() * hc.length)] : neutral[Math.floor(rand() * neutral.length)]);
+          const px = x + (rand() - .5) * 1.8, py = rowY + (rand() - .5) * 2.2, w = (5.3 + rand() * 1.7) * scale, h = (6.5 + rand() * 1.6) * scale, head = (1.15 + rand() * .45) * scale;
+          const opacity = .52 + rand() * .27;
+          seatCtx.globalAlpha = opacity;
+          // jersey and shoulders
+          seatCtx.fillStyle = shirt; seatCtx.beginPath(); seatCtx.moveTo(px - w * .52, py + h); seatCtx.lineTo(px - w * .43, py + 3 * scale); seatCtx.quadraticCurveTo(px, py + 1.8 * scale, px + w * .43, py + 3 * scale); seatCtx.lineTo(px + w * .52, py + h); seatCtx.closePath(); seatCtx.fill();
+          seatCtx.strokeStyle = "rgba(10,13,18,.48)"; seatCtx.lineWidth = .65 * scale; seatCtx.beginPath(); seatCtx.moveTo(px, py + 4 * scale); seatCtx.lineTo(px, py + h - .3); seatCtx.stroke();
+          // face, hair and an occasional cap catch just enough light to read as people in the seats
+          seatCtx.fillStyle = skin[Math.floor(rand() * skin.length)]; seatCtx.beginPath(); seatCtx.arc(px, py + 1.65 * scale, head, 0, Math.PI * 2); seatCtx.fill();
+          if (rand() < .42) { seatCtx.fillStyle = "rgba(18,20,23,.9)"; seatCtx.beginPath(); seatCtx.ellipse(px, py + .85 * scale, head * 1.08, head * .48, 0, Math.PI, Math.PI * 2); seatCtx.fill(); }
+          if (rand() < .055) seatFans.push({ x: px, y: py + 4.6 * scale, side: rand() < .5 ? -1 : 1, phase: rand() * Math.PI * 2, col: shirt, skin: skin[Math.floor(rand() * skin.length)], scale });
+        }
+      }
+    }
+    seatCtx.globalAlpha = 1;
+  }
   for (let i = 0; i < 520; i++) { const low = i % 3 !== 0, band = low ? LOW : UP; lights.push({ x: R(0, IW), y: R(band[0] + 6, band[1] - 4), r: low ? R(1.6, 2.6) : R(1.1, 1.8), ph: R(0, 6.28), sp: R(0.4, 1.4), sw: R(2, 7), on: Math.random() < 0.55, t: R(2, 14) }); }
   const TC = ["#f4f7fb", "#f4f7fb", "#f4f7fb", "#3b8cff", "#ff7a1a", "#ffd447"];
   const TCN = ["#f4f7fb", "#f4f7fb", "#e8192c", "#e8192c", "#1d3f9e", "#f4f7fb"];
   if (false) for (let i = 0; i < 70; i++) towels.push({ x: R(20, IW - 20), y: R(LOW[0] + 30, LOW[1] - 20), w: R(7, 11), h: R(9, 14), c: TC[i % TC.length], cn: TCN[i % TCN.length], ph: R(0, 6.28), sp: R(2.2, 4.2) });
-  const FANS = [], FAN_COLORS = ["#d9e5f6", "#a9bdd5", "#7588a3", "#e3c88d", "#7196c4", "#859baf"];
-  for (let row = 0; row < 7; row++) {
-    const n = 112 + row * 12, y = UP[0] + row * 37 + 10;
-    for (let i = 0; i < n; i++) FANS.push({ x: (i + R(0.05, 0.95)) * IW / n, y: y + R(-7, 7), z: 0.72 + row * 0.105, ph: R(0, 6.28), reach: R(0.72, 1.28), col: FAN_COLORS[Math.floor(R(0, FAN_COLORS.length))] });
-  }
-  let boost = 0, last = 0, W = 0, H = 0, D = 1, s = 1, ox = 0, oy = 0, wave = -1, nextWave = performance.now() + 9000, rallySide = "all", rallyUntil = 0;
+  let boost = 0, last = 0, W = 0, H = 0, s = 1, ox = 0, oy = 0, wave = -1, nextWave = performance.now() + 9000;
   const night = () => { const h = new Date().getHours(); return h >= 18 || h < 5; };
   function size() {
-    const r = cv.getBoundingClientRect(), w = Math.max(1, Math.round(r.width)), h = Math.max(1, Math.round(r.height)), d = Math.min(1.5, window.devicePixelRatio || 1);
-    if (w !== W || h !== H || d !== D) { W = w; H = h; D = d; cv.width = Math.round(w * d); cv.height = Math.round(h * d); cx.setTransform(d, 0, 0, d, 0, 0); }
+    const r = cv.getBoundingClientRect(), w = Math.max(1, Math.round(r.width)), h = Math.max(1, Math.round(r.height));
+    if (w !== W || h !== H) { W = cv.width = w; H = cv.height = h; }
     s = Math.max(W / IW, H / IH); ox = (W - IW * s) / 2; oy = H - IH * s;
   }
   const P = (x, y) => [ox + x * s, oy + y * s];
   function frame(now) {
     requestAnimationFrame(frame);
-    const on = document.body.classList.contains("tv") && !document.body.classList.contains("phone") && !document.hidden && !document.body.classList.contains("cs-live") && !document.body.classList.contains("covered"), nfl = document.body.classList.contains("nflday");
+    const on = document.body.classList.contains("tv") && (document.body.classList.contains("cfb") || document.body.classList.contains("nflday")) && !document.hidden && !document.body.classList.contains("cs-live") && !document.body.classList.contains("covered"), nfl = document.body.classList.contains("nflday");
     if (!on || now - last < 33) return;
     const dt = Math.min(0.1, (now - last) / 1000); last = now; size();
+    if (now > nextSeatCheck) { paintSeats(stadiumGame()); nextSeatCheck = now + 1600; }
     cx.clearRect(0, 0, W, H);
+    cx.save(); cx.setTransform(s, 0, 0, s, ox, oy); cx.drawImage(seats, 0, 0); cx.restore();
     const nt = night(), t = now / 1000, b = boost; boost = Math.max(0, boost - dt * 0.18);
-    // The upper bowl: small seated silhouettes, arms lifting in a natural wave when a score or room hit lands.
-    cx.globalCompositeOperation = "source-over";
-    cx.globalAlpha = 0.22;
-    cx.strokeStyle = "rgba(205,220,242,.24)"; cx.lineWidth = Math.max(0.7, s * 1.1);
-    for (const yy of [UP[0] - 12, UP[1] + 8, LOW[0] - 12, LOW[1] + 8]) { const [x0, y0] = P(0, yy), [x1, y1] = P(IW, yy); cx.beginPath(); cx.moveTo(x0, y0); cx.quadraticCurveTo(W / 2, y0 - 16 * s, x1, y1); cx.stroke(); }
-    for (const f of FANS) {
-      const local = now < rallyUntil && (rallySide === "all" || (rallySide === "a" ? f.x < IW / 2 : f.x >= IW / 2));
-      const pulse = wave >= 0 ? Math.exp(-Math.pow((f.x / IW - (wave - 0.1)) / 0.12, 2)) : 0;
-      const lift = Math.max(local ? 0.92 : 0, Math.min(1, b * 0.68 + pulse * 0.88)) * f.reach;
-      const t0 = t * 1.45 + f.ph, [x, y] = P(f.x + Math.sin(t0) * 1.8, f.y - lift * 8), r = Math.max(0.65, f.z * s * 1.25), bw = r * 2.6, bh = r * 2.8;
-      cx.globalAlpha = 0.12 + (local || pulse > 0.1 ? 0.20 : 0) + (f.z - 0.7) * 0.12;
-      cx.fillStyle = f.col; cx.beginPath(); cx.ellipse(x, y, r, r * 1.05, 0, 0, Math.PI * 2); cx.fill();
-      cx.globalAlpha *= 0.8; cx.fillRect(x - bw / 2, y + r * 0.75, bw, bh);
-      if (lift > 0.35) { cx.strokeStyle = f.col; cx.lineWidth = Math.max(0.7, r * 0.42); cx.beginPath(); cx.moveTo(x - r, y + r * 1.15); cx.lineTo(x - r * 1.8, y - r * (0.2 + lift * 1.6)); cx.moveTo(x + r, y + r * 1.15); cx.lineTo(x + r * 1.8, y - r * (0.25 + lift * 1.8)); cx.stroke(); }
+    // A few fans wave an arm in the home section; the packed crowd plate itself stays crisp and still.
+    cx.save(); cx.setTransform(s, 0, 0, s, ox, oy); cx.lineCap = "round";
+    for (const f of seatFans) {
+      const sway = Math.sin(t * 2.15 + f.phase), lift = 1.2 + (sway + 1) * 1.2;
+      cx.globalAlpha = .75; cx.strokeStyle = f.col; cx.lineWidth = 1.35 * f.scale;
+      cx.beginPath(); cx.moveTo(f.x + f.side * 2.2 * f.scale, f.y); cx.quadraticCurveTo(f.x + f.side * (3.4 + sway) * f.scale, f.y - lift, f.x + f.side * (3.6 + sway) * f.scale, f.y - (4.4 + lift) * f.scale); cx.stroke();
+      cx.fillStyle = f.skin; cx.beginPath(); cx.arc(f.x + f.side * (3.6 + sway) * f.scale, f.y - (4.4 + lift) * f.scale, .8 * f.scale, 0, Math.PI * 2); cx.fill();
     }
-    cx.globalAlpha = 1;
-    // Sport-specific light on the playing surface for sports without their own field or court artwork.
-    const sport = document.body.dataset.stadiumSport;
-    if (["Soccer", "UFC", "Golf", "Tennis", "Other"].includes(sport)) {
-      const colors = { Soccer: ["#153b2a", "#8ed6a2"], UFC: ["#171419", "#d88a63"], Golf: ["#173d28", "#a9d58f"], Tennis: ["#173549", "#95d8f1"], Other: ["#1a2533", "#9eb8d7"] }[sport];
-      const y = H * 0.67, g = cx.createLinearGradient(0, y, 0, H); g.addColorStop(0, "rgba(6,10,15,0)"); g.addColorStop(1, colors[0]); cx.fillStyle = g; cx.fillRect(0, y, W, H - y);
-      cx.globalAlpha = 0.18; cx.strokeStyle = colors[1]; cx.lineWidth = 1.2; cx.beginPath();
-      if (sport === "Soccer") { cx.ellipse(W / 2, H * 0.91, W * 0.17, H * 0.12, 0, 0, Math.PI * 2); cx.moveTo(W * 0.08, H * 0.76); cx.lineTo(W * 0.92, H * 0.76); }
-      else if (sport === "Golf") { for (let i = 0; i < 8; i++) { cx.moveTo(W * (0.1 + i * .115), H * .7); cx.lineTo(W * (0.2 + i * .1), H); } }
-      else if (sport === "Tennis") { cx.rect(W * .22, H * .73, W * .56, H * .22); cx.moveTo(W / 2, H * .73); cx.lineTo(W / 2, H * .95); cx.moveTo(W * .22, H * .84); cx.lineTo(W * .78, H * .84); }
-      else if (sport === "UFC") { const x = W / 2, cy = H * .88, rx = W * .2, ry = H * .13; for (let i = 0; i < 8; i++) { const a = Math.PI / 8 + i * Math.PI / 4, px = x + Math.cos(a) * rx, py = cy + Math.sin(a) * ry; i ? cx.lineTo(px, py) : cx.moveTo(px, py); } cx.closePath(); }
-      cx.stroke(); cx.globalAlpha = 1;
-    }
+    cx.restore(); cx.globalAlpha = 1;
     // a light-show wave across the stands every so often at night
     if (nt && now > nextWave) { wave = 0; nextWave = now + R(22000, 40000); }
     if (wave >= 0) { wave += dt * 0.32; if (wave > 1.25) wave = -1; }
@@ -20416,7 +20047,7 @@ body.tv[data-stadium-sport="Other"]::before { background:radial-gradient(1000px 
     cx.globalCompositeOperation = "source-over"; cx.globalAlpha = 1;
   }
   requestAnimationFrame(frame);
-  window.sbCrowd = { pop: (k, side) => { boost = Math.min(1.6, boost + (k || 1)); if (side === "a" || side === "h") { rallySide = side; rallyUntil = performance.now() + 2800; wave = side === "a" ? 0.18 : 0.82; } else { rallySide = "all"; rallyUntil = performance.now() + 1800; } } };
+  window.sbCrowd = { pop: (k) => { boost = Math.min(1.6, boost + (k || 1)); } };
 })();
 </script>
 <script type="module">
