@@ -13376,6 +13376,24 @@ void main(){
     if (sp === "MLB") return "ballgame";
     return null;
   }
+  window.__sbScene = () => {
+    const c = document.body.classList; if (c.contains("baseball") || c.contains("hoops") || c.contains("hockey")) return null;
+    const fb = (g) => g && (g.sport === "NFL" || g.sport === "CFB"), now = Date.now(), { list } = boardGroups();
+    const nb = new Map(list.map((G) => [G.g.id, G.entries.length + (G.legs ? G.legs.length : 0)]));
+    const tm = (t) => ({ id: String(t.id), ab: t.ab, nm: t.nm, fn: t.fn, col: t.col, alt: t.alt, lg: t.lg, sc: t.sc, rk: t.rk });
+    const gm = (g) => ({ id: g.id, sport: g.sport, st: g.st, d: g.d, t: g.t, a: tm(g.a), h: tm(g.h), ven: g.ven, net: g.net, riv: g.sport === "CFB" ? cfRiv(g) : "", n: nb.get(g.id) || 0,
+      sit: g.sit ? { pos: g.sit.pos, rz: g.sit.rz, yl: g.sit.yl, dd: g.sit.dd } : null });
+    const all = [...S.games.values()].filter(fb);
+    const on = all.filter((g) => g.st === "in" || (g.st === "pre" && g.t - now < 20 * 60e3 && g.t - now > -3 * 3600e3));
+    const mine = list.map((G) => G.g).filter((g) => fb(g) && g.st !== "post");
+    const soon = mine.filter((g) => g.st === "pre" && g.t - now < 90 * 60e3);
+    let pick = on.length === 1 ? on[0] : !on.length && soon.length === 1 ? soon[0] : null;
+    const riv = on.filter((g) => g.sport === "CFB" && cfRiv(g) && nb.get(g.id)).sort((x, y) => nb.get(y.id) - nb.get(x.id))[0];
+    if (!pick && riv) pick = riv;
+    const games = [...on].sort((x, y) => (nb.get(y.id) || 0) - (nb.get(x.id) || 0) || x.t - y.t);
+    for (const g of mine) if (!games.includes(g) && g.t - now < 6 * 3600e3) games.push(g);
+    return { kind: pick ? "stadium" : "room", game: pick ? gm(pick) : null, games: games.slice(0, 12).map(gm) };
+  };
   window.__sbGame = (a, h) => { for (const g of S.games.values()) if (g.a && g.h && g.a.ab === a && g.h.ab === h) return g; return null; };
   function wdFx(kind, b) {
     try { if (!window.SBW || !b || !b.pick) return; const win = (b.units || 0) * ppu(b.odds || 100);
@@ -13770,7 +13788,7 @@ void main(){
   // ---------- sheets ----------
   function openSheet(id) { $(id).hidden = false; }
   // keep every open screen current: when a new version is up, reload it (never mid-form or mid-animation)
-  const BUILD = "20261028031929";
+  const BUILD = "20261028061624";
   function checkBuild() {
     if (BUILD === "dev") return;
     fetch("version.json?t=" + Date.now(), { cache: "no-store" }).then((r) => (r.ok ? r.json() : null)).then((j) => {
@@ -15448,6 +15466,7 @@ void main(){
   // ---------- Reactions: clips take over the screen like a jumbotron, live bets down the right ----------
   let statusSrc = null, statusBet = null, popT = 0, pipT = 0, hideT = 0, pipGo = 0, jbTick = 0;
   let pipTeam = null; // set right before a team's moment plays: the next clip on the jumbo wears their colors
+  window.__sbPipStop = () => stopStatus();
   function stopStatus() {
     pipGo++;
     try { if (statusSrc) statusSrc.stop(); } catch (e) {}
@@ -15847,7 +15866,8 @@ void main(){
   const djTrack = (P) => (P && P !== "lockin" && P.dj && P.bpm && !P.house ? Object.assign({}, P, DJ_TRACKS[djTurn++ % 2], { lib: true, music: true, songId: undefined }) : P);
   const djRate = (bpm) => { let r = bpm / DJ_BPM; while (r < 0.72) r *= 2; while (r > 1.44) r /= 2; return r; };
   const DJ_FLY = { base: "sounds/aura/djfly", intro: 10, loop: 24 };
-  const djClip = () => (kitOn() ? { base: DJ_BASE, intro: 0, loop: DJ_LOOP } : DJ_FLY);
+  const DJ_STAGE = { base: "sounds/aura/djstage", intro: 0, loop: 32 };
+  const djClip = () => (window.SBW && SBW.stage && SBW.stage() ? DJ_STAGE : kitOn() ? { base: DJ_BASE, intro: 0, loop: DJ_LOOP } : DJ_FLY);
   // where the clip is `x` seconds (of its own) past the first downbeat: the intro once, then round the loop
   const djAt = (D, x) => (x < 0 ? (D.intro ? 0 : (x % D.loop) + D.loop) : x < D.intro + D.loop ? x : D.intro + ((x - D.intro) % D.loop));
   const djPos = (P, t, D, x0) => djAt(D || djClip(), (t - (P.b0 || 0)) * djRate(P.bpm) - (x0 || 0));
@@ -16009,7 +16029,7 @@ void main(){
       $("#jbTag").textContent = why || MOOD_TAG[mood] || "Live";
       jbBug(b);
       jb.className = "jumbo lux m-" + mood + (team ? " teamed" : "") + (lux ? " hz" : ""); jb.hidden = false; fitPic(v);
-      try { if (window.SBW && !pre) SBW.clip({ dj: dj || hz, v, ext: !!P.ext, bpm: P.bpm || 0 }); } catch (e) { console.warn(e); }
+      try { if (window.SBW && !pre) SBW.clip({ dj: dj || hz, house: hz, v, ext: !!P.ext, bpm: P.bpm || 0, stage: D === DJ_STAGE }); } catch (e) { console.warn(e); }
       const jt = $("#jbTeam");
       if (team) {
         const c1 = hexRgb(team.t.col) || [40, 44, 60], c2 = hexRgb(team.t.alt) || c1;
@@ -23995,7 +24015,13 @@ function wdRead() {
   const lb = [...document.querySelectorAll("#rbLb .rb-lr")].slice(0, 4).map((r) => { const nm = ((r.querySelector(".nm b") || {}).textContent || "").trim(), lv = r.querySelector(".lv"), net = ((r.querySelector(".net") || {}).childNodes[0] || {}).textContent || "";
     return { nm, c: wdHex(r.style.getPropertyValue("--c")), v: lv ? (lv.childNodes[1] || lv.lastChild || {}).textContent || "" : net }; }).filter((x) => x.nm);
   let ven = null; try { const G = window.__sbGame && window.__sbGame(T.a.ab, T.h.ab); ven = G && G.ven ? G.ven : null; } catch (e) {}
-  return { sport, T, pulse, lb, ven };
+  // football: the director says stadium (one prime-time game, a rivalry the room's on) or war room (several games, or none)
+  let scene = null, kind = ""; try { scene = sport === "nfl" && window.__sbScene ? window.__sbScene() : null; } catch (e) {}
+  let fk = ""; try { fk = localStorage.getItem("sb-world-kind") || ""; } catch (e) {}
+  if (scene) { kind = fk === "room" || fk === "stadium" ? fk : scene.kind; if (kind === "stadium" && !scene.game && scene.games.length) scene.game = scene.games[0]; if (kind === "stadium" && !scene.game) kind = "room"; }
+  if (kind === "stadium") { const q = scene.game; for (const s of ["a", "h"]) { const t = q[s]; T[s] = { ab: t.ab, nm: t.nm, fn: t.fn, id: t.id, rk: t.rk, col: wdHex(t.col, T[s].col), alt: wdHex(t.alt, T[s].alt), colHex: t.col || wdCss(T[s].col), altHex: t.alt || wdCss(T[s].alt), sc: t.sc == null ? "" : String(t.sc), lg: t.lg || "" }; }
+    T.d = q.d || T.d; ven = q.ven || ven; }
+  return { sport, T, pulse, lb, ven, scene, kind };
 }
 
 // ---- the real ballparks: each home park's fence (feet down the lines, the alleys, center), its wall heights, its roof and
@@ -24167,8 +24193,8 @@ function wdPartyBuild(st) {
     const g = new THREE.ConeGeometry(L * 0.09, L, 20, 1, true); g.translate(0, -L / 2, 0);
     const cone = new THREE.Mesh(g, m), piv = new THREE.Group(); piv.position.set(x + nx * o, top, z + nz * o); piv.add(cone); scene.add(piv);
     piv.lookAt(V.cx, 0, V.cz); piv.rotateX(-Math.PI / 2); P.beams.push({ piv, m, ph: i * 0.7, base: piv.quaternion.clone() }); }
-  // the lasers: a fan out of the suite
-  const F = st.djFace(), right = new THREE.Vector3(0, 1, 0).cross(F.n).normalize();
+  // the lasers: a fan off the front of the DJ's truss
+  const F = st.laserFace ? st.laserFace() : st.djFace(), right = new THREE.Vector3(0, 1, 0).cross(F.n).normalize();
   for (let i = 0; i < 12; i++) { const m = new THREE.MeshBasicMaterial({ color: new THREE.Color().setRGB(...WD_PCOL[[3, 1, 2][i % 3]], THREE.LinearSRGBColorSpace), transparent: true, opacity: 0, blending: THREE.AdditiveBlending, depthWrite: false });
     const g = new THREE.BoxGeometry(0.12, 0.12, L * 1.2); g.translate(0, 0, L * 0.6); const ln = new THREE.Mesh(g, m), piv = new THREE.Group();
     piv.position.copy(F.c).add(F.n.clone().multiplyScalar(0.8)).add(right.clone().multiplyScalar((i / 11 - 0.5) * F.w * 0.8)); piv.add(ln); scene.add(piv);
@@ -24188,7 +24214,9 @@ function wdPartyTick(st, now, dt, t) {
   const want = WD.mode === "dj" ? 1 : 0; P.on += (want - P.on) * Math.min(1, dt * (want ? 1.2 : 2.5));
   if (want && !P.t0) { P.t0 = now; P.shot = 0; P.shotAt = 0; } if (!want && P.on < 0.02) P.t0 = 0;
   const on = P.on; if (on < 0.005) { for (const b of P.beams) b.m.opacity = 0; for (const l of P.lasers) l.m.opacity = 0; return 0; }
-  const beat = ((now - (P.t0 || now)) / 1000) * (P.bpm / 60), pulse = Math.exp(-(beat % 1) * 5), bar = Math.floor(beat / 4);
+  // the beat: a DJ clip is locked to the song at 120 to the clip (2 beats a second of its time), else the set's tempo
+  const vc = st.vid && st.vid.clock && st.vid.v && st.vid.v.readyState >= 2 && !st.vid.v.paused ? st.vid.v.currentTime * 2 : null;
+  const beat = vc != null ? vc : ((now - (P.t0 || now)) / 1000) * (P.bpm / 60); P.beat = beat; const pulse = Math.exp(-(beat % 1) * 5), bar = Math.floor(beat / 4); P.pulse = pulse; P.bar = bar;
   for (const b of P.beams) { b.piv.quaternion.copy(b.base); b.piv.rotateZ(Math.sin(t * 0.55 + b.ph) * 0.5); b.piv.rotateX(Math.sin(t * 0.37 + b.ph * 1.7) * 0.28); b.m.opacity = on * (0.09 + pulse * 0.07); }
   const fan = Math.sin(t * 0.8) * 0.45;
   for (const l of P.lasers) { l.piv.quaternion.copy(l.base); l.piv.rotateY((l.i / 11 - 0.5) * 1.3 + fan * 0.4); l.piv.rotateX(0.18 + Math.sin(t * 1.1 + l.i * 0.3) * 0.12); l.m.opacity = on * (bar % 2 ? 0.4 : 0.16) * (0.6 + pulse * 0.4); }
@@ -24198,8 +24226,882 @@ function wdPartyTick(st, now, dt, t) {
   // confetti on the drops
   if (Math.floor(beat / 16) !== P.drop) { P.drop = Math.floor(beat / 16); if (P.drop > 0 && on > 0.8) wdShow(st, [WD_PCOL[P.drop % 5], WD_PCOL[(P.drop + 2) % 5], [1, 1, 1]], 4, 1600); }
   // the camera works the room: every 9 s a new angle once it's arrived
-  if (want && !st.fly && now - P.shotAt > 9000) { if (P.shotAt) { P.shot = (P.shot + 1) % 4; document.body.classList.toggle("v2w-wide", P.shot !== 0); wdFly(st, wdPartyShot(st, P.shot), 3200, (st.V.fwR || 30) * 0.25); } P.shotAt = now; }
+  if (want && !st.fly && now - P.shotAt > 9000) { if (P.shotAt) { P.shot = (P.shot + 1) % 4; document.body.classList.toggle("v2w-wide", P.shot !== 0); wdFly(st, (st.partyShot || wdPartyShot)(st, P.shot), 3200, (st.V.fwR || 30) * 0.25); } P.shotAt = now; }
   return on;
+}
+// ---- the party deck: a stage with an LED wall behind, speaker stacks, a truss of moving lights and a sign, and the DJ at
+// the booth. In a football stadium the DJ is the home team's mascot in 3D (its own booth in the team's colors; in a set the
+// boards show a camera on it); in the war room it's DJ Goldie, a video with its own matte (colour on top, matte below)
+// standing on the deck, a still of him when there's no set on, his own loop in a house set ----
+const WD_MG = `uniform sampler2D uMap; uniform float uLit; varying vec2 vUv;
+void main(){
+  float a = texture2D(uMap, vec2(vUv.x, min(vUv.y * .5, .4994))).r;
+  if (a < .006) discard;
+  vec3 c = texture2D(uMap, vec2(vUv.x, max(.5 + vUv.y * .5, .5006))).rgb;
+  gl_FragColor = vec4(c * uLit, a);
+}`;
+const WD_MGW = 1120, WD_MGH = 900;   // the clip's picture (each half of the stacked frame)
+const wdDeckSrc = (v) => "sounds/aura/djstage" + (v.canPlayType('video/mp4; codecs="avc1.42E01E"') ? ".mp4" : ".webm");
+// where a football stadium's stage goes: built into a corner of the building, standing at the top of the lower bowl (its fans
+// all in front of it) in a slot of its own where the suites and the upper deck give way to it: no seats under it or behind it
+function wdDeckSpotFb(st) {
+  const V = st.V, C = st.C, K = 1.05, depth = 11 * K, width = 30 * K, lo = V.tiers[0], t = 0.885, [px, pz, nx, nz] = wdNorm(C, t);
+  const oc = lo.o1 + depth / 2 + 0.6, floor = (lo.y1f ? lo.y1f(t) : lo.y1) + 0.8, p = [px + nx * oc, floor, pz + nz * oc];
+  const fl = Math.hypot(V.cx - p[0], V.cz - p[2]) || 1, f = [(V.cx - p[0]) / fl, (V.cz - p[2]) / fl];
+  const gap = (x, z) => { const dx = x - p[0], dz = z - p[2], lz = dx * f[0] + dz * f[1], lx = dx * f[1] - dz * f[0]; return Math.abs(lx) < width / 2 + 2.5 && lz < depth / 2 + 2; };
+  const upper = V.tiers.slice(1).some((q) => !q.keep || q.keep(p[0], p[2]));
+  return { p, look: [V.cx, V.cz], base: floor - 5, K, who: "mascot", gap, house: { top: upper ? V.top + 1.5 : floor + 18.5 * K, back: V.outer + 0.4 - oc } };
+}
+function wdDeckBuild(st, o) {
+  const THREE = st.THREE, scene = st.scene, K = o.K || 1, depth = 11 * K, width = 30 * K, floor = o.p[1], base = o.base ?? floor - 3 * K;
+  const col = (r, g, b) => new THREE.Color().setRGB(r, g, b, THREE.LinearSRGBColorSpace);
+  const flat = (c) => new THREE.MeshBasicMaterial({ color: col(...c) });
+  const g = new THREE.Group(); g.position.set(o.p[0], floor, o.p[2]); g.lookAt(o.look[0], floor, o.look[1]); scene.add(g);
+  const add = (geo, mat, x, y, z) => { const m = new THREE.Mesh(geo, mat); m.position.set(x, y, z); g.add(m); return m; };
+  const dark = flat([0.028, 0.03, 0.04]), steel = flat([0.2, 0.21, 0.245]), T = st.R.T, team = T.h, masc = o.who === "mascot";
+  // the deck: a block, its top, an LED fascia along the front carrying the board's ribbon
+  if (floor - base > 0.2) add(new THREE.BoxGeometry(width, floor - base, depth), dark, 0, -(floor - base) / 2, 0);
+  add(new THREE.BoxGeometry(width, 0.12 * K, depth), flat([0.06, 0.064, 0.08]), 0, 0.06 * K, 0);
+  if (st.rtex) { const hh = Math.min(2.2 * K, Math.max(0.6, floor - base - 0.3)), fg = new THREE.PlaneGeometry(width, hh), tx = width / (hh * (4096 / 96)); fg.attributes.uv.array.forEach((v, i, a) => { if (i % 2 === 0) a[i] = v * tx; });
+    add(fg, new THREE.MeshBasicMaterial({ map: st.rtex }), 0, -hh / 2 - 0.15 * K, depth / 2 + 0.03); }
+  // the LED wall behind, on a riser, in a frame
+  const lw = 22 * K, lh = 9.6 * K, ly = 1.4 * K + lh / 2, lz = -depth / 2 + 0.9 * K;
+  add(new THREE.BoxGeometry(lw + 0.8 * K, lh + 0.8 * K, 0.6 * K), dark, 0, ly, lz - 0.35 * K);
+  add(new THREE.BoxGeometry(lw, 1.4 * K, 1.6 * K), flat([0.04, 0.042, 0.055]), 0, 0.7 * K, lz + 0.2 * K);
+  const lc = wdCanvas(1024, 448), x = lc.getContext("2d");
+  const paintIdle = () => {
+    const c1 = masc ? wdMix(team.col, [0, 0, 0], 0.45) : [0.1, 0.03, 0.22], c2 = masc ? wdMix(team.alt, [0, 0, 0], 0.6) : [0.05, 0.08, 0.27];
+    const gr = x.createLinearGradient(0, 0, 1024, 448); gr.addColorStop(0, wdCss(c1)); gr.addColorStop(0.6, wdCss(c2)); gr.addColorStop(1, "#05070c"); x.fillStyle = gr; x.fillRect(0, 0, 1024, 448);
+    for (let i = 0; i < 48; i++) { const hh = 30 + 110 * Math.abs(Math.sin(i * 0.61) * Math.sin(i * 0.23 + 1)); x.fillStyle = masc ? wdCss(wdLift(team.alt, 0.35), 0.35) : `rgba(${150 + (i % 5) * 20},${90 + (i % 3) * 40},255,.35)`; x.fillRect(16 + i * 21, 430 - hh, 14, hh); }
+    x.textAlign = "center"; x.textBaseline = "middle";
+    if (masc && team.img && team.img.complete && team.img.naturalWidth) { x.save(); x.shadowColor = "rgba(255,255,255,.5)"; x.shadowBlur = 30; x.drawImage(team.img, 512 - 130, 40, 260, 260); x.restore(); }
+    x.font = `900 ${masc ? 70 : 150}px "Barlow Condensed", Inter, sans-serif`; x.shadowColor = masc ? wdCss(wdLift(team.alt, 0.4)) : "#c77dff"; x.shadowBlur = 30; x.fillStyle = "#f6f2ff";
+    x.fillText(masc ? `${(team.nm || team.ab || "").toUpperCase()} DJ` : "DJ GOLDIE", 512, masc ? 340 : 190);
+    x.shadowBlur = 0; if (!masc) { x.font = `800 40px "Barlow Condensed", Inter, sans-serif`; x.fillStyle = "rgba(255,210,120,.9)"; x.fillText("SWEAT ZONE", 512, 300); }
+  };
+  paintIdle();
+  const ledIdle = wdTex(THREE, lc), blank = wdTex(THREE, wdCanvas(2, 2)); st.tex.push(ledIdle, blank);
+  const led = add(new THREE.PlaneGeometry(lw, lh), wdScreenMat(THREE, ledIdle, lw / lh, blank), 0, ly, lz + 0.02); led.material.uniforms.uLed.value = 0.7;
+  // speaker stacks either side
+  const sc = wdCanvas(128, 256), sx = sc.getContext("2d"); sx.fillStyle = "#0a0b0f"; sx.fillRect(0, 0, 128, 256);
+  for (const cy of [68, 188]) { sx.fillStyle = "#16181f"; sx.beginPath(); sx.arc(64, cy, 52, 0, Math.PI * 2); sx.fill(); sx.strokeStyle = "#2a2d36"; sx.lineWidth = 5; sx.stroke(); sx.fillStyle = "#0d0e12"; sx.beginPath(); sx.arc(64, cy, 30, 0, Math.PI * 2); sx.fill(); sx.fillStyle = "#30333d"; sx.beginPath(); sx.arc(64, cy, 9, 0, Math.PI * 2); sx.fill(); }
+  const stx = wdTex(THREE, sc); st.tex.push(stx); const spk = new THREE.MeshBasicMaterial({ map: stx });
+  for (const s of [-1, 1]) for (let k = 0; k < 2; k++) add(new THREE.BoxGeometry(2.8 * K, 3.7 * K, 2.6 * K), [dark, dark, dark, dark, spk, dark], s * (width / 2 - 2.4 * K), 1.85 * K + k * 3.75 * K, -0.6 * K + (k ? -0.2 * K : 0));
+  // the truss: four posts, beams round the top, moving heads along the front, the sign on top
+  const th = 15 * K, tz = depth / 2 - 0.7 * K, tb = -depth / 2 + 0.5 * K, tx0 = width / 2 - 0.6 * K, pw = 0.5 * K;
+  for (const s of [-1, 1]) for (const z of [tz, tb]) add(new THREE.BoxGeometry(pw, th, pw), steel, s * tx0, th / 2, z);
+  for (const z of [tz, tb]) add(new THREE.BoxGeometry(width - 0.6 * K, pw, pw), steel, 0, th, z);
+  for (const s of [-1, 1]) add(new THREE.BoxGeometry(pw, pw, tz - tb), steel, s * tx0, th, (tz + tb) / 2);
+  const fade = (() => { const c = wdCanvas(4, 128), x2 = c.getContext("2d"), g2 = x2.createLinearGradient(0, 0, 0, 128); g2.addColorStop(0, "rgba(255,255,255,0)"); g2.addColorStop(0.8, "rgba(255,255,255,.6)"); g2.addColorStop(1, "rgba(255,255,255,1)"); x2.fillStyle = g2; x2.fillRect(0, 0, 4, 128); const tt = new THREE.CanvasTexture(c); st.tex.push(tt); return tt; })();
+  const glowT = wdGlowTex(THREE); st.tex.push(glowT);
+  const heads = [], BL = 40 * K;
+  for (let i = 0; i < 8; i++) {
+    const hx = (i / 7 - 0.5) * (width - 4 * K), piv = new THREE.Group(); piv.position.set(hx, th - 0.7 * K, tz); g.add(piv);
+    piv.add(new THREE.Mesh(new THREE.BoxGeometry(0.9 * K, 1.0 * K, 0.9 * K), dark));
+    const m = new THREE.MeshBasicMaterial({ map: fade, color: col(...WD_PCOL[i % 5]), transparent: true, opacity: 0, blending: THREE.AdditiveBlending, depthWrite: false, side: THREE.DoubleSide });
+    const cg = new THREE.ConeGeometry(BL * 0.07, BL, 16, 1, true); cg.translate(0, -BL / 2, 0); piv.add(new THREE.Mesh(cg, m));
+    const lm = new THREE.SpriteMaterial({ map: glowT, color: col(...WD_PCOL[i % 5]), blending: THREE.AdditiveBlending, transparent: true, depthWrite: false, opacity: 0.25 });
+    const lens = new THREE.Sprite(lm); lens.scale.set(2.4 * K, 2.4 * K, 1); lens.position.set(hx, th - 1.3 * K, tz + 0.5 * K); g.add(lens);
+    heads.push({ piv, m, lm, i });
+  }
+  const sign = wdTex(THREE, wdNeonArt(masc ? (team.ab || "DJ").toUpperCase() + " DJ" : "DJ GOLDIE", masc ? wdCss(wdLift(team.alt, 0.45)) : "#c77dff")); st.tex.push(sign);
+  const signM = new THREE.MeshBasicMaterial({ map: sign, transparent: true, blending: THREE.AdditiveBlending, depthWrite: false, opacity: 0.75 });
+  add(new THREE.PlaneGeometry(18 * K, 4.5 * K), signM, 0, th + 2.6 * K, tz);
+  // the pool of light on the deck, and a glow behind the DJ
+  const pool = new THREE.MeshBasicMaterial({ map: glowT, color: col(0.75, 0.3, 1), transparent: true, blending: THREE.AdditiveBlending, depthWrite: false, opacity: 0.25 });
+  const pm = add(new THREE.PlaneGeometry(22 * K, 12 * K), pool, 0, 0.16 * K, 0.5 * K); pm.rotation.x = -Math.PI / 2;
+  const halo = new THREE.SpriteMaterial({ map: glowT, color: col(0.6, 0.3, 1), blending: THREE.AdditiveBlending, transparent: true, depthWrite: false, opacity: 0.3 });
+  const hs = new THREE.Sprite(halo); hs.scale.set(16 * K, 12 * K, 1); hs.position.set(0, 5 * K, lz + 1.2 * K); g.add(hs);
+  if (o.house) { const Hh = o.house.top - floor, bk = o.house.back, len = depth / 2 + 2 + bk, zc = (depth / 2 + 2 - bk) / 2, conc = flat([0.06, 0.065, 0.08]), edge = flat(wdLift(team.alt, 0.35));
+    for (const s of [-1, 1]) { add(new THREE.BoxGeometry(1.4 * K, Hh + 6, len), conc, s * (width / 2 + 2.5), (Hh + 6) / 2 - 6, zc); add(new THREE.BoxGeometry(0.3 * K, Hh + 6, 0.3 * K), edge, s * (width / 2 + 1.8), (Hh + 6) / 2 - 6, depth / 2 + 2); }
+    add(new THREE.BoxGeometry(width + 6.4, 1.2 * K, len), conc, 0, Hh, zc); add(new THREE.BoxGeometry(width + 5, 0.35 * K, 0.35 * K), edge, 0, Hh - 0.7 * K, depth / 2 + 2);
+    add(new THREE.BoxGeometry(width + 5, Hh + 6, 0.6), flat([0.025, 0.028, 0.036]), 0, (Hh + 6) / 2 - 6, -bk + 0.6); }
+  const n = new THREE.Vector3(0, 0, 1).applyQuaternion(g.quaternion);
+  const D = { g, K, led, ledIdle, paintIdle, heads, signM, pool, halo, mv: null, mvTex: null, mvOn: false, lt: -1, masc: null, mg: null };
+  st.deck = D; st.beams = [];
+  st.laserFace = () => ({ c: g.localToWorld(new THREE.Vector3(0, th - 0.4 * K, tz)), n: n.clone(), w: width * 0.9, h: 6 * K });
+  if (masc) {
+    // the mascot, lit: a key from out front, the sky, a rim in the set's colour from behind
+    const Hm = 4.6 * K, zb = depth / 2 - 4.2 * K, spec = wdMascSpec(st.R.scene && st.R.scene.game ? st.R.scene.game.sport : "NFL", team);
+    const A = wdMascot(THREE, spec, team); A.root.scale.setScalar(Hm); A.root.position.set(0, 0.12 * K, zb); g.add(A.root);
+    const booth = wdMascotBooth(THREE, team, 6.4 * K, 1.95 * K, 1.7 * K); booth.position.set(0, 0.12 * K, zb + 1.25 * K); g.add(booth); st.tex.push(booth.userData.tex, A.jt, A.grad);
+    if (!st.lit) { st.lit = true; scene.add(new THREE.HemisphereLight(0xc4d4ff, 0x302018, 1.25)); const key = new THREE.DirectionalLight(0xffffff, 2.0); key.position.set(o.look[0] - o.p[0], 60, o.look[1] - o.p[2]); key.position.normalize().multiplyScalar(100).add(new THREE.Vector3(...o.p)); key.target.position.set(...o.p); scene.add(key, key.target); }
+    const rim = new THREE.DirectionalLight(0x9a5cff, 0); rim.position.copy(g.localToWorld(new THREE.Vector3(0, Hm * 1.6, -depth * 2))); rim.target = A.root; scene.add(rim);
+    D.masc = A; D.booth = booth; D.rim = rim; D.Hm = Hm; D.zb = zb;
+    st.djFace = () => ({ c: g.localToWorld(new THREE.Vector3(0, Hm * 0.55, zb)), n: n.clone(), w: Hm * 1.2, h: Hm * 0.95 });
+    // a camera on the mascot for the boards in a set (two targets, so a screen in its own shot never reads what's being drawn)
+    const mk = () => { const r = new THREE.WebGLRenderTarget(640, 360); r.texture.colorSpace = THREE.NoColorSpace; return r; };
+    D.rtA = mk(); D.rtB = mk(); D.mcam = new THREE.PerspectiveCamera(34, 16 / 9, 0.5, 4000); D.camOn = false; D.camN = 0;
+  } else {
+    // DJ Goldie: the matte'd video on a card at the booth, drawn after the deck
+    const wb = 8.6 * K, hb = (wb * WD_MGH) / WD_MGW, zb = depth / 2 - 3.4 * K;
+    const poster = new THREE.TextureLoader().load("sounds/aura/djstage_poster.jpg"); poster.colorSpace = THREE.NoColorSpace; poster.minFilter = THREE.LinearFilter; poster.generateMipmaps = false; st.tex.push(poster);
+    const mgMat = new THREE.ShaderMaterial({ uniforms: { uMap: { value: poster }, uLit: { value: 1 }, uAsp: { value: 1 } }, transparent: true, depthWrite: false, toneMapped: false,
+      vertexShader: "varying vec2 vUv; void main(){ vUv = uv; gl_Position = projectionMatrix * modelViewMatrix * vec4(position, 1.0); }", fragmentShader: WD_MG });
+    const mg = add(new THREE.PlaneGeometry(wb, hb), mgMat, 0, hb / 2 - 0.05 * K, zb); mg.renderOrder = 2;
+    Object.assign(D, { mg, mgMat, poster });
+    st.djFace = () => ({ c: g.localToWorld(new THREE.Vector3(0, hb * 0.56, zb)), n: n.clone(), w: wb * 0.78, h: hb * 0.78 });
+  }
+  return D;
+}
+// no set on: the still (or the mascot back to hyping), the wall's own picture
+function wdDeckIdle(st) {
+  const D = st && st.deck; if (!D) return;
+  if (D.mv) try { D.mv.pause(); } catch (e) {}
+  D.mvOn = false; D.camOn = false; if (D.mgMat) D.mgMat.uniforms.uMap.value = D.poster;
+  const u = D.led.material.uniforms; u.uMap.value = D.ledIdle; u.uAsp.value = u.uScr.value; u.uStack.value = 0;
+}
+// a house set in the war room: the wall and the board have its video, Goldie plays from his own loop on the set's beat
+function wdDeckPlay(st, bpm) {
+  const D = st.deck, THREE = st.THREE; if (!D || !D.mgMat) return;
+  if (!D.mv) { const v = document.createElement("video"); v.muted = true; v.loop = true; v.playsInline = true; v.preload = "auto"; v.setAttribute("muted", ""); v.src = wdDeckSrc(v); D.mv = v; }
+  if (!D.mvTex) { D.mvTex = new THREE.VideoTexture(D.mv); D.mvTex.colorSpace = THREE.NoColorSpace; D.mvTex.minFilter = THREE.LinearFilter; D.mvTex.generateMipmaps = false; }
+  let r = (bpm > 60 ? bpm : 124) / 120; while (r < 0.72) r *= 2; while (r > 1.44) r /= 2;
+  D.mv.defaultPlaybackRate = r; D.mv.playbackRate = r; D.mv.play().catch(() => {});
+  D.mgMat.uniforms.uMap.value = D.mvTex; D.mvOn = true;
+}
+// a set in the stadium: the boards and the deck's wall show the camera on the mascot
+function wdDeckCamOn(st) {
+  const D = st.deck; if (!D || !D.masc) return false; D.camOn = true;
+  for (const m of [D.led.material, ...st.screens.map((s) => s.material)]) { m.uniforms.uMap.value = D.rtB.texture; m.uniforms.uAsp.value = 16 / 9; m.uniforms.uStack.value = 0; }
+  return true;
+}
+function wdDeckCam(st, now) {
+  const D = st.deck; if (!D || !D.camOn || !WD.r) return;
+  if (D.camN++ % 2) return;
+  const t = now / 1000, H = D.Hm, a = Math.sin(t * 0.21) * 0.55, r = H * (2.0 + 0.5 * Math.sin(t * 0.13)), up = H * (0.75 + 0.15 * Math.sin(t * 0.17));
+  const c = D.g.localToWorld(new st.THREE.Vector3(Math.sin(a) * r, up, D.zb + Math.cos(a) * r)), l = D.g.localToWorld(new st.THREE.Vector3(0, H * 0.62, D.zb));
+  D.mcam.position.copy(c); D.mcam.lookAt(l); D.mcam.updateProjectionMatrix();
+  WD.r.setRenderTarget(D.rtA); WD.r.render(st.scene, D.mcam); WD.r.setRenderTarget(null);
+  const s = D.rtA; D.rtA = D.rtB; D.rtB = s;
+  for (const m of [D.led.material, ...st.screens.map((x) => x.material)]) m.uniforms.uMap.value = D.rtB.texture;
+}
+function wdDeckTick(st, now, dt, t) {
+  const D = st.deck, P = st.party; if (!D) return;
+  const on = P ? P.on : 0, pulse = P ? P.pulse || 0 : 0, bar = P ? P.bar || 0 : 0, c = WD_PCOL[bar % 5];
+  if (D.mvOn && D.mv.readyState >= 2 && D.mv.currentTime !== D.lt) { D.lt = D.mv.currentTime; D.mvTex.needsUpdate = true; }
+  for (const h of D.heads) {
+    h.piv.rotation.set(0.5 + Math.sin(t * 0.9 + h.i * 0.8) * 0.45 * (0.3 + on), 0, Math.sin(t * 0.6 + h.i * 1.3) * 0.6 * (0.3 + on));
+    h.m.opacity = on * (0.1 + pulse * 0.1); h.lm.opacity = 0.18 + on * (0.5 + pulse * 0.5);
+    if (on > 0.02) { const k = WD_PCOL[(bar + h.i) % 5]; h.m.color.setRGB(...k, st.THREE.LinearSRGBColorSpace); h.lm.color.setRGB(...k, st.THREE.LinearSRGBColorSpace); }
+  }
+  D.signM.opacity = 0.6 + on * (0.25 + pulse * 0.15);
+  D.pool.opacity = 0.18 + on * (0.3 + pulse * 0.35); D.halo.opacity = 0.2 + on * (0.25 + pulse * 0.3);
+  if (on > 0.02) { D.pool.color.setRGB(...c, st.THREE.LinearSRGBColorSpace); D.halo.color.setRGB(...c, st.THREE.LinearSRGBColorSpace); }
+  if (D.masc) {
+    const beat = P && P.beat != null && on > 0.05 ? P.beat : t * (100 / 60);
+    wdMascotTick(D.masc, dt, t, beat, on > 0.5 ? "dj" : "idle", D.Hm);
+    if (D.rim) { D.rim.intensity = 0.6 + on * (1.4 + pulse * 1.6); if (on > 0.02) D.rim.color.setRGB(...c, st.THREE.LinearSRGBColorSpace); }
+    for (const p of D.booth.userData.plat) p.rotation.y += dt * 3.5;
+  }
+}
+// the mascot reacts: its team scored (jump), the other side did (head in hands), a bet hit (jump)
+function wdDeckAct(st, kind, ms) { const D = st && st.deck; if (D && D.masc) D.masc.act = { kind, until: (performance.now() - st.t0) / 1000 + (ms || 3500) / 1000 }; }
+// ---- the fans: real 3D people in the seats (one instanced mesh: a body, a head, two arms, a phone), each in a team's shirt.
+// They react: the side that scores jumps with its arms up, a bet that cashes gets the whole place up, a miss gets hands on
+// heads, the wave runs round, and in a DJ set they bounce on the beat with their phones up ----
+const WD_FAN_VS = `attribute vec3 aCol; attribute vec4 aR; attribute vec3 aP; varying vec3 vC; varying float vL, vD, vPh;
+uniform float uT, uParty, uBeat, uSad, uWave, uWaveU, uBurst, uK; uniform float uCh[8];
+float h1(float n){ return fract(sin(n * 91.345) * 43758.5453); }
+vec3 rz(vec3 p, vec3 o, float a){ p -= o; float c = cos(a), s = sin(a); return vec3(c * p.x - s * p.y, s * p.x + c * p.y, p.z) + o; }
+vec3 rx(vec3 p, vec3 o, float a){ p -= o; float c = cos(a), s = sin(a); return vec3(p.x, c * p.y - s * p.z, s * p.y + c * p.z) + o; }
+void main(){
+  vec3 p = position; float part = aP.x, kind = aP.y;
+  float ph = aR.x * 6.2831, sp = .8 + aR.y * 1.4, tm = aR.z;
+  float ch = 0.; for (int i = 0; i < 8; i++) if (abs(float(i) - tm) < .5) ch = uCh[i];
+  float wv = uWave * exp(-pow((fract(aR.w - uWaveU) - .5) * 26.0, 2.0));
+  float cheer = clamp(max(ch, uBurst * (.45 + .55 * aR.y)), 0., 1.);
+  float beat = uParty * pow(1. - fract(uBeat + aR.x * .08), 3.);
+  // arms: up and out on a cheer or the wave, waving in a set, hands on heads on a miss
+  float up = clamp(cheer * 1.15 + wv * 1.2 + uParty * (.55 + .45 * sin(uT * 2.2 + ph)) * step(.35, aR.y), 0., 1.);
+  float sad = uSad * step(aR.y, .8) * (1. - up);
+  float sw = sin(uT * sp * 3.3 + ph) * .25 * cheer + sin(uT * 3.1 + ph) * .3 * uParty;
+  float aL = -(up * 2.55 + sad * 2.2) - sw * up, aRr = (up * 2.55 + sad * 2.2) - sw * up;
+  if (part > 1.5 && part < 2.5) p = rz(p, vec3(-.3, .98, 0.), aL);
+  if (part > 2.5) { p = rz(p, vec3(.3, .98, 0.), aRr); }
+  if (part > 3.5) p = mix(vec3(.3, .98, 0.), p, step(.2, uParty) * step(.45, aR.y));
+  if (part > .5 && part < 1.5) p = rx(p, vec3(0., 1.02, 0.), sad * .5 - cheer * .15);
+  // jumping on a cheer, bouncing in a set, standing up for the wave
+  p.y += cheer * .32 * abs(sin(uT * sp * 3.4 + ph)) + beat * .14 + wv * .25 + sin(uT * .7 + ph) * .015;
+  vec4 w = modelMatrix * instanceMatrix * vec4(p * uK, 1.0);
+  vec4 mv = viewMatrix * w; vD = -mv.z; gl_Position = projectionMatrix * mv;
+  vec3 n = normalize(mat3(modelMatrix * instanceMatrix) * normal);
+  vL = .5 + .38 * max(dot(n, normalize(vec3(.3, .9, .25))), 0.) + .12 * n.y;
+  vec3 skin = mix(vec3(.36, .24, .17), vec3(.88, .7, .56), h1(aR.x * 17.0));
+  vec3 pants = vec3(.08, .09, .12) + .1 * h1(aR.x * 5.0);
+  vC = kind < .5 ? aCol : kind < 1.5 ? skin : kind < 2.5 ? pants : vec3(1.0);
+  vPh = kind > 2.5 ? 1. : 0.;
+}`;
+const WD_FAN_FS = `uniform float uLit, uFlash, uFl, uParty; uniform vec3 uFc, uHaze; varying vec3 vC; varying float vL, vD, vPh;
+void main(){
+  vec3 c = vC * vL * uLit + uFc * uFlash * .25;
+  c = mix(c, vec3(.75, .88, 1.) * 1.6, vPh);
+  c = mix(c, uHaze, smoothstep(40.0, uFl, vD) * .5);
+  gl_FragColor = vec4(c, 1.0);
+}`;
+// one fan, ~1.9 tall standing (shirt, head, arms with the forearm bare, a phone in the right hand): no backs or bottoms
+function wdFanGeo(THREE) {
+  const pos = [], nrm = [], prt = [];
+  const box = (x, y, z, w, h, d, part, kind, faces) => {
+    const g = new THREE.BoxGeometry(w, h, d); g.translate(x, y, z); const P = g.attributes.position.array, N = g.attributes.normal.array, I = g.index.array;
+    for (let f = 0; f < 6; f++) { if (!faces.includes(f)) continue; for (let k = 0; k < 6; k++) { const i = I[f * 6 + k]; pos.push(P[i * 3], P[i * 3 + 1], P[i * 3 + 2]); nrm.push(N[i * 3], N[i * 3 + 1], N[i * 3 + 2]); prt.push(part, kind, 0); } }
+    g.dispose();
+  };
+  const F = [0, 1, 2, 4];          // +x, -x, +y, +z (toward the field)
+  box(0, 0.55, 0, 0.36, 0.5, 0.22, 0, 2, [0, 1, 4]);           // legs (mostly behind the row in front)
+  box(0, 0.98, 0, 0.5, 0.56, 0.26, 0, 0, F);                   // shirt
+  box(0, 1.37, 0.01, 0.25, 0.27, 0.25, 1, 1, F);               // head
+  box(-0.3, 0.84, 0, 0.13, 0.3, 0.13, 2, 0, F); box(-0.3, 0.58, 0, 0.11, 0.24, 0.11, 2, 1, F);   // left: sleeve, forearm
+  box(0.3, 0.84, 0, 0.13, 0.3, 0.13, 3, 0, F); box(0.3, 0.58, 0, 0.11, 0.24, 0.11, 3, 1, F);     // right
+  box(0.3, 0.42, 0.08, 0.08, 0.13, 0.02, 4, 3, [4]);           // the phone
+  const g = new THREE.BufferGeometry(); g.setAttribute("position", new THREE.Float32BufferAttribute(pos, 3)); g.setAttribute("normal", new THREE.Float32BufferAttribute(nrm, 3)); g.setAttribute("aP", new THREE.Float32BufferAttribute(prt, 3));
+  return g;
+}
+// seats: [{ p: [x, y, z], face: angle to turn to (radians about y), team: 0..7, u: 0..1 round the place }]; cols: shirt colors by team
+// (each team a few shades: its color, its other color, white, black)
+function wdFansBuild(st, seats, cols, K) {
+  const THREE = st.THREE, n = seats.length; if (!n) return null;
+  const ig = wdFanGeo(THREE);
+  const aCol = new Float32Array(n * 3), aR = new Float32Array(n * 4);
+  const rnd = (i, s) => { const x = Math.sin(i * 12.9898 + s * 78.233) * 43758.5453; return x - Math.floor(x); };
+  const mat = new THREE.ShaderMaterial({ vertexShader: WD_FAN_VS, fragmentShader: WD_FAN_FS,
+    uniforms: { uT: { value: 0 }, uParty: { value: 0 }, uBeat: { value: 0 }, uSad: { value: 0 }, uWave: { value: 0 }, uWaveU: { value: 0 }, uBurst: { value: 0 }, uK: { value: K || 1 }, uCh: { value: new Array(8).fill(0) },
+      uLit: { value: 1 }, uFlash: { value: 0 }, uFl: { value: 420 }, uFc: { value: new THREE.Vector3(1, 1, 1) }, uHaze: { value: new THREE.Vector3(0.03, 0.04, 0.07) } } });
+  const mesh = new THREE.InstancedMesh(ig, mat, n), m4 = new THREE.Matrix4(), q = new THREE.Quaternion(), e = new THREE.Euler(), s3 = new THREE.Vector3(), p3 = new THREE.Vector3();
+  for (let i = 0; i < n; i++) {
+    const S = seats[i], tc = cols[S.team] || cols[0], r = rnd(i, 1);
+    const c = r < 0.62 ? tc[0] : r < 0.8 ? tc[1] : r < 0.9 ? [0.86, 0.86, 0.84] : [0.1, 0.11, 0.14];
+    const v = 0.85 + rnd(i, 2) * 0.3; aCol.set([c[0] * v, c[1] * v, c[2] * v], i * 3);
+    aR.set([rnd(i, 3), rnd(i, 4), S.team, S.u], i * 4);
+    e.set(0, S.face + (rnd(i, 5) - 0.5) * 0.3, 0); q.setFromEuler(e); const sc = 0.92 + rnd(i, 6) * 0.16; s3.set(sc, sc, sc); p3.set(S.p[0], S.p[1], S.p[2]);
+    m4.compose(p3, q, s3); mesh.setMatrixAt(i, m4);
+  }
+  ig.setAttribute("aCol", new THREE.InstancedBufferAttribute(aCol, 3)); ig.setAttribute("aR", new THREE.InstancedBufferAttribute(aR, 4));
+  mesh.frustumCulled = false; st.scene.add(mesh); st.mats.push(mat);
+  st.fans = { mesh, mat, ch: new Array(8).fill(0), n };
+  return st.fans;
+}
+// seats along the deck bands: rows across each tier, a fan every `gap` along it, some seats empty
+function wdFanSeats(C, V, tiers, gap, fill, teamOf) {
+  const out = [], N = 720, P = []; for (let i = 0; i <= N; i++) P.push(wdNorm(C, i / N));
+  for (const t of tiers) {
+    const rows = t.fanRows || Math.max(4, Math.round((t.rows || 20) * 0.75));
+    for (let r = 0; r < rows; r++) {
+      const f = (r + 0.55) / rows, o = t.o0 + (t.o1 - t.o0) * f, step = (t.gap || gap) * (1 + r * 0.004);
+      let acc = (r % 2) * step * 0.5;
+      for (let i = 0; i < N; i++) {
+        const a = P[i], b = P[i + 1], ax = a[0] + a[2] * o, az = a[1] + a[3] * o, bx = b[0] + b[2] * o, bz = b[1] + b[3] * o, L = Math.hypot(bx - ax, bz - az);
+        let s = acc; while (s < L) { const k = s / L, x = ax + (bx - ax) * k, z = az + (bz - az) * k, u = (i + k) / N;
+          if ((!t.keep || t.keep(x, z)) && Math.abs(Math.sin(x * 12.99 + z * 78.23 + r * 3.1) * 43758.5) % 1 < fill) {
+            const y0 = t.y0f ? t.y0f(u) : t.y0, y1 = t.y1f ? t.y1f(u) : t.y1;
+            out.push({ p: [x, y0 + (y1 - y0) * f, z], face: Math.atan2(-(a[2] + b[2]) / 2, -(a[3] + b[3]) / 2), team: teamOf(x, z, u, r), u }); }
+          s += step; }
+        acc = s - L;
+      }
+    }
+  }
+  return out;
+}
+function wdFansTick(st, t) {
+  const F = st.fans; if (!F) return; const u = F.mat.uniforms, P = st.party;
+  for (let i = 0; i < 8; i++) { F.ch[i] *= 0.985; u.uCh.value[i] = Math.min(1, F.ch[i]); }
+  u.uT.value = t; u.uBurst.value = Math.min(1, st.burst * 0.8); u.uWave.value = Math.min(1, st.wave); u.uWaveU.value = (t * 0.09) % 1;
+  u.uSad.value = Math.min(1, st.dim * 1.2); u.uFlash.value = st.flash; u.uFc.value.set(...st.fc);
+  u.uParty.value = P ? P.on : 0; u.uBeat.value = P && P.beat != null ? P.beat : t * 2;
+}
+// a team scores, a bet hits: their fans go up (team index into the shirts)
+function wdFansCheer(st, team, k) { if (st.fans && team >= 0 && team < 8) st.fans.ch[team] = Math.max(st.fans.ch[team], k || 1.4); }
+// ---- the home team's mascot, DJing: a 3D cartoon character (toon-shaded) in the team's jersey with headphones and a chain,
+// built from what the team is (a bird, a big cat, a dog, a bear, a horse, a bull or a ram, a hog, a gator, a dolphin, an
+// elephant, a buckeye, or a person in the right hat). On the decks in a set, moving on the song's beat; between sets it hypes
+// the crowd; when its team scores it jumps, when the other side does it holds its head ----
+// by team, after the real mascots: kind, fur (or skin), accent (beak, muzzle, snout), and what makes it that one: its jersey (jer,
+// jer2 for the number and trim, num, txt across the top, paw), a hat (hat, hatc, hatL), horns, a mane, a beard and mustache...
+const WD_MASC = {
+  "NFL:ARI": { k: "bird", fur: "#c8102e", acc: "#f5b800", x: { crest: 1, mask: "#141414", jer: "#f2f2f2", jer2: "#97233f", txt: "CARDINALS", num: "" } },                    // Big Red
+  "NFL:ATL": { k: "bird", fur: "#a07a48", acc: "#f5c400", x: { head: "#b08a52", goggles: 1, jer: "#a71930", jer2: "#f2f2f2", num: "00" } },                                  // Freddie Falcon
+  "NFL:BAL": { k: "bird", fur: "#1e1530", acc: "#2e2e34", x: { beak: "big", eye: "#ffc72c", jer: "#241773", jer2: "#9e7c0c", txt: "RAVENS", num: "" } },                    // Poe
+  "NFL:BUF": { k: "bull", fur: "#2160d8", acc: "#4d86ff", x: { horns: "short", hornc: "#f2f2f2", jer: "#c60c30", jer2: "#f2f2f2", num: "88" } },                           // Billy Buffalo
+  "NFL:CAR": { k: "cat", fur: "#16191d", acc: "#24282e", x: { eye: "#00a3e0", jer: "#141414", jer2: "#f2f2f2", paw: 1 } },                                                    // Sir Purr
+  "NFL:CHI": { k: "bear", fur: "#6b4a2b", acc: "#c8a27a", x: { jer: "#0b162a", jer2: "#f2f2f2", num: "00" } },                                                               // Staley Da Bear
+  "NFL:CIN": { k: "cat", fur: "#f47a20", acc: "#f7f3ea", x: { stripes: 1, jer: "#141414", jer2: "#fb4f14", txt: "BENGALS", num: "" } },                                     // Who Dey
+  "NFL:CLE": { k: "dog", fur: "#9a6a3a", acc: "#e6d2b5", x: { ears: "flop", jer: "#4a2c16", jer2: "#ff3c00", txt: "BROWNS", num: "" } },                                    // Chomps
+  "NFL:DAL": { k: "human", fur: "#f0c4a0", acc: "#041e42", x: { hat: "cowboy", hatc: "#f2f2f2", band: "#041e42", star: 1, scarf: "#041e42", jer: "#f2f2f2", jer2: "#041e42", num: "00" } },   // Rowdy
+  "NFL:DEN": { k: "horse", fur: "#f2f2f2", acc: "#f2f2f2", x: { mane: "#fb4f14", jer: "#fb4f14", jer2: "#002244", txt: "BRONCOS", num: "" } },                              // Miles
+  "NFL:DET": { k: "cat", fur: "#c8a06a", acc: "#f0e0c0", x: { mane: "#6b4a2a", jer: "#0076b6", jer2: "#f2f2f2", num: "20" } },                                               // Roary
+  "NFL:GB": { k: "human", fur: "#e8bc96", acc: "#ffb612", x: { hat: "cheese", jer: "#204e32", jer2: "#ffb612", num: "" , txt: "PACKERS" } },                                // (none: a cheesehead)
+  "NFL:HOU": { k: "bull", fur: "#13243f", acc: "#22355a", x: { horns: "bull", hornc: "#f2f2f2", ring: 1, jer: "#0b1f3a", jer2: "#c8102e", num: "1" } },                      // Toro
+  "NFL:IND": { k: "horse", fur: "#3a6fd6", acc: "#f2f2f2", x: { mane: "#1f4fb0", jer: "#f2f2f2", jer2: "#002c5f", txt: "COLTS", num: "" } },                                // Blue
+  "NFL:JAX": { k: "cat", fur: "#e3c41c", acc: "#f3e7c4", x: { spots: 1, shades: 1, jer: "#006778", jer2: "#f2f2f2", paw: 1 } },                                              // Jaxson de Ville
+  "NFL:KC": { k: "dog", fur: "#8a8d8f", acc: "#f2f2f2", x: { ears: "wolf", jer: "#e31837", jer2: "#ffb612", num: "00" } },                                                   // K.C. Wolf
+  "NFL:LV": { k: "human", fur: "#4a3326", acc: "#a5acaf", x: { hat: "helmet", hatc: "#a5acaf", mask: "#141414", eyemask: 1, jer: "#141414", jer2: "#a5acaf", num: "1" } },  // Raider Rusher
+  "NFL:LAC": { k: "human", fur: "#e2b38e", acc: "#ffc20e", x: { hat: "boltmask", hatc: "#ffc20e", jer: "#002a5e", jer2: "#ffc20e", num: "1" } },                              // Boltman
+  "NFL:LAR": { k: "bull", fur: "#b08a5a", acc: "#e8d8c0", x: { horns: "ram", hornc: "#e0b030", jer: "#003594", jer2: "#ffd100", num: "1" } },                                // Rampage
+  "NFL:MIA": { k: "fish", fur: "#5fb8b8", acc: "#f2f2f2", x: { kind: "dolphin", jer: "#f2f2f2", jer2: "#008e97", num: "1" } },                                                // T.D.
+  "NFL:MIN": { k: "human", fur: "#e6b48f", acc: "#ffc62f", x: { hat: "viking", hatc: "#4f2683", hornc: "#ffc62f", beard: "#ffc62f", stache: "#ffc62f", jer: "#4f2683", jer2: "#ffc62f", num: "1" } },   // Viktor
+  "NFL:NE": { k: "human", fur: "#f0c4a0", acc: "#002244", x: { hat: "tricorn", hatc: "#002244", chin: 1, jer: "#002244", jer2: "#c60c30", num: "1" } },                      // Pat Patriot
+  "NFL:NO": { k: "dog", fur: "#a86a3a", acc: "#f2e6d0", x: { ears: "flop", jowl: 1, jer: "#f2f2f2", jer2: "#b39b6a", num: "00" } },                                          // Gumbo
+  "NFL:NYG": { k: "human", fur: "#e8c0a0", acc: "#0b2265", x: { hat: "helmet", hatc: "#0b2265", mask: "#c8c8c8", stripe: "#a71930", big: 1, jer: "#0b2265", jer2: "#f2f2f2", txt: "GIANTS", num: "" } },  // (none: the big-head fan)
+  "NFL:NYJ": { k: "bear", fur: "#8a6a4a", acc: "#d8bc98", x: { jer: "#125740", jer2: "#f2f2f2", num: "13" } },                                                               // (none: the bear in the 13)
+  "NFL:PHI": { k: "bird", fur: "#d4d8dc", acc: "#f5b800", x: { head: "#f4f4f4", jer: "#004c54", jer2: "#f2f2f2", num: "00" } },                                             // Swoop
+  "NFL:PIT": { k: "human", fur: "#e6b48f", acc: "#ffb612", x: { hat: "hard", hatc: "#ffb612", stache: "#3a2a1a", chin: 1, jer: "#ffb612", over: "#16181c", jer2: "#16181c", num: "" } },   // Steely McBeam
+  "NFL:SF": { k: "human", fur: "#f0c4a0", acc: "#6b4423", x: { hat: "cowboy", hatc: "#6b4423", band: "#aa0000", beard: "#b5462a", stache: "#b5462a", jer: "#aa0000", jer2: "#f2f2f2", num: "49" } },   // Sourdough Sam
+  "NFL:SEA": { k: "bird", fur: "#1a3a6b", acc: "#a5acaf", x: { crest: 1, crestc: "#69be28", eye: "#69be28", jer: "#002244", jer2: "#69be28", num: "0" } },                 // Blitz
+  "NFL:TB": { k: "human", fur: "#e8bc96", acc: "#c8102e", x: { hat: "pirate", hatc: "#c8102e", beard: "#c0391b", stache: "#c0391b", jer: "#c8102e", jer2: "#f2f2f2", txt: "BUCS", num: "" } },   // Captain Fear
+  "NFL:TEN": { k: "coon", fur: "#8a7a6a", acc: "#e8e0d8", x: { eye: "#4b92db", tongue: 1, jer: "#0c2340", jer2: "#4b92db", txt: "TITANS", num: "" } },                    // T-Rac
+  "NFL:WSH": { k: "hog", fur: "#f2aaa0", acc: "#5a1414", x: { hat: "cap", hatc: "#5a1414", hatL: "W", hatLc: "#ffb612", jer: "#f2f2f2", jer2: "#5a1414", txt: "COMMANDERS", num: "" } },   // Major Tuddy
+};
+// anyone else, from the name: "Tigers", "Bulldogs", "Wildcats"...
+function wdMascSpec(sport, t) {
+  const k = WD_MASC[sport + ":" + t.ab]; if (k) return { kind: k.k, fur: k.fur, acc: k.acc, x: k.x };
+  const n = String(t.nm || t.fn || "").toLowerCase(), c1 = t.colHex || "#5a5a5a", c2 = t.altHex || "#f2f2f2";
+  const S = (kind, fur, acc, x) => ({ kind, fur: fur || c1, acc: acc || c2, x: x || {} });
+  if (/buckeye/.test(n)) return S("nut", "#6b3f1f", "#c9a074");
+  if (/tide|elephant/.test(n)) return S("ele", "#9e9e9e", "#d9d9d9");
+  if (/tiger|bengal/.test(n)) return S("cat", "#f47a20", "#f7f3ea", { stripes: 1 });
+  if (/lion/.test(n)) return S("cat", "#d4a04a", "#f7ecd0", { mane: "#8a5a22" });
+  if (/cougar|panther|jaguar|wildcat|bobcat|puma|lynx|cat\b|cats\b/.test(n)) return S("cat", c1, "#f2efe8");
+  if (/bulldog|dawg/.test(n)) return S("dog", c1, "#f2f2f2", { ears: "flop", jowl: 1 });
+  if (/husk|wolf|wolves|wolfpack|coyote|fox/.test(n)) return S("dog", "#8a8d8f", "#f2f2f2", { ears: "wolf" });
+  if (/dog|hound|terrier|vol/.test(n)) return S("dog", "#c49a5a", "#f2e6d0", { ears: "flop" });
+  if (/bear|bruin|grizzl|wolverine/.test(n)) return S("bear", "#6b4a2b", "#c8a27a");
+  if (/duck/.test(n)) return S("bird", "#ffd200", "#ff9d00", { bill: 1, head: "#1f7a3a" });
+  if (/eagle|hawk|falcon|owl|raven|cardinal|jay|bird|gamecock|cock|pelican|phoenix|warhawk|osprey|tern|redhawk/.test(n)) return S("bird", c1, "#f5b800", { crest: /cardinal|gamecock|cock/.test(n) ? 1 : 0 });
+  if (/bronco|mustang|colt|stallion|horse|pony|sooner/.test(n)) return S("horse", "#8a5a2b", c2, { mane: c1 });
+  if (/longhorn|steer/.test(n)) return S("bull", "#bf5700", "#f2f2f2", { horns: "long" });
+  if (/bull|bison|buffalo|ram\b|rams\b|aggie/.test(n)) return S("bull", c1, "#f2f2f2", { horns: /ram/.test(n) ? "ram" : "bull" });
+  if (/hog|razorback|pig/.test(n)) return S("hog", "#e8a090", c1);
+  if (/gator|croc/.test(n)) return S("gator", "#3f8f3a", "#e8e0b0");
+  if (/dolphin|shark|fish/.test(n)) return S("fish", c1, "#e8f6f6", { kind: /shark/.test(n) ? "shark" : "dolphin" });
+  if (/trojan|spartan|titan|warrior|knight/.test(n)) return S("human", "#e0b08a", c1, { hat: "trojan" });
+  if (/viking|norse/.test(n)) return S("human", "#e6b48f", c2, { hat: "viking", beard: c2 });
+  if (/pirate|buccaneer|raider/.test(n)) return S("human", "#d7a581", c1, { hat: "pirate" });
+  if (/cowboy|rancher|wrangler/.test(n)) return S("human", "#e0b08a", c1, { hat: "cowboy" });
+  if (/irish|leprechaun/.test(n)) return S("human", "#efc39f", "#0c7a3a", { hat: "lep", beard: "#c0562a" });
+  if (/patriot|minutem|colonial|revolution/.test(n)) return S("human", "#e8bc96", c1, { hat: "tricorn" });
+  if (/miner|mountaineer|pioneer|volunteer|cavalier|commodore|rebel/.test(n)) return S("human", "#e0b08a", c1, { hat: "cowboy", beard: "#6b4423" });
+  return S("bear", c1, c2);
+}
+function wdMascot(THREE, spec, team) {
+  const lin = (h) => { const c = wdHex(h, [0.5, 0.5, 0.5]); return new THREE.Color().setRGB(c[0], c[1], c[2], THREE.LinearSRGBColorSpace); };
+  const grad = new THREE.DataTexture(new Uint8Array([90, 90, 90, 255, 175, 175, 175, 255, 255, 255, 255, 255]), 3, 1); grad.minFilter = grad.magFilter = THREE.NearestFilter; grad.needsUpdate = true;
+  const mats = {}; const M = (h, emi) => { const k = h + (emi || ""); if (!mats[k]) { const o = { color: lin(h), gradientMap: grad }; if (emi) { o.emissive = lin(emi); o.emissiveIntensity = 0.6; } mats[k] = new THREE.MeshToonMaterial(o); } return mats[k]; };
+  const X = spec.x || {}, fur = spec.fur, acc = spec.acc, jer = X.jer || team.colHex || "#333333", jer2 = X.jer2 || team.altHex || "#f2f2f2";
+  const root = new THREE.Group(), body = new THREE.Group(); root.add(body);
+  const mesh = (geo, mat, x, y, z, parent) => { const m = new THREE.Mesh(geo, mat); m.position.set(x || 0, y || 0, z || 0); (parent || body).add(m); return m; };
+  const sph = (r, ws, hs) => new THREE.SphereGeometry(r, ws || 18, hs || 14);
+  // legs, then the jersey (a number on the front, the team's letters), the chain
+  for (const s of [-1, 1]) { mesh(new THREE.CapsuleGeometry(0.055, 0.26, 4, 10), M("#22252c"), s * 0.075, 0.2, 0); mesh(new THREE.BoxGeometry(0.1, 0.06, 0.17), M("#f2f2f2"), s * 0.075, 0.03, 0.03); }
+  const torso = mesh(new THREE.CapsuleGeometry(0.15, 0.14, 6, 16), M(jer), 0, 0.56, 0); torso.scale.set(1, 1, 0.82);
+  const jc = wdCanvas(256, 256), jx = jc.getContext("2d"); jx.textAlign = "center"; jx.textBaseline = "middle"; jx.font = `900 150px "Barlow Condensed", Inter, sans-serif`; jx.lineWidth = 10; jx.strokeStyle = jer; jx.fillStyle = jer2;
+  const num = X.num != null ? String(X.num) : String(team.num || (team.ab ? (team.ab.charCodeAt(0) % 89) + 1 : 1)), top = String(X.txt || team.ab || "").toUpperCase();
+  if (X.paw) { jx.beginPath(); jx.ellipse(128, 160, 44, 38, 0, 0, Math.PI * 2); jx.fill(); for (const [px, py] of [[78, 108], [108, 86], [148, 86], [178, 108]]) { jx.beginPath(); jx.ellipse(px, py, 17, 21, 0, 0, Math.PI * 2); jx.fill(); } }
+  else if (num) { jx.strokeText(num, 128, 140); jx.fillText(num, 128, 140); }
+  jx.font = `900 ${num || X.paw ? 46 : top.length > 7 ? 44 : 62}px "Barlow Condensed", Inter, sans-serif`; jx.lineWidth = 6; jx.strokeText(top, 128, num || X.paw ? 40 : 120, 250); jx.fillText(top, 128, num || X.paw ? 40 : 120, 250);
+  const jt = new THREE.CanvasTexture(jc); jt.colorSpace = THREE.NoColorSpace;
+  const dec = mesh(new THREE.PlaneGeometry(0.19, 0.19), new THREE.MeshBasicMaterial({ map: jt, transparent: true, depthWrite: false }), 0, 0.5, 0.124);
+  if (X.over) { mesh(new THREE.BoxGeometry(0.2, 0.2, 0.02), M(X.over), 0, 0.47, 0.118); for (const s of [-1, 1]) mesh(new THREE.BoxGeometry(0.035, 0.16, 0.02), M(X.over), s * 0.07, 0.62, 0.105); dec.position.y = 0.5; dec.position.z = 0.13; }
+  if (X.scarf) { const sc = mesh(new THREE.TorusGeometry(0.1, 0.03, 8, 20), M(X.scarf), 0, 0.71, 0.01); sc.rotation.x = Math.PI / 2; mesh(new THREE.ConeGeometry(0.06, 0.1, 4), M(X.scarf), 0, 0.64, 0.11).rotation.x = Math.PI; }
+  const chain = mesh(new THREE.TorusGeometry(0.085, 0.009, 6, 24), M("#ffcf4a", "#5a3a00"), 0, 0.66, 0.06); chain.rotation.x = 1.25;
+  mesh(new THREE.CylinderGeometry(0.028, 0.028, 0.01, 14), M("#ffcf4a", "#5a3a00"), 0, 0.615, 0.122).rotation.x = Math.PI / 2;
+  // arms: shoulder and elbow pivots, the sleeve in the jersey, the forearm and hand in fur (gloves on a person or a bird)
+  const arm = (s) => {
+    const sh = new THREE.Group(); sh.position.set(s * 0.17, 0.66, 0); body.add(sh);
+    mesh(new THREE.CapsuleGeometry(0.05, 0.12, 4, 10), M(jer), 0, -0.08, 0, sh);
+    const el = new THREE.Group(); el.position.set(0, -0.17, 0); sh.add(el);
+    mesh(new THREE.CapsuleGeometry(0.042, 0.1, 4, 10), M(spec.kind === "human" ? spec.fur : fur), 0, -0.07, 0, el);
+    mesh(sph(0.052, 12, 10), M(spec.kind === "human" || spec.kind === "bird" ? "#f4f4f4" : fur), 0, -0.165, 0.01, el);
+    return { sh, el };
+  };
+  const L = arm(-1), R = arm(1);
+  // the head
+  const neck = new THREE.Group(); neck.position.set(0, 0.74, 0); body.add(neck);
+  const hd = new THREE.Group(); hd.position.set(0, 0.16, 0); hd.scale.setScalar(1.32); neck.add(hd);
+  const H = (geo, mat, x, y, z) => mesh(geo, mat, x, y, z, hd);
+  const eyes = (y, z, sp, r, col) => { for (const s of [-1, 1]) { H(sph(r, 12, 10), M("#ffffff"), s * sp, y, z); H(sph(r * 0.55, 10, 8), M(col || "#111111"), s * sp, y, z + r * 0.62); } };
+  const K = spec.kind;
+  if (K === "bird") {
+    const hc = X.head || fur; const h0 = H(sph(0.15), M(hc)); h0.scale.set(1, 1.02, 1.05);
+    if (X.face) { const f = H(sph(0.11), M(X.face), 0, 0.02, 0.06); f.scale.set(1.15, 0.6, 0.8); }
+    if (X.mask) { const f = H(sph(0.11), M(X.mask), 0, 0.03, 0.065); f.scale.set(1.25, 0.55, 0.85); }
+    eyes(0.04, 0.115, 0.062, 0.032, X.eye);
+    if (X.goggles) for (const s of [-1, 1]) H(new THREE.TorusGeometry(0.042, 0.01, 6, 18), M("#2a2a2e"), s * 0.062, 0.04, 0.13);
+    if (X.bill) { const b = H(sph(0.08), M(acc), 0, -0.025, 0.15); b.scale.set(1.2, 0.35, 1.0); }
+    else { const bg = X.beak === "big", b = H(new THREE.ConeGeometry(bg ? 0.07 : 0.05, bg ? 0.24 : 0.16, 12), M(acc), 0, -0.02, bg ? 0.22 : 0.19); b.rotation.x = Math.PI / 2 + 0.25; }
+    for (const s of [-1, 1]) { const b2 = H(new THREE.BoxGeometry(0.1, 0.018, 0.02), M("#111111"), s * 0.06, 0.095, 0.115); b2.rotation.z = s * 0.35; }   // the brows: mean
+    if (X.crest) for (let i = 0; i < 3; i++) { const c = H(new THREE.ConeGeometry(0.03, 0.12, 8), M(X.crestc || hc), 0, 0.16 - i * 0.01, -0.03 - i * 0.045); c.rotation.x = -0.5 - i * 0.25; }
+    else for (let i = 0; i < 3; i++) { const c = H(new THREE.ConeGeometry(0.035, 0.1, 8), M(hc), 0, 0.06 - i * 0.03, -0.13 - i * 0.02); c.rotation.x = -1.9; }
+  } else if (K === "cat" || K === "dog" || K === "bear" || K === "coon") {
+    const h0 = H(sph(0.145), M(fur)); h0.scale.set(1.08, 0.98, 1);
+    if (X.mane) { const m0 = H(new THREE.TorusGeometry(0.15, 0.06, 10, 22), M(X.mane), 0, 0, -0.02); m0.scale.set(1, 1.05, 1); }
+    const mz = K === "dog" ? 0.15 : 0.12, sn = H(sph(K === "dog" ? 0.085 : 0.075), M(acc), 0, -0.04, mz); sn.scale.set(1.15, 0.8, K === "dog" ? 1.25 : 0.9);
+    H(sph(0.026, 10, 8), M("#141414"), 0, -0.01, mz + (K === "dog" ? 0.1 : 0.07));
+    if (X.jowl) for (const s of [-1, 1]) H(sph(0.05), M(acc), s * 0.055, -0.085, 0.12);
+    if (K === "coon") { const mk = H(new THREE.BoxGeometry(0.26, 0.06, 0.02), M("#1b1b1b"), 0, 0.035, 0.13); mk.rotation.x = -0.1; }
+    eyes(0.035, 0.115, 0.058, 0.03, X.eye);
+    if (X.tongue) { const tg = H(sph(0.03, 10, 8), M("#e8708a"), 0, -0.085, mz + 0.05); tg.scale.set(1, 0.5, 1.2); }
+    for (const s of [-1, 1]) {
+      if (K === "bear" || K === "coon") H(sph(0.045), M(fur), s * 0.1, 0.12, -0.01);
+      else if (K === "dog" && X.ears === "flop") { const e = H(sph(0.06), M(acc === "#f2f2f2" ? fur : fur), s * 0.13, 0.03, -0.01); e.scale.set(0.45, 1.3, 0.9); e.rotation.z = s * 0.3; }
+      else { const e = H(new THREE.ConeGeometry(0.05, 0.11, 10), M(fur), s * 0.085, 0.15, -0.01); e.rotation.z = -s * 0.35; }
+    }
+    if (X.stripes) for (let i = 0; i < 3; i++) H(new THREE.BoxGeometry(0.02, 0.07, 0.02), M("#141414"), (i - 1) * 0.04, 0.13, 0.08);
+    if (X.spots) for (let i = 0; i < 5; i++) H(sph(0.016, 8, 6), M("#3b2a14"), Math.cos(i * 1.7) * 0.09, 0.08 + Math.sin(i * 2.3) * 0.03, 0.1);
+  } else if (K === "horse") {
+    H(sph(0.12), M(fur)); const sn = H(new THREE.CapsuleGeometry(0.07, 0.13, 6, 12), M(fur), 0, -0.04, 0.12); sn.rotation.x = Math.PI / 2 - 0.35;
+    H(sph(0.06), M(acc), 0, -0.07, 0.2).scale.set(1.1, 0.8, 0.8);
+    eyes(0.04, 0.09, 0.07, 0.028);
+    for (const s of [-1, 1]) { const e = H(new THREE.ConeGeometry(0.035, 0.1, 8), M(fur), s * 0.06, 0.14, -0.02); e.rotation.z = -s * 0.2; }
+    for (let i = 0; i < 5; i++) H(new THREE.BoxGeometry(0.04, 0.07, 0.05), M(X.mane || "#222222"), 0, 0.12 - i * 0.045, -0.06 - i * 0.025);
+  } else if (K === "bull" || K === "hog") {
+    const h0 = H(sph(0.14), M(fur)); h0.scale.set(1.12, 0.95, 1);
+    const sn = H(new THREE.CylinderGeometry(0.075, 0.08, 0.06, 16), M(K === "hog" ? "#f2b0a8" : acc), 0, -0.04, 0.14); sn.rotation.x = Math.PI / 2;
+    for (const s of [-1, 1]) H(sph(0.014, 8, 6), M("#3a1a14"), s * 0.03, -0.04, 0.172);
+    if (X.ring) H(new THREE.TorusGeometry(0.03, 0.006, 6, 16), M("#d8d8d8"), 0, -0.075, 0.172);
+    eyes(0.045, 0.11, 0.06, 0.028);
+    if (K === "hog") for (const s of [-1, 1]) { const e = H(new THREE.ConeGeometry(0.05, 0.09, 4), M(fur), s * 0.09, 0.13, 0.02); e.rotation.z = -s * 0.5; e.rotation.x = 0.3; }
+    else {
+      const hc = M(X.hornc || acc), hk = X.horns || "bull";
+      for (const s of [-1, 1]) {
+        if (hk === "ram") { for (let i = 0; i < 9; i++) { const a = i * 0.62, r = 0.085 - i * 0.006, hs = H(sph(0.034 - i * 0.0018, 10, 8), hc, s * (0.15 + 0.03 * i / 8), 0.11 + Math.sin(a) * r, -0.02 + Math.cos(a) * r - 0.02); hs.scale.set(1, 1, 1); } }
+        else { const ln = hk === "long" ? 0.3 : hk === "short" ? 0.1 : 0.16, h = H(new THREE.ConeGeometry(0.03, ln, 10), hc, s * (0.13 + ln * 0.4), 0.11, 0); h.rotation.z = -s * (hk === "long" ? 1.35 : 0.9); }
+      }
+    }
+  } else if (K === "gator") {
+    H(sph(0.12), M(fur)).scale.set(1.1, 0.85, 1); const sn = H(new THREE.BoxGeometry(0.17, 0.07, 0.24), M(fur), 0, -0.04, 0.17); sn.rotation.x = 0.06;
+    for (let i = 0; i < 6; i++) for (const s of [-1, 1]) { const tt = H(new THREE.ConeGeometry(0.012, 0.03, 4), M("#ffffff"), s * 0.07, -0.085, 0.08 + i * 0.035); tt.rotation.x = Math.PI; }
+    eyes(0.08, 0.06, 0.06, 0.035);
+  } else if (K === "fish") {
+    const h0 = H(sph(0.14), M(fur)); h0.scale.set(0.95, 1, 1.15); const sn = H(new THREE.CapsuleGeometry(0.04, 0.08, 4, 10), M(fur), 0, -0.05, 0.16); sn.rotation.x = Math.PI / 2;
+    H(sph(0.08), M(acc), 0, -0.06, 0.09).scale.set(1.2, 0.6, 0.8); eyes(0.04, 0.11, 0.065, 0.03);
+    const fin = H(new THREE.ConeGeometry(0.05, 0.14, 4), M(fur), 0, 0.17, -0.04); fin.scale.set(0.3, 1, 1); fin.rotation.x = -0.4;
+    if (X.kind === "shark") for (let i = 0; i < 5; i++) { const tt = H(new THREE.ConeGeometry(0.01, 0.025, 4), M("#ffffff"), (i - 2) * 0.025, -0.075, 0.12); tt.rotation.x = Math.PI; }
+  } else if (K === "ele") {
+    H(sph(0.14), M(fur)); for (const s of [-1, 1]) { const e = H(sph(0.11), M(fur), s * 0.17, 0.0, -0.02); e.scale.set(0.25, 1, 0.9); }
+    for (let i = 0; i < 5; i++) H(sph(0.04 - i * 0.004, 10, 8), M(fur), 0, -0.05 - i * 0.045, 0.14 + Math.sin(i * 0.5) * 0.03);
+    for (const s of [-1, 1]) { const tk = H(new THREE.ConeGeometry(0.018, 0.09, 8), M("#f4efe0"), s * 0.05, -0.08, 0.12); tk.rotation.x = 2.4; }
+    eyes(0.05, 0.11, 0.06, 0.026);
+  } else if (K === "nut") {
+    H(sph(0.17), M(fur)); const cap = H(sph(0.11), M(acc), 0, 0.11, 0.01); cap.scale.set(1, 0.45, 1); eyes(0.03, 0.14, 0.065, 0.034);
+    const sm = H(new THREE.TorusGeometry(0.05, 0.01, 6, 14, Math.PI), M("#2a1508"), 0, -0.05, 0.155); sm.rotation.z = Math.PI;
+  } else {    // a person
+    H(sph(0.13), M(fur)).scale.set(0.95, 1.05, 0.95); eyes(0.03, 0.1, 0.05, 0.028);
+    H(sph(0.024, 8, 6), M(fur), 0, -0.005, 0.13);
+    const sm = H(new THREE.TorusGeometry(0.045, 0.009, 6, 14, Math.PI), M("#5a1a14"), 0, -0.055, 0.115); sm.rotation.z = Math.PI;
+    if (X.beard) { const b = H(sph(0.1), M(X.beard), 0, -0.08, 0.05); b.scale.set(1.1, 0.8, 0.8); }
+    if (X.patch) { H(new THREE.CylinderGeometry(0.03, 0.03, 0.01, 12), M("#111111"), 0.05, 0.03, 0.128).rotation.x = Math.PI / 2; }
+    if (X.stache) for (const sd of [-1, 1]) { const m = H(sph(0.04, 12, 8), M(X.stache), sd * 0.035, -0.035, 0.115); m.scale.set(1.3, 0.55, 0.7); m.rotation.z = sd * 0.25; }
+    if (X.chin) H(sph(0.06, 12, 10), M(fur), 0, -0.1, 0.07).scale.set(1.2, 0.9, 1);
+    if (X.big) hd.scale.setScalar(1.6);
+  }
+  // hats, on whoever wears one
+  { const hat = X.hat, a2 = M(X.hatc || acc), lt = (txt, col, w, x, y, z) => { const c = wdCanvas(128, 128), q = c.getContext("2d"); q.font = `900 104px "Barlow Condensed", Inter, sans-serif`; q.textAlign = "center"; q.textBaseline = "middle"; q.fillStyle = col; q.fillText(txt, 64, 70);
+      const tx = new THREE.CanvasTexture(c); tx.colorSpace = THREE.NoColorSpace; return H(new THREE.PlaneGeometry(w, w), new THREE.MeshBasicMaterial({ map: tx, transparent: true, depthWrite: false }), x, y, z); };
+    if (hat === "cheese") { const w = H(new THREE.CylinderGeometry(0.2, 0.2, 0.13, 3), M("#ffc72c"), 0, 0.15, 0); w.rotation.y = Math.PI / 6; for (let i = 0; i < 5; i++) H(sph(0.02, 8, 6), M("#d99a10"), Math.cos(i * 1.3) * 0.1, 0.13 + (i % 2) * 0.04, 0.1); }
+    else if (hat === "cap") { const d = H(new THREE.SphereGeometry(0.15, 20, 10, 0, Math.PI * 2, 0, Math.PI * 0.5), a2, 0, 0.085, -0.01); d.scale.set(1.04, 0.8, 1.04); H(new THREE.BoxGeometry(0.16, 0.012, 0.11), a2, 0, 0.092, 0.16).rotation.x = -0.12; if (X.hatL) lt(X.hatL, X.hatLc || "#fff", 0.1, 0, 0.16, 0.115).rotation.x = -0.55; }
+    else if (hat === "cowboy") { H(new THREE.CylinderGeometry(0.25, 0.25, 0.015, 24), a2, 0, 0.1, 0); H(new THREE.CylinderGeometry(0.1, 0.125, 0.15, 18), a2, 0, 0.185, 0); if (X.band) H(new THREE.CylinderGeometry(0.127, 0.127, 0.035, 18), M(X.band), 0, 0.13, 0);
+      if (X.star) lt("★", "#041e42", 0.1, 0, 0.19, 0.105); }
+    else if (hat === "tricorn") { H(sph(0.13), a2, 0, 0.12, -0.01).scale.set(1, 0.62, 1);
+      for (let i = 0; i < 3; i++) { const a = (i / 3) * Math.PI * 2, f = new THREE.Group(); f.position.set(0, 0.13, 0); f.rotation.y = a + Math.PI / 3; hd.add(f);
+        const fl = new THREE.Mesh(new THREE.BoxGeometry(0.2, 0.11, 0.018), a2); fl.position.set(0, 0.025, 0.12); fl.rotation.x = -0.35; f.add(fl);
+        const tr = new THREE.Mesh(new THREE.BoxGeometry(0.2, 0.014, 0.022), M("#f2f2f2")); tr.position.set(0, 0.08, 0.1); tr.rotation.x = -0.35; f.add(tr); } }
+    else if (hat === "viking") { H(new THREE.SphereGeometry(0.15, 18, 10, 0, Math.PI * 2, 0, Math.PI * 0.5), a2, 0, 0.03, 0); H(new THREE.TorusGeometry(0.15, 0.015, 6, 24), M(X.hornc || "#ffc62f"), 0, 0.035, 0).rotation.x = Math.PI / 2;
+      for (const sd of [-1, 1]) { const h = H(new THREE.ConeGeometry(0.04, 0.2, 10), M(X.hornc || "#f4efe0"), sd * 0.17, 0.15, 0); h.rotation.z = -sd * 0.75; } }
+    else if (hat === "pirate") { const c = H(new THREE.CylinderGeometry(0.21, 0.21, 0.08, 3), M(X.hatc || "#141414"), 0, 0.14, 0); c.rotation.y = Math.PI; H(sph(0.025, 8, 6), M("#f2f2f2"), 0, 0.17, 0.11); H(new THREE.BoxGeometry(0.3, 0.03, 0.03), M("#141414"), 0, 0.1, 0.06); }
+    else if (hat === "hard" || hat === "miner") { H(new THREE.SphereGeometry(0.15, 18, 10, 0, Math.PI * 2, 0, Math.PI * 0.5), a2, 0, 0.04, -0.01); H(new THREE.CylinderGeometry(0.19, 0.19, 0.012, 24), a2, 0, 0.06, 0.02); H(new THREE.BoxGeometry(0.02, 0.06, 0.24), a2, 0, 0.17, 0); if (hat === "miner") H(sph(0.025, 8, 6), M("#ffffaa", "#ffff66"), 0, 0.09, 0.14); }
+    else if (hat === "boltmask") { const m = H(new THREE.SphereGeometry(0.152, 20, 12, 0, Math.PI * 2, 0, Math.PI * 0.62), a2, 0, 0.0, 0.0); m.rotation.x = 0.2;
+      for (const sd of [-1, 1]) { H(new THREE.BoxGeometry(0.05, 0.022, 0.02), M("#141414"), sd * 0.05, 0.03, 0.142); } const b = H(new THREE.BoxGeometry(0.03, 0.16, 0.02), M("#f2f2f2"), 0, 0.13, 0.1); b.rotation.z = 0.5; b.rotation.x = -0.6; }
+    else if (hat === "helmet" || hat === "bolt" || hat === "pilot" || hat === "trojan") { const hm = H(new THREE.SphereGeometry(0.158, 20, 12, 0, Math.PI * 2, 0, Math.PI * 0.56), a2, 0, 0.0, -0.015); hm.rotation.x = -0.25;
+      if (X.stripe) H(new THREE.BoxGeometry(0.03, 0.02, 0.3), M(X.stripe), 0, 0.15, -0.01);
+      if (X.eyemask) H(new THREE.BoxGeometry(0.2, 0.05, 0.03), M("#141414"), 0, 0.03, 0.115);
+      if (hat === "trojan") for (let i = 0; i < 7; i++) H(new THREE.BoxGeometry(0.03, 0.06, 0.05), M("#c8102e"), 0, 0.19 - Math.abs(i - 3) * 0.006, -0.12 + i * 0.04);
+      if (hat === "bolt") { const b = H(new THREE.BoxGeometry(0.02, 0.15, 0.03), M("#ffc20e"), 0.06, 0.08, 0.1); b.rotation.z = 0.4; }
+      if (hat === "pilot") { for (const sd of [-1, 1]) H(new THREE.CylinderGeometry(0.035, 0.035, 0.03, 14), M("#9ad1ff", "#335577"), sd * 0.05, 0.1, 0.12).rotation.x = Math.PI / 2; }
+      if (hat === "helmet") { const mk = M(X.mask || "#c8c8c8"); for (const y of [-0.045, -0.085]) H(new THREE.BoxGeometry(0.2, 0.012, 0.012), mk, 0, y, 0.135); for (const sd of [-1, 1]) H(new THREE.BoxGeometry(0.012, 0.07, 0.012), mk, sd * 0.05, -0.065, 0.135); } }
+    else if (hat === "lep") { H(new THREE.CylinderGeometry(0.22, 0.22, 0.012, 24), a2, 0, 0.1, 0); H(new THREE.CylinderGeometry(0.1, 0.11, 0.17, 18), a2, 0, 0.19, 0); H(new THREE.BoxGeometry(0.06, 0.04, 0.012), M("#ffd24a"), 0, 0.13, 0.11); }
+    if (X.shades) { for (const sd of [-1, 1]) H(new THREE.BoxGeometry(0.075, 0.045, 0.02), M("#101014"), sd * 0.055, 0.04, 0.135); H(new THREE.BoxGeometry(0.05, 0.012, 0.02), M("#101014"), 0, 0.05, 0.138); }
+  }
+  // headphones on everyone
+  const hp = M("#16181d"), hb = H(new THREE.TorusGeometry(0.16, 0.014, 6, 24, Math.PI), hp, 0, 0.02, -0.01); hb.rotation.z = 0;
+  for (const s of [-1, 1]) { const cup = H(new THREE.CylinderGeometry(0.055, 0.055, 0.04, 16), hp, s * 0.16, 0.0, 0); cup.rotation.z = Math.PI / 2; H(new THREE.CylinderGeometry(0.035, 0.035, 0.042, 14), M(jer2, jer2), s * 0.162, 0.0, 0).rotation.z = Math.PI / 2; }
+  const A = { root, body, L, R, neck, hd, torso, cur: null, act: null, mats, grad, jt };
+  return A;
+}
+// the poses: shoulder (forward/up, out) and elbow per arm, a lean, the head
+const WD_MPOSE = {
+  decks: [-0.5, -0.12, -0.62, -0.5, 0.12, -0.62, 0.14],
+  fist: [-0.5, -0.12, -0.62, -2.75, 0.22, -0.2, 0.02],
+  up: [-2.75, -0.32, -0.15, -2.75, 0.32, -0.15, -0.06],
+  point: [-0.5, -0.12, -0.62, -1.5, 0.35, -0.05, 0.04],
+  phones: [-0.3, -1.25, -2.35, -0.5, 0.12, -0.62, 0.1],
+  clap: [-2.85, -0.12, -0.35, -2.85, 0.12, -0.35, -0.04],
+  wave: [-2.55, -0.3, -0.2, -2.55, 0.3, -0.2, -0.04],
+  wing: [-0.15, -1.45, -0.1, -0.15, 1.45, -0.1, -0.08],
+  sad: [-2.1, -0.95, -2.2, -2.1, 0.95, -2.2, 0.2],
+  hype: [-0.6, -0.5, -1.2, -2.6, 0.3, -0.25, 0.0],
+};
+// a 64-beat set, and between sets a slower hype loop
+const WD_MSET = [[0, "up"], [4, "decks"], [12, "fist"], [16, "decks"], [24, "point"], [28, "phones"], [32, "clap"], [40, "wave"], [44, "decks"], [56, "wing"], [62, "decks"]];
+const WD_MIDLE = [[0, "decks"], [8, "hype"], [12, "decks"], [20, "clap"], [24, "point"], [28, "up"], [30, "decks"]];
+function wdMascotTick(A, dt, t, beat, mode, H) {
+  if (!A) return;
+  const set = mode === "dj", list = set ? WD_MSET : WD_MIDLE, n = set ? 64 : 32, b = ((beat % n) + n) % n;
+  let name = list[0][1]; for (const [k, v] of list) if (b >= k) name = v;
+  if (A.act && A.act.until > t) name = A.act.kind === "sad" ? "sad" : "up";
+  const P = WD_MPOSE[name] || WD_MPOSE.decks, ph = beat % 1, pulse = Math.exp(-ph * 5), sw = Math.sin(beat * Math.PI / 2);
+  const tg = P.slice();
+  if (name === "decks") { tg[1] += 0.14 * Math.sin(beat * Math.PI * 2 * (b % 4 >= 3 ? 2 : 1)); tg[4] += 0.05 * Math.sin(beat * Math.PI); }
+  if (name === "fist" || name === "up") { tg[5] -= 0.5 * pulse; if (name === "up") tg[2] -= 0.5 * pulse; }
+  if (name === "point") tg[3] -= 0.18 * pulse;
+  if (name === "clap") { const o = Math.sin(Math.PI * ((beat + 0.04) % 1)); tg[1] -= 0.18 * o; tg[4] += 0.18 * o; }
+  if (name === "wave") { tg[1] += 0.4 * sw; tg[4] += 0.4 * sw; }
+  if (name === "hype") { tg[4] += 0.35 * Math.sin(t * 6); }
+  if (!A.cur) A.cur = tg.slice();
+  const k = 1 - Math.exp(-dt * 11); for (let i = 0; i < tg.length; i++) A.cur[i] += (tg[i] - A.cur[i]) * k;
+  const c = A.cur;
+  A.L.sh.rotation.set(c[0], 0, c[1]); A.L.el.rotation.set(c[2], 0, 0); A.R.sh.rotation.set(c[3], 0, c[4]); A.R.el.rotation.set(c[5], 0, 0);
+  A.body.rotation.x = c[6]; A.body.rotation.z = (name === "wave" ? 0.09 : 0.04) * sw;
+  const jump = A.act && A.act.until > t && A.act.kind !== "sad" ? Math.abs(Math.sin(t * 7.5)) * 0.14 : 0;
+  A.body.position.y = 0.018 * pulse * (set ? 1 : 0.6) + jump;
+  A.neck.rotation.x = (name === "sad" ? 0.45 : name === "up" || name === "clap" || name === "wave" ? -0.22 : 0.08) + 0.16 * pulse;
+  A.neck.rotation.y = 0.12 * Math.sin(beat * Math.PI / 4);
+}
+// the booth he's behind: decks, a mixer, the front lit in the team's colors
+function wdMascotBooth(THREE, team, w, h, d) {
+  const g = new THREE.Group(), c = wdCanvas(1024, 256), x = c.getContext("2d"), col = team.colHex || "#333333", alt = team.altHex || "#ffc94d";
+  const gr = x.createLinearGradient(0, 0, 1024, 0); gr.addColorStop(0, "#07080c"); gr.addColorStop(0.5, col); gr.addColorStop(1, "#07080c"); x.fillStyle = gr; x.fillRect(0, 0, 1024, 256);
+  x.fillStyle = alt; x.fillRect(0, 10, 1024, 8); x.fillRect(0, 238, 1024, 8);
+  x.font = `900 120px "Barlow Condensed", Inter, sans-serif`; x.textAlign = "center"; x.textBaseline = "middle"; x.shadowColor = alt; x.shadowBlur = 30; x.fillStyle = "#ffffff"; x.fillText("SWEAT ZONE", 512, 132);
+  const tx = new THREE.CanvasTexture(c); tx.colorSpace = THREE.NoColorSpace;
+  const dark = new THREE.MeshBasicMaterial({ color: new THREE.Color().setRGB(0.03, 0.032, 0.04, THREE.LinearSRGBColorSpace) });
+  const box = new THREE.Mesh(new THREE.BoxGeometry(w, h, d), [dark, dark, dark, dark, new THREE.MeshBasicMaterial({ map: tx }), dark]); box.position.y = h / 2; g.add(box);
+  const top = new THREE.MeshBasicMaterial({ color: new THREE.Color().setRGB(0.06, 0.065, 0.08, THREE.LinearSRGBColorSpace) }), plat = [];
+  for (const s of [-1, 1]) { const tt = new THREE.Mesh(new THREE.BoxGeometry(w * 0.26, h * 0.12, d * 0.8), top); tt.position.set(s * w * 0.26, h + h * 0.06, 0); g.add(tt);
+    const p = new THREE.Mesh(new THREE.CylinderGeometry(w * 0.1, w * 0.1, h * 0.03, 24), new THREE.MeshBasicMaterial({ color: new THREE.Color().setRGB(0.015, 0.015, 0.02, THREE.LinearSRGBColorSpace) })); p.position.set(s * w * 0.26, h + h * 0.135, 0); g.add(p); plat.push(p);
+    const lab = new THREE.Mesh(new THREE.CylinderGeometry(w * 0.03, w * 0.03, h * 0.032, 16), new THREE.MeshBasicMaterial({ color: new THREE.Color().setRGB(...wdLift(wdHex(alt), 0.4), THREE.LinearSRGBColorSpace) })); lab.position.copy(p.position); lab.position.y += 0.002; g.add(lab); }
+  const mx = new THREE.Mesh(new THREE.BoxGeometry(w * 0.18, h * 0.14, d * 0.75), top); mx.position.set(0, h + h * 0.07, 0); g.add(mx);
+  g.userData.plat = plat; g.userData.tex = tx;
+  return g;
+}
+// ---- football: the game's own stadium. What makes each one itself in a few fields: the decks (one big bowl, an upper deck
+// along the sides, or all the way round), the roof (open, a dome, a retractable one, glass, canopies over the sidelines), the
+// seat color, the video boards (one end, both ends, center-hung, a halo) and a landmark or two. Units are yards ----
+// up: 0 one bowl, 1 upper deck on the sides, 2 all round; boards: e | both | center | halo; low: an end that's low (e | w)
+const WD_FBS = {
+  ARI: { nm: "State Farm Stadium", roof: "retract", seat: "#8c1d2e", boards: "both" }, ATL: { nm: "Mercedes-Benz Stadium", roof: "retract", seat: "#2a2a2e", boards: "halo", up: 2, f: ["petals"] },
+  BAL: { nm: "M&T Bank Stadium", seat: "#3d2a7a", boards: "both" }, BUF: { nm: "Highmark Stadium", roof: "canopy", seat: "#1d3f8f", boards: "both", up: 2 },
+  CAR: { nm: "Bank of America Stadium", seat: "#14181d", boards: "both" }, CHI: { nm: "Soldier Field", seat: "#1d2a44", boards: "e", f: ["colonnade"] },
+  CIN: { nm: "Paycor Stadium", seat: "#202020", boards: "both" }, CLE: { nm: "Huntington Bank Field", seat: "#e65a1f", boards: "both", f: ["lake"] },
+  DAL: { nm: "AT&T Stadium", roof: "retract", seat: "#3a4b63", boards: "center", up: 2, f: ["arches"] }, DEN: { nm: "Empower Field at Mile High", seat: "#d9531a", boards: "e", f: ["bronco"] },
+  DET: { nm: "Ford Field", roof: "dome", seat: "#1d5e99", boards: "both", up: 2 }, GB: { nm: "Lambeau Field", up: 0, seat: "#9aa0a6", boards: "both", f: ["g"] },
+  HOU: { nm: "NRG Stadium", roof: "retract", seat: "#8e1b2c", boards: "both", up: 2 }, IND: { nm: "Lucas Oil Stadium", roof: "retract", seat: "#1d3b66", boards: "both", up: 2, f: ["window"] },
+  JAX: { nm: "EverBank Stadium", seat: "#1f6b77", boards: "both" }, KC: { nm: "Arrowhead Stadium", seat: "#b51d2c", boards: "both", up: 2 },
+  LV: { nm: "Allegiant Stadium", roof: "dome", seat: "#1d1d20", boards: "both", up: 2, f: ["torch"] }, LAC: { nm: "SoFi Stadium", roof: "glass", seat: "#4d5560", boards: "halo", up: 2 },
+  LAR: { nm: "SoFi Stadium", roof: "glass", seat: "#4d5560", boards: "halo", up: 2 }, MIA: { nm: "Hard Rock Stadium", roof: "canopy", seat: "#14808a", boards: "both", up: 2 },
+  MIN: { nm: "U.S. Bank Stadium", roof: "glass", seat: "#4a2a7a", boards: "both", up: 2, f: ["horn"] }, NE: { nm: "Gillette Stadium", seat: "#2a3550", boards: "e", f: ["lighthouse"] },
+  NO: { nm: "Caesars Superdome", roof: "dome", seat: "#2a2a2a", boards: "both", up: 2 }, NYG: { nm: "MetLife Stadium", seat: "#55595e", boards: "both", up: 2 },
+  NYJ: { nm: "MetLife Stadium", seat: "#55595e", boards: "both", up: 2 }, PHI: { nm: "Lincoln Financial Field", seat: "#1d4f55", boards: "both" },
+  PIT: { nm: "Acrisure Stadium", seat: "#e0a419", boards: "e", low: "w", f: ["river"] }, SF: { nm: "Levi's Stadium", seat: "#a01c1c", boards: "both", f: ["tower"] },
+  SEA: { nm: "Lumen Field", roof: "canopy", seat: "#3a4350", boards: "e", low: "e", f: ["flag12"] }, TB: { nm: "Raymond James Stadium", seat: "#b51d1d", boards: "both", f: ["ship"] },
+  TEN: { nm: "Nissan Stadium", seat: "#3f7fc8", boards: "both" }, WSH: { nm: "Northwest Stadium", seat: "#5a1a1e", boards: "both" },
+};
+// college: by the venue's name
+const WD_CFS = [
+  [/michigan stadium/i, { up: 0, seat: "#8a8c90", boards: "both", hi: 1.15 }], [/ohio stadium/i, { seat: "#5a5d62", boards: "e", low: "e", f: ["rotunda"] }],
+  [/bryant-denny/i, { seat: "#9e1b32", boards: "both", up: 2 }], [/jordan-hare/i, { seat: "#103a6b", boards: "both" }], [/tiger stadium/i, { seat: "#4a2a7a", boards: "both", up: 2 }],
+  [/neyland/i, { seat: "#e8822a", boards: "both", up: 2, f: ["checker"] }], [/darrell k royal|dkr/i, { seat: "#bf5700", boards: "both", up: 2 }], [/kyle field/i, { seat: "#5c0025", boards: "both", up: 2 }],
+  [/ben hill griffin|the swamp/i, { seat: "#0b2a7a", boards: "both", up: 0 }], [/beaver stadium/i, { seat: "#d8dadc", boards: "both", up: 2 }], [/notre dame stadium/i, { up: 0, seat: "#3a3d42", boards: "e", f: ["mural"] }],
+  [/memorial coliseum|coliseum/i, { up: 0, seat: "#7a1d1d", boards: "e", low: "e", f: ["peristyle", "torch"] }], [/rose bowl/i, { up: 0, seat: "#6b7078", boards: "both", f: ["hills"] }],
+  [/autzen/i, { seat: "#1f5a2c", boards: "both" }], [/kinnick/i, { seat: "#1d1d1d", boards: "both" }], [/sanford/i, { seat: "#9e1b32", boards: "both", up: 2 }],
+  [/clemson|memorial stadium \(clemson/i, { up: 0, seat: "#e06a1c", boards: "both", f: ["hills"] }], [/vaught-hemingway/i, { seat: "#1d2a5a", boards: "both", up: 2 }],
+  [/lavell edwards/i, { up: 0, seat: "#1d3a6b", boards: "both", f: ["hills"] }], [/kenan/i, { up: 0, seat: "#7bafd4", boards: "both", f: ["pines"] }],
+];
+function wdFbSpec(R) {
+  const S = R.scene && R.scene.game, h = S ? S.h : null, vn = (S && S.ven && S.ven.nm) || (R.ven && R.ven.nm) || "";
+  let fs = null; for (const v of Object.values(WD_FBS)) if (vn && v.nm && vn.toLowerCase().includes(v.nm.toLowerCase().slice(0, 12))) { fs = Object.assign({}, v); break; }
+  if (!fs) for (const [re, v] of WD_CFS) if (re.test(vn)) { fs = Object.assign({ nm: vn }, v); break; }
+  if (!fs && h && S.sport === "NFL" && WD_FBS[h.ab]) fs = Object.assign({}, WD_FBS[h.ab]);
+  if (!fs) fs = { nm: vn || "", seat: h && h.col ? h.col : "#3a3f48", boards: "both", up: S && S.sport === "CFB" ? 0 : 1, roof: S && S.ven && S.ven.indoor ? "dome" : "open" };
+  if (S && S.ven && S.ven.indoor && (!fs.roof || fs.roof === "open" || fs.roof === "canopy")) fs.roof = "dome";
+  fs.up = fs.up ?? 1; fs.f = fs.f || []; fs.roof = fs.roof || "open"; fs.boards = fs.boards || "both";
+  return fs;
+}
+// the venue: the generic football stadium reshaped to the spec
+function wdFbVenue(fs) {
+  const B = WD_V.nfl, V = Object.assign({}, B), hi = fs.hi || 1, A = V.A;
+  const sides = fs.boards === "e" ? (x) => x < 54 : fs.boards === "both" ? (x) => Math.abs(x) < 54 : null;
+  const lowF = fs.low ? (u) => { const x = Math.cos(u * Math.PI * 2) * (fs.low === "e" ? 1 : -1); return x > 0.55 ? 0.45 + 0.55 * Math.max(0, Math.min(1, (0.9 - x) / 0.35)) : 1; } : null;
+  const lower = { o0: 3.5, o1: fs.up === 0 ? 44 * hi : 31, y0: 2, y1: fs.up === 0 ? 27 * hi : 16, rows: fs.up === 0 ? 60 : 30, fanRows: fs.up === 0 ? 30 : 22 };
+  if (lowF) lower.y1f = (u) => lower.y0 + (lower.y1 - lower.y0) * lowF(u);
+  V.tiers = [lower];
+  if (fs.up === 0) V.tiers.push({ suite: 1, o0: lower.o1 + 0.6, y0: lower.y1 + 0.6, y1: lower.y1 + 5, keep: (x) => Math.abs(x) < 50 });
+  else {
+    const kp = fs.up === 2 ? (fs.low ? (x) => (fs.low === "e" ? x < 54 : x > -54) : null) : sides || ((x) => x < 54);
+    V.tiers.push({ suite: 1, o0: 31.6, y0: 16.6, y1: 21.8, keep: kp || undefined }, { o0: 33, o1: 62, y0: 23.5, y1: 46, rows: 32, fanRows: 14, gap: 1.25, keep: kp || undefined });
+  }
+  const top = Math.max(...V.tiers.map((t) => t.y1)), outer = Math.max(...V.tiers.map((t) => t.o1 || t.o0));
+  V.ribs = [{ o: 3.4, y0: 0, y1: 1.9 }].concat(fs.up === 0 ? [] : [{ o: 32.9, y0: 22, y1: 23.5, keep: V.tiers[1].keep }]);
+  // the boards: over the end (or both), hung in the middle, or a halo
+  const endUp = fs.up === 2 && !fs.low, bh = 29.25, bw = 52;
+  const endP = (s) => (endUp ? [s * (A + outer + 3), top + bh / 2 + 2, 0] : [s * (A + 46), 31, 0]);
+  if (fs.boards === "center" || fs.boards === "halo") V.jumbo = { p: [0, fs.boards === "halo" ? 62 : 52, 0], hung: 1, w: fs.boards === "halo" ? 34 : 46, h: fs.boards === "halo" ? 12 : 20, halo: fs.boards === "halo" };
+  else V.jumbo = { p: endP(1), face: [-1, 0, 0], w: bw, h: bh, legs: endUp ? 0 : 1, base: endUp ? top : null };
+  V.jumbo2 = fs.boards === "both" ? { p: endP(-1), face: [1, 0, 0], w: bw, h: bh, legs: endUp ? 0 : 1, base: endUp ? top : null } : null;
+  V.roof = fs.roof === "dome" || fs.roof === "retract" ? 78 : fs.roof === "glass" ? 74 : 0; V.dome = fs.roof === "dome" || fs.roof === "retract";
+  V.towers = []; V.fs = fs; V.top = top; V.outer = outer;
+  V.board = { p: [-18, 33, 64], l: [16, 4, -22], f: 52 };
+  return V;
+}
+// what goes up after the decks: the roof, the rim lights, the landmarks, the second board
+function wdFbBuild(st, fs) {
+  const THREE = st.THREE, V = st.V, C = st.C, scene = st.scene, T = st.R.T, glow = st.glowAt;
+  const col = (h, k) => { const c = Array.isArray(h) ? h : wdHex(h); return new THREE.Color().setRGB(c[0] * (k || 1), c[1] * (k || 1), c[2] * (k || 1), THREE.LinearSRGBColorSpace); };
+  const flat = (h, k) => new THREE.MeshBasicMaterial({ color: col(h, k) });
+  const add = (geo, mat, x, y, z) => { const m = new THREE.Mesh(geo, mat); m.position.set(x, y, z); scene.add(m); return m; };
+  const top = V.top, outer = V.outer, A = V.A, B = V.B;
+  // the outside wall of the bowl, up to the top row
+  const fac = wdBand(THREE, C, { o0: outer + 0.4, y0: 0, y1: top + 1.5 }, 360); scene.add(new THREE.Mesh(fac, new THREE.MeshBasicMaterial({ color: col([0.05, 0.055, 0.07]), side: THREE.DoubleSide })));
+  // the roof
+  if (V.dome) {
+    const rim = Math.max(A, B) + outer + 4, Hh = 26, Rs = (rim * rim + Hh * Hh) / (2 * Hh), th = Math.asin(Math.min(1, rim / Rs));
+    const mat = new THREE.ShaderMaterial({ side: THREE.BackSide, uniforms: { uSpokes: { value: fs.roof === "retract" ? 6 : 28 }, uRings: { value: 1 }, uT: { value: 0 }, uBase: { value: new THREE.Vector3(...(fs.roof === "retract" ? [0.2, 0.21, 0.24] : [0.55, 0.57, 0.6])) }, uLine: { value: new THREE.Vector3(0.12, 0.13, 0.15) } },
+      vertexShader: "varying vec3 vP; void main(){ vP = position; gl_Position = projectionMatrix * modelViewMatrix * vec4(position, 1.0); }", fragmentShader: WD_DOME });
+    const d = new THREE.Mesh(new THREE.SphereGeometry(Rs, 72, 18, 0, Math.PI * 2, 0, th), mat); d.scale.set(1, 1, (B + outer + 4) / rim); d.position.set(0, top + 8 + Hh - Rs, 0); scene.add(d); st.mats.push(mat);
+    for (let i = 0; i < 20; i++) { const a = (i / 20) * Math.PI * 2; glow([Math.cos(a) * (A + 20), top + 12, Math.sin(a) * (B + 18)], 22, [1, 0.97, 0.9], 0.5); }
+  } else if (fs.roof === "glass") {
+    const c = wdCanvas(512, 512), x = c.getContext("2d"); x.fillStyle = "rgba(200,220,255,.08)"; x.fillRect(0, 0, 512, 512); x.strokeStyle = "rgba(220,235,255,.5)"; x.lineWidth = 3; for (let i = 0; i <= 512; i += 64) { x.beginPath(); x.moveTo(i, 0); x.lineTo(i, 512); x.stroke(); x.beginPath(); x.moveTo(0, i); x.lineTo(512, i); x.stroke(); }
+    const tx = wdTex(THREE, c); tx.wrapS = tx.wrapT = THREE.RepeatWrapping; tx.repeat.set(8, 5); st.tex.push(tx);
+    const r = add(new THREE.PlaneGeometry((A + outer) * 2.2, (B + outer) * 2.2), new THREE.MeshBasicMaterial({ map: tx, transparent: true, depthWrite: false, side: THREE.DoubleSide }), 0, top + 22, 0); r.rotation.x = Math.PI / 2;
+    for (let i = 0; i < 24; i++) { const a = (i / 24) * Math.PI * 2; glow([Math.cos(a) * (A + 24), top + 18, Math.sin(a) * (B + 22)], 20, [1, 0.97, 0.9], 0.45); }
+  } else {
+    // open: lights all round the rim, and canopies over the sidelines where there are some
+    for (let i = 0; i < 56; i++) { const p = wdNorm(C, (i + 0.5) / 56), o = outer + 1; glow([p[0] + p[2] * o, top + 6, p[1] + p[3] * o], 9, [1, 0.97, 0.9], 0.45); glow([p[0] + p[2] * o, top + 6, p[1] + p[3] * o], 2.6, [1, 1, 1], 0.95); }
+    if (fs.roof === "canopy") for (const s of [-1, 1]) { const g = wdBand(THREE, C, { o0: 20, o1: outer + 2, y0: top + 9, y1: top + 6, keep: (x, z) => Math.abs(x) < 64 && z * s > 0 }, 360);
+      scene.add(new THREE.Mesh(g, new THREE.MeshBasicMaterial({ color: col([0.16, 0.17, 0.2]), side: THREE.DoubleSide }))); }
+  }
+  // the second board, at the other end
+  if (V.jumbo2) wdFbBoard(st, V.jumbo2);
+  // landmarks
+  const F = fs.f, h = T.h;
+  const sign = (txt, c2, w, x, y, z, ry) => { const tx = wdTex(THREE, wdNeonArt(txt, c2)); st.tex.push(tx); const m = add(new THREE.PlaneGeometry(w, w / 4), new THREE.MeshBasicMaterial({ map: tx, transparent: true, blending: THREE.AdditiveBlending, depthWrite: false, side: THREE.DoubleSide }), x, y, z); m.rotation.y = ry || 0; return m; };
+  if (F.includes("colonnade")) for (const s of [-1, 1]) for (let i = 0; i < 12; i++) add(new THREE.CylinderGeometry(1.2, 1.4, 22, 12), flat([0.72, 0.7, 0.66]), -55 + i * 10, top + 9, s * (B + outer + 3));
+  if (F.includes("lighthouse")) { const lx = A + 40, lz = -30; add(new THREE.CylinderGeometry(2.2, 3.4, 44, 16), flat([0.92, 0.92, 0.9]), lx, 22, lz); add(new THREE.CylinderGeometry(2.6, 2.6, 4, 16), flat([0.2, 0.22, 0.26]), lx, 46, lz); glow([lx, 46, lz], 34, [1, 0.95, 0.75], 0.9); }
+  if (F.includes("ship")) { const sx = -(A + 30), sz = -18; add(new THREE.BoxGeometry(10, 6, 36), flat([0.38, 0.22, 0.12]), sx, 20, sz); for (const k of [-10, 0, 10]) { add(new THREE.CylinderGeometry(0.4, 0.4, 22, 6), flat([0.3, 0.2, 0.1]), sx, 34, sz + k); add(new THREE.PlaneGeometry(9, 10), flat([0.9, 0.88, 0.8]), sx + 0.4, 36, sz + k).rotation.y = Math.PI / 2; } }
+  if (F.includes("bronco") || F.includes("torch")) { const bx = A + 46, by = 31 + 29.25 / 2 + 7; if (F.includes("torch")) { add(new THREE.CylinderGeometry(0.8, 1.6, 30, 12), flat([0.75, 0.75, 0.78]), -(A + 34), 26, 0); glow([-(A + 34), 43, 0], 26, [1, 0.6, 0.2], 1); glow([-(A + 34), 43, 0], 10, [1, 0.9, 0.6], 1); }
+    void bx; void by; void sign; }
+  if (F.includes("flag12")) { add(new THREE.CylinderGeometry(0.4, 0.4, 34, 8), flat([0.8, 0.8, 0.82]), -(A + 34), 17 + top * 0.3, -20); const fc = wdCanvas(256, 160), fx = fc.getContext("2d"); fx.fillStyle = "#002244"; fx.fillRect(0, 0, 256, 160); fx.fillStyle = "#69be28"; fx.font = "900 120px Barlow Condensed, Inter, sans-serif"; fx.textAlign = "center"; fx.textBaseline = "middle"; fx.fillText("12", 128, 86);
+    const ft = wdTex(THREE, fc); st.tex.push(ft); const fl = add(new THREE.PlaneGeometry(12, 7.5), new THREE.MeshBasicMaterial({ map: ft, side: THREE.DoubleSide }), -(A + 34) + 6.2, 17 + top * 0.3 + 13, -20); fl.rotation.y = Math.PI / 2; st.flag = fl; }
+  if (F.includes("lake") || F.includes("river")) { const w = add(new THREE.PlaneGeometry(900, 500), flat([0.02, 0.06, 0.1]), F.includes("lake") ? 0 : -(A + 300), -0.2, F.includes("lake") ? -(B + 330) : 0); w.rotation.x = -Math.PI / 2; }
+  if (F.includes("hills") || F.includes("pines")) for (let i = 0; i < 30; i++) { const a = (i / 30) * Math.PI * 2, r = Math.max(A, B) + outer + 60 + (i % 3) * 20; add(new THREE.ConeGeometry(F.includes("pines") ? 8 : 40, F.includes("pines") ? 40 : 30, 8), flat(F.includes("pines") ? [0.03, 0.08, 0.05] : [0.05, 0.07, 0.06]), Math.cos(a) * r, 12, Math.sin(a) * r); }
+  if (F.includes("peristyle")) { for (let i = 0; i < 9; i++) { const z = -32 + i * 8; add(new THREE.BoxGeometry(3, 26, 2.4), flat([0.78, 0.74, 0.66]), A + 38, 13, z); } add(new THREE.BoxGeometry(3.4, 4, 70), flat([0.78, 0.74, 0.66]), A + 38, 27, 0); }
+  if (F.includes("rotunda")) { add(new THREE.CylinderGeometry(9, 9, 18, 24), flat([0.62, 0.55, 0.45]), A + 52, 9, 0); add(new THREE.SphereGeometry(9, 20, 10, 0, Math.PI * 2, 0, Math.PI / 2), flat([0.4, 0.42, 0.4]), A + 52, 18, 0); }
+  if (F.includes("mural")) { const mc = wdCanvas(512, 512), mx = mc.getContext("2d"); mx.fillStyle = "#3a2c1e"; mx.fillRect(0, 0, 512, 512); mx.fillStyle = "#d9a94a"; mx.beginPath(); mx.arc(256, 150, 46, 0, 7); mx.fill(); mx.fillRect(220, 190, 72, 260); mx.save(); mx.translate(256, 220); for (const s of [-1, 1]) { mx.save(); mx.rotate(s * -0.6); mx.fillRect(s > 0 ? 20 : -50, -180, 30, 180); mx.restore(); } mx.restore();
+    const mt = wdTex(THREE, mc); st.tex.push(mt); const m = add(new THREE.PlaneGeometry(40, 40), new THREE.MeshBasicMaterial({ map: mt }), -(A + 70), 30, 0); m.rotation.y = Math.PI / 2; }
+  if (F.includes("arches")) for (const s of [-1, 1]) { const ar = add(new THREE.TorusGeometry(110, 1.6, 8, 48, Math.PI), flat([0.75, 0.78, 0.82]), 0, 0, s * (B + 20)); ar.scale.set(1, 0.85, 1); }
+  if (F.includes("petals")) for (let i = 0; i < 8; i++) { const a = (i / 8) * Math.PI * 2, p = add(new THREE.BoxGeometry(46, 1, 22), flat([0.2, 0.21, 0.24]), Math.cos(a) * 52, V.roof - 2, Math.sin(a) * 40); p.rotation.y = -a; p.rotation.z = 0.08; }
+  if (F.includes("horn")) { const hn = add(new THREE.ConeGeometry(4, 22, 16), flat([0.9, 0.86, 0.75]), -(A + 30), top + 14, 0); hn.rotation.z = Math.PI / 2.4; }
+  if (F.includes("window")) { const w = add(new THREE.PlaneGeometry(90, 40), new THREE.MeshBasicMaterial({ color: col([0.25, 0.32, 0.45]), transparent: true, opacity: 0.5 }), -(A + outer + 2), top - 8, 0); w.rotation.y = Math.PI / 2; }
+  if (F.includes("tower")) add(new THREE.BoxGeometry(150, 34, 14), flat([0.12, 0.13, 0.16]), 0, top + 10, -(B + outer + 6));
+  // the home team on top of the main board: the logo, lit
+  if (!V.jumbo.hung && h.lg) { const lc = wdCanvas(512, 512), lx = lc.getContext("2d"), lt = wdTex(THREE, lc); st.tex.push(lt); const J = V.jumbo;
+    const m = add(new THREE.PlaneGeometry(22, 22), new THREE.MeshBasicMaterial({ map: lt, transparent: true, depthWrite: false, side: THREE.DoubleSide }), J.p[0] - 1, J.p[1] + J.h / 2 + 13, J.p[2]); m.rotation.y = -Math.PI / 2;
+    const draw = () => { lx.clearRect(0, 0, 512, 512); if (h.img && h.img.complete && h.img.naturalWidth) { lx.shadowColor = "rgba(255,255,255,.7)"; lx.shadowBlur = 30; lx.drawImage(h.img, 36, 36, 440, 440); lt.needsUpdate = true; } };
+    draw(); st.logoSign = draw; }
+}
+// a board at the end (a screen in the jumbotron's set: it shows what the jumbotron shows)
+function wdFbBoard(st, J) {
+  const THREE = st.THREE, scene = st.scene, n = new THREE.Vector3(...J.face), dark = new THREE.MeshBasicMaterial({ color: new THREE.Color().setRGB(0.03, 0.032, 0.04, THREE.LinearSRGBColorSpace) });
+  const g = new THREE.Group(); g.position.set(...J.p); scene.add(g); g.lookAt(g.position.clone().add(n));
+  g.add(new THREE.Mesh(new THREE.BoxGeometry(J.w + 3, J.h + 3, 2), dark));
+  const m = wdScreenMat(THREE, st.jtex, J.w / J.h, st.otex), s = new THREE.Mesh(new THREE.PlaneGeometry(J.w, J.h), m); s.position.z = 1.02; g.add(s); st.screens.push(s);
+  if (J.legs) for (const s2 of [-1, 1]) { const leg = new THREE.Mesh(new THREE.BoxGeometry(2, J.p[1], 2), dark); leg.position.set(s2 * J.w * 0.3, -J.p[1] / 2, -0.5); g.add(leg); }
+  if (J.base != null) { const hh = J.p[1] - J.h / 2 - (J.base - 3); const sup = new THREE.Mesh(new THREE.BoxGeometry(J.w + 3, hh, 6), dark); sup.position.set(0, -J.h / 2 - hh / 2, -2.5); g.add(sup); }
+  const prev = st.jface; st.jface2 = () => ({ c: g.localToWorld(new THREE.Vector3(0, 0, 1.02)), n: n.clone(), w: J.w, h: J.h });
+  st.jface = (camPos) => { const a = prev(camPos), b = st.jface2(); return !camPos || a.c.distanceTo(camPos) <= b.c.distanceTo(camPos) ? a : b; };
+}
+// fans in the seats: the home side mostly, the visitors in a pocket (a neutral site split down the middle), a few neutral
+function wdFbFans(st) {
+  const V = st.V, R = st.R, S = R.scene && R.scene.game, neutral = !!(S && S.riv && /cocktail|red river|neutral/i.test(S.riv + " " + ((S.ven && S.ven.nm) || "")));
+  const tiers = V.tiers.filter((t) => !t.suite).map((t, i) => Object.assign({}, t, { gap: t.gap || (i ? 1.25 : 0.95) }));
+  const seats = wdFanSeats(st.C, V, tiers, 0.95, 0.86, (x, z, u) => (neutral ? (x < 0 ? 1 : 0) : (u > 0.31 && u < 0.4 ? 1 : Math.abs(Math.sin(x * 3.1 + z * 7.7)) % 1 < 0.06 ? 2 : 0)));
+  const tc = (t) => [wdLift(t.col, 0.12), wdLift(t.alt, 0.12)];
+  const F = wdFansBuild(st, seats, [tc(R.T.h), tc(R.T.a), [[0.8, 0.8, 0.8], [0.15, 0.16, 0.2]]], 1.05);
+  if (F) { F.mat.uniforms.uFl.value = 420; for (const m of st.crowd) m.uniforms.uSO.value = 1; }
+  return F;
+}
+// ---- the war room: when several games are on, the board lives in a TV studio. A curved LED wall: the big screen in the
+// middle (the videos, the room's leaderboard, the fx cards) and a live tile for each game either side (both teams' colors,
+// logos, the score, the clock, who has the ball, the red zone, how many of the room's bets ride on it); the anchor desk; DJ
+// Goldie's deck off to the side; a studio crowd in bleachers and on the floor in the colors of the teams that are on, who go
+// up when their team scores; lights on a ceiling truss. Units are meters ----
+const WD_ROOM_V = { cx: 0, cz: 0, A: 26, B: 18, n: 2, roof: 20, room: 1, tiers: [], fw: [0, 12.5, -15], fwR: 7, dj: { w: 7 }, board: { p: [0, 8.6, 30], l: [0, 6.6, -14], f: 46 } };
+function wdRoomTile(t, W, H) {
+  const c = wdCanvas(W, H), x = c.getContext("2d");
+  if (!t) {
+    const g0 = x.createLinearGradient(0, 0, W, H); g0.addColorStop(0, "#0c1324"); g0.addColorStop(1, "#05070d"); x.fillStyle = g0; x.fillRect(0, 0, W, H);
+    x.textAlign = "center"; x.textBaseline = "middle"; x.font = `900 54px "Barlow Condensed", Inter, sans-serif`; x.fillStyle = "rgba(255,201,77,.85)"; x.fillText("SWEAT CENTER", W / 2, H / 2);
+    x.fillStyle = "rgba(0,0,0,.22)"; for (let i = 0; i < W; i += 3) x.fillRect(i, 0, 1, H); return c;
+  }
+  const ca = wdMix(wdHex(t.a.col), [0, 0, 0], 0.35), ch = wdMix(wdHex(t.h.col), [0, 0, 0], 0.35), live = t.st === "in";
+  const gr = x.createLinearGradient(0, 0, W, 0); gr.addColorStop(0, wdCss(ca)); gr.addColorStop(0.48, wdCss(wdMix(ca, [0, 0, 0], 0.5))); gr.addColorStop(0.52, wdCss(wdMix(ch, [0, 0, 0], 0.5))); gr.addColorStop(1, wdCss(ch)); x.fillStyle = gr; x.fillRect(0, 0, W, H);
+  x.fillStyle = "rgba(0,0,0,.42)"; x.fillRect(0, H - 62, W, 62);
+  x.textAlign = "center"; x.textBaseline = "middle";
+  for (const [s, cx] of [["a", W * 0.22], ["h", W * 0.78]]) {
+    const tm = t[s], im = tm.lg && WD.logos && WD.logos[tm.lg];
+    if (im && im.complete && im.naturalWidth) x.drawImage(im, cx - 58, 26, 116, 116); else { x.font = `900 60px "Barlow Condensed", Inter, sans-serif`; x.fillStyle = "#fff"; x.fillText(tm.ab, cx, 86); }
+    x.font = `800 38px "Barlow Condensed", Inter, sans-serif`; x.fillStyle = "rgba(255,255,255,.92)"; x.fillText((tm.rk ? "#" + tm.rk + " " : "") + tm.ab, cx, 168);
+    if (t.sit && t.sit.pos && String(t.sit.pos) === String(tm.id)) { x.fillStyle = "#ffc94d"; x.beginPath(); x.ellipse(cx + (s === "a" ? 76 : -76), 168, 13, 8, 0, 0, Math.PI * 2); x.fill(); }
+  }
+  x.font = `900 108px "Barlow Condensed", Inter, sans-serif`; x.fillStyle = "#fff";
+  if (t.st !== "pre") { x.fillText(String(t.a.sc ?? ""), W * 0.43 - 12, 112); x.fillText(String(t.h.sc ?? ""), W * 0.57 + 12, 112); x.fillStyle = "rgba(255,255,255,.4)"; x.font = `900 60px "Barlow Condensed", Inter, sans-serif`; x.fillText("–", W / 2, 108); }
+  x.font = `800 34px "Barlow Condensed", Inter, sans-serif`; x.fillStyle = live ? "#ff4d5e" : "rgba(255,255,255,.8)"; x.fillText(String(t.d || "").toUpperCase(), W / 2, H - 31);
+  if (t.n) { const lb = `${t.n} BET${t.n > 1 ? "S" : ""}`; x.font = `800 26px "Barlow Condensed", Inter, sans-serif`; const w = x.measureText(lb).width + 26; x.fillStyle = "#ffc94d"; x.fillRect(W / 2 - w / 2, 12, w, 34); x.fillStyle = "#14100a"; x.fillText(lb, W / 2, 30); }
+  if (t.sit && t.sit.rz && live) { x.strokeStyle = "#ff3045"; x.lineWidth = 12; x.strokeRect(6, 6, W - 12, H - 12); x.font = `900 26px "Barlow Condensed", Inter, sans-serif`; x.fillStyle = "#ff3045"; x.fillText("RED ZONE", W / 2, H - 82); }
+  else if (t.sit && t.sit.dd && live) { x.font = `700 24px "Barlow Condensed", Inter, sans-serif`; x.fillStyle = "rgba(255,255,255,.75)"; x.fillText(t.sit.dd.toUpperCase(), W / 2, H - 82); }
+  x.fillStyle = "rgba(0,0,0,.2)"; for (let i = 0; i < W; i += 3) x.fillRect(i, 0, 1, H);
+  return c;
+}
+// the big screen when nothing's on it: the room
+function wdRoomArt(R, card) {
+  if (card) return wdJumboArt(R, card);
+  const W = 1024, H = 576, c = wdCanvas(W, H), x = c.getContext("2d"), gs = (R.scene && R.scene.games) || [];
+  const g = x.createLinearGradient(0, 0, W, H); g.addColorStop(0, "#14082e"); g.addColorStop(0.55, "#071433"); g.addColorStop(1, "#04070f"); x.fillStyle = g; x.fillRect(0, 0, W, H);
+  x.textAlign = "center"; x.textBaseline = "middle"; x.font = `900 84px "Barlow Condensed", Inter, sans-serif`; x.fillStyle = "#ffc94d"; x.fillText("SWEAT CENTER", W / 2, 78);
+  const live = gs.filter((q) => q.st === "in").length; x.font = `800 36px "Barlow Condensed", Inter, sans-serif`; x.fillStyle = "#ff4d5e";
+  x.fillText(live ? `${live} GAME${live > 1 ? "S" : ""} LIVE` : gs.length ? "GAMES COMING UP" : "THE ROOM", W / 2, 140);
+  const lb = (R.lb || []).slice(0, 4);
+  lb.forEach((p, i) => { const y = 214 + i * 76; x.fillStyle = "rgba(255,255,255,.06)"; x.fillRect(150, y - 30, W - 300, 62); x.fillStyle = wdCss(wdLift(p.c, 0.35)); x.fillRect(150, y - 30, 10, 62);
+    x.textAlign = "left"; x.font = `800 40px "Barlow Condensed", Inter, sans-serif`; x.fillStyle = "#fff"; x.fillText(`${i + 1}  ${p.nm.toUpperCase()}`, 182, y + 2); x.textAlign = "right"; x.fillStyle = "#3ee08f"; x.fillText(p.v || "", W - 176, y + 2); });
+  x.textAlign = "center"; if (R.pulse) { x.fillStyle = "rgba(0,0,0,.5)"; x.fillRect(0, H - 62, W, 62); x.font = `800 36px "Barlow Condensed", Inter, sans-serif`; x.fillStyle = "#3ee08f"; x.fillText(R.pulse.toUpperCase(), W / 2, H - 30); }
+  x.fillStyle = "rgba(0,0,0,.22)"; for (let i = 0; i < W; i += 3) x.fillRect(i, 0, 1, H);
+  return c;
+}
+function wdRoomBuild(L, R) {
+  const THREE = L.THREE, V = Object.assign({}, WD_ROOM_V); WD.V = V;
+  const C = wdContour(V), scene = new THREE.Scene(), cam = new THREE.PerspectiveCamera(V.board.f, innerWidth / innerHeight, 0.3, 900);
+  const st = { THREE, scene, cam, V, C, R, mats: [], tex: [], disp: [], t0: performance.now(), look: new THREE.Vector3(...V.board.l), fly: null, hold: null, glows: [], fw: null, flash: 0, fc: [1, 1, 1], wave: 0, burst: 0, dim: 0, room: true, crowd: [], suites: [], beams: [] };
+  const col = (c) => new THREE.Color().setRGB(c[0], c[1], c[2], THREE.LinearSRGBColorSpace), flat = (c) => new THREE.MeshBasicMaterial({ color: col(c) });
+  const add = (geo, mat, x, y, z, p) => { const m = new THREE.Mesh(geo, mat); m.position.set(x, y, z); (p || scene).add(m); return m; };
+  const sky = new THREE.Mesh(new THREE.SphereGeometry(300, 24, 12), new THREE.ShaderMaterial({ side: THREE.BackSide, depthWrite: false, uniforms: { uT: { value: 0 }, uArena: { value: 1 }, uTint: { value: new THREE.Vector3(0.2, 0.1, 0.4) }, uFc: { value: new THREE.Vector3(1, 1, 1) }, uFlash: { value: 0 } },
+    vertexShader: "varying vec3 vP; void main(){ vP = position; gl_Position = projectionMatrix * modelViewMatrix * vec4(position, 1.0); }", fragmentShader: WD_SKY }));
+  scene.add(sky); st.sky = sky; st.mats.push(sky.material);
+  st.field = null; st.fieldArt = () => null;
+  // the floor: dark and glossy, the studio's mark in the middle, LED lines running to the wall
+  { const c = wdCanvas(1024, 1024), x = c.getContext("2d"), g = x.createRadialGradient(512, 430, 40, 512, 512, 720); g.addColorStop(0, "#1a2240"); g.addColorStop(1, "#05070c"); x.fillStyle = g; x.fillRect(0, 0, 1024, 1024);
+    x.strokeStyle = "rgba(120,150,255,.08)"; x.lineWidth = 2; for (let i = 0; i <= 1024; i += 64) { x.beginPath(); x.moveTo(i, 0); x.lineTo(i, 1024); x.stroke(); x.beginPath(); x.moveTo(0, i); x.lineTo(1024, i); x.stroke(); }
+    x.textAlign = "center"; x.textBaseline = "middle"; x.font = `900 92px "Barlow Condensed", Inter, sans-serif`; x.fillStyle = "rgba(255,201,77,.22)"; x.fillText("SWEAT CENTER", 512, 560);
+    const tx = wdTex(THREE, c, 8); st.tex.push(tx); const fl = add(new THREE.PlaneGeometry(110, 110), new THREE.MeshBasicMaterial({ map: tx }), 0, 0, 0); fl.rotation.x = -Math.PI / 2; }
+  for (const s of [-1, 1]) for (let i = 0; i < 3; i++) { const m = add(new THREE.PlaneGeometry(0.25, 40), new THREE.MeshBasicMaterial({ color: col(i === 1 ? [1, 0.75, 0.3] : [0.35, 0.5, 1]), transparent: true, opacity: 0.55, blending: THREE.AdditiveBlending, depthWrite: false }), s * (4 + i * 3.5), 0.02, -2); m.rotation.x = -Math.PI / 2; m.rotation.z = s * 0.06 * (i + 1); }
+  // the walls and ceiling of the studio
+  add(new THREE.CylinderGeometry(46, 46, 22, 48, 1, true), new THREE.MeshBasicMaterial({ color: col([0.02, 0.024, 0.036]), side: THREE.BackSide }), 0, 11, 0);
+  const ceil = add(new THREE.CircleGeometry(46, 48), flat([0.012, 0.014, 0.02]), 0, 21, 0); ceil.rotation.x = Math.PI / 2;
+  // the LED wall: on an arc round the room's middle, the big screen at its center and three rows of game tiles either side
+  const ARC = { c: [0, 6], r: 28 }, onArc = (s, y) => { const a = s / ARC.r; return { p: [Math.sin(a) * ARC.r + ARC.c[0], y, ARC.c[1] - Math.cos(a) * ARC.r], ry: -a }; };
+  const jtex = wdTex(THREE, wdRoomArt(R)), ocv = wdCanvas(1280, 720), otex = wdTex(THREE, ocv); st.tex.push(jtex, otex); st.jtex = jtex; st.ocv = ocv; st.otex = otex; st.jumboArt = wdRoomArt;
+  const SW = 20, SH = 11.25, SY = 7.6;
+  const back = onArc(0, SY); add(new THREE.BoxGeometry(SW + 1.2, SH + 1.2, 0.6), flat([0.02, 0.022, 0.03]), back.p[0], SY, back.p[2] - 0.4);
+  const scr = add(new THREE.PlaneGeometry(SW, SH), wdScreenMat(THREE, jtex, SW / SH, otex), back.p[0], SY, back.p[2]); scr.material.uniforms.uLed.value = 0.45; st.screens = [scr];
+  const sn = new THREE.Vector3(0, 0, 1);
+  st.jface = () => ({ c: scr.position.clone(), n: sn.clone(), w: SW, h: SH });
+  const TW = 7.4, TH = 4.16, tiles = []; st.blank = wdTex(THREE, wdCanvas(2, 2)); st.tex.push(st.blank);
+  for (const side of [-1, 1]) for (let ci = 0; ci < 2; ci++) for (let ri = 0; ri < 3; ri++) {
+    const s = side * (SW / 2 + 0.6 + TW / 2 + ci * (TW + 0.5)), y = 3.0 + ri * (TH + 0.44), q = onArc(s, y);
+    const tx = wdTex(THREE, wdRoomTile(null, 512, 288)); st.tex.push(tx);
+    const m = wdScreenMat(THREE, tx, TW / TH, st.blank); m.uniforms.uLed.value = 0.5;
+    const pl = add(new THREE.PlaneGeometry(TW, TH), m, q.p[0], y, q.p[2]); pl.rotation.y = q.ry;
+    const fr = add(new THREE.BoxGeometry(TW + 0.3, TH + 0.3, 0.3), flat([0.02, 0.022, 0.03]), q.p[0], y, q.p[2]); fr.rotation.y = q.ry; fr.translateZ(-0.2);
+    tiles.push({ pl, m, tx, sig: "", ci, y, side, flash: 0 });
+  }
+  // the order games fill them: the inside columns first, top down, left then right
+  st.tiles = tiles.sort((a, b) => a.ci - b.ci || b.y - a.y || a.side - b.side);
+  // the ribbon over the wall
+  const rtex = wdTex(THREE, wdRibbonArt([{ t: "SWEAT CENTER", c: [1, 0.8, 0.3] }])); rtex.wrapS = THREE.RepeatWrapping; st.tex.push(rtex); st.rtex = rtex;
+  { const th0 = Math.PI - 0.98, tl = 1.96, rg = new THREE.CylinderGeometry(ARC.r + 0.2, ARC.r + 0.2, 1.3, 64, 1, true, th0, tl), k = ((ARC.r * tl) / (1.3 * (4096 / 96)));
+    rg.attributes.uv.array.forEach((v, i, a) => { if (i % 2 === 0) a[i] = (1 - v) * k; }); add(rg, new THREE.MeshBasicMaterial({ map: rtex, side: THREE.DoubleSide }), ARC.c[0], 15.2, ARC.c[1]); }
+  // the anchor desk
+  { const c = wdCanvas(1024, 160), x = c.getContext("2d"), g = x.createLinearGradient(0, 0, 1024, 0); g.addColorStop(0, "#0b0f1c"); g.addColorStop(0.5, "#1b2547"); g.addColorStop(1, "#0b0f1c"); x.fillStyle = g; x.fillRect(0, 0, 1024, 160);
+    x.fillStyle = "#ffc94d"; x.fillRect(0, 8, 1024, 5); x.textAlign = "center"; x.textBaseline = "middle"; x.font = `900 82px "Barlow Condensed", Inter, sans-serif`; x.fillStyle = "#f2f4ff"; x.fillText("SWEAT CENTER", 512, 88);
+    const tx = wdTex(THREE, c); st.tex.push(tx); const dk = flat([0.03, 0.034, 0.05]);
+    add(new THREE.BoxGeometry(13, 1.15, 2.4), [dk, dk, flat([0.07, 0.08, 0.11]), dk, new THREE.MeshBasicMaterial({ map: tx }), dk], 0, 0.58, -8.5); }
+  // lights: a truss across the ceiling, glows on it, studio wash
+  const glowT = wdGlowTex(THREE); st.tex.push(glowT);
+  const glow = (p, s, c, op) => { const m = new THREE.SpriteMaterial({ map: glowT, color: col(c), blending: THREE.AdditiveBlending, transparent: true, depthWrite: false, opacity: op ?? 1 }); const sp = new THREE.Sprite(m); sp.position.set(...p); sp.scale.set(s, s, 1); scene.add(sp); st.glows.push({ sp, m, base: c, op: op ?? 1 }); return sp; };
+  st.glowAt = glow;
+  const steel = flat([0.16, 0.17, 0.2]);
+  for (const z of [-12, -2, 8]) add(new THREE.BoxGeometry(56, 0.5, 0.5), steel, 0, 18, z);
+  for (const x of [-24, -8, 8, 24]) add(new THREE.BoxGeometry(0.5, 0.5, 24), steel, x, 18, -2);
+  for (let i = 0; i < 12; i++) { const x = -22 + i * 4; glow([x, 17.5, -12], 1.6, [1, 0.95, 0.85], 0.75); glow([x, 17.5, 8], 1.3, [0.7, 0.8, 1], 0.5); }
+  glow([0, 9, -24], 60, [0.35, 0.2, 0.8], 0.22); glow([0, 3, -10], 30, [1, 0.75, 0.4], 0.12);
+  // DJ Goldie's deck, off to the left of the wall
+  wdDeckBuild(st, { p: [-24.5, 1.1, -3], look: [0, 5], base: 0, K: 0.55, who: "meegy" });
+  // bleachers: the right side raked up away from the floor, a smaller one at the back left; the pit in front of the desk
+  const seats = [], teamsOn = [], gs = (R.scene && R.scene.games) || [];
+  for (const q of gs) for (const s of ["h", "a"]) if (teamsOn.length < 8 && !teamsOn.some((t) => t.ab === q[s].ab)) teamsOn.push(q[s]);
+  let k = 0; const tIdx = (i) => (teamsOn.length ? i % teamsOn.length : 0), rnd = (i) => { const v = Math.sin(i * 91.3) * 43758.5; return v - Math.floor(v); };
+  const stepM = flat([0.035, 0.038, 0.05]);
+  const bleacher = (x0, z0, z1, dir, rows) => {
+    for (let r = 0; r < rows; r++) { const x = x0 + dir * r * 0.95, y = 0.45 + r * 0.5; add(new THREE.BoxGeometry(0.95, y, z1 - z0), stepM, x, y / 2, (z0 + z1) / 2);
+      for (let z = z0 + 0.4; z < z1 - 0.3; z += 0.62) { const i = k++; if (rnd(i + 7) < 0.9) seats.push({ p: [x, y, z + (r % 2) * 0.3], face: dir > 0 ? -Math.PI / 2 : Math.PI / 2, team: tIdx(Math.floor(rnd(i) * 97)), u: (z - z0) / (z1 - z0) }); } }
+  };
+  bleacher(15, -14, 14, 1, 14); bleacher(-15, 6.5, 16, -1, 11);
+  for (let x = -11; x <= 11; x += 0.72) for (let z = 3; z <= 14; z += 0.8) { const i = k++; if (rnd(i + 3) < 0.82) seats.push({ p: [x + (rnd(i) - 0.5) * 0.3, 0, z + (rnd(i + 1) - 0.5) * 0.3], face: Math.PI + (rnd(i + 2) - 0.5) * 0.4, team: tIdx(Math.floor(rnd(i + 5) * 97)), u: (x + 11) / 22 }); }
+  const cols = teamsOn.length ? teamsOn.map((t) => [wdLift(wdHex(t.col), 0.14), wdLift(wdHex(t.alt), 0.14)]) : [[[0.7, 0.55, 0.2], [0.2, 0.3, 0.6]]];
+  const F = wdFansBuild(st, seats, cols, 1.05); if (F) F.mat.uniforms.uFl.value = 140;
+  st.teamsOn = teamsOn.map((t) => t.ab);
+  // fireworks (sparks off the wall in here)
+  { const N = 1200, pos = new Float32Array(N * 3), cl = new Float32Array(N * 3), g = new THREE.BufferGeometry(); g.setAttribute("position", new THREE.BufferAttribute(pos, 3)); g.setAttribute("color", new THREE.BufferAttribute(cl, 3));
+    const m = new THREE.PointsMaterial({ size: 0.35, map: glowT, vertexColors: true, blending: THREE.AdditiveBlending, transparent: true, depthWrite: false, sizeAttenuation: true });
+    const pts = new THREE.Points(g, m); pts.frustumCulled = false; scene.add(pts); st.fw = { N, pos, col: cl, vel: new Float32Array(N * 3), life: new Float32Array(N), base: new Float32Array(N * 3), g, i: 0 }; }
+  // the party: beams down from the truss over the crowd, lasers off the DJ's truss
+  { const fade = (() => { const c = wdCanvas(4, 128), x = c.getContext("2d"), g = x.createLinearGradient(0, 0, 0, 128); g.addColorStop(0, "rgba(255,255,255,0)"); g.addColorStop(0.75, "rgba(255,255,255,.55)"); g.addColorStop(1, "rgba(255,255,255,1)"); x.fillStyle = g; x.fillRect(0, 0, 4, 128); const t = new THREE.CanvasTexture(c); st.tex.push(t); return t; })();
+    const P = { beams: [], lasers: [], on: 0, t0: 0, bpm: 124, shot: 0, shotAt: 0 }, Lb = 26;
+    for (let i = 0; i < 10; i++) { const m = new THREE.MeshBasicMaterial({ map: fade, color: col(WD_PCOL[i % 5]), transparent: true, opacity: 0, blending: THREE.AdditiveBlending, depthWrite: false, side: THREE.DoubleSide });
+      const g = new THREE.ConeGeometry(Lb * 0.09, Lb, 18, 1, true); g.translate(0, -Lb / 2, 0); const piv = new THREE.Group(); piv.position.set(-22 + (i % 5) * 11, 17.6, i < 5 ? -12 : 8); piv.add(new THREE.Mesh(g, m)); scene.add(piv);
+      P.beams.push({ piv, m, ph: i * 0.7, base: piv.quaternion.clone() }); }
+    const F2 = st.laserFace(), right = new THREE.Vector3(0, 1, 0).cross(F2.n).normalize();
+    for (let i = 0; i < 10; i++) { const m = new THREE.MeshBasicMaterial({ color: col(WD_PCOL[[3, 1, 2][i % 3]]), transparent: true, opacity: 0, blending: THREE.AdditiveBlending, depthWrite: false });
+      const g = new THREE.BoxGeometry(0.05, 0.05, 70); g.translate(0, 0, 35); const piv = new THREE.Group(); piv.position.copy(F2.c).add(right.clone().multiplyScalar((i / 9 - 0.5) * F2.w * 0.8)); piv.add(new THREE.Mesh(g, m)); scene.add(piv);
+      piv.lookAt(piv.position.clone().add(F2.n)); P.lasers.push({ piv, m, i, base: piv.quaternion.clone() }); }
+    st.party = P; }
+  st.partyShot = (st2, k) => { const T3 = st2.THREE, F = st2.djFace();
+    if (k === 0) return wdFrame(st2, F, 0.46);
+    if (k === 1) return { p: new T3.Vector3(-4, 4.5, 9), l: new T3.Vector3(-17, 4, -7), f: 50 };
+    if (k === 2) return { p: new T3.Vector3(2, 15, 20), l: new T3.Vector3(0, 2, 2), f: 55 };
+    return { p: new T3.Vector3(8, 5.5, -15), l: new T3.Vector3(-2, 2.5, 9), f: 52 }; };
+  // the shots
+  const sh = (p, l, f) => ({ p: new THREE.Vector3(...p), l: new THREE.Vector3(...l), f });
+  st.shots = { board: sh(V.board.p, V.board.l, V.board.f) };
+  const df = st.djFace(); st.shots.suite = { p: df.c.clone().add(df.n.clone().multiplyScalar(df.w * 1.3)).add(new THREE.Vector3(0, df.h * 0.1, 0)), l: df.c.clone(), f: 42 };
+  st.hold = st.holdShot = st.shots.board; cam.position.copy(st.shots.board.p); cam.lookAt(st.look); cam.fov = V.board.f; cam.updateProjectionMatrix();
+  st.onIdle = (R2) => wdRoomIdle(st, R2);
+  wdRoomIdle(st, R, true);
+  return st;
+}
+// keep the tiles up with the games: repaint what changed, and a score lights its tile, sparks off it, gets that team's fans up
+function wdRoomIdle(st, R, first) {
+  const gs = ((R.scene && R.scene.games) || []).slice(0, st.tiles.length);
+  WD.logos = WD.logos || {};
+  for (const q of gs) for (const s of ["a", "h"]) { const u = q[s].lg; if (u && !WD.logos[u]) { const im = new Image(); im.crossOrigin = "anonymous"; im.referrerPolicy = "no-referrer"; im.onload = () => { if (WD.st === st) { for (const t of st.tiles) t.sig = ""; wdRoomIdle(st, wdRead()); } }; im.src = u; WD.logos[u] = im; } }
+  st.prevSc = st.prevSc || {};
+  st.tiles.forEach((T, i) => {
+    const q = gs[i] || null, sig = q ? JSON.stringify([q.id, q.a.sc, q.h.sc, q.d, q.sit, q.n, q.st]) : "";
+    if (sig === T.sig) return; T.sig = sig;
+    T.tx.image = wdRoomTile(q, 512, 288); T.tx.needsUpdate = true;
+    if (!q || first) { if (q) st.prevSc[q.id] = [q.a.sc, q.h.sc]; return; }
+    const p = st.prevSc[q.id]; st.prevSc[q.id] = [q.a.sc, q.h.sc];
+    if (!p) return;
+    for (const [k, s] of [[0, "a"], [1, "h"]]) { const was = Number(p[k]), now = Number(q[s].sc);
+      if (isFinite(was) && isFinite(now) && now > was) {
+        T.flash = 1.4; const ti = st.teamsOn ? st.teamsOn.indexOf(q[s].ab) : -1; if (ti >= 0) wdFansCheer(st, ti, 1.6);
+        const c = wdLift(wdHex(q[s].col), 0.35); st.fc = c; st.flash = Math.max(st.flash, 0.6);
+        const wp = T.pl.position; wdBurst(st, [wp.x, wp.y + 2.5, wp.z + 1.5], c, 90, 5); if (now - was >= 6) wdBurst(st, [wp.x, wp.y + 2.5, wp.z + 1.5], [1, 0.85, 0.4], 60, 6);
+      } }
+  });
+  st.ribExtra = gs.filter((q) => q.st === "in").map((q) => ({ t: `${q.a.ab} ${q.a.sc ?? ""}  ${q.h.ab} ${q.h.sc ?? ""}  ${String(q.d || "").toUpperCase()}`, c: [1, 1, 1] }));
+}
+function wdRoomTick(st, dt) {
+  if (!st.tiles) return;
+  for (const T of st.tiles) { if (T.flash > 0.01) { T.flash *= Math.pow(0.25, dt); T.m.uniforms.uLed.value = 0.5 - Math.min(0.5, T.flash * 0.35); T.pl.scale.setScalar(1 + Math.min(0.06, T.flash * 0.05)); } else if (T.flash) { T.flash = 0; T.m.uniforms.uLed.value = 0.5; T.pl.scale.setScalar(1); } }
 }
 
 // ---- the venues: a contour the stands are built around, decks off it, the field, where the camera sits ----
@@ -24258,7 +25160,7 @@ const WD_VS = "varying vec2 vUv; varying float vD; void main(){ vUv = uv; vec4 m
 const WD_H = "float h21(vec2 p){ p = fract(p * vec2(123.34, 456.21)); p += dot(p, p + 45.32); return fract(p.x * p.y); }";
 // the crowd: a seat per cell, a fan in most (head over shoulders), in the home colors, the away team's pocket, some white and
 // dark; too small to draw at a distance, their average; the wave; camera flashes
-const WD_CROWD = `uniform float uT, uSeat, uRow, uWave, uWX, uFl, uLit, uFlash, uBurst; uniform vec3 uC1, uC2, uC3, uStep, uFc, uHaze; varying vec2 vUv; varying float vD; ${WD_H}
+const WD_CROWD = `uniform float uT, uSeat, uRow, uWave, uWX, uFl, uLit, uFlash, uBurst, uSO; uniform vec3 uC1, uC2, uC3, uStep, uFc, uHaze; varying vec2 vUv; varying float vD; ${WD_H}
 void main(){
   vec2 g = vec2(vUv.x / uSeat, vUv.y * uRow), id = floor(g), f = fract(g);
   float r = h21(id), r2 = h21(id + 17.3), r3 = h21(id + 41.7);
@@ -24267,16 +25169,16 @@ void main(){
   float lift = w * .32 + (sin(uT * (2.0 + r3 * 3.0) + r3 * 40.0) * .5 + .5) * .05 * (.4 + uBurst);
   float body = smoothstep(.36, .27, length((f - vec2(.5, .36 + lift)) * vec2(1.0, 1.5)));
   float head = smoothstep(.17, .12, length(f - vec2(.5, .74 + lift)));
-  float occ = step(.13, r2);
+  float occ = step(.13, r2) * (1.0 - uSO);
   vec3 skin = mix(vec3(.33, .22, .16), vec3(.86, .67, .53), r3);
   vec3 seat = uStep * (.8 + .4 * step(.55, f.y));
   col = mix(col, vec3(dot(col, vec3(.3, .59, .11))), .28) * .82;
   vec3 c = mix(seat, mix(col, skin, head * (1.0 - body)), max(body, head) * occ);
   float px = max(fwidth(g.x), fwidth(g.y)), far = smoothstep(.5, 1.1, px);
-  vec3 avg = mix(uStep, uC1 * .44 + uC2 * .16 + uC3 * .08 + vec3(.84) * .12 + vec3(.12) * .11 + vec3(.5, .38, .3) * .09, .62);
+  vec3 avg = mix(uStep, uC1 * .44 + uC2 * .16 + uC3 * .08 + vec3(.84) * .12 + vec3(.12) * .11 + vec3(.5, .38, .3) * .09, .62 * (1.0 - uSO));
   c = mix(c, avg, far);
   c *= uLit * (.72 + .28 * vUv.y) * (1.0 + w * .7);
-  float fl = step(1.0 - (.0016 + uBurst * .02), h21(id + floor(uT * 8.0) * 1.37));
+  float fl = step(1.0 - (.0016 + uBurst * .02), h21(id + floor(uT * 8.0) * 1.37)) * (1.0 - uSO);
   c += vec3(1.0) * fl * (1.0 - far * .6) * 1.2 + uFc * uFlash * .45;
   c = mix(c, uHaze, smoothstep(40.0, uFl, vD) * .55);
   gl_FragColor = vec4(c, 1.0);
@@ -24435,8 +25337,11 @@ function wdNeonArt(txt, col) {
   return c;
 }
 function wdGlowTex(THREE) { const c = wdCanvas(128, 128), x = c.getContext("2d"), g = x.createRadialGradient(64, 64, 0, 64, 64, 64); g.addColorStop(0, "rgba(255,255,255,1)"); g.addColorStop(0.25, "rgba(255,255,255,.55)"); g.addColorStop(1, "rgba(255,255,255,0)"); x.fillStyle = g; x.fillRect(0, 0, 128, 128); const t = new THREE.CanvasTexture(c); return t; }
-const WD_SCR = `uniform sampler2D uMap, uOver; uniform float uAsp, uScr, uLed; varying vec2 vUv;
-vec3 tap(vec2 q){ return texture2D(uMap, clamp(q, .001, .999)).rgb; }
+const WD_SCR = `uniform sampler2D uMap, uOver; uniform float uAsp, uScr, uLed, uStack; varying vec2 vUv;
+vec3 tap(vec2 q){ q = clamp(q, .001, .999);
+  if (uStack > .5) { vec3 c = texture2D(uMap, vec2(q.x, max(.5 + q.y * .5, .5006))).rgb; float a = texture2D(uMap, vec2(q.x, min(q.y * .5, .4994))).r;
+    return mix(mix(vec3(.06, .02, .14), vec3(.02, .05, .16), q.x) * (.7 + .5 * q.y), c, a); }
+  return texture2D(uMap, q).rgb; }
 void main(){
   vec2 cu = vUv, bu = vUv; float ta = max(.2, uAsp);
   if (ta > uScr) { cu.y = (vUv.y - .5) * ta / uScr + .5; bu.x = (vUv.x - .5) * uScr / ta + .5; } else { cu.x = (vUv.x - .5) * uScr / ta + .5; bu.y = (vUv.y - .5) * ta / uScr + .5; }
@@ -24448,14 +25353,16 @@ void main(){
   gl_FragColor = vec4(c, 1.);
 }`;
 function wdScreenMat(THREE, tex, scr, over) {
-  return new THREE.ShaderMaterial({ uniforms: { uMap: { value: tex }, uOver: { value: over }, uAsp: { value: scr }, uScr: { value: scr }, uLed: { value: 1 } }, toneMapped: false,
+  return new THREE.ShaderMaterial({ uniforms: { uMap: { value: tex }, uOver: { value: over }, uAsp: { value: scr }, uScr: { value: scr }, uLed: { value: 1 }, uStack: { value: 0 } }, toneMapped: false,
     vertexShader: "varying vec2 vUv; void main(){ vUv = uv; gl_Position = projectionMatrix * modelViewMatrix * vec4(position, 1.0); }", fragmentShader: WD_SCR });
 }
 function wdTex(THREE, canvas, aniso) { const t = new THREE.CanvasTexture(canvas); t.colorSpace = THREE.NoColorSpace; t.anisotropy = aniso || 1; t.needsUpdate = true; return t; }
 
 // ---- build a venue ----
 function wdBuild(L, R) {
-  const THREE = L.THREE, pf = R.sport === "mlb" ? wdPark(R) : null, V = pf ? Object.assign({}, WD_V.mlb, { dome: pf.roof !== "open" ? 1 : 0, towers: pf.roof !== "open" ? [] : WD_V.mlb.towers }) : WD_V[R.sport];
+  if (R.kind === "room") return wdRoomBuild(L, R);
+  const fs = R.sport === "nfl" && R.kind === "stadium" ? wdFbSpec(R) : null;
+  const THREE = L.THREE, pf = R.sport === "mlb" ? wdPark(R) : null, V = fs ? wdFbVenue(fs) : pf ? Object.assign({}, WD_V.mlb, { dome: pf.roof !== "open" ? 1 : 0, towers: pf.roof !== "open" ? [] : WD_V.mlb.towers }) : WD_V[R.sport];
   WD.V = V; const C = pf ? wdParkContour(pf) : wdContour(V), wallH = pf ? wdParkWall(pf) : null;
   if (pf) { WD.V = V; const cp = wdNorm(C, 0.125), w = 50, h = 28.1; V.jumbo = { p: [cp[0] + cp[2] * 31, 16 + h / 2 + 1.5, cp[1] + cp[3] * 31], face: [-cp[2], 0, -cp[3]], w, h, legs: 0, base: 16 }; }
   const scene = new THREE.Scene(), cam = new THREE.PerspectiveCamera(V.board.f, innerWidth / innerHeight, 0.5, 4000), T = R.T, aniso = Math.min(8, WD.r.capabilities.getMaxAnisotropy());
@@ -24463,6 +25370,10 @@ function wdBuild(L, R) {
   const st = { THREE, scene, cam, V, C, R, mats: [], tex: [], disp: [], t0: performance.now(), look: new THREE.Vector3(...V.board.l), fly: null, hold: null, glows: [], fw: null, flash: 0, fc: [1, 1, 1], wave: 0, burst: 0, dim: 0 };
   const v3 = (a) => new THREE.Vector3(a[0], a[1], a[2]);
   const keep = (m) => { st.mats.push(m); return m; };
+  // a football stadium's stage takes a slot of the building: the decks over the bowl give way to it there
+  if (fs) { st.deckSpot = wdDeckSpotFb(st); const gap = st.deckSpot.gap;
+    for (const q of V.tiers.slice(1)) { const k0 = q.keep; q.keep = (x, z) => (!k0 || k0(x, z)) && !gap(x, z); }
+    V.ribs = V.ribs.map((r, i) => (i ? Object.assign({}, r, { keep: (x, z) => (!r.keep || r.keep(x, z)) && !gap(x, z) }) : r)); }
   // the sky (or the arena's dark)
   const sky = new THREE.Mesh(new THREE.SphereGeometry(3000, 32, 16), keep(new THREE.ShaderMaterial({ side: THREE.BackSide, depthWrite: false,
     uniforms: { uT: { value: 0 }, uArena: { value: V.roof || V.dome ? 1 : 0 }, uTint: { value: v3(C1) }, uFc: { value: v3([1, 1, 1]) }, uFlash: { value: 0 } },
@@ -24477,8 +25388,8 @@ function wdBuild(L, R) {
   const [fw, fh, fx0, fz0] = V.field, field = new THREE.Mesh(new THREE.PlaneGeometry(fw, fh), new THREE.MeshBasicMaterial({ map: ftex }));
   field.rotation.x = -Math.PI / 2; field.position.set(fx0, 0, fz0); scene.add(field); st.field = field;
   // the decks
-  const crowdU = () => ({ uT: { value: 0 }, uSeat: { value: R.sport === "nfl" ? 0.62 : 0.56 }, uRow: { value: 20 }, uWave: { value: 0 }, uWX: { value: 120 }, uFl: { value: V.roof ? 140 : 420 }, uLit: { value: 1 }, uFlash: { value: 0 }, uBurst: { value: 0 },
-    uC1: { value: v3(C1) }, uC2: { value: v3(C2) }, uC3: { value: v3(C3) }, uStep: { value: v3(V.roof ? [0.07, 0.07, 0.08] : [0.1, 0.1, 0.11]) }, uFc: { value: v3([1, 1, 1]) }, uHaze: { value: v3(haze) } });
+  const crowdU = () => ({ uSO: { value: 0 }, uT: { value: 0 }, uSeat: { value: R.sport === "nfl" ? 0.62 : 0.56 }, uRow: { value: 20 }, uWave: { value: 0 }, uWX: { value: 120 }, uFl: { value: V.roof ? 140 : 420 }, uLit: { value: 1 }, uFlash: { value: 0 }, uBurst: { value: 0 },
+    uC1: { value: v3(C1) }, uC2: { value: v3(C2) }, uC3: { value: v3(C3) }, uStep: { value: v3(V.fs ? wdMix(wdHex(V.fs.seat), [0, 0, 0], 0.35) : V.roof ? [0.07, 0.07, 0.08] : [0.1, 0.1, 0.11]) }, uFc: { value: v3([1, 1, 1]) }, uHaze: { value: v3(haze) } });
   st.crowd = []; st.suites = [];
   for (const t0 of V.tiers) {
     const t = wallH && !t0.suite && t0.y0 < 6 ? Object.assign({}, t0, { y0f: (u) => Math.max(t0.y0, wallH(u) + 0.4), y1f: (u) => Math.max(t0.y0, wallH(u) + 0.4) + (t0.y1 - t0.y0) }) : t0;
@@ -24532,7 +25443,7 @@ function wdBuild(L, R) {
     const bt = wdTex(THREE, c); st.tex.push(bt); const pnl = new THREE.Mesh(new THREE.PlaneGeometry(16, 8), new THREE.MeshBasicMaterial({ map: bt, side: THREE.DoubleSide })); pnl.rotation.y = Math.PI; bank.add(pnl);
     glow([p[0], p[1] + 4, p[2]], 70, [1, 0.97, 0.88], 0.55); glow([p[0], p[1] + 4, p[2]], 22, [1, 1, 1], 0.9);
   }
-  if (V.roof) {
+  if (V.roof && !V.fs) {
     const rg = new THREE.Mesh(new THREE.CircleGeometry(Math.max(V.A, V.B) * 2.2, 48), new THREE.MeshBasicMaterial({ color: new THREE.Color().setRGB(0.012, 0.013, 0.018, THREE.LinearSRGBColorSpace), side: THREE.DoubleSide }));
     rg.rotation.x = Math.PI / 2; rg.position.set(0, V.roof, 0); scene.add(rg);
     for (let i = 0; i < 18; i++) { const p = wdNorm(C, i / 18), o = V.tiers[0].o1 * 0.5; glow([p[0] + p[2] * o, V.roof - 2, p[1] + p[3] * o], 8, [1, 0.96, 0.9], 0.75); }
@@ -24563,6 +25474,8 @@ function wdBuild(L, R) {
     if (J.legs) for (const s2 of [-1, 1]) { const leg = new THREE.Mesh(new THREE.BoxGeometry(2, J.p[1], 2), dark); leg.position.set(s2 * J.w * 0.3, -J.p[1] / 2, -0.5); jg.add(leg); }
     st.jface = () => ({ c: jg.localToWorld(new THREE.Vector3(0, 0, 1.02)), n: n.clone(), w: J.w, h: J.h });
   }
+  if (fs) { try { wdFbBuild(st, fs); } catch (e) { console.warn("stadium", e); } wdDeckBuild(st, st.deckSpot); }
+  else {
   // the DJ's suite, on the far side, lit up in purple
   {
     const t = V.dj.t, [px, pz, nx, nz] = wdNorm(C, t), so = V.tiers.find((x) => x.suite), w = V.dj.w, h = w / 1.7778 / 0.92, cy = (so.y0 + so.y1) / 2 + h * 0.08;
@@ -24584,11 +25497,13 @@ function wdBuild(L, R) {
     for (const s of [-1, 1]) { const bm = new THREE.Mesh(new THREE.ConeGeometry(w * 0.5, w * 4, 16, 1, true), new THREE.MeshBasicMaterial({ color: new THREE.Color().setRGB(...(s < 0 ? [0.8, 0.3, 1] : [0.3, 0.6, 1]), THREE.LinearSRGBColorSpace), transparent: true, opacity: 0, blending: THREE.AdditiveBlending, depthWrite: false, side: THREE.DoubleSide }));
       bm.geometry.translate(0, -w * 2, 0); const piv = new THREE.Group(); piv.position.set(s * w * 0.35, h * 0.3, 0.5); piv.add(bm); g.add(piv); st.beams.push({ piv, bm, s }); }
   }
+  }
   // fireworks
   { const N = 1800, pos = new Float32Array(N * 3), col = new Float32Array(N * 3), g = new THREE.BufferGeometry(); g.setAttribute("position", new THREE.BufferAttribute(pos, 3)); g.setAttribute("color", new THREE.BufferAttribute(col, 3));
     const m = new THREE.PointsMaterial({ size: (V.fwR || 30) * 0.05, map: glowT, vertexColors: true, blending: THREE.AdditiveBlending, transparent: true, depthWrite: false, sizeAttenuation: true });
     const pts = new THREE.Points(g, m); pts.frustumCulled = false; scene.add(pts); st.fw = { N, pos, col, vel: new Float32Array(N * 3), life: new Float32Array(N), base: new Float32Array(N * 3), g, i: 0 }; }
   try { wdPartyBuild(st); } catch (e) { console.warn("party", e); }
+  if (fs) try { wdFbFans(st); } catch (e) { console.warn("fans", e); }
   // the shots
   const sh = (p, l, f) => ({ p: v3(p), l: v3(l), f });
   st.shots = { board: sh(V.board.p, V.board.l, V.board.f) };
@@ -24602,6 +25517,8 @@ function wdDispose(st) {
   if (!st) return;
   st.scene.traverse((o) => { if (o.geometry) o.geometry.dispose(); if (o.material) (Array.isArray(o.material) ? o.material : [o.material]).forEach((m) => m.dispose()); });
   st.tex.forEach((t) => t.dispose()); if (st.vid && st.vid.tex) st.vid.tex.dispose();
+  const D = st.deck; if (D && D.mv) { try { D.mv.pause(); D.mv.removeAttribute("src"); D.mv.load(); } catch (e) {} if (D.mvTex) D.mvTex.dispose(); }
+  if (D && D.rtA) { D.rtA.dispose(); D.rtB.dispose(); }
 }
 
 // ---- the camera: fly between shots along a crane arc, hold with a slow drift ----
@@ -24640,8 +25557,8 @@ function wdProject(st) {
 function wdVidOff(st) {
   if (!st) return; const V = st.vid; st.vid = null;
   if (V && V.tex) V.tex.dispose();
-  for (const s of st.screens) { s.material.uniforms.uMap.value = st.jtex; s.material.uniforms.uAsp.value = s.material.uniforms.uScr.value; }
-  if (st.djGlass) { const u = st.djGlass.material.uniforms; u.uMap.value = st.djIdle; u.uAsp.value = u.uScr.value; }
+  for (const s of st.screens) { const u = s.material.uniforms; u.uMap.value = st.jtex; u.uAsp.value = u.uScr.value; u.uStack.value = 0; }
+  wdDeckIdle(st);
   document.body.classList.remove("v2w-tex"); WD.npSig = ""; if (st.ocv) { st.ocv.getContext("2d").clearRect(0, 0, 1280, 720); st.otex.needsUpdate = true; }
 }
 function wdVidTick(st, now) {
@@ -24649,7 +25566,7 @@ function wdVidTick(st, now) {
   if (kind !== V.kind) { if (V.tex) V.tex.dispose(); V.kind = kind;
     V.tex = useCv ? new THREE.CanvasTexture(V.cv) : new THREE.VideoTexture(V.v); V.tex.colorSpace = THREE.NoColorSpace; V.tex.minFilter = THREE.LinearFilter; V.tex.generateMipmaps = false;
     for (const m of V.mats) m.uniforms.uMap.value = V.tex; }
-  const asp = useCv ? V.cv.width / Math.max(1, V.cv.height) : V.v.videoWidth / Math.max(1, V.v.videoHeight);
+  const asp = (useCv ? V.cv.width / Math.max(1, V.cv.height) : V.v.videoWidth / Math.max(1, V.v.videoHeight)) * (V.stack ? 2 : 1);
   if (asp > 0) for (const m of V.mats) m.uniforms.uAsp.value = asp;
   if (useCv) V.tex.needsUpdate = true; else if (V.v.readyState >= 2 && V.v.currentTime !== V.lt) { V.lt = V.v.currentTime; V.tex.needsUpdate = true; }
   if (now - (WD.npAt || 0) > 400) { WD.npAt = now; wdNpArt(st); }
@@ -24719,18 +25636,20 @@ function wdRib(items, ms) {
 }
 function wdCard(card, ms) {
   const st = WD.st; if (!st) return; WD.card = card; WD.cardTo = Date.now() + ms;
-  st.jtex.image = wdJumboArt(st.R, card); st.jtex.needsUpdate = true;
+  st.jtex.image = (st.jumboArt || wdJumboArt)(st.R, card); st.jtex.needsUpdate = true;
 }
 // the idle art from the board as it stands: the ribbons and the jumbotron
 function wdIdleArt(force) {
-  const st = WD.st; if (!st) return; const R = wdRead(); st.R.pulse = R.pulse; st.R.lb = R.lb; Object.assign(st.R.T.a, { sc: R.T.a.sc }); Object.assign(st.R.T.h, { sc: R.T.h.sc }); st.R.T.d = R.T.d;
-  const T = st.R.T, sig = JSON.stringify([R.pulse, R.lb, T.a.sc, T.h.sc, T.d]);
+  const st = WD.st; if (!st) return; const R = wdRead(); st.R.pulse = R.pulse; st.R.lb = R.lb; st.R.scene = R.scene || st.R.scene;
+  if (st.onIdle) try { st.onIdle(R); } catch (e) { console.warn(e); } Object.assign(st.R.T.a, { sc: R.T.a.sc }); Object.assign(st.R.T.h, { sc: R.T.h.sc }); st.R.T.d = R.T.d;
+  const T = st.R.T, sig = JSON.stringify([R.pulse, R.lb, T.a.sc, T.h.sc, T.d, st.room ? st.ribExtra : 0, st.room && R.scene ? R.scene.games.map((q) => q.st) : 0]);
   if (WD.card && Date.now() > WD.cardTo) { WD.card = null; force = true; }
   if (!force && sig === WD.sig) return; WD.sig = sig;
-  st.jtex.image = wdJumboArt(st.R, WD.card); st.jtex.needsUpdate = true;
+  st.jtex.image = (st.jumboArt || wdJumboArt)(st.R, WD.card); st.jtex.needsUpdate = true;
   if (!WD.ribAt || Date.now() > WD.ribAt) {
     const items = [{ t: "SWEAT BOARD", c: [1, 0.79, 0.3] }]; const vn = (st.pf && st.pf.nm) || (st.R.ven && st.R.ven.nm); if (vn) items.push({ t: vn.toUpperCase(), c: wdLift(st.R.T.h.alt, 0.4) });
-    if (T.a.sc !== "") items.push({ t: `${T.a.ab} ${T.a.sc}  ${T.h.ab} ${T.h.sc}  ${(T.d || "").toUpperCase()}`, c: [1, 1, 1] });
+    if (T.a.sc !== "" && !st.room) items.push({ t: `${T.a.ab} ${T.a.sc}  ${T.h.ab} ${T.h.sc}  ${(T.d || "").toUpperCase()}`, c: [1, 1, 1] });
+    for (const x of st.ribExtra || []) items.push(x);
     if (R.pulse) items.push({ t: R.pulse.toUpperCase(), c: [0.24, 0.88, 0.56] });
     for (const p of R.lb) items.push({ t: `${p.nm.toUpperCase()} ${p.v}`.trim(), c: wdLift(p.c, 0.35) });
     wdRib(items, 0);
@@ -24759,12 +25678,14 @@ async function wdStart() {
   } catch (e) { console.warn("world", e); }
   WD.starting = false;
 }
-const wdKey = (R) => R.sport + ":" + R.T.a.ab + ":" + R.T.h.ab + ":" + ((R.ven && R.ven.nm) || "");
+const wdKey = (R) => R.sport + ":" + (R.kind || "") + (R.kind === "room" ? "" : ":" + R.T.a.ab + ":" + R.T.h.ab + ":" + ((R.ven && R.ven.nm) || ""));
 function wdRepaint() {
   const st = WD.st; if (!st) return; const a = st.fieldArt(); if (a) { st.field.material.map.image = a; st.field.material.map.needsUpdate = true; } WD.sig = ""; wdIdleArt(true);
 }
 function wdStop() {
+  const stg = !!(WD.st && WD.st.vid && WD.st.vid.stack);
   if (WD.mode !== "board") wdBack(true);
+  if (stg) try { if (window.__sbPipStop) window.__sbPipStop(); } catch (e) {}
   wdUnproject(WD.st); wdVidOff(WD.st); wdDispose(WD.st); WD.st = null; document.body.classList.remove("v2w", "v2w-away", "v2w-dj", "v2w-clip", "v2w-fly", "v2w-in");
 }
 function wdSize(q, force) {
@@ -24785,7 +25706,7 @@ function wdLoop(now) {
   const dt = Math.min(0.1, (now - (WD.last || now)) / 1000); WD.last = now; const t = (now - st.t0) / 1000;
   // the building's mood: flashes decay, the wave runs out, a miss dims the lights
   st.flash *= Math.pow(0.12, dt); st.wave *= Math.pow(0.55, dt); st.burst *= Math.pow(0.3, dt); st.dim *= Math.pow(0.4, dt);
-  const party = wdPartyTick(st, now, dt, (now - st.t0) / 1000), lit = (1 - st.dim * 0.45) * (1 - party * 0.55);
+  const party = wdPartyTick(st, now, dt, (now - st.t0) / 1000); wdDeckTick(st, now, dt, t); const lit = (1 - st.dim * 0.45) * (1 - party * 0.55);
   for (const m of st.crowd) { const u = m.uniforms; u.uT.value = t; u.uWave.value = Math.min(1, st.wave); u.uFlash.value = st.flash; u.uFc.value.set(...st.fc); u.uBurst.value = Math.min(1, st.burst); u.uLit.value = lit; }
   for (const m of st.suites) { m.uniforms.uT.value = t; m.uniforms.uLit.value = lit; }
   st.sky.material.uniforms.uT.value = t; st.sky.material.uniforms.uFlash.value = st.flash; st.sky.material.uniforms.uFc.value.set(...st.fc);
@@ -24793,7 +25714,8 @@ function wdLoop(now) {
   if (st.rtex) st.rtex.offset.x = (st.rtex.offset.x + dt * (WD.ribAt ? 0.05 : 0.025)) % 1;
   const on = WD.mode === "dj"; for (const b of st.beams) { b.bm.material.opacity += ((on ? 0.08 : 0) - b.bm.material.opacity) * Math.min(1, dt * 3); b.piv.rotation.z = Math.sin(t * 1.3 + b.s) * 0.7 * b.s; b.piv.rotation.x = 0.9 + Math.sin(t * 0.9 + b.s * 2) * 0.35; }
   if (WD.glow) { const o = Math.min(0.5, st.flash * 0.32) * (WD.mode === "board" ? 1 : 0); if (Math.abs(o - (WD.glowO || 0)) > 0.015) { WD.glowO = o; WD.glow.style.opacity = o.toFixed(3); WD.glow.style.setProperty("--wfc", st.fc.map((v) => Math.round(v * 255)).join(",")); } }
-  wdFwTick(st, dt); wdCam(st, now); wdProject(st); wdVidTick(st, now);
+  wdFansTick(st, t); if (st.room) wdRoomTick(st, dt);
+  wdFwTick(st, dt); wdCam(st, now); wdProject(st); wdVidTick(st, now); wdDeckCam(st, now);
   WD.r.render(st.scene, st.cam);
 }
 // keep up with the board: start or stop with TV, rebuild when the sport or the teams change, scores that light it up
@@ -24811,7 +25733,7 @@ function wdPoll() {
 }
 function wdScore(side, d) {
   const st = WD.st; if (!st) return; const t = st.R.T[side], big = st.R.sport === "nba" ? d >= 3 : true;
-  st.fc = wdLift(t.col, 0.3); st.flash = big ? 1.4 : 0.7; st.burst = 1; if (big) { st.wave = 1.2; wdShow(st, [wdLift(t.col, 0.35), wdLift(t.alt, 0.4)], st.R.sport === "nba" ? 3 : 6, 2400); }
+  st.fc = wdLift(t.col, 0.3); st.flash = big ? 1.4 : 0.7; st.burst = 0.35; wdFansCheer(st, side === "h" ? 0 : 1, big ? 1.6 : 1); wdDeckAct(st, side === "h" ? "cheer" : "sad", big ? 4500 : 2500); if (big) { st.wave = 1.2; wdShow(st, [wdLift(t.col, 0.35), wdLift(t.alt, 0.4)], st.R.sport === "nba" ? 3 : 6, 2400); }
 }
 function wdBack(now) {
   const st = WD.st; WD.mode = "back"; document.body.classList.remove("v2w-dj", "v2w-clip", "v2w-fly");
@@ -24835,7 +25757,11 @@ window.SBW = {
     wdSize(1);
     const F = dj ? st.djFace() : st.jface(st.cam.position);
     if (st.party) st.party.bpm = o.bpm > 60 ? o.bpm : 124;
-    if (inWorld) { st.vid = { v: o.v, cv: document.getElementById("djCv"), mats: dj ? [st.djGlass.material, ...st.screens.map((x) => x.material)] : st.screens.map((x) => x.material), tex: null, kind: "" }; }
+    if (inWorld) { const D = st.deck, stage = !!(dj && o.stage && D && D.mg), mcam = !!(dj && !o.house && D && D.masc), scr = st.screens.map((x) => x.material);
+      const mats = !dj || !D ? scr : stage ? [D.mgMat, D.led.material, ...scr] : mcam ? [] : [D.led.material, ...scr];
+      st.vid = { v: o.v, cv: document.getElementById("djCv"), mats, tex: null, kind: "", stack: stage, clock: dj && !o.house };
+      for (const m of mats) if (m.uniforms.uStack) m.uniforms.uStack.value = stage ? 1 : 0;
+      if (mcam) wdDeckCamOn(st); else if (dj && !stage) wdDeckPlay(st, o.bpm); }
     else st.proj = { F, els: [o.v, document.getElementById("jbWash"), document.getElementById("djCv")].filter(Boolean) };
     const go = ++WD.go, show = () => { if (go === WD.go) document.body.classList.remove("v2w-fly"); };
     // never leave the panels hidden behind a camera move that didn't finish
@@ -24844,13 +25770,15 @@ window.SBW = {
     return true;
   },
   clipEnd() { if (!WD.st || WD.mode === "board" || WD.mode === "back") return; WD.go++; wdBack(false); },
+  // a DJ break can be the stage clip (him on the deck) while the building's up
+  stage: () => !!(WD.st && WD.st.deck && WD.st.deck.mg && wdTv() && !WD.off),
   // the room's moments. kind: hit, miss, place; o: { c: the person's color hex, nm, pick, amt }
   fx(kind, o) {
     const st = WD.st; if (!st) return; o = o || {}; const c = wdLift(wdHex(o.c, [1, 0.8, 0.3]), 0.3), nm = String(o.nm || "").toUpperCase(), pk = String(o.pick || "").toUpperCase();
-    if (kind === "hit") { st.fc = c; st.flash = 1.6; st.wave = 1.4; st.burst = 1; wdShow(st, [c, [1, 0.82, 0.3], [1, 1, 1]], 10, 5200);
+    if (kind === "hit") { st.fc = c; st.flash = 1.6; st.wave = 1.4; st.burst = 1; wdDeckAct(st, "cheer", 5000); wdShow(st, [c, [1, 0.82, 0.3], [1, 1, 1]], 10, 5200);
       wdRib([{ t: "CASHED", c: [0.02, 0.03, 0.05], bg: [0.24, 0.88, 0.56] }, { t: `${nm} · ${pk}`, c }, { t: o.amt ? "+" + o.amt : "", c: [0.24, 0.88, 0.56] }].filter((x) => x.t), 40e3);
       wdCard({ big: "CASHED", l1: `${nm} · ${pk}`, l2: o.amt ? "+" + o.amt : "", c: wdMix(c, [0, 0, 0], 0.35) }, 30e3); }
-    else if (kind === "miss") { st.dim = 1; wdRib([{ t: "MISSED", c: [1, 1, 1], bg: [0.75, 0.15, 0.22] }, { t: `${nm} · ${pk}`, c: [1, 0.6, 0.65] }].filter((x) => x.t), 15e3); }
+    else if (kind === "miss") { st.dim = 1; wdDeckAct(st, "sad", 3000); wdRib([{ t: "MISSED", c: [1, 1, 1], bg: [0.75, 0.15, 0.22] }, { t: `${nm} · ${pk}`, c: [1, 0.6, 0.65] }].filter((x) => x.t), 15e3); }
     else if (kind === "place") { st.fc = c; st.flash = 0.8; st.burst = 1.4;
       wdRib([{ t: "NEW BET", c: [0.02, 0.03, 0.05], bg: c }, { t: `${nm} · ${pk}`, c }, { t: o.amt || "", c: [1, 1, 1] }].filter((x) => x.t), 30e3);
       wdCard({ big: "NEW BET", l1: `${nm} · ${pk}`, l2: o.amt || "", c: wdMix(c, [0, 0, 0], 0.4) }, 20e3); }
