@@ -6592,6 +6592,32 @@ body.v2b .pp-tiles b { font: 800 20px/1.1 var(--f-num); }
 body.v2b .pp-bet { border: 0; border-radius: 12px; background: linear-gradient(180deg, var(--ta, var(--c)), var(--th, var(--c))) 0 0 / 6px 100% no-repeat, linear-gradient(180deg, #121620, #0a0d12); box-shadow: inset 0 0 0 1px var(--v2-line), 0 10px 24px rgba(0,0,0,.35); }
 body.v2b .pp-bet .pp-pick .t { font: 800 30px/1.05 var(--f-num); }
 body.v2b .pp-div { font: 800 13px/1 var(--f-ui); letter-spacing: .3em; color: var(--v2-ink3); }
+/* ================= V2: the stadium behind the board ================= */
+#v2world { position: fixed; inset: 0; width: 100vw; height: 100vh; z-index: 0; display: block; pointer-events: none; }
+body.v2w { background: #020306; }
+body.v2w::before, body.v2w #cfield, body.v2w #bfield, body.v2w #hcourt, body.v2w #ice, body.v2w #rbMark { display: none !important; }
+/* the board in front: when the camera leaves for the DJ or the jumbotron, it steps back out of the way */
+body.v2w .app { transition: opacity .55s ease, transform .75s cubic-bezier(.2,.7,.2,1); transform-origin: 50% 40%; }
+body.v2w.v2w-away .app { opacity: 0; transform: scale(.94); pointer-events: none; }
+body.v2w.v2w-away #roomTvQr { opacity: 0; transition: opacity .4s; }
+/* the video waits for the camera to get there */
+body.v2w.v2w-fly #jumbo { opacity: 0 !important; animation: none !important; }
+body.v2w.v2w-clip #jumbo, body.v2w.v2w-dj #jumbo { transition: opacity .5s ease; }
+/* a DJ break plays through the suite's glass: only the song card and the header stay on screen */
+body.v2w.v2w-dj #jumbo { background: transparent !important; box-shadow: none !important; -webkit-backdrop-filter: none !important; backdrop-filter: none !important; }
+body.v2w.v2w-dj #jumbo .jb-screen > video, body.v2w.v2w-dj #jumbo #jbWash, body.v2w.v2w-dj #jumbo #djCv { opacity: 0 !important; }
+body.v2w.v2w-dj #jumbo .jb-screen, body.v2w.v2w-dj #jumbo .jb-main { background: transparent !important; box-shadow: none !important; border-color: transparent !important; }
+body.v2w.v2w-dj #jumbo::before, body.v2w.v2w-dj #jumbo::after, body.v2w.v2w-dj #jumbo .jb-screen::before, body.v2w.v2w-dj #jumbo .jb-screen::after { display: none !important; }
+/* the panels stay solid in front of the building so nothing behind shows through the numbers */
+html body.v2w.tv .rb-g { background: linear-gradient(180deg, #0e1219, #080a0e) !important; }
+html body.v2w.tv .rb-sec, html body.v2w.tv .rb-card { background: linear-gradient(180deg, rgba(14,18,25,.93), rgba(8,10,14,.95)) !important; }
+body.v2w.v2w-dj #jumbo .jb-side { visibility: hidden; }
+body.v2w.v2w-dj #jumbo .jb-screen { border: 0 !important; outline: 0 !important; }
+body.v2w.v2w-dj #jumbo .jb-screen > i, body.v2w.v2w-dj #jumbo .jb-screen > b.cn { display: none !important; }
+/* a score or a cash: the building's light spills over the edges of the board */
+#v2wGlow { position: fixed; inset: 0; z-index: 3; pointer-events: none; opacity: 0; --wfc: 255,255,255; mix-blend-mode: screen;
+  background: radial-gradient(120% 60% at 50% 115%, rgba(var(--wfc), .55), rgba(var(--wfc), 0) 60%), radial-gradient(70% 40% at 50% -12%, rgba(var(--wfc), .35), rgba(var(--wfc), 0) 70%); }
+body:not(.v2w) #v2wGlow { display: none; }
 </style>
 </head>
 <body>
@@ -12011,7 +12037,7 @@ body.v2b .pp-div { font: 800 13px/1 var(--f-ui); letter-spacing: .3em; color: va
   }
   const LOSS_LAB = { lburn: "Burned", lshred: "Shredded", lgrave: "Buried", lbeat: "Bad beat", lbust: "The leg", lyard: "Graveyard" };
   function lossRun(list) {
-    if (v2On()) return missV2(list);
+    if (v2On()) { wdFx("miss", list && list[0] && (list[0].b || list[0])); return missV2(list); }
     showClear();
     const el = cashEl(), one = list.length === 1, b = list[0].b, n = list[0].n, nm = personName(b), col = personCol(b);
     const g = b.kind !== "parlay" && b.sel ? gameOf(b.sel) : null, beat = one ? lossBeat(b) : null, legs = one ? lossLegs(b) : null, day = lossDay(b);
@@ -13288,8 +13314,12 @@ void main(){
     if (sp === "MLB") return "ballgame";
     return null;
   }
+  function wdFx(kind, b) {
+    try { if (!window.SBW || !b || !b.pick) return; const win = (b.units || 0) * ppu(b.odds || 100);
+      SBW.fx(kind, { c: personCol(b), nm: personName(b), pick: b.pick, amt: kind === "hit" ? fU(win) : kind === "place" ? `${fU(b.units || 0)} to win ${fU(win)}` : "" }); } catch (e) {}
+  }
   function cashRun({ b, n, names, tile }) {
-    if (v2On()) return hitV2({ b, n, names, tile });
+    if (v2On()) { wdFx("hit", b); return hitV2({ b, n, names, tile }); }
     showClear();
     const el = cashEl(), F = flexOf(b), lvl = showLevel(b, F, n), c = showCtx(b, n, names, F, lvl);
     c.tile = tile || null; c.v = null;
@@ -13452,7 +13482,7 @@ void main(){
     el.classList.remove("on"); setTimeout(() => { if (!el.classList.contains("on")) el.hidden = true; }, 600);
   }
   function announce(b) {
-    if (v2On()) { placeV2(b); return; }
+    if (v2On()) { wdFx("place", b); placeV2(b); return; }
     const tag = isMe(b) ? null : { name: personName(b), sub: "just bet", col: personCol(b) };
     const T = flexOf(b);
     if (T.k === "nuke") { nukeWarn(b); if (tag) whoTag({ ...tag, sub: "nuke inbound" }, 7000); return; }
@@ -13677,7 +13707,7 @@ void main(){
   // ---------- sheets ----------
   function openSheet(id) { $(id).hidden = false; }
   // keep every open screen current: when a new version is up, reload it (never mid-form or mid-animation)
-  const BUILD = "20261028003259";
+  const BUILD = "20261028011635";
   function checkBuild() {
     if (BUILD === "dev") return;
     fetch("version.json?t=" + Date.now(), { cache: "no-store" }).then((r) => (r.ok ? r.json() : null)).then((j) => {
@@ -15361,6 +15391,7 @@ void main(){
     if (whoJb) whoOff();
     const jb = $("#jumbo"), v = $("#pipVid"), bg = $("#jbBg"); clearTimeout(pipT); clearTimeout(hideT); clearInterval(jbTick); clearInterval(djT); $("#djCv").hidden = true;
     if (!jb.hidden) { jb.classList.add("out"); hideT = setTimeout(() => { jb.hidden = true; jb.classList.remove("out"); try { v.pause(); bg.pause(); } catch (e) {} }, 400); }
+    try { if (window.SBW) SBW.clipEnd(); } catch (e) {}
   }
   $("#lockStop").addEventListener("click", stopStatus);
   $("#jumbo").addEventListener("click", stopStatus);
@@ -15914,6 +15945,7 @@ void main(){
       $("#jbTag").textContent = why || MOOD_TAG[mood] || "Live";
       jbBug(b);
       jb.className = "jumbo lux m-" + mood + (team ? " teamed" : "") + (lux ? " hz" : ""); jb.hidden = false; fitPic(v);
+      try { if (window.SBW && !pre) SBW.clip({ dj: dj || hz, v, ext: !!P.ext }); } catch (e) { console.warn(e); }
       const jt = $("#jbTeam");
       if (team) {
         const c1 = hexRgb(team.t.col) || [40, 44, 60], c2 = hexRgb(team.t.alt) || c1;
@@ -23862,6 +23894,614 @@ ACT3.cfb = function (st, a) { const v = (st.info.cf && st.info.cf.v) || "band"; 
 Object.assign(SIG_OF, { maction: "lightning", funbelt: "fireworks", sickos: "galaxy", cupcake: "coins", direct: "globe", afterdark: "galaxy", big12: "fireworks", airraid: "fireworks",
   b1g: "rocks", punting: "rocks", storm: "lightning", hate: "fire", bowl: "fireworks", heisman: "coins", freefb: "ot", satslip: "receipt" });
 
+
+// ================= V2: the board lives in a stadium =================
+// One 3D venue behind the board, built for the sport that's on: a ballpark, a football stadium, an arena with a hardwood
+// court or a rink. The crowd wears the home team's colors, the decks have suites and LED ribbons, the lights are up, there's
+// a jumbotron. A DJ break flies the camera across to the DJ's suite (the set plays through its glass); a video flies to the
+// jumbotron and pushes in until the screen is the whole picture, then the real video takes over. New bets, wins, misses and
+// scores light the place up: ribbons, the jumbotron, the crowd, fireworks. localStorage sb-world = off (or sb-v2 = off) keeps
+// the flat backgrounds.
+const WD = { st: null, starting: false, key: "", mode: "board", last: 0, raf: 0, q: 0, go: 0, sig: "", card: null, cardTo: 0, ribAt: 0 };
+const wdOn = () => { if (WD.off) return false; try { return localStorage.getItem("sb-v2") !== "off" && localStorage.getItem("sb-world") !== "off"; } catch (e) { return true; } };
+const wdTv = () => document.body.classList.contains("tv") && !document.body.classList.contains("phone");
+const wdHex = (h, d) => { const m = /^#?([0-9a-f]{6})$/i.exec(String(h || "").trim()); if (!m) return d || [0.3, 0.32, 0.38]; const n = parseInt(m[1], 16); return [((n >> 16) & 255) / 255, ((n >> 8) & 255) / 255, (n & 255) / 255]; };
+const wdLum = (c) => 0.299 * c[0] + 0.587 * c[1] + 0.114 * c[2];
+const wdCss = (c, a) => `rgba(${Math.round(c[0] * 255)},${Math.round(c[1] * 255)},${Math.round(c[2] * 255)},${a == null ? 1 : a})`;
+const wdMix = (a, b, k) => [a[0] + (b[0] - a[0]) * k, a[1] + (b[1] - a[1]) * k, a[2] + (b[2] - a[2]) * k];
+const wdLift = (c, min) => { const l = wdLum(c); return l >= min ? c : wdMix(c, [1, 1, 1], Math.min(0.7, (min - l) / Math.max(0.05, 1 - l))); };
+const wdEase = (x) => (x < 0.5 ? 4 * x * x * x : 1 - Math.pow(-2 * x + 2, 3) / 2);
+
+// what's on: the sport from the board's mode, the teams from the big game's card
+function wdRead() {
+  let force = ""; try { force = localStorage.getItem("sb-world-sport") || ""; } catch (e) {}
+  const c = document.body.classList, sport = WD_V[force] ? force : c.contains("baseball") ? "mlb" : c.contains("hoops") ? "nba" : c.contains("hockey") ? "nhl" : "nfl";
+  const g = document.querySelector("#rbGames .rb-g.hero") || document.querySelector("#rbGames .rb-g") || document.querySelector(".pp-g, .rb-g");
+  const T = { a: { ab: "SWEAT", col: [0.1, 0.16, 0.32], alt: [1, 0.79, 0.3], sc: "", lg: "" }, h: { ab: "BOARD", col: [0.5, 0.1, 0.16], alt: [1, 0.79, 0.3], sc: "", lg: "" }, d: "" };
+  if (g) {
+    const v = (k) => g.style.getPropertyValue(k).trim();
+    for (const s of ["a", "h"]) {
+      const tm = g.querySelector(".rb-gh .tm." + s), t = T[s];
+      t.col = wdHex(v(s === "a" ? "--ca" : "--ch"), t.col); t.alt = wdHex(v(s === "a" ? "--ra" : "--rh"), t.alt);
+      if (tm) { const n = tm.querySelector(".nmx .na") || tm.querySelector(".nmx") || tm.querySelector(".ab"); t.ab = ((n && n.textContent) || t.ab).trim().slice(0, 5); t.sc = ((tm.querySelector(".sc") || {}).textContent || "").trim(); const im = tm.querySelector("img"); t.lg = im ? im.getAttribute("data-u") || im.src : ""; }
+    }
+    T.d = ((g.querySelector(".rb-gh .clk") || {}).textContent || "").trim();
+  }
+  const pulse = ((document.getElementById("pulseChip") || {}).textContent || "").replace(/\s+/g, " ").trim();
+  const lb = [...document.querySelectorAll("#rbLb .rb-lr")].slice(0, 4).map((r) => { const nm = ((r.querySelector(".nm b") || {}).textContent || "").trim(), lv = r.querySelector(".lv"), net = ((r.querySelector(".net") || {}).childNodes[0] || {}).textContent || "";
+    return { nm, c: wdHex(r.style.getPropertyValue("--c")), v: lv ? (lv.childNodes[1] || lv.lastChild || {}).textContent || "" : net }; }).filter((x) => x.nm);
+  return { sport, T, pulse, lb };
+}
+
+// ---- the venues: a contour the stands are built around, decks off it, the field, where the camera sits ----
+// units: football in yards, everything else in meters; contour(t) is a superellipse (A, B, n) around (cx, cz)
+const WD_V = {
+  nfl: { A: 72, B: 44, n: 5, cx: 0, cz: 0, roof: 0, field: [120, 53.33, 0, 0],
+    tiers: [{ o0: 3.5, o1: 31, y0: 2, y1: 16, rows: 30 }, { suite: 1, o0: 31.6, y0: 16.6, y1: 21.8, keep: (x) => x < 54 }, { o0: 33, o1: 62, y0: 23.5, y1: 46, rows: 32, keep: (x) => x < 54 }],
+    ribs: [{ o: 3.4, y0: 0, y1: 1.9 }, { o: 32.9, y0: 22, y1: 23.5, keep: (x) => x < 54 }], wall: 0,
+    jumbo: { p: [118, 31, 0], face: [-1, 0, 0], w: 52, h: 29.25, legs: 1 }, dj: { t: 0.75, w: 16 },
+    towers: [[-100, 74, -86], [100, 74, -86], [-100, 74, 86], [100, 74, 86]], fw: [0, 70, 0], fwR: 46,
+    board: { p: [-18, 33, 64], l: [16, 4, -22], f: 52 } },
+  mlb: { A: 82, B: 80, Bb: 62, n: 2.3, cx: 0, cz: -44, roof: 0, field: [190, 190, 0, -60],
+    tiers: [{ o0: 0.6, o1: 22, y0: 3.2, y1: 13, rows: 26 }, { suite: 1, o0: 22.6, y0: 13.6, y1: 17.6, keep: (x, z) => z > -66 }, { o0: 24, o1: 44, y0: 19, y1: 38, rows: 26, keep: (x, z) => z > -58 }],
+    ribs: [{ o: 22.5, y0: 18, y1: 19.2, keep: (x, z) => z > -58 }], wall: { o: 0.3, y1: 3.2 },
+    jumbo: { p: [0, 34, -164], face: [0, 0, 1], w: 54, h: 30.4, legs: 1 }, dj: { t: 0.97, w: 12 },
+    towers: [[-96, 58, -20], [96, 58, -20], [-70, 56, -120], [70, 56, -120], [0, 50, 44]], fw: [0, 58, -110], fwR: 40,
+    board: { p: [-40, 44, 30], l: [22, 0, -64], f: 50 } },
+  nba: { A: 20.5, B: 14, n: 5, cx: 0, cz: 0, roof: 33, field: [34.6, 21.2, 0, 0], court: 1,
+    tiers: [{ o0: 0.6, o1: 14, y0: 0.6, y1: 8, rows: 20 }, { suite: 1, o0: 14.6, y0: 8.6, y1: 11.2 }, { o0: 15.6, o1: 29, y0: 12.2, y1: 25, rows: 20 }],
+    ribs: [{ o: 15.5, y0: 11.2, y1: 12.2 }, { o: 0.5, y0: 0, y1: 0.7 }], wall: 0,
+    jumbo: { p: [0, 17.5, 0], hung: 1, w: 8.2, h: 4.6 }, dj: { t: 0.75, w: 6.5 },
+    towers: [], fw: [0, 26, 0], fwR: 9,
+    board: { p: [-7, 12.5, 23], l: [2.5, 3.5, -7], f: 54 } },
+  nhl: { A: 36, B: 20, n: 5, cx: 0, cz: 0, roof: 40, field: [61, 26, 0, 0], rink: 1,
+    tiers: [{ o0: 2.2, o1: 18, y0: 1.4, y1: 10, rows: 22 }, { suite: 1, o0: 18.6, y0: 10.6, y1: 13.6 }, { o0: 19.6, o1: 34, y0: 14.6, y1: 29, rows: 20 }],
+    ribs: [{ o: 19.5, y0: 13.6, y1: 14.6 }], wall: 0,
+    jumbo: { p: [0, 21, 0], hung: 1, w: 10, h: 5.6 }, dj: { t: 0.75, w: 8 },
+    towers: [], fw: [0, 30, 0], fwR: 12,
+    board: { p: [-10, 15, 30], l: [3, 3, -8], f: 54 } },
+};
+function wdContour(V) {
+  return (t) => { const a = t * Math.PI * 2, c = Math.cos(a), s = Math.sin(a), e = 2 / V.n, B = s > 0 && V.Bb ? V.Bb : V.B;
+    return [V.cx + V.A * Math.sign(c) * Math.pow(Math.abs(c), e), V.cz + B * Math.sign(s) * Math.pow(Math.abs(s), e)]; };
+}
+function wdNorm(C, t) {
+  const p = C(t), a = C(t - 0.0007), b = C(t + 0.0007), tx = b[0] - a[0], tz = b[1] - a[1], l = Math.hypot(tx, tz) || 1;
+  let nx = tz / l, nz = -tx / l; const V = WD.V; if ((p[0] - V.cx) * nx + (p[1] - V.cz) * nz < 0) { nx = -nx; nz = -nz; }
+  return [p[0], p[1], nx, nz];
+}
+// a band around the contour from offset o0 at height y0 to offset o1 at y1 (a deck, or a wall when o0 = o1); u runs around in
+// meters, v across
+function wdBand(THREE, C, o, seg) {
+  const N = seg || 360, pos = [], uv = [], idx = [], P = [];
+  for (let i = 0; i <= N; i++) P.push(wdNorm(C, i / N));
+  let len = 0; const L = [0]; for (let i = 1; i <= N; i++) { const a = P[i - 1], b = P[i], om = (o.o0 + (o.o1 ?? o.o0)) / 2; len += Math.hypot(b[0] + b[2] * om - a[0] - a[2] * om, b[1] + b[3] * om - a[1] - a[3] * om); L.push(len); }
+  for (let i = 0; i <= N; i++) { const [x, z, nx, nz] = P[i], o1 = o.o1 ?? o.o0;
+    pos.push(x + nx * o.o0, o.y0, z + nz * o.o0, x + nx * o1, o.y1, z + nz * o1); uv.push(L[i], 0, L[i], 1); }
+  for (let i = 0; i < N; i++) { const [x, z] = P[i], [x2, z2] = P[i + 1], om = (o.o0 + (o.o1 ?? o.o0)) / 2, nx = P[i][2], nz = P[i][3];
+    if (o.keep && !o.keep((x + x2) / 2 + nx * om, (z + z2) / 2 + nz * om)) continue;
+    const a = i * 2, b = a + 1, c = a + 2, d = a + 3; idx.push(a, c, b, b, c, d); }
+  const g = new THREE.BufferGeometry(); g.setAttribute("position", new THREE.Float32BufferAttribute(pos, 3)); g.setAttribute("uv", new THREE.Float32BufferAttribute(uv, 2)); g.setIndex(idx);
+  g.userData.len = len; return g;
+}
+const WD_VS = "varying vec2 vUv; varying float vD; void main(){ vUv = uv; vec4 mv = modelViewMatrix * vec4(position, 1.0); vD = -mv.z; gl_Position = projectionMatrix * mv; }";
+const WD_H = "float h21(vec2 p){ p = fract(p * vec2(123.34, 456.21)); p += dot(p, p + 45.32); return fract(p.x * p.y); }";
+// the crowd: a seat per cell, a fan in most (head over shoulders), in the home colors, the away team's pocket, some white and
+// dark; too small to draw at a distance, their average; the wave; camera flashes
+const WD_CROWD = `uniform float uT, uSeat, uRow, uWave, uWX, uFl, uLit, uFlash, uBurst; uniform vec3 uC1, uC2, uC3, uStep, uFc, uHaze; varying vec2 vUv; varying float vD; ${WD_H}
+void main(){
+  vec2 g = vec2(vUv.x / uSeat, vUv.y * uRow), id = floor(g), f = fract(g);
+  float r = h21(id), r2 = h21(id + 17.3), r3 = h21(id + 41.7);
+  vec3 col = r < .44 ? uC1 : r < .6 ? uC2 : r < .68 ? uC3 : r < .8 ? vec3(.84, .83, .8) : r < .91 ? vec3(.12, .13, .16) : vec3(.5, .38, .3);
+  float u = vUv.x / uWX, w = uWave * exp(-pow((fract(u - uT * .09) - .5) * 16.0, 2.0));
+  float lift = w * .32 + (sin(uT * (2.0 + r3 * 3.0) + r3 * 40.0) * .5 + .5) * .05 * (.4 + uBurst);
+  float body = smoothstep(.36, .27, length((f - vec2(.5, .36 + lift)) * vec2(1.0, 1.5)));
+  float head = smoothstep(.17, .12, length(f - vec2(.5, .74 + lift)));
+  float occ = step(.13, r2);
+  vec3 skin = mix(vec3(.33, .22, .16), vec3(.86, .67, .53), r3);
+  vec3 seat = uStep * (.8 + .4 * step(.55, f.y));
+  col = mix(col, vec3(dot(col, vec3(.3, .59, .11))), .28) * .82;
+  vec3 c = mix(seat, mix(col, skin, head * (1.0 - body)), max(body, head) * occ);
+  float px = max(fwidth(g.x), fwidth(g.y)), far = smoothstep(.5, 1.1, px);
+  vec3 avg = mix(uStep, uC1 * .44 + uC2 * .16 + uC3 * .08 + vec3(.84) * .12 + vec3(.12) * .11 + vec3(.5, .38, .3) * .09, .62);
+  c = mix(c, avg, far);
+  c *= uLit * (.72 + .28 * vUv.y) * (1.0 + w * .7);
+  float fl = step(1.0 - (.0016 + uBurst * .02), h21(id + floor(uT * 8.0) * 1.37));
+  c += vec3(1.0) * fl * (1.0 - far * .6) * 1.2 + uFc * uFlash * .45;
+  c = mix(c, uHaze, smoothstep(40.0, uFl, vD) * .55);
+  gl_FragColor = vec4(c, 1.0);
+}`;
+// the suites: a row of lit glass boxes
+const WD_SUITE = `uniform float uT, uW, uLit; uniform vec3 uGlow, uHaze; uniform float uFl; varying vec2 vUv; varying float vD; ${WD_H}
+void main(){
+  float x = vUv.x / uW, id = floor(x), f = fract(x), r = h21(vec2(id, 3.1)), r2 = h21(vec2(id, 9.7));
+  float glass = step(.06, f) * step(f, .94) * step(.16, vUv.y) * step(vUv.y, .9);
+  vec3 warm = mix(vec3(1.0, .74, .45), vec3(.75, .85, 1.0), step(.7, r)) * (.25 + .75 * r2) * uLit;
+  vec3 c = mix(vec3(.05, .055, .07), warm * (.55 + .45 * (1.0 - vUv.y)), glass);
+  c += uGlow * glass * .08;
+  c = mix(c, uHaze, smoothstep(40.0, uFl, vD) * .5);
+  gl_FragColor = vec4(c, 1.0);
+}`;
+const WD_SKY = `uniform float uT, uArena; uniform vec3 uTint, uFc; uniform float uFlash; varying vec3 vP; ${WD_H}
+void main(){
+  vec3 d = normalize(vP); float y = d.y;
+  vec3 c = mix(vec3(.05, .07, .12) + uTint * .05, vec3(.006, .008, .02), smoothstep(-.05, .55, y));
+  c += vec3(.25, .22, .18) * exp(-max(y, 0.0) * 9.0) * .35 * (1.0 - uArena);
+  vec2 sp = vec2(atan(d.z, d.x) * 120.0, y * 120.0); float s = step(.9965, h21(floor(sp))) * smoothstep(.15, .5, y) * (1.0 - uArena);
+  c += vec3(s) * (.5 + .5 * sin(uT * 2.0 + h21(floor(sp)) * 30.0));
+  c = mix(c, vec3(.012, .014, .02), uArena * smoothstep(-.2, .3, y));
+  c += uFc * uFlash * .12;
+  gl_FragColor = vec4(c, 1.0);
+}`;
+
+// ---- canvas art: the field, the ribbons, the screens ----
+function wdCanvas(w, h) { const c = document.createElement("canvas"); c.width = w; c.height = h; return c; }
+function wdTeamArt(ctx, t, x, y, size, rot) {
+  ctx.save(); ctx.translate(x, y); if (rot) ctx.rotate(rot);
+  if (t.img && t.img.complete && t.img.naturalWidth) { const s = size; ctx.drawImage(t.img, -s / 2, -s / 2, s, s); }
+  else { ctx.font = `900 ${Math.round(size * 0.42)}px "Barlow Condensed", Inter, sans-serif`; ctx.textAlign = "center"; ctx.textBaseline = "middle"; ctx.lineWidth = size * 0.04; ctx.strokeStyle = wdCss(t.alt); ctx.fillStyle = "#fff"; ctx.strokeText(t.ab, 0, 0); ctx.fillText(t.ab, 0, 0); }
+  ctx.restore();
+}
+function wdFieldNFL(T) {
+  const W = 2400, H = Math.round((W * 53.33) / 120), c = wdCanvas(W, H), x = c.getContext("2d"), k = W / 120;
+  for (let i = 0; i < 24; i++) { x.fillStyle = i % 2 ? "#2f7a37" : "#2a6f32"; x.fillRect(i * 5 * k, 0, 5 * k + 1, H); }
+  for (let i = 0; i < 2600; i++) { x.fillStyle = `rgba(0,0,0,${Math.random() * 0.05})`; x.fillRect(Math.random() * W, Math.random() * H, 3, 3); }
+  for (const [s, x0] of [["a", 0], ["h", 110]]) { const t = T[s]; x.fillStyle = wdCss(t.col); x.fillRect(x0 * k, 0, 10 * k, H);
+    x.save(); x.translate((x0 + 5) * k, H / 2); x.rotate(s === "a" ? -Math.PI / 2 : Math.PI / 2); x.font = `900 ${Math.round(6.6 * k)}px "Barlow Condensed", Inter, sans-serif`; x.textAlign = "center"; x.textBaseline = "middle";
+    x.lineWidth = 0.5 * k; x.strokeStyle = wdCss(t.alt); x.fillStyle = "#fff"; const nm = (t.nm || t.ab).toUpperCase(); x.strokeText(nm, 0, 0); x.fillText(nm, 0, 0); x.restore(); }
+  x.strokeStyle = "#f4f6f2"; x.lineWidth = 0.25 * k;
+  for (let yd = 10; yd <= 110; yd += 5) { x.lineWidth = (yd === 10 || yd === 110 ? 0.45 : 0.22) * k; x.beginPath(); x.moveTo(yd * k, 0.3 * k); x.lineTo(yd * k, H - 0.3 * k); x.stroke(); }
+  x.lineWidth = 0.14 * k;
+  for (let yd = 11; yd < 110; yd++) { if (yd % 5 === 0) continue; for (const z of [0.4, 23.58, 29.75 - 0.6, 53.33 - 1.0]) { x.beginPath(); x.moveTo(yd * k, z * k); x.lineTo(yd * k, (z + 0.6) * k); x.stroke(); } }
+  x.lineWidth = 0.5 * k; x.strokeRect(0.25 * k, 0.25 * k, W - 0.5 * k, H - 0.5 * k);
+  x.fillStyle = "#f4f6f2"; x.font = `700 ${Math.round(2 * k)}px "Barlow Condensed", Inter, sans-serif`; x.textAlign = "center"; x.textBaseline = "middle";
+  for (let yd = 20; yd <= 100; yd += 10) { const n = String(50 - Math.abs(60 - yd)); for (const [z, r] of [[12, 0], [53.33 - 12, Math.PI]]) { x.save(); x.translate(yd * k, z * k); x.rotate(r); x.fillText(n, 0, 0); x.restore(); } }
+  wdTeamArt(x, T.h, W / 2, H / 2, 13 * k);
+  return c;
+}
+function wdFieldMLB(V, C) {
+  const S = 2048, c = wdCanvas(S, S), x = c.getContext("2d"), [fw, , fx0, fz0] = V.field, k = S / fw, X = (wx) => (wx - fx0 + fw / 2) * k, Y = (wz) => (wz - fz0 + fw / 2) * k;
+  x.fillStyle = "#24612d"; x.fillRect(0, 0, S, S);
+  // fair territory, mowed in a checkerboard
+  x.save(); x.beginPath(); x.moveTo(X(0), Y(0)); x.lineTo(X(-140), Y(-140)); x.lineTo(X(140), Y(-140)); x.closePath(); x.clip();
+  x.translate(X(0), Y(0)); x.rotate(Math.PI / 4); const q = 7 * k; for (let i = -30; i < 30; i++) for (let j = -30; j < 30; j++) { x.fillStyle = (i + j) % 2 ? "#2f8a3e" : "#287a36"; x.fillRect(i * q, j * q, q + 1, q + 1); }
+  x.restore();
+  // the warning track along the wall
+  x.beginPath(); for (let i = 0; i <= 240; i++) { const p = C(i / 240); i ? x.lineTo(X(p[0]), Y(p[1])) : x.moveTo(X(p[0]), Y(p[1])); } x.closePath(); x.lineWidth = 9 * k; x.strokeStyle = "#8f6a45"; x.stroke();
+  // the infield: the skin, the grass square, the cutouts, the mound
+  x.save(); x.beginPath(); x.moveTo(X(0), Y(1.5)); x.lineTo(X(-60), Y(-62)); x.lineTo(X(60), Y(-62)); x.closePath(); x.clip();
+  x.fillStyle = "#b8875a"; x.beginPath(); x.arc(X(0), Y(-18.4), 29 * k, 0, Math.PI * 2); x.fill(); x.restore();
+  const b = 27.43 / Math.SQRT2; x.fillStyle = "#2f8a3e"; x.beginPath(); x.moveTo(X(0), Y(-2.5)); x.lineTo(X(b - 2.2), Y(-b)); x.lineTo(X(0), Y(-2 * b + 2.6)); x.lineTo(X(-b + 2.2), Y(-b)); x.closePath(); x.fill();
+  x.fillStyle = "#b8875a"; for (const [bx, bz, r] of [[0, 0, 4.2], [b, -b, 2.9], [0, -2 * b, 2.9], [-b, -b, 2.9], [0, -18.4, 2.75]]) { x.beginPath(); x.arc(X(bx), Y(bz), r * k, 0, Math.PI * 2); x.fill(); }
+  x.fillStyle = "#c79a6a"; x.beginPath(); x.arc(X(0), Y(-18.4), 1.4 * k, 0, Math.PI * 2); x.fill();
+  // chalk: the foul lines, the boxes, the bases
+  x.strokeStyle = "#f5f3ee"; x.lineWidth = 0.28 * k; x.beginPath(); x.moveTo(X(0), Y(0)); x.lineTo(X(-110), Y(-110)); x.moveTo(X(0), Y(0)); x.lineTo(X(110), Y(-110)); x.stroke();
+  x.lineWidth = 0.16 * k; x.strokeRect(X(-1.9), Y(-0.9), 1.2 * k, 1.8 * k); x.strokeRect(X(0.7), Y(-0.9), 1.2 * k, 1.8 * k);
+  x.fillStyle = "#fff"; for (const [bx, bz] of [[b, -b], [0, -2 * b], [-b, -b]]) { x.save(); x.translate(X(bx), Y(bz)); x.rotate(Math.PI / 4); x.fillRect(-0.3 * k, -0.3 * k, 0.6 * k, 0.6 * k); x.restore(); }
+  x.beginPath(); x.moveTo(X(-0.22), Y(-0.4)); x.lineTo(X(0.22), Y(-0.4)); x.lineTo(X(0.22), Y(0)); x.lineTo(X(0), Y(0.22)); x.lineTo(X(-0.22), Y(0)); x.closePath(); x.fill();
+  return c;
+}
+function wdCourt(T, V) {
+  const [fw, fh] = V.field, W = 2048, H = Math.round((W * fh) / fw), c = wdCanvas(W, H), x = c.getContext("2d"), k = W / fw, cw = 28.65, ch = 15.24, ox = (fw - cw) / 2, oz = (fh - ch) / 2;
+  const X = (m) => (ox + m) * k, Y = (m) => (oz + m) * k, home = T.h;
+  x.fillStyle = wdCss(wdMix(home.col, [0, 0, 0], 0.45)); x.fillRect(0, 0, W, H);
+  // hardwood: planks along the court
+  x.save(); x.beginPath(); x.rect(X(0), Y(0), cw * k, ch * k); x.clip();
+  for (let z = 0; z < ch; z += 0.075) { let xx = 0; while (xx < cw) { const l = 1.2 + Math.random() * 2.4, tone = 0.86 + Math.random() * 0.14; x.fillStyle = `rgb(${Math.round(206 * tone)},${Math.round(150 * tone)},${Math.round(94 * tone)})`; x.fillRect(X(xx), Y(z), l * k + 1, 0.075 * k + 0.6); xx += l; } }
+  x.restore();
+  x.fillStyle = "rgba(255,240,220,.06)"; x.fillRect(X(0), Y(0), cw * k, ch * k);
+  x.strokeStyle = "#fff"; x.lineWidth = 0.06 * k * 1.6;
+  x.strokeRect(X(0), Y(0), cw * k, ch * k); x.beginPath(); x.moveTo(X(cw / 2), Y(0)); x.lineTo(X(cw / 2), Y(ch)); x.stroke();
+  x.fillStyle = wdCss(home.col); x.beginPath(); x.arc(X(cw / 2), Y(ch / 2), 1.83 * k, 0, Math.PI * 2); x.fill(); x.stroke();
+  wdTeamArt(x, home, X(cw / 2), Y(ch / 2), 3.3 * k);
+  for (const side of [0, 1]) {
+    const bx = side ? cw - 1.575 : 1.575, dir = side ? -1 : 1, kx = side ? cw - 5.79 : 0;
+    x.fillStyle = wdCss(home.col); x.fillRect(X(kx), Y(ch / 2 - 2.44), 5.79 * k, 4.88 * k); x.strokeRect(X(kx), Y(ch / 2 - 2.44), 5.79 * k, 4.88 * k);
+    x.beginPath(); x.arc(X(side ? cw - 5.79 : 5.79), Y(ch / 2), 1.83 * k, 0, Math.PI * 2); x.stroke();
+    x.beginPath(); x.moveTo(X(side ? cw : 0), Y(0.91)); x.lineTo(X(bx + dir * 0.0), Y(0.91));
+    const a0 = Math.asin((ch / 2 - 0.91) / 7.24); x.lineTo(X(side ? cw - 4.27 : 4.27), Y(0.91));
+    x.arc(X(bx), Y(ch / 2), 7.24 * k, side ? Math.PI + a0 : -a0, side ? Math.PI - a0 : a0, side ? true : false);
+    x.lineTo(X(side ? cw : 0), Y(ch - 0.91)); x.stroke();
+    x.beginPath(); x.arc(X(bx), Y(ch / 2), 1.22 * k, side ? Math.PI / 2 : -Math.PI / 2, side ? -Math.PI / 2 : Math.PI / 2, false); x.stroke();
+  }
+  x.font = `900 ${Math.round(1.1 * k)}px "Barlow Condensed", Inter, sans-serif`; x.textAlign = "center"; x.textBaseline = "middle"; x.fillStyle = "rgba(255,255,255,.85)";
+  x.fillText((home.nm || home.ab).toUpperCase(), X(cw / 2), Y(ch + oz / 2)); x.fillText((home.nm || home.ab).toUpperCase(), X(cw / 2), Y(-oz / 2));
+  return c;
+}
+function wdRink(T, V) {
+  const [fw, fh] = V.field, W = 2048, H = Math.round((W * fh) / fw), c = wdCanvas(W, H), x = c.getContext("2d"), k = W / fw, X = (m) => (m + fw / 2) * k, Y = (m) => (m + fh / 2) * k;
+  x.fillStyle = "#0b0f15"; x.fillRect(0, 0, W, H);
+  const rr = (r) => { x.beginPath(); x.moveTo(X(-fw / 2 + r), Y(-fh / 2)); x.arcTo(X(fw / 2), Y(-fh / 2), X(fw / 2), Y(fh / 2), r * k); x.arcTo(X(fw / 2), Y(fh / 2), X(-fw / 2), Y(fh / 2), r * k); x.arcTo(X(-fw / 2), Y(fh / 2), X(-fw / 2), Y(-fh / 2), r * k); x.arcTo(X(-fw / 2), Y(-fh / 2), X(fw / 2), Y(-fh / 2), r * k); x.closePath(); };
+  rr(8.5); const gi = x.createRadialGradient(W / 2, H / 2, 10, W / 2, H / 2, W * 0.6); gi.addColorStop(0, "#f4f8fb"); gi.addColorStop(1, "#dce8f0"); x.fillStyle = gi; x.fill();
+  x.save(); rr(8.5); x.clip(); for (let i = 0; i < 900; i++) { x.strokeStyle = `rgba(150,180,205,${Math.random() * 0.14})`; x.lineWidth = 1; x.beginPath(); const a = Math.random() * W, b = Math.random() * H; x.moveTo(a, b); x.lineTo(a + (Math.random() - 0.5) * 120, b + (Math.random() - 0.5) * 30); x.stroke(); }
+  const ln = (m, col, w) => { x.fillStyle = col; x.fillRect(X(m) - (w * k) / 2, 0, w * k, H); };
+  ln(0, "#c8102e", 0.3); ln(-7.62, "#1f4fb4", 0.3); ln(7.62, "#1f4fb4", 0.3); ln(-27.15, "#c8102e", 0.06); ln(27.15, "#c8102e", 0.06);
+  x.strokeStyle = "#1f4fb4"; x.lineWidth = 0.06 * k; x.beginPath(); x.arc(X(0), Y(0), 4.57 * k, 0, Math.PI * 2); x.stroke();
+  x.strokeStyle = "#c8102e"; for (const [fx, fz] of [[-20.12, -6.71], [-20.12, 6.71], [20.12, -6.71], [20.12, 6.71]]) { x.beginPath(); x.arc(X(fx), Y(fz), 4.57 * k, 0, Math.PI * 2); x.stroke(); x.fillStyle = "#c8102e"; x.beginPath(); x.arc(X(fx), Y(fz), 0.3 * k, 0, Math.PI * 2); x.fill(); }
+  x.fillStyle = "rgba(80,140,230,.55)"; for (const s of [-1, 1]) { x.beginPath(); x.arc(X(s * 27.15), Y(0), 1.83 * k, s > 0 ? Math.PI / 2 : -Math.PI / 2, s > 0 ? Math.PI * 1.5 : Math.PI / 2, false); x.fill(); }
+  x.globalAlpha = 0.85; wdTeamArt(x, T.h, X(0), Y(0), 7 * k); x.globalAlpha = 1;
+  x.restore();
+  return c;
+}
+// the LED ribbon: a line of items, each its own color
+function wdRibbonArt(items) {
+  const W = 4096, H = 96, c = wdCanvas(W, H), x = c.getContext("2d");
+  x.fillStyle = "#020306"; x.fillRect(0, 0, W, H);
+  x.font = `800 58px "Barlow Condensed", Inter, sans-serif`; x.textBaseline = "middle";
+  let px = 30; const list = items.length ? items : [{ t: "SWEAT BOARD", c: [1, 0.8, 0.3] }];
+  for (let i = 0; px < W; i++) { const it = list[i % list.length], w = x.measureText(it.t).width;
+    if (it.bg) { x.fillStyle = wdCss(it.bg); x.fillRect(px - 18, 8, w + 36, H - 16); }
+    x.fillStyle = wdCss(it.c || [1, 1, 1]); x.fillText(it.t, px, H / 2 + 3); px += w + 40; x.fillStyle = "rgba(255,255,255,.35)"; x.fillText("◆", px, H / 2 + 2); px += 64; }
+  // the LED grain
+  x.fillStyle = "rgba(0,0,0,.28)"; for (let i = 0; i < W; i += 4) x.fillRect(i, 0, 1, H); for (let j = 0; j < H; j += 4) x.fillRect(0, j, W, 1);
+  return c;
+}
+// the jumbotron when no video is up: the game, the room
+function wdJumboArt(R, card) {
+  const W = 1024, H = 576, c = wdCanvas(W, H), x = c.getContext("2d"), T = R.T;
+  const g = x.createLinearGradient(0, 0, W, 0); g.addColorStop(0, wdCss(wdMix(T.a.col, [0, 0, 0], 0.35))); g.addColorStop(0.5, "#05070b"); g.addColorStop(1, wdCss(wdMix(T.h.col, [0, 0, 0], 0.35)));
+  x.fillStyle = g; x.fillRect(0, 0, W, H);
+  if (card) {
+    x.fillStyle = wdCss(card.c, 0.9); x.fillRect(0, 0, W, H); x.fillStyle = "rgba(0,0,0,.35)"; x.fillRect(0, H * 0.62, W, H * 0.38);
+    x.textAlign = "center"; x.textBaseline = "middle"; x.fillStyle = "#fff";
+    x.font = `900 150px "Barlow Condensed", Inter, sans-serif`; x.fillText(card.big, W / 2, H * 0.33);
+    x.font = `800 66px "Barlow Condensed", Inter, sans-serif`; x.fillText(card.l1 || "", W / 2, H * 0.73);
+    x.font = `700 44px "Barlow Condensed", Inter, sans-serif`; x.fillStyle = "rgba(255,255,255,.8)"; x.fillText(card.l2 || "", W / 2, H * 0.88);
+  } else {
+    x.textAlign = "center"; x.textBaseline = "middle";
+    x.font = `900 46px "Barlow Condensed", Inter, sans-serif`; x.fillStyle = "#ffc94d"; x.fillText("SWEAT BOARD", W / 2, 56);
+    for (const [s, cx] of [["a", W * 0.25], ["h", W * 0.75]]) { const t = T[s]; wdTeamArt(x, t, cx, 200, 150);
+      x.fillStyle = "#fff"; x.font = `900 64px "Barlow Condensed", Inter, sans-serif`; x.fillText(t.ab, cx, 318); x.font = `900 150px "Barlow Condensed", Inter, sans-serif`; x.fillText(t.sc || "", cx, 432); }
+    x.font = `800 44px "Barlow Condensed", Inter, sans-serif`; x.fillStyle = "#ff4d5e"; x.fillText((T.d || "").toUpperCase(), W / 2, 330);
+    if (R.pulse) { x.fillStyle = "rgba(0,0,0,.5)"; x.fillRect(0, H - 64, W, 64); x.font = `800 40px "Barlow Condensed", Inter, sans-serif`; x.fillStyle = "#3ee08f"; x.fillText(R.pulse.toUpperCase(), W / 2, H - 31); }
+  }
+  x.fillStyle = "rgba(0,0,0,.22)"; for (let i = 0; i < W; i += 3) x.fillRect(i, 0, 1, H);
+  return c;
+}
+function wdNeonArt(txt, col) {
+  const W = 1024, H = 256, c = wdCanvas(W, H), x = c.getContext("2d");
+  x.font = `900 150px "Barlow Condensed", Inter, sans-serif`; x.textAlign = "center"; x.textBaseline = "middle";
+  x.shadowColor = col; x.shadowBlur = 40; x.fillStyle = col; x.fillText(txt, W / 2, H / 2); x.shadowBlur = 12; x.fillStyle = "#fff"; x.fillText(txt, W / 2, H / 2);
+  return c;
+}
+function wdGlowTex(THREE) { const c = wdCanvas(128, 128), x = c.getContext("2d"), g = x.createRadialGradient(64, 64, 0, 64, 64, 64); g.addColorStop(0, "rgba(255,255,255,1)"); g.addColorStop(0.25, "rgba(255,255,255,.55)"); g.addColorStop(1, "rgba(255,255,255,0)"); x.fillStyle = g; x.fillRect(0, 0, 128, 128); const t = new THREE.CanvasTexture(c); return t; }
+function wdTex(THREE, canvas, aniso) { const t = new THREE.CanvasTexture(canvas); t.colorSpace = THREE.NoColorSpace; t.anisotropy = aniso || 1; t.needsUpdate = true; return t; }
+
+// ---- build a venue ----
+function wdBuild(L, R) {
+  const THREE = L.THREE, V = WD_V[R.sport], C = wdContour(V); WD.V = V;
+  const scene = new THREE.Scene(), cam = new THREE.PerspectiveCamera(V.board.f, innerWidth / innerHeight, 0.5, 4000), T = R.T, aniso = Math.min(8, WD.r.capabilities.getMaxAnisotropy());
+  const C1 = wdLift(T.h.col, 0.16), C2 = wdLift(T.h.alt, 0.2), C3 = wdLift(T.a.col, 0.16), haze = [0.03, 0.04, 0.07];
+  const st = { THREE, scene, cam, V, C, R, mats: [], tex: [], disp: [], t0: performance.now(), look: new THREE.Vector3(...V.board.l), fly: null, hold: null, glows: [], fw: null, flash: 0, fc: [1, 1, 1], wave: 0, burst: 0, dim: 0 };
+  const v3 = (a) => new THREE.Vector3(a[0], a[1], a[2]);
+  const keep = (m) => { st.mats.push(m); return m; };
+  // the sky (or the arena's dark)
+  const sky = new THREE.Mesh(new THREE.SphereGeometry(3000, 32, 16), keep(new THREE.ShaderMaterial({ side: THREE.BackSide, depthWrite: false,
+    uniforms: { uT: { value: 0 }, uArena: { value: V.roof ? 1 : 0 }, uTint: { value: v3(C1) }, uFc: { value: v3([1, 1, 1]) }, uFlash: { value: 0 } },
+    vertexShader: "varying vec3 vP; void main(){ vP = position; gl_Position = projectionMatrix * modelViewMatrix * vec4(position, 1.0); }", fragmentShader: WD_SKY })));
+  scene.add(sky); st.sky = sky;
+  // the ground around the field
+  const ground = new THREE.Mesh(new THREE.CircleGeometry(Math.max(V.A, V.B) * 3, 48), new THREE.MeshBasicMaterial({ color: new THREE.Color().setRGB(...(V.roof ? [0.035, 0.04, 0.05] : [0.06, 0.14, 0.07]), THREE.LinearSRGBColorSpace) }));
+  ground.rotation.x = -Math.PI / 2; ground.position.set(V.cx, -0.05, V.cz); scene.add(ground);
+  // the field
+  const art = R.sport === "nfl" ? wdFieldNFL(T) : R.sport === "mlb" ? wdFieldMLB(V, C) : R.sport === "nba" ? wdCourt(T, V) : wdRink(T, V);
+  const ftex = wdTex(THREE, art, aniso); st.tex.push(ftex); st.fieldArt = () => (R.sport === "nfl" ? wdFieldNFL(T) : R.sport === "nba" ? wdCourt(T, V) : R.sport === "nhl" ? wdRink(T, V) : null);
+  const [fw, fh, fx0, fz0] = V.field, field = new THREE.Mesh(new THREE.PlaneGeometry(fw, fh), new THREE.MeshBasicMaterial({ map: ftex }));
+  field.rotation.x = -Math.PI / 2; field.position.set(fx0, 0, fz0); scene.add(field); st.field = field;
+  // the decks
+  const crowdU = () => ({ uT: { value: 0 }, uSeat: { value: R.sport === "nfl" ? 0.62 : 0.56 }, uRow: { value: 20 }, uWave: { value: 0 }, uWX: { value: 120 }, uFl: { value: V.roof ? 140 : 420 }, uLit: { value: 1 }, uFlash: { value: 0 }, uBurst: { value: 0 },
+    uC1: { value: v3(C1) }, uC2: { value: v3(C2) }, uC3: { value: v3(C3) }, uStep: { value: v3(V.roof ? [0.07, 0.07, 0.08] : [0.1, 0.1, 0.11]) }, uFc: { value: v3([1, 1, 1]) }, uHaze: { value: v3(haze) } });
+  st.crowd = []; st.suites = [];
+  for (const t of V.tiers) {
+    const g = wdBand(THREE, C, t, 480);
+    if (t.suite) {
+      const m = keep(new THREE.ShaderMaterial({ uniforms: { uT: { value: 0 }, uW: { value: R.sport === "nfl" ? 11 : R.sport === "mlb" ? 9 : 5 }, uLit: { value: 1 }, uGlow: { value: v3(C1) }, uHaze: { value: v3(haze) }, uFl: { value: V.roof ? 140 : 420 } }, vertexShader: WD_VS, fragmentShader: WD_SUITE, side: THREE.DoubleSide }));
+      scene.add(new THREE.Mesh(g, m)); st.suites.push(m); continue;
+    }
+    const u = crowdU(); u.uRow.value = t.rows; const m = keep(new THREE.ShaderMaterial({ uniforms: u, vertexShader: WD_VS, fragmentShader: WD_CROWD, side: THREE.DoubleSide, extensions: { derivatives: true } }));
+    scene.add(new THREE.Mesh(g, m)); st.crowd.push(m);
+    // the face of the deck under its front row
+    const fg = wdBand(THREE, C, { o0: t.o0, y0: t.y0 - (t.y0 > 3 ? 2.2 : t.y0), y1: t.y0, keep: t.keep }, 240);
+    scene.add(new THREE.Mesh(fg, new THREE.MeshBasicMaterial({ color: new THREE.Color().setRGB(0.04, 0.045, 0.06, THREE.LinearSRGBColorSpace), side: THREE.DoubleSide })));
+  }
+  // the ballpark wall, padded in the home color
+  if (V.wall) { const wg = wdBand(THREE, C, { o0: V.wall.o, y0: 0, y1: V.wall.y1 }, 360); scene.add(new THREE.Mesh(wg, new THREE.MeshBasicMaterial({ color: new THREE.Color().setRGB(...wdMix(wdLift(T.h.col, 0.08), [0, 0, 0], 0.25), THREE.LinearSRGBColorSpace), side: THREE.DoubleSide })));
+    const yg = wdBand(THREE, C, { o0: V.wall.o + 0.02, y0: V.wall.y1, y1: V.wall.y1 + 0.25 }, 360); scene.add(new THREE.Mesh(yg, new THREE.MeshBasicMaterial({ color: new THREE.Color().setRGB(1, 0.83, 0.3, THREE.LinearSRGBColorSpace), side: THREE.DoubleSide })));
+    // the distances on the wall, and the foul poles
+    for (const [ang, n] of [[-135, "330"], [-112, "375"], [-90, "400"], [-68, "375"], [-45, "330"]]) {
+      const a = (ang * Math.PI) / 180, dir = [Math.cos(a), Math.sin(a)]; let best = null, bd = 1e9; for (let i = 0; i < 360; i++) { const p = C(i / 360), d = Math.abs(Math.atan2(p[1], p[0]) - a); if (d < bd) { bd = d; best = p; } }
+      const c = wdCanvas(256, 128), x = c.getContext("2d"); x.font = `900 110px "Barlow Condensed", Inter, sans-serif`; x.textAlign = "center"; x.textBaseline = "middle"; x.fillStyle = "#fff"; x.fillText(n, 128, 68);
+      const tx = wdTex(THREE, c); st.tex.push(tx); const pl = new THREE.Mesh(new THREE.PlaneGeometry(5, 2.5), new THREE.MeshBasicMaterial({ map: tx, transparent: true, depthWrite: false }));
+      pl.position.set(best[0] - dir[0] * 0.5, 1.7, best[1] - dir[1] * 0.5); pl.lookAt(0, 1.7, 0); scene.add(pl); void dir;
+    }
+    for (const s of [-1, 1]) { let best = null, bd = 1e9; for (let i = 0; i < 720; i++) { const p = C(i / 720); if (p[1] > -10) continue; const d = Math.abs(p[0] + s * p[1]); if (d < bd) { bd = d; best = p; } }
+      const pole = new THREE.Mesh(new THREE.CylinderGeometry(0.25, 0.25, 26, 8), new THREE.MeshBasicMaterial({ color: new THREE.Color().setRGB(1, 0.83, 0.25, THREE.LinearSRGBColorSpace) })); pole.position.set(best[0], 13, best[1]); scene.add(pole); }
+  }
+  // the hockey boards and glass
+  if (V.rink) {
+    const rc = (t) => { const a = t * Math.PI * 2, c = Math.cos(a), s = Math.sin(a), e = 2 / 7; return [30.5 * Math.sign(c) * Math.pow(Math.abs(c), e), 13 * Math.sign(s) * Math.pow(Math.abs(s), e)]; };
+    const save = WD.V; WD.V = { cx: 0, cz: 0 };
+    scene.add(new THREE.Mesh(wdBand(THREE, rc, { o0: 0, y0: 0, y1: 1.07 }, 240), new THREE.MeshBasicMaterial({ color: new THREE.Color().setRGB(0.93, 0.94, 0.95, THREE.LinearSRGBColorSpace), side: THREE.DoubleSide })));
+    scene.add(new THREE.Mesh(wdBand(THREE, rc, { o0: -0.01, y0: 0.9, y1: 1.07 }, 240), new THREE.MeshBasicMaterial({ color: new THREE.Color().setRGB(...wdLift(T.h.col, 0.12), THREE.LinearSRGBColorSpace), side: THREE.DoubleSide })));
+    scene.add(new THREE.Mesh(wdBand(THREE, rc, { o0: 0.05, y0: 1.07, y1: 2.6 }, 240), new THREE.MeshBasicMaterial({ color: new THREE.Color().setRGB(0.7, 0.85, 0.95, THREE.LinearSRGBColorSpace), transparent: true, opacity: 0.12, depthWrite: false, side: THREE.DoubleSide })));
+    WD.V = save;
+  }
+  // the LED ribbons
+  st.ribs = [];
+  const rtex = wdTex(THREE, wdRibbonArt([{ t: "SWEAT BOARD", c: [1, 0.8, 0.3] }])); rtex.wrapS = THREE.RepeatWrapping; st.tex.push(rtex); st.rtex = rtex;
+  for (const rb of V.ribs) { const g = wdBand(THREE, C, { o0: rb.o, y0: rb.y0, y1: rb.y1, keep: rb.keep }, 480), len = g.userData.len, hh = rb.y1 - rb.y0;
+    const m = new THREE.MeshBasicMaterial({ map: rtex, side: THREE.DoubleSide }); const tx = 1 / (hh * (4096 / 96)); g.attributes.uv.array.forEach((v, i, a) => { if (i % 2 === 0) a[i] = v * tx; }); g.attributes.uv.needsUpdate = true; void len;
+    scene.add(new THREE.Mesh(g, m)); st.ribs.push(m); }
+  // lights: towers over an open stadium, rigging over an arena
+  const glowT = wdGlowTex(THREE); st.tex.push(glowT);
+  const glow = (p, s, col, op) => { const m = new THREE.SpriteMaterial({ map: glowT, color: new THREE.Color().setRGB(...col, THREE.LinearSRGBColorSpace), blending: THREE.AdditiveBlending, transparent: true, depthWrite: false, opacity: op ?? 1 }); const sp = new THREE.Sprite(m); sp.position.set(...p); sp.scale.set(s, s, 1); scene.add(sp); st.glows.push({ sp, m, base: col, op: op ?? 1 }); return sp; };
+  for (const p of V.towers) {
+    const pole = new THREE.Mesh(new THREE.BoxGeometry(1.4, p[1], 1.4), new THREE.MeshBasicMaterial({ color: new THREE.Color().setRGB(0.05, 0.055, 0.07, THREE.LinearSRGBColorSpace) })); pole.position.set(p[0], p[1] / 2, p[2]); scene.add(pole);
+    const bank = new THREE.Group(); bank.position.set(p[0], p[1] + 4, p[2]); bank.lookAt(V.cx, 0, V.cz); scene.add(bank);
+    const c = wdCanvas(256, 128), x = c.getContext("2d"); x.fillStyle = "#14161c"; x.fillRect(0, 0, 256, 128); for (let i = 0; i < 8; i++) for (let j = 0; j < 4; j++) { x.fillStyle = "#fffdf2"; x.beginPath(); x.arc(18 + i * 31, 18 + j * 31, 11, 0, Math.PI * 2); x.fill(); }
+    const bt = wdTex(THREE, c); st.tex.push(bt); const pnl = new THREE.Mesh(new THREE.PlaneGeometry(16, 8), new THREE.MeshBasicMaterial({ map: bt, side: THREE.DoubleSide })); pnl.rotation.y = Math.PI; bank.add(pnl);
+    glow([p[0], p[1] + 4, p[2]], 70, [1, 0.97, 0.88], 0.55); glow([p[0], p[1] + 4, p[2]], 22, [1, 1, 1], 0.9);
+  }
+  if (V.roof) {
+    const rg = new THREE.Mesh(new THREE.CircleGeometry(Math.max(V.A, V.B) * 2.2, 48), new THREE.MeshBasicMaterial({ color: new THREE.Color().setRGB(0.012, 0.013, 0.018, THREE.LinearSRGBColorSpace), side: THREE.DoubleSide }));
+    rg.rotation.x = Math.PI / 2; rg.position.set(0, V.roof, 0); scene.add(rg);
+    for (let i = 0; i < 18; i++) { const p = wdNorm(C, i / 18), o = V.tiers[0].o1 * 0.5; glow([p[0] + p[2] * o, V.roof - 2, p[1] + p[3] * o], 8, [1, 0.96, 0.9], 0.75); }
+    for (let i = 0; i < 4; i++) { const a = (i / 4) * Math.PI * 2 + 0.4; glow([Math.cos(a) * V.A * 0.45, V.roof - 4, Math.sin(a) * V.B * 0.45], 26, [0.9, 0.92, 1], 0.28); }
+  }
+  // the jumbotron
+  const J = V.jumbo, jtex = wdTex(THREE, wdJumboArt(R)); st.tex.push(jtex); st.jtex = jtex;
+  st.screens = [];
+  const screen = (w, h) => { const m = new THREE.MeshBasicMaterial({ map: jtex, toneMapped: false }); const s = new THREE.Mesh(new THREE.PlaneGeometry(w, h), m); st.screens.push(s); return s; };
+  const dark = new THREE.MeshBasicMaterial({ color: new THREE.Color().setRGB(0.03, 0.032, 0.04, THREE.LinearSRGBColorSpace) });
+  const trim = new THREE.MeshBasicMaterial({ color: new THREE.Color().setRGB(...C2, THREE.LinearSRGBColorSpace) });
+  const jg = new THREE.Group(); jg.position.set(...J.p); scene.add(jg); st.jg = jg;
+  if (J.hung) {
+    const box = new THREE.Mesh(new THREE.BoxGeometry(J.w + 0.6, J.h + 0.6, J.w + 0.6), dark); jg.add(box);
+    for (let i = 0; i < 4; i++) { const s = screen(J.w, J.h), a = (i / 4) * Math.PI * 2; s.position.set(Math.sin(a) * (J.w / 2 + 0.31), 0, Math.cos(a) * (J.w / 2 + 0.31)); s.rotation.y = a; jg.add(s); }
+    const ring = new THREE.Mesh(new THREE.CylinderGeometry(J.w * 0.78, J.w * 0.78, 0.9, 40, 1, true), new THREE.MeshBasicMaterial({ map: rtex })); ring.position.y = -J.h / 2 - 1; jg.add(ring);
+    const cab = new THREE.Mesh(new THREE.CylinderGeometry(0.06, 0.06, V.roof - J.p[1], 4), dark); cab.position.y = (V.roof - J.p[1]) / 2; jg.add(cab);
+    st.jface = (camPos) => { const d = camPos.clone().sub(jg.position); d.y = 0; const a = Math.round(Math.atan2(d.x, d.z) / (Math.PI / 2)) * (Math.PI / 2); return { c: new THREE.Vector3(jg.position.x + Math.sin(a) * (J.w / 2 + 0.31), jg.position.y, jg.position.z + Math.cos(a) * (J.w / 2 + 0.31)), n: new THREE.Vector3(Math.sin(a), 0, Math.cos(a)), w: J.w, h: J.h }; };
+  } else {
+    const n = v3(J.face), box = new THREE.Mesh(new THREE.BoxGeometry(J.w + 3, J.h + 3, 2), dark); jg.add(box); jg.lookAt(jg.position.clone().add(n));
+    const s = screen(J.w, J.h); s.position.z = 1.02; jg.add(s);
+    const top = new THREE.Mesh(new THREE.BoxGeometry(J.w + 3, 0.5, 2.1), trim); top.position.y = J.h / 2 + 1.5; jg.add(top);
+    const sign = wdTex(THREE, wdNeonArt("SWEAT BOARD", "#ffc94d")); st.tex.push(sign); const sg = new THREE.Mesh(new THREE.PlaneGeometry(J.w * 0.6, J.w * 0.15), new THREE.MeshBasicMaterial({ map: sign, transparent: true, blending: THREE.AdditiveBlending, depthWrite: false })); sg.position.set(0, J.h / 2 + 5.5, 1.1); jg.add(sg);
+    if (J.legs) for (const s2 of [-1, 1]) { const leg = new THREE.Mesh(new THREE.BoxGeometry(2, J.p[1], 2), dark); leg.position.set(s2 * J.w * 0.3, -J.p[1] / 2, -0.5); jg.add(leg); }
+    st.jface = () => ({ c: jg.localToWorld(new THREE.Vector3(0, 0, 1.02)), n: n.clone(), w: J.w, h: J.h });
+  }
+  // the DJ's suite, on the far side, lit up in purple
+  {
+    const t = V.dj.t, [px, pz, nx, nz] = wdNorm(C, t), so = V.tiers.find((x) => x.suite), w = V.dj.w, h = w / 1.7778 / 0.92, cy = (so.y0 + so.y1) / 2 + h * 0.08;
+    // the party suite sticks out of the row, taller than the rest, its glass the shape of the video
+    const g = new THREE.Group(); g.position.set(px + nx * (so.o0 - 1.2), cy, pz + nz * (so.o0 - 1.2)); g.lookAt(V.cx, cy, V.cz); scene.add(g); st.djg = g;
+    const back = new THREE.Mesh(new THREE.BoxGeometry(w + 0.8, h + 0.6, 3), dark); back.position.z = -1.6; g.add(back);
+    const c = wdCanvas(512, 256), x = c.getContext("2d"), gr = x.createLinearGradient(0, 0, 512, 256); gr.addColorStop(0, "#2a0f4a"); gr.addColorStop(1, "#0b1440"); x.fillStyle = gr; x.fillRect(0, 0, 512, 256);
+    x.font = `900 64px "Barlow Condensed", Inter, sans-serif`; x.textAlign = "center"; x.shadowColor = "#c77dff"; x.shadowBlur = 24; x.fillStyle = "#e9d5ff"; x.fillText("DJ GOLDIE", 256, 140);
+    const idle = wdTex(THREE, c); st.tex.push(idle); st.djIdle = idle;
+    const gm = new THREE.MeshBasicMaterial({ map: idle, toneMapped: false }), gl = new THREE.Mesh(new THREE.PlaneGeometry(w, h * 0.92), gm); gl.position.z = 0.02; g.add(gl); st.djGlass = gl;
+    const neon = new THREE.MeshBasicMaterial({ color: new THREE.Color().setRGB(0.85, 0.45, 1, THREE.LinearSRGBColorSpace) });
+    for (const [bw, bh, bx, by] of [[w + 0.6, 0.18, 0, h / 2 + 0.2], [w + 0.6, 0.18, 0, -h / 2 - 0.2], [0.18, h + 0.5, -w / 2 - 0.3, 0], [0.18, h + 0.5, w / 2 + 0.3, 0]]) { const b = new THREE.Mesh(new THREE.BoxGeometry(bw, bh, 0.2), neon); b.position.set(bx, by, 0.1); g.add(b); }
+    const rail = new THREE.Mesh(new THREE.BoxGeometry(w + 1, 0.12, 0.12), new THREE.MeshBasicMaterial({ color: new THREE.Color().setRGB(0.7, 0.72, 0.78, THREE.LinearSRGBColorSpace) })); rail.position.set(0, -h / 2 + 0.05, 0.7); g.add(rail);
+    const sz = wdTex(THREE, wdNeonArt("SWEAT ZONE", "#c77dff")); st.tex.push(sz); const sgn = new THREE.Mesh(new THREE.PlaneGeometry(w * 0.9, w * 0.225), new THREE.MeshBasicMaterial({ map: sz, transparent: true, blending: THREE.AdditiveBlending, depthWrite: false })); sgn.position.set(0, h / 2 + w * 0.16, 0.3); g.add(sgn);
+    const gp = g.localToWorld(new THREE.Vector3(0, 0, 1)); glow([gp.x, gp.y, gp.z], w * 2.2, [0.65, 0.3, 1], 0.45);
+    st.djFace = () => ({ c: g.localToWorld(new THREE.Vector3(0, 0, 0.02)), n: g.localToWorld(new THREE.Vector3(0, 0, 1)).sub(g.position).normalize(), w, h: h * 0.92 });
+    // party lights out of the suite when it's on
+    st.beams = [];
+    for (const s of [-1, 1]) { const bm = new THREE.Mesh(new THREE.ConeGeometry(w * 0.5, w * 4, 16, 1, true), new THREE.MeshBasicMaterial({ color: new THREE.Color().setRGB(...(s < 0 ? [0.8, 0.3, 1] : [0.3, 0.6, 1]), THREE.LinearSRGBColorSpace), transparent: true, opacity: 0, blending: THREE.AdditiveBlending, depthWrite: false, side: THREE.DoubleSide }));
+      bm.geometry.translate(0, -w * 2, 0); const piv = new THREE.Group(); piv.position.set(s * w * 0.35, h * 0.3, 0.5); piv.add(bm); g.add(piv); st.beams.push({ piv, bm, s }); }
+  }
+  // fireworks
+  { const N = 1800, pos = new Float32Array(N * 3), col = new Float32Array(N * 3), g = new THREE.BufferGeometry(); g.setAttribute("position", new THREE.BufferAttribute(pos, 3)); g.setAttribute("color", new THREE.BufferAttribute(col, 3));
+    const m = new THREE.PointsMaterial({ size: (V.fwR || 30) * 0.05, map: glowT, vertexColors: true, blending: THREE.AdditiveBlending, transparent: true, depthWrite: false, sizeAttenuation: true });
+    const pts = new THREE.Points(g, m); pts.frustumCulled = false; scene.add(pts); st.fw = { N, pos, col, vel: new Float32Array(N * 3), life: new Float32Array(N), base: new Float32Array(N * 3), g, i: 0 }; }
+  // the shots
+  const sh = (p, l, f) => ({ p: v3(p), l: v3(l), f });
+  st.shots = { board: sh(V.board.p, V.board.l, V.board.f) };
+  const df = st.djFace(), dd = df.w * 1.12;
+  st.shots.suite = { p: df.c.clone().add(df.n.clone().multiplyScalar(dd)).add(new THREE.Vector3(0, df.h * 0.12, 0)), l: df.c.clone().add(new THREE.Vector3(0, df.h * 0.1, 0)), f: 42 };
+  st.hold = st.holdShot = st.shots.board;
+  cam.position.copy(st.shots.board.p); cam.lookAt(st.look); cam.fov = V.board.f; cam.updateProjectionMatrix();
+  return st;
+}
+function wdDispose(st) {
+  if (!st) return;
+  st.scene.traverse((o) => { if (o.geometry) o.geometry.dispose(); if (o.material) (Array.isArray(o.material) ? o.material : [o.material]).forEach((m) => m.dispose()); });
+  st.tex.forEach((t) => t.dispose()); if (st.vtex) st.vtex.dispose();
+}
+
+// ---- the camera: fly between shots along a crane arc, hold with a slow drift ----
+function wdShotFill(st) {
+  const F = st.jface(st.cam.position), cam = st.cam, fov = 40, tv = Math.tan(((fov / 2) * Math.PI) / 180), asp = innerWidth / innerHeight;
+  const d = Math.min(F.h / 2 / tv, F.w / 2 / (tv * asp)) * 0.985;
+  return { p: F.c.clone().add(F.n.clone().multiplyScalar(d)), l: F.c.clone(), f: fov, F };
+}
+function wdFly(st, to, ms, lift, done) {
+  const cam = st.cam; st.fly = { a: cam.position.clone(), al: st.look.clone(), af: cam.fov, b: to.p.clone(), bl: to.l.clone(), bf: to.f, t0: performance.now(), ms, lift: lift || 0, done };
+  st.hold = null; st.holdShot = to;
+}
+function wdCam(st, now) {
+  const cam = st.cam, THREE = st.THREE;
+  if (st.fly) {
+    const F = st.fly, k = Math.min(1, (now - F.t0) / F.ms), e = wdEase(k);
+    const mid = F.a.clone().add(F.b).multiplyScalar(0.5); mid.y += F.lift;
+    const p = new THREE.Vector3().copy(F.a).multiplyScalar((1 - e) * (1 - e)).add(mid.multiplyScalar(2 * (1 - e) * e)).add(F.b.clone().multiplyScalar(e * e));
+    cam.position.copy(p); st.look.copy(F.al).lerp(F.bl, wdEase(Math.min(1, k * 1.15))); cam.fov = F.af + (F.bf - F.af) * e;
+    if (k >= 1) { st.fly = null; st.hold = st.holdShot; st.holdT = now; if (F.done) try { F.done(); } catch (e2) { console.warn(e2); } }
+  } else if (st.hold) {
+    const H = st.hold, t = now / 1000, a = WD.mode === "board" ? Math.max(1.2, H.p.distanceTo(H.l) * 0.035) : WD.mode === "dj" ? H.p.distanceTo(H.l) * 0.025 : 0;
+    cam.position.set(H.p.x + Math.sin(t * 0.11) * a, H.p.y + Math.sin(t * 0.07) * a * 0.35, H.p.z + Math.cos(t * 0.09) * a * 0.6);
+    st.look.copy(H.l); cam.fov += (H.f - cam.fov) * 0.1;
+  }
+  cam.lookAt(st.look); cam.updateProjectionMatrix();
+}
+
+// ---- moments: what the room does shows up in the building ----
+function wdBurst(st, p, col, n, sp) {
+  const F = st.fw, s = sp || (WD.V.fwR || 30) * 0.55;
+  for (let j = 0; j < n; j++) { const i = F.i++ % F.N, u = Math.random() * 2 - 1, a = Math.random() * Math.PI * 2, r = Math.sqrt(1 - u * u), v = s * (0.75 + Math.random() * 0.35);
+    F.pos.set([p[0], p[1], p[2]], i * 3); F.vel.set([r * Math.cos(a) * v, u * v + s * 0.15, r * Math.sin(a) * v], i * 3); F.life[i] = 1.6 + Math.random() * 0.9;
+    const c = Math.random() < 0.25 ? [1, 0.95, 0.8] : col; F.base.set(c, i * 3); }
+}
+function wdFwTick(st, dt) {
+  const F = st.fw, g = -(WD.V.fwR || 30) * 0.32;
+  for (let i = 0; i < F.N; i++) { if (F.life[i] <= 0) { F.col[i * 3] = F.col[i * 3 + 1] = F.col[i * 3 + 2] = 0; continue; }
+    F.life[i] -= dt; const k = Math.max(0, Math.min(1, F.life[i] / 1.2)), dr = Math.pow(0.35, dt);
+    F.vel[i * 3] *= dr; F.vel[i * 3 + 1] = F.vel[i * 3 + 1] * dr + g * dt; F.vel[i * 3 + 2] *= dr;
+    F.pos[i * 3] += F.vel[i * 3] * dt; F.pos[i * 3 + 1] += F.vel[i * 3 + 1] * dt; F.pos[i * 3 + 2] += F.vel[i * 3 + 2] * dt;
+    const tw = 0.75 + 0.25 * Math.sin(F.life[i] * 40 + i); F.col[i * 3] = F.base[i * 3] * k * tw; F.col[i * 3 + 1] = F.base[i * 3 + 1] * k * tw; F.col[i * 3 + 2] = F.base[i * 3 + 2] * k * tw; }
+  F.g.attributes.position.needsUpdate = true; F.g.attributes.color.needsUpdate = true;
+}
+// a show of fireworks over the field: bursts in the colors given, n of them across ms
+function wdShow(st, cols, n, ms) {
+  const V = WD.V; for (let i = 0; i < n; i++) setTimeout(() => { if (WD.st !== st) return; const p = [V.fw[0] + (Math.random() - 0.5) * V.fwR * 2.2, V.fw[1] + (Math.random() - 0.3) * V.fwR * 0.5, V.fw[2] + (Math.random() - 0.5) * V.fwR * 1.2]; wdBurst(st, p, cols[i % cols.length], 150); }, (i / Math.max(1, n - 1)) * ms + Math.random() * 120);
+}
+function wdRib(items, ms) {
+  const st = WD.st; if (!st) return;
+  st.rtex.image = wdRibbonArt(items); st.rtex.needsUpdate = true;
+  clearTimeout(WD.ribT); if (ms) WD.ribT = setTimeout(() => { WD.ribAt = 0; wdIdleArt(true); }, ms);
+  WD.ribAt = ms ? Date.now() + ms : 0;
+}
+function wdCard(card, ms) {
+  const st = WD.st; if (!st) return; WD.card = card; WD.cardTo = Date.now() + ms;
+  if (!st.vtex) { st.jtex.image = wdJumboArt(st.R, card); st.jtex.needsUpdate = true; }
+}
+// the idle art from the board as it stands: the ribbons and the jumbotron
+function wdIdleArt(force) {
+  const st = WD.st; if (!st) return; const R = wdRead(); st.R.pulse = R.pulse; st.R.lb = R.lb; Object.assign(st.R.T.a, { sc: R.T.a.sc }); Object.assign(st.R.T.h, { sc: R.T.h.sc }); st.R.T.d = R.T.d;
+  const T = st.R.T, sig = JSON.stringify([R.pulse, R.lb, T.a.sc, T.h.sc, T.d]);
+  if (WD.card && Date.now() > WD.cardTo) { WD.card = null; force = true; }
+  if (!force && sig === WD.sig) return; WD.sig = sig;
+  if (!st.vtex) { st.jtex.image = wdJumboArt(st.R, WD.card); st.jtex.needsUpdate = true; }
+  if (!WD.ribAt || Date.now() > WD.ribAt) {
+    const items = [{ t: "SWEAT BOARD", c: [1, 0.79, 0.3] }];
+    if (T.a.sc !== "") items.push({ t: `${T.a.ab} ${T.a.sc}  ${T.h.ab} ${T.h.sc}  ${(T.d || "").toUpperCase()}`, c: [1, 1, 1] });
+    if (R.pulse) items.push({ t: R.pulse.toUpperCase(), c: [0.24, 0.88, 0.56] });
+    for (const p of R.lb) items.push({ t: `${p.nm.toUpperCase()} ${p.v}`.trim(), c: wdLift(p.c, 0.35) });
+    wdRib(items, 0);
+  }
+}
+
+// ---- running it ----
+async function wdStart() {
+  if (WD.st || WD.starting || !wdOn() || !wdTv()) return;
+  WD.starting = true;
+  try {
+    const L = await s3lib(), THREE = L.THREE;
+    if (!WD.r) {
+      const cv = document.createElement("canvas"); cv.id = "v2world"; cv.setAttribute("aria-hidden", "true"); document.body.prepend(cv);
+      WD.glow = document.createElement("div"); WD.glow.id = "v2wGlow"; WD.glow.setAttribute("aria-hidden", "true"); document.body.append(WD.glow);
+      WD.r = new THREE.WebGLRenderer({ canvas: cv, antialias: false, alpha: false, powerPreference: "high-performance" });
+      WD.r.outputColorSpace = THREE.LinearSRGBColorSpace; WD.r.setPixelRatio(1);
+      cv.addEventListener("webglcontextlost", (e) => { e.preventDefault(); wdStop(); });
+      addEventListener("resize", () => wdSize(WD.q || WD.qb || 0.6, true));
+    }
+    const R = wdRead(); WD.key = wdKey(R);
+    for (const s of ["a", "h"]) if (R.T[s].lg) { const im = new Image(); im.crossOrigin = "anonymous"; im.referrerPolicy = "no-referrer"; im.onload = () => { if (WD.st && WD.st.R.T[s] === R.T[s]) wdRepaint(); }; im.src = R.T[s].lg; R.T[s].img = im; }
+    WD.st = wdBuild(L, R); wdSize(WD.qb || 0.6, true);
+    document.body.classList.add("v2w"); WD.sig = ""; wdIdleArt(true);
+    if (!WD.raf) WD.raf = requestAnimationFrame(wdLoop);
+  } catch (e) { console.warn("world", e); }
+  WD.starting = false;
+}
+const wdKey = (R) => R.sport + ":" + R.T.a.ab + ":" + R.T.h.ab;
+function wdRepaint() {
+  const st = WD.st; if (!st) return; const a = st.fieldArt(); if (a) { st.field.material.map.image = a; st.field.material.map.needsUpdate = true; } WD.sig = ""; wdIdleArt(true);
+}
+function wdStop() {
+  if (WD.mode !== "board") wdBack(true);
+  wdDispose(WD.st); WD.st = null; document.body.classList.remove("v2w", "v2w-away", "v2w-dj", "v2w-clip", "v2w-fly");
+}
+function wdSize(q, force) {
+  if (!WD.r || (!force && q === WD.q)) return; WD.q = q;
+  WD.r.setSize(Math.round(innerWidth * q), Math.round(innerHeight * q), false);
+  if (WD.st) { WD.st.cam.aspect = innerWidth / innerHeight; WD.st.cam.updateProjectionMatrix(); }
+}
+function wdLoop(now) {
+  WD.raf = requestAnimationFrame(wdLoop);
+  const st = WD.st, gap = now - (WD.tick || now); WD.tick = now; if (!st) return;
+  if (!wdTv() || document.hidden) { WD.r.domElement.style.visibility = "hidden"; return; }
+  WD.r.domElement.style.visibility = "";
+  const showing = WD.mode === "board" && !!document.querySelector(".cs.show"), fps = WD.mode !== "board" || st.fly ? 60 : showing ? 10 : 30;
+  // a screen that can't keep up: draw it smaller, and if that's not enough, go back to the flat backgrounds
+  if (WD.mode === "board" && !showing && !st.fly && gap < 1000) { WD.slow = Math.max(0, (WD.slow || 0) + (gap > 48 ? 1 : -1));
+    if (WD.slow > 240) { WD.slow = 0; if (WD.q > 0.46) { WD.qb = 0.45; wdSize(0.45, true); } else { WD.off = true; wdStop(); console.warn("world: too slow here, flat backgrounds"); return; } } }
+  if (now - WD.last < 1000 / fps - 3) return;
+  const dt = Math.min(0.1, (now - (WD.last || now)) / 1000); WD.last = now; const t = (now - st.t0) / 1000;
+  // the building's mood: flashes decay, the wave runs out, a miss dims the lights
+  st.flash *= Math.pow(0.12, dt); st.wave *= Math.pow(0.55, dt); st.burst *= Math.pow(0.3, dt); st.dim *= Math.pow(0.4, dt);
+  const lit = 1 - st.dim * 0.45;
+  for (const m of st.crowd) { const u = m.uniforms; u.uT.value = t; u.uWave.value = Math.min(1, st.wave); u.uFlash.value = st.flash; u.uFc.value.set(...st.fc); u.uBurst.value = Math.min(1, st.burst); u.uLit.value = lit; }
+  for (const m of st.suites) { m.uniforms.uT.value = t; m.uniforms.uLit.value = lit; }
+  st.sky.material.uniforms.uT.value = t; st.sky.material.uniforms.uFlash.value = st.flash; st.sky.material.uniforms.uFc.value.set(...st.fc);
+  for (const g of st.glows) { const k = Math.min(1, st.flash); g.m.color.setRGB(...wdMix(g.base, st.fc, k * 0.7).map((v) => v * lit), st.THREE.LinearSRGBColorSpace); g.m.opacity = g.op * (1 + k * 0.6); }
+  if (st.rtex) st.rtex.offset.x = (st.rtex.offset.x + dt * (WD.ribAt ? 0.05 : 0.025)) % 1;
+  const on = WD.mode === "dj"; for (const b of st.beams) { b.bm.material.opacity += ((on ? 0.08 : 0) - b.bm.material.opacity) * Math.min(1, dt * 3); b.piv.rotation.z = Math.sin(t * 1.3 + b.s) * 0.7 * b.s; b.piv.rotation.x = 0.9 + Math.sin(t * 0.9 + b.s * 2) * 0.35; }
+  if (WD.glow) { const o = Math.min(0.5, st.flash * 0.32) * (WD.mode === "board" ? 1 : 0); if (Math.abs(o - (WD.glowO || 0)) > 0.015) { WD.glowO = o; WD.glow.style.opacity = o.toFixed(3); WD.glow.style.setProperty("--wfc", st.fc.map((v) => Math.round(v * 255)).join(",")); } }
+  wdFwTick(st, dt); wdCam(st, now);
+  if (st.vtex && st.vtex.image && st.vtex.image.readyState >= 2) st.vtex.needsUpdate = true;
+  WD.r.render(st.scene, st.cam);
+}
+// keep up with the board: start or stop with TV, rebuild when the sport or the teams change, scores that light it up
+function wdPoll() {
+  if (!wdOn() || !wdTv()) { if (WD.st) wdStop(); return; }
+  if (!WD.st) { wdStart(); return; }
+  const R = wdRead(), k = wdKey(R);
+  if (k !== WD.key && WD.mode === "board" && !WD.st.fly) { wdDispose(WD.st); WD.st = null; wdStart(); return; }
+  const T = WD.st.R.T;
+  for (const s of ["a", "h"]) { const was = parseFloat(T[s].sc), now = parseFloat(R.T[s].sc); if (isFinite(was) && isFinite(now) && now > was) wdScore(s, now - was); }
+  wdIdleArt(false);
+}
+function wdScore(side, d) {
+  const st = WD.st; if (!st) return; const t = st.R.T[side], big = st.R.sport === "nba" ? d >= 3 : true;
+  st.fc = wdLift(t.col, 0.3); st.flash = big ? 1.4 : 0.7; st.burst = 1; if (big) { st.wave = 1.2; wdShow(st, [wdLift(t.col, 0.35), wdLift(t.alt, 0.4)], st.R.sport === "nba" ? 3 : 6, 2400); }
+}
+function wdBack(now) {
+  const st = WD.st; WD.mode = "back"; document.body.classList.remove("v2w-dj", "v2w-clip", "v2w-fly");
+  if (!st) { WD.mode = "board"; document.body.classList.remove("v2w-away"); return; }
+  const fin = () => { WD.mode = "board"; document.body.classList.remove("v2w-away"); if (st.vtex) { st.vtex.dispose(); st.vtex = null; } for (const s of st.screens) s.material.map = st.jtex, s.material.needsUpdate = true; st.djGlass.material.map = st.djIdle; st.djGlass.material.needsUpdate = true; wdSize(WD.qb || 0.6); WD.sig = ""; wdIdleArt(true); };
+  if (now) { st.fly = null; st.hold = st.shots.board; fin(); return; }
+  wdFly(st, st.shots.board, 2100, WD.V.fwR * 0.6, fin);
+  setTimeout(() => { if (WD.mode === "back") document.body.classList.remove("v2w-away"); }, 1250);
+}
+window.SBW = {
+  live: () => !!(WD.st && wdTv()),
+  // a video is up: o.dj (the DJ set), o.v (the video element), o.ext (someone else's video: can't go on a texture)
+  clip(o) {
+    const st = WD.st; if (!st || !wdTv()) return false;
+    const THREE = st.THREE, dj = !!o.dj;
+    WD.mode = dj ? "dj" : "clip"; document.body.classList.add("v2w-away", "v2w-fly"); document.body.classList.toggle("v2w-dj", dj); document.body.classList.toggle("v2w-clip", !dj);
+    wdSize(1);
+    if (st.vtex) { st.vtex.dispose(); st.vtex = null; }
+    if (o.v && !o.ext) { const vt = new THREE.VideoTexture(o.v); vt.colorSpace = THREE.NoColorSpace; st.vtex = vt; if (dj) { st.djGlass.material.map = vt; st.djGlass.material.needsUpdate = true; } else for (const s of st.screens) { s.material.map = vt; s.material.needsUpdate = true; } }
+    const go = ++WD.go;
+    // never leave the video hidden behind a camera move that didn't finish
+    setTimeout(() => { if (go === WD.go) document.body.classList.remove("v2w-fly"); }, 4800);
+    if (dj) wdFly(st, st.shots.suite, 2600, WD.V.fwR * 0.5, () => { if (go === WD.go) document.body.classList.remove("v2w-fly"); });
+    else {
+      const fill = wdShotFill(st), near = { p: fill.p.clone().add(fill.F.n.clone().multiplyScalar(fill.p.distanceTo(fill.l) * 1.6)).add(new THREE.Vector3(0, fill.F.h * 0.35, 0)), l: fill.l.clone(), f: 46 };
+      wdFly(st, near, 1500, WD.V.fwR * 0.35, () => { if (go !== WD.go) return; wdFly(st, fill, 850, 0, () => { if (go === WD.go) document.body.classList.remove("v2w-fly"); }); });
+    }
+    return true;
+  },
+  clipEnd() { if (!WD.st || WD.mode === "board" || WD.mode === "back") return; WD.go++; wdBack(false); },
+  // the room's moments. kind: hit, miss, place; o: { c: the person's color hex, nm, pick, amt }
+  fx(kind, o) {
+    const st = WD.st; if (!st) return; o = o || {}; const c = wdLift(wdHex(o.c, [1, 0.8, 0.3]), 0.3), nm = String(o.nm || "").toUpperCase(), pk = String(o.pick || "").toUpperCase();
+    if (kind === "hit") { st.fc = c; st.flash = 1.6; st.wave = 1.4; st.burst = 1; wdShow(st, [c, [1, 0.82, 0.3], [1, 1, 1]], 10, 5200);
+      wdRib([{ t: "CASHED", c: [0.02, 0.03, 0.05], bg: [0.24, 0.88, 0.56] }, { t: `${nm} · ${pk}`, c }, { t: o.amt ? "+" + o.amt : "", c: [0.24, 0.88, 0.56] }].filter((x) => x.t), 40e3);
+      wdCard({ big: "CASHED", l1: `${nm} · ${pk}`, l2: o.amt ? "+" + o.amt : "", c: wdMix(c, [0, 0, 0], 0.35) }, 30e3); }
+    else if (kind === "miss") { st.dim = 1; wdRib([{ t: "MISSED", c: [1, 1, 1], bg: [0.75, 0.15, 0.22] }, { t: `${nm} · ${pk}`, c: [1, 0.6, 0.65] }].filter((x) => x.t), 15e3); }
+    else if (kind === "place") { st.fc = c; st.flash = 0.8; st.burst = 1.4;
+      wdRib([{ t: "NEW BET", c: [0.02, 0.03, 0.05], bg: c }, { t: `${nm} · ${pk}`, c }, { t: o.amt || "", c: [1, 1, 1] }].filter((x) => x.t), 30e3);
+      wdCard({ big: "NEW BET", l1: `${nm} · ${pk}`, l2: o.amt || "", c: wdMix(c, [0, 0, 0], 0.4) }, 20e3); }
+  },
+  // for checking a frame: hold the camera on a shot
+  shot(k) { const st = WD.st; if (!st) return; const s = k === "fill" ? wdShotFill(st) : st.shots[k]; if (!s) return; st.fly = null; st.hold = s; st.holdShot = s; },
+  look(p, l, f) { const st = WD.st; if (!st) return; const T = st.THREE, s = { p: new T.Vector3(...p), l: new T.Vector3(...l), f: f || 50 }; st.fly = null; st.hold = st.holdShot = s; },
+  st: () => WD.st,
+};
+setInterval(wdPoll, 2000);
+setTimeout(wdPoll, 600);
 </script>
 </body>
 </html>
