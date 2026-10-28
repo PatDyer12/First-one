@@ -13398,7 +13398,7 @@ void main(){
     const SP = c.contains("hoops") ? ["NBA", "CBB"] : c.contains("hockey") ? ["NHL"] : ["NFL", "CFB"], fb = (g) => g && SP.includes(g.sport), now = Date.now(), { list } = boardGroups();
     const nb = new Map(list.map((G) => [G.g.id, G.entries.length + (G.legs ? G.legs.length : 0)]));
     const tm = (t) => ({ id: String(t.id), ab: t.ab, nm: t.nm, fn: t.fn, col: t.col, alt: t.alt, lg: t.lg, sc: t.sc, rk: t.rk });
-    const gm = (g) => ({ id: g.id, sport: g.sport, st: g.st, d: g.d, t: g.t, a: tm(g.a), h: tm(g.h), ven: g.ven, net: g.net, riv: g.sport === "CFB" ? cfRiv(g) : arRiv(g), n: nb.get(g.id) || 0,
+    const gm = (g) => ({ id: g.id, sport: g.sport, st: g.st, d: g.d, t: g.t, a: tm(g.a), h: tm(g.h), ven: g.ven, neu: !!g.abroad, net: g.net, riv: g.sport === "CFB" ? cfRiv(g) : arRiv(g), n: nb.get(g.id) || 0,
       sit: g.sit ? { pos: g.sit.pos, rz: g.sit.rz, yl: g.sit.yl, dd: g.sit.dd } : null });
     const all = [...S.games.values()].filter(fb);
     const on = all.filter((g) => g.st === "in" || (g.st === "pre" && g.t - now < 20 * 60e3 && g.t - now > -3 * 3600e3));
@@ -13805,7 +13805,7 @@ void main(){
   // ---------- sheets ----------
   function openSheet(id) { $(id).hidden = false; }
   // keep every open screen current: when a new version is up, reload it (never mid-form or mid-animation)
-  const BUILD = "20261028155107";
+  const BUILD = "20261028164746";
   function checkBuild() {
     if (BUILD === "dev") return;
     fetch("version.json?t=" + Date.now(), { cache: "no-store" }).then((r) => (r.ok ? r.json() : null)).then((j) => {
@@ -25006,9 +25006,19 @@ const WD_CFS = [
   [/clemson|memorial stadium \(clemson/i, { up: 0, seat: "#e06a1c", boards: "both", f: ["hills"] }], [/vaught-hemingway/i, { seat: "#1d2a5a", boards: "both", up: 2 }],
   [/lavell edwards/i, { up: 0, seat: "#1d3a6b", boards: "both", f: ["hills"] }], [/kenan/i, { up: 0, seat: "#7bafd4", boards: "both", f: ["pines"] }],
 ];
+// the international games, by the venue's name: roof "ring" is a canopy all the way round; arch is Wembley's, glowwall the
+// Allianz Arena's lit skin, towers the MCG's light towers
+const WD_INTL = [
+  [/bernab/i, { roof: "retract", seat: "#e4e4e8", boards: "halo", up: 2, hi: 1.1 }], [/bayern|allianz arena/i, { roof: "ring", seat: "#8a8d92", boards: "both", up: 2, f: ["glowwall"] }],
+  [/banorte|azteca/i, { roof: "ring", seat: "#3a3d44", boards: "both", up: 2, hi: 1.12 }], [/wembley/i, { roof: "ring", seat: "#b0102a", boards: "both", up: 2, f: ["arch"] }],
+  [/tottenham/i, { roof: "ring", seat: "#14213d", boards: "both", up: 2 }], [/stade de france/i, { roof: "ring", seat: "#46557a", boards: "both", up: 2 }],
+  [/melbourne cricket|\bmcg\b/i, { roof: "ring", seat: "#4a5560", boards: "both", up: 2, hi: 1.2, f: ["towers"] }], [/maracan/i, { roof: "ring", seat: "#d9b01c", boards: "both", up: 0, hi: 1.12 }],
+  [/olympiastadion|deutsche bank park|frankfurt/i, { roof: "ring", seat: "#3a3d44", boards: "both", up: 2 }], [/arena corinthians|neo qu[ií]mica/i, { roof: "ring", seat: "#2a2a2e", boards: "both", up: 2 }],
+];
 function wdFbSpec(R) {
   const S = R.scene && R.scene.game, h = S ? S.h : null, vn = (S && S.ven && S.ven.nm) || (R.ven && R.ven.nm) || "";
   let fs = null; for (const v of Object.values(WD_FBS)) if (vn && v.nm && vn.toLowerCase().includes(v.nm.toLowerCase().slice(0, 12))) { fs = Object.assign({}, v); break; }
+  if (!fs) for (const [re, v] of WD_INTL) if (re.test(vn)) { fs = Object.assign({ nm: vn, intl: 1 }, v); break; }
   if (!fs) for (const [re, v] of WD_CFS) if (re.test(vn)) { fs = Object.assign({ nm: vn }, v); break; }
   if (!fs && h && S.sport === "NFL" && WD_FBS[h.ab]) fs = Object.assign({}, WD_FBS[h.ab]);
   if (!fs) fs = { nm: vn || "", seat: h && h.col ? h.col : "#3a3f48", boards: "both", up: S && S.sport === "CFB" ? 0 : 1, roof: S && S.ven && S.ven.indoor ? "dome" : "open" };
@@ -25066,7 +25076,7 @@ function wdFbBuild(st, fs) {
   } else {
     // open: lights all round the rim, and canopies over the sidelines where there are some
     for (let i = 0; i < 56; i++) { const p = wdNorm(C, (i + 0.5) / 56), o = outer + 1; glow([p[0] + p[2] * o, top + 6, p[1] + p[3] * o], 9, [1, 0.97, 0.9], 0.45); glow([p[0] + p[2] * o, top + 6, p[1] + p[3] * o], 2.6, [1, 1, 1], 0.95); }
-    if (fs.roof === "canopy") for (const s of [-1, 1]) { const g = wdBand(THREE, C, { o0: 20, o1: outer + 2, y0: top + 9, y1: top + 6, keep: (x, z) => Math.abs(x) < 64 && z * s > 0 }, 360);
+    if (fs.roof === "canopy" || fs.roof === "ring") for (const s of [-1, 1]) { const g = wdBand(THREE, C, { o0: 20, o1: outer + 2, y0: top + 9, y1: top + 6, keep: fs.roof === "ring" ? (x, z) => z * s > 0 || (z === 0 && s > 0) : (x, z) => Math.abs(x) < 64 && z * s > 0 }, 360);
       scene.add(new THREE.Mesh(g, new THREE.MeshBasicMaterial({ color: col([0.16, 0.17, 0.2]), side: THREE.DoubleSide }))); }
   }
   // the second board, at the other end
@@ -25091,6 +25101,12 @@ function wdFbBuild(st, fs) {
   if (F.includes("petals")) for (let i = 0; i < 8; i++) { const a = (i / 8) * Math.PI * 2, p = add(new THREE.BoxGeometry(46, 1, 22), flat([0.2, 0.21, 0.24]), Math.cos(a) * 52, V.roof - 2, Math.sin(a) * 40); p.rotation.y = -a; p.rotation.z = 0.08; }
   if (F.includes("horn")) { const hn = add(new THREE.ConeGeometry(4, 22, 16), flat([0.9, 0.86, 0.75]), -(A + 30), top + 14, 0); hn.rotation.z = Math.PI / 2.4; }
   if (F.includes("window")) { const w = add(new THREE.PlaneGeometry(90, 40), new THREE.MeshBasicMaterial({ color: col([0.25, 0.32, 0.45]), transparent: true, opacity: 0.5 }), -(A + outer + 2), top - 8, 0); w.rotation.y = Math.PI / 2; }
+  if (F.includes("arch")) { const ar = add(new THREE.TorusGeometry(A + outer * 0.55, 1.8, 10, 64, Math.PI), flat([0.94, 0.94, 0.95]), 0, 0, -(B + outer) * 0.35); ar.rotation.x = -0.3; ar.scale.set(1, 1.05, 1);
+    for (let i = 0; i < 14; i++) { const a = (i / 13) * Math.PI, x = Math.cos(a) * (A + outer * 0.55), y = Math.sin(a) * (A + outer * 0.55) * 1.05; glow([x, y * Math.cos(0.3), -(B + outer) * 0.35 - y * Math.sin(0.3)], 10, [1, 1, 1], 0.35); } }
+  if (F.includes("glowwall")) { const gw = wdBand(THREE, C, { o0: outer + 0.9, y0: top - 6, y1: top + 4 }, 360); scene.add(new THREE.Mesh(gw, new THREE.MeshBasicMaterial({ color: col(wdLift(h.col, 0.25), 0.9), side: THREE.DoubleSide })));
+    for (let i = 0; i < 48; i++) { const p = wdNorm(C, (i + 0.5) / 48), o = outer + 1.2; glow([p[0] + p[2] * o, top - 1, p[1] + p[3] * o], 16, wdLift(h.col, 0.4), 0.35); } }
+  if (F.includes("towers")) for (let i = 0; i < 6; i++) { const a = (i / 6) * Math.PI * 2 + 0.5, x = Math.cos(a) * (A + outer + 14), z = Math.sin(a) * (B + outer + 14), H2 = top + 34;
+    add(new THREE.BoxGeometry(2, H2, 2), flat([0.12, 0.13, 0.15]), x, H2 / 2, z); add(new THREE.BoxGeometry(10, 6, 1.5), flat([0.9, 0.9, 0.85]), x, H2 + 2, z).lookAt(0, H2, 0); glow([x, H2 + 2, z], 50, [1, 0.97, 0.88], 0.5); glow([x, H2 + 2, z], 14, [1, 1, 1], 0.9); }
   if (F.includes("tower")) add(new THREE.BoxGeometry(150, 34, 14), flat([0.12, 0.13, 0.16]), 0, top + 10, -(B + outer + 6));
   // the home team on top of the main board: the logo, lit
   if (!V.jumbo.hung && h.lg) { const lc = wdCanvas(512, 512), lx = lc.getContext("2d"), lt = wdTex(THREE, lc); st.tex.push(lt); const J = V.jumbo;
@@ -25111,7 +25127,7 @@ function wdFbBoard(st, J) {
 }
 // fans in the seats: the home side mostly, the visitors in a pocket (a neutral site split down the middle), a few neutral
 function wdFbFans(st) {
-  const V = st.V, R = st.R, S = R.scene && R.scene.game, neutral = !!(S && S.riv && /cocktail|red river|neutral/i.test(S.riv + " " + ((S.ven && S.ven.nm) || "")));
+  const V = st.V, R = st.R, S = R.scene && R.scene.game, neutral = !!(S && (S.neu || (S.riv && /cocktail|red river|neutral/i.test(S.riv + " " + ((S.ven && S.ven.nm) || "")))));
   const tiers = V.tiers.filter((t) => !t.suite).map((t, i) => Object.assign({}, t, { gap: t.gap || (i ? 1.25 : 0.95) }));
   const seats = wdFanSeats(st.C, V, tiers, 0.95, 0.86, (x, z, u) => (neutral ? (x < 0 ? 1 : 0) : (u > 0.31 && u < 0.4 ? 1 : Math.abs(Math.sin(x * 3.1 + z * 7.7)) % 1 < 0.06 ? 2 : 0)));
   const tc = (t) => [wdLift(t.col, 0.12), wdLift(t.alt, 0.12)];
