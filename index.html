@@ -13387,19 +13387,25 @@ void main(){
     if (sp === "MLB") return "ballgame";
     return null;
   }
+  const AR_RIV = new Map([["BOS", "LAL", "Celtics–Lakers"], ["BOS", "NY", "Celtics–Knicks"], ["BKN", "NY", "Battle of New York"], ["GS", "LAL", "Battle of California"], ["LAC", "LAL", "Battle of LA"],
+    ["CHI", "DET", "Bulls–Pistons"], ["MIA", "NY", "Heat–Knicks"], ["BOS", "PHI", "Celtics–76ers"], ["DAL", "SA", "I-35"], ["HOU", "SA", "I-10"],
+    ["BOS", "MTL", "Original Six"], ["MTL", "TOR", "Original Six"], ["NYI", "NYR", "Battle of New York"], ["NJ", "NYR", "Hudson River"], ["PHI", "PIT", "Battle of Pennsylvania"],
+    ["CGY", "EDM", "Battle of Alberta"], ["CHI", "DET", "Original Six"], ["BOS", "TOR", "Original Six"], ["COL", "DET", "Avs–Wings"], ["OTT", "TOR", "Battle of Ontario"], ["PHI", "WSH", "Flyers–Caps"], ["PIT", "WSH", "Caps–Pens"]]
+    .map(([x, y, n]) => [[x, y].sort().join(":"), n]));
+  const arRiv = (g) => (g && (g.sport === "NBA" || g.sport === "NHL") ? AR_RIV.get([g.a.ab, g.h.ab].sort().join(":")) || "" : "");
   window.__sbScene = () => {
-    const c = document.body.classList; if (c.contains("baseball") || c.contains("hoops") || c.contains("hockey")) return null;
-    const fb = (g) => g && (g.sport === "NFL" || g.sport === "CFB"), now = Date.now(), { list } = boardGroups();
+    const c = document.body.classList; if (c.contains("baseball")) return null;
+    const SP = c.contains("hoops") ? ["NBA", "CBB"] : c.contains("hockey") ? ["NHL"] : ["NFL", "CFB"], fb = (g) => g && SP.includes(g.sport), now = Date.now(), { list } = boardGroups();
     const nb = new Map(list.map((G) => [G.g.id, G.entries.length + (G.legs ? G.legs.length : 0)]));
     const tm = (t) => ({ id: String(t.id), ab: t.ab, nm: t.nm, fn: t.fn, col: t.col, alt: t.alt, lg: t.lg, sc: t.sc, rk: t.rk });
-    const gm = (g) => ({ id: g.id, sport: g.sport, st: g.st, d: g.d, t: g.t, a: tm(g.a), h: tm(g.h), ven: g.ven, net: g.net, riv: g.sport === "CFB" ? cfRiv(g) : "", n: nb.get(g.id) || 0,
+    const gm = (g) => ({ id: g.id, sport: g.sport, st: g.st, d: g.d, t: g.t, a: tm(g.a), h: tm(g.h), ven: g.ven, net: g.net, riv: g.sport === "CFB" ? cfRiv(g) : arRiv(g), n: nb.get(g.id) || 0,
       sit: g.sit ? { pos: g.sit.pos, rz: g.sit.rz, yl: g.sit.yl, dd: g.sit.dd } : null });
     const all = [...S.games.values()].filter(fb);
     const on = all.filter((g) => g.st === "in" || (g.st === "pre" && g.t - now < 20 * 60e3 && g.t - now > -3 * 3600e3));
     const mine = list.map((G) => G.g).filter((g) => fb(g) && g.st !== "post");
     const soon = mine.filter((g) => g.st === "pre" && g.t - now < 90 * 60e3);
     let pick = on.length === 1 ? on[0] : !on.length && soon.length === 1 ? soon[0] : null;
-    const riv = on.filter((g) => g.sport === "CFB" && cfRiv(g) && nb.get(g.id)).sort((x, y) => nb.get(y.id) - nb.get(x.id))[0];
+    const riv = on.filter((g) => (g.sport === "CFB" ? cfRiv(g) : arRiv(g)) && nb.get(g.id)).sort((x, y) => nb.get(y.id) - nb.get(x.id))[0];
     if (!pick && riv) pick = riv;
     const games = [...on].sort((x, y) => (nb.get(y.id) || 0) - (nb.get(x.id) || 0) || x.t - y.t);
     for (const g of mine) if (!games.includes(g) && g.t - now < 6 * 3600e3) games.push(g);
@@ -13799,7 +13805,7 @@ void main(){
   // ---------- sheets ----------
   function openSheet(id) { $(id).hidden = false; }
   // keep every open screen current: when a new version is up, reload it (never mid-form or mid-animation)
-  const BUILD = "20261028081107";
+  const BUILD = "20261028155107";
   function checkBuild() {
     if (BUILD === "dev") return;
     fetch("version.json?t=" + Date.now(), { cache: "no-store" }).then((r) => (r.ok ? r.json() : null)).then((j) => {
@@ -24026,8 +24032,9 @@ function wdRead() {
   const lb = [...document.querySelectorAll("#rbLb .rb-lr")].slice(0, 4).map((r) => { const nm = ((r.querySelector(".nm b") || {}).textContent || "").trim(), lv = r.querySelector(".lv"), net = ((r.querySelector(".net") || {}).childNodes[0] || {}).textContent || "";
     return { nm, c: wdHex(r.style.getPropertyValue("--c")), v: lv ? (lv.childNodes[1] || lv.lastChild || {}).textContent || "" : net }; }).filter((x) => x.nm);
   let ven = null; try { const G = window.__sbGame && window.__sbGame(T.a.ab, T.h.ab); ven = G && G.ven ? G.ven : null; } catch (e) {}
-  // football: the director says stadium (one prime-time game, a rivalry the room's on) or war room (several games, or none)
-  let scene = null, kind = ""; try { scene = sport === "nfl" && window.__sbScene ? window.__sbScene() : null; } catch (e) {}
+  // football, basketball, hockey: the director says the game's own building (one game on, a rivalry the room's on) or the war
+  // room (several games, or none)
+  let scene = null, kind = ""; try { scene = (sport === "nfl" || sport === "nba" || sport === "nhl") && window.__sbScene ? window.__sbScene() : null; } catch (e) {}
   let fk = ""; try { fk = localStorage.getItem("sb-world-kind") || ""; } catch (e) {}
   if (scene) { kind = fk === "room" || fk === "stadium" ? fk : scene.kind; if (kind === "stadium" && !scene.game && scene.games.length) scene.game = scene.games[0]; if (kind === "stadium" && !scene.game) kind = "room"; }
   if (kind === "stadium") { const q = scene.game; for (const s of ["a", "h"]) { const t = q[s]; T[s] = { ab: t.ab, nm: t.nm, fn: t.fn, id: t.id, rk: t.rk, col: wdHex(t.col, T[s].col), alt: wdHex(t.alt, T[s].alt), colHex: t.col || wdCss(T[s].col), altHex: t.alt || wdCss(T[s].alt), sc: t.sc == null ? "" : String(t.sc), lg: t.lg || "" }; }
@@ -24631,6 +24638,69 @@ const WD_MASC = {
   "CFB:ARIZ": { k: "cat", fur: "#a87a4a", acc: "#f2e6d0", x: { hat: "cowboy", hatc: "#2a2a30", scarf: "#cc0033", jer: "#003366", jer2: "#cc0033", txt: "WILDCATS", num: "" } },   // Wilbur
   "CFB:CIN": { k: "cat", fur: "#2a2a2e", acc: "#c8c8cc", x: { jer: "#e00122", jer2: "#141414", txt: "BEARCATS", num: "" } },                                                // the Bearcat
   "CFB:KU": { k: "bird", fur: "#0051ba", acc: "#ffc82d", x: { head: "#e8000d", jer: "#0051ba", jer2: "#e8000d", txt: "KU", num: "" } },                                     // Big Jay
+  // the NBA and the NHL: the costumed mascots (a fan in the team's cap where there's none)
+  "NBA:ATL": { k: "bird", fur: "#c8102e", acc: "#fdb927", x: { head: "#c8102e", crest: 1, crestc: "#fdb927", jer: "#c8102e", jer2: "#fdb927", txt: "HAWKS", num: "" } },            // Harry the Hawk
+  "NBA:BOS": { k: "human", fur: "#efc39f", acc: "#008348", x: { hat: "lep", hatc: "#0a6b3d", jer: "#008348", jer2: "#ffffff", txt: "CELTICS", num: "" } },                     // Lucky
+  "NBA:BKN": { k: "human", fur: "#e2b08a", acc: "#111111", x: { hat: "cap", hatc: "#111111", hatL: "B", hatLc: "#ffffff", jer: "#111111", jer2: "#ffffff", txt: "BROOKLYN", num: "" } },   // (none)
+  "NBA:CHA": { k: "bee", fur: "#00788c", acc: "#1d1060", x: { eyeS: 1.2, jer: "#00788c", jer2: "#ffffff", txt: "HUGO", num: "" } },                                          // Hugo the Hornet
+  "NBA:CHI": { k: "bull", fur: "#ce1141", acc: "#f2c0c0", x: { horns: "bull", hornc: "#f4efe0", ring: 1, jer: "#ce1141", jer2: "#111111", txt: "BULLS", num: "" } },        // Benny the Bull
+  "NBA:CLE": { k: "dog", fur: "#b07a3a", acc: "#f2e6d0", x: { ears: "flop", jer: "#860038", jer2: "#fdbb30", txt: "CAVS", num: "" } },                                       // Moondog
+  "NBA:DAL": { k: "horse", fur: "#0064b1", acc: "#bbc4ca", x: { mane: "#002b5e", jer: "#0064b1", jer2: "#ffffff", txt: "MAVS", num: "" } },                                // Champ
+  "NBA:DEN": { k: "cat", fur: "#c8a06a", acc: "#f0e0c0", x: { jer: "#0e2240", jer2: "#fec524", txt: "NUGGETS", num: "" } },                                                // Rocky
+  "NBA:DET": { k: "horse", fur: "#1d428a", acc: "#e8e0d8", x: { mane: "#c8102e", jer: "#c8102e", jer2: "#ffffff", txt: "PISTONS", num: "" } },                             // Hooper
+  "NBA:GS": { k: "human", fur: "#e2b08a", acc: "#1d428a", x: { hat: "cap", hatc: "#1d428a", hatL: "GS", hatLc: "#fdb927", jer: "#1d428a", jer2: "#fdb927", txt: "WARRIORS", num: "30" } },   // (none: a fan in a 30)
+  "NBA:HOU": { k: "bear", fur: "#b8864e", acc: "#e6cfa8", x: { jer: "#ce1141", jer2: "#ffffff", txt: "ROCKETS", num: "" } },                                              // Clutch
+  "NBA:IND": { k: "cat", fur: "#1d5ea8", acc: "#f2efe8", x: { eye: "#ffd520", jer: "#0c2340", jer2: "#ffd520", txt: "PACERS", num: "" } },                                 // Boomer
+  "NBA:LAC": { k: "bird", fur: "#1d428a", acc: "#e8dcc8", x: { head: "#e8907a", beak: "big", jer: "#c8102e", jer2: "#ffffff", txt: "CLIPPERS", num: "" } },                // Chuck the Condor
+  "NBA:LAL": { k: "human", fur: "#e2b08a", acc: "#552583", x: { hat: "cap", hatc: "#552583", hatL: "LA", hatLc: "#fdb927", jer: "#fdb927", jer2: "#552583", txt: "LAKERS", num: "" } },   // (none)
+  "NBA:MEM": { k: "bear", fur: "#6b4a2b", acc: "#c8a27a", x: { jer: "#5d76a9", jer2: "#12173f", txt: "GRIZZ", num: "" } },                                                 // Grizz
+  "NBA:MIA": { k: "bear", fur: "#f2681e", acc: "#f6a04a", x: { tuft: "#ffb000", eyeS: 1.15, jer: "#98002e", jer2: "#ffffff", txt: "HEAT", num: "" } },                   // Burnie
+  "NBA:MIL": { k: "horse", fur: "#9a6a3a", acc: "#e8d8c0", x: { antlers: "deer", antc: "#e8dcc0", mane: "#6a4422", jer: "#00471b", jer2: "#eee1c6", txt: "BUCKS", num: "" } },   // Bango
+  "NBA:MIN": { k: "dog", fur: "#7a8288", acc: "#f2f2f2", x: { ears: "wolf", jer: "#0c2340", jer2: "#78be20", txt: "WOLVES", num: "" } },                                   // Crunch
+  "NBA:NO": { k: "bird", fur: "#f4f4f4", acc: "#c8a24a", x: { head: "#f4f4f4", beak: "big", jer: "#0a2240", jer2: "#b4975a", txt: "PELICANS", num: "" } },               // Pierre
+  "NBA:NY": { k: "human", fur: "#e2b08a", acc: "#f58426", x: { hat: "cap", hatc: "#1d428a", hatL: "NY", hatLc: "#f58426", jer: "#1d428a", jer2: "#f58426", txt: "KNICKS", num: "" } },   // (none)
+  "NBA:OKC": { k: "bull", fur: "#007ac1", acc: "#7ab8e0", x: { horns: "short", hornc: "#f4efe0", mane: "#005a90", jer: "#ef3b24", jer2: "#ffffff", txt: "THUNDER", num: "" } },   // Rumble the Bison
+  "NBA:ORL": { k: "gator", fur: "#43a047", acc: "#c8e6a0", x: { jer: "#0150b5", jer2: "#ffffff", txt: "MAGIC", num: "" } },                                                // Stuff the Magic Dragon
+  "NBA:PHI": { k: "dog", fur: "#2a5cb8", acc: "#cfe0ff", x: { ears: "flop", jer: "#1d428a", jer2: "#e01234", txt: "SIXERS", num: "" } },                                 // Franklin
+  "NBA:PHX": { k: "bear", fur: "#2a2622", acc: "#6a5a50", x: { jer: "#e56020", jer2: "#1d1160", txt: "SUNS", num: "" } },                                                  // Go the Gorilla
+  "NBA:POR": { k: "cat", fur: "#a5acaf", acc: "#e8ecef", x: { jer: "#e03a3e", jer2: "#ffffff", txt: "BLAZERS", num: "" } },                                               // Blaze the Trail Cat
+  "NBA:SAC": { k: "cat", fur: "#d4a04a", acc: "#f7ecd0", x: { mane: "#5a2d81", jer: "#5a2d81", jer2: "#ffffff", txt: "KINGS", num: "" } },                              // Slamson
+  "NBA:SA": { k: "dog", fur: "#9a7a5a", acc: "#e6d8c4", x: { ears: "wolf", jer: "#111111", jer2: "#c4ced4", txt: "SPURS", num: "" } },                                 // the Coyote
+  "NBA:TOR": { k: "gator", fur: "#ce1141", acc: "#f2d0c0", x: { jer: "#111111", jer2: "#ce1141", txt: "RAPTORS", num: "" } },                                              // the Raptor
+  "NBA:UTAH": { k: "bear", fur: "#6b4a2b", acc: "#c8a27a", x: { jer: "#4e008e", jer2: "#ffffff", txt: "JAZZ", num: "" } },                                                // Jazz Bear
+  "NBA:WSH": { k: "bear", fur: "#1d4fb0", acc: "#9ab8f0", x: { tuft: "#e31837", jer: "#e31837", jer2: "#ffffff", txt: "WIZARDS", num: "" } },                           // G-Wiz
+  "NHL:ANA": { k: "bird", fur: "#2e7d32", acc: "#fcb514", x: { bill: 1, head: "#2e7d32", jer: "#fc4c02", jer2: "#111111", txt: "DUCKS", num: "" } },                       // Wild Wing
+  "NHL:BOS": { k: "bear", fur: "#2a2420", acc: "#a0866a", x: { jer: "#231f20", jer2: "#fdb71a", txt: "BRUINS", num: "" } },                                                // Blades
+  "NHL:BUF": { k: "cat", fur: "#c8a06a", acc: "#f0e0c0", x: { fangs: 1, jer: "#00468b", jer2: "#fdb71a", txt: "SABRES", num: "" } },                                      // Sabretooth
+  "NHL:CGY": { k: "dog", fur: "#8a6a4a", acc: "#e6d2b5", x: { ears: "flop", tongue: 1, jer: "#dd1a32", jer2: "#f1be48", txt: "FLAMES", num: "" } },                       // Harvey the Hound
+  "NHL:CAR": { k: "hog", fur: "#f2aaa0", acc: "#cc0000", x: { jer: "#cc0000", jer2: "#111111", txt: "CANES", num: "" } },                                                  // Stormy
+  "NHL:CHI": { k: "bird", fur: "#1a1a1a", acc: "#f5b800", x: { head: "#f4f4f4", crest: 1, crestc: "#ce1126", jer: "#cf0a2c", jer2: "#ffffff", txt: "HAWKS", num: "" } },   // Tommy Hawk
+  "NHL:COL": { k: "dog", fur: "#8a5a2a", acc: "#f4efe6", x: { ears: "flop", jowl: 1, blaze: "#f4efe6", jer: "#6f263d", jer2: "#236192", txt: "AVS", num: "" } },        // Bernie
+  "NHL:CBJ": { k: "bee", fur: "#9bcf2e", acc: "#002654", x: { jer: "#002654", jer2: "#ce1126", txt: "STINGER", num: "" } },                                                // Stinger
+  "NHL:DAL": { k: "bear", fur: "#2e9a5a", acc: "#a8e0b8", x: { eyeS: 1.3, jer: "#006847", jer2: "#ffffff", txt: "STARS", num: "" } },                                     // Victor E. Green
+  "NHL:DET": { k: "human", fur: "#e2b08a", acc: "#ce1126", x: { hat: "cap", hatc: "#ce1126", hatL: "D", hatLc: "#ffffff", jer: "#ce1126", jer2: "#ffffff", txt: "RED WINGS", num: "" } },   // (none)
+  "NHL:EDM": { k: "cat", fur: "#d07a3a", acc: "#f2e6d0", x: { jer: "#041e42", jer2: "#ff4c00", txt: "OILERS", num: "" } },                                                // Hunter the Lynx
+  "NHL:FLA": { k: "cat", fur: "#c8a06a", acc: "#f0e0c0", x: { jer: "#c8102e", jer2: "#041e42", txt: "PANTHERS", num: "" } },                                              // Stanley C. Panther
+  "NHL:LA": { k: "cat", fur: "#d4a04a", acc: "#f7ecd0", x: { mane: "#8a5a22", jer: "#111111", jer2: "#a2aaad", txt: "KINGS", num: "" } },                                // Bailey
+  "NHL:MIN": { k: "bear", fur: "#e8e0d0", acc: "#c8b8a0", x: { tuft: "#154734", jer: "#154734", jer2: "#ddcba4", txt: "WILD", num: "" } },                                // Nordy
+  "NHL:MTL": { k: "bear", fur: "#f47b20", acc: "#ffb070", x: { tuft: "#f47b20", eyeS: 1.2, jer: "#af1e2d", jer2: "#ffffff", txt: "HABS", num: "" } },                   // Youppi!
+  "NHL:NSH": { k: "cat", fur: "#d8a440", acc: "#f7ecd0", x: { fangs: 1, stripes: 1, jer: "#041e42", jer2: "#ffb81c", txt: "PREDS", num: "" } },                          // Gnash
+  "NHL:NJ": { k: "human", fur: "#c8102e", acc: "#111111", x: { hat: "horns", hatc: "#7a0a14", jer: "#c8102e", jer2: "#111111", txt: "DEVILS", num: "" } },               // the NJ Devil
+  "NHL:NYI": { k: "gator", fur: "#f47d31", acc: "#ffd0a0", x: { jer: "#00539b", jer2: "#f47d31", txt: "ISLES", num: "" } },                                               // Sparky the Dragon
+  "NHL:NYR": { k: "human", fur: "#e2b08a", acc: "#0038a8", x: { hat: "cap", hatc: "#0038a8", hatL: "NY", hatLc: "#ce1126", jer: "#0038a8", jer2: "#ce1126", txt: "RANGERS", num: "" } },   // (none)
+  "NHL:OTT": { k: "cat", fur: "#d4a04a", acc: "#f7ecd0", x: { mane: "#c8102e", jer: "#111111", jer2: "#c69214", txt: "SENS", num: "" } },                                // Spartacat
+  "NHL:PHI": { k: "bear", fur: "#f74902", acc: "#ff8a40", x: { tuft: "#f74902", eyeS: 1.6, jer: "#f74902", jer2: "#111111", txt: "FLYERS", num: "" } },                 // Gritty
+  "NHL:PIT": { k: "bird", fur: "#111111", acc: "#fcb514", x: { head: "#111111", face: "#f4f4f4", jer: "#111111", jer2: "#fcb514", txt: "PENS", num: "" } },                // Iceburgh
+  "NHL:SJ": { k: "fish", fur: "#006d75", acc: "#e8f6f6", x: { kind: "shark", jer: "#006d75", jer2: "#ffffff", txt: "SHARKS", num: "" } },                                  // S.J. Sharkie
+  "NHL:SEA": { k: "bear", fur: "#5ab4c8", acc: "#a8e0ec", x: { tuft: "#355464", jer: "#001628", jer2: "#99d9d9", txt: "KRAKEN", num: "" } },                              // Buoy
+  "NHL:STL": { k: "bear", fur: "#2a6fc0", acc: "#a8c8f0", x: { jer: "#002f87", jer2: "#fcb514", txt: "BLUES", num: "" } },                                                 // Louie
+  "NHL:TB": { k: "bee", fur: "#2a6fc0", acc: "#ffffff", x: { jer: "#002868", jer2: "#ffffff", txt: "BOLTS", num: "" } },                                                    // ThunderBug
+  "NHL:TOR": { k: "bear", fur: "#f4f4f4", acc: "#d8d8d8", x: { jer: "#00205b", jer2: "#ffffff", txt: "LEAFS", num: "" } },                                                 // Carlton the Bear
+  "NHL:UTAH": { k: "ele", fur: "#6b4a2b", acc: "#a08060", x: { jer: "#111111", jer2: "#7ab2e1", txt: "MAMMOTH", num: "" } },                                              // Tusk
+  "NHL:VAN": { k: "fish", fur: "#1a1a1a", acc: "#f4f4f4", x: { kind: "dolphin", jer: "#00205b", jer2: "#00843d", txt: "CANUCKS", num: "" } },                            // Fin the Whale
+  "NHL:VGK": { k: "gator", fur: "#e07a2a", acc: "#f2c080", x: { jer: "#333f42", jer2: "#b4975a", txt: "KNIGHTS", num: "" } },                                               // Chance the Gila Monster
+  "NHL:WSH": { k: "bird", fur: "#4a3426", acc: "#f5b800", x: { head: "#f4f4f4", beak: "big", jer: "#c8102e", jer2: "#041e42", txt: "CAPS", num: "" } },                  // Slapshot
+  "NHL:WPG": { k: "horse", fur: "#6b4a2b", acc: "#a08060", x: { antlers: "moose", antc: "#c8b088", jer: "#041e42", jer2: "#ac162c", txt: "JETS", num: "" } },            // Mick E. Moose
 };
 // anyone else, from the name: "Tigers", "Bulldogs", "Wildcats"...
 function wdMascSpec(sport, t) {
@@ -24706,7 +24776,7 @@ function wdMascot(THREE, spec, team) {
   const neck = new THREE.Group(); neck.position.set(0, 0.74, 0); body.add(neck);
   const hd = new THREE.Group(); hd.position.set(0, 0.16, 0); hd.scale.setScalar(1.32); neck.add(hd);
   const H = (geo, mat, x, y, z) => mesh(geo, mat, x, y, z, hd);
-  const eyes = (y, z, sp, r, col) => { for (const s of [-1, 1]) { H(sph(r, 12, 10), M("#ffffff"), s * sp, y, z); H(sph(r * 0.55, 10, 8), M(col || "#111111"), s * sp, y, z + r * 0.62); } };
+  const eyes = (y, z, sp, r, col) => { const ek = X.eyeS || 1; r *= ek; sp *= 1 + (ek - 1) * 0.55; z += (ek - 1) * 0.03; for (const s of [-1, 1]) { H(sph(r, 12, 10), M("#ffffff"), s * sp, y, z); H(sph(r * 0.55, 10, 8), M(col || "#111111"), s * sp, y, z + r * 0.62); } };
   const K = spec.kind;
   if (K === "bird") {
     const hc = X.head || fur; const h0 = H(sph(0.15), M(hc)); h0.scale.set(1, 1.02, 1.05);
@@ -24726,6 +24796,7 @@ function wdMascot(THREE, spec, team) {
     H(sph(0.026, 10, 8), M("#141414"), 0, -0.01, mz + (K === "dog" ? 0.1 : 0.07));
     if (X.jowl) for (const s of [-1, 1]) H(sph(0.05), M(acc), s * 0.055, -0.085, 0.12);
     if (X.teeth) for (const s of [-1, 1]) H(new THREE.ConeGeometry(0.013, 0.04, 6), M("#ffffff"), s * 0.04, -0.09, mz + 0.06);
+    if (X.fangs) for (const s of [-1, 1]) { const fg = H(new THREE.ConeGeometry(0.014, 0.085, 6), M("#ffffff"), s * 0.03, -0.1, mz + 0.06); fg.rotation.x = Math.PI; }
     if (X.buck) for (const s of [-1, 1]) H(new THREE.BoxGeometry(0.022, 0.038, 0.01), M("#ffffff"), s * 0.012, -0.09, mz + 0.055);
     if (X.blaze) H(sph(0.04, 10, 8), M(X.blaze), 0, 0.075, 0.118).scale.set(0.55, 2.0, 0.5);
     if (X.cheeks) for (const s of [-1, 1]) H(sph(0.045, 10, 8), M(X.cheeks), s * 0.085, 0.0, 0.095).scale.set(0.7, 1.4, 0.5);
@@ -24755,6 +24826,9 @@ function wdMascot(THREE, spec, team) {
     eyes(0.04, 0.09, 0.07, 0.028);
     for (const s of [-1, 1]) { const lg = X.ears === "long", e = H(new THREE.ConeGeometry(lg ? 0.04 : 0.035, lg ? 0.22 : 0.1, 8), M(fur), s * (lg ? 0.07 : 0.06), lg ? 0.19 : 0.14, -0.02); e.rotation.z = -s * (lg ? 0.45 : 0.2); }
     for (let i = 0; i < 5; i++) H(new THREE.BoxGeometry(0.04, 0.07, 0.05), M(X.mane || "#222222"), 0, 0.12 - i * 0.045, -0.06 - i * 0.025);
+    if (X.antlers) for (const s of [-1, 1]) { const ac = M(X.antc || "#e0d0b0");
+      if (X.antlers === "moose") { const pm = H(new THREE.BoxGeometry(0.2, 0.025, 0.12), ac, s * 0.17, 0.2, -0.02); pm.rotation.z = s * 0.35; for (let i = 0; i < 4; i++) { const tn = H(new THREE.ConeGeometry(0.012, 0.06, 5), ac, s * (0.1 + i * 0.045), 0.235 + i * 0.016, -0.02 + (i % 2) * 0.03); tn.rotation.z = -s * 0.3; } }
+      else { const bm = H(new THREE.CylinderGeometry(0.016, 0.022, 0.19, 6), ac, s * 0.095, 0.19, -0.02); bm.rotation.z = -s * 0.5; for (let i = 0; i < 3; i++) { const tn = H(new THREE.CylinderGeometry(0.011, 0.015, 0.08, 5), ac, s * (0.1 + i * 0.035), 0.21 + i * 0.03, 0.0); tn.rotation.z = s * 0.2; } } }
     if (X.spots) for (let i = 0; i < 7; i++) H(sph(0.018, 8, 6), M(X.spotc || "#3a2a1a"), Math.cos(i * 1.9) * 0.07, 0.04 + Math.sin(i * 2.7) * 0.05, 0.095 + Math.abs(Math.sin(i * 1.9)) * 0.01);
   } else if (K === "bull" || K === "hog") {
     const h0 = H(sph(0.14), M(fur)); h0.scale.set(1.12, 0.95, 1);
@@ -24802,6 +24876,7 @@ function wdMascot(THREE, spec, team) {
     if (X.chin) H(sph(0.06, 12, 10), M(fur), 0, -0.1, 0.07).scale.set(1.2, 0.9, 1);
     if (X.big) hd.scale.setScalar(1.6);
   }
+  if (X.tuft && !X.hat) for (let i = 0; i < 5; i++) { const a = (i - 2) * 0.32, tf = H(new THREE.ConeGeometry(0.035, 0.12 + (2 - Math.abs(i - 2)) * 0.03, 8), M(X.tuft), Math.sin(a) * 0.07, 0.15 + Math.cos(a) * 0.02, -0.02 - Math.abs(i - 2) * 0.01); tf.rotation.z = -a; }
   // hats, on whoever wears one
   { const hat = X.hat, a2 = M(X.hatc || acc), lt = (txt, col, w, x, y, z) => { const c = wdCanvas(128, 128), q = c.getContext("2d"); q.font = `900 104px "Barlow Condensed", Inter, sans-serif`; q.textAlign = "center"; q.textBaseline = "middle"; q.fillStyle = col; q.fillText(txt, 64, 70);
       const tx = new THREE.CanvasTexture(c); tx.colorSpace = THREE.NoColorSpace; return H(new THREE.PlaneGeometry(w, w), new THREE.MeshBasicMaterial({ map: tx, transparent: true, depthWrite: false }), x, y, z); };
@@ -25044,6 +25119,262 @@ function wdFbFans(st) {
   if (F) { F.mat.uniforms.uFl.value = 420; for (const m of st.crowd) m.uniforms.uSO.value = 1; }
   return F;
 }
+// ---- basketball and hockey: the game's own arena. Most buildings are a lower bowl, a ring of suites, an upper deck and a
+// cube hung over center ice or the court; what makes each one itself: the seat color, the court (the wood, the paint, the
+// apron), the title banners in the rafters, the roof (Madison Square Garden's ring, the Saddledome's saddle, Climate Pledge's
+// skylit roof), and a thing or two nobody else has (the Clippers' Wall and Halo, the Sharks' head, the Blue Jackets' cannon,
+// Tampa's Tesla coils, Vegas's castle, Detroit's gondola, the Garden's bridges). Units are meters ----
+// board: cube | big | ring. roof: dark | ring | saddle | sky. steep: a high, steep upper bowl. small: a little building
+const WD_ARS = [
+  [/state farm arena/i, { nba: "ATL", seat: "#2b2b30", f: ["suitewall"] }],
+  [/td garden/i, { nba: "BOS", nhl: "BOS", seat: "#2e2e33" }],
+  [/barclays/i, { nba: "BKN", seat: "#121214" }],
+  [/spectrum center/i, { nba: "CHA", seat: "#0d4f5e" }],
+  [/united center/i, { nba: "CHI", nhl: "CHI", seat: "#9c1028" }],
+  [/rocket arena|rocket mortgage fieldhouse/i, { nba: "CLE", seat: "#4a0f26", f: ["glass"] }],
+  [/american airlines center/i, { nba: "DAL", nhl: "DAL", seat: "#24405e" }],
+  [/ball arena/i, { nba: "DEN", nhl: "COL", seat: "#1c2a44" }],
+  [/little caesars/i, { nba: "DET", nhl: "DET", seat: "#a3172a", f: ["gondola"] }],
+  [/chase center/i, { nba: "GS", seat: "#26292f", board: "big" }],
+  [/toyota center/i, { nba: "HOU", seat: "#a8102a" }],
+  [/gainbridge|bankers life fieldhouse/i, { nba: "IND", seat: "#123a6b", f: ["fieldhouse"] }],
+  [/intuit dome/i, { nba: "LAC", seat: "#1d428a", board: "ring", f: ["wall"] }],
+  [/crypto\.com|staples center/i, { nba: "LAL", nhl: "LA", seat: "#3e2a62" }],
+  [/fedexforum/i, { nba: "MEM", seat: "#26375e" }],
+  [/kaseya|ftx arena|american airlines arena/i, { nba: "MIA", seat: "#3a161e" }],
+  [/fiserv forum/i, { nba: "MIL", seat: "#163a22" }],
+  [/target center/i, { nba: "MIN", seat: "#1b3657" }],
+  [/smoothie king/i, { nba: "NO", seat: "#1b2a44" }],
+  [/madison square garden/i, { nba: "NY", nhl: "NYR", seat: "#26355a", roof: "ring", f: ["bridges"] }],
+  [/paycom center/i, { nba: "OKC", seat: "#0b4d86" }],
+  [/kia center|amway center/i, { nba: "ORL", seat: "#123a78" }],
+  [/xfinity mobile arena|wells fargo center/i, { nba: "PHI", nhl: "PHI", seat: "#1a3570" }],
+  [/footprint center|mortgage matchup|phx arena/i, { nba: "PHX", seat: "#2a1a4e" }],
+  [/moda center/i, { nba: "POR", seat: "#541418" }],
+  [/golden 1 center/i, { nba: "SAC", seat: "#3a2a5a", board: "big", f: ["glass"] }],
+  [/frost bank center|at&t center/i, { nba: "SA", seat: "#1b1b1f" }],
+  [/scotiabank arena/i, { nba: "TOR", nhl: "TOR", seat: "#24365e" }],
+  [/delta center/i, { nba: "UTAH", nhl: "UTAH", seat: "#2a1d40" }],
+  [/capital one arena/i, { nba: "WSH", nhl: "WSH", seat: "#7a1020" }],
+  [/honda center/i, { nhl: "ANA", seat: "#36363c" }],
+  [/keybank center/i, { nhl: "BUF", seat: "#163a6b" }],
+  [/saddledome/i, { nhl: "CGY", seat: "#8a1a20", roof: "saddle" }],
+  [/lenovo center|pnc arena/i, { nhl: "CAR", seat: "#8a1020" }],
+  [/nationwide arena/i, { nhl: "CBJ", seat: "#1a2a4a", f: ["cannon"] }],
+  [/rogers place/i, { nhl: "EDM", seat: "#1d2c4e" }],
+  [/amerant bank arena|fla live arena|bb&t center/i, { nhl: "FLA", seat: "#8a1a28" }],
+  [/xcel energy center/i, { nhl: "MIN", seat: "#12402a" }],
+  [/bell centre/i, { nhl: "MTL", seat: "#8a1426", steep: 1 }],
+  [/bridgestone arena/i, { nhl: "NSH", seat: "#1d2a50" }],
+  [/prudential center/i, { nhl: "NJ", seat: "#7a1018" }],
+  [/ubs arena/i, { nhl: "NYI", seat: "#1a2a4a" }],
+  [/canadian tire centre/i, { nhl: "OTT", seat: "#8a1424" }],
+  [/ppg paints arena/i, { nhl: "PIT", seat: "#1b1b1f", f: ["glass"] }],
+  [/sap center/i, { nhl: "SJ", seat: "#16383e", f: ["shark"] }],
+  [/climate pledge/i, { nhl: "SEA", seat: "#141f2e", roof: "sky" }],
+  [/enterprise center/i, { nhl: "STL", seat: "#163a6b" }],
+  [/benchmark international|amalie arena/i, { nhl: "TB", seat: "#18285a", f: ["tesla"] }],
+  [/rogers arena/i, { nhl: "VAN", seat: "#16385a" }],
+  [/t-mobile arena/i, { nhl: "VGK", seat: "#29292e", f: ["castle"] }],
+  [/canada life centre|bell mts place/i, { nhl: "WPG", seat: "#1a2a4a", small: 1 }],
+];
+// the titles hanging in the rafters, by team
+const WD_TITLES = {
+  "NBA:BOS": [1957, 1959, 1960, 1961, 1962, 1963, 1964, 1965, 1966, 1968, 1969, 1974, 1976, 1981, 1984, 1986, 2008, 2024], "NBA:LAL": [1949, 1950, 1952, 1953, 1954, 1972, 1980, 1982, 1985, 1987, 1988, 2000, 2001, 2002, 2009, 2010, 2020],
+  "NBA:GS": [1947, 1956, 1975, 2015, 2017, 2018, 2022], "NBA:CHI": [1991, 1992, 1993, 1996, 1997, 1998], "NBA:SA": [1999, 2003, 2005, 2007, 2014], "NBA:MIA": [2006, 2012, 2013],
+  "NBA:DET": [1989, 1990, 2004], "NBA:PHI": [1955, 1967, 1983], "NBA:NY": [1970, 1973], "NBA:HOU": [1994, 1995], "NBA:MIL": [1971, 2021], "NBA:TOR": [2019], "NBA:DEN": [2023], "NBA:DAL": [2011],
+  "NBA:CLE": [2016], "NBA:OKC": [2025], "NBA:POR": [1977], "NBA:WSH": [1978], "NBA:ATL": [1958], "NBA:SAC": [1951],
+  "NHL:MTL": [1916, 1924, 1930, 1931, 1944, 1946, 1953, 1956, 1957, 1958, 1959, 1960, 1965, 1966, 1968, 1969, 1971, 1973, 1976, 1977, 1978, 1979, 1986, 1993],
+  "NHL:TOR": [1918, 1922, 1932, 1942, 1945, 1947, 1948, 1949, 1951, 1962, 1963, 1964, 1967], "NHL:DET": [1936, 1937, 1943, 1950, 1952, 1954, 1955, 1997, 1998, 2002, 2008],
+  "NHL:BOS": [1929, 1939, 1941, 1970, 1972, 2011], "NHL:CHI": [1934, 1938, 1961, 2010, 2013, 2015], "NHL:EDM": [1984, 1985, 1987, 1988, 1990], "NHL:PIT": [1991, 1992, 2009, 2016, 2017],
+  "NHL:NYI": [1980, 1981, 1982, 1983], "NHL:NYR": [1928, 1933, 1940, 1994], "NHL:NJ": [1995, 2000, 2003], "NHL:COL": [1996, 2001, 2022], "NHL:TB": [2004, 2020, 2021], "NHL:PHI": [1974, 1975],
+  "NHL:LA": [2012, 2014], "NHL:FLA": [2024, 2025], "NHL:DAL": [1999], "NHL:CGY": [1989], "NHL:CAR": [2006], "NHL:ANA": [2007], "NHL:STL": [2019], "NHL:VGK": [2023], "NHL:WSH": [2018],
+};
+// the court: the wood (std, light, dark, parquet), the paint, the apron past the lines, a line color, a touch on the apron
+const WD_COURT = {
+  BOS: { wood: "parquet", key: "#008348", apron: "#0b3d26" }, BKN: { wood: "dark", key: "#111111", apron: "#111111" }, MIA: { key: "#98002e", apron: "#141414" },
+  MIL: { wood: "light", key: "#00471b", apron: "#00471b" }, IND: { wood: "light", key: "#0c2340", apron: "#0c2340" }, MIN: { key: "#0c2340", apron: "#0c2340", deco: "trees" },
+  DEN: { key: "#0e2240", apron: "#0e2240", deco: "mountains" }, CHA: { key: "#00788c", apron: "#1d1060", deco: "pins" }, ORL: { key: "#0150b5", apron: "#0b1f44", deco: "pins" },
+  GS: { key: "#1d428a", apron: "#1d428a" }, SA: { key: "#1a1a1a", apron: "#5a6168" }, LAL: { key: "#552583", apron: "#552583", line: "#fdb927" }, NY: { key: "#1d428a", apron: "#1d428a", line: "#f58426" },
+  MEM: { key: "#12173f", apron: "#5d76a9" }, UTAH: { key: "#4e008e", apron: "#111111" }, POR: { key: "#e03a3e", apron: "#111111" }, TOR: { key: "#d91244", apron: "#111111" },
+  PHX: { key: "#e56020", apron: "#29127a" }, OKC: { key: "#007ac1", apron: "#002d62" }, SAC: { key: "#5a2d81", apron: "#5a2d81" }, LAC: { key: "#1d428a", apron: "#12173f" },
+};
+function wdArSpec(R) {
+  const S = R.scene && R.scene.game, h = S ? S.h : null, vn = (S && S.ven && S.ven.nm) || (R.ven && R.ven.nm) || "", sp = R.sport;
+  let as = null; for (const [re, v] of WD_ARS) if (vn && re.test(vn)) { as = Object.assign({ nm: vn }, v); break; }
+  if (!as && h) for (const [, v] of WD_ARS) if (v[sp] === h.ab) { as = Object.assign({}, v); break; }
+  if (!as) as = { nm: vn, seat: h && h.col ? h.col : "#2a2e36" };
+  as.f = as.f || []; as.board = as.board || "cube"; as.roof = as.roof || "dark"; as.sp = sp; as.home = h ? h.ab : "";
+  as.titles = (h && WD_TITLES[(S.sport || sp.toUpperCase()) + ":" + h.ab]) || [];
+  return as;
+}
+// the venue: the generic arena reshaped to the spec
+function wdArVenue(as, sp) {
+  const B = WD_V[sp], V = Object.assign({}, B), A = V.A;
+  const lower = Object.assign({}, B.tiers[0], { fanRows: 16 }), su = Object.assign({}, B.tiers[1]), up = Object.assign({}, B.tiers[2], { fanRows: 15, gap: 1.05 });
+  if (as.steep) { up.y1 += 5; up.o1 -= 2; up.fanRows = 17; }
+  if (as.small) { up.o1 -= 5; up.y1 -= 4.5; up.fanRows = 11; }
+  const tiers = [lower, su];
+  // Atlanta: one sideline is a wall of suites, three high, no upper deck over it
+  if (as.f.includes("suitewall")) { const far = (x, z) => z < -V.B * 0.7; up.keep = (x, z) => !far(x, z);
+    for (let i = 1; i < 4; i++) tiers.push({ suite: 1, o0: su.o0 + i * 0.5, y0: su.y0 + i * 3.4, y1: su.y1 + i * 3.4, keep: far }); }
+  tiers.push(up);
+  // the Clippers' Wall: behind one basket, a single steep wall of seats from the floor to the roof
+  if (as.f.includes("wall")) { const end = (x) => x > A * 0.94; for (const t of tiers) { const k0 = t.keep; t.keep = (x, z) => (!k0 || k0(x, z)) && !end(x); }
+    tiers.push({ o0: lower.o0, o1: up.o1 - 4, y0: lower.y0, y1: up.y1 + 2, rows: 51, fanRows: 30, gap: 0.95, wall: 1, keep: end }); }
+  V.tiers = tiers;
+  V.ribs = B.ribs.map((r) => (r.y0 > 5 ? Object.assign({}, r, { keep: up.keep }) : r));
+  const top = Math.max(...tiers.map((t) => t.y1)), outer = Math.max(...tiers.map((t) => t.o1 || t.o0));
+  V.roof = Math.max(B.roof, top + 6); V.top = top; V.outer = outer;
+  const J = B.jumbo; V.jumbo = as.board === "big" ? Object.assign({}, J, { w: J.w * 1.35, h: J.h * 1.35, p: [J.p[0], J.p[1] + 1, J.p[2]] }) : as.board === "ring" ? { p: [0, J.p[1] + 1.5, 0], hung: 1, ring: 1, R: sp === "nhl" ? 24 : 17, w: 0, h: J.h * 1.05 } : J;
+  if (V.jumbo.ring) V.jumbo.w = 2 * V.jumbo.R * Math.tan(Math.PI / 8);
+  V.towers = []; V.fs = as; V.ar = as;
+  return V;
+}
+// the court, the home team's: the wood, the keys and the apron in their colors, the logo at center, the name on the baselines
+function wdArCourt(T, V, as) {
+  const cs = WD_COURT[as.home] || {}, home = T.h, [fw, fh] = V.field, W = 2048, H = Math.round((W * fh) / fw), c = wdCanvas(W, H), x = c.getContext("2d"), k = W / fw, cw = 28.65, ch = 15.24, ox = (fw - cw) / 2, oz = (fh - ch) / 2;
+  const X = (m) => (ox + m) * k, Y = (m) => (oz + m) * k, key = cs.key ? wdHex(cs.key) : home.col, apron = cs.apron ? wdHex(cs.apron) : wdMix(home.col, [0, 0, 0], 0.45), line = cs.line || "#ffffff";
+  x.fillStyle = wdCss(apron); x.fillRect(0, 0, W, H);
+  // touches on the apron: pinstripes, the north woods, the Rockies
+  if (cs.deco === "pins") { x.strokeStyle = "rgba(255,255,255,.12)"; x.lineWidth = 0.04 * k; for (let i = 0; i < fw; i += 0.5) { x.beginPath(); x.moveTo(i * k, 0); x.lineTo(i * k, H); x.stroke(); } }
+  if (cs.deco === "trees") { x.fillStyle = "rgba(0,0,0,.28)"; for (let i = 0; i < 40; i++) { const tx = (i / 40) * fw * k, s = (0.5 + (i % 3) * 0.2) * k; for (const by of [Y(0) - 0.2 * k, Y(ch) + oz * k]) { x.beginPath(); x.moveTo(tx, by); x.lineTo(tx + s * 0.6, by - s * 1.6 * (by < H / 2 ? 1 : -1)); x.lineTo(tx + s * 1.2, by); x.fill(); } } }
+  if (cs.deco === "mountains") { x.fillStyle = "rgba(255,255,255,.08)"; for (const by of [Y(0), Y(ch)]) { const d = by < H / 2 ? -1 : 1; x.beginPath(); x.moveTo(0, by); for (let i = 0; i <= 24; i++) x.lineTo((i / 24) * W, by + d * (0.4 + Math.abs(Math.sin(i * 1.7)) * 1.4) * k); x.lineTo(W, by); x.fill(); } }
+  // the wood
+  x.save(); x.beginPath(); x.rect(X(0), Y(0), cw * k, ch * k); x.clip();
+  const tone = cs.wood === "light" ? [226, 182, 128] : cs.wood === "dark" ? [92, 86, 82] : [206, 150, 94];
+  if (cs.wood === "parquet") { const q = 1.2; for (let i = 0; i < cw / q + 1; i++) for (let j = 0; j < ch / q + 1; j++) { const t = 0.86 + ((i * 7 + j * 3) % 5) * 0.03, vert = (i + j) % 2;
+      for (let s = 0; s < 6; s++) { x.fillStyle = `rgb(${Math.round(tone[0] * t * (0.95 + (s % 2) * 0.05))},${Math.round(tone[1] * t)},${Math.round(tone[2] * t)})`; if (vert) x.fillRect(X(i * q + s * q / 6), Y(j * q), (q / 6) * k + 1, q * k + 1); else x.fillRect(X(i * q), Y(j * q + s * q / 6), q * k + 1, (q / 6) * k + 1); } } }
+  else for (let z = 0; z < ch; z += 0.075) { let xx = 0; while (xx < cw) { const l = 1.2 + Math.random() * 2.4, t = 0.86 + Math.random() * 0.14; x.fillStyle = `rgb(${Math.round(tone[0] * t)},${Math.round(tone[1] * t)},${Math.round(tone[2] * t)})`; x.fillRect(X(xx), Y(z), l * k + 1, 0.075 * k + 0.6); xx += l; } }
+  x.restore();
+  x.fillStyle = "rgba(255,240,220,.06)"; x.fillRect(X(0), Y(0), cw * k, ch * k);
+  // the lines: the court, half court, the circle in the home color with the logo, the keys, the arcs, the restricted area
+  x.strokeStyle = line; x.lineWidth = 0.05 * k * 1.6;
+  x.strokeRect(X(0), Y(0), cw * k, ch * k); x.beginPath(); x.moveTo(X(cw / 2), Y(0)); x.lineTo(X(cw / 2), Y(ch)); x.stroke();
+  x.fillStyle = wdCss(key); x.beginPath(); x.arc(X(cw / 2), Y(ch / 2), 1.83 * k, 0, Math.PI * 2); x.fill(); x.stroke();
+  wdTeamArt(x, home, X(cw / 2), Y(ch / 2), 4.6 * k);
+  for (const side of [0, 1]) {
+    const bx = side ? cw - 1.575 : 1.575, kx = side ? cw - 5.79 : 0;
+    x.fillStyle = wdCss(key); x.fillRect(X(kx), Y(ch / 2 - 2.44), 5.79 * k, 4.88 * k); x.strokeRect(X(kx), Y(ch / 2 - 2.44), 5.79 * k, 4.88 * k);
+    x.beginPath(); x.arc(X(side ? cw - 5.79 : 5.79), Y(ch / 2), 1.83 * k, 0, Math.PI * 2); x.stroke();
+    x.beginPath(); x.moveTo(X(side ? cw : 0), Y(0.91)); const a0 = Math.asin((ch / 2 - 0.91) / 7.24); x.lineTo(X(side ? cw - 4.27 : 4.27), Y(0.91));
+    x.arc(X(bx), Y(ch / 2), 7.24 * k, side ? Math.PI + a0 : -a0, side ? Math.PI - a0 : a0, side ? true : false); x.lineTo(X(side ? cw : 0), Y(ch - 0.91)); x.stroke();
+    x.beginPath(); x.arc(X(bx), Y(ch / 2), 1.22 * k, side ? Math.PI / 2 : -Math.PI / 2, side ? -Math.PI / 2 : Math.PI / 2, false); x.stroke();
+  }
+  // the home team's name on both aprons, the city across the baselines
+  x.font = `900 ${Math.round(1.25 * k)}px "Barlow Condensed", Inter, sans-serif`; x.textAlign = "center"; x.textBaseline = "middle"; x.fillStyle = "rgba(255,255,255,.88)";
+  const nm = (home.nm || home.ab).toUpperCase(); x.fillText(nm, X(cw / 2), Y(ch + oz / 2)); x.fillText(nm, X(cw / 2), Y(-oz / 2));
+  for (const [bx, r] of [[X(-ox / 2), -Math.PI / 2], [X(cw + ox / 2), Math.PI / 2]]) { x.save(); x.translate(bx, Y(ch / 2)); x.rotate(r); x.font = `900 ${Math.round(0.9 * k)}px "Barlow Condensed", Inter, sans-serif`; x.fillText((home.fn || home.nm || home.ab).toUpperCase(), 0, 0); x.restore(); }
+  return c;
+}
+// where the stage goes: a corner of the building, past the lower bowl, the suites and upper deck give way to it
+function wdDeckSpotAr(st) {
+  const V = st.V, C = st.C, K = V.rink ? 0.56 : 0.5, depth = 11 * K, width = 30 * K, lo = V.tiers[0], t = V.ar && V.ar.f.includes("wall") ? 0.615 : 0.885, [px, pz, nx, nz] = wdNorm(C, t);
+  const oc = lo.o1 + depth / 2 + 0.5, floor = lo.y1 + 0.6, p = [px + nx * oc, floor, pz + nz * oc];
+  const fl = Math.hypot(V.cx - p[0], V.cz - p[2]) || 1, f = [(V.cx - p[0]) / fl, (V.cz - p[2]) / fl];
+  const gap = (x, z) => { const dx = x - p[0], dz = z - p[2], lz = dx * f[0] + dz * f[1], lx = dx * f[1] - dz * f[0]; return Math.abs(lx) < width / 2 + 1.2 && lz < depth / 2 + 1; };
+  return { p, look: [V.cx, V.cz], base: lo.y1 - 2.5, K, who: "mascot", gap, house: { top: V.top + 1.2, back: V.outer + 0.4 - oc } };
+}
+// what goes up after the decks: the outside wall, the roof and its rigging, the banners, the baskets or the nets, the
+// building's own landmarks
+function wdArBuild(st, as) {
+  const THREE = st.THREE, V = st.V, C = st.C, scene = st.scene, T = st.R.T, glow = st.glowAt, hk = !!V.rink, A = V.A, B = V.B;
+  const col = (h, k) => { const c = Array.isArray(h) ? h : wdHex(h); return new THREE.Color().setRGB(c[0] * (k || 1), c[1] * (k || 1), c[2] * (k || 1), THREE.LinearSRGBColorSpace); };
+  const flat = (h, k) => new THREE.MeshBasicMaterial({ color: col(h, k) });
+  const add = (geo, mat, x, y, z, par) => { const m = new THREE.Mesh(geo, mat); m.position.set(x, y, z); (par || scene).add(m); return m; };
+  const top = V.top, outer = V.outer, roof = V.roof, F = as.f, h = T.h;
+  st.arFl = []; const flashAt = (p, s, c) => { glow(p, s, c, 0); st.arFl.push(st.glows[st.glows.length - 1]); };
+  // the outside wall of the bowl, and the concourse ring at the top of the lower bowl
+  scene.add(new THREE.Mesh(wdBand(THREE, C, { o0: outer + 0.4, y0: 0, y1: roof }, 360), new THREE.MeshBasicMaterial({ color: col(F.includes("fieldhouse") ? [0.16, 0.07, 0.05] : [0.035, 0.038, 0.05]), side: THREE.DoubleSide })));
+  // the roof: dark, a grid of catwalks, lights round the rim; or the Garden's ring, the saddle, Seattle's skylights
+  const RW = (A + outer) * 2.3, RD = (B + outer) * 2.3;
+  if (as.roof === "saddle") {
+    const g = new THREE.PlaneGeometry(RW, RD, 40, 24); g.rotateX(Math.PI / 2); const p = g.attributes.position;
+    for (let i = 0; i < p.count; i++) { const x = p.getX(i), z = p.getZ(i); p.setY(i, roof + 2 - 11 * ((x / (RW / 2)) ** 2) + 11 * ((z / (RD / 2)) ** 2)); } g.computeVertexNormals();
+    add(g, new THREE.MeshBasicMaterial({ color: col([0.03, 0.032, 0.04]), side: THREE.DoubleSide }), 0, 0, 0);
+    for (let i = 0; i <= 16; i++) { const x = -RW / 2 + (i / 16) * RW; const lg = add(new THREE.BoxGeometry(0.25, 0.25, RD), flat([0.12, 0.12, 0.14]), x, roof + 2.1 - 11 * ((x / (RW / 2)) ** 2) - 0.3, 0); void lg; }
+    // the saddle's rim, lit, so the shape reads
+    for (let i = 0; i < 40; i++) { const a = (i / 40) * Math.PI * 2, x = Math.cos(a) * RW * 0.42, z = Math.sin(a) * RD * 0.42; glow([x, roof + 2 - 11 * ((x / (RW / 2)) ** 2) + 11 * ((z / (RD / 2)) ** 2) - 0.6, z], 2.4, [1, 0.9, 0.75], 0.9); }
+  } else {
+    const rf = add(new THREE.CircleGeometry(Math.max(RW, RD) * 0.62, 48), new THREE.MeshBasicMaterial({ color: col(as.roof === "sky" ? [0.1, 0.085, 0.07] : [0.014, 0.015, 0.02]), side: THREE.DoubleSide }), 0, roof, 0); rf.rotation.x = Math.PI / 2; rf.scale.set(1, RD / RW, 1);
+    // catwalks: a grid of trusses under the roof
+    const tr = flat([0.1, 0.105, 0.12]); for (let i = -3; i <= 3; i++) { add(new THREE.BoxGeometry(RW * 0.7, 0.35, 0.35), tr, 0, roof - 1.2, i * B * 0.32); add(new THREE.BoxGeometry(0.35, 0.35, RD * 0.7), tr, i * A * 0.3, roof - 1.6, 0); }
+    if (as.roof === "sky") { // Climate Pledge: the old roof kept, a band of skylight round its edge, wood and warm light
+      const sk = add(new THREE.TorusGeometry(Math.max(A, B) + outer * 0.9, 1.6, 6, 64), new THREE.MeshBasicMaterial({ color: col([0.55, 0.72, 0.95]) }), 0, roof - 0.5, 0); sk.rotation.x = Math.PI / 2; sk.scale.set(1, (B + outer) / (A + outer), 1);
+      for (let i = 0; i < 24; i++) { const a = (i / 24) * Math.PI * 2; glow([Math.cos(a) * (A + outer * 0.9), roof - 1, Math.sin(a) * (B + outer * 0.9)], 10, [0.6, 0.78, 1], 0.4); } }
+    if (as.roof === "ring") { // the Garden: a lit ring in the ceiling with its cables out to the walls
+      const rr = Math.min(A, B) * 1.05; const ring = add(new THREE.TorusGeometry(rr, 0.55, 8, 64), new THREE.MeshBasicMaterial({ color: col([1, 0.96, 0.86]) }), 0, roof - 0.8, 0); ring.rotation.x = Math.PI / 2;
+      for (let i = 0; i < 48; i++) { const a = (i / 48) * Math.PI * 2, L = Math.max(A, B) + outer - rr; const cb = add(new THREE.BoxGeometry(L, 0.12, 0.12), flat([0.3, 0.31, 0.34]), Math.cos(a) * (rr + L / 2), roof - 0.6, Math.sin(a) * (rr + L / 2)); cb.rotation.y = -a; }
+      for (let i = 0; i < 16; i++) { const a = (i / 16) * Math.PI * 2; glow([Math.cos(a) * rr, roof - 1, Math.sin(a) * rr], 8, [1, 0.95, 0.85], 0.6); } }
+  }
+  for (let i = 0; i < 24; i++) { const p = wdNorm(C, i / 24), o = V.tiers[0].o1 * 0.6; glow([p[0] + p[2] * o, roof - 2.4, p[1] + p[3] * o], 3.2, [1, 0.96, 0.9], 0.85); glow([p[0] + p[2] * o, roof - 2.4, p[1] + p[3] * o], 1.1, [1, 1, 1], 1); }
+  for (let i = 0; i < 4; i++) { const a = (i / 4) * Math.PI * 2 + 0.4; glow([Math.cos(a) * A * 0.45, roof - 4, Math.sin(a) * B * 0.45], 14, [0.9, 0.92, 1], 0.12); }
+  // the banners: every title, in the home colors, in a row over the far side
+  const ttl = as.titles || [];
+  if (ttl.length) { const bw = hk ? 2.6 : 2.2, bh = bw * 1.6, per = Math.min(ttl.length, hk ? 14 : 12), rows = Math.ceil(ttl.length / per), x0 = -((per - 1) * bw * 1.25) / 2;
+    ttl.forEach((yr, i) => { const r = Math.floor(i / per), j = i % per, cv = wdCanvas(128, 208), q = cv.getContext("2d");
+      q.fillStyle = wdCss(wdMix(h.col, [0, 0, 0], 0.15)); q.fillRect(0, 0, 128, 208); q.fillStyle = wdCss(wdLift(h.alt, 0.3)); q.fillRect(0, 0, 128, 10); q.fillRect(0, 198, 128, 10);
+      q.textAlign = "center"; q.textBaseline = "middle"; q.fillStyle = "#fff"; q.font = `900 22px "Barlow Condensed", Inter, sans-serif`; q.fillText((h.nm || h.ab).toUpperCase(), 64, 40);
+      q.font = `800 17px "Barlow Condensed", Inter, sans-serif`; q.fillText(hk ? "STANLEY CUP" : "WORLD", 64, 74); q.fillText(hk ? "CHAMPIONS" : "CHAMPIONS", 64, 96);
+      q.font = `900 50px "Barlow Condensed", Inter, sans-serif`; q.fillStyle = wdCss(wdLift(h.alt, 0.35)); q.fillText(String(yr), 64, 150);
+      const tx = wdTex(THREE, cv); st.tex.push(tx); add(new THREE.PlaneGeometry(bw, bh), new THREE.MeshBasicMaterial({ map: tx, side: THREE.DoubleSide }), x0 + j * bw * 1.25, roof - 3 - bh / 2 - r * (bh + 0.8), -(B + V.tiers[0].o1 * 0.75)); }); }
+  // the baskets (stanchion, arm, glass, rim, net) or the nets (red posts, the mesh)
+  for (const s of [-1, 1]) {
+    if (!hk) { // the backboard 1.22 m in from the baseline, the rim's center 1.575 m in, the stanchion out on the apron
+      const bx = s * (28.65 / 2 - 1.22), rx = s * (28.65 / 2 - 1.575), px = s * (28.65 / 2 + 1.9), pad = flat(wdMix(h.col, [0, 0, 0], 0.25)), steel = flat([0.14, 0.15, 0.18]);
+      add(new THREE.BoxGeometry(1.4, 1.6, 2.2), pad, px, 0.8, 0); add(new THREE.BoxGeometry(0.3, 2.3, 0.4), steel, px, 2.75, 0); add(new THREE.BoxGeometry(Math.abs(px - bx), 0.3, 0.4), steel, (px + bx) / 2, 3.75, 0);
+      add(new THREE.BoxGeometry(0.05, 1.07, 1.83), new THREE.MeshBasicMaterial({ color: col([0.75, 0.85, 0.95]), transparent: true, opacity: 0.35, depthWrite: false }), bx, 3.43, 0);
+      const rim = add(new THREE.TorusGeometry(0.23, 0.02, 6, 20), flat([1, 0.42, 0.1]), rx, 3.05, 0); rim.rotation.x = Math.PI / 2;
+      add(new THREE.CylinderGeometry(0.23, 0.15, 0.45, 12, 1, true), new THREE.MeshBasicMaterial({ color: col([0.95, 0.95, 0.95]), transparent: true, opacity: 0.6, side: THREE.DoubleSide, depthWrite: false }), rx, 2.82, 0); }
+    else { const gx = s * 27.15, red = flat([0.85, 0.08, 0.1]);
+      add(new THREE.BoxGeometry(0.1, 1.22, 0.1), red, gx, 0.61, -0.915); add(new THREE.BoxGeometry(0.1, 1.22, 0.1), red, gx, 0.61, 0.915); add(new THREE.BoxGeometry(0.1, 0.1, 1.93), red, gx, 1.22, 0);
+      add(new THREE.BoxGeometry(1.1, 1.18, 1.8), new THREE.MeshBasicMaterial({ color: col([0.95, 0.95, 0.95]), transparent: true, opacity: 0.28, depthWrite: false }), gx + s * 0.55, 0.6, 0); }
+  }
+  // landmarks
+  const sideZ = -(B + V.tiers[0].o1 + 3);
+  if (F.includes("gondola")) { const gz = -(B + V.tiers[0].o1 + 6), gy = top - 2.5, len = A * 1.6; add(new THREE.BoxGeometry(len, 3, 4), flat([0.05, 0.055, 0.07]), 0, gy, gz);
+    const gl = add(new THREE.PlaneGeometry(len - 1, 1.6), new THREE.MeshBasicMaterial({ color: col([1, 0.78, 0.5]) }), 0, gy + 0.2, gz + 2.02); void gl; for (const cx of [-len / 3, 0, len / 3]) add(new THREE.BoxGeometry(0.1, roof - gy, 0.1), flat([0.3, 0.3, 0.32]), cx, (roof + gy) / 2, gz); }
+  if (F.includes("bridges")) for (const s of [-1, 1]) { const bz = s * (B + V.tiers[0].o1 + 7), by = top - 3.5, len = A * 1.7; add(new THREE.BoxGeometry(len, 1.2, 2.6), flat([0.06, 0.065, 0.08]), 0, by, bz);
+    add(new THREE.PlaneGeometry(len - 1, 0.5), new THREE.MeshBasicMaterial({ color: col([0.95, 0.75, 0.45]), side: THREE.DoubleSide }), 0, by + 0.9, bz - s * 1.31); for (let i = 0; i < 6; i++) add(new THREE.BoxGeometry(0.08, roof - by, 0.08), flat([0.3, 0.3, 0.32]), -len / 2 + (i + 0.5) * (len / 6), (roof + by) / 2, bz); }
+  if (F.includes("fieldhouse") || F.includes("glass")) for (const s of F.includes("fieldhouse") ? [-1, 1] : [-1]) { const wx = s * (A + outer + 0.2), wy = top + (roof - top) / 2 + 1, cv = wdCanvas(512, 256), q = cv.getContext("2d");
+      q.fillStyle = F.includes("fieldhouse") ? "#3a5a7a" : "#0c1424"; q.fillRect(0, 0, 512, 256); for (let i = 0; i < 260; i++) { q.fillStyle = `rgba(255,${200 + Math.random() * 55},${140 + Math.random() * 80},${Math.random() * 0.8})`; q.fillRect(Math.random() * 512, 120 + Math.random() * 136, 3, 3); }
+      q.strokeStyle = "#151a22"; q.lineWidth = 6; for (let i = 0; i <= 512; i += 64) { q.beginPath(); q.moveTo(i, 0); q.lineTo(i, 256); q.stroke(); } q.beginPath(); q.moveTo(0, 128); q.lineTo(512, 128); q.stroke();
+      if (F.includes("fieldhouse")) { q.globalCompositeOperation = "destination-in"; q.beginPath(); q.moveTo(0, 256); q.lineTo(0, 110); q.quadraticCurveTo(256, -60, 512, 110); q.lineTo(512, 256); q.fill(); }
+      const tx = wdTex(THREE, cv); st.tex.push(tx); const w = add(new THREE.PlaneGeometry(B * 2.6, (roof - top) * 0.9), new THREE.MeshBasicMaterial({ map: tx, transparent: true, side: THREE.DoubleSide }), wx, wy, 0); w.rotation.y = Math.PI / 2; }
+  if (F.includes("shark")) { const g = new THREE.Group(); g.position.set(A * 0.78, roof - 11, 0); g.rotation.y = -Math.PI / 2; g.scale.setScalar(1.8); scene.add(g); const skin = flat([0.2, 0.3, 0.36]), belly = flat([0.78, 0.82, 0.84]);
+    const hd = add(new THREE.SphereGeometry(3.2, 24, 16), skin, 0, 0, 0, g); hd.scale.set(1, 0.75, 1.5);
+    const jaw = add(new THREE.SphereGeometry(2.8, 20, 12, 0, Math.PI * 2, Math.PI / 2, Math.PI / 2), belly, 0, -0.9, 0.8, g); jaw.scale.set(1, 0.6, 1.3);
+    add(new THREE.CircleGeometry(2.2, 20), flat([0.08, 0.02, 0.03]), 0, -0.4, 3.6, g).scale.set(1, 0.5, 1);
+    for (let i = 0; i < 9; i++) { const tth = add(new THREE.ConeGeometry(0.16, 0.5, 4), flat([1, 1, 1]), -1.8 + i * 0.45, 0.05, 3.55, g); tth.rotation.x = Math.PI; }
+    for (const s of [-1, 1]) { add(new THREE.SphereGeometry(0.32, 10, 8), flat([0.02, 0.02, 0.03]), s * 1.9, 0.9, 2.9, g); }
+    const fin = add(new THREE.ConeGeometry(1.2, 3.2, 4), skin, 0, 3, -1.2, g); fin.scale.set(0.3, 1, 1); fin.rotation.x = -0.4; }
+  if (F.includes("cannon")) { const p = wdNorm(C, 0.62), o = V.tiers[0].o1 + 1.5, g = new THREE.Group(); g.position.set(p[0] + p[2] * o, V.tiers[0].y1 + 1.6, p[1] + p[3] * o); g.lookAt(0, 0, 0); scene.add(g);
+    const brl = add(new THREE.CylinderGeometry(0.35, 0.55, 3.8, 14), flat([0.12, 0.12, 0.13]), 0, 0.4, 0.6, g); brl.rotation.x = Math.PI / 2 - 0.25;
+    for (const s of [-1, 1]) { const wh = add(new THREE.TorusGeometry(0.75, 0.12, 6, 16), flat([0.36, 0.22, 0.12]), s * 0.75, -0.3, -0.4, g); wh.rotation.y = Math.PI / 2; }
+    g.updateMatrixWorld(true); const mz = g.localToWorld(new THREE.Vector3(0, 0.9, 2.8)); flashAt([mz.x, mz.y, mz.z], 14, [1, 0.7, 0.35]); flashAt([mz.x, mz.y, mz.z], 5, [1, 1, 0.9]); st.arCannon = g; }
+  if (F.includes("tesla")) { st.arCoils = []; for (const s of [-1, 1]) { const cx = s * (A + V.tiers[0].o1 * 0.7), cy = top + 1; add(new THREE.CylinderGeometry(0.6, 1.2, 4, 12), flat([0.25, 0.26, 0.3]), cx, cy + 2, 0);
+      const tor = add(new THREE.TorusGeometry(1.3, 0.45, 10, 24), flat([0.7, 0.72, 0.78]), cx, cy + 4.4, 0); tor.rotation.x = Math.PI / 2; glow([cx, cy + 4.6, 0], 9, [0.55, 0.75, 1], 0.6); flashAt([cx, cy + 4.6, 0], 24, [0.6, 0.8, 1]); st.arCoils.push(st.glows[st.glows.length - 1]); } }
+  if (F.includes("castle")) { const cx = A + V.tiers[0].o1 * 0.4, stone = flat([0.42, 0.42, 0.44]), gold = flat(wdHex("#b4975a"));
+    for (const z of [-7, -2.4, 2.4, 7]) { const tw = Math.abs(z) > 5; add(new THREE.BoxGeometry(3, tw ? 12 : 8, 3), stone, cx, tw ? 6 : 4, z); for (const k of [-1, 1]) add(new THREE.BoxGeometry(0.8, 1, 0.8), stone, cx, (tw ? 12 : 8) + 0.5, z + k * 1); if (tw) add(new THREE.ConeGeometry(2, 3.4, 4), gold, cx, 13.7, z); }
+    add(new THREE.BoxGeometry(2.8, 6, 4.4), flat([0.04, 0.03, 0.03]), cx - 0.2, 3, 0); }
+  // the home team's logo over center, lit, on top of the cube
+  void sideZ;
+}
+// the arena's fans: the home colors all round, the visitors in a pocket, the Wall all one color
+function wdArFans(st) {
+  const V = st.V, R = st.R, tiers = V.tiers.filter((t) => !t.suite).map((t, i) => Object.assign({}, t, { gap: t.gap || (i ? 1.05 : 0.85) }));
+  const seats = wdFanSeats(st.C, V, tiers, 0.85, 0.88, (x, z, u) => (V.ar && V.ar.f.includes("wall") && x > V.A * 0.94 ? 0 : u > 0.33 && u < 0.4 ? 1 : Math.abs(Math.sin(x * 3.1 + z * 7.7)) % 1 < 0.06 ? 2 : 0));
+  const tc = (t) => [wdLift(t.col, 0.12), wdLift(t.alt, 0.12)];
+  const F = wdFansBuild(st, seats, [tc(R.T.h), tc(R.T.a), [[0.8, 0.8, 0.8], [0.15, 0.16, 0.2]]], 0.95);
+  if (F) { F.mat.uniforms.uFl.value = 160; for (const m of st.crowd) m.uniforms.uSO.value = 1; }
+  return F;
+}
+// the building's own moment when the home side scores: the cannon fires, the coils strike; between, the coils crackle
+function wdArFx(st, side) { if (side === "h" && st.arFl) for (const e of st.arFl) e.op = 1.3; }
+function wdArTick(st, dt) {
+  if (!st.arFl) return; for (const e of st.arFl) e.op *= Math.pow(0.18, dt);
+  if (st.arCoils) for (const e of st.arCoils) if (Math.random() < dt * 0.6) e.op = Math.max(e.op, 0.45 + Math.random() * 0.3);
+}
 // ---- the war room: when several games are on, the board lives in a TV studio. A curved LED wall: the big screen in the
 // middle (the videos, the room's leaderboard, the fx cards) and a live tile for each game either side (both teams' colors,
 // logos, the score, the clock, who has the ball, the red zone, how many of the room's bets ride on it); the anchor desk; DJ
@@ -25061,14 +25392,16 @@ function wdRoomTile(t, W, H) {
   const gr = x.createLinearGradient(0, 0, W, 0); gr.addColorStop(0, wdCss(ca)); gr.addColorStop(0.48, wdCss(wdMix(ca, [0, 0, 0], 0.5))); gr.addColorStop(0.52, wdCss(wdMix(ch, [0, 0, 0], 0.5))); gr.addColorStop(1, wdCss(ch)); x.fillStyle = gr; x.fillRect(0, 0, W, H);
   x.fillStyle = "rgba(0,0,0,.42)"; x.fillRect(0, H - 62, W, 62);
   x.textAlign = "center"; x.textBaseline = "middle";
-  for (const [s, cx] of [["a", W * 0.22], ["h", W * 0.78]]) {
+  // basketball's scores run to three digits: the logos move out, the numbers come down a size
+  const L = t.st === "pre" ? 0 : Math.max(String(t.a.sc ?? "").length, String(t.h.sc ?? "").length), big = L >= 3, mid = L === 2;
+  for (const [s, cx] of [["a", W * (big || mid ? 0.15 : 0.22)], ["h", W * (big || mid ? 0.85 : 0.78)]]) {
     const tm = t[s], im = tm.lg && WD.logos && WD.logos[tm.lg];
     if (im && im.complete && im.naturalWidth) x.drawImage(im, cx - 58, 26, 116, 116); else { x.font = `900 60px "Barlow Condensed", Inter, sans-serif`; x.fillStyle = "#fff"; x.fillText(tm.ab, cx, 86); }
     x.font = `800 38px "Barlow Condensed", Inter, sans-serif`; x.fillStyle = "rgba(255,255,255,.92)"; x.fillText((tm.rk ? "#" + tm.rk + " " : "") + tm.ab, cx, 168);
     if (t.sit && t.sit.pos && String(t.sit.pos) === String(tm.id)) { x.fillStyle = "#ffc94d"; x.beginPath(); x.ellipse(cx + (s === "a" ? 76 : -76), 168, 13, 8, 0, 0, Math.PI * 2); x.fill(); }
   }
-  x.font = `900 108px "Barlow Condensed", Inter, sans-serif`; x.fillStyle = "#fff";
-  if (t.st !== "pre") { x.fillText(String(t.a.sc ?? ""), W * 0.43 - 12, 112); x.fillText(String(t.h.sc ?? ""), W * 0.57 + 12, 112); x.fillStyle = "rgba(255,255,255,.4)"; x.font = `900 60px "Barlow Condensed", Inter, sans-serif`; x.fillText("–", W / 2, 108); }
+  x.font = `900 ${big ? 72 : mid ? 96 : 108}px "Barlow Condensed", Inter, sans-serif`; x.fillStyle = "#fff";
+  if (t.st !== "pre") { x.fillText(String(t.a.sc ?? ""), big ? W * 0.385 : mid ? W * 0.365 : W * 0.43 - 12, 112); x.fillText(String(t.h.sc ?? ""), big ? W * 0.615 : mid ? W * 0.635 : W * 0.57 + 12, 112); x.fillStyle = "rgba(255,255,255,.4)"; x.font = `900 60px "Barlow Condensed", Inter, sans-serif`; if (!big) x.fillText("–", W / 2, 108); }
   x.font = `800 34px "Barlow Condensed", Inter, sans-serif`; x.fillStyle = live ? "#ff4d5e" : "rgba(255,255,255,.8)"; x.fillText(String(t.d || "").toUpperCase(), W / 2, H - 31);
   if (t.n) { const lb = `${t.n} BET${t.n > 1 ? "S" : ""}`; x.font = `800 26px "Barlow Condensed", Inter, sans-serif`; const w = x.measureText(lb).width + 26; x.fillStyle = "#ffc94d"; x.fillRect(W / 2 - w / 2, 12, w, 34); x.fillStyle = "#14100a"; x.fillText(lb, W / 2, 30); }
   if (t.sit && t.sit.rz && live) { x.strokeStyle = "#ff3045"; x.lineWidth = 12; x.strokeRect(6, 6, W - 12, H - 12); x.font = `900 26px "Barlow Condensed", Inter, sans-serif`; x.fillStyle = "#ff3045"; x.fillText("RED ZONE", W / 2, H - 82); }
@@ -25406,6 +25739,8 @@ function wdRink(T, V) {
   x.strokeStyle = "#1f4fb4"; x.lineWidth = 0.06 * k; x.beginPath(); x.arc(X(0), Y(0), 4.57 * k, 0, Math.PI * 2); x.stroke();
   x.strokeStyle = "#c8102e"; for (const [fx, fz] of [[-20.12, -6.71], [-20.12, 6.71], [20.12, -6.71], [20.12, 6.71]]) { x.beginPath(); x.arc(X(fx), Y(fz), 4.57 * k, 0, Math.PI * 2); x.stroke(); x.fillStyle = "#c8102e"; x.beginPath(); x.arc(X(fx), Y(fz), 0.3 * k, 0, Math.PI * 2); x.fill(); }
   x.fillStyle = "rgba(80,140,230,.55)"; for (const s of [-1, 1]) { x.beginPath(); x.arc(X(s * 27.15), Y(0), 1.83 * k, s > 0 ? Math.PI / 2 : -Math.PI / 2, s > 0 ? Math.PI * 1.5 : Math.PI / 2, false); x.fill(); }
+  // a medallion in the home color at center ice under the logo, so a white logo still reads on the ice
+  if (V.ar) { x.fillStyle = wdCss(T.h.col, 0.92); x.beginPath(); x.arc(X(0), Y(0), 4.3 * k, 0, Math.PI * 2); x.fill(); x.strokeStyle = wdCss(wdLift(T.h.alt, 0.4)); x.lineWidth = 0.18 * k; x.stroke(); }
   x.globalAlpha = 0.85; wdTeamArt(x, T.h, X(0), Y(0), 7 * k); x.globalAlpha = 1;
   x.restore();
   return c;
@@ -25476,8 +25811,8 @@ function wdTex(THREE, canvas, aniso) { const t = new THREE.CanvasTexture(canvas)
 // ---- build a venue ----
 function wdBuild(L, R) {
   if (R.kind === "room") return wdRoomBuild(L, R);
-  const fs = R.sport === "nfl" && R.kind === "stadium" ? wdFbSpec(R) : null;
-  const THREE = L.THREE, pf = R.sport === "mlb" ? wdPark(R) : null, V = fs ? wdFbVenue(fs) : pf ? Object.assign({}, WD_V.mlb, { dome: pf.roof !== "open" ? 1 : 0, towers: pf.roof !== "open" ? [] : WD_V.mlb.towers }) : WD_V[R.sport];
+  const fs = R.sport === "nfl" && R.kind === "stadium" ? wdFbSpec(R) : null, as = (R.sport === "nba" || R.sport === "nhl") && R.kind === "stadium" ? wdArSpec(R) : null;
+  const THREE = L.THREE, pf = R.sport === "mlb" ? wdPark(R) : null, V = fs ? wdFbVenue(fs) : as ? wdArVenue(as, R.sport) : pf ? Object.assign({}, WD_V.mlb, { dome: pf.roof !== "open" ? 1 : 0, towers: pf.roof !== "open" ? [] : WD_V.mlb.towers }) : WD_V[R.sport];
   WD.V = V; const C = pf ? wdParkContour(pf) : wdContour(V), wallH = pf ? wdParkWall(pf) : null;
   if (pf) { WD.V = V; const cp = wdNorm(C, 0.125), w = 50, h = 28.1; V.jumbo = { p: [cp[0] + cp[2] * 31, 16 + h / 2 + 1.5, cp[1] + cp[3] * 31], face: [-cp[2], 0, -cp[3]], w, h, legs: 0, base: 16 }; }
   const scene = new THREE.Scene(), cam = new THREE.PerspectiveCamera(V.board.f, innerWidth / innerHeight, 0.5, 4000), T = R.T, aniso = Math.min(8, WD.r.capabilities.getMaxAnisotropy());
@@ -25485,10 +25820,10 @@ function wdBuild(L, R) {
   const st = { THREE, scene, cam, V, C, R, mats: [], tex: [], disp: [], t0: performance.now(), look: new THREE.Vector3(...V.board.l), fly: null, hold: null, glows: [], fw: null, flash: 0, fc: [1, 1, 1], wave: 0, burst: 0, dim: 0 };
   const v3 = (a) => new THREE.Vector3(a[0], a[1], a[2]);
   const keep = (m) => { st.mats.push(m); return m; };
-  // a football stadium's stage takes a slot of the building: the decks over the bowl give way to it there
-  if (fs) { st.deckSpot = wdDeckSpotFb(st); const gap = st.deckSpot.gap;
+  // a stadium's or an arena's stage takes a slot of the building: the decks over the bowl give way to it there
+  if (fs || as) { st.deckSpot = fs ? wdDeckSpotFb(st) : wdDeckSpotAr(st); const gap = st.deckSpot.gap;
     for (const q of V.tiers.slice(1)) { const k0 = q.keep; q.keep = (x, z) => (!k0 || k0(x, z)) && !gap(x, z); }
-    V.ribs = V.ribs.map((r, i) => (i ? Object.assign({}, r, { keep: (x, z) => (!r.keep || r.keep(x, z)) && !gap(x, z) }) : r)); }
+    V.ribs = V.ribs.map((r, i) => (i || as ? Object.assign({}, r, { keep: (x, z) => (!r.keep || r.keep(x, z)) && !gap(x, z) }) : r)); }
   // the sky (or the arena's dark)
   const sky = new THREE.Mesh(new THREE.SphereGeometry(3000, 32, 16), keep(new THREE.ShaderMaterial({ side: THREE.BackSide, depthWrite: false,
     uniforms: { uT: { value: 0 }, uArena: { value: V.roof || V.dome ? 1 : 0 }, uTint: { value: v3(C1) }, uFc: { value: v3([1, 1, 1]) }, uFlash: { value: 0 } },
@@ -25498,8 +25833,9 @@ function wdBuild(L, R) {
   const ground = new THREE.Mesh(new THREE.CircleGeometry(Math.max(V.A, V.B) * 3, 48), new THREE.MeshBasicMaterial({ color: new THREE.Color().setRGB(...(V.roof && !V.dome ? [0.035, 0.04, 0.05] : [0.06, 0.14, 0.07]), THREE.LinearSRGBColorSpace) }));
   ground.rotation.x = -Math.PI / 2; ground.position.set(V.cx, -0.05, V.cz); scene.add(ground);
   // the field
-  const art = R.sport === "nfl" ? wdFieldNFL(T) : R.sport === "mlb" ? wdFieldMLB(V, C, pf) : R.sport === "nba" ? wdCourt(T, V) : wdRink(T, V);
-  const ftex = wdTex(THREE, art, aniso); st.tex.push(ftex); st.fieldArt = () => (R.sport === "nfl" ? wdFieldNFL(T) : R.sport === "nba" ? wdCourt(T, V) : R.sport === "nhl" ? wdRink(T, V) : null);
+  const court = () => (as ? wdArCourt(T, V, as) : wdCourt(T, V));
+  const art = R.sport === "nfl" ? wdFieldNFL(T) : R.sport === "mlb" ? wdFieldMLB(V, C, pf) : R.sport === "nba" ? court() : wdRink(T, V);
+  const ftex = wdTex(THREE, art, aniso); st.tex.push(ftex); st.fieldArt = () => (R.sport === "nfl" ? wdFieldNFL(T) : R.sport === "nba" ? court() : R.sport === "nhl" ? wdRink(T, V) : null);
   const [fw, fh, fx0, fz0] = V.field, field = new THREE.Mesh(new THREE.PlaneGeometry(fw, fh), new THREE.MeshBasicMaterial({ map: ftex }));
   field.rotation.x = -Math.PI / 2; field.position.set(fx0, 0, fz0); scene.add(field); st.field = field;
   // the decks
@@ -25574,7 +25910,17 @@ function wdBuild(L, R) {
   const dark = new THREE.MeshBasicMaterial({ color: new THREE.Color().setRGB(0.03, 0.032, 0.04, THREE.LinearSRGBColorSpace) });
   const trim = new THREE.MeshBasicMaterial({ color: new THREE.Color().setRGB(...C2, THREE.LinearSRGBColorSpace) });
   const jg = new THREE.Group(); jg.position.set(...J.p); scene.add(jg); st.jg = jg;
-  if (J.hung) {
+  if (J.hung && J.ring) {
+    const NF = 8, R0 = J.R, sa = Math.PI / 4;
+    for (let i = 0; i < NF; i++) { const a = i * sa, f = new THREE.Group(); f.rotation.y = a; jg.add(f);
+      const fr = new THREE.Mesh(new THREE.BoxGeometry(J.w + 0.25, J.h + 0.6, 0.5), dark); fr.position.z = R0 - 0.27; f.add(fr);
+      const so = screen(J.w, J.h); so.position.z = R0 + 0.01; f.add(so); const si = screen(J.w, J.h); si.position.z = R0 - 0.55; si.rotation.y = Math.PI; f.add(si); }
+    const rg = new THREE.CylinderGeometry(R0 + 0.02, R0 + 0.02, 0.8, 48, 1, true), ru = (2 * Math.PI * R0) / (0.8 * (4096 / 96)); rg.attributes.uv.array.forEach((v, i, a) => { if (i % 2 === 0) a[i] = (1 - v) * ru; });
+    const rb = new THREE.Mesh(rg, new THREE.MeshBasicMaterial({ map: rtex })); rb.position.y = -J.h / 2 - 0.8; jg.add(rb);
+    for (let i = 0; i < 4; i++) { const a = (i / 4) * Math.PI * 2 + sa / 2, cab = new THREE.Mesh(new THREE.CylinderGeometry(0.06, 0.06, V.roof - J.p[1], 4), dark); cab.position.set(Math.sin(a) * R0, (V.roof - J.p[1]) / 2, Math.cos(a) * R0); jg.add(cab); }
+    st.jface = (camPos) => { const d = camPos ? camPos.clone().sub(jg.position) : new THREE.Vector3(0, 0, 1); const a = Math.round(Math.atan2(d.x, d.z) / sa) * sa;
+      return { c: new THREE.Vector3(jg.position.x + Math.sin(a) * (R0 + 0.01), jg.position.y, jg.position.z + Math.cos(a) * (R0 + 0.01)), n: new THREE.Vector3(Math.sin(a), 0, Math.cos(a)), w: J.w, h: J.h }; };
+  } else if (J.hung) {
     const box = new THREE.Mesh(new THREE.BoxGeometry(J.w + 0.6, J.h + 0.6, J.w + 0.6), dark); jg.add(box);
     for (let i = 0; i < 4; i++) { const s = screen(J.w, J.h), a = (i / 4) * Math.PI * 2; s.position.set(Math.sin(a) * (J.w / 2 + 0.31), 0, Math.cos(a) * (J.w / 2 + 0.31)); s.rotation.y = a; jg.add(s); }
     const ring = new THREE.Mesh(new THREE.CylinderGeometry(J.w * 0.78, J.w * 0.78, 0.9, 40, 1, true), new THREE.MeshBasicMaterial({ map: rtex })); ring.position.y = -J.h / 2 - 1; jg.add(ring);
@@ -25589,7 +25935,7 @@ function wdBuild(L, R) {
     if (J.legs) for (const s2 of [-1, 1]) { const leg = new THREE.Mesh(new THREE.BoxGeometry(2, J.p[1], 2), dark); leg.position.set(s2 * J.w * 0.3, -J.p[1] / 2, -0.5); jg.add(leg); }
     st.jface = () => ({ c: jg.localToWorld(new THREE.Vector3(0, 0, 1.02)), n: n.clone(), w: J.w, h: J.h });
   }
-  if (fs) { try { wdFbBuild(st, fs); } catch (e) { console.warn("stadium", e); } wdDeckBuild(st, st.deckSpot); }
+  if (fs || as) { try { if (fs) wdFbBuild(st, fs); else wdArBuild(st, as); } catch (e) { console.warn(fs ? "stadium" : "arena", e); } wdDeckBuild(st, st.deckSpot); }
   else {
   // the DJ's suite, on the far side, lit up in purple
   {
@@ -25619,10 +25965,12 @@ function wdBuild(L, R) {
     const pts = new THREE.Points(g, m); pts.frustumCulled = false; scene.add(pts); st.fw = { N, pos, col, vel: new Float32Array(N * 3), life: new Float32Array(N), base: new Float32Array(N * 3), g, i: 0 }; }
   try { wdPartyBuild(st); } catch (e) { console.warn("party", e); }
   if (fs) try { wdFbFans(st); } catch (e) { console.warn("fans", e); }
+  if (as) try { wdArFans(st); } catch (e) { console.warn("fans", e); }
   // the shots
   const sh = (p, l, f) => ({ p: v3(p), l: v3(l), f });
   st.shots = { board: sh(V.board.p, V.board.l, V.board.f) };
   if (fs) st.shots.cel = sh([-24, 9, 26], [14, 30, -80], 58);
+  if (as) st.shots.cel = V.rink ? sh([-24, 3.4, 12], [16, 15, -30], 58) : sh([-14, 2.6, 8], [10, 12, -22], 58);
   const df = st.djFace(), dd = df.w * 1.12;
   st.shots.suite = { p: df.c.clone().add(df.n.clone().multiplyScalar(dd)).add(new THREE.Vector3(0, df.h * 0.12, 0)), l: df.c.clone().add(new THREE.Vector3(0, df.h * 0.1, 0)), f: 42 };
   st.hold = st.holdShot = st.shots.board;
@@ -25835,7 +26183,7 @@ function wdLoop(now) {
   if (st.rtex) st.rtex.offset.x = (st.rtex.offset.x + dt * (WD.ribAt ? 0.05 : 0.025)) % 1;
   const on = WD.mode === "dj"; for (const b of st.beams) { b.bm.material.opacity += ((on ? 0.08 : 0) - b.bm.material.opacity) * Math.min(1, dt * 3); b.piv.rotation.z = Math.sin(t * 1.3 + b.s) * 0.7 * b.s; b.piv.rotation.x = 0.9 + Math.sin(t * 0.9 + b.s * 2) * 0.35; }
   if (WD.glow) { const o = Math.min(0.5, st.flash * 0.32) * (WD.mode === "board" ? 1 : 0); if (Math.abs(o - (WD.glowO || 0)) > 0.015) { WD.glowO = o; WD.glow.style.opacity = o.toFixed(3); WD.glow.style.setProperty("--wfc", st.fc.map((v) => Math.round(v * 255)).join(",")); } }
-  wdFansTick(st, t); if (st.room) wdRoomTick(st, dt);
+  wdFansTick(st, t); if (st.room) wdRoomTick(st, dt); if (st.arFl) wdArTick(st, dt);
   wdFwTick(st, dt); wdCam(st, now); wdProject(st); wdVidTick(st, now); wdDeckCam(st, now);
   WD.r.render(st.scene, st.cam);
 }
@@ -25858,6 +26206,7 @@ function wdPoll() {
 }
 function wdScore(side, d) {
   const st = WD.st; if (!st) return; const t = st.R.T[side], big = st.R.sport === "nba" ? d >= 3 : true;
+  if (st.arFl && big) wdArFx(st, side);
   st.fc = wdLift(t.col, 0.3); st.flash = big ? 1.4 : 0.7; st.burst = 0.35; wdFansCheer(st, side === "h" ? 0 : 1, big ? 1.6 : 1); wdDeckAct(st, side === "h" ? "cheer" : "sad", big ? 4500 : 2500); if (big) { st.wave = 1.2; wdShow(st, [wdLift(t.col, 0.35), wdLift(t.alt, 0.4)], st.R.sport === "nba" ? 3 : 6, 2400); }
 }
 function wdBack(now) {
