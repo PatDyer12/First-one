@@ -6675,6 +6675,10 @@ body.v2w.v2w-tex #pipVid, body.v2w.v2w-tex #jbWash, body.v2w.v2w-tex #djCv, body
 body.v2w .cs.v2x { background: radial-gradient(ellipse 78% 72% at 50% 52%, rgba(2,3,6,.36), rgba(2,3,6,.72) 100%); }
 body.v2w .cs.v2x.v2miss { background: radial-gradient(ellipse 78% 72% at 50% 52%, rgba(6,2,4,.4), rgba(4,2,4,.82) 100%); }
 body.v2w.v2w-show .app, body.v2w.v2w-show #roomTvQr { opacity: 0; transition: opacity .5s; pointer-events: none; }
+/* in the building the payout sits over a lit crowd (gold rays, coins): a dark pool under it and an edge on the figures */
+body.v2w .cs.v2x .v2-pay { position: relative; isolation: isolate; }
+body.v2w .cs.v2x .v2-pay::before { content: ""; position: absolute; inset: -70px -120px -50px -90px; z-index: -1; pointer-events: none; background: radial-gradient(closest-side, rgba(3,4,8,.66), rgba(3,4,8,.34) 60%, transparent); }
+body.v2w .cs.v2x .v2-amt, body.v2w .cs.v2x .v2-usd { filter: drop-shadow(0 3px 0 rgba(0,0,0,.5)) drop-shadow(0 0 22px rgba(0,0,0,.75)); }
 </style>
 </head>
 <body>
@@ -13201,7 +13205,7 @@ void main(){
       X.go(m, "go", 0); X.sfx("rev", 0.4, 0);
       for (let i = 0; i < n; i++) { X.at(900 + i * 300, () => { const r = m.querySelectorAll(".reel")[i]; if (r) r.classList.add("stop"); }); X.sfx("slam", 0.5, 900 + i * 300); }
       const end = 900 + n * 300;
-      X.go(m, "win", end); X.at(end, () => { X.gl("coins", 140, X.W * 0.5); X.burst(1, null, X.H * 0.45, 160, true); }); X.sfx("payout", 0.0001, 0); X.at(end, () => playSfx("jackpot", 0.6)); X.flash(end);
+      X.go(m, "win", end); X.at(end, () => { X.gl("coins", 140, X.W * 0.5); X.burst(1, null, X.H * 0.45, 160, true); }); X.at(end, () => playSfx("jackpot", 0.6)); X.flash(end);
       X.word("Jackpot", "gold", end + 100, 720);
       return Math.max(3200, end + 1300);
     } },
@@ -13795,7 +13799,7 @@ void main(){
   // ---------- sheets ----------
   function openSheet(id) { $(id).hidden = false; }
   // keep every open screen current: when a new version is up, reload it (never mid-form or mid-animation)
-  const BUILD = "20261028070139";
+  const BUILD = "20261028074230";
   function checkBuild() {
     if (BUILD === "dev") return;
     fetch("version.json?t=" + Date.now(), { cache: "no-store" }).then((r) => (r.ok ? r.json() : null)).then((j) => {
