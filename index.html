@@ -6436,6 +6436,162 @@ body.tv.pplg .roomtv:not([hidden]) span { align-self: start; }
 @keyframes v2Hdr { 0% { opacity: 0; transform: translateY(40px) skewX(-10deg); } 100% { opacity: 1; transform: skewX(-10deg); } }
 .sg-mitt { width: 360px !important; }
 .sg-towers { width: 1920px; height: 1080px; }
+
+/* ================= V2: the board ================= */
+/* One broadcast look: near-black slabs with a hairline, team colors as bars and fills, status by color (green winning,
+   red losing, amber close, grey not started), condensed numerals for everything you read from the couch */
+body.v2b { --v2-p1: #10141b; --v2-p2: #0a0d12; --v2-line: rgba(255,255,255,.075); --v2-ink: #eef2f7; --v2-ink2: rgba(238,242,247,.68); --v2-ink3: rgba(238,242,247,.44);
+  --v2-win: #3ee08f; --v2-loss: #ff4d5e; --v2-even: #ffc94d; --v2-live: #ff3b4e; }
+
+/* ---- the header: a slim broadcast bar (shapes and color only; sizes stay so it holds one line) ---- */
+body.v2b.tv header.top { background: linear-gradient(180deg, rgba(5,7,11,.96), rgba(5,7,11,.8)); box-shadow: 0 1px 0 var(--v2-line), 0 10px 30px rgba(0,0,0,.35); }
+body.v2b.tv header.top h1 span { color: var(--v2-even); }
+body.v2b.tv header.top .chip, body.v2b.tv header.top .btn { border-radius: 7px; border: 0; box-shadow: inset 0 0 0 1px var(--v2-line); background: rgba(255,255,255,.04); }
+body.v2b.tv header.top .modechip { border-radius: 4px; background: linear-gradient(90deg, rgba(255,59,78,.16), rgba(255,59,78,.03)); box-shadow: inset 3px 0 0 var(--v2-live), inset 0 0 0 1px rgba(255,59,78,.28); }
+body.v2b.tv header.top .modechip.pulse { background: linear-gradient(90deg, rgba(62,224,143,.14), rgba(62,224,143,.03)); box-shadow: inset 3px 0 0 var(--v2-win), inset 0 0 0 1px rgba(62,224,143,.28); }
+body.v2b.tv header.top .seg { border-radius: 8px; background: rgba(255,255,255,.035); box-shadow: inset 0 0 0 1px var(--v2-line); }
+body.v2b.tv header.top .clock { font-family: var(--f-num); font-weight: 700; letter-spacing: .04em; }
+
+/* ---- a bet ticket ---- */
+body.v2b .ob-bet { border: 0; border-radius: 12px; padding: 14px 16px 18px 24px; column-gap: 16px; overflow: hidden;
+  background: linear-gradient(180deg, var(--ta, var(--c)), var(--th, var(--c))) 0 0 / 7px 100% no-repeat, linear-gradient(180deg, var(--v2-p1), var(--v2-p2));
+  box-shadow: inset 0 0 0 1px var(--v2-line), 0 12px 28px rgba(0,0,0,.38); }
+body.v2b .ob-bet.k-w { box-shadow: inset 0 0 0 1px rgba(62,224,143,.32), 0 0 0 1px rgba(62,224,143,.08), 0 12px 30px rgba(0,0,0,.4), 0 0 34px rgba(62,224,143,.08); }
+body.v2b .ob-bet.k-l { box-shadow: inset 0 0 0 1px rgba(255,77,94,.3), 0 12px 30px rgba(0,0,0,.4); }
+body.v2b .ob-bet .ob-who b { font: 800 15px/1 var(--f-ui); letter-spacing: .14em; text-transform: uppercase; }
+body.v2b .ob-bet .ob-pick .t, body.v2b .ob-grp .ob-pick .t { font: 800 38px/1.02 var(--f-num); letter-spacing: .005em; color: #fff; }
+body.v2b .ob-meta { font: 600 16px/1.3 var(--f-ui); color: var(--v2-ink2); }
+body.v2b .ob-bet > .edge, body.v2b .ob-grp > .edge { opacity: .55; }
+/* the state on the right: a tinted block, the word over the number */
+body.v2b .ob-st { min-width: 168px; padding: 10px 16px 11px; border-radius: 10px; text-align: center; background: rgba(255,255,255,.04); box-shadow: inset 0 0 0 1px var(--v2-line); }
+body.v2b .ob-st em { display: block; font: 800 12px/1 var(--f-ui); font-style: normal; letter-spacing: .24em; text-transform: uppercase; color: var(--v2-ink3); }
+body.v2b .ob-st b { display: block; margin-top: 6px; font: 800 30px/1 var(--f-num); color: #fff; letter-spacing: .01em; }
+body.v2b .ob-st.k-w { background: linear-gradient(180deg, rgba(62,224,143,.18), rgba(62,224,143,.06)); box-shadow: inset 0 0 0 1px rgba(62,224,143,.38); }
+body.v2b .ob-st.k-w em { color: var(--v2-win); }
+body.v2b .ob-st.k-l { background: linear-gradient(180deg, rgba(255,77,94,.18), rgba(255,77,94,.06)); box-shadow: inset 0 0 0 1px rgba(255,77,94,.38); }
+body.v2b .ob-st.k-l em { color: var(--v2-loss); }
+body.v2b .ob-st.k-e { background: linear-gradient(180deg, rgba(255,201,77,.16), rgba(255,201,77,.05)); box-shadow: inset 0 0 0 1px rgba(255,201,77,.36); }
+body.v2b .ob-st.k-e em { color: var(--v2-even); }
+body.v2b .ob-st .tl { position: absolute; right: 8px; top: 8px; width: 9px; height: 9px; }
+body.v2b .ob-st { position: relative; }
+/* the progress line along the bottom */
+body.v2b .ob-bet > .meter, body.v2b .ob-grp > .meter { position: absolute; left: 7px; right: 0; bottom: 0; height: 5px; margin: 0; border-radius: 0; background: rgba(255,255,255,.06); }
+body.v2b .meter i { border-radius: 0; }
+/* the row of chips on top */
+body.v2b .fx-row { gap: 8px; }
+body.v2b .bt-chip { border-radius: 6px; padding: 5px 10px 4px; font: 800 12px/1 var(--f-ui); letter-spacing: .14em; text-transform: uppercase; }
+body.v2b .fx-pay { font: 700 13px/1 var(--f-ui); letter-spacing: .14em; text-transform: uppercase; color: var(--v2-ink3); }
+body.v2b .fx-pay b { font: 800 22px/1 var(--f-num); letter-spacing: .01em; color: var(--v2-win); margin-left: 4px; }
+/* avatars: flat discs with a hairline */
+body.v2b .rb-av { background: var(--c); box-shadow: 0 0 0 2px rgba(5,7,11,.9), inset 0 -6px 12px rgba(0,0,0,.18); font-family: var(--f-display); font-weight: 900; color: #fff; text-shadow: 0 2px 0 rgba(0,0,0,.25); }
+
+/* ---- a group ride ---- */
+body.v2b .ob-grp { border: 0; border-radius: 14px; overflow: hidden; padding: 16px 16px 18px 24px;
+  background: var(--gb, linear-gradient(90deg, var(--c), var(--c))) 0 0 / 100% 4px no-repeat, linear-gradient(180deg, var(--c), var(--c)) 0 0 / 7px 100% no-repeat, linear-gradient(180deg, #121720, #0a0d12);
+  box-shadow: inset 0 0 0 1px var(--v2-line), 0 14px 32px rgba(0,0,0,.42); }
+body.v2b .ob-grp .ob-gring { display: none; }
+body.v2b .ob-gtag { gap: 10px; }
+body.v2b .ob-gsc { border-radius: 6px; padding: 6px 12px 5px; font: 900 14px/1 var(--f-display); letter-spacing: .2em; background: rgba(255,255,255,.08); box-shadow: inset 0 0 0 1px rgba(255,255,255,.12); color: #fff; }
+body.v2b .ob-gn { font: 900 28px/1 var(--f-num); color: #fff; }
+body.v2b .ob-gl { margin-top: 14px; display: grid; gap: 8px; }
+body.v2b .ob-gm { border-radius: 10px; padding: 10px 14px 10px 16px; border: 0; background: linear-gradient(180deg, var(--c), var(--c)) 0 0 / 4px 100% no-repeat, rgba(255,255,255,.035); box-shadow: inset 0 0 0 1px var(--v2-line); }
+body.v2b .ob-gmn b { font: 800 17px/1 var(--f-ui); letter-spacing: .14em; text-transform: uppercase; color: var(--c); }
+body.v2b .ob-gmn small { border-radius: 5px; padding: 4px 8px 3px; font: 800 11px/1 var(--f-ui); letter-spacing: .14em; text-transform: uppercase; background: rgba(255,255,255,.07); color: var(--v2-ink2); }
+body.v2b .ob-gmp { font: 600 16px/1.3 var(--f-ui); color: var(--v2-ink2); }
+body.v2b .ob-gmp b { font: 800 18px/1 var(--f-num); color: #fff; }
+body.v2b .ob-gmr em { font: 800 11px/1 var(--f-ui); font-style: normal; letter-spacing: .2em; text-transform: uppercase; color: var(--v2-ink3); }
+body.v2b .ob-gmr b { font: 800 30px/1 var(--f-num); color: #fff; }
+
+/* ---- head to head: two sides split by a VS ---- */
+body.v2b .ob-h2h { border: 0; border-radius: 16px; padding: 14px 12px 12px; background: linear-gradient(90deg, color-mix(in srgb, var(--lc) 10%, transparent), transparent 45%, transparent 55%, color-mix(in srgb, var(--rc) 10%, transparent)); box-shadow: inset 0 0 0 1px var(--v2-line); }
+body.v2b .ob-vsl { font: 800 13px/1 var(--f-ui); letter-spacing: .3em; text-transform: uppercase; color: var(--v2-ink3); }
+body.v2b .ob-vs { border-radius: 6px; padding: 6px 14px 5px; font: 900 18px/1 var(--f-display); letter-spacing: .2em; color: #fff; background: linear-gradient(90deg, var(--lc), var(--rc)); box-shadow: 0 6px 16px rgba(0,0,0,.4); }
+
+/* ---- a game's header in the bets column: the matchup bar ---- */
+body.v2b .ob-strip { border-radius: 10px; padding: 10px 14px; background: linear-gradient(90deg, rgba(255,255,255,.06), rgba(255,255,255,.02)); box-shadow: inset 0 0 0 1px var(--v2-line); }
+body.v2b .ob-strip .ob-tm b { font: 900 24px/1 var(--f-display); letter-spacing: .06em; }
+body.v2b .ob-strip .ob-at { color: var(--v2-ink3); }
+body.v2b .ob-clk.s-live { font: 800 14px/1 var(--f-ui); letter-spacing: .2em; text-transform: uppercase; color: var(--v2-live); }
+body.v2b .ob-hd b { font: 800 14px/1 var(--f-ui); letter-spacing: .34em; text-transform: uppercase; color: var(--v2-ink3); }
+body.v2b .ob-hd .num { border-radius: 6px; background: rgba(255,255,255,.08); font: 800 16px/1 var(--f-num); padding: 4px 9px 3px; }
+
+/* ---- a game card: the broadcast scorebug on top ---- */
+body.v2b .rb-g { border: 0; border-radius: 14px; overflow: hidden; background: linear-gradient(180deg, var(--v2-p1), var(--v2-p2)); box-shadow: inset 0 0 0 1px var(--v2-line), 0 16px 40px rgba(0,0,0,.45); }
+body.v2b .rb-gh { position: relative; box-shadow: inset 0 -1px 0 var(--v2-line); }
+body.v2b .rb-gh .clk { border-radius: 4px; padding: 6px 10px 5px; font: 800 14px/1 var(--f-num); letter-spacing: .12em; text-transform: uppercase; background: rgba(0,0,0,.55); box-shadow: inset 0 0 0 1px var(--v2-line); }
+body.v2b .rb-gh .clk.on { color: #fff; box-shadow: inset 0 0 0 1px rgba(255,59,78,.55); }
+body.v2b .rb-gh .clk.on::before { background: var(--v2-live); animation: v2Live 1.4s ease-in-out infinite; }
+@keyframes v2Live { 50% { opacity: .3; } }
+/* the big game: one row, team slab | score | clock | score | team slab */
+body.v2b .rb-g.hero .rb-gh, body.v2b.tv .rb-games.primeg .rb-g.hero .rb-gh { grid-template-columns: minmax(0, 1fr) auto minmax(0, 1fr); column-gap: 0; row-gap: 0; padding: 0; background: #04060a; }
+body.v2b .rb-g.hero > .rb-gh { margin: -18px -20px 0; }
+body.v2b .rb-g.hero .rb-gh .mid { grid-column: 2; grid-row: 1; flex-direction: column; gap: 6px; padding: 0 14px; }
+body.v2b .rb-g.hero .rb-gh .tm { position: relative; align-self: stretch; min-height: 86px; gap: 12px; padding-left: 16px;
+  background: linear-gradient(90deg, color-mix(in srgb, var(--ca, #333) 94%, #000), color-mix(in srgb, var(--ca, #333) 58%, #04060a)); box-shadow: inset 0 -4px 0 var(--ra, var(--ca)); }
+body.v2b .rb-g.hero .rb-gh .tm.h { padding-left: 0; padding-right: 16px;
+  background: linear-gradient(270deg, color-mix(in srgb, var(--ch, #333) 94%, #000), color-mix(in srgb, var(--ch, #333) 58%, #04060a)); box-shadow: inset 0 -4px 0 var(--rh, var(--ch)); }
+/* a sheen across the slab */
+body.v2b .rb-g.hero .rb-gh .tm::before { content: ""; position: absolute; inset: 0 0 50% 0; background: linear-gradient(180deg, rgba(255,255,255,.1), rgba(255,255,255,0)); pointer-events: none; }
+body.v2b .rb-g.hero .rb-gh .tl { width: 52px; height: 52px; }
+body.v2b .rb-g.hero .rb-gh .ab { font-size: 15px; gap: 5px; }
+body.v2b .rb-gh .tm .nmx { font: 900 30px/1 var(--f-display); letter-spacing: .05em; color: #fff; text-shadow: 0 2px 0 rgba(0,0,0,.35); }
+body.v2b .rb-gh .tm .sub em { font: 700 13px/1 var(--f-num); letter-spacing: .08em; color: rgba(255,255,255,.62); }
+body.v2b .rb-g.hero .rb-gh .tm .sc { align-self: stretch; display: flex; align-items: center; justify-content: center; min-width: 78px; padding: 0 10px; margin: 0;
+  background: rgba(3,5,9,.74); box-shadow: inset 0 -4px 0 rgba(255,255,255,.06); font: 800 56px/1 var(--f-num); letter-spacing: 0; color: rgba(255,255,255,.6); }
+body.v2b .rb-g.hero .rb-gh .tm.a .sc { margin-left: auto; }
+body.v2b .rb-g.hero .rb-gh .tm.h .sc { margin-right: auto; }
+body.v2b .rb-g.hero .rb-gh .tm.lead .sc { color: #fff; }
+body.v2b .rb-g.hero .rb-gh .tm.lead .sc::after { content: ""; position: absolute; }
+/* every other game: a slimmer version of the same bug */
+body.v2b .rb-g:not(.hero) .rb-gh { background: linear-gradient(90deg, color-mix(in srgb, var(--ca, #222) 46%, #05070b), #06080c 50%, color-mix(in srgb, var(--ch, #222) 46%, #05070b)); }
+body.v2b .rb-g:not(.hero) .rb-gh .sc { font-family: var(--f-num); font-weight: 800; }
+
+/* ---- the ballpark diamond ---- */
+body.v2b .dm-svg.v2 { filter: drop-shadow(0 14px 26px rgba(0,0,0,.5)); }
+body.v2b .dm-svg.v2 .dm-base { fill: #f6f4ee; stroke: rgba(0,0,0,.4); stroke-width: .4; }
+body.v2b .dm-svg.v2 .dm-base.on { fill: #ffd34d; stroke: #fff; stroke-width: .8; filter: drop-shadow(0 0 3px #ffd34d) drop-shadow(0 0 7px rgba(255,211,77,.7)); }
+body.v2b .dm-run { fill: none; stroke: #ffd34d; stroke-width: .9; transform-box: fill-box; transform-origin: center; animation: v2Run 1.8s ease-out infinite; }
+@keyframes v2Run { 0% { transform: scale(.45); opacity: .95; } 100% { transform: scale(1.5); opacity: 0; } }
+body.v2b .dm-fls { fill: #fff; opacity: 0; animation: v2Flash 5s steps(1) infinite; }
+@keyframes v2Flash { 0%, 100% { opacity: 0; } 3% { opacity: .9; } 5% { opacity: 0; } 61% { opacity: .7; } 62.5% { opacity: 0; } }
+body.v2b .dm-cnt i.on.b { background: var(--v2-win); }
+body.v2b .dm-cnt i.on.s { background: var(--v2-even); }
+body.v2b .dm-cnt i.on.o { background: var(--v2-loss); }
+body.v2b .dm-inn { font-family: var(--f-num); }
+body.v2b .dm-last { border-radius: 8px; padding: 9px 12px; background: rgba(255,255,255,.04); box-shadow: inset 0 0 0 1px var(--v2-line); color: var(--v2-ink); }
+body.v2b .dm-pp { border-radius: 8px; padding: 6px 10px; background: rgba(255,255,255,.035); box-shadow: inset 0 0 0 1px var(--v2-line); }
+body.v2b .dm-ls { border-radius: 8px; overflow: hidden; }
+/* the ballpark behind the board: the wall's numbers sat under the bets */
+body.v2b #bfield text { display: none; }
+
+/* ---- the leaderboard: broadcast standings ---- */
+body.v2b #rbLb .rb-sec.lb { border: 0; border-radius: 16px; background: linear-gradient(180deg, var(--v2-p1), var(--v2-p2)); box-shadow: inset 0 0 0 1px var(--v2-line), 0 16px 40px rgba(0,0,0,.45); }
+body.v2b #rbLb .rb-sec.lb h3 { font: 800 14px/1 var(--f-ui); letter-spacing: .34em; color: var(--v2-ink3); }
+body.v2b #rbLb .rb-lr { border: 0; border-radius: 10px; padding-left: 10px; background: linear-gradient(180deg, var(--c), var(--c)) 0 0 / 4px 100% no-repeat, rgba(255,255,255,.03); box-shadow: inset 0 0 0 1px var(--v2-line); }
+body.v2b #rbLb .rb-lr:first-of-type { background: linear-gradient(180deg, #ffd36b, #c98a1f) 0 0 / 4px 100% no-repeat, linear-gradient(90deg, rgba(255,211,107,.12), rgba(255,211,107,.02)); box-shadow: inset 0 0 0 1px rgba(255,211,107,.3); }
+body.v2b #rbLb .rb-lr .rk { font: 900 20px/1 var(--f-num); color: var(--v2-ink3); }
+body.v2b #rbLb .rb-lr .nm b { font: 800 18px/1 var(--f-ui); letter-spacing: .06em; text-transform: uppercase; }
+body.v2b #rbLb .rb-lr .net { font: 800 24px/1 var(--f-num); }
+body.v2b #rbLb .rb-lr .lv em { font: 700 10px/1 var(--f-ui); letter-spacing: .08em; color: var(--v2-ink3); }
+
+/* ---- the ticker: a bottom line ---- */
+body.v2b.tv .ticker { background: linear-gradient(180deg, #07090d, #040508); box-shadow: 0 -1px 0 var(--v2-line), 0 -10px 30px rgba(0,0,0,.4); }
+body.v2b .tk-lbl { background: var(--v2-live); color: #fff; font: 900 20px/1 var(--f-display); letter-spacing: .14em; clip-path: polygon(0 0, 100% 0, calc(100% - 14px) 100%, 0 100%); padding-right: 30px; }
+body.v2b .tk-lbl .dot { background: #fff; }
+body.v2b .tk-g, body.v2b .tk-a { border-radius: 4px; }
+body.v2b .tk-sep { width: 2px; height: 46%; background: rgba(255,255,255,.12); transform: skewX(-18deg); border-radius: 0; }
+body.v2b .tk-a u { border-radius: 4px; font: 900 .78em/1 var(--f-display); letter-spacing: .14em; }
+
+/* ---- the people board's columns ---- */
+body.v2b .pp-col { border: 0; border-radius: 16px; background: linear-gradient(180deg, var(--c), var(--c)) 0 0 / 100% 4px no-repeat, linear-gradient(180deg, var(--v2-p1), var(--v2-p2)); box-shadow: inset 0 0 0 1px var(--v2-line), 0 16px 40px rgba(0,0,0,.45); }
+body.v2b .pp-h { background: linear-gradient(180deg, color-mix(in srgb, var(--c) 16%, transparent), transparent 90%); border-bottom: 1px solid var(--v2-line); }
+body.v2b .pp-nm b { font: 900 34px/1 var(--f-display); letter-spacing: .04em; text-transform: uppercase; }
+body.v2b .pp-net { font: 800 34px/1 var(--f-num); }
+body.v2b .pp-tiles > div { border: 0; border-radius: 8px; background: rgba(255,255,255,.04); box-shadow: inset 0 0 0 1px var(--v2-line); }
+body.v2b .pp-tiles b { font: 800 20px/1.1 var(--f-num); }
+body.v2b .pp-bet { border: 0; border-radius: 12px; background: linear-gradient(180deg, var(--ta, var(--c)), var(--th, var(--c))) 0 0 / 6px 100% no-repeat, linear-gradient(180deg, #121620, #0a0d12); box-shadow: inset 0 0 0 1px var(--v2-line), 0 10px 24px rgba(0,0,0,.35); }
+body.v2b .pp-bet .pp-pick .t { font: 800 30px/1.05 var(--f-num); }
+body.v2b .pp-div { font: 800 13px/1 var(--f-ui); letter-spacing: .3em; color: var(--v2-ink3); }
 </style>
 </head>
 <body>
@@ -6932,6 +7088,7 @@ body.tv.pplg .roomtv:not([hidden]) span { align-self: start; }
 <script>
 (function () {
   "use strict";
+  try { if (localStorage.getItem("sb-v2") !== "off") document.body.classList.add("v2b"); } catch (e) { document.body.classList.add("v2b"); }
   const $ = (s) => document.querySelector(s);
   const SPORTS = ["NFL", "CFB", "NBA", "CBB", "MLB", "NHL", "Soccer", "UFC", "Golf", "Tennis", "Other"];
   const RANGE_LABEL = { day: "Today", week: "Last 7 days", month: "Last 30 days", all: "All time" };
@@ -7668,6 +7825,43 @@ body.tv.pplg .roomtv:not([hidden]) span { align-self: start; }
   }
   setInterval(loadMLBS, 20000);
   const MLB_H = [125, 205], MLB_B = { 1: [150.5, 179.5], 2: [125, 154], 3: [99.5, 179.5] };
+  // V2: the diamond as a ballpark at night: the home crowd in the stands (camera flashes), the wall padded in the home
+  // team's color with its distances and foul poles, mowed grass under the lights, glowing runners
+  function v2DmField(g, ca, ch, on, marks) {
+    const id = "v" + String(g.id).replace(/\W/g, ""), rgb = (h) => { const m = /^#?([0-9a-f]{6})$/i.exec(String(h || "")); if (!m) return [60, 70, 90]; const n = parseInt(m[1], 16); return [(n >> 16) & 255, (n >> 8) & 255, n & 255]; };
+    const dk = (h, k) => `rgb(${rgb(h).map((v) => Math.round(v * k + 6)).join(",")})`, L = (h) => { const [r, gg, b] = rgb(h); return (0.299 * r + 0.587 * gg + 0.114 * b) / 255; };
+    const wall = L(g.h.col) >= 0.1 ? g.h.col : ch, seat = dk(g.h.col || ch, 0.3);
+    let fl = ""; for (let i = 0; i < 14; i++) { const t = (i + 0.5) / 14, x = (1 - t) * (1 - t) * 12 + 2 * (1 - t) * t * 125 + t * t * 238, y = (1 - t) * (1 - t) * 106 + 2 * (1 - t) * t * -54 + t * t * 106 + 6 + ((i * 7) % 5) * 1.6;
+      fl += `<circle class="dm-fls" cx="${x.toFixed(1)}" cy="${(y + (i % 2 ? 3 : 0)).toFixed(1)}" r="1.1" style="animation-delay:${((i * 1.37) % 5).toFixed(2)}s"/>`; }
+    const B = { 1: [150.5, 179.5], 2: [125, 154], 3: [99.5, 179.5] };
+    const base = (k) => { const [x, y] = B[k]; return (on[k - 1] ? `<circle class="dm-run" cx="${x}" cy="${y}" r="7"/>` : "") + `<rect x="${x - 3.2}" y="${y - 3.2}" width="6.4" height="6.4" transform="rotate(45 ${x} ${y})" class="dm-base${on[k - 1] ? " on" : ""}"/>`; };
+    return `<svg class="dm-svg v2" viewBox="6 12 238 206" preserveAspectRatio="xMidYMid meet" role="img" aria-label="Spray chart">
+      <defs><pattern id="${id}Mow" width="12" height="12" patternUnits="userSpaceOnUse" patternTransform="rotate(45 125 205)"><rect width="12" height="12" fill="#2e8a3e"/><rect width="6" height="12" fill="#277a35"/></pattern>
+        <linearGradient id="${id}Seat" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="${seat}"/><stop offset="1" stop-color="${dk(g.h.col || ch, 0.16)}"/></linearGradient>
+        <radialGradient id="${id}Lt" cx=".5" cy=".42" r=".62"><stop offset="0" stop-color="#fff" stop-opacity=".16"/><stop offset=".7" stop-color="#fff" stop-opacity=".03"/><stop offset="1" stop-color="#000" stop-opacity=".18"/></radialGradient>
+        <clipPath id="${id}Fair"><path d="M125,205 L31.7,111.7 Q125,-21.7 218.3,111.7 Z"/></clipPath></defs>
+      <path d="M8,110 Q125,-64 242,110 L232,124 Q125,-30 18,124 Z" fill="url(#${id}Seat)"/>
+      <g fill="none" stroke="rgba(0,0,0,.38)" stroke-width=".7"><path d="M11,113 Q125,-55 239,113"/><path d="M14,117 Q125,-46 236,117"/><path d="M16,121 Q125,-38 234,121"/></g>
+      <path d="M8,110 Q125,-64 242,110" fill="none" stroke="${esc(ch)}" stroke-opacity=".55" stroke-width="1"/>
+      <g class="dm-crowd">${fl}</g>
+      <path d="M125,214 L16,112 Q125,-34 234,112 Z" fill="#17502a"/>
+      <path d="M125,205 L31.7,111.7 Q125,-21.7 218.3,111.7 Z" fill="url(#${id}Mow)"/>
+      <path d="M31.7,111.7 Q125,-21.7 218.3,111.7" fill="none" stroke="#a87e52" stroke-width="7" clip-path="url(#${id}Fair)"/>
+      <path d="M125,205 L31.7,111.7 Q125,-21.7 218.3,111.7 Z" fill="url(#${id}Lt)"/>
+      <path d="M30.6,110.6 Q125,-24.2 219.4,110.6" fill="none" stroke="${esc(wall)}" stroke-width="3.6"/>
+      <path d="M29.2,109.2 Q125,-27.2 220.8,109.2" fill="none" stroke="#ffd34d" stroke-width=".7"/>
+      <g class="dm-dist" font-family="Barlow Condensed, Inter, sans-serif" font-weight="800" font-size="6.4" fill="#fff" text-anchor="middle" opacity=".82"><text x="125" y="54">400</text><text x="74" y="72">375</text><text x="176" y="72">375</text><text x="45" y="104">330</text><text x="205" y="104">330</text></g>
+      <path d="M31.7,111.7 L27.6,93 M218.3,111.7 L222.4,93" stroke="#ffd34d" stroke-width="1.2" stroke-linecap="round"/>
+      <g clip-path="url(#${id}Fair)"><circle cx="125" cy="179" r="40" fill="#b8875a"/><circle cx="125" cy="179" r="40" fill="none" stroke="#8d6542" stroke-width=".8"/></g>
+      <path d="M125,198 L145,178 L125,158 L105,178 Z" fill="url(#${id}Mow)"/>
+      <circle cx="125" cy="181" r="4.6" fill="#c08f60"/><rect x="123.3" y="180.6" width="3.4" height=".8" fill="#fff"/>
+      <circle cx="125" cy="203" r="8" fill="#b8875a"/>
+      <path d="M125,205 L31.7,111.7 M125,205 L218.3,111.7" stroke="#fff" stroke-width=".9"/>
+      <g fill="none" stroke="rgba(255,255,255,.75)" stroke-width=".45"><rect x="118.6" y="200.4" width="3.4" height="5.6"/><rect x="128" y="200.4" width="3.4" height="5.6"/></g>
+      ${base(1)}${base(2)}${base(3)}<path d="M122.6,203.2 h4.8 v2 l-2.4,2 l-2.4,-2z" fill="#fff"/>
+      ${marks}
+    </svg>`;
+  }
   function diamondHtml(g) {
     const d = MLBS.get(g.id), m = g.mlb || {}, live = g.st === "in";
     if (!d || Date.now() - d.at > 40e3) setTimeout(loadMLBS, 0);
@@ -7681,7 +7875,8 @@ body.tv.pplg .roomtv:not([hidden]) span { align-self: start; }
       return `<path class="dm-fl" d="M${hx},${hy} Q${mx.toFixed(1)},${(my - lift).toFixed(1)} ${last.x},${last.y}" fill="none" stroke="#fff" stroke-width=".8" stroke-dasharray="2 2.2" opacity=".75"/>`; })() : "";
     const on = m.on || [false, false, false];
     const base = (k) => { const [x, y] = MLB_B[k]; return `<rect x="${x - 3.2}" y="${y - 3.2}" width="6.4" height="6.4" transform="rotate(45 ${x} ${y})" class="dm-base${on[k - 1] ? " on" : ""}"/>`; };
-    const field = `<svg class="dm-svg" viewBox="18 18 214 202" preserveAspectRatio="xMidYMid meet" role="img" aria-label="Spray chart">
+    const marks = `${hits.filter((h) => h !== last).map(mark).join("")}${arc}${last ? mark(last) : ""}`;
+    const field = document.body.classList.contains("v2b") ? v2DmField(g, ca, ch, on, marks) : `<svg class="dm-svg" viewBox="18 18 214 202" preserveAspectRatio="xMidYMid meet" role="img" aria-label="Spray chart">
       <defs><pattern id="dmMow" width="14" height="14" patternUnits="userSpaceOnUse" patternTransform="rotate(45 125 205)"><rect width="14" height="14" fill="#2f7d3a"/><rect width="7" height="14" fill="#2a7134"/></pattern>
         <clipPath id="dmFair"><path d="M125,205 L31.7,111.7 Q125,-21.7 218.3,111.7 Z"/></clipPath></defs>
       <path d="M125,212 L18,105 Q125,-40 232,105 Z" fill="#1d4f27" opacity=".55"/>
@@ -13482,7 +13677,7 @@ void main(){
   // ---------- sheets ----------
   function openSheet(id) { $(id).hidden = false; }
   // keep every open screen current: when a new version is up, reload it (never mid-form or mid-animation)
-  const BUILD = "20261027212231";
+  const BUILD = "20261028003259";
   function checkBuild() {
     if (BUILD === "dev") return;
     fetch("version.json?t=" + Date.now(), { cache: "no-store" }).then((r) => (r.ok ? r.json() : null)).then((j) => {
