@@ -14506,7 +14506,7 @@ void main(){
   // ---------- sheets ----------
   function openSheet(id) { $(id).hidden = false; }
   // keep every open screen current: when a new version is up, reload it (never mid-form or mid-animation)
-  const BUILD = "20261028220334";
+  const BUILD = "20261028221614";
   function checkBuild() {
     if (BUILD === "dev") return;
     fetch("version.json?t=" + Date.now(), { cache: "no-store" }).then((r) => (r.ok ? r.json() : null)).then((j) => {
@@ -24983,6 +24983,16 @@ function wdDeckSpotFb(st) {
   const upper = V.tiers.slice(1).some((q) => !q.keep || q.keep(p[0], p[2]));
   return { p, look: [V.cx, V.cz], base: floor - 5, K, who: "mascot", gap, house: { top: upper ? V.top + 1.5 : floor + 18.5 * K, back: V.outer + 0.4 - oc } };
 }
+// a ballpark's party deck: out past the outfield in right-center, on top of the bleachers, facing home plate; the upper deck
+// gives way to it there. DJ Goldie (Meegy) plays it, his video with its own matte
+function wdDeckSpotPark(st) {
+  const V = st.V, C = st.C, K = 1.05, depth = 11 * K, width = 30 * K, lo = V.tiers[0], t = (-62 + 135) / 360, [px, pz, nx, nz] = wdNorm(C, t);
+  const oc = lo.o1 + depth / 2 + 0.6, floor = lo.y1 + 0.8, p = [px + nx * oc, floor, pz + nz * oc];
+  const look = [0, -12], fl = Math.hypot(look[0] - p[0], look[1] - p[2]) || 1, f = [(look[0] - p[0]) / fl, (look[1] - p[2]) / fl];
+  const gap = (x, z) => { const dx = x - p[0], dz = z - p[2], lz = dx * f[0] + dz * f[1], lx = dx * f[1] - dz * f[0]; return Math.abs(lx) < width / 2 + 2.5 && lz < depth / 2 + 2; };
+  const top = Math.max(...V.tiers.map((q) => q.y1 || 0)), outer = Math.max(...V.tiers.map((q) => q.o1 || q.o0 || 0));
+  return { p, look, base: floor - 5, K, who: "meegy", gap, house: { top: top + 1.5, back: outer + 0.4 - oc } };
+}
 function wdDeckBuild(st, o) {
   const THREE = st.THREE, scene = st.scene, K = o.K || 1, depth = 11 * K, width = 30 * K, floor = o.p[1], base = o.base ?? floor - 3 * K;
   const col = (r, g, b) => new THREE.Color().setRGB(r, g, b, THREE.LinearSRGBColorSpace);
@@ -26635,7 +26645,7 @@ function wdTex(THREE, canvas, aniso) { const t = new THREE.CanvasTexture(canvas)
 function wdBuild(L, R) {
   if (R.kind === "room") return wdRoomBuild(L, R);
   const fs = R.sport === "nfl" && R.kind === "stadium" ? wdFbSpec(R) : null, as = (R.sport === "nba" || R.sport === "nhl") && R.kind === "stadium" ? wdArSpec(R) : null;
-  const THREE = L.THREE, pf = R.sport === "mlb" ? wdPark(R) : null, V = fs ? wdFbVenue(fs) : as ? wdArVenue(as, R.sport) : pf ? Object.assign({}, WD_V.mlb, { dome: pf.roof !== "open" ? 1 : 0, towers: pf.roof !== "open" ? [] : WD_V.mlb.towers }) : WD_V[R.sport];
+  const THREE = L.THREE, pf = R.sport === "mlb" ? wdPark(R) : null, V = fs ? wdFbVenue(fs) : as ? wdArVenue(as, R.sport) : pf ? Object.assign({}, WD_V.mlb, { tiers: WD_V.mlb.tiers.map((q) => Object.assign({}, q)), dome: pf.roof !== "open" ? 1 : 0, towers: pf.roof !== "open" ? [] : WD_V.mlb.towers }) : WD_V[R.sport];
   WD.V = V; const C = pf ? wdParkContour(pf) : wdContour(V), wallH = pf ? wdParkWall(pf) : null;
   if (pf) { WD.V = V; const cp = wdNorm(C, 0.125), w = 50, h = 28.1; V.jumbo = { p: [cp[0] + cp[2] * 31, 16 + h / 2 + 1.5, cp[1] + cp[3] * 31], face: [-cp[2], 0, -cp[3]], w, h, legs: 0, base: 16 }; }
   const scene = new THREE.Scene(), cam = new THREE.PerspectiveCamera(V.board.f, innerWidth / innerHeight, 0.5, 4000), T = R.T, aniso = Math.min(8, WD.r.capabilities.getMaxAnisotropy());
@@ -26644,9 +26654,9 @@ function wdBuild(L, R) {
   const v3 = (a) => new THREE.Vector3(a[0], a[1], a[2]);
   const keep = (m) => { st.mats.push(m); return m; };
   // a stadium's or an arena's stage takes a slot of the building: the decks over the bowl give way to it there
-  if (fs || as) { st.deckSpot = fs ? wdDeckSpotFb(st) : wdDeckSpotAr(st); const gap = st.deckSpot.gap;
+  if (fs || as || pf) { st.deckSpot = fs ? wdDeckSpotFb(st) : as ? wdDeckSpotAr(st) : wdDeckSpotPark(st); const gap = st.deckSpot.gap;
     for (const q of V.tiers.slice(1)) { const k0 = q.keep; q.keep = (x, z) => (!k0 || k0(x, z)) && !gap(x, z); }
-    V.ribs = V.ribs.map((r, i) => (i || as ? Object.assign({}, r, { keep: (x, z) => (!r.keep || r.keep(x, z)) && !gap(x, z) }) : r)); }
+    V.ribs = V.ribs.map((r, i) => (i || as || pf ? Object.assign({}, r, { keep: (x, z) => (!r.keep || r.keep(x, z)) && !gap(x, z) }) : r)); }
   // the sky (or the arena's dark)
   const sky = new THREE.Mesh(new THREE.SphereGeometry(3000, 32, 16), keep(new THREE.ShaderMaterial({ side: THREE.BackSide, depthWrite: false,
     uniforms: { uT: { value: 0 }, uArena: { value: V.roof || V.dome ? 1 : 0 }, uTint: { value: v3(C1) }, uFc: { value: v3([1, 1, 1]) }, uFlash: { value: 0 } },
@@ -26758,7 +26768,7 @@ function wdBuild(L, R) {
     if (J.legs) for (const s2 of [-1, 1]) { const leg = new THREE.Mesh(new THREE.BoxGeometry(2, J.p[1], 2), dark); leg.position.set(s2 * J.w * 0.3, -J.p[1] / 2, -0.5); jg.add(leg); }
     st.jface = () => ({ c: jg.localToWorld(new THREE.Vector3(0, 0, 1.02)), n: n.clone(), w: J.w, h: J.h });
   }
-  if (fs || as) { try { if (fs) wdFbBuild(st, fs); else wdArBuild(st, as); } catch (e) { console.warn(fs ? "stadium" : "arena", e); } wdDeckBuild(st, st.deckSpot); }
+  if (fs || as || pf) { if (fs || as) try { if (fs) wdFbBuild(st, fs); else wdArBuild(st, as); } catch (e) { console.warn(fs ? "stadium" : "arena", e); } wdDeckBuild(st, st.deckSpot); }
   else {
   // the DJ's suite, on the far side, lit up in purple
   {
