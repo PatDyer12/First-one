@@ -6594,6 +6594,30 @@ body.v2b .pp-tiles b { font: 800 20px/1.1 var(--f-num); }
 body.v2b .pp-bet { border: 0; border-radius: 12px; background: linear-gradient(180deg, var(--ta, var(--c)), var(--th, var(--c))) 0 0 / 6px 100% no-repeat, linear-gradient(180deg, #121620, #0a0d12); box-shadow: inset 0 0 0 1px var(--v2-line), 0 10px 24px rgba(0,0,0,.35); }
 body.v2b .pp-bet .pp-pick .t { font: 800 30px/1.05 var(--f-num); }
 body.v2b .pp-div { font: 800 13px/1 var(--f-ui); letter-spacing: .3em; color: var(--v2-ink3); }
+
+/* ---- motion around the tickets: one soft light running round the edge instead of the zigzag borders ----
+   The light is a big conic gradient spinning (a transform, so the graphics card does it) inside the ticket's edge ring; green
+   while it's winning, amber when it's close, a slow dim red when it's losing, the ticket's own color on a big moment. It keeps
+   its place on the clock when the board redraws, so it never snaps back to the start */
+body.v2b :is(.ob-bet, .ob-grp, .pp-bet) > .edge { display: block !important; position: absolute; inset: 0; z-index: 3; border-radius: inherit; padding: 2px; overflow: hidden; pointer-events: none;
+  opacity: 0; transition: opacity .8s ease; animation: none !important; box-shadow: none !important; filter: none !important; background: none !important;
+  -webkit-mask: linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0); -webkit-mask-composite: xor; mask: linear-gradient(#000 0 0) content-box exclude, linear-gradient(#000 0 0); }
+body.v2b :is(.ob-bet, .ob-grp, .pp-bet) > .edge::before, body.v2b :is(.ob-bet, .ob-grp, .pp-bet) > .edge::after, body.v2b :is(.ob-bet, .ob-grp, .pp-bet) > .edge > i:last-child { display: none !important; }
+body.v2b :is(.ob-bet, .ob-grp, .pp-bet) > .edge > i:first-child { display: block !important; position: absolute; left: 50%; top: 50%; width: 160%; height: auto; aspect-ratio: 1; inset: auto; translate: -50% -50%; background: conic-gradient(from 0deg, transparent 0 60%, color-mix(in srgb, var(--rc, #fff) 35%, transparent) 76%, var(--rc, #fff) 91%, #fff 95%, transparent 99%) !important;
+  animation: v2lSpin 4s linear infinite !important; will-change: rotate; }
+body.v2b :is(.ob-bet, .ob-grp, .pp-bet).k-w > .edge { opacity: 1; --rc: var(--v2-win); }
+body.v2b :is(.ob-bet, .ob-grp, .pp-bet).k-e > .edge { opacity: .75; --rc: var(--v2-even); }
+body.v2b :is(.ob-bet, .ob-grp, .pp-bet).k-e > .edge > i:first-child { animation-duration: 6s !important; }
+body.v2b :is(.ob-bet, .ob-grp, .pp-bet).k-l > .edge { opacity: .5; --rc: var(--v2-loss); }
+body.v2b :is(.ob-bet, .ob-grp, .pp-bet).k-l > .edge > i:first-child { animation-duration: 8s !important; animation-direction: reverse !important; }
+body.v2b :is(.ob-bet, .ob-grp, .pp-bet).pop-good > .edge { opacity: 1; --rc: var(--edc, var(--v2-win)); }
+body.v2b :is(.ob-bet, .ob-grp, .pp-bet).pop-good > .edge > i:first-child { animation-duration: 2s !important; }
+@keyframes v2lSpin { to { rotate: 360deg; } }
+/* a winning ticket breathes a little light around itself */
+body.v2b :is(.ob-bet, .ob-grp).k-w { animation: v2lBreathe 4s ease-in-out infinite; }
+@keyframes v2lBreathe { 0%, 100% { box-shadow: inset 0 0 0 1px rgba(62,224,143,.3), 0 12px 30px rgba(0,0,0,.4), 0 0 18px rgba(62,224,143,.06); } 50% { box-shadow: inset 0 0 0 1px rgba(62,224,143,.42), 0 12px 30px rgba(0,0,0,.4), 0 0 34px rgba(62,224,143,.16); } }
+/* no flicker or stepping on the board */
+body.v2b .bt-islive .fx-glint, body.v2b .fx-glint::before, body.v2b .fx-glint::after { animation-timing-function: ease-in-out !important; }
 /* ================= V2: the stadium behind the board ================= */
 #v2world { position: fixed; inset: 0; width: 100vw; height: 100vh; z-index: 0; display: block; pointer-events: none; }
 body.v2w { background: #020306; }
@@ -7125,6 +7149,16 @@ body.v2w.v2w-away #v2world { -webkit-mask-image: none; mask-image: none; }
 (function () {
   "use strict";
   try { if (localStorage.getItem("sb-v2") !== "off") document.body.classList.add("v2b"); } catch (e) { document.body.classList.add("v2b"); }
+  // V2: a looping animation on the board (named v2l...) is set by the clock, not by when its element was drawn, so a redraw
+  // never sends a spinning edge or a breathing glow back to the start; each ticket gets its own offset
+  if (document.body.classList.contains("v2b") && document.getAnimations) {
+    const seen = new WeakSet(); let q = 0, last = 0;
+    const lock = () => { q = 0; last = performance.now();
+      for (const a of document.getAnimations()) { if (seen.has(a) || !/^v2l/.test(a.animationName || "")) continue; seen.add(a);
+        const el = a.effect && a.effect.target, k = el && el.closest ? (el.closest("[data-ids]") || el).getAttribute("data-ids") || "" : ""; let h = 0; for (const ch of k) h = (h * 31 + ch.charCodeAt(0)) | 0;
+        try { a.startTime = -(Math.abs(h) % 24000); } catch (e) {} } };
+    new MutationObserver(() => { if (!q) q = setTimeout(() => requestAnimationFrame(lock), Math.max(0, 250 - (performance.now() - last))); }).observe(document.body, { childList: true, subtree: true });
+  }
   const $ = (s) => document.querySelector(s);
   const SPORTS = ["NFL", "CFB", "NBA", "CBB", "MLB", "NHL", "Soccer", "UFC", "Golf", "Tennis", "Other"];
   const RANGE_LABEL = { day: "Today", week: "Last 7 days", month: "Last 30 days", all: "All time" };
@@ -13324,6 +13358,7 @@ void main(){
     if (sp === "MLB") return "ballgame";
     return null;
   }
+  window.__sbGame = (a, h) => { for (const g of S.games.values()) if (g.a && g.h && g.a.ab === a && g.h.ab === h) return g; return null; };
   function wdFx(kind, b) {
     try { if (!window.SBW || !b || !b.pick) return; const win = (b.units || 0) * ppu(b.odds || 100);
       SBW.fx(kind, { c: personCol(b), nm: personName(b), pick: b.pick, amt: kind === "hit" ? fU(win) : kind === "place" ? `${fU(b.units || 0)} to win ${fU(win)}` : "" }); } catch (e) {}
@@ -13717,7 +13752,7 @@ void main(){
   // ---------- sheets ----------
   function openSheet(id) { $(id).hidden = false; }
   // keep every open screen current: when a new version is up, reload it (never mid-form or mid-animation)
-  const BUILD = "20261028014850";
+  const BUILD = "20261028022101";
   function checkBuild() {
     if (BUILD === "dev") return;
     fetch("version.json?t=" + Date.now(), { cache: "no-store" }).then((r) => (r.ok ? r.json() : null)).then((j) => {
@@ -14478,6 +14513,7 @@ void main(){
     const team = (k) => { const x = t[k], tm = x.team; return { id: tm.id, rec: (((x.records || [])[0] || {}).summary || "").replace(/^0-0(-0)?$/, ""), rk: x.curatedRank && x.curatedRank.current <= 25 ? x.curatedRank.current : 0, ab: tm.abbreviation || "", nm: tm.shortDisplayName || tm.name || "", fn: tm.displayName || "", loc: tm.location || "", cf: tm.conferenceId != null ? String(tm.conferenceId) : "", lg: dkLg(tm.logo), col: tm.color ? "#" + tm.color : "", alt: tm.alternateColor ? "#" + tm.alternateColor : "", sc: /^\d+$/.test(String(x.score)) ? Number(x.score) : null }; };
     const g = { id: String(e.id), sport, t: Date.parse(e.date), st: st.state || "pre", d: st.shortDetail || "", a: team("away"), h: team("home"), pd: e.status.period || 0, clk: e.status.clock, sty: (e.season && e.season.type) || 0, nt: ((c.notes || [])[0] || {}).headline || "" };
     g.net = ((((c.broadcasts || [])[0] || {}).names) || [])[0] || "";
+    g.ven = c.venue ? { nm: c.venue.fullName || "", indoor: !!c.venue.indoor } : null;
     g.city = (c.venue && c.venue.address && c.venue.address.city) || ""; g.abroad = !!(c.venue && c.venue.address && c.venue.address.country && c.venue.address.country !== "USA");
     const si = c.situation, lp = si && si.lastPlay;
     if (si) g.sit = { rz: !!si.isRedZone, pos: si.possession || null, dd: si.downDistanceText || si.shortDownDistanceText || "", yl: typeof si.yardLine === "number" ? si.yardLine : null, dn: si.down || null, ds: si.distance ?? null,
@@ -23940,7 +23976,145 @@ function wdRead() {
   const pulse = ((document.getElementById("pulseChip") || {}).textContent || "").replace(/\s+/g, " ").trim();
   const lb = [...document.querySelectorAll("#rbLb .rb-lr")].slice(0, 4).map((r) => { const nm = ((r.querySelector(".nm b") || {}).textContent || "").trim(), lv = r.querySelector(".lv"), net = ((r.querySelector(".net") || {}).childNodes[0] || {}).textContent || "";
     return { nm, c: wdHex(r.style.getPropertyValue("--c")), v: lv ? (lv.childNodes[1] || lv.lastChild || {}).textContent || "" : net }; }).filter((x) => x.nm);
-  return { sport, T, pulse, lb };
+  let ven = null; try { const G = window.__sbGame && window.__sbGame(T.a.ab, T.h.ab); ven = G && G.ven ? G.ven : null; } catch (e) {}
+  return { sport, T, pulse, lb, ven };
+}
+
+// ---- the real ballparks: each home park's fence (feet down the lines, the alleys, center), its wall heights, its roof and
+// the things you'd know it by. Angles: -135 the left field pole, -90 dead center, -45 the right field pole ----
+const WD_MLB = {
+  ARI: { nm: "Chase Field", d: [330, 374, 407, 374, 335], w: 7.5, ws: [[-100, -80, 25]], roof: "retract", f: ["pool"] },
+  ATL: { nm: "Truist Park", d: [335, 385, 400, 375, 325], w: 6, ws: [[-60, -45, 16]], roof: "open", f: [] },
+  BAL: { nm: "Oriole Park at Camden Yards", d: [333, 364, 400, 373, 318], w: 7, ws: [[-135, -110, 13]], roof: "open", f: ["warehouse"] },
+  BOS: { nm: "Fenway Park", d: [310, 379, 390, 380, 302], w: 5, ws: [[-135, -103, 37, "#23502e"]], roof: "open", f: ["monster", "citgo"] },
+  CHC: { nm: "Wrigley Field", d: [355, 368, 400, 368, 353], w: 11.5, wc: "#2f5d27", roof: "open", f: ["ivy", "wrigleyboard", "rooftops"] },
+  CHW: { nm: "Rate Field", d: [330, 377, 400, 372, 335], w: 8, roof: "open", f: [] },
+  CIN: { nm: "Great American Ball Park", d: [328, 379, 404, 370, 325], w: 8, ws: [[-135, -110, 12]], roof: "open", f: ["stacks"] },
+  CLE: { nm: "Progressive Field", d: [325, 370, 400, 375, 325], w: 9, ws: [[-135, -100, 19]], roof: "open", f: [] },
+  COL: { nm: "Coors Field", d: [347, 390, 415, 375, 350], w: 8, ws: [[-62, -45, 14]], roof: "open", f: ["pines", "purple"] },
+  DET: { nm: "Comerica Park", d: [345, 370, 412, 365, 330], w: 8, roof: "open", f: ["tigers"] },
+  HOU: { nm: "Daikin Park", d: [315, 362, 409, 373, 326], w: 10, ws: [[-135, -108, 19]], roof: "retract", f: ["train"] },
+  KC: { nm: "Kauffman Stadium", d: [330, 387, 410, 387, 330], w: 8.5, roof: "open", f: ["fountains", "crown"] },
+  LAA: { nm: "Angel Stadium", d: [347, 387, 396, 370, 350], w: 8, ws: [[-60, -45, 18]], roof: "open", f: ["rocks"] },
+  LAD: { nm: "Dodger Stadium", d: [330, 375, 395, 375, 330], w: 8, roof: "open", f: ["palms", "pavilions"] },
+  MIA: { nm: "loanDepot park", d: [344, 386, 400, 387, 335], w: 8, roof: "retract", f: [] },
+  MIL: { nm: "American Family Field", d: [344, 371, 400, 374, 345], w: 8, roof: "retract", f: ["slide"] },
+  MIN: { nm: "Target Field", d: [339, 377, 404, 367, 328], w: 8, ws: [[-62, -45, 23]], roof: "open", f: [] },
+  NYM: { nm: "Citi Field", d: [335, 379, 408, 383, 330], w: 8, roof: "open", f: ["apple"] },
+  NYY: { nm: "Yankee Stadium", d: [318, 399, 408, 385, 314], w: 8, roof: "open", f: ["frieze"] },
+  ATH: { nm: "Sutter Health Park", d: [330, 375, 403, 375, 325], w: 8, roof: "open", f: [] },
+  OAK: { nm: "Sutter Health Park", d: [330, 375, 403, 375, 325], w: 8, roof: "open", f: [] },
+  PHI: { nm: "Citizens Bank Park", d: [329, 374, 401, 369, 330], w: 10, roof: "open", f: ["bell"] },
+  PIT: { nm: "PNC Park", d: [325, 389, 399, 375, 320], w: 6, ws: [[-62, -45, 21]], roof: "open", f: ["bridge"] },
+  SD: { nm: "Petco Park", d: [334, 357, 396, 382, 322], w: 8, roof: "open", f: ["western"] },
+  SF: { nm: "Oracle Park", d: [339, 364, 391, 415, 309], w: 8, ws: [[-70, -45, 24, "#8a3b26"]], roof: "open", f: ["cove", "coke"] },
+  SEA: { nm: "T-Mobile Park", d: [331, 378, 401, 381, 326], w: 8, roof: "retract", f: [] },
+  STL: { nm: "Busch Stadium", d: [336, 375, 400, 375, 335], w: 8, roof: "open", f: ["arch"] },
+  TB: { nm: "Tropicana Field", d: [315, 370, 404, 370, 322], w: 9.5, roof: "dome", turf: 1, f: ["catwalks", "tank"] },
+  TEX: { nm: "Globe Life Field", d: [329, 372, 407, 374, 326], w: 8, roof: "retract", turf: 1, f: [] },
+  TOR: { nm: "Rogers Centre", d: [328, 368, 400, 359, 328], w: 10, roof: "retract", turf: 1, f: [] },
+  WSH: { nm: "Nationals Park", d: [336, 377, 402, 370, 335], w: 8, roof: "open", f: [] },
+};
+// the park for a game: the venue's own name first (a team playing somewhere else), then the home team's
+function wdPark(R) {
+  try { const f = localStorage.getItem("sb-world-park"); if (f && WD_MLB[f]) return Object.assign({ k: f }, WD_MLB[f]); } catch (e) {}
+  const vn = String((R.ven && R.ven.nm) || "").toLowerCase();
+  if (vn) for (const k in WD_MLB) if (vn.includes(WD_MLB[k].nm.toLowerCase().split(" ")[0])) return Object.assign({ k }, WD_MLB[k]);
+  const p = WD_MLB[R.T.h.ab]; return p ? Object.assign({ k: R.T.h.ab }, p) : { k: "", nm: (R.ven && R.ven.nm) || "", d: [330, 375, 400, 375, 330], w: 8, roof: R.ven && R.ven.indoor ? "retract" : "open", f: [] };
+}
+// the fence and the stands behind it, from the dimensions: smooth through the poles, the alleys and center, then around the
+// foul side and behind home
+function wdParkContour(pf) {
+  const m = (ft) => ft * 0.3048, [lf, lcf, cf, rcf, rf] = pf.d.map(m);
+  const P = [[-135, lf], [-112.5, lcf], [-90, cf], [-67.5, rcf], [-45, rf], [-24, rf * 0.58], [8, 33], [50, 22], [90, 19], [130, 22], [172, 33], [204, lf * 0.58]];
+  const n = P.length, cr = (p0, p1, p2, p3, u) => 0.5 * (2 * p1 + (-p0 + p2) * u + (2 * p0 - 5 * p1 + 4 * p2 - p3) * u * u + (-p0 + 3 * p1 - 3 * p2 + p3) * u * u * u);
+  return (t) => {
+    t = ((t % 1) + 1) % 1; const th = -135 + 360 * t;
+    let i = 0; while (i < n - 1 && !(th >= P[i][0] && th < (P[i + 1] ? P[i + 1][0] : 225))) i++;
+    const a0 = P[i][0], a1 = i + 1 < n ? P[i + 1][0] : 225, u = (th - a0) / (a1 - a0);
+    const r = cr(P[(i - 1 + n) % n][1], P[i][1], P[(i + 1) % n][1], P[(i + 2) % n][1], u), a = (th * Math.PI) / 180;
+    return [r * Math.cos(a), r * Math.sin(a)];
+  };
+}
+const wdTh = (t) => -135 + 360 * (((t % 1) + 1) % 1);
+// the wall's height at a point on the contour (meters): fair territory gets the park's wall and its tall stretches, foul ground
+// a low rail
+function wdParkWall(pf) {
+  return (t) => { const th = wdTh(t); let h = th >= -136 && th <= -44 ? pf.w : 4.2; for (const [a, b, hh] of pf.ws || []) if (th >= a && th <= b) h = Math.max(h, hh); return h * 0.3048; };
+}
+// a dome or a closed roof seen from inside: cables running out from the middle, rings of catwalks (the Trop), panel seams on a
+// retractable roof
+const WD_DOME = `uniform float uSpokes, uRings, uT; uniform vec3 uBase, uLine; varying vec3 vP;
+void main(){
+  float r = length(vP.xz), a = atan(vP.z, vP.x) / 6.2831853 + .5;
+  float k = r / 170.0;
+  vec3 c = uBase * (1.05 - k * .55);
+  float sp = abs(fract(a * uSpokes) - .5); c = mix(c, uLine, smoothstep(.03, .0, sp) * .8);
+  if (uRings > 0.0) { for (int i = 1; i <= 4; i++) { float rr = float(i) * .21; float d = abs(k - rr); c = mix(c, vec3(.08, .09, .11), smoothstep(.012, .0, d)); float lt = step(.92, fract(a * 90.0 + float(i) * .3)) * smoothstep(.02, .0, d); c += vec3(1.0, .95, .85) * lt * 1.4; } }
+  c += vec3(.9, .92, 1.0) * smoothstep(.12, .0, k) * .15;
+  gl_FragColor = vec4(c, 1.0);
+}`;
+function wdParkBuild(st, pf, C, V) {
+  const THREE = st.THREE, scene = st.scene, T = st.R.T, m = (ft) => ft * 0.3048, col = (h) => new THREE.Color().setRGB(...wdHex(h), THREE.LinearSRGBColorSpace);
+  const basic = (h, o) => new THREE.MeshBasicMaterial(Object.assign({ color: col(h) }, o || {}));
+  const at = (deg, rAdd) => { let best = null, bd = 1e9; for (let i = 0; i < 720; i++) { const t = i / 720; if (Math.abs(wdTh(t) - deg) < bd) { bd = Math.abs(wdTh(t) - deg); best = t; } } const p = wdNorm(C, best); return [p[0] + p[2] * (rAdd || 0), p[1] + p[3] * (rAdd || 0), p[2], p[3], best]; };
+  const box = (w, h, d, c, x, y, z, ry) => { const b = new THREE.Mesh(new THREE.BoxGeometry(w, h, d), typeof c === "string" ? basic(c) : c); b.position.set(x, y, z); if (ry) b.rotation.y = ry; scene.add(b); return b; };
+  const face = (o) => Math.atan2(-o[2], -o[3]);
+  const sign = (txt, color, w, x, y, z, ry) => { const tx = wdTex(THREE, wdNeonArt(txt, color)); st.tex.push(tx); const s = new THREE.Mesh(new THREE.PlaneGeometry(w, w / 4), new THREE.MeshBasicMaterial({ map: tx, transparent: true, blending: THREE.AdditiveBlending, depthWrite: false, side: THREE.DoubleSide })); s.position.set(x, y, z); s.rotation.y = ry || 0; scene.add(s); return s; };
+  const wallH = wdParkWall(pf);
+  // the roof
+  if (pf.roof === "dome" || pf.roof === "retract") {
+    const rim = 175, H = pf.roof === "dome" ? 34 : 26, Rs = (rim * rim + H * H) / (2 * H), th = Math.asin(rim / Rs);
+    const g = new THREE.SphereGeometry(Rs, 72, 18, 0, Math.PI * 2, 0, th), mat = new THREE.ShaderMaterial({ side: THREE.BackSide,
+      uniforms: { uSpokes: { value: pf.roof === "dome" ? 24 : 8 }, uRings: { value: pf.f.includes("catwalks") ? 1 : 0 }, uT: { value: 0 }, uBase: { value: new THREE.Vector3(...(pf.roof === "dome" ? [0.62, 0.64, 0.68] : [0.3, 0.32, 0.36])) }, uLine: { value: new THREE.Vector3(0.18, 0.19, 0.22) } },
+      vertexShader: "varying vec3 vP; void main(){ vP = position; gl_Position = projectionMatrix * modelViewMatrix * vec4(position, 1.0); }", fragmentShader: WD_DOME });
+    const d = new THREE.Mesh(g, mat); d.position.set(0, 40 + H - Rs, -48); if (pf.roof === "dome") d.rotation.x = -0.1; scene.add(d); st.mats.push(mat);
+    // a dome lights the field from its rings, not from towers
+    if (pf.f.includes("catwalks")) for (let i = 0; i < 16; i++) { const a = (i / 16) * Math.PI * 2; st.glowAt([Math.cos(a) * 60, 64, -48 + Math.sin(a) * 60], 26, [1, 0.97, 0.9], 0.35); }
+  }
+  // the outfield wall in its own color and heights, padding on top
+  const wc = pf.wc || null;
+  for (const [a, b, hh, c] of pf.ws || []) if (c) { const g = wdBand(THREE, C, { o0: 0.22, y0: 0, y1: m(hh), keep: (x, z) => { const t = Math.atan2(z, x) * 180 / Math.PI; return t >= a && t <= b; } }, 360); scene.add(new THREE.Mesh(g, basic(c, { side: THREE.DoubleSide }))); }
+  if (wc) { const g = wdBand(THREE, C, { o0: 0.21, y0: 0, y1: m(pf.w), keep: (x, z) => { const t = Math.atan2(z, x) * 180 / Math.PI; return t >= -136 && t <= -44; } }, 360);
+    const cv = wdCanvas(512, 64), x = cv.getContext("2d"); x.fillStyle = "#24461f"; x.fillRect(0, 0, 512, 64); for (let i = 0; i < 900; i++) { x.fillStyle = `rgba(${40 + Math.random() * 50},${80 + Math.random() * 70},${30 + Math.random() * 30},.9)`; x.beginPath(); x.arc(Math.random() * 512, Math.random() * 64, 2 + Math.random() * 3, 0, Math.PI * 2); x.fill(); }
+    const tx = wdTex(THREE, cv); tx.wrapS = THREE.RepeatWrapping; st.tex.push(tx); g.attributes.uv.array.forEach((v, i, arr) => { if (i % 2 === 0) arr[i] = v / 24; }); scene.add(new THREE.Mesh(g, new THREE.MeshBasicMaterial({ map: tx, side: THREE.DoubleSide }))); }
+  // the things you'd know it by
+  const F = new Set(pf.f);
+  if (F.has("monster")) { const p = at(-118, -0.5); const cv = wdCanvas(512, 256), x = cv.getContext("2d"); x.fillStyle = "#23502e"; x.fillRect(0, 0, 512, 256); x.fillStyle = "#f2f2ea"; x.font = "700 22px Inter, sans-serif";
+    for (let i = 0; i < 10; i++) { x.fillText(String(i + 1), 120 + i * 34, 40); } x.fillRect(118, 60, 340, 2); x.font = "800 30px Inter, sans-serif"; x.fillText(T.a.ab, 30, 100); x.fillText(T.h.ab, 30, 150);
+    const tx = wdTex(THREE, cv); st.tex.push(tx); const pl = new THREE.Mesh(new THREE.PlaneGeometry(16, 8), new THREE.MeshBasicMaterial({ map: tx })); pl.position.set(p[0] - p[2] * 0.4, 4.6, p[1] - p[3] * 0.4); pl.rotation.y = face(p); scene.add(pl); }
+  if (F.has("citgo")) { const p = at(-120, 70); const s = sign("CITGO", "#ff3b3b", 22, p[0], 40, p[1], face(p)); void s; box(1, 30, 1, "#222", p[0], 15, p[1]); }
+  if (F.has("wrigleyboard")) { const p = at(-90, 26); const cv = wdCanvas(512, 256), x = cv.getContext("2d"); x.fillStyle = "#1f4a2a"; x.fillRect(0, 0, 512, 256); x.fillStyle = "#f2f2ea"; x.font = "900 34px 'Barlow Condensed', Inter"; x.textAlign = "center"; x.fillText("WRIGLEY FIELD", 256, 46);
+    for (let r = 0; r < 4; r++) for (let c = 0; c < 9; c++) x.fillRect(40 + c * 50, 80 + r * 40, 36, 28); const tx = wdTex(THREE, cv); st.tex.push(tx);
+    const b = new THREE.Mesh(new THREE.PlaneGeometry(26, 13), new THREE.MeshBasicMaterial({ map: tx, side: THREE.DoubleSide })); b.position.set(p[0], 26, p[1]); b.rotation.y = face(p); scene.add(b); box(2, 20, 2, "#1f4a2a", p[0], 10, p[1]); }
+  if (F.has("rooftops")) for (const deg of [-125, -108, -72, -55]) { const p = at(deg, 40); box(24, 18, 14, "#4a2d24", p[0], 9, p[1], face(p)); box(24, 3, 14, "#1d3c6e", p[0], 19.5, p[1], face(p)); }
+  if (F.has("ivy")) {}
+  if (F.has("frieze")) { const up = V.tiers.find((x) => x.o1 && x.y1 > 30); if (up) { const cv = wdCanvas(512, 64), x = cv.getContext("2d"); x.fillStyle = "#f4f4f0"; for (let i = 0; i < 16; i++) { x.beginPath(); x.arc(16 + i * 32, 64, 14, Math.PI, 0); x.lineTo(32 + i * 32, 0); x.lineTo(i * 32, 0); x.closePath(); x.fill(); } const tx = wdTex(THREE, cv); tx.wrapS = THREE.RepeatWrapping; st.tex.push(tx);
+    const g = wdBand(THREE, C, { o0: up.o1, y0: up.y1 + 1, y1: up.y1 + 5, keep: up.keep }, 360); g.attributes.uv.array.forEach((v, i, arr) => { if (i % 2 === 0) arr[i] = v / 14; }); scene.add(new THREE.Mesh(g, new THREE.MeshBasicMaterial({ map: tx, transparent: true, side: THREE.DoubleSide }))); } }
+  if (F.has("cove")) { const w = new THREE.Mesh(new THREE.PlaneGeometry(260, 160), basic("#123a5e")); w.rotation.x = -Math.PI / 2; w.position.set(150, -0.4, -120); scene.add(w); }
+  if (F.has("coke")) { const p = at(-118, 34); const bt = new THREE.Mesh(new THREE.CylinderGeometry(2.4, 4, 24, 16), basic("#c8102e")); bt.position.set(p[0], 22, p[1]); scene.add(bt); const nk = new THREE.Mesh(new THREE.CylinderGeometry(1, 2.4, 8, 12), basic("#e8e8e8")); nk.position.set(p[0], 38, p[1]); scene.add(nk);
+    const gv = new THREE.Mesh(new THREE.SphereGeometry(6, 16, 10), basic("#8a5a32")); gv.scale.set(1, 1.2, 0.5); const q = at(-108, 36); gv.position.set(q[0], 24, q[1]); scene.add(gv); }
+  if (F.has("pool")) { const p = at(-62, 6); box(12, 1, 6, new THREE.MeshBasicMaterial({ color: col("#2aa7d8") }), p[0], 3.4, p[1], face(p)); }
+  if (F.has("fountains")) for (let i = 0; i < 10; i++) { const deg = -128 + i * 9.5, p = at(deg, 4); const f = new THREE.Mesh(new THREE.ConeGeometry(1.4, 9, 10, 1, true), new THREE.MeshBasicMaterial({ color: col("#bfe7ff"), transparent: true, opacity: 0.55, blending: THREE.AdditiveBlending, depthWrite: false })); f.position.set(p[0], 6, p[1]); scene.add(f); }
+  if (F.has("crown")) { const p = at(-90, 30); box(16, 22, 2, "#0a2a5e", p[0], 26, p[1], face(p)); const s = sign("ROYALS", "#4aa3ff", 18, p[0] - p[2] * 1.3, 40, p[1] - p[3] * 1.3, face(p)); void s; }
+  if (F.has("pines")) for (let i = 0; i < 14; i++) { const p = at(-104 + i * 2, 4 + (i % 3) * 3); const c = new THREE.Mesh(new THREE.ConeGeometry(2.2, 9, 8), basic("#1f4d2a")); c.position.set(p[0], 7.5, p[1]); scene.add(c); }
+  if (F.has("purple")) { const lo = V.tiers[0]; const y = lo.y0 + (lo.y1 - lo.y0) * 0.62; const g = wdBand(THREE, C, { o0: lo.o0 + (lo.o1 - lo.o0) * 0.62 - 0.05, y0: y, y1: y + 0.5, keep: (x, z) => z > -40 }, 360); scene.add(new THREE.Mesh(g, basic("#5b2d8e", { side: THREE.DoubleSide }))); }
+  if (F.has("train")) { const p = at(-128, 8); box(46, 1.2, 2, "#3a3a3a", p[0], 26, p[1], face(p)); box(14, 5, 3.4, "#8a8d93", p[0], 29, p[1], face(p)); box(4, 6, 3.6, "#4a4d53", p[0] + p[3] * 8, 29.5, p[1] - p[2] * 8, face(p)); }
+  if (F.has("slide")) { const p = at(-122, 10); const pts = []; for (let i = 0; i <= 20; i++) { const u = i / 20; pts.push(new THREE.Vector3(p[0] + Math.sin(u * 5) * 4, 30 - u * 18, p[1] + u * 3)); }
+    const tube = new THREE.Mesh(new THREE.TubeGeometry(new THREE.CatmullRomCurve3(pts), 40, 1.1, 10, false), basic("#ffc72c")); scene.add(tube); box(8, 5, 6, "#13294b", p[0], 32, p[1], face(p)); }
+  if (F.has("palms")) for (const deg of [-128, -116, -64, -52]) { const p = at(deg, 22); box(0.8, 18, 0.8, "#6b4a2e", p[0], 9, p[1]); const c = new THREE.Mesh(new THREE.SphereGeometry(3.2, 10, 6), basic("#2e6b36")); c.scale.set(1.3, 0.45, 1.3); c.position.set(p[0], 18.5, p[1]); scene.add(c); }
+  if (F.has("pavilions")) for (const deg of [-118, -62]) { const p = at(deg, 10); const r = new THREE.Mesh(new THREE.CylinderGeometry(22, 22, 1, 24, 1, false, 0, Math.PI), basic("#e9e6dd")); r.scale.set(1, 1, 0.35); r.position.set(p[0], 14, p[1]); r.rotation.y = face(p); scene.add(r); }
+  if (F.has("tank")) { const p = at(-64, 1.5); box(14, 3, 4, new THREE.MeshBasicMaterial({ color: col("#2f7fd6") }), p[0], 1.6, p[1], face(p)); st.glowAt([p[0], 3, p[1]], 18, [0.3, 0.6, 1], 0.5); }
+  if (F.has("stacks")) for (const deg of [-62, -58]) { const p = at(deg, 18); box(3, 26, 3, "#5a5a5a", p[0], 13, p[1]); st.glowAt([p[0], 27, p[1]], 10, [1, 0.6, 0.2], 0.6); }
+  if (F.has("bell")) { const p = at(-64, 26); sign("LIBERTY BELL", "#ffcc33", 22, p[0], 34, p[1], face(p)); }
+  if (F.has("apple")) { const p = at(-90, 6); const a = new THREE.Mesh(new THREE.SphereGeometry(3, 16, 12), basic("#d4202a")); a.position.set(p[0], 6, p[1]); scene.add(a); }
+  if (F.has("warehouse")) { const p = at(-52, 34); box(150, 28, 18, "#7a3f2a", p[0], 14, p[1], face(p)); }
+  if (F.has("arch")) { const pts = []; for (let i = 0; i <= 30; i++) { const u = i / 30 * 2 - 1; pts.push(new THREE.Vector3(u * 60, 120 * (1 - u * u) * 0.95, -420)); } scene.add(new THREE.Mesh(new THREE.TubeGeometry(new THREE.CatmullRomCurve3(pts), 60, 2.2, 6, false), basic("#c9ced6"))); }
+  if (F.has("bridge")) { const z = -260; box(260, 3, 8, "#ffcc00", 30, 30, z); for (const x of [-40, 30, 100]) box(4, 50, 4, "#ffcc00", x, 25, z); }
+  if (F.has("rocks")) { const p = at(-88, 6); for (let i = 0; i < 6; i++) { const r = new THREE.Mesh(new THREE.DodecahedronGeometry(4 + Math.random() * 3), basic("#7a6a58")); r.position.set(p[0] + (i - 3) * 4, 3, p[1] + (i % 2) * 3); scene.add(r); } }
+  if (F.has("western")) { const p = at(-134, 14); box(18, 24, 14, "#8a4a32", p[0], 12, p[1], face(p)); }
+  if (F.has("tigers")) for (const deg of [-110, -70]) { const p = at(deg, 12); box(4, 5, 9, "#d97a1e", p[0], 24, p[1], face(p)); }
+  void wallH;
 }
 
 // ---- the venues: a contour the stands are built around, decks off it, the field, where the camera sits ----
@@ -23986,8 +24160,8 @@ function wdBand(THREE, C, o, seg) {
   const N = seg || 360, pos = [], uv = [], idx = [], P = [];
   for (let i = 0; i <= N; i++) P.push(wdNorm(C, i / N));
   let len = 0; const L = [0]; for (let i = 1; i <= N; i++) { const a = P[i - 1], b = P[i], om = (o.o0 + (o.o1 ?? o.o0)) / 2; len += Math.hypot(b[0] + b[2] * om - a[0] - a[2] * om, b[1] + b[3] * om - a[1] - a[3] * om); L.push(len); }
-  for (let i = 0; i <= N; i++) { const [x, z, nx, nz] = P[i], o1 = o.o1 ?? o.o0;
-    pos.push(x + nx * o.o0, o.y0, z + nz * o.o0, x + nx * o1, o.y1, z + nz * o1); uv.push(L[i], 0, L[i], 1); }
+  for (let i = 0; i <= N; i++) { const [x, z, nx, nz] = P[i], o1 = o.o1 ?? o.o0, y0 = o.y0f ? o.y0f(i / N) : o.y0, y1 = o.y1f ? o.y1f(i / N) : o.y1;
+    pos.push(x + nx * o.o0, y0, z + nz * o.o0, x + nx * o1, y1, z + nz * o1); uv.push(L[i], 0, L[i], 1); }
   for (let i = 0; i < N; i++) { const [x, z] = P[i], [x2, z2] = P[i + 1], om = (o.o0 + (o.o1 ?? o.o0)) / 2, nx = P[i][2], nz = P[i][3];
     if (o.keep && !o.keep((x + x2) / 2 + nx * om, (z + z2) / 2 + nz * om)) continue;
     const a = i * 2, b = a + 1, c = a + 2, d = a + 3; idx.push(a, c, b, b, c, d); }
@@ -24069,12 +24243,12 @@ function wdFieldNFL(T) {
   wdTeamArt(x, T.h, W / 2, H / 2, 13 * k);
   return c;
 }
-function wdFieldMLB(V, C) {
+function wdFieldMLB(V, C, pf) {
   const S = 2048, c = wdCanvas(S, S), x = c.getContext("2d"), [fw, , fx0, fz0] = V.field, k = S / fw, X = (wx) => (wx - fx0 + fw / 2) * k, Y = (wz) => (wz - fz0 + fw / 2) * k;
   x.fillStyle = "#24612d"; x.fillRect(0, 0, S, S);
   // fair territory, mowed in a checkerboard
   x.save(); x.beginPath(); x.moveTo(X(0), Y(0)); x.lineTo(X(-140), Y(-140)); x.lineTo(X(140), Y(-140)); x.closePath(); x.clip();
-  x.translate(X(0), Y(0)); x.rotate(Math.PI / 4); const q = 7 * k; for (let i = -30; i < 30; i++) for (let j = -30; j < 30; j++) { x.fillStyle = (i + j) % 2 ? "#2f8a3e" : "#287a36"; x.fillRect(i * q, j * q, q + 1, q + 1); }
+  x.translate(X(0), Y(0)); x.rotate(Math.PI / 4); const q = 7 * k; for (let i = -30; i < 30; i++) for (let j = -30; j < 30; j++) { x.fillStyle = (i + j) % 2 ? (pf && pf.turf ? "#2b8a3c" : "#2f8a3e") : (pf && pf.turf ? "#29833a" : "#287a36"); x.fillRect(i * q, j * q, q + 1, q + 1); }
   x.restore();
   // the warning track along the wall
   x.beginPath(); for (let i = 0; i <= 240; i++) { const p = C(i / 240); i ? x.lineTo(X(p[0]), Y(p[1])) : x.moveTo(X(p[0]), Y(p[1])); } x.closePath(); x.lineWidth = 9 * k; x.strokeStyle = "#8f6a45"; x.stroke();
@@ -24179,7 +24353,8 @@ function wdTex(THREE, canvas, aniso) { const t = new THREE.CanvasTexture(canvas)
 
 // ---- build a venue ----
 function wdBuild(L, R) {
-  const THREE = L.THREE, V = WD_V[R.sport], C = wdContour(V); WD.V = V;
+  const THREE = L.THREE, pf = R.sport === "mlb" ? wdPark(R) : null, V = pf ? Object.assign({}, WD_V.mlb, { dome: pf.roof !== "open" ? 1 : 0, towers: pf.roof !== "open" ? [] : WD_V.mlb.towers }) : WD_V[R.sport];
+  WD.V = V; const C = pf ? wdParkContour(pf) : wdContour(V), wallH = pf ? wdParkWall(pf) : null;
   const scene = new THREE.Scene(), cam = new THREE.PerspectiveCamera(V.board.f, innerWidth / innerHeight, 0.5, 4000), T = R.T, aniso = Math.min(8, WD.r.capabilities.getMaxAnisotropy());
   const C1 = wdLift(T.h.col, 0.16), C2 = wdLift(T.h.alt, 0.2), C3 = wdLift(T.a.col, 0.16), haze = [0.03, 0.04, 0.07];
   const st = { THREE, scene, cam, V, C, R, mats: [], tex: [], disp: [], t0: performance.now(), look: new THREE.Vector3(...V.board.l), fly: null, hold: null, glows: [], fw: null, flash: 0, fc: [1, 1, 1], wave: 0, burst: 0, dim: 0 };
@@ -24187,14 +24362,14 @@ function wdBuild(L, R) {
   const keep = (m) => { st.mats.push(m); return m; };
   // the sky (or the arena's dark)
   const sky = new THREE.Mesh(new THREE.SphereGeometry(3000, 32, 16), keep(new THREE.ShaderMaterial({ side: THREE.BackSide, depthWrite: false,
-    uniforms: { uT: { value: 0 }, uArena: { value: V.roof ? 1 : 0 }, uTint: { value: v3(C1) }, uFc: { value: v3([1, 1, 1]) }, uFlash: { value: 0 } },
+    uniforms: { uT: { value: 0 }, uArena: { value: V.roof || V.dome ? 1 : 0 }, uTint: { value: v3(C1) }, uFc: { value: v3([1, 1, 1]) }, uFlash: { value: 0 } },
     vertexShader: "varying vec3 vP; void main(){ vP = position; gl_Position = projectionMatrix * modelViewMatrix * vec4(position, 1.0); }", fragmentShader: WD_SKY })));
   scene.add(sky); st.sky = sky;
   // the ground around the field
-  const ground = new THREE.Mesh(new THREE.CircleGeometry(Math.max(V.A, V.B) * 3, 48), new THREE.MeshBasicMaterial({ color: new THREE.Color().setRGB(...(V.roof ? [0.035, 0.04, 0.05] : [0.06, 0.14, 0.07]), THREE.LinearSRGBColorSpace) }));
+  const ground = new THREE.Mesh(new THREE.CircleGeometry(Math.max(V.A, V.B) * 3, 48), new THREE.MeshBasicMaterial({ color: new THREE.Color().setRGB(...(V.roof && !V.dome ? [0.035, 0.04, 0.05] : [0.06, 0.14, 0.07]), THREE.LinearSRGBColorSpace) }));
   ground.rotation.x = -Math.PI / 2; ground.position.set(V.cx, -0.05, V.cz); scene.add(ground);
   // the field
-  const art = R.sport === "nfl" ? wdFieldNFL(T) : R.sport === "mlb" ? wdFieldMLB(V, C) : R.sport === "nba" ? wdCourt(T, V) : wdRink(T, V);
+  const art = R.sport === "nfl" ? wdFieldNFL(T) : R.sport === "mlb" ? wdFieldMLB(V, C, pf) : R.sport === "nba" ? wdCourt(T, V) : wdRink(T, V);
   const ftex = wdTex(THREE, art, aniso); st.tex.push(ftex); st.fieldArt = () => (R.sport === "nfl" ? wdFieldNFL(T) : R.sport === "nba" ? wdCourt(T, V) : R.sport === "nhl" ? wdRink(T, V) : null);
   const [fw, fh, fx0, fz0] = V.field, field = new THREE.Mesh(new THREE.PlaneGeometry(fw, fh), new THREE.MeshBasicMaterial({ map: ftex }));
   field.rotation.x = -Math.PI / 2; field.position.set(fx0, 0, fz0); scene.add(field); st.field = field;
@@ -24202,7 +24377,8 @@ function wdBuild(L, R) {
   const crowdU = () => ({ uT: { value: 0 }, uSeat: { value: R.sport === "nfl" ? 0.62 : 0.56 }, uRow: { value: 20 }, uWave: { value: 0 }, uWX: { value: 120 }, uFl: { value: V.roof ? 140 : 420 }, uLit: { value: 1 }, uFlash: { value: 0 }, uBurst: { value: 0 },
     uC1: { value: v3(C1) }, uC2: { value: v3(C2) }, uC3: { value: v3(C3) }, uStep: { value: v3(V.roof ? [0.07, 0.07, 0.08] : [0.1, 0.1, 0.11]) }, uFc: { value: v3([1, 1, 1]) }, uHaze: { value: v3(haze) } });
   st.crowd = []; st.suites = [];
-  for (const t of V.tiers) {
+  for (const t0 of V.tiers) {
+    const t = wallH && !t0.suite && t0.y0 < 6 ? Object.assign({}, t0, { y0f: (u) => Math.max(t0.y0, wallH(u) + 0.4), y1f: (u) => Math.max(t0.y0, wallH(u) + 0.4) + (t0.y1 - t0.y0) }) : t0;
     const g = wdBand(THREE, C, t, 480);
     if (t.suite) {
       const m = keep(new THREE.ShaderMaterial({ uniforms: { uT: { value: 0 }, uW: { value: R.sport === "nfl" ? 11 : R.sport === "mlb" ? 9 : 5 }, uLit: { value: 1 }, uGlow: { value: v3(C1) }, uHaze: { value: v3(haze) }, uFl: { value: V.roof ? 140 : 420 } }, vertexShader: WD_VS, fragmentShader: WD_SUITE, side: THREE.DoubleSide }));
@@ -24211,18 +24387,19 @@ function wdBuild(L, R) {
     const u = crowdU(); u.uRow.value = t.rows; const m = keep(new THREE.ShaderMaterial({ uniforms: u, vertexShader: WD_VS, fragmentShader: WD_CROWD, side: THREE.DoubleSide, extensions: { derivatives: true } }));
     scene.add(new THREE.Mesh(g, m)); st.crowd.push(m);
     // the face of the deck under its front row
-    const fg = wdBand(THREE, C, { o0: t.o0, y0: t.y0 - (t.y0 > 3 ? 2.2 : t.y0), y1: t.y0, keep: t.keep }, 240);
+    const fg = wdBand(THREE, C, { o0: t.o0, y0: t.y0 - (t.y0 > 3 ? 2.2 : t.y0), y1: t.y0, y0f: t.y0f ? () => 0 : null, y1f: t.y0f || null, keep: t.keep }, 240);
     scene.add(new THREE.Mesh(fg, new THREE.MeshBasicMaterial({ color: new THREE.Color().setRGB(0.04, 0.045, 0.06, THREE.LinearSRGBColorSpace), side: THREE.DoubleSide })));
   }
   // the ballpark wall, padded in the home color
-  if (V.wall) { const wg = wdBand(THREE, C, { o0: V.wall.o, y0: 0, y1: V.wall.y1 }, 360); scene.add(new THREE.Mesh(wg, new THREE.MeshBasicMaterial({ color: new THREE.Color().setRGB(...wdMix(wdLift(T.h.col, 0.08), [0, 0, 0], 0.25), THREE.LinearSRGBColorSpace), side: THREE.DoubleSide })));
-    const yg = wdBand(THREE, C, { o0: V.wall.o + 0.02, y0: V.wall.y1, y1: V.wall.y1 + 0.25 }, 360); scene.add(new THREE.Mesh(yg, new THREE.MeshBasicMaterial({ color: new THREE.Color().setRGB(1, 0.83, 0.3, THREE.LinearSRGBColorSpace), side: THREE.DoubleSide })));
+  if (V.wall) { const wy = wallH || (() => V.wall.y1), wg = wdBand(THREE, C, { o0: V.wall.o, y0: 0, y1: V.wall.y1, y1f: wy }, 360); scene.add(new THREE.Mesh(wg, new THREE.MeshBasicMaterial({ color: new THREE.Color().setRGB(...wdMix(wdLift(T.h.col, 0.08), [0, 0, 0], 0.25), THREE.LinearSRGBColorSpace), side: THREE.DoubleSide })));
+    const yg = wdBand(THREE, C, { o0: V.wall.o + 0.02, y0: V.wall.y1, y1: V.wall.y1 + 0.25, y0f: wy, y1f: (u) => wy(u) + 0.25 }, 360); scene.add(new THREE.Mesh(yg, new THREE.MeshBasicMaterial({ color: new THREE.Color().setRGB(1, 0.83, 0.3, THREE.LinearSRGBColorSpace), side: THREE.DoubleSide })));
     // the distances on the wall, and the foul poles
-    for (const [ang, n] of [[-135, "330"], [-112, "375"], [-90, "400"], [-68, "375"], [-45, "330"]]) {
+    const dd = pf ? pf.d : [330, 375, 400, 375, 330];
+    for (const [ang, n] of [[-135, dd[0]], [-112.5, dd[1]], [-90, dd[2]], [-67.5, dd[3]], [-45, dd[4]]].map(([a, v]) => [a, String(v)])) {
       const a = (ang * Math.PI) / 180, dir = [Math.cos(a), Math.sin(a)]; let best = null, bd = 1e9; for (let i = 0; i < 360; i++) { const p = C(i / 360), d = Math.abs(Math.atan2(p[1], p[0]) - a); if (d < bd) { bd = d; best = p; } }
       const c = wdCanvas(256, 128), x = c.getContext("2d"); x.font = `900 110px "Barlow Condensed", Inter, sans-serif`; x.textAlign = "center"; x.textBaseline = "middle"; x.fillStyle = "#fff"; x.fillText(n, 128, 68);
       const tx = wdTex(THREE, c); st.tex.push(tx); const pl = new THREE.Mesh(new THREE.PlaneGeometry(5, 2.5), new THREE.MeshBasicMaterial({ map: tx, transparent: true, depthWrite: false }));
-      pl.position.set(best[0] - dir[0] * 0.5, 1.7, best[1] - dir[1] * 0.5); pl.lookAt(0, 1.7, 0); scene.add(pl); void dir;
+      const ty = Math.min(1.7, (wallH ? wallH(((ang + 135) / 360 + 1) % 1) : 3.2) - 1.4); pl.position.set(best[0] - dir[0] * 0.5, ty, best[1] - dir[1] * 0.5); pl.lookAt(0, ty, 0); scene.add(pl); void dir;
     }
     for (const s of [-1, 1]) { let best = null, bd = 1e9; for (let i = 0; i < 720; i++) { const p = C(i / 720); if (p[1] > -10) continue; const d = Math.abs(p[0] + s * p[1]); if (d < bd) { bd = d; best = p; } }
       const pole = new THREE.Mesh(new THREE.CylinderGeometry(0.25, 0.25, 26, 8), new THREE.MeshBasicMaterial({ color: new THREE.Color().setRGB(1, 0.83, 0.25, THREE.LinearSRGBColorSpace) })); pole.position.set(best[0], 13, best[1]); scene.add(pole); }
@@ -24258,6 +24435,8 @@ function wdBuild(L, R) {
     for (let i = 0; i < 18; i++) { const p = wdNorm(C, i / 18), o = V.tiers[0].o1 * 0.5; glow([p[0] + p[2] * o, V.roof - 2, p[1] + p[3] * o], 8, [1, 0.96, 0.9], 0.75); }
     for (let i = 0; i < 4; i++) { const a = (i / 4) * Math.PI * 2 + 0.4; glow([Math.cos(a) * V.A * 0.45, V.roof - 4, Math.sin(a) * V.B * 0.45], 26, [0.9, 0.92, 1], 0.28); }
   }
+  st.glowAt = glow;
+  if (pf) { st.pf = pf; try { wdParkBuild(st, pf, C, V); } catch (e) { console.warn("park", e); } }
   // the jumbotron
   const J = V.jumbo, jtex = wdTex(THREE, wdJumboArt(R)); st.tex.push(jtex); st.jtex = jtex;
   st.screens = [];
@@ -24410,7 +24589,7 @@ function wdIdleArt(force) {
   if (!force && sig === WD.sig) return; WD.sig = sig;
   if (!st.vtex) { st.jtex.image = wdJumboArt(st.R, WD.card); st.jtex.needsUpdate = true; }
   if (!WD.ribAt || Date.now() > WD.ribAt) {
-    const items = [{ t: "SWEAT BOARD", c: [1, 0.79, 0.3] }];
+    const items = [{ t: "SWEAT BOARD", c: [1, 0.79, 0.3] }]; const vn = (st.pf && st.pf.nm) || (st.R.ven && st.R.ven.nm); if (vn) items.push({ t: vn.toUpperCase(), c: wdLift(st.R.T.h.alt, 0.4) });
     if (T.a.sc !== "") items.push({ t: `${T.a.ab} ${T.a.sc}  ${T.h.ab} ${T.h.sc}  ${(T.d || "").toUpperCase()}`, c: [1, 1, 1] });
     if (R.pulse) items.push({ t: R.pulse.toUpperCase(), c: [0.24, 0.88, 0.56] });
     for (const p of R.lb) items.push({ t: `${p.nm.toUpperCase()} ${p.v}`.trim(), c: wdLift(p.c, 0.35) });
@@ -24434,13 +24613,13 @@ async function wdStart() {
     }
     const R = wdRead(); WD.key = wdKey(R);
     for (const s of ["a", "h"]) if (R.T[s].lg) { const im = new Image(); im.crossOrigin = "anonymous"; im.referrerPolicy = "no-referrer"; im.onload = () => { if (WD.st && WD.st.R.T[s] === R.T[s]) wdRepaint(); }; im.src = R.T[s].lg; R.T[s].img = im; }
-    WD.st = wdBuild(L, R); wdSize(WD.qb || 0.6, true);
+    WD.st = wdBuild(L, R); WD.builtAt = Date.now(); wdSize(WD.qb || 0.6, true);
     document.body.classList.add("v2w"); WD.sig = ""; wdIdleArt(true);
     if (!WD.raf) WD.raf = requestAnimationFrame(wdLoop);
   } catch (e) { console.warn("world", e); }
   WD.starting = false;
 }
-const wdKey = (R) => R.sport + ":" + R.T.a.ab + ":" + R.T.h.ab;
+const wdKey = (R) => R.sport + ":" + R.T.a.ab + ":" + R.T.h.ab + ":" + ((R.ven && R.ven.nm) || "");
 function wdRepaint() {
   const st = WD.st; if (!st) return; const a = st.fieldArt(); if (a) { st.field.material.map.image = a; st.field.material.map.needsUpdate = true; } WD.sig = ""; wdIdleArt(true);
 }
@@ -24482,7 +24661,10 @@ function wdPoll() {
   if (!wdOn() || !wdTv()) { if (WD.st) wdStop(); return; }
   if (!WD.st) { wdStart(); return; }
   const R = wdRead(), k = wdKey(R);
-  if (k !== WD.key && WD.mode === "board" && !WD.st.fly) { wdDispose(WD.st); WD.st = null; wdStart(); return; }
+  // a new venue (the big game changed, or its venue came in): rebuild, but never in the middle of a show, only once the change
+  // has held for two looks, and not more than every 15 s
+  if (k !== WD.key) { const calm = WD.mode === "board" && !WD.st.fly && !document.querySelector(".cs.show, #cash:not([hidden])") && Date.now() - (WD.builtAt || 0) > 15e3;
+    if (WD.pend === k && calm) { WD.pend = ""; wdDispose(WD.st); WD.st = null; wdStart(); return; } WD.pend = k; } else WD.pend = "";
   const T = WD.st.R.T;
   for (const s of ["a", "h"]) { const was = parseFloat(T[s].sc), now = parseFloat(R.T[s].sc); if (isFinite(was) && isFinite(now) && now > was) wdScore(s, now - was); }
   wdIdleArt(false);
