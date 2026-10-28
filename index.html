@@ -6443,13 +6443,15 @@ body.tv.pplg .roomtv:not([hidden]) span { align-self: start; }
 body.v2b { --v2-p1: #10141b; --v2-p2: #0a0d12; --v2-line: rgba(255,255,255,.075); --v2-ink: #eef2f7; --v2-ink2: rgba(238,242,247,.68); --v2-ink3: rgba(238,242,247,.44);
   --v2-win: #3ee08f; --v2-loss: #ff4d5e; --v2-even: #ffc94d; --v2-live: #ff3b4e; }
 
-/* ---- the header: a slim broadcast bar (shapes and color only; sizes stay so it holds one line) ---- */
-body.v2b.tv header.top { background: linear-gradient(180deg, rgba(5,7,11,.96), rgba(5,7,11,.8)); box-shadow: 0 1px 0 var(--v2-line), 0 10px 30px rgba(0,0,0,.35); }
+/* ---- the header: no bar, the words float over the board with a shadow under them; the chips are small dark pills ---- */
+body.v2b.tv header.top { background: none !important; box-shadow: none !important; border: 0 !important; -webkit-backdrop-filter: none !important; backdrop-filter: none !important; }
+body.v2b.tv header.top::before, body.v2b.tv header.top::after { display: none !important; }
+body.v2b.tv header.top h1, body.v2b.tv header.top .clock, body.v2b.tv header.top .status { text-shadow: 0 2px 4px rgba(0,0,0,.9), 0 0 18px rgba(0,0,0,.75), 0 0 2px rgba(0,0,0,.9); }
 body.v2b.tv header.top h1 span { color: var(--v2-even); }
-body.v2b.tv header.top .chip, body.v2b.tv header.top .btn { border-radius: 7px; border: 0; box-shadow: inset 0 0 0 1px var(--v2-line); background: rgba(255,255,255,.04); }
-body.v2b.tv header.top .modechip { border-radius: 4px; background: linear-gradient(90deg, rgba(255,59,78,.16), rgba(255,59,78,.03)); box-shadow: inset 3px 0 0 var(--v2-live), inset 0 0 0 1px rgba(255,59,78,.28); }
-body.v2b.tv header.top .modechip.pulse { background: linear-gradient(90deg, rgba(62,224,143,.14), rgba(62,224,143,.03)); box-shadow: inset 3px 0 0 var(--v2-win), inset 0 0 0 1px rgba(62,224,143,.28); }
-body.v2b.tv header.top .seg { border-radius: 8px; background: rgba(255,255,255,.035); box-shadow: inset 0 0 0 1px var(--v2-line); }
+body.v2b.tv header.top .chip, body.v2b.tv header.top .btn { border-radius: 7px; border: 0; background: rgba(5,7,11,.72); box-shadow: inset 0 0 0 1px rgba(255,255,255,.1), 0 4px 14px rgba(0,0,0,.45); text-shadow: 0 1px 2px rgba(0,0,0,.6); }
+body.v2b.tv header.top .modechip { border-radius: 4px; background: linear-gradient(90deg, rgba(70,10,18,.82), rgba(5,7,11,.72)); box-shadow: inset 3px 0 0 var(--v2-live), inset 0 0 0 1px rgba(255,59,78,.32), 0 4px 14px rgba(0,0,0,.45); }
+body.v2b.tv header.top .modechip.pulse { background: linear-gradient(90deg, rgba(10,60,36,.82), rgba(5,7,11,.72)); box-shadow: inset 3px 0 0 var(--v2-win), inset 0 0 0 1px rgba(62,224,143,.3), 0 4px 14px rgba(0,0,0,.45); }
+body.v2b.tv header.top .seg { border-radius: 8px; background: rgba(5,7,11,.72); box-shadow: inset 0 0 0 1px rgba(255,255,255,.1), 0 4px 14px rgba(0,0,0,.45); }
 body.v2b.tv header.top .clock { font-family: var(--f-num); font-weight: 700; letter-spacing: .04em; }
 
 /* ---- a bet ticket ---- */
@@ -6600,24 +6602,32 @@ body.v2w::before, body.v2w #cfield, body.v2w #bfield, body.v2w #hcourt, body.v2w
 body.v2w .app { transition: opacity .55s ease, transform .75s cubic-bezier(.2,.7,.2,1); transform-origin: 50% 40%; }
 body.v2w.v2w-away .app { opacity: 0; transform: scale(.94); pointer-events: none; }
 body.v2w.v2w-away #roomTvQr { opacity: 0; transition: opacity .4s; }
-/* the video waits for the camera to get there */
-body.v2w.v2w-fly #jumbo { opacity: 0 !important; animation: none !important; }
-body.v2w.v2w-clip #jumbo, body.v2w.v2w-dj #jumbo { transition: opacity .5s ease; }
-/* a DJ break plays through the suite's glass: only the song card and the header stay on screen */
-body.v2w.v2w-dj #jumbo { background: transparent !important; box-shadow: none !important; -webkit-backdrop-filter: none !important; backdrop-filter: none !important; }
-body.v2w.v2w-dj #jumbo .jb-screen > video, body.v2w.v2w-dj #jumbo #jbWash, body.v2w.v2w-dj #jumbo #djCv { opacity: 0 !important; }
-body.v2w.v2w-dj #jumbo .jb-screen, body.v2w.v2w-dj #jumbo .jb-main { background: transparent !important; box-shadow: none !important; border-color: transparent !important; }
-body.v2w.v2w-dj #jumbo::before, body.v2w.v2w-dj #jumbo::after, body.v2w.v2w-dj #jumbo .jb-screen::before, body.v2w.v2w-dj #jumbo .jb-screen::after { display: none !important; }
+/* a video never leaves the building: the picture is glued onto the jumbotron (a DJ set onto the suite's glass) and the rest
+   floats around it as glass panels: the title plate top left, the room's bets on the right turned toward the field, the song
+   card and the score bug over the stands */
+body.v2w.v2w-in #jumbo { background: none !important; box-shadow: none !important; -webkit-backdrop-filter: none !important; backdrop-filter: none !important; animation: none !important; }
+body.v2w.v2w-in #jumbo::before, body.v2w.v2w-in #jumbo::after { display: none !important; }
+body.v2w.v2w-in #jumbo .jb-main, body.v2w.v2w-in #jumbo .jb-screen { background: none !important; box-shadow: none !important; border: 0 !important; outline: 0 !important; border-radius: 0 !important; overflow: visible !important; }
+body.v2w.v2w-in #jumbo .jb-screen::before, body.v2w.v2w-in #jumbo .jb-screen::after { display: none !important; }
+body.v2w.v2w-proj #pipVid, body.v2w.v2w-proj #jbWash, body.v2w.v2w-proj #djCv { position: fixed !important; inset: 0 auto auto 0 !important; width: 1280px !important; height: 720px !important; max-width: none !important; max-height: none !important; transform-origin: 0 0 !important; border-radius: 0 !important; margin: 0 !important; z-index: 0; }
+body.v2w.v2w-proj #jbWash { display: block !important; filter: blur(24px) brightness(.55); }
+body.v2w.v2w-in #jumbo .jb-head { justify-self: start; align-self: start; width: auto !important; margin: 16px 0 0 20px; padding: 10px 16px; border: 0 !important; border-radius: 10px; background: rgba(5,7,11,.76) !important; box-shadow: inset 0 0 0 1px rgba(255,255,255,.1), 0 12px 30px rgba(0,0,0,.5) !important; }
+body.v2w.v2w-in #jumbo .jb-side { margin: 16px 20px 16px 0; border: 0 !important; border-radius: 18px; background: rgba(6,8,12,.82) !important; box-shadow: inset 0 0 0 1px rgba(255,255,255,.1), 0 30px 70px rgba(0,0,0,.6) !important; transform: perspective(1600px) rotateY(-8deg); transform-origin: 100% 50%; overflow: hidden; }
+body.v2w.v2w-in #jumbo .jb-head, body.v2w.v2w-in #jumbo .jb-side, body.v2w.v2w-in #jumbo .jb-prog, body.v2w.v2w-in #jbBug, body.v2w.v2w-in #jbNp, body.v2w.v2w-in #jbTeam { transition: opacity .5s ease; }
+body.v2w.v2w-in #jbBug, body.v2w.v2w-in #jbNp { box-shadow: 0 14px 34px rgba(0,0,0,.55); }
+body.v2w.v2w-in #jumbo.out { opacity: 0 !important; transition: opacity .4s ease; }
+/* while the camera's moving: only the picture on the screen */
+body.v2w.v2w-fly #jumbo .jb-head, body.v2w.v2w-fly #jumbo .jb-side, body.v2w.v2w-fly #jumbo .jb-prog, body.v2w.v2w-fly #jbBug, body.v2w.v2w-fly #jbNp, body.v2w.v2w-fly #jbTeam { opacity: 0 !important; }
 /* the panels stay solid in front of the building so nothing behind shows through the numbers */
 html body.v2w.tv .rb-g { background: linear-gradient(180deg, #0e1219, #080a0e) !important; }
 html body.v2w.tv .rb-sec, html body.v2w.tv .rb-card { background: linear-gradient(180deg, rgba(14,18,25,.93), rgba(8,10,14,.95)) !important; }
-body.v2w.v2w-dj #jumbo .jb-side { visibility: hidden; }
-body.v2w.v2w-dj #jumbo .jb-screen { border: 0 !important; outline: 0 !important; }
-body.v2w.v2w-dj #jumbo .jb-screen > i, body.v2w.v2w-dj #jumbo .jb-screen > b.cn { display: none !important; }
 /* a score or a cash: the building's light spills over the edges of the board */
 #v2wGlow { position: fixed; inset: 0; z-index: 3; pointer-events: none; opacity: 0; --wfc: 255,255,255; mix-blend-mode: screen;
   background: radial-gradient(120% 60% at 50% 115%, rgba(var(--wfc), .55), rgba(var(--wfc), 0) 60%), radial-gradient(70% 40% at 50% -12%, rgba(var(--wfc), .35), rgba(var(--wfc), 0) 70%); }
 body:not(.v2w) #v2wGlow { display: none; }
+/* the top of the building fades a little darker so the floating header always reads */
+body.v2w #v2world { -webkit-mask-image: linear-gradient(to bottom, rgba(0,0,0,.42), rgba(0,0,0,.42) 4%, #000 17%); mask-image: linear-gradient(to bottom, rgba(0,0,0,.42), rgba(0,0,0,.42) 4%, #000 17%); }
+body.v2w.v2w-away #v2world { -webkit-mask-image: none; mask-image: none; }
 </style>
 </head>
 <body>
@@ -13707,7 +13717,7 @@ void main(){
   // ---------- sheets ----------
   function openSheet(id) { $(id).hidden = false; }
   // keep every open screen current: when a new version is up, reload it (never mid-form or mid-animation)
-  const BUILD = "20261028011635";
+  const BUILD = "20261028014850";
   function checkBuild() {
     if (BUILD === "dev") return;
     fetch("version.json?t=" + Date.now(), { cache: "no-store" }).then((r) => (r.ok ? r.json() : null)).then((j) => {
@@ -24315,6 +24325,33 @@ function wdShotFill(st) {
   const d = Math.min(F.h / 2 / tv, F.w / 2 / (tv * asp)) * 0.985;
   return { p: F.c.clone().add(F.n.clone().multiplyScalar(d)), l: F.c.clone(), f: fov, F };
 }
+// a screen in frame: F (its center, normal, size) at fr of the picture's width, left of center so the floating panels have the
+// right side
+function wdFrame(st, F, fr) {
+  const T = st.THREE, fov = 40, tv = Math.tan(((fov / 2) * Math.PI) / 180), asp = innerWidth / innerHeight;
+  const d = F.w / (fr * 2 * tv * asp), right = new T.Vector3(0, 1, 0).cross(F.n).normalize(), off = 0.35 * d * tv * asp, lift = F.h * 0.13;
+  const p = F.c.clone().add(F.n.clone().multiplyScalar(d)).add(right.clone().multiplyScalar(off)).add(new T.Vector3(0, F.h * 0.12 + lift, 0));
+  return { p, l: F.c.clone().add(right.multiplyScalar(off)).add(new T.Vector3(0, lift, 0)), f: fov };
+}
+// the page's video, glued onto a screen in the building: its four corners projected, a CSS matrix3d mapping the element's box
+// onto them (the video stays the page's own element, sharp, any source)
+const WD_PW = 1280, WD_PH = 720;
+function wdProject(st) {
+  const P = st.proj; if (!P) return; const T = st.THREE, F = P.F, up = new T.Vector3(0, 1, 0), right = up.clone().cross(F.n).normalize();
+  const hw = F.w / 2, hh = F.h / 2, W = innerWidth, H = innerHeight;
+  const pts = [[-hw, hh], [hw, hh], [hw, -hh], [-hw, -hh]].map(([x, y]) => { const v = F.c.clone().add(right.clone().multiplyScalar(x)).add(up.clone().multiplyScalar(y)).project(st.cam); return [((v.x + 1) / 2) * W, ((1 - v.y) / 2) * H, v.z]; });
+  const behind = pts.some((q) => q[2] > 1 || q[2] < -1);
+  const [[x0, y0], [x1, y1], [x2, y2], [x3, y3]] = pts;
+  const dx1 = x1 - x2, dx2 = x3 - x2, dx3 = x0 - x1 + x2 - x3, dy1 = y1 - y2, dy2 = y3 - y2, dy3 = y0 - y1 + y2 - y3;
+  let a, b, c, d, e, f, g, h;
+  if (Math.abs(dx3) < 1e-6 && Math.abs(dy3) < 1e-6) { a = x1 - x0; b = x2 - x1; c = x0; d = y1 - y0; e = y2 - y1; f = y0; g = 0; h = 0; }
+  else { const den = dx1 * dy2 - dx2 * dy1; g = (dx3 * dy2 - dx2 * dy3) / den; h = (dx1 * dy3 - dx3 * dy1) / den; a = x1 - x0 + g * x1; b = x3 - x0 + h * x3; c = x0; d = y1 - y0 + g * y1; e = y3 - y0 + h * y3; f = y0; }
+  const m = `matrix3d(${a / WD_PW},${d / WD_PW},0,${g / WD_PW},${b / WD_PH},${e / WD_PH},0,${h / WD_PH},0,0,1,0,${c},${f},0,1)`;
+  for (const el of P.els) { el.style.transform = m; el.style.visibility = behind ? "hidden" : ""; }
+}
+function wdUnproject(st) {
+  if (!st || !st.proj) { document.body.classList.remove("v2w-proj", "v2w-in"); return; } for (const el of st.proj.els) { el.style.transform = ""; el.style.visibility = ""; } st.proj = null; document.body.classList.remove("v2w-proj", "v2w-in");
+}
 function wdFly(st, to, ms, lift, done) {
   const cam = st.cam; st.fly = { a: cam.position.clone(), al: st.look.clone(), af: cam.fov, b: to.p.clone(), bl: to.l.clone(), bf: to.f, t0: performance.now(), ms, lift: lift || 0, done };
   st.hold = null; st.holdShot = to;
@@ -24328,7 +24365,7 @@ function wdCam(st, now) {
     cam.position.copy(p); st.look.copy(F.al).lerp(F.bl, wdEase(Math.min(1, k * 1.15))); cam.fov = F.af + (F.bf - F.af) * e;
     if (k >= 1) { st.fly = null; st.hold = st.holdShot; st.holdT = now; if (F.done) try { F.done(); } catch (e2) { console.warn(e2); } }
   } else if (st.hold) {
-    const H = st.hold, t = now / 1000, a = WD.mode === "board" ? Math.max(1.2, H.p.distanceTo(H.l) * 0.035) : WD.mode === "dj" ? H.p.distanceTo(H.l) * 0.025 : 0;
+    const H = st.hold, t = now / 1000, a = WD.mode === "board" ? Math.max(1.2, H.p.distanceTo(H.l) * 0.035) : H.p.distanceTo(H.l) * (WD.mode === "dj" ? 0.02 : 0.012);
     cam.position.set(H.p.x + Math.sin(t * 0.11) * a, H.p.y + Math.sin(t * 0.07) * a * 0.35, H.p.z + Math.cos(t * 0.09) * a * 0.6);
     st.look.copy(H.l); cam.fov += (H.f - cam.fov) * 0.1;
   }
@@ -24409,7 +24446,7 @@ function wdRepaint() {
 }
 function wdStop() {
   if (WD.mode !== "board") wdBack(true);
-  wdDispose(WD.st); WD.st = null; document.body.classList.remove("v2w", "v2w-away", "v2w-dj", "v2w-clip", "v2w-fly");
+  wdUnproject(WD.st); wdDispose(WD.st); WD.st = null; document.body.classList.remove("v2w", "v2w-away", "v2w-dj", "v2w-clip", "v2w-fly", "v2w-in");
 }
 function wdSize(q, force) {
   if (!WD.r || (!force && q === WD.q)) return; WD.q = q;
@@ -24437,8 +24474,7 @@ function wdLoop(now) {
   if (st.rtex) st.rtex.offset.x = (st.rtex.offset.x + dt * (WD.ribAt ? 0.05 : 0.025)) % 1;
   const on = WD.mode === "dj"; for (const b of st.beams) { b.bm.material.opacity += ((on ? 0.08 : 0) - b.bm.material.opacity) * Math.min(1, dt * 3); b.piv.rotation.z = Math.sin(t * 1.3 + b.s) * 0.7 * b.s; b.piv.rotation.x = 0.9 + Math.sin(t * 0.9 + b.s * 2) * 0.35; }
   if (WD.glow) { const o = Math.min(0.5, st.flash * 0.32) * (WD.mode === "board" ? 1 : 0); if (Math.abs(o - (WD.glowO || 0)) > 0.015) { WD.glowO = o; WD.glow.style.opacity = o.toFixed(3); WD.glow.style.setProperty("--wfc", st.fc.map((v) => Math.round(v * 255)).join(",")); } }
-  wdFwTick(st, dt); wdCam(st, now);
-  if (st.vtex && st.vtex.image && st.vtex.image.readyState >= 2) st.vtex.needsUpdate = true;
+  wdFwTick(st, dt); wdCam(st, now); wdProject(st);
   WD.r.render(st.scene, st.cam);
 }
 // keep up with the board: start or stop with TV, rebuild when the sport or the teams change, scores that light it up
@@ -24458,7 +24494,8 @@ function wdScore(side, d) {
 function wdBack(now) {
   const st = WD.st; WD.mode = "back"; document.body.classList.remove("v2w-dj", "v2w-clip", "v2w-fly");
   if (!st) { WD.mode = "board"; document.body.classList.remove("v2w-away"); return; }
-  const fin = () => { WD.mode = "board"; document.body.classList.remove("v2w-away"); if (st.vtex) { st.vtex.dispose(); st.vtex = null; } for (const s of st.screens) s.material.map = st.jtex, s.material.needsUpdate = true; st.djGlass.material.map = st.djIdle; st.djGlass.material.needsUpdate = true; wdSize(WD.qb || 0.6); WD.sig = ""; wdIdleArt(true); };
+  const fin = () => { WD.mode = "board"; document.body.classList.remove("v2w-away"); wdUnproject(st); wdSize(WD.qb || 0.6); WD.sig = ""; wdIdleArt(true); };
+  setTimeout(() => { if (WD.mode !== "clip" && WD.mode !== "dj") wdUnproject(st); }, 520);
   if (now) { st.fly = null; st.hold = st.shots.board; fin(); return; }
   wdFly(st, st.shots.board, 2100, WD.V.fwR * 0.6, fin);
   setTimeout(() => { if (WD.mode === "back") document.body.classList.remove("v2w-away"); }, 1250);
@@ -24468,19 +24505,15 @@ window.SBW = {
   // a video is up: o.dj (the DJ set), o.v (the video element), o.ext (someone else's video: can't go on a texture)
   clip(o) {
     const st = WD.st; if (!st || !wdTv()) return false;
-    const THREE = st.THREE, dj = !!o.dj;
-    WD.mode = dj ? "dj" : "clip"; document.body.classList.add("v2w-away", "v2w-fly"); document.body.classList.toggle("v2w-dj", dj); document.body.classList.toggle("v2w-clip", !dj);
+    const dj = !!o.dj;
+    WD.mode = dj ? "dj" : "clip"; document.body.classList.add("v2w-away", "v2w-fly", "v2w-in", "v2w-proj"); document.body.classList.toggle("v2w-dj", dj); document.body.classList.toggle("v2w-clip", !dj);
     wdSize(1);
-    if (st.vtex) { st.vtex.dispose(); st.vtex = null; }
-    if (o.v && !o.ext) { const vt = new THREE.VideoTexture(o.v); vt.colorSpace = THREE.NoColorSpace; st.vtex = vt; if (dj) { st.djGlass.material.map = vt; st.djGlass.material.needsUpdate = true; } else for (const s of st.screens) { s.material.map = vt; s.material.needsUpdate = true; } }
-    const go = ++WD.go;
-    // never leave the video hidden behind a camera move that didn't finish
-    setTimeout(() => { if (go === WD.go) document.body.classList.remove("v2w-fly"); }, 4800);
-    if (dj) wdFly(st, st.shots.suite, 2600, WD.V.fwR * 0.5, () => { if (go === WD.go) document.body.classList.remove("v2w-fly"); });
-    else {
-      const fill = wdShotFill(st), near = { p: fill.p.clone().add(fill.F.n.clone().multiplyScalar(fill.p.distanceTo(fill.l) * 1.6)).add(new THREE.Vector3(0, fill.F.h * 0.35, 0)), l: fill.l.clone(), f: 46 };
-      wdFly(st, near, 1500, WD.V.fwR * 0.35, () => { if (go !== WD.go) return; wdFly(st, fill, 850, 0, () => { if (go === WD.go) document.body.classList.remove("v2w-fly"); }); });
-    }
+    const F = dj ? st.djFace() : st.jface(st.cam.position);
+    st.proj = { F, els: [o.v, document.getElementById("jbWash"), document.getElementById("djCv")].filter(Boolean) };
+    const go = ++WD.go, show = () => { if (go === WD.go) document.body.classList.remove("v2w-fly"); };
+    // never leave the panels hidden behind a camera move that didn't finish
+    setTimeout(show, 4800);
+    wdFly(st, wdFrame(st, F, dj ? 0.54 : 0.56), dj ? 2600 : 2100, WD.V.fwR * (dj ? 0.5 : 0.35), show);
     return true;
   },
   clipEnd() { if (!WD.st || WD.mode === "board" || WD.mode === "back") return; WD.go++; wdBack(false); },
@@ -24496,7 +24529,7 @@ window.SBW = {
       wdCard({ big: "NEW BET", l1: `${nm} · ${pk}`, l2: o.amt || "", c: wdMix(c, [0, 0, 0], 0.4) }, 20e3); }
   },
   // for checking a frame: hold the camera on a shot
-  shot(k) { const st = WD.st; if (!st) return; const s = k === "fill" ? wdShotFill(st) : st.shots[k]; if (!s) return; st.fly = null; st.hold = s; st.holdShot = s; },
+  shot(k) { const st = WD.st; if (!st) return; const s = k === "fill" ? wdShotFill(st) : k === "jview" ? wdFrame(st, st.jface(st.cam.position), 0.6) : k === "dview" ? wdFrame(st, st.djFace(), 0.56) : st.shots[k]; if (!s) return; st.fly = null; st.hold = s; st.holdShot = s; },
   look(p, l, f) { const st = WD.st; if (!st) return; const T = st.THREE, s = { p: new T.Vector3(...p), l: new T.Vector3(...l), f: f || 50 }; st.fly = null; st.hold = st.holdShot = s; },
   st: () => WD.st,
 };
