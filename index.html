@@ -6440,7 +6440,7 @@ body.tv.pplg .roomtv:not([hidden]) span { align-self: start; }
 /* ================= V2: the board ================= */
 /* One broadcast look: near-black slabs with a hairline, team colors as bars and fills, status by color (green winning,
    red losing, amber close, grey not started), condensed numerals for everything you read from the couch */
-body.v2b { --v2-p1: #10141b; --v2-p2: #0a0d12; --v2-line: rgba(255,255,255,.075); --v2-ink: #eef2f7; --v2-ink2: rgba(238,242,247,.68); --v2-ink3: rgba(238,242,247,.44);
+body.v2b { --v2-p1: rgba(31,41,59,.94); --v2-p2: rgba(21,28,42,.95); --v2-line: rgba(255,255,255,.075); --v2-ink: #eef2f7; --v2-ink2: rgba(238,242,247,.68); --v2-ink3: rgba(238,242,247,.44);
   --v2-win: #3ee08f; --v2-loss: #ff4d5e; --v2-even: #ffc94d; --v2-live: #ff3b4e; }
 
 /* ---- the header: no bar, the words float over the board with a shadow under them; the chips are small dark pills ---- */
@@ -6489,7 +6489,7 @@ body.v2b .rb-av { background: var(--c); box-shadow: 0 0 0 2px rgba(5,7,11,.9), i
 
 /* ---- a group ride ---- */
 body.v2b .ob-grp { border: 0; border-radius: 14px; overflow: hidden; padding: 16px 16px 18px 24px;
-  background: var(--gb, linear-gradient(90deg, var(--c), var(--c))) 0 0 / 100% 4px no-repeat, linear-gradient(180deg, var(--c), var(--c)) 0 0 / 7px 100% no-repeat, linear-gradient(180deg, #121720, #0a0d12);
+  background: var(--gb, linear-gradient(90deg, var(--c), var(--c))) 0 0 / 100% 4px no-repeat, linear-gradient(180deg, var(--c), var(--c)) 0 0 / 7px 100% no-repeat, linear-gradient(180deg, rgba(33,43,62,.95), rgba(22,29,43,.96));
   box-shadow: inset 0 0 0 1px var(--v2-line), 0 14px 32px rgba(0,0,0,.42); }
 body.v2b .ob-grp .ob-gring { display: none; }
 body.v2b .ob-gtag { gap: 10px; }
@@ -6529,9 +6529,9 @@ body.v2b .rb-g.hero .rb-gh, body.v2b.tv .rb-games.primeg .rb-g.hero .rb-gh { gri
 body.v2b .rb-g.hero > .rb-gh { margin: -18px -20px 0; }
 body.v2b .rb-g.hero .rb-gh .mid { grid-column: 2; grid-row: 1; flex-direction: column; gap: 6px; padding: 0 14px; }
 body.v2b .rb-g.hero .rb-gh .tm { position: relative; align-self: stretch; min-height: 86px; gap: 12px; padding-left: 16px;
-  background: linear-gradient(90deg, color-mix(in srgb, var(--ca, #333) 94%, #000), color-mix(in srgb, var(--ca, #333) 58%, #04060a)); box-shadow: inset 0 -4px 0 var(--ra, var(--ca)); }
+  background: var(--ca, #333); box-shadow: inset 0 -4px 0 var(--ra, var(--ca)); }
 body.v2b .rb-g.hero .rb-gh .tm.h { padding-left: 0; padding-right: 16px;
-  background: linear-gradient(270deg, color-mix(in srgb, var(--ch, #333) 94%, #000), color-mix(in srgb, var(--ch, #333) 58%, #04060a)); box-shadow: inset 0 -4px 0 var(--rh, var(--ch)); }
+  background: var(--ch, #333); box-shadow: inset 0 -4px 0 var(--rh, var(--ch)); }
 /* a sheen across the slab */
 body.v2b .rb-g.hero .rb-gh .tm::before { content: ""; position: absolute; inset: 0 0 50% 0; background: linear-gradient(180deg, rgba(255,255,255,.1), rgba(255,255,255,0)); pointer-events: none; }
 body.v2b .rb-g.hero .rb-gh .tl { width: 52px; height: 52px; }
@@ -6539,13 +6539,13 @@ body.v2b .rb-g.hero .rb-gh .ab { font-size: 15px; gap: 5px; }
 body.v2b .rb-gh .tm .nmx { font: 900 30px/1 var(--f-display); letter-spacing: .05em; color: #fff; text-shadow: 0 2px 0 rgba(0,0,0,.35); }
 body.v2b .rb-gh .tm .sub em { font: 700 13px/1 var(--f-num); letter-spacing: .08em; color: rgba(255,255,255,.62); }
 body.v2b .rb-g.hero .rb-gh .tm .sc { align-self: stretch; display: flex; align-items: center; justify-content: center; min-width: 78px; padding: 0 10px; margin: 0;
-  background: rgba(3,5,9,.74); box-shadow: inset 0 -4px 0 rgba(255,255,255,.06); font: 800 56px/1 var(--f-num); letter-spacing: 0; color: rgba(255,255,255,.6); }
+  background: none; box-shadow: none; font: 800 56px/1 var(--f-num); letter-spacing: 0; color: rgba(255,255,255,.72); text-shadow: 0 2px 0 rgba(0,0,0,.3); }
 body.v2b .rb-g.hero .rb-gh .tm.a .sc { margin-left: auto; }
 body.v2b .rb-g.hero .rb-gh .tm.h .sc { margin-right: auto; }
 body.v2b .rb-g.hero .rb-gh .tm.lead .sc { color: #fff; }
 body.v2b .rb-g.hero .rb-gh .tm.lead .sc::after { content: ""; position: absolute; }
 /* every other game: a slimmer version of the same bug */
-body.v2b .rb-g:not(.hero) .rb-gh { background: linear-gradient(90deg, color-mix(in srgb, var(--ca, #222) 46%, #05070b), #06080c 50%, color-mix(in srgb, var(--ch, #222) 46%, #05070b)); }
+body.v2b .rb-g:not(.hero) .rb-gh { background: linear-gradient(90deg, var(--ca, #222) 0 42%, rgba(12,16,24,.9) 42% 58%, var(--ch, #222) 58% 100%); }
 body.v2b .rb-g:not(.hero) .rb-gh .sc { font-family: var(--f-num); font-weight: 800; }
 
 /* ---- the ballpark diamond ---- */
@@ -6591,7 +6591,7 @@ body.v2b .pp-nm b { font: 900 34px/1 var(--f-display); letter-spacing: .04em; te
 body.v2b .pp-net { font: 800 34px/1 var(--f-num); }
 body.v2b .pp-tiles > div { border: 0; border-radius: 8px; background: rgba(255,255,255,.04); box-shadow: inset 0 0 0 1px var(--v2-line); }
 body.v2b .pp-tiles b { font: 800 20px/1.1 var(--f-num); }
-body.v2b .pp-bet { border: 0; border-radius: 12px; background: linear-gradient(180deg, var(--ta, var(--c)), var(--th, var(--c))) 0 0 / 6px 100% no-repeat, linear-gradient(180deg, #121620, #0a0d12); box-shadow: inset 0 0 0 1px var(--v2-line), 0 10px 24px rgba(0,0,0,.35); }
+body.v2b .pp-bet { border: 0; border-radius: 12px; background: linear-gradient(180deg, var(--ta, var(--c)), var(--th, var(--c))) 0 0 / 6px 100% no-repeat, linear-gradient(180deg, rgba(33,43,62,.95), rgba(22,29,43,.96)); box-shadow: inset 0 0 0 1px var(--v2-line), 0 10px 24px rgba(0,0,0,.35); }
 body.v2b .pp-bet .pp-pick .t { font: 800 30px/1.05 var(--f-num); }
 body.v2b .pp-div { font: 800 13px/1 var(--f-ui); letter-spacing: .3em; color: var(--v2-ink3); }
 
@@ -6618,6 +6618,14 @@ body.v2b :is(.ob-bet, .ob-grp).k-w { animation: v2lBreathe 4s ease-in-out infini
 @keyframes v2lBreathe { 0%, 100% { box-shadow: inset 0 0 0 1px rgba(62,224,143,.3), 0 12px 30px rgba(0,0,0,.4), 0 0 18px rgba(62,224,143,.06); } 50% { box-shadow: inset 0 0 0 1px rgba(62,224,143,.42), 0 12px 30px rgba(0,0,0,.4), 0 0 34px rgba(62,224,143,.16); } }
 /* no flicker or stepping on the board */
 body.v2b .bt-islive .fx-glint, body.v2b .fx-glint::before, body.v2b .fx-glint::after { animation-timing-function: ease-in-out !important; }
+
+/* ---- no black boxes: typed tickets and parlay legs sit on the same slate as everything else ---- */
+body.v2b .ob-bet.fx { background: linear-gradient(180deg, var(--ta, var(--c)), var(--th, var(--c))) 0 0 / 7px 100% no-repeat,
+  linear-gradient(180deg, color-mix(in srgb, var(--fxk, #8fa3c8) 9%, rgb(31,41,59)), color-mix(in srgb, var(--fxk, #8fa3c8) 5%, rgb(21,28,42))) !important; }
+body.v2b .ob-legs .lg { border-radius: 10px; border: 0; background: rgba(255,255,255,.06); box-shadow: inset 0 0 0 1px rgba(255,255,255,.07); }
+body.v2b .ob-legs .lg.lw { background: linear-gradient(90deg, rgba(62,224,143,.16), rgba(62,224,143,.05)); box-shadow: inset 0 0 0 1px rgba(62,224,143,.3); }
+body.v2b .ob-legs .lg.ll { background: linear-gradient(90deg, rgba(255,77,94,.14), rgba(255,77,94,.04)); box-shadow: inset 0 0 0 1px rgba(255,77,94,.26); }
+body.v2b .ob-legs .lg-t { color: #fff; }
 /* ================= V2: the stadium behind the board ================= */
 #v2world { position: fixed; inset: 0; width: 100vw; height: 100vh; z-index: 0; display: block; pointer-events: none; }
 body.v2w { background: #020306; }
@@ -6643,8 +6651,8 @@ body.v2w.v2w-in #jumbo.out { opacity: 0 !important; transition: opacity .4s ease
 /* while the camera's moving: only the picture on the screen */
 body.v2w.v2w-fly #jumbo .jb-head, body.v2w.v2w-fly #jumbo .jb-side, body.v2w.v2w-fly #jumbo .jb-prog, body.v2w.v2w-fly #jbBug, body.v2w.v2w-fly #jbNp, body.v2w.v2w-fly #jbTeam { opacity: 0 !important; }
 /* the panels stay solid in front of the building so nothing behind shows through the numbers */
-html body.v2w.tv .rb-g { background: linear-gradient(180deg, #0e1219, #080a0e) !important; }
-html body.v2w.tv .rb-sec, html body.v2w.tv .rb-card { background: linear-gradient(180deg, rgba(14,18,25,.93), rgba(8,10,14,.95)) !important; }
+html body.v2w.tv .rb-g { background: linear-gradient(180deg, rgb(31,41,59), rgb(21,28,42)) !important; }
+html body.v2w.tv .rb-sec, html body.v2w.tv .rb-card { background: linear-gradient(180deg, rgba(31,41,59,.93), rgba(21,28,42,.95)) !important; }
 /* a score or a cash: the building's light spills over the edges of the board */
 #v2wGlow { position: fixed; inset: 0; z-index: 3; pointer-events: none; opacity: 0; --wfc: 255,255,255; mix-blend-mode: screen;
   background: radial-gradient(120% 60% at 50% 115%, rgba(var(--wfc), .55), rgba(var(--wfc), 0) 60%), radial-gradient(70% 40% at 50% -12%, rgba(var(--wfc), .35), rgba(var(--wfc), 0) 70%); }
@@ -6652,6 +6660,8 @@ body:not(.v2w) #v2wGlow { display: none; }
 /* the top of the building fades a little darker so the floating header always reads */
 body.v2w #v2world { -webkit-mask-image: linear-gradient(to bottom, rgba(0,0,0,.42), rgba(0,0,0,.42) 4%, #000 17%); mask-image: linear-gradient(to bottom, rgba(0,0,0,.42), rgba(0,0,0,.42) 4%, #000 17%); }
 body.v2w.v2w-away #v2world { -webkit-mask-image: none; mask-image: none; }
+/* the set's wide shots: the room's bets step aside so the light show has the screen */
+body.v2w.v2w-wide #jumbo .jb-side { opacity: 0 !important; }
 </style>
 </head>
 <body>
@@ -13752,7 +13762,7 @@ void main(){
   // ---------- sheets ----------
   function openSheet(id) { $(id).hidden = false; }
   // keep every open screen current: when a new version is up, reload it (never mid-form or mid-animation)
-  const BUILD = "20261028022101";
+  const BUILD = "20261028023509";
   function checkBuild() {
     if (BUILD === "dev") return;
     fetch("version.json?t=" + Date.now(), { cache: "no-store" }).then((r) => (r.ok ? r.json() : null)).then((j) => {
@@ -15991,7 +16001,7 @@ void main(){
       $("#jbTag").textContent = why || MOOD_TAG[mood] || "Live";
       jbBug(b);
       jb.className = "jumbo lux m-" + mood + (team ? " teamed" : "") + (lux ? " hz" : ""); jb.hidden = false; fitPic(v);
-      try { if (window.SBW && !pre) SBW.clip({ dj: dj || hz, v, ext: !!P.ext }); } catch (e) { console.warn(e); }
+      try { if (window.SBW && !pre) SBW.clip({ dj: dj || hz, v, ext: !!P.ext, bpm: P.bpm || 0 }); } catch (e) { console.warn(e); }
       const jt = $("#jbTeam");
       if (team) {
         const c1 = hexRgb(team.t.col) || [40, 44, 60], c2 = hexRgb(team.t.alt) || c1;
@@ -24116,6 +24126,54 @@ function wdParkBuild(st, pf, C, V) {
   if (F.has("tigers")) for (const deg of [-110, -70]) { const p = at(deg, 12); box(4, 5, 9, "#d97a1e", p[0], 24, p[1], face(p)); }
   void wallH;
 }
+// ---- the DJ set as a show in the building: house lights down, colored beams sweeping the stands from up top, lasers fanning out
+// of the DJ's suite, phone lights in the crowd, everything pulsing on the beat, the set on the jumbotron too, confetti on the
+// drops, and the camera working the room (the suite, a wide shot from the field, overhead, along the crowd) ----
+const WD_PCOL = [[0.75, 0.3, 1], [1, 0.3, 0.7], [0.3, 0.75, 1], [0.35, 1, 0.8], [1, 0.75, 0.3]];
+function wdPartyBuild(st) {
+  const THREE = st.THREE, V = st.V, C = st.C, scene = st.scene, fade = (() => { const c = wdCanvas(4, 128), x = c.getContext("2d"), g = x.createLinearGradient(0, 0, 0, 128); g.addColorStop(0, "rgba(255,255,255,0)"); g.addColorStop(0.75, "rgba(255,255,255,.55)"); g.addColorStop(1, "rgba(255,255,255,1)"); x.fillStyle = g; x.fillRect(0, 0, 4, 128); const t = new THREE.CanvasTexture(c); st.tex.push(t); return t; })();
+  const top = Math.max(...V.tiers.map((t) => t.y1)) + (V.roof ? -6 : 8), outer = Math.max(...V.tiers.map((t) => t.o1 || t.o0)), L = Math.max(V.A, V.B) * 1.6;
+  const P = { beams: [], lasers: [], on: 0, t0: 0, bpm: 124, shot: 0, shotAt: 0 };
+  // the beams: up on the rim all the way round, aimed in at the field and swept
+  for (let i = 0; i < 10; i++) { const [x, z, nx, nz] = wdNorm(C, (i + 0.5) / 10), o = outer * 0.85;
+    const m = new THREE.MeshBasicMaterial({ map: fade, color: new THREE.Color().setRGB(...WD_PCOL[i % 5], THREE.LinearSRGBColorSpace), transparent: true, opacity: 0, blending: THREE.AdditiveBlending, depthWrite: false, side: THREE.DoubleSide });
+    const g = new THREE.ConeGeometry(L * 0.09, L, 20, 1, true); g.translate(0, -L / 2, 0);
+    const cone = new THREE.Mesh(g, m), piv = new THREE.Group(); piv.position.set(x + nx * o, top, z + nz * o); piv.add(cone); scene.add(piv);
+    piv.lookAt(V.cx, 0, V.cz); piv.rotateX(-Math.PI / 2); P.beams.push({ piv, m, ph: i * 0.7, base: piv.quaternion.clone() }); }
+  // the lasers: a fan out of the suite
+  const F = st.djFace(), right = new THREE.Vector3(0, 1, 0).cross(F.n).normalize();
+  for (let i = 0; i < 12; i++) { const m = new THREE.MeshBasicMaterial({ color: new THREE.Color().setRGB(...WD_PCOL[[3, 1, 2][i % 3]], THREE.LinearSRGBColorSpace), transparent: true, opacity: 0, blending: THREE.AdditiveBlending, depthWrite: false });
+    const g = new THREE.BoxGeometry(0.12, 0.12, L * 1.2); g.translate(0, 0, L * 0.6); const ln = new THREE.Mesh(g, m), piv = new THREE.Group();
+    piv.position.copy(F.c).add(F.n.clone().multiplyScalar(0.8)).add(right.clone().multiplyScalar((i / 11 - 0.5) * F.w * 0.8)); piv.add(ln); scene.add(piv);
+    piv.lookAt(piv.position.clone().add(F.n)); P.lasers.push({ piv, m, i, base: piv.quaternion.clone() }); }
+  st.party = P;
+}
+// the shots around the room during a set
+function wdPartyShot(st, k) {
+  const THREE = st.THREE, F = st.djFace(), right = new THREE.Vector3(0, 1, 0).cross(F.n).normalize(), d = F.w * 1.4, ctr = new THREE.Vector3(st.V.cx, 0, st.V.cz), R = st.V.fwR || 30;
+  if (k === 0) return wdFrame(st, F, 0.54);
+  if (k === 1) return { p: F.c.clone().add(F.n.clone().multiplyScalar(d * 3.4)).setY(Math.max(4, F.c.y * 0.35)), l: F.c.clone().add(new THREE.Vector3(0, F.h * 0.6, 0)), f: 58 };
+  if (k === 2) return { p: ctr.clone().add(F.n.clone().multiplyScalar(-R * 0.5)).add(new THREE.Vector3(0, R * 2.4, 0)), l: ctr.clone().add(F.n.clone().multiplyScalar(-R * 0.9)), f: 62 };
+  return { p: F.c.clone().add(F.n.clone().multiplyScalar(d * 1.6)).add(right.clone().multiplyScalar(d * 1.3)).add(new THREE.Vector3(0, F.h * 0.4, 0)), l: F.c.clone().add(right.clone().multiplyScalar(-d * 0.4)), f: 50 };
+}
+function wdPartyTick(st, now, dt, t) {
+  const P = st.party; if (!P) return 0;
+  const want = WD.mode === "dj" ? 1 : 0; P.on += (want - P.on) * Math.min(1, dt * (want ? 1.2 : 2.5));
+  if (want && !P.t0) { P.t0 = now; P.shot = 0; P.shotAt = 0; } if (!want && P.on < 0.02) P.t0 = 0;
+  const on = P.on; if (on < 0.005) { for (const b of P.beams) b.m.opacity = 0; for (const l of P.lasers) l.m.opacity = 0; return 0; }
+  const beat = ((now - (P.t0 || now)) / 1000) * (P.bpm / 60), pulse = Math.exp(-(beat % 1) * 5), bar = Math.floor(beat / 4);
+  for (const b of P.beams) { b.piv.quaternion.copy(b.base); b.piv.rotateZ(Math.sin(t * 0.55 + b.ph) * 0.5); b.piv.rotateX(Math.sin(t * 0.37 + b.ph * 1.7) * 0.28); b.m.opacity = on * (0.09 + pulse * 0.07); }
+  const fan = Math.sin(t * 0.8) * 0.45;
+  for (const l of P.lasers) { l.piv.quaternion.copy(l.base); l.piv.rotateY((l.i / 11 - 0.5) * 1.3 + fan * 0.4); l.piv.rotateX(0.18 + Math.sin(t * 1.1 + l.i * 0.3) * 0.12); l.m.opacity = on * (bar % 2 ? 0.55 : 0.22) * (0.6 + pulse * 0.4); }
+  // the crowd: phone lights up, the wave now and then, a flash in the set's colors on the downbeat
+  st.burst = Math.max(st.burst, on * 0.9); if (beat % 32 < 0.05) st.wave = Math.max(st.wave, on * 1.1);
+  const c = WD_PCOL[bar % 5]; if (pulse > 0.9) { st.fc = c; st.flash = Math.max(st.flash, on * 0.5); }
+  // confetti on the drops
+  if (Math.floor(beat / 16) !== P.drop) { P.drop = Math.floor(beat / 16); if (P.drop > 0 && on > 0.8) wdShow(st, [WD_PCOL[P.drop % 5], WD_PCOL[(P.drop + 2) % 5], [1, 1, 1]], 4, 1600); }
+  // the camera works the room: every 9 s a new angle once it's arrived
+  if (want && !st.fly && now - P.shotAt > 9000) { if (P.shotAt) { P.shot = (P.shot + 1) % 4; document.body.classList.toggle("v2w-wide", P.shot !== 0); wdFly(st, wdPartyShot(st, P.shot), 3200, (st.V.fwR || 30) * 0.25); } P.shotAt = now; }
+  return on;
+}
 
 // ---- the venues: a contour the stands are built around, decks off it, the field, where the camera sits ----
 // units: football in yards, everything else in meters; contour(t) is a superellipse (A, B, n) around (cx, cz)
@@ -24483,6 +24541,7 @@ function wdBuild(L, R) {
   { const N = 1800, pos = new Float32Array(N * 3), col = new Float32Array(N * 3), g = new THREE.BufferGeometry(); g.setAttribute("position", new THREE.BufferAttribute(pos, 3)); g.setAttribute("color", new THREE.BufferAttribute(col, 3));
     const m = new THREE.PointsMaterial({ size: (V.fwR || 30) * 0.05, map: glowT, vertexColors: true, blending: THREE.AdditiveBlending, transparent: true, depthWrite: false, sizeAttenuation: true });
     const pts = new THREE.Points(g, m); pts.frustumCulled = false; scene.add(pts); st.fw = { N, pos, col, vel: new Float32Array(N * 3), life: new Float32Array(N), base: new Float32Array(N * 3), g, i: 0 }; }
+  try { wdPartyBuild(st); } catch (e) { console.warn("party", e); }
   // the shots
   const sh = (p, l, f) => ({ p: v3(p), l: v3(l), f });
   st.shots = { board: sh(V.board.p, V.board.l, V.board.f) };
@@ -24645,7 +24704,7 @@ function wdLoop(now) {
   const dt = Math.min(0.1, (now - (WD.last || now)) / 1000); WD.last = now; const t = (now - st.t0) / 1000;
   // the building's mood: flashes decay, the wave runs out, a miss dims the lights
   st.flash *= Math.pow(0.12, dt); st.wave *= Math.pow(0.55, dt); st.burst *= Math.pow(0.3, dt); st.dim *= Math.pow(0.4, dt);
-  const lit = 1 - st.dim * 0.45;
+  const party = wdPartyTick(st, now, dt, (now - st.t0) / 1000), lit = (1 - st.dim * 0.45) * (1 - party * 0.55);
   for (const m of st.crowd) { const u = m.uniforms; u.uT.value = t; u.uWave.value = Math.min(1, st.wave); u.uFlash.value = st.flash; u.uFc.value.set(...st.fc); u.uBurst.value = Math.min(1, st.burst); u.uLit.value = lit; }
   for (const m of st.suites) { m.uniforms.uT.value = t; m.uniforms.uLit.value = lit; }
   st.sky.material.uniforms.uT.value = t; st.sky.material.uniforms.uFlash.value = st.flash; st.sky.material.uniforms.uFc.value.set(...st.fc);
@@ -24676,7 +24735,8 @@ function wdScore(side, d) {
 function wdBack(now) {
   const st = WD.st; WD.mode = "back"; document.body.classList.remove("v2w-dj", "v2w-clip", "v2w-fly");
   if (!st) { WD.mode = "board"; document.body.classList.remove("v2w-away"); return; }
-  const fin = () => { WD.mode = "board"; document.body.classList.remove("v2w-away"); wdUnproject(st); wdSize(WD.qb || 0.6); WD.sig = ""; wdIdleArt(true); };
+  document.body.classList.remove("v2w-wide");
+  const fin = () => { WD.mode = "board"; document.body.classList.remove("v2w-away"); wdUnproject(st); if (st.vtex) { st.vtex.dispose(); st.vtex = null; for (const s of st.screens) { s.material.map = st.jtex; s.material.needsUpdate = true; } } wdSize(WD.qb || 0.6); WD.sig = ""; wdIdleArt(true); };
   setTimeout(() => { if (WD.mode !== "clip" && WD.mode !== "dj") wdUnproject(st); }, 520);
   if (now) { st.fly = null; st.hold = st.shots.board; fin(); return; }
   wdFly(st, st.shots.board, 2100, WD.V.fwR * 0.6, fin);
@@ -24692,6 +24752,8 @@ window.SBW = {
     wdSize(1);
     const F = dj ? st.djFace() : st.jface(st.cam.position);
     st.proj = { F, els: [o.v, document.getElementById("jbWash"), document.getElementById("djCv")].filter(Boolean) };
+    if (st.vtex) { st.vtex.dispose(); st.vtex = null; }
+    if (dj && st.party) { st.party.bpm = o.bpm > 60 ? o.bpm : 124; if (o.v && !o.ext) { const vt = new st.THREE.VideoTexture(o.v); vt.colorSpace = st.THREE.NoColorSpace; st.vtex = vt; for (const s of st.screens) { s.material.map = vt; s.material.needsUpdate = true; } } }
     const go = ++WD.go, show = () => { if (go === WD.go) document.body.classList.remove("v2w-fly"); };
     // never leave the panels hidden behind a camera move that didn't finish
     setTimeout(show, 4800);
