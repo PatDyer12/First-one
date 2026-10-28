@@ -6670,6 +6670,11 @@ body.v2w.v2w-proj #jbNp.on { opacity: .72 !important; }
 body.v2w.v2w-in #jumbo .jb-x { position: fixed; top: 12px; right: 18px; margin: 0; font-size: 26px; line-height: 1; color: #fff !important; opacity: .2; z-index: 5; }
 /* our own videos play in the building (a texture on the jumbotron, the suite's glass); the page's copies just keep time */
 body.v2w.v2w-tex #pipVid, body.v2w.v2w-tex #jbWash, body.v2w.v2w-tex #djCv, body.v2w.v2w-tex #jbNp { opacity: .001 !important; }
+/* a win or a miss plays in the building: the show draws only its light, the world shows through behind a soft vignette, and
+   the board steps out of the way while it's on */
+body.v2w .cs.v2x { background: radial-gradient(ellipse 78% 72% at 50% 52%, rgba(2,3,6,.36), rgba(2,3,6,.72) 100%); }
+body.v2w .cs.v2x.v2miss { background: radial-gradient(ellipse 78% 72% at 50% 52%, rgba(6,2,4,.4), rgba(4,2,4,.82) 100%); }
+body.v2w.v2w-show .app, body.v2w.v2w-show #roomTvQr { opacity: 0; transition: opacity .5s; pointer-events: none; }
 </style>
 </head>
 <body>
@@ -12601,16 +12606,17 @@ body.v2w.v2w-tex #pipVid, body.v2w.v2w-tex #jbWash, body.v2w.v2w-tex #djCv, body
     let cv = null, gl = null, bg = null, pt = null, quad = null, pbuf = null, failed = false, raf = 0, St = null;
     const BG_VS = "attribute vec2 p;void main(){gl_Position=vec4(p,0.,1.);}";
     const BG_FS = `precision mediump float;
-uniform vec2 R;uniform float T,B,SH,F,G;uniform vec3 C1,C2,A;
+uniform vec2 R;uniform float T,B,SH,F,G,IW;uniform vec3 C1,C2,A;
 float h1(float n){return fract(sin(n)*43758.5453);}
 float h2(vec2 p){return fract(sin(dot(p,vec2(127.1,311.7)))*43758.5453);}
 void main(){
   vec2 p=(gl_FragCoord.xy-0.5*R)/R.y; p.y-=0.03;
   float r=length(p), a=atan(p.y,p.x);
   vec3 acc=mix(A,vec3(1.0,0.80,0.36),G);
-  vec3 col=mix(C1*0.07+0.008, C1*0.30+0.018, smoothstep(1.3,0.0,r));
+  // in the stadium (IW) only the light is drawn: the building shows through behind it
+  vec3 col=IW>0.5?vec3(0.0):mix(C1*0.07+0.008, C1*0.30+0.018, smoothstep(1.3,0.0,r));
   // the floor: a lit grid in perspective, rolling toward you
-  if(p.y<-0.10){
+  if(IW<0.5&&p.y<-0.10){
     float d=-p.y-0.10, z=0.36/(d+0.015);
     vec2 g=vec2(p.x*z, z+T*1.4);
     vec2 f=abs(fract(g)-0.5);
@@ -12632,6 +12638,7 @@ void main(){
   float sk=step(0.982,h1(floor(a*80.0)))*smoothstep(0.25,0.95,r)*B;
   col+=acc*sk*0.7;
   col*=smoothstep(1.7,0.35,r);
+  if(IW>0.5){float a=clamp(max(col.r,max(col.g,col.b)),0.0,1.0);gl_FragColor=vec4(min(col,vec3(a))*F,a*F);return;}
   col+=(h2(gl_FragCoord.xy+fract(T)*61.0)-0.5)*0.022;
   gl_FragColor=vec4(col*F,F);
 }`;
@@ -12659,7 +12666,7 @@ void main(){
         bg = prog(BG_VS, BG_FS); pt = prog(PT_VS, PT_FS);
         quad = gl.createBuffer(); gl.bindBuffer(gl.ARRAY_BUFFER, quad); gl.bufferData(gl.ARRAY_BUFFER, new Float32Array([-1, -1, 1, -1, -1, 1, 1, 1]), gl.STATIC_DRAW);
         pbuf = gl.createBuffer();
-        bg.u = Object.fromEntries(["R", "T", "B", "SH", "F", "G", "C1", "C2", "A"].map((k) => [k, gl.getUniformLocation(bg, k)]));
+        bg.u = Object.fromEntries(["R", "T", "B", "SH", "F", "G", "IW", "C1", "C2", "A"].map((k) => [k, gl.getUniformLocation(bg, k)]));
         pt.u = { R: gl.getUniformLocation(pt, "R"), PS: gl.getUniformLocation(pt, "PS") }; pt.a = Object.fromEntries(["aP", "aS", "aC", "aK"].map((k) => [k, gl.getAttribLocation(pt, k)]));
         return true;
       } catch (e) { failed = true; gl = null; cv = null; return false; }
@@ -12708,7 +12715,7 @@ void main(){
       }
       gl.viewport(0, 0, cv.width, cv.height); gl.disable(gl.BLEND); gl.clearColor(0, 0, 0, 0); gl.clear(gl.COLOR_BUFFER_BIT);
       gl.useProgram(bg); gl.bindBuffer(gl.ARRAY_BUFFER, quad); const lp = gl.getAttribLocation(bg, "p"); gl.enableVertexAttribArray(lp); gl.vertexAttribPointer(lp, 2, gl.FLOAT, false, 0, 0);
-      const u = bg.u; gl.uniform2f(u.R, cv.width, cv.height); gl.uniform1f(u.T, St.t); gl.uniform1f(u.B, St.B); gl.uniform1f(u.SH, St.SH); gl.uniform1f(u.F, St.F); gl.uniform1f(u.G, St.G);
+      const u = bg.u; gl.uniform2f(u.R, cv.width, cv.height); gl.uniform1f(u.T, St.t); gl.uniform1f(u.B, St.B); gl.uniform1f(u.SH, St.SH); gl.uniform1f(u.F, St.F); gl.uniform1f(u.G, St.G); gl.uniform1f(u.IW, St.iw);
       gl.uniform3fv(u.C1, St.c1); gl.uniform3fv(u.C2, St.c2); gl.uniform3fv(u.A, St.acc);
       gl.drawArrays(gl.TRIANGLE_STRIP, 0, 4); gl.disableVertexAttribArray(lp);
       if (N.length || A.length) {
@@ -12735,7 +12742,7 @@ void main(){
       start(host, P, gold) {
         if (!init()) return false;
         this.stop(); if (cv.width !== W) { cv.width = W; cv.height = H; } host.prepend(cv);
-        St = { t: 0, ft: 0.016, fn: 0, last: performance.now(), B: 0, SH: -1, F: 0, Ft: 1, G: gold ? 1 : 0, c1: f3(P.base), c2: f3(P.c2), acc: f3(P.acc), cols: [f3(P.acc), f3(P.c2), f3(mixW(P.acc, 0.5))].concat(gold ? [[1, 0.84, 0.4], [1, 0.95, 0.75]] : []), ps: [], emb: 0, ea: 0, fw: null };
+        St = { iw: document.body.classList.contains("v2w") ? 1 : 0, t: 0, ft: 0.016, fn: 0, last: performance.now(), B: 0, SH: -1, F: 0, Ft: 1, G: gold ? 1 : 0, c1: f3(P.base), c2: f3(P.c2), acc: f3(P.acc), cols: [f3(P.acc), f3(P.c2), f3(mixW(P.acc, 0.5))].concat(gold ? [[1, 0.84, 0.4], [1, 0.95, 0.75]] : []), ps: [], emb: 0, ea: 0, fw: null };
         raf = requestAnimationFrame(frame); return true;
       },
       burst(k, x, y, n, noRing) { if (!St) return; St.B = Math.min(1.5, St.B + (k || 1)); if (!noRing) St.SH = 0.001; E.impact(x == null ? W / 2 : x, y == null ? H * 0.47 : y, n || 160); },
@@ -13788,7 +13795,7 @@ void main(){
   // ---------- sheets ----------
   function openSheet(id) { $(id).hidden = false; }
   // keep every open screen current: when a new version is up, reload it (never mid-form or mid-animation)
-  const BUILD = "20261028061624";
+  const BUILD = "20261028070139";
   function checkBuild() {
     if (BUILD === "dev") return;
     fetch("version.json?t=" + Date.now(), { cache: "no-store" }).then((r) => (r.ok ? r.json() : null)).then((j) => {
@@ -24550,6 +24557,76 @@ const WD_MASC = {
   "NFL:TB": { k: "human", fur: "#e8bc96", acc: "#c8102e", x: { hat: "pirate", hatc: "#c8102e", beard: "#c0391b", stache: "#c0391b", jer: "#c8102e", jer2: "#f2f2f2", txt: "BUCS", num: "" } },   // Captain Fear
   "NFL:TEN": { k: "coon", fur: "#8a7a6a", acc: "#e8e0d8", x: { eye: "#4b92db", tongue: 1, jer: "#0c2340", jer2: "#4b92db", txt: "TITANS", num: "" } },                    // T-Rac
   "NFL:WSH": { k: "hog", fur: "#f2aaa0", acc: "#5a1414", x: { hat: "cap", hatc: "#5a1414", hatL: "W", hatLc: "#ffb612", jer: "#f2f2f2", jer2: "#5a1414", txt: "COMMANDERS", num: "" } },   // Major Tuddy
+  // college: the costumed mascots of the big programs (and the live animal, or the thing the fans are, where there's no costume)
+  "CFB:UGA": { k: "dog", fur: "#ece6da", acc: "#f7f3ea", x: { ears: "flop", jowl: 1, teeth: 1, collar: "#141414", jer: "#ba0c2f", jer2: "#141414", txt: "DAWGS", num: "" } },        // Hairy Dawg
+  "CFB:FLA": { k: "gator", fur: "#3f8f3a", acc: "#e8e0b0", x: { jer: "#0021a5", jer2: "#fa4616", txt: "GATORS", num: "" } },                                                  // Albert
+  "CFB:ALA": { k: "ele", fur: "#a6a6a6", acc: "#d9d9d9", x: { jer: "#9e1b32", jer2: "#f2f2f2", txt: "BAMA", num: "" } },                                                      // Big Al
+  "CFB:LSU": { k: "cat", fur: "#f2a43a", acc: "#f7f3ea", x: { stripes: 1, jer: "#461d7c", jer2: "#fdd023", txt: "LSU", num: "" } },                                          // Mike the Tiger
+  "CFB:AUB": { k: "cat", fur: "#f47a20", acc: "#f7f3ea", x: { stripes: 1, jer: "#0c2340", jer2: "#e87722", txt: "AUBURN", num: "" } },                                       // Aubie
+  "CFB:CLEM": { k: "cat", fur: "#f56600", acc: "#f7f3ea", x: { stripes: 1, jer: "#f56600", jer2: "#522d80", paw: 1 } },                                                      // The Tiger
+  "CFB:MIZ": { k: "cat", fur: "#f1a020", acc: "#f7f3ea", x: { stripes: 1, jer: "#141414", jer2: "#f1b82d", txt: "MIZZOU", num: "" } },                                       // Truman
+  "CFB:MEM": { k: "cat", fur: "#f1a020", acc: "#f7f3ea", x: { stripes: 1, jer: "#003087", jer2: "#898d8d", txt: "TIGERS", num: "" } },                                       // Pouncer
+  "CFB:TENN": { k: "dog", fur: "#e9e5de", acc: "#f4f1ec", x: { ears: "long", spots: 1, spotc: "#2a3340", jer: "#ff8200", jer2: "#f2f2f2", txt: "VOLS", num: "" } },        // Smokey
+  "CFB:TEX": { k: "bull", fur: "#bf5700", acc: "#f2ece0", x: { horns: "long", hornc: "#f2efe0", jer: "#bf5700", jer2: "#f2f2f2", txt: "TEXAS", num: "" } },                 // Hook 'Em
+  "CFB:TA&M": { k: "dog", fur: "#9a6230", acc: "#f4efe6", x: { ears: "wolf", blaze: "#f4efe6", collar: "#500000", jer: "#500000", jer2: "#f2f2f2", txt: "AGGIES", num: "" } },   // Reveille
+  "CFB:OSU": { k: "nut", fur: "#6b3f1f", acc: "#c9a074", x: { jer: "#bb0000", jer2: "#f2f2f2", txt: "BRUTUS", num: "00" } },                                                // Brutus Buckeye
+  "CFB:MICH": { k: "bear", fur: "#4a3426", acc: "#b48a62", x: { blaze: "#c8a070", jer: "#00274c", jer2: "#ffcb05", txt: "MICHIGAN", num: "" } },                           // (none: a wolverine)
+  "CFB:ORE": { k: "bird", fur: "#f4f4f4", acc: "#ffb000", x: { bill: 1, head: "#f4f4f4", hat: "cap", hatc: "#154733", hatL: "O", hatLc: "#fee123", jer: "#154733", jer2: "#fee123", txt: "DUCKS", num: "" } },   // The Duck
+  "CFB:USC": { k: "human", fur: "#e2b08a", acc: "#990000", x: { hat: "trojan", hatc: "#ffc72c", plume: "#990000", chin: 1, cape: "#990000", jer: "#990000", jer2: "#ffc72c", txt: "TROJANS", num: "" } },   // Tommy Trojan
+  "CFB:ND": { k: "human", fur: "#efc39f", acc: "#0c7a3a", x: { hat: "lep", hatc: "#0c7a3a", beard: "#c0562a", jer: "#0c7a3a", jer2: "#c99700", txt: "IRISH", num: "" } },       // the Leprechaun
+  "CFB:PSU": { k: "cat", fur: "#e6dfd0", acc: "#f7f3ea", x: { jer: "#041e42", jer2: "#f2f2f2", txt: "PENN ST", num: "" } },                                                   // the Nittany Lion
+  "CFB:OU": { k: "horse", fur: "#f2efe8", acc: "#f2efe8", x: { mane: "#841617", jer: "#841617", jer2: "#fdf9d8", txt: "SOONERS", num: "" } },                               // Boomer
+  "CFB:MISS": { k: "fish", fur: "#7c8a98", acc: "#e8ecef", x: { kind: "shark", jer: "#14213d", jer2: "#ce1126", txt: "OLE MISS", num: "" } },                               // Tony the Landshark
+  "CFB:MSST": { k: "dog", fur: "#dcd7cf", acc: "#f4f1ec", x: { ears: "flop", jowl: 1, teeth: 1, collar: "#141414", jer: "#660000", jer2: "#f2f2f2", txt: "STATE", num: "" } },   // Bully
+  "CFB:ARK": { k: "hog", fur: "#8a1c2c", acc: "#f2f2f2", x: { snout: "#c25a62", tusks: 1, ridge: "#141414", jer: "#f2f2f2", jer2: "#9d2235", txt: "HOGS", num: "" } },      // Big Red
+  "CFB:SC": { k: "bird", fur: "#73000a", acc: "#ffc72c", x: { head: "#f4f4f4", crest: 1, crestc: "#d9001b", jer: "#73000a", jer2: "#f2f2f2", txt: "COCKY", num: "" } },      // Cocky
+  "CFB:UK": { k: "cat", fur: "#b8a68a", acc: "#f2efe8", x: { jer: "#0033a0", jer2: "#f2f2f2", txt: "UK", num: "" } },                                                         // the Wildcat
+  "CFB:VAN": { k: "human", fur: "#efc39f", acc: "#000000", x: { hat: "tricorn", hatc: "#141414", beard: "#8a6a4a", stache: "#8a6a4a", jer: "#141414", jer2: "#cfae70", txt: "DORES", num: "" } },   // Mr. Commodore
+  "CFB:FSU": { k: "horse", fur: "#f2efe8", acc: "#e8e0d8", x: { spots: 1, mane: "#2a1a10", jer: "#782f40", jer2: "#ceb888", txt: "NOLES", num: "" } },                     // (Renegade, the appaloosa)
+  "CFB:MIA": { k: "bird", fur: "#f4f4f4", acc: "#f47321", x: { beak: "big", head: "#f4f4f4", hat: "sailor", jer: "#005030", jer2: "#f47321", txt: "CANES", num: "" } },     // Sebastian the Ibis
+  "CFB:VT": { k: "bird", fur: "#630031", acc: "#cf4420", x: { head: "#630031", crest: 1, crestc: "#cf4420", jer: "#630031", jer2: "#cf4420", txt: "HOKIES", num: "" } },    // the HokieBird
+  "CFB:JMU": { k: "dog", fur: "#e9e1d2", acc: "#f7f3ea", x: { ears: "flop", jowl: 1, teeth: 1, hat: "crown", hatc: "#cbb677", cape: "#450084", jer: "#450084", jer2: "#cbb677", txt: "DUKES", num: "" } },   // Duke Dog
+  "CFB:WIS": { k: "bear", fur: "#5a4a3c", acc: "#f2efe8", x: { blaze: "#f4f4f4", cheeks: "#1b1b1b", jer: "#c5050c", jer2: "#f2f2f2", num: "W", txt: "BUCKY" } },          // Bucky Badger
+  "CFB:IOWA": { k: "bird", fur: "#141414", acc: "#ffcd00", x: { head: "#141414", face: "#ffcd00", jer: "#ffcd00", jer2: "#141414", txt: "HAWKEYES", num: "" } },            // Herky
+  "CFB:NEB": { k: "human", fur: "#efc39f", acc: "#e41c38", x: { hat: "cowboy", hatc: "#e41c38", band: "#141414", big: 1, chin: 1, over: "#3a5a8a", jer: "#e41c38", jer2: "#f2f2f2", num: "N", txt: "" } },   // Herbie Husker
+  "CFB:WASH": { k: "dog", fur: "#8a8d8f", acc: "#f2f2f2", x: { ears: "wolf", jer: "#4b2e83", jer2: "#e8d3a2", txt: "HUSKIES", num: "" } },                               // Harry the Husky
+  "CFB:UCLA": { k: "bear", fur: "#b8864e", acc: "#e6cfa8", x: { jer: "#2774ae", jer2: "#ffd100", txt: "BRUINS", num: "" } },                                                // Joe Bruin
+  "CFB:COLO": { k: "bull", fur: "#4a3426", acc: "#6a4a32", x: { horns: "short", hornc: "#e8dcc0", mane: "#2a1a10", jer: "#141414", jer2: "#cfb87c", txt: "BUFFS", num: "" } },   // Chip
+  "CFB:UTAH": { k: "bird", fur: "#be0000", acc: "#ffc72c", x: { head: "#be0000", crest: 1, crestc: "#f4f4f4", jer: "#f2f2f2", jer2: "#be0000", txt: "UTES", num: "" } },     // Swoop
+  "CFB:BYU": { k: "cat", fur: "#c79a5e", acc: "#f2e6d0", x: { jer: "#002e5d", jer2: "#f2f2f2", txt: "BYU", num: "" } },                                                      // Cosmo
+  "CFB:KSU": { k: "cat", fur: "#512888", acc: "#f2efe8", x: { jer: "#f2f2f2", jer2: "#512888", txt: "K-STATE", num: "" } },                                                 // Willie
+  "CFB:OKST": { k: "human", fur: "#e8bc96", acc: "#ff7300", x: { hat: "cowboy", hatc: "#3a2a1a", stache: "#3a2a1a", chin: 1, big: 1, scarf: "#ff7300", jer: "#141414", jer2: "#ff7300", txt: "POKES", num: "" } },   // Pistol Pete
+  "CFB:TTU": { k: "human", fur: "#e8bc96", acc: "#cc0000", x: { hat: "cowboy", hatc: "#141414", eyemask: 1, stache: "#3a2a1a", big: 1, jer: "#cc0000", jer2: "#141414", txt: "RAIDERS", num: "" } },   // Raider Red
+  "CFB:MSU": { k: "human", fur: "#e2b08a", acc: "#18453b", x: { hat: "trojan", hatc: "#18453b", plume: "#18453b", chin: 1, big: 1, jer: "#18453b", jer2: "#f2f2f2", txt: "SPARTY", num: "" } },   // Sparty
+  "CFB:UNC": { k: "bull", fur: "#f2efe8", acc: "#e8e0d8", x: { horns: "ram", hornc: "#7bafd4", jer: "#7bafd4", jer2: "#13294b", txt: "HEELS", num: "" } },                 // Rameses
+  "CFB:WVU": { k: "human", fur: "#e6b48f", acc: "#002855", x: { hat: "coonskin", beard: "#5a3a1a", stache: "#5a3a1a", jer: "#002855", jer2: "#eaaa00", txt: "WVU", num: "" } },   // the Mountaineer
+  "CFB:GT": { k: "bee", fur: "#eaaa00", acc: "#141414", x: { jer: "#003057", jer2: "#b3a369", txt: "BUZZ", num: "" } },                                                     // Buzz
+  "CFB:SYR": { k: "nut", fur: "#f76900", acc: "#002d72", x: { jer: "#002d72", jer2: "#f76900", txt: "ORANGE", num: "" } },                                                 // Otto
+  "CFB:PUR": { k: "human", fur: "#e8bc96", acc: "#cfb991", x: { hat: "hard", hatc: "#cfb991", chin: 1, big: 1, jer: "#141414", jer2: "#cfb991", txt: "PURDUE", num: "" } },   // Purdue Pete
+  "CFB:MINN": { k: "bear", fur: "#c8962a", acc: "#ecd9a8", x: { buck: 1, jer: "#7a0019", jer2: "#ffcc33", txt: "GOPHERS", num: "" } },                                     // Goldy Gopher
+  "CFB:TCU": { k: "frog", fur: "#4d1979", acc: "#a3a9ac", x: { jer: "#f2f2f2", jer2: "#4d1979", txt: "TCU", num: "" } },                                                   // SuperFrog
+  "CFB:ASU": { k: "human", fur: "#f0c4a0", acc: "#8c1d40", x: { hat: "horns", hatc: "#8c1d40", beard: "#2a1a10", jer: "#8c1d40", jer2: "#ffc627", txt: "SUN DEVILS", num: "" } },   // Sparky
+  "CFB:DUKE": { k: "human", fur: "#2a62b8", acc: "#003087", x: { hat: "horns", hatc: "#003087", cape: "#003087", jer: "#003087", jer2: "#f2f2f2", txt: "DUKE", num: "" } },   // the Blue Devil
+  "CFB:WAKE": { k: "human", fur: "#efc39f", acc: "#141414", x: { hat: "top", hatc: "#141414", jer: "#141414", jer2: "#9e7e38", txt: "DEACS", num: "" } },                  // the Demon Deacon
+  "CFB:NAVY": { k: "bull", fur: "#f2efe8", acc: "#e8e0d8", x: { horns: "goat", hornc: "#c8b88a", goatee: "#e8e0d8", jer: "#00205b", jer2: "#c5b783", txt: "NAVY", num: "" } },   // Bill the Goat
+  "CFB:ARMY": { k: "horse", fur: "#6a5a4a", acc: "#d8cfc0", x: { ears: "long", mane: "#2a2018", jer: "#141414", jer2: "#d3bc8d", txt: "ARMY", num: "" } },                 // the Mule
+  "CFB:MD": { k: "frog", fur: "#5a7a3a", acc: "#e8dcb0", x: { shell: "#3a4a2a", jer: "#e21833", jer2: "#ffd200", txt: "TERPS", num: "" } },                               // Testudo
+  "CFB:IU": { k: "human", fur: "#e8bc96", acc: "#990000", x: { hat: "cap", hatc: "#990000", hatL: "IU", hatLc: "#f2f2f2", jer: "#990000", jer2: "#f2f2f2", txt: "HOOSIERS", num: "" } },   // (none: a Hoosier fan)
+  "CFB:ILL": { k: "human", fur: "#e8bc96", acc: "#e84a27", x: { hat: "cap", hatc: "#13294b", hatL: "I", hatLc: "#e84a27", jer: "#e84a27", jer2: "#13294b", txt: "ILLINI", num: "" } },   // (none)
+  "CFB:RUTG": { k: "human", fur: "#e2b08a", acc: "#cc0033", x: { hat: "helmet", hatc: "#cc0033", mask: "#141414", stripe: "#f2f2f2", eyemask: 0, jer: "#cc0033", jer2: "#f2f2f2", txt: "KNIGHTS", num: "" } },   // the Scarlet Knight
+  "CFB:LOU": { k: "bird", fur: "#c9001f", acc: "#f5b800", x: { crest: 1, mask: "#141414", jer: "#141414", jer2: "#c9001f", txt: "LOUIE", num: "" } },                      // Louie
+  "CFB:ISU": { k: "bird", fur: "#c8102e", acc: "#f1be48", x: { crest: 1, crestc: "#f1be48", jer: "#c8102e", jer2: "#f1be48", txt: "CY", num: "" } },                        // Cy
+  "CFB:BAY": { k: "bear", fur: "#5a3a22", acc: "#c8a27a", x: { jer: "#154734", jer2: "#ffb81c", txt: "BAYLOR", num: "" } },                                                 // Bruiser
+  "CFB:CAL": { k: "bear", fur: "#c8962a", acc: "#ecd9a8", x: { jer: "#003262", jer2: "#fdb515", txt: "CAL", num: "" } },                                                    // Oski
+  "CFB:STAN": { k: "human", fur: "#e8bc96", acc: "#8c1515", x: { hat: "cap", hatc: "#8c1515", hatL: "S", hatLc: "#f2f2f2", jer: "#8c1515", jer2: "#f2f2f2", txt: "STANFORD", num: "" } },   // (the Tree, as a fan)
+  "CFB:SMU": { k: "horse", fur: "#3a2a20", acc: "#5a4a3a", x: { mane: "#141414", jer: "#cc0035", jer2: "#f2f2f2", txt: "PONIES", num: "" } },                               // Peruna
+  "CFB:BC": { k: "bird", fur: "#5a3a22", acc: "#f5b800", x: { head: "#f4f4f4", beak: "big", jer: "#98002e", jer2: "#bc9b6a", txt: "EAGLES", num: "" } },                  // Baldwin
+  "CFB:NCST": { k: "dog", fur: "#8a8d8f", acc: "#f2f2f2", x: { ears: "wolf", jer: "#cc0000", jer2: "#f2f2f2", txt: "WUF", num: "" } },                                    // Mr. Wuf
+  "CFB:PITT": { k: "cat", fur: "#3a3a3e", acc: "#c8c8cc", x: { jer: "#003594", jer2: "#ffb81c", txt: "PITT", num: "" } },                                                   // Roc
+  "CFB:UVA": { k: "human", fur: "#e8bc96", acc: "#232d4b", x: { hat: "cowboy", hatc: "#232d4b", eyemask: 1, cape: "#f84c1e", jer: "#232d4b", jer2: "#f84c1e", txt: "HOOS", num: "" } },   // CavMan
+  "CFB:ARIZ": { k: "cat", fur: "#a87a4a", acc: "#f2e6d0", x: { hat: "cowboy", hatc: "#2a2a30", scarf: "#cc0033", jer: "#003366", jer2: "#cc0033", txt: "WILDCATS", num: "" } },   // Wilbur
+  "CFB:CIN": { k: "cat", fur: "#2a2a2e", acc: "#c8c8cc", x: { jer: "#e00122", jer2: "#141414", txt: "BEARCATS", num: "" } },                                                // the Bearcat
+  "CFB:KU": { k: "bird", fur: "#0051ba", acc: "#ffc82d", x: { head: "#e8000d", jer: "#0051ba", jer2: "#e8000d", txt: "KU", num: "" } },                                     // Big Jay
 };
 // anyone else, from the name: "Tigers", "Bulldogs", "Wildcats"...
 function wdMascSpec(sport, t) {
@@ -24602,8 +24679,15 @@ function wdMascot(THREE, spec, team) {
   const dec = mesh(new THREE.PlaneGeometry(0.19, 0.19), new THREE.MeshBasicMaterial({ map: jt, transparent: true, depthWrite: false }), 0, 0.5, 0.124);
   if (X.over) { mesh(new THREE.BoxGeometry(0.2, 0.2, 0.02), M(X.over), 0, 0.47, 0.118); for (const s of [-1, 1]) mesh(new THREE.BoxGeometry(0.035, 0.16, 0.02), M(X.over), s * 0.07, 0.62, 0.105); dec.position.y = 0.5; dec.position.z = 0.13; }
   if (X.scarf) { const sc = mesh(new THREE.TorusGeometry(0.1, 0.03, 8, 20), M(X.scarf), 0, 0.71, 0.01); sc.rotation.x = Math.PI / 2; mesh(new THREE.ConeGeometry(0.06, 0.1, 4), M(X.scarf), 0, 0.64, 0.11).rotation.x = Math.PI; }
-  const chain = mesh(new THREE.TorusGeometry(0.085, 0.009, 6, 24), M("#ffcf4a", "#5a3a00"), 0, 0.66, 0.06); chain.rotation.x = 1.25;
-  mesh(new THREE.CylinderGeometry(0.028, 0.028, 0.01, 14), M("#ffcf4a", "#5a3a00"), 0, 0.615, 0.122).rotation.x = Math.PI / 2;
+  // a spiked collar sits just under the head, in place of the chain
+  if (X.collar) { const cl = mesh(new THREE.TorusGeometry(0.128, 0.028, 8, 24), M(X.collar), 0, 0.685, 0); cl.rotation.x = Math.PI / 2; cl.scale.set(1, 0.86, 1);
+    for (let i = 0; i < 10; i++) { const a = (i / 10) * Math.PI * 2, sp = mesh(new THREE.ConeGeometry(0.016, 0.05, 6), M("#d8d8dc"), Math.sin(a) * 0.16, 0.685, Math.cos(a) * 0.138); sp.lookAt(Math.sin(a) * 2, 0.685, Math.cos(a) * 2); sp.rotateX(Math.PI / 2); } }
+  if (X.cape) { const cp = mesh(new THREE.BoxGeometry(0.36, 0.44, 0.012), M(X.cape), 0, 0.47, -0.14); cp.rotation.x = 0.1; for (const s of [-1, 1]) mesh(sph(0.018, 8, 6), M("#ffcf4a"), s * 0.1, 0.69, 0.07); }
+  if (spec.kind === "bee") for (const s of [-1, 1]) { const wg = mesh(sph(0.11, 12, 8), M("#dce8f4", "#4a5a6a"), s * 0.12, 0.66, -0.15); wg.scale.set(0.25, 1, 0.55); wg.rotation.z = -s * 0.5; }
+  if (X.shell) { const sh = mesh(new THREE.SphereGeometry(0.2, 18, 10, 0, Math.PI * 2, 0, Math.PI / 2), M(X.shell), 0, 0.53, -0.1); sh.rotation.x = -Math.PI / 2; sh.scale.set(1, 1.2, 0.7);
+    for (let i = 0; i < 5; i++) { const pl = mesh(new THREE.CylinderGeometry(0.045, 0.045, 0.01, 6), M("#5a6a3a"), Math.cos(i * 1.26) * 0.08 * (i ? 1 : 0), 0.53 + Math.sin(i * 1.26) * 0.1 * (i ? 1 : 0), -0.235); pl.rotation.x = Math.PI / 2; } }
+  if (!X.collar) { const chain = mesh(new THREE.TorusGeometry(0.085, 0.009, 6, 24), M("#ffcf4a", "#5a3a00"), 0, 0.66, 0.06); chain.rotation.x = 1.25;
+    mesh(new THREE.CylinderGeometry(0.028, 0.028, 0.01, 14), M("#ffcf4a", "#5a3a00"), 0, 0.615, 0.122).rotation.x = Math.PI / 2; }
   // arms: shoulder and elbow pivots, the sleeve in the jersey, the forearm and hand in fur (gloves on a person or a bird)
   const arm = (s) => {
     const sh = new THREE.Group(); sh.position.set(s * 0.17, 0.66, 0); body.add(sh);
@@ -24637,25 +24721,44 @@ function wdMascot(THREE, spec, team) {
     const mz = K === "dog" ? 0.15 : 0.12, sn = H(sph(K === "dog" ? 0.085 : 0.075), M(acc), 0, -0.04, mz); sn.scale.set(1.15, 0.8, K === "dog" ? 1.25 : 0.9);
     H(sph(0.026, 10, 8), M("#141414"), 0, -0.01, mz + (K === "dog" ? 0.1 : 0.07));
     if (X.jowl) for (const s of [-1, 1]) H(sph(0.05), M(acc), s * 0.055, -0.085, 0.12);
+    if (X.teeth) for (const s of [-1, 1]) H(new THREE.ConeGeometry(0.013, 0.04, 6), M("#ffffff"), s * 0.04, -0.09, mz + 0.06);
+    if (X.buck) for (const s of [-1, 1]) H(new THREE.BoxGeometry(0.022, 0.038, 0.01), M("#ffffff"), s * 0.012, -0.09, mz + 0.055);
+    if (X.blaze) H(sph(0.04, 10, 8), M(X.blaze), 0, 0.075, 0.118).scale.set(0.55, 2.0, 0.5);
+    if (X.cheeks) for (const s of [-1, 1]) H(sph(0.045, 10, 8), M(X.cheeks), s * 0.085, 0.0, 0.095).scale.set(0.7, 1.4, 0.5);
     if (K === "coon") { const mk = H(new THREE.BoxGeometry(0.26, 0.06, 0.02), M("#1b1b1b"), 0, 0.035, 0.13); mk.rotation.x = -0.1; }
     eyes(0.035, 0.115, 0.058, 0.03, X.eye);
     if (X.tongue) { const tg = H(sph(0.03, 10, 8), M("#e8708a"), 0, -0.085, mz + 0.05); tg.scale.set(1, 0.5, 1.2); }
     for (const s of [-1, 1]) {
       if (K === "bear" || K === "coon") H(sph(0.045), M(fur), s * 0.1, 0.12, -0.01);
-      else if (K === "dog" && X.ears === "flop") { const e = H(sph(0.06), M(acc === "#f2f2f2" ? fur : fur), s * 0.13, 0.03, -0.01); e.scale.set(0.45, 1.3, 0.9); e.rotation.z = s * 0.3; }
+      else if (K === "dog" && X.ears === "flop") { const e = H(sph(0.06), M(fur), s * 0.13, 0.03, -0.01); e.scale.set(0.45, 1.3, 0.9); e.rotation.z = s * 0.3; }
+      else if (K === "dog" && X.ears === "long") { const e = H(sph(0.065), M(X.spotc || fur), s * 0.145, -0.03, 0.0); e.scale.set(0.38, 2.1, 0.95); e.rotation.z = s * 0.12; }
       else { const e = H(new THREE.ConeGeometry(0.05, 0.11, 10), M(fur), s * 0.085, 0.15, -0.01); e.rotation.z = -s * 0.35; }
     }
     if (X.stripes) for (let i = 0; i < 3; i++) H(new THREE.BoxGeometry(0.02, 0.07, 0.02), M("#141414"), (i - 1) * 0.04, 0.13, 0.08);
-    if (X.spots) for (let i = 0; i < 5; i++) H(sph(0.016, 8, 6), M("#3b2a14"), Math.cos(i * 1.7) * 0.09, 0.08 + Math.sin(i * 2.3) * 0.03, 0.1);
+    if (X.spots) for (let i = 0; i < 5; i++) H(sph(0.016, 8, 6), M(X.spotc || "#3b2a14"), Math.cos(i * 1.7) * 0.09, 0.08 + Math.sin(i * 2.3) * 0.03, 0.1);
+  } else if (K === "bee") {
+    H(sph(0.15), M(fur)).scale.set(1.05, 1, 1); H(new THREE.TorusGeometry(0.13, 0.025, 8, 24), M(acc), 0, 0.075, -0.01).rotation.x = Math.PI / 2 - 0.25;
+    for (const s of [-1, 1]) { const e = H(sph(0.058, 14, 10), M("#121216"), s * 0.068, 0.02, 0.11); e.scale.set(0.85, 1.15, 0.6); H(sph(0.014, 8, 6), M("#ffffff"), s * 0.06 + 0.01, 0.05, 0.142);
+      const an = H(new THREE.CylinderGeometry(0.006, 0.006, 0.16, 6), M(acc), s * 0.06, 0.2, 0.04); an.rotation.z = -s * 0.4; H(sph(0.022, 8, 6), M(acc), s * 0.095, 0.27, 0.04); }
+    const sm = H(new THREE.TorusGeometry(0.04, 0.008, 6, 14, Math.PI), M("#2a1508"), 0, -0.06, 0.14); sm.rotation.z = Math.PI;
+  } else if (K === "frog") {
+    if (X.shell) { H(sph(0.13), M(fur)).scale.set(1, 0.92, 1.15); eyes(0.04, 0.115, 0.06, 0.03); }
+    else { H(sph(0.15), M(fur)).scale.set(1.25, 0.8, 1); for (const s of [-1, 1]) H(sph(0.06), M(fur), s * 0.08, 0.1, 0.05); eyes(0.11, 0.095, 0.08, 0.036); H(sph(0.1), M(acc), 0, -0.06, 0.07).scale.set(1.25, 0.5, 0.8); }
+    const sm = H(new THREE.TorusGeometry(X.shell ? 0.045 : 0.1, 0.008, 6, 18, Math.PI), M("#2a1508"), 0, X.shell ? -0.05 : -0.02, X.shell ? 0.14 : 0.13); sm.rotation.z = Math.PI; if (!X.shell) sm.scale.set(1, 0.35, 1);
   } else if (K === "horse") {
     H(sph(0.12), M(fur)); const sn = H(new THREE.CapsuleGeometry(0.07, 0.13, 6, 12), M(fur), 0, -0.04, 0.12); sn.rotation.x = Math.PI / 2 - 0.35;
     H(sph(0.06), M(acc), 0, -0.07, 0.2).scale.set(1.1, 0.8, 0.8);
     eyes(0.04, 0.09, 0.07, 0.028);
-    for (const s of [-1, 1]) { const e = H(new THREE.ConeGeometry(0.035, 0.1, 8), M(fur), s * 0.06, 0.14, -0.02); e.rotation.z = -s * 0.2; }
+    for (const s of [-1, 1]) { const lg = X.ears === "long", e = H(new THREE.ConeGeometry(lg ? 0.04 : 0.035, lg ? 0.22 : 0.1, 8), M(fur), s * (lg ? 0.07 : 0.06), lg ? 0.19 : 0.14, -0.02); e.rotation.z = -s * (lg ? 0.45 : 0.2); }
     for (let i = 0; i < 5; i++) H(new THREE.BoxGeometry(0.04, 0.07, 0.05), M(X.mane || "#222222"), 0, 0.12 - i * 0.045, -0.06 - i * 0.025);
+    if (X.spots) for (let i = 0; i < 7; i++) H(sph(0.018, 8, 6), M(X.spotc || "#3a2a1a"), Math.cos(i * 1.9) * 0.07, 0.04 + Math.sin(i * 2.7) * 0.05, 0.095 + Math.abs(Math.sin(i * 1.9)) * 0.01);
   } else if (K === "bull" || K === "hog") {
     const h0 = H(sph(0.14), M(fur)); h0.scale.set(1.12, 0.95, 1);
-    const sn = H(new THREE.CylinderGeometry(0.075, 0.08, 0.06, 16), M(K === "hog" ? "#f2b0a8" : acc), 0, -0.04, 0.14); sn.rotation.x = Math.PI / 2;
+    const sn = H(new THREE.CylinderGeometry(0.075, 0.08, 0.06, 16), M(K === "hog" ? X.snout || "#f2b0a8" : acc), 0, -0.04, 0.14); sn.rotation.x = Math.PI / 2;
+    if (X.tusks) for (const s of [-1, 1]) { const tk = H(new THREE.ConeGeometry(0.014, 0.07, 8), M("#f4efe0"), s * 0.075, -0.05, 0.15); tk.rotation.z = -s * 0.35; }
+    if (X.ridge) for (let i = 0; i < 6; i++) { const r = H(new THREE.ConeGeometry(0.022, 0.07, 6), M(X.ridge), 0, 0.14 - i * 0.012, 0.06 - i * 0.045); r.rotation.x = -0.35 - i * 0.12; }
+    if (K === "bull" && X.mane) H(sph(0.12), M(X.mane), 0, 0.07, -0.08).scale.set(1.15, 0.9, 0.9);
+    if (X.goatee) { const gt = H(new THREE.ConeGeometry(0.03, 0.1, 8), M(X.goatee), 0, -0.13, 0.11); gt.rotation.x = Math.PI - 0.3; }
     for (const s of [-1, 1]) H(sph(0.014, 8, 6), M("#3a1a14"), s * 0.03, -0.04, 0.172);
     if (X.ring) H(new THREE.TorusGeometry(0.03, 0.006, 6, 16), M("#d8d8d8"), 0, -0.075, 0.172);
     eyes(0.045, 0.11, 0.06, 0.028);
@@ -24664,6 +24767,7 @@ function wdMascot(THREE, spec, team) {
       const hc = M(X.hornc || acc), hk = X.horns || "bull";
       for (const s of [-1, 1]) {
         if (hk === "ram") { for (let i = 0; i < 9; i++) { const a = i * 0.62, r = 0.085 - i * 0.006, hs = H(sph(0.034 - i * 0.0018, 10, 8), hc, s * (0.15 + 0.03 * i / 8), 0.11 + Math.sin(a) * r, -0.02 + Math.cos(a) * r - 0.02); hs.scale.set(1, 1, 1); } }
+        else if (hk === "goat") { const h = H(new THREE.ConeGeometry(0.026, 0.16, 10), hc, s * 0.065, 0.17, -0.03); h.rotation.x = -0.75; h.rotation.z = -s * 0.15; }
         else { const ln = hk === "long" ? 0.3 : hk === "short" ? 0.1 : 0.16, h = H(new THREE.ConeGeometry(0.03, ln, 10), hc, s * (0.13 + ln * 0.4), 0.11, 0); h.rotation.z = -s * (hk === "long" ? 1.35 : 0.9); }
       }
     }
@@ -24714,11 +24818,18 @@ function wdMascot(THREE, spec, team) {
     else if (hat === "helmet" || hat === "bolt" || hat === "pilot" || hat === "trojan") { const hm = H(new THREE.SphereGeometry(0.158, 20, 12, 0, Math.PI * 2, 0, Math.PI * 0.56), a2, 0, 0.0, -0.015); hm.rotation.x = -0.25;
       if (X.stripe) H(new THREE.BoxGeometry(0.03, 0.02, 0.3), M(X.stripe), 0, 0.15, -0.01);
       if (X.eyemask) H(new THREE.BoxGeometry(0.2, 0.05, 0.03), M("#141414"), 0, 0.03, 0.115);
-      if (hat === "trojan") for (let i = 0; i < 7; i++) H(new THREE.BoxGeometry(0.03, 0.06, 0.05), M("#c8102e"), 0, 0.19 - Math.abs(i - 3) * 0.006, -0.12 + i * 0.04);
+      if (hat === "trojan") for (let i = 0; i < 7; i++) H(new THREE.BoxGeometry(0.03, 0.06, 0.05), M(X.plume || "#c8102e"), 0, 0.19 - Math.abs(i - 3) * 0.006, -0.12 + i * 0.04);
       if (hat === "bolt") { const b = H(new THREE.BoxGeometry(0.02, 0.15, 0.03), M("#ffc20e"), 0.06, 0.08, 0.1); b.rotation.z = 0.4; }
       if (hat === "pilot") { for (const sd of [-1, 1]) H(new THREE.CylinderGeometry(0.035, 0.035, 0.03, 14), M("#9ad1ff", "#335577"), sd * 0.05, 0.1, 0.12).rotation.x = Math.PI / 2; }
       if (hat === "helmet") { const mk = M(X.mask || "#c8c8c8"); for (const y of [-0.045, -0.085]) H(new THREE.BoxGeometry(0.2, 0.012, 0.012), mk, 0, y, 0.135); for (const sd of [-1, 1]) H(new THREE.BoxGeometry(0.012, 0.07, 0.012), mk, sd * 0.05, -0.065, 0.135); } }
     else if (hat === "lep") { H(new THREE.CylinderGeometry(0.22, 0.22, 0.012, 24), a2, 0, 0.1, 0); H(new THREE.CylinderGeometry(0.1, 0.11, 0.17, 18), a2, 0, 0.19, 0); H(new THREE.BoxGeometry(0.06, 0.04, 0.012), M("#ffd24a"), 0, 0.13, 0.11); }
+    else if (hat === "sailor") { H(new THREE.CylinderGeometry(0.115, 0.13, 0.07, 18), M("#f4f4f4"), 0, 0.15, -0.01); const rm = H(new THREE.TorusGeometry(0.13, 0.022, 8, 22), M("#f4f4f4"), 0, 0.12, -0.01); rm.rotation.x = Math.PI / 2; }
+    else if (hat === "crown") { H(new THREE.CylinderGeometry(0.105, 0.1, 0.06, 18), a2, 0, 0.165, 0); for (let i = 0; i < 6; i++) { const a = (i / 6) * Math.PI * 2; H(new THREE.ConeGeometry(0.022, 0.06, 6), a2, Math.sin(a) * 0.095, 0.22, Math.cos(a) * 0.095); H(sph(0.012, 8, 6), M(i % 2 ? "#c8102e" : "#2a62d8", i % 2 ? "#40080c" : "#0a1a40"), Math.sin(a) * 0.105, 0.165, Math.cos(a) * 0.105); } }
+    else if (hat === "coonskin") { H(new THREE.CylinderGeometry(0.125, 0.14, 0.12, 18), M("#6b4a2b"), 0, 0.13, -0.01); H(sph(0.125), M("#6b4a2b"), 0, 0.19, -0.01).scale.set(1, 0.35, 1);
+      for (let i = 0; i < 5; i++) { const tl = H(sph(0.035, 10, 8), M(i % 2 ? "#2a1a10" : "#7a5a3a"), 0.05, 0.1 - i * 0.045, -0.15 - i * 0.012); tl.scale.set(1, 1.3, 1); } }
+    else if (hat === "horns") for (const sd of [-1, 1]) { const h = H(new THREE.ConeGeometry(0.026, 0.1, 10), a2, sd * 0.075, 0.15, 0.04); h.rotation.z = -sd * 0.45; }
+    else if (hat === "top") { H(new THREE.CylinderGeometry(0.2, 0.2, 0.012, 24), a2, 0, 0.11, 0); H(new THREE.CylinderGeometry(0.1, 0.1, 0.2, 18), a2, 0, 0.21, 0); H(new THREE.CylinderGeometry(0.102, 0.102, 0.03, 18), M("#9e7e38"), 0, 0.13, 0); }
+    if (X.eyemask && hat !== "helmet") H(new THREE.BoxGeometry(0.24, 0.055, 0.02), M("#141414"), 0, 0.03, 0.105);
     if (X.shades) { for (const sd of [-1, 1]) H(new THREE.BoxGeometry(0.075, 0.045, 0.02), M("#101014"), sd * 0.055, 0.04, 0.135); H(new THREE.BoxGeometry(0.05, 0.012, 0.02), M("#101014"), 0, 0.05, 0.138); }
   }
   // headphones on everyone
@@ -25070,7 +25181,7 @@ function wdRoomBuild(L, R) {
     return { p: new T3.Vector3(8, 5.5, -15), l: new T3.Vector3(-2, 2.5, 9), f: 52 }; };
   // the shots
   const sh = (p, l, f) => ({ p: new THREE.Vector3(...p), l: new THREE.Vector3(...l), f });
-  st.shots = { board: sh(V.board.p, V.board.l, V.board.f) };
+  st.shots = { board: sh(V.board.p, V.board.l, V.board.f), cel: sh([-7, 3.6, 13], [16, 4.5, -2], 58) };
   const df = st.djFace(); st.shots.suite = { p: df.c.clone().add(df.n.clone().multiplyScalar(df.w * 1.3)).add(new THREE.Vector3(0, df.h * 0.1, 0)), l: df.c.clone(), f: 42 };
   st.hold = st.holdShot = st.shots.board; cam.position.copy(st.shots.board.p); cam.lookAt(st.look); cam.fov = V.board.f; cam.updateProjectionMatrix();
   st.onIdle = (R2) => wdRoomIdle(st, R2);
@@ -25507,6 +25618,7 @@ function wdBuild(L, R) {
   // the shots
   const sh = (p, l, f) => ({ p: v3(p), l: v3(l), f });
   st.shots = { board: sh(V.board.p, V.board.l, V.board.f) };
+  if (fs) st.shots.cel = sh([-24, 9, 26], [14, 30, -80], 58);
   const df = st.djFace(), dd = df.w * 1.12;
   st.shots.suite = { p: df.c.clone().add(df.n.clone().multiplyScalar(dd)).add(new THREE.Vector3(0, df.h * 0.12, 0)), l: df.c.clone().add(new THREE.Vector3(0, df.h * 0.1, 0)), f: 42 };
   st.hold = st.holdShot = st.shots.board;
@@ -25698,7 +25810,9 @@ function wdLoop(now) {
   const st = WD.st, gap = now - (WD.tick || now); WD.tick = now; if (!st) return;
   if (!wdTv() || document.hidden) { WD.r.domElement.style.visibility = "hidden"; return; }
   WD.r.domElement.style.visibility = "";
-  const showing = WD.mode === "board" && !!document.querySelector(".cs.show"), fps = WD.mode !== "board" || st.fly ? 60 : showing ? 10 : 30;
+  // a win or a miss on: the board steps aside, the camera turns to the crowd, and back after
+  if (now - (WD.shAt || 0) > 250) { WD.shAt = now; const on = !!document.querySelector(".cs.v2x.show"); if (on !== !!WD.showing) { WD.showing = on; document.body.classList.toggle("v2w-show", on); wdShowCam(st, on); } }
+  const showing = WD.mode === "board" && !!document.querySelector(".cs.show"), fps = st.fly ? 60 : WD.mode === "show" ? 30 : WD.mode !== "board" ? 60 : showing ? 10 : 30;
   // a screen that can't keep up: draw it smaller, and if that's not enough, go back to the flat backgrounds
   if (WD.mode === "board" && !showing && !st.fly && gap < 1000) { WD.slow = Math.max(0, (WD.slow || 0) + (gap > 48 ? 1 : -1));
     if (WD.slow > 240) { WD.slow = 0; if (WD.q > 0.46) { WD.qb = 0.45; wdSize(0.45, true); } else { WD.off = true; wdStop(); console.warn("world: too slow here, flat backgrounds"); return; } } }
@@ -25717,6 +25831,10 @@ function wdLoop(now) {
   wdFansTick(st, t); if (st.room) wdRoomTick(st, dt);
   wdFwTick(st, dt); wdCam(st, now); wdProject(st); wdVidTick(st, now); wdDeckCam(st, now);
   WD.r.render(st.scene, st.cam);
+}
+function wdShowCam(st, on) {
+  if (on && WD.mode === "board" && st.shots.cel) { WD.mode = "show"; wdFly(st, st.shots.cel, 2200, (WD.V.fwR || 30) * 0.3); }
+  else if (!on && WD.mode === "show") { WD.mode = "board"; wdFly(st, st.shots.board, 2000, (WD.V.fwR || 30) * 0.3); }
 }
 // keep up with the board: start or stop with TV, rebuild when the sport or the teams change, scores that light it up
 function wdPoll() {
