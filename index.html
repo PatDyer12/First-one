@@ -13770,7 +13770,7 @@ void main(){
   // ---------- sheets ----------
   function openSheet(id) { $(id).hidden = false; }
   // keep every open screen current: when a new version is up, reload it (never mid-form or mid-animation)
-  const BUILD = "20261028030219";
+  const BUILD = "20261028031929";
   function checkBuild() {
     if (BUILD === "dev") return;
     fetch("version.json?t=" + Date.now(), { cache: "no-store" }).then((r) => (r.ok ? r.json() : null)).then((j) => {
@@ -24086,9 +24086,28 @@ function wdParkBuild(st, pf, C, V) {
     const g = new THREE.SphereGeometry(Rs, 72, 18, 0, Math.PI * 2, 0, th), mat = new THREE.ShaderMaterial({ side: THREE.BackSide,
       uniforms: { uSpokes: { value: pf.roof === "dome" ? 24 : 8 }, uRings: { value: pf.f.includes("catwalks") ? 1 : 0 }, uT: { value: 0 }, uBase: { value: new THREE.Vector3(...(pf.roof === "dome" ? [0.62, 0.64, 0.68] : [0.3, 0.32, 0.36])) }, uLine: { value: new THREE.Vector3(0.18, 0.19, 0.22) } },
       vertexShader: "varying vec3 vP; void main(){ vP = position; gl_Position = projectionMatrix * modelViewMatrix * vec4(position, 1.0); }", fragmentShader: WD_DOME });
-    const d = new THREE.Mesh(g, mat); d.position.set(0, 40 + H - Rs, -48); if (pf.roof === "dome") d.rotation.x = -0.1; scene.add(d); st.mats.push(mat);
+    const d = new THREE.Mesh(g, mat); d.position.set(0, 40 + H - Rs, -48); scene.add(d); st.mats.push(mat);
+    st.roofY = (x, z) => d.position.y + Math.sqrt(Math.max(0, Rs * Rs - x * x - (z + 48) * (z + 48)));
     // a dome lights the field from its rings, not from towers
     if (pf.f.includes("catwalks")) for (let i = 0; i < 16; i++) { const a = (i / 16) * Math.PI * 2; st.glowAt([Math.cos(a) * 60, 64, -48 + Math.sin(a) * 60], 26, [1, 0.97, 0.9], 0.35); }
+  }
+  {
+    const cv = wdCanvas(512, 256), x = cv.getContext("2d"), gr = x.createLinearGradient(0, 0, 0, 256); gr.addColorStop(0, "#151a24"); gr.addColorStop(1, "#0c1018"); x.fillStyle = gr; x.fillRect(0, 0, 512, 256);
+    for (let i = 0; i < 16; i++) { x.fillStyle = `rgba(255,${200 + Math.random() * 40 | 0},${140 + Math.random() * 60 | 0},${0.35 + Math.random() * 0.4})`; x.fillRect(i * 32 + 3, 150, 26, 18); }
+    for (let i = 0; i < 4; i++) { x.fillStyle = ["#1d3c6e", "#7a1f2b", "#23502e", "#5a3f12"][(i + (pf.k || "").length) % 4]; x.fillRect(i * 128 + 8, 60, 112, 50); x.fillStyle = "rgba(255,255,255,.75)"; x.font = "800 22px Inter, sans-serif"; x.fillText(["SWEAT BOARD", (pf.nm || "").toUpperCase().slice(0, 11), "LIVE", "PLAY BALL"][i], i * 128 + 16, 92); }
+    for (let i = 0; i < 64; i++) { x.fillStyle = "rgba(255,250,235,.85)"; x.fillRect(i * 8 + 2, 14, 3, 3); }
+    const tx = wdTex(THREE, cv); tx.wrapS = THREE.RepeatWrapping; st.tex.push(tx);
+    const fy = (u) => { const p = wdNorm(C, u), xx = p[0] + p[2] * 46, zz = p[1] + p[3] * 46; return st.roofY ? st.roofY(xx, zz) + 1 : zz > -58 ? 44 : 33; };
+    const g = wdBand(THREE, C, { o0: 46, y0: 0, y1: 40, y1f: fy }, 480); g.attributes.uv.array.forEach((v, i, arr) => { if (i % 2 === 0) arr[i] = v / 60; }); scene.add(new THREE.Mesh(g, new THREE.MeshBasicMaterial({ map: tx, side: THREE.DoubleSide })));
+    // the back of the outfield decks, so nothing's open behind them
+    const bk = wdBand(THREE, C, { o0: 40, y0: 13, y1: 31.5, keep: (xx, zz) => zz <= -58 }, 360); scene.add(new THREE.Mesh(bk, basic("#10141c", { side: THREE.DoubleSide })));
+    if (!st.roofY) {
+      // an open park: a canopy light ring on top, the city beyond
+      for (let i = 0; i < 36; i++) { const p = wdNorm(C, i / 36), xx = p[0] + p[2] * 46, zz = p[1] + p[3] * 46; st.glowAt([xx, fy(i / 36) + 1, zz], 9, [1, 0.96, 0.88], 0.35); }
+      const sk = wdCanvas(1024, 256), y = sk.getContext("2d"); for (let i = 0; i < 70; i++) { const w = 10 + Math.random() * 28, h = 40 + Math.random() * 200, xx = Math.random() * 1024; y.fillStyle = "#0b0f18"; y.fillRect(xx, 256 - h, w, h); y.fillStyle = "rgba(255,215,150,.6)"; for (let k = 0; k < h / 9; k++) if (Math.random() < 0.35) y.fillRect(xx + 2 + (k % 3) * (w / 3), 256 - h + 4 + k * 8, 2, 3); }
+      const stx = wdTex(THREE, sk); stx.wrapS = THREE.RepeatWrapping; stx.repeat.x = 3; st.tex.push(stx);
+      const city = new THREE.Mesh(new THREE.CylinderGeometry(700, 700, 160, 48, 1, true), new THREE.MeshBasicMaterial({ map: stx, transparent: true, side: THREE.BackSide, depthWrite: false })); city.position.set(0, 60, -48); scene.add(city);
+    }
   }
   // the outfield wall in its own color and heights, padding on top
   const wc = pf.wc || null;
@@ -24159,7 +24178,7 @@ function wdPartyBuild(st) {
 // the shots around the room during a set
 function wdPartyShot(st, k) {
   const THREE = st.THREE, F = st.djFace(), right = new THREE.Vector3(0, 1, 0).cross(F.n).normalize(), d = F.w * 1.4, ctr = new THREE.Vector3(st.V.cx, 0, st.V.cz), R = st.V.fwR || 30;
-  if (k === 0) return wdFrame(st, F, 0.54);
+  if (k === 0) return wdFrame(st, F, 0.46);
   if (k === 1) return { p: F.c.clone().add(F.n.clone().multiplyScalar(d * 3.4)).setY(Math.max(4, F.c.y * 0.35)), l: F.c.clone().add(new THREE.Vector3(0, F.h * 0.6, 0)), f: 58 };
   if (k === 2) return { p: ctr.clone().add(F.n.clone().multiplyScalar(-R * 0.5)).add(new THREE.Vector3(0, R * 2.4, 0)), l: ctr.clone().add(F.n.clone().multiplyScalar(-R * 0.9)), f: 62 };
   return { p: F.c.clone().add(F.n.clone().multiplyScalar(d * 1.6)).add(right.clone().multiplyScalar(d * 1.3)).add(new THREE.Vector3(0, F.h * 0.4, 0)), l: F.c.clone().add(right.clone().multiplyScalar(-d * 0.4)), f: 50 };
@@ -24193,8 +24212,9 @@ const WD_V = {
     towers: [[-100, 74, -86], [100, 74, -86], [-100, 74, 86], [100, 74, 86]], fw: [0, 70, 0], fwR: 46,
     board: { p: [-18, 33, 64], l: [16, 4, -22], f: 52 } },
   mlb: { A: 82, B: 80, Bb: 62, n: 2.3, cx: 0, cz: -44, roof: 0, field: [190, 190, 0, -60],
-    tiers: [{ o0: 0.6, o1: 22, y0: 3.2, y1: 13, rows: 26 }, { suite: 1, o0: 22.6, y0: 13.6, y1: 17.6, keep: (x, z) => z > -66 }, { o0: 24, o1: 44, y0: 19, y1: 38, rows: 26, keep: (x, z) => z > -58 }],
-    ribs: [{ o: 22.5, y0: 18, y1: 19.2, keep: (x, z) => z > -58 }], wall: { o: 0.3, y1: 3.2 },
+    tiers: [{ o0: 0.6, o1: 22, y0: 3.2, y1: 13, rows: 26 }, { suite: 1, o0: 22.6, y0: 13.6, y1: 17.6, keep: (x, z) => z > -66 }, { o0: 24, o1: 44, y0: 19, y1: 38, rows: 26, keep: (x, z) => z > -58 },
+      { o0: 24, o1: 40, y0: 16, y1: 31, rows: 20, keep: (x, z) => z <= -58 && Math.abs(Math.atan2(z, x) * 180 / Math.PI + 90) > 15 }],
+    ribs: [{ o: 22.5, y0: 18, y1: 19.2, keep: (x, z) => z > -58 }, { o: 23.6, y0: 14.6, y1: 15.8, keep: (x, z) => z <= -58 }], wall: { o: 0.3, y1: 3.2 },
     jumbo: { p: [0, 34, -164], face: [0, 0, 1], w: 54, h: 30.4, legs: 1 }, dj: { t: 0.97, w: 12 },
     towers: [[-96, 58, -20], [96, 58, -20], [-70, 56, -120], [70, 56, -120], [0, 50, 44]], fw: [0, 58, -110], fwR: 40,
     board: { p: [-40, 44, 30], l: [22, 0, -64], f: 50 } },
@@ -24437,6 +24457,7 @@ function wdTex(THREE, canvas, aniso) { const t = new THREE.CanvasTexture(canvas)
 function wdBuild(L, R) {
   const THREE = L.THREE, pf = R.sport === "mlb" ? wdPark(R) : null, V = pf ? Object.assign({}, WD_V.mlb, { dome: pf.roof !== "open" ? 1 : 0, towers: pf.roof !== "open" ? [] : WD_V.mlb.towers }) : WD_V[R.sport];
   WD.V = V; const C = pf ? wdParkContour(pf) : wdContour(V), wallH = pf ? wdParkWall(pf) : null;
+  if (pf) { WD.V = V; const cp = wdNorm(C, 0.125), w = 50, h = 28.1; V.jumbo = { p: [cp[0] + cp[2] * 31, 16 + h / 2 + 1.5, cp[1] + cp[3] * 31], face: [-cp[2], 0, -cp[3]], w, h, legs: 0, base: 16 }; }
   const scene = new THREE.Scene(), cam = new THREE.PerspectiveCamera(V.board.f, innerWidth / innerHeight, 0.5, 4000), T = R.T, aniso = Math.min(8, WD.r.capabilities.getMaxAnisotropy());
   const C1 = wdLift(T.h.col, 0.16), C2 = wdLift(T.h.alt, 0.2), C3 = wdLift(T.a.col, 0.16), haze = [0.03, 0.04, 0.07];
   const st = { THREE, scene, cam, V, C, R, mats: [], tex: [], disp: [], t0: performance.now(), look: new THREE.Vector3(...V.board.l), fly: null, hold: null, glows: [], fw: null, flash: 0, fc: [1, 1, 1], wave: 0, burst: 0, dim: 0 };
@@ -24538,6 +24559,7 @@ function wdBuild(L, R) {
     const s = screen(J.w, J.h); s.position.z = 1.02; jg.add(s);
     const top = new THREE.Mesh(new THREE.BoxGeometry(J.w + 3, 0.5, 2.1), trim); top.position.y = J.h / 2 + 1.5; jg.add(top);
     const sign = wdTex(THREE, wdNeonArt("SWEAT BOARD", "#ffc94d")); st.tex.push(sign); const sg = new THREE.Mesh(new THREE.PlaneGeometry(J.w * 0.6, J.w * 0.15), new THREE.MeshBasicMaterial({ map: sign, transparent: true, blending: THREE.AdditiveBlending, depthWrite: false })); sg.position.set(0, J.h / 2 + 5.5, 1.1); jg.add(sg);
+    if (J.base != null) { const hh = J.p[1] - J.h / 2 - (J.base - 3); const sup = new THREE.Mesh(new THREE.BoxGeometry(J.w + 3, hh, 6), dark); sup.position.set(0, -J.h / 2 - hh / 2, -2.5); jg.add(sup); }
     if (J.legs) for (const s2 of [-1, 1]) { const leg = new THREE.Mesh(new THREE.BoxGeometry(2, J.p[1], 2), dark); leg.position.set(s2 * J.w * 0.3, -J.p[1] / 2, -0.5); jg.add(leg); }
     st.jface = () => ({ c: jg.localToWorld(new THREE.Vector3(0, 0, 1.02)), n: n.clone(), w: J.w, h: J.h });
   }
@@ -24818,7 +24840,7 @@ window.SBW = {
     const go = ++WD.go, show = () => { if (go === WD.go) document.body.classList.remove("v2w-fly"); };
     // never leave the panels hidden behind a camera move that didn't finish
     setTimeout(show, 4800);
-    wdFly(st, wdFrame(st, F, dj ? 0.54 : 0.56), dj ? 2600 : 2100, WD.V.fwR * (dj ? 0.5 : 0.35), show);
+    wdFly(st, wdFrame(st, F, dj ? 0.46 : 0.44), dj ? 2600 : 2100, WD.V.fwR * (dj ? 0.5 : 0.35), show);
     return true;
   },
   clipEnd() { if (!WD.st || WD.mode === "board" || WD.mode === "back") return; WD.go++; wdBack(false); },
