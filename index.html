@@ -13799,7 +13799,7 @@ void main(){
   // ---------- sheets ----------
   function openSheet(id) { $(id).hidden = false; }
   // keep every open screen current: when a new version is up, reload it (never mid-form or mid-animation)
-  const BUILD = "20261028074230";
+  const BUILD = "20261028081107";
   function checkBuild() {
     if (BUILD === "dev") return;
     fetch("version.json?t=" + Date.now(), { cache: "no-store" }).then((r) => (r.ok ? r.json() : null)).then((j) => {
@@ -25816,7 +25816,10 @@ function wdLoop(now) {
   WD.r.domElement.style.visibility = "";
   // a win or a miss on: the board steps aside, the camera turns to the crowd, and back after
   if (now - (WD.shAt || 0) > 250) { WD.shAt = now; const on = !!document.querySelector(".cs.v2x.show"); if (on !== !!WD.showing) { WD.showing = on; document.body.classList.toggle("v2w-show", on); wdShowCam(st, on); } }
-  const showing = WD.mode === "board" && !!document.querySelector(".cs.show"), fps = st.fly ? 60 : WD.mode === "show" ? 30 : WD.mode !== "board" ? 60 : showing ? 10 : 30;
+  // a show over the building: 30 fps, 15 on a screen that's already been turned down or that falls behind during it
+  if (WD.mode === "show" && gap < 1000) WD.ss = Math.max(0, Math.min(40, (WD.ss || 0) + (gap > 60 ? 1 : -1)));
+  const slowShow = (WD.qb && WD.qb < 0.5) || (WD.ss || 0) > 20;
+  const showing = WD.mode === "board" && !!document.querySelector(".cs.show"), fps = WD.mode === "show" ? (slowShow ? 15 : st.fly ? 60 : 30) : st.fly ? 60 : WD.mode !== "board" ? 60 : showing ? 10 : 30;
   // a screen that can't keep up: draw it smaller, and if that's not enough, go back to the flat backgrounds
   if (WD.mode === "board" && !showing && !st.fly && gap < 1000) { WD.slow = Math.max(0, (WD.slow || 0) + (gap > 48 ? 1 : -1));
     if (WD.slow > 240) { WD.slow = 0; if (WD.q > 0.46) { WD.qb = 0.45; wdSize(0.45, true); } else { WD.off = true; wdStop(); console.warn("world: too slow here, flat backgrounds"); return; } } }
