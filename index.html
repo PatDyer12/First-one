@@ -6662,6 +6662,14 @@ body.v2w #v2world { -webkit-mask-image: linear-gradient(to bottom, rgba(0,0,0,.4
 body.v2w.v2w-away #v2world { -webkit-mask-image: none; mask-image: none; }
 /* the set's wide shots: the room's bets step aside so the light show has the screen */
 body.v2w.v2w-wide #jumbo .jb-side { opacity: 0 !important; }
+/* the song name sits small in the corner of the picture itself, glued to the screen with it */
+body.v2w.v2w-proj #jbNp { position: fixed !important; inset: 0 auto auto 0 !important; max-width: 620px !important; margin: 0 !important; transform-origin: 0 0 !important; font-size: 20px !important;
+  transition: opacity .5s ease !important; background: rgba(6,8,12,.5) !important; border-color: rgba(255,255,255,.08) !important; box-shadow: none !important; z-index: 1; }
+body.v2w.v2w-proj #jbNp.on { opacity: .72 !important; }
+/* the close button: out of the title plate, a faint x in the top right corner */
+body.v2w.v2w-in #jumbo .jb-x { position: fixed; top: 12px; right: 18px; margin: 0; font-size: 26px; line-height: 1; color: #fff !important; opacity: .2; z-index: 5; }
+/* our own videos play in the building (a texture on the jumbotron, the suite's glass); the page's copies just keep time */
+body.v2w.v2w-tex #pipVid, body.v2w.v2w-tex #jbWash, body.v2w.v2w-tex #djCv, body.v2w.v2w-tex #jbNp { opacity: .001 !important; }
 </style>
 </head>
 <body>
@@ -13762,7 +13770,7 @@ void main(){
   // ---------- sheets ----------
   function openSheet(id) { $(id).hidden = false; }
   // keep every open screen current: when a new version is up, reload it (never mid-form or mid-animation)
-  const BUILD = "20261028023509";
+  const BUILD = "20261028030219";
   function checkBuild() {
     if (BUILD === "dev") return;
     fetch("version.json?t=" + Date.now(), { cache: "no-store" }).then((r) => (r.ok ? r.json() : null)).then((j) => {
@@ -24164,7 +24172,7 @@ function wdPartyTick(st, now, dt, t) {
   const beat = ((now - (P.t0 || now)) / 1000) * (P.bpm / 60), pulse = Math.exp(-(beat % 1) * 5), bar = Math.floor(beat / 4);
   for (const b of P.beams) { b.piv.quaternion.copy(b.base); b.piv.rotateZ(Math.sin(t * 0.55 + b.ph) * 0.5); b.piv.rotateX(Math.sin(t * 0.37 + b.ph * 1.7) * 0.28); b.m.opacity = on * (0.09 + pulse * 0.07); }
   const fan = Math.sin(t * 0.8) * 0.45;
-  for (const l of P.lasers) { l.piv.quaternion.copy(l.base); l.piv.rotateY((l.i / 11 - 0.5) * 1.3 + fan * 0.4); l.piv.rotateX(0.18 + Math.sin(t * 1.1 + l.i * 0.3) * 0.12); l.m.opacity = on * (bar % 2 ? 0.55 : 0.22) * (0.6 + pulse * 0.4); }
+  for (const l of P.lasers) { l.piv.quaternion.copy(l.base); l.piv.rotateY((l.i / 11 - 0.5) * 1.3 + fan * 0.4); l.piv.rotateX(0.18 + Math.sin(t * 1.1 + l.i * 0.3) * 0.12); l.m.opacity = on * (bar % 2 ? 0.4 : 0.16) * (0.6 + pulse * 0.4); }
   // the crowd: phone lights up, the wave now and then, a flash in the set's colors on the downbeat
   st.burst = Math.max(st.burst, on * 0.9); if (beat % 32 < 0.05) st.wave = Math.max(st.wave, on * 1.1);
   const c = WD_PCOL[bar % 5]; if (pulse > 0.9) { st.fc = c; st.flash = Math.max(st.flash, on * 0.5); }
@@ -24407,6 +24415,22 @@ function wdNeonArt(txt, col) {
   return c;
 }
 function wdGlowTex(THREE) { const c = wdCanvas(128, 128), x = c.getContext("2d"), g = x.createRadialGradient(64, 64, 0, 64, 64, 64); g.addColorStop(0, "rgba(255,255,255,1)"); g.addColorStop(0.25, "rgba(255,255,255,.55)"); g.addColorStop(1, "rgba(255,255,255,0)"); x.fillStyle = g; x.fillRect(0, 0, 128, 128); const t = new THREE.CanvasTexture(c); return t; }
+const WD_SCR = `uniform sampler2D uMap, uOver; uniform float uAsp, uScr, uLed; varying vec2 vUv;
+vec3 tap(vec2 q){ return texture2D(uMap, clamp(q, .001, .999)).rgb; }
+void main(){
+  vec2 cu = vUv, bu = vUv; float ta = max(.2, uAsp);
+  if (ta > uScr) { cu.y = (vUv.y - .5) * ta / uScr + .5; bu.x = (vUv.x - .5) * uScr / ta + .5; } else { cu.x = (vUv.x - .5) * uScr / ta + .5; bu.y = (vUv.y - .5) * ta / uScr + .5; }
+  vec3 bg = vec3(0.); for (int i = 0; i < 8; i++) { float a = float(i) * .785; bg += tap(bu + vec2(cos(a), sin(a)) * .05); } bg = bg / 8. * .42;
+  bool inside = cu.x >= 0. && cu.x <= 1. && cu.y >= 0. && cu.y <= 1.;
+  vec3 c = inside ? tap(cu) : bg;
+  vec2 px = fract(vUv * vec2(uScr * 220., 220.)); c *= mix(1., .95 + .08 * step(.16, px.x) * step(.16, px.y), uLed);
+  vec4 o = texture2D(uOver, vUv); c = mix(c, o.rgb, o.a);
+  gl_FragColor = vec4(c, 1.);
+}`;
+function wdScreenMat(THREE, tex, scr, over) {
+  return new THREE.ShaderMaterial({ uniforms: { uMap: { value: tex }, uOver: { value: over }, uAsp: { value: scr }, uScr: { value: scr }, uLed: { value: 1 } }, toneMapped: false,
+    vertexShader: "varying vec2 vUv; void main(){ vUv = uv; gl_Position = projectionMatrix * modelViewMatrix * vec4(position, 1.0); }", fragmentShader: WD_SCR });
+}
 function wdTex(THREE, canvas, aniso) { const t = new THREE.CanvasTexture(canvas); t.colorSpace = THREE.NoColorSpace; t.anisotropy = aniso || 1; t.needsUpdate = true; return t; }
 
 // ---- build a venue ----
@@ -24498,7 +24522,8 @@ function wdBuild(L, R) {
   // the jumbotron
   const J = V.jumbo, jtex = wdTex(THREE, wdJumboArt(R)); st.tex.push(jtex); st.jtex = jtex;
   st.screens = [];
-  const screen = (w, h) => { const m = new THREE.MeshBasicMaterial({ map: jtex, toneMapped: false }); const s = new THREE.Mesh(new THREE.PlaneGeometry(w, h), m); st.screens.push(s); return s; };
+  const ocv = wdCanvas(1280, 720), otex = wdTex(THREE, ocv); st.tex.push(otex); st.ocv = ocv; st.otex = otex;
+  const screen = (w, h) => { const m = wdScreenMat(THREE, jtex, w / h, otex); const s = new THREE.Mesh(new THREE.PlaneGeometry(w, h), m); st.screens.push(s); return s; };
   const dark = new THREE.MeshBasicMaterial({ color: new THREE.Color().setRGB(0.03, 0.032, 0.04, THREE.LinearSRGBColorSpace) });
   const trim = new THREE.MeshBasicMaterial({ color: new THREE.Color().setRGB(...C2, THREE.LinearSRGBColorSpace) });
   const jg = new THREE.Group(); jg.position.set(...J.p); scene.add(jg); st.jg = jg;
@@ -24520,12 +24545,12 @@ function wdBuild(L, R) {
   {
     const t = V.dj.t, [px, pz, nx, nz] = wdNorm(C, t), so = V.tiers.find((x) => x.suite), w = V.dj.w, h = w / 1.7778 / 0.92, cy = (so.y0 + so.y1) / 2 + h * 0.08;
     // the party suite sticks out of the row, taller than the rest, its glass the shape of the video
-    const g = new THREE.Group(); g.position.set(px + nx * (so.o0 - 1.2), cy, pz + nz * (so.o0 - 1.2)); g.lookAt(V.cx, cy, V.cz); scene.add(g); st.djg = g;
+    const g = new THREE.Group(); g.position.set(px + nx * (so.o0 - 3.2), cy, pz + nz * (so.o0 - 3.2)); g.lookAt(V.cx, cy, V.cz); scene.add(g); st.djg = g;
     const back = new THREE.Mesh(new THREE.BoxGeometry(w + 0.8, h + 0.6, 3), dark); back.position.z = -1.6; g.add(back);
     const c = wdCanvas(512, 256), x = c.getContext("2d"), gr = x.createLinearGradient(0, 0, 512, 256); gr.addColorStop(0, "#2a0f4a"); gr.addColorStop(1, "#0b1440"); x.fillStyle = gr; x.fillRect(0, 0, 512, 256);
     x.font = `900 64px "Barlow Condensed", Inter, sans-serif`; x.textAlign = "center"; x.shadowColor = "#c77dff"; x.shadowBlur = 24; x.fillStyle = "#e9d5ff"; x.fillText("DJ GOLDIE", 256, 140);
     const idle = wdTex(THREE, c); st.tex.push(idle); st.djIdle = idle;
-    const gm = new THREE.MeshBasicMaterial({ map: idle, toneMapped: false }), gl = new THREE.Mesh(new THREE.PlaneGeometry(w, h * 0.92), gm); gl.position.z = 0.02; g.add(gl); st.djGlass = gl;
+    const gm = wdScreenMat(THREE, idle, w / (h * 0.92), st.otex), gl = new THREE.Mesh(new THREE.PlaneGeometry(w, h * 0.92), gm); gl.position.z = 0.02; g.add(gl); st.djGlass = gl; gm.uniforms.uLed.value = 0.4;
     const neon = new THREE.MeshBasicMaterial({ color: new THREE.Color().setRGB(0.85, 0.45, 1, THREE.LinearSRGBColorSpace) });
     for (const [bw, bh, bx, by] of [[w + 0.6, 0.18, 0, h / 2 + 0.2], [w + 0.6, 0.18, 0, -h / 2 - 0.2], [0.18, h + 0.5, -w / 2 - 0.3, 0], [0.18, h + 0.5, w / 2 + 0.3, 0]]) { const b = new THREE.Mesh(new THREE.BoxGeometry(bw, bh, 0.2), neon); b.position.set(bx, by, 0.1); g.add(b); }
     const rail = new THREE.Mesh(new THREE.BoxGeometry(w + 1, 0.12, 0.12), new THREE.MeshBasicMaterial({ color: new THREE.Color().setRGB(0.7, 0.72, 0.78, THREE.LinearSRGBColorSpace) })); rail.position.set(0, -h / 2 + 0.05, 0.7); g.add(rail);
@@ -24554,7 +24579,7 @@ function wdBuild(L, R) {
 function wdDispose(st) {
   if (!st) return;
   st.scene.traverse((o) => { if (o.geometry) o.geometry.dispose(); if (o.material) (Array.isArray(o.material) ? o.material : [o.material]).forEach((m) => m.dispose()); });
-  st.tex.forEach((t) => t.dispose()); if (st.vtex) st.vtex.dispose();
+  st.tex.forEach((t) => t.dispose()); if (st.vid && st.vid.tex) st.vid.tex.dispose();
 }
 
 // ---- the camera: fly between shots along a crane arc, hold with a slow drift ----
@@ -24586,8 +24611,42 @@ function wdProject(st) {
   else { const den = dx1 * dy2 - dx2 * dy1; g = (dx3 * dy2 - dx2 * dy3) / den; h = (dx1 * dy3 - dx3 * dy1) / den; a = x1 - x0 + g * x1; b = x3 - x0 + h * x3; c = x0; d = y1 - y0 + g * y1; e = y3 - y0 + h * y3; f = y0; }
   const m = `matrix3d(${a / WD_PW},${d / WD_PW},0,${g / WD_PW},${b / WD_PH},${e / WD_PH},0,${h / WD_PH},0,0,1,0,${c},${f},0,1)`;
   for (const el of P.els) { el.style.transform = m; el.style.visibility = behind ? "hidden" : ""; }
+  // the song: small, in the bottom right corner of the picture itself
+  const np = document.getElementById("jbNp");
+  if (np && !np.hidden) { np.style.transform = `${m} translate(${WD_PW - 26 - np.offsetWidth}px, ${WD_PH - 24 - np.offsetHeight}px)`; np.style.visibility = behind ? "hidden" : ""; }
+}
+function wdVidOff(st) {
+  if (!st) return; const V = st.vid; st.vid = null;
+  if (V && V.tex) V.tex.dispose();
+  for (const s of st.screens) { s.material.uniforms.uMap.value = st.jtex; s.material.uniforms.uAsp.value = s.material.uniforms.uScr.value; }
+  if (st.djGlass) { const u = st.djGlass.material.uniforms; u.uMap.value = st.djIdle; u.uAsp.value = u.uScr.value; }
+  document.body.classList.remove("v2w-tex"); WD.npSig = ""; if (st.ocv) { st.ocv.getContext("2d").clearRect(0, 0, 1280, 720); st.otex.needsUpdate = true; }
+}
+function wdVidTick(st, now) {
+  const V = st.vid; if (!V) return; const THREE = st.THREE, useCv = V.cv && !V.cv.hidden && V.cv.width > 0, kind = useCv ? "cv" : "v";
+  if (kind !== V.kind) { if (V.tex) V.tex.dispose(); V.kind = kind;
+    V.tex = useCv ? new THREE.CanvasTexture(V.cv) : new THREE.VideoTexture(V.v); V.tex.colorSpace = THREE.NoColorSpace; V.tex.minFilter = THREE.LinearFilter; V.tex.generateMipmaps = false;
+    for (const m of V.mats) m.uniforms.uMap.value = V.tex; }
+  const asp = useCv ? V.cv.width / Math.max(1, V.cv.height) : V.v.videoWidth / Math.max(1, V.v.videoHeight);
+  if (asp > 0) for (const m of V.mats) m.uniforms.uAsp.value = asp;
+  if (useCv) V.tex.needsUpdate = true; else if (V.v.readyState >= 2 && V.v.currentTime !== V.lt) { V.lt = V.v.currentTime; V.tex.needsUpdate = true; }
+  if (now - (WD.npAt || 0) > 400) { WD.npAt = now; wdNpArt(st); }
+}
+// the song, small in the bottom right corner of the picture
+function wdNpArt(st) {
+  const np = document.getElementById("jbNp"), on = np && !np.hidden && np.classList.contains("on"), song = on ? (document.getElementById("npSong") || {}).textContent || "" : "", art = on ? (document.getElementById("npArtist") || {}).textContent || "" : "";
+  const sig = song + "|" + art; if (sig === WD.npSig) return; WD.npSig = sig;
+  const x = st.ocv.getContext("2d"); x.clearRect(0, 0, 1280, 720);
+  if (song) { x.font = `600 25px Inter, sans-serif`; const w1 = x.measureText(song).width; x.font = `500 18px Inter, sans-serif`; const w2 = x.measureText(art).width; const w = Math.min(620, Math.max(w1, w2) + 92), h = 76, X = 1280 - 26 - w, Y = 720 - 24 - h;
+    x.fillStyle = "rgba(6,8,12,.55)"; x.beginPath(); x.roundRect ? x.roundRect(X, Y, w, h, 10) : x.rect(X, Y, w, h); x.fill();
+    const g = x.createLinearGradient(X + 12, Y + 12, X + 64, Y + 64); g.addColorStop(0, "#9b8cff"); g.addColorStop(0.55, "#ff5fa2"); g.addColorStop(1, "#4f9dff"); x.fillStyle = g; x.fillRect(X + 12, Y + 12, 52, 52);
+    x.fillStyle = "#fff"; for (let i = 0; i < 4; i++) x.fillRect(X + 20 + i * 10, Y + 40 - (i % 2 ? 14 : 8), 5, i % 2 ? 18 : 12);
+    x.globalAlpha = 0.55; x.font = `700 12px Inter, sans-serif`; x.fillText("NOW PLAYING", X + 78, Y + 24); x.globalAlpha = 0.92;
+    x.font = `600 25px Inter, sans-serif`; x.fillText(song, X + 78, Y + 50, w - 90); x.globalAlpha = 0.6; x.font = `500 18px Inter, sans-serif`; x.fillText(art, X + 78, Y + 70, w - 90); x.globalAlpha = 1; }
+  st.otex.needsUpdate = true;
 }
 function wdUnproject(st) {
+  const np = document.getElementById("jbNp"); if (np) { np.style.transform = ""; np.style.visibility = ""; }
   if (!st || !st.proj) { document.body.classList.remove("v2w-proj", "v2w-in"); return; } for (const el of st.proj.els) { el.style.transform = ""; el.style.visibility = ""; } st.proj = null; document.body.classList.remove("v2w-proj", "v2w-in");
 }
 function wdFly(st, to, ms, lift, done) {
@@ -24638,7 +24697,7 @@ function wdRib(items, ms) {
 }
 function wdCard(card, ms) {
   const st = WD.st; if (!st) return; WD.card = card; WD.cardTo = Date.now() + ms;
-  if (!st.vtex) { st.jtex.image = wdJumboArt(st.R, card); st.jtex.needsUpdate = true; }
+  st.jtex.image = wdJumboArt(st.R, card); st.jtex.needsUpdate = true;
 }
 // the idle art from the board as it stands: the ribbons and the jumbotron
 function wdIdleArt(force) {
@@ -24646,7 +24705,7 @@ function wdIdleArt(force) {
   const T = st.R.T, sig = JSON.stringify([R.pulse, R.lb, T.a.sc, T.h.sc, T.d]);
   if (WD.card && Date.now() > WD.cardTo) { WD.card = null; force = true; }
   if (!force && sig === WD.sig) return; WD.sig = sig;
-  if (!st.vtex) { st.jtex.image = wdJumboArt(st.R, WD.card); st.jtex.needsUpdate = true; }
+  st.jtex.image = wdJumboArt(st.R, WD.card); st.jtex.needsUpdate = true;
   if (!WD.ribAt || Date.now() > WD.ribAt) {
     const items = [{ t: "SWEAT BOARD", c: [1, 0.79, 0.3] }]; const vn = (st.pf && st.pf.nm) || (st.R.ven && st.R.ven.nm); if (vn) items.push({ t: vn.toUpperCase(), c: wdLift(st.R.T.h.alt, 0.4) });
     if (T.a.sc !== "") items.push({ t: `${T.a.ab} ${T.a.sc}  ${T.h.ab} ${T.h.sc}  ${(T.d || "").toUpperCase()}`, c: [1, 1, 1] });
@@ -24684,7 +24743,7 @@ function wdRepaint() {
 }
 function wdStop() {
   if (WD.mode !== "board") wdBack(true);
-  wdUnproject(WD.st); wdDispose(WD.st); WD.st = null; document.body.classList.remove("v2w", "v2w-away", "v2w-dj", "v2w-clip", "v2w-fly", "v2w-in");
+  wdUnproject(WD.st); wdVidOff(WD.st); wdDispose(WD.st); WD.st = null; document.body.classList.remove("v2w", "v2w-away", "v2w-dj", "v2w-clip", "v2w-fly", "v2w-in");
 }
 function wdSize(q, force) {
   if (!WD.r || (!force && q === WD.q)) return; WD.q = q;
@@ -24712,7 +24771,7 @@ function wdLoop(now) {
   if (st.rtex) st.rtex.offset.x = (st.rtex.offset.x + dt * (WD.ribAt ? 0.05 : 0.025)) % 1;
   const on = WD.mode === "dj"; for (const b of st.beams) { b.bm.material.opacity += ((on ? 0.08 : 0) - b.bm.material.opacity) * Math.min(1, dt * 3); b.piv.rotation.z = Math.sin(t * 1.3 + b.s) * 0.7 * b.s; b.piv.rotation.x = 0.9 + Math.sin(t * 0.9 + b.s * 2) * 0.35; }
   if (WD.glow) { const o = Math.min(0.5, st.flash * 0.32) * (WD.mode === "board" ? 1 : 0); if (Math.abs(o - (WD.glowO || 0)) > 0.015) { WD.glowO = o; WD.glow.style.opacity = o.toFixed(3); WD.glow.style.setProperty("--wfc", st.fc.map((v) => Math.round(v * 255)).join(",")); } }
-  wdFwTick(st, dt); wdCam(st, now); wdProject(st);
+  wdFwTick(st, dt); wdCam(st, now); wdProject(st); wdVidTick(st, now);
   WD.r.render(st.scene, st.cam);
 }
 // keep up with the board: start or stop with TV, rebuild when the sport or the teams change, scores that light it up
@@ -24736,7 +24795,7 @@ function wdBack(now) {
   const st = WD.st; WD.mode = "back"; document.body.classList.remove("v2w-dj", "v2w-clip", "v2w-fly");
   if (!st) { WD.mode = "board"; document.body.classList.remove("v2w-away"); return; }
   document.body.classList.remove("v2w-wide");
-  const fin = () => { WD.mode = "board"; document.body.classList.remove("v2w-away"); wdUnproject(st); if (st.vtex) { st.vtex.dispose(); st.vtex = null; for (const s of st.screens) { s.material.map = st.jtex; s.material.needsUpdate = true; } } wdSize(WD.qb || 0.6); WD.sig = ""; wdIdleArt(true); };
+  const fin = () => { WD.mode = "board"; document.body.classList.remove("v2w-away"); wdUnproject(st); wdVidOff(st); wdSize(WD.qb || 0.6); WD.sig = ""; wdIdleArt(true); };
   setTimeout(() => { if (WD.mode !== "clip" && WD.mode !== "dj") wdUnproject(st); }, 520);
   if (now) { st.fly = null; st.hold = st.shots.board; fin(); return; }
   wdFly(st, st.shots.board, 2100, WD.V.fwR * 0.6, fin);
@@ -24747,13 +24806,15 @@ window.SBW = {
   // a video is up: o.dj (the DJ set), o.v (the video element), o.ext (someone else's video: can't go on a texture)
   clip(o) {
     const st = WD.st; if (!st || !wdTv()) return false;
-    const dj = !!o.dj;
-    WD.mode = dj ? "dj" : "clip"; document.body.classList.add("v2w-away", "v2w-fly", "v2w-in", "v2w-proj"); document.body.classList.toggle("v2w-dj", dj); document.body.classList.toggle("v2w-clip", !dj);
+    const dj = !!o.dj, inWorld = !!(o.v && !o.ext);
+    wdVidOff(st); wdUnproject(st);
+    WD.mode = dj ? "dj" : "clip"; document.body.classList.add("v2w-away", "v2w-fly", "v2w-in"); document.body.classList.toggle("v2w-dj", dj); document.body.classList.toggle("v2w-clip", !dj);
+    document.body.classList.toggle("v2w-proj", !inWorld); document.body.classList.toggle("v2w-tex", inWorld);
     wdSize(1);
     const F = dj ? st.djFace() : st.jface(st.cam.position);
-    st.proj = { F, els: [o.v, document.getElementById("jbWash"), document.getElementById("djCv")].filter(Boolean) };
-    if (st.vtex) { st.vtex.dispose(); st.vtex = null; }
-    if (dj && st.party) { st.party.bpm = o.bpm > 60 ? o.bpm : 124; if (o.v && !o.ext) { const vt = new st.THREE.VideoTexture(o.v); vt.colorSpace = st.THREE.NoColorSpace; st.vtex = vt; for (const s of st.screens) { s.material.map = vt; s.material.needsUpdate = true; } } }
+    if (st.party) st.party.bpm = o.bpm > 60 ? o.bpm : 124;
+    if (inWorld) { st.vid = { v: o.v, cv: document.getElementById("djCv"), mats: dj ? [st.djGlass.material, ...st.screens.map((x) => x.material)] : st.screens.map((x) => x.material), tex: null, kind: "" }; }
+    else st.proj = { F, els: [o.v, document.getElementById("jbWash"), document.getElementById("djCv")].filter(Boolean) };
     const go = ++WD.go, show = () => { if (go === WD.go) document.body.classList.remove("v2w-fly"); };
     // never leave the panels hidden behind a camera move that didn't finish
     setTimeout(show, 4800);
