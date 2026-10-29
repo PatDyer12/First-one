@@ -6996,6 +6996,13 @@ body.tv .flash .word { border-radius: 12px 0 0 12px; }
 .ob-legs li.lg.lgx .lg-n.l { color: #ff6b78; background: rgba(255,77,94,.15); }
 .ob-legs li.lg.lgx .lg-n.h { color: #04130c; background: #3ee08f; } .ob-legs li.lg.lgx .lg-n.h i { color: rgba(4,19,12,.6); }
 .ob-legs li.lg.lgx .lg-n.m { color: rgba(255,255,255,.5); background: rgba(255,77,94,.1); text-decoration: line-through; }
+
+body.tv.has-ticker .app { padding-bottom: 2px; }
+body.tv .rb-games.primeg > .rb-pcol { margin-bottom: 0; }
+body.tv .rb-main { -webkit-mask-image: linear-gradient(180deg, transparent 0, #000 14px, #000 calc(100% - 16px), transparent 100%); mask-image: linear-gradient(180deg, transparent 0, #000 14px, #000 calc(100% - 16px), transparent 100%); }
+body.tv .rb-games.primeg > .rb-pcol.pr, body.tv .rb-rsc { -webkit-mask-image: linear-gradient(180deg, transparent 0, #000 18px, #000 calc(100% - 10px), transparent 100%); mask-image: linear-gradient(180deg, transparent 0, #000 18px, #000 calc(100% - 10px), transparent 100%); }
+body.tv .rb-games.primeg.mason > .rb-pcol { -webkit-mask-image: linear-gradient(180deg, transparent 0, #000 16px, #000 calc(100% - 10px), transparent 100%); mask-image: linear-gradient(180deg, transparent 0, #000 16px, #000 calc(100% - 10px), transparent 100%); }
+body.tv .pp-list { -webkit-mask-image: linear-gradient(180deg, transparent 0, #000 10px, #000 calc(100% - 10px), transparent 100%); mask-image: linear-gradient(180deg, transparent 0, #000 10px, #000 calc(100% - 10px), transparent 100%); }
 </style>
 </head>
 <body>
@@ -14524,7 +14531,7 @@ void main(){
   // ---------- sheets ----------
   function openSheet(id) { $(id).hidden = false; }
   // keep every open screen current: when a new version is up, reload it (never mid-form or mid-animation)
-  const BUILD = "20261029002011";
+  const BUILD = "20261029002929";
   function checkBuild() {
     if (BUILD === "dev") return;
     fetch("version.json?t=" + Date.now(), { cache: "no-store" }).then((r) => (r.ok ? r.json() : null)).then((j) => {
