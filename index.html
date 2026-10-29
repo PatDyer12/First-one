@@ -14541,7 +14541,7 @@ void main(){
   // ---------- sheets ----------
   function openSheet(id) { $(id).hidden = false; }
   // keep every open screen current: when a new version is up, reload it (never mid-form or mid-animation)
-  const BUILD = "20261029023758";
+  const BUILD = "20261029025136";
   function checkBuild() {
     if (BUILD === "dev") return;
     fetch("version.json?t=" + Date.now(), { cache: "no-store" }).then((r) => (r.ok ? r.json() : null)).then((j) => {
@@ -27177,12 +27177,13 @@ function wdShotFill(st) {
   return { p: F.c.clone().add(F.n.clone().multiplyScalar(d)), l: F.c.clone(), f: fov, F };
 }
 // a screen in frame: F (its center, normal, size) at fr of the picture's width, left of center so the floating panels have the
-// right side
+// right side. nr: the camera's near plane for the shot, a little over half way to the screen: seats, walls and the roof the
+// camera ends up in or behind are cut away, so the screen's always in clear view from wherever the shot puts the camera
 function wdFrame(st, F, fr) {
   const T = st.THREE, fov = 40, tv = Math.tan(((fov / 2) * Math.PI) / 180), asp = innerWidth / innerHeight;
-  const d = F.w / (fr * 2 * tv * asp), right = new T.Vector3(0, 1, 0).cross(F.n).normalize(), off = 0.35 * d * tv * asp, lift = F.h * 0.13;
+  const d = F.w / (fr * 2 * tv * asp), right = new T.Vector3(0, 1, 0).cross(F.n).normalize(), off = 0.38 * d * tv * asp, lift = F.h * 0.13;
   const p = F.c.clone().add(F.n.clone().multiplyScalar(d)).add(right.clone().multiplyScalar(off)).add(new T.Vector3(0, F.h * 0.12 + lift, 0));
-  return { p, l: F.c.clone().add(right.multiplyScalar(off)).add(new T.Vector3(0, lift, 0)), f: fov };
+  return { p, l: F.c.clone().add(right.multiplyScalar(off)).add(new T.Vector3(0, lift, 0)), f: fov, nr: d * 0.58 };
 }
 // the page's video, glued onto a screen in the building: its four corners projected, a CSS matrix3d mapping the element's box
 // onto them (the video stays the page's own element, sharp, any source)
@@ -27240,7 +27241,8 @@ function wdUnproject(st) {
   if (!st || !st.proj) { document.body.classList.remove("v2w-proj", "v2w-in"); return; } for (const el of st.proj.els) { el.style.transform = ""; el.style.visibility = ""; } st.proj = null; document.body.classList.remove("v2w-proj", "v2w-in");
 }
 function wdFly(st, to, ms, lift, done) {
-  const cam = st.cam; st.fly = { a: cam.position.clone(), al: st.look.clone(), af: cam.fov, b: to.p.clone(), bl: to.l.clone(), bf: to.f, t0: performance.now(), ms, lift: lift || 0, done };
+  const cam = st.cam; if (st.near0 == null) st.near0 = cam.near;
+  st.fly = { a: cam.position.clone(), al: st.look.clone(), af: cam.fov, an: cam.near, bn: to.nr || st.near0, b: to.p.clone(), bl: to.l.clone(), bf: to.f, t0: performance.now(), ms, lift: lift || 0, done };
   st.hold = null; st.holdShot = to;
 }
 function wdCam(st, now) {
@@ -27250,6 +27252,7 @@ function wdCam(st, now) {
     const mid = F.a.clone().add(F.b).multiplyScalar(0.5); mid.y += F.lift;
     const p = new THREE.Vector3().copy(F.a).multiplyScalar((1 - e) * (1 - e)).add(mid.multiplyScalar(2 * (1 - e) * e)).add(F.b.clone().multiplyScalar(e * e));
     cam.position.copy(p); st.look.copy(F.al).lerp(F.bl, wdEase(Math.min(1, k * 1.15))); cam.fov = F.af + (F.bf - F.af) * e;
+    if (F.an !== F.bn) cam.near = F.bn > F.an ? F.an + (F.bn - F.an) * Math.pow(e, 3) : F.bn + (F.an - F.bn) * Math.pow(1 - e, 3);
     if (k >= 1) { st.fly = null; st.hold = st.holdShot; st.holdT = now; if (F.done) try { F.done(); } catch (e2) { console.warn(e2); } }
   } else if (st.hold) {
     const H = st.hold, t = now / 1000, a = WD.mode === "board" ? Math.max(1.2, H.p.distanceTo(H.l) * 0.035) : H.p.distanceTo(H.l) * (WD.mode === "dj" ? 0.02 : 0.012);
@@ -27420,7 +27423,7 @@ function wdBack(now) {
   document.body.classList.remove("v2w-wide");
   const fin = () => { WD.mode = "board"; document.body.classList.remove("v2w-away"); wdUnproject(st); wdVidOff(st); wdSize(WD.qb || 0.6); WD.sig = ""; wdIdleArt(true); };
   setTimeout(() => { if (WD.mode !== "clip" && WD.mode !== "dj") wdUnproject(st); }, 520);
-  if (now) { st.fly = null; st.hold = st.shots.board; fin(); return; }
+  if (now) { st.fly = null; st.hold = st.shots.board; if (st.near0 != null) st.cam.near = st.near0; fin(); return; }
   wdFly(st, st.shots.board, 2100, WD.V.fwR * 0.6, fin);
   setTimeout(() => { if (WD.mode === "back") document.body.classList.remove("v2w-away"); }, 1250);
 }
@@ -27443,7 +27446,7 @@ window.SBW = {
     const go = ++WD.go, show = () => { if (go === WD.go) { document.body.classList.remove("v2w-fly"); if (WD.mode === "clip" || WD.mode === "dj") wdSize(1); } };
     // never leave the panels hidden behind a camera move that didn't finish
     setTimeout(show, 4800);
-    wdFly(st, wdFrame(st, F, dj ? 0.46 : 0.44), dj ? 2600 : 2100, WD.V.fwR * (dj ? 0.5 : 0.35), show);
+    wdFly(st, wdFrame(st, F, dj ? 0.5 : 0.56), dj ? 2600 : 2100, WD.V.fwR * (dj ? 0.5 : 0.35), show);
     return true;
   },
   clipEnd() { if (!WD.st || WD.mode === "board" || WD.mode === "back") return; WD.go++; wdBack(false); },
@@ -27461,7 +27464,7 @@ window.SBW = {
       wdCard({ big: "NEW BET", l1: `${nm} · ${pk}`, l2: o.amt || "", c: wdMix(c, [0, 0, 0], 0.4) }, 20e3); }
   },
   // for checking a frame: hold the camera on a shot
-  shot(k) { const st = WD.st; if (!st) return; const s = k === "fill" ? wdShotFill(st) : k === "jview" ? wdFrame(st, st.jface(st.cam.position), 0.6) : k === "dview" ? wdFrame(st, st.djFace(), 0.56) : st.shots[k]; if (!s) return; st.fly = null; st.hold = s; st.holdShot = s; },
+  shot(k) { const st = WD.st; if (!st) return; const s = k === "fill" ? wdShotFill(st) : k === "jview" ? wdFrame(st, st.jface(st.cam.position), 0.6) : k === "dview" ? wdFrame(st, st.djFace(), 0.56) : st.shots[k]; if (!s) return; st.fly = null; st.hold = s; st.holdShot = s; if (st.near0 == null) st.near0 = st.cam.near; st.cam.near = s.nr || st.near0; },
   look(p, l, f) { const st = WD.st; if (!st) return; const T = st.THREE, s = { p: new T.Vector3(...p), l: new T.Vector3(...l), f: f || 50 }; st.fly = null; st.hold = st.holdShot = s; },
   st: () => WD.st,
 };
