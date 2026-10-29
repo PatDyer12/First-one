@@ -14506,7 +14506,7 @@ void main(){
   // ---------- sheets ----------
   function openSheet(id) { $(id).hidden = false; }
   // keep every open screen current: when a new version is up, reload it (never mid-form or mid-animation)
-  const BUILD = "20261028221614";
+  const BUILD = "20261029000428";
   function checkBuild() {
     if (BUILD === "dev") return;
     fetch("version.json?t=" + Date.now(), { cache: "no-store" }).then((r) => (r.ok ? r.json() : null)).then((j) => {
@@ -18622,6 +18622,7 @@ void main(){
     return soon;
   }
   function dirWant() {
+    const so = soloSport(); if (so) return so;
     const b = nightSport();
     if (b && ESPN[b]) return b;
     return dirOnNow() || b || ([0, 1, 4].includes(etDow()) ? "NFL" : "CFB");
@@ -21596,8 +21597,19 @@ void main(){
   const etToday = () => new Intl.DateTimeFormat("en-CA", { timeZone: "America/New_York" }).format(new Date());
   // (a screen can opt out: localStorage "sb-sun-nfl" = "off")
   function sunNfl() { let off = false; try { off = localStorage.getItem("sb-sun-nfl") === "off"; } catch (e) {} return !GUEST && !off && document.body.classList.contains("tv") && etDow() === 0; }
+  var soloAt = 0, soloV = null;
+  function soloSport() {
+    if (GUEST || !document.body.classList.contains("tv")) return null;
+    const now = Date.now(); if (now - soloAt < 30e3) return soloV; soloAt = now; soloV = null;
+    let off = false; try { off = localStorage.getItem("sb-solo") === "off"; } catch (e) {} if (off) return null;
+    const p = {}; for (const x of new Intl.DateTimeFormat("en-CA", { timeZone: "America/New_York", year: "numeric", month: "2-digit", day: "2-digit", hour: "2-digit", hourCycle: "h23" }).formatToParts(new Date(now))) p[x.type] = x.value;
+    const day = `${p.year}-${p.month}-${p.day}`, hr = Number(p.hour);
+    for (const [d0, sp] of [["2026-10-28", "NBA"]]) { const d1 = new Date(Date.parse(d0 + "T12:00:00Z") + 864e5).toISOString().slice(0, 10); if ((day === d0 && hr >= 12) || (day === d1 && hr < 6)) soloV = sp; }
+    return soloV;
+  }
+  function spBet(b, sp) { return b.kind === "parlay" ? b.sport === sp || (Array.isArray(b.legSel) && b.legSel.some((x) => x && x.sp === sp)) : ((b.sel && b.sel.sp) || b.sport) === sp; }
   function nflBet(b) { return b.kind === "parlay" ? b.sport === "NFL" || (Array.isArray(b.legSel) && b.legSel.some((x) => x && x.sp === "NFL")) : ((b.sel && b.sel.sp) || b.sport) === "NFL"; }
-  function isGone(b) { return !!b && ((sunNfl() && !nflBet(b)) || listGone(b)); }
+  function isGone(b) { if (!b) return false; const so = soloSport(); return (sunNfl() && !nflBet(b)) || (!!so && !spBet(b, so)) || listGone(b); }
   function listGone(b) {
     if (!b || isMe(b) || !S.gone.size) return false;
     if (S.gone.has(personKey(b))) return true;
@@ -21628,7 +21640,7 @@ void main(){
     if (due.length && !GUEST && S.canWrite && S.db) S.db.doc("config/settings").set({ gone: want, goneSeeds: [...done, ...due.map((x) => x.id)] }, { merge: true }).catch(() => {});
     setGone(want);
   }
-  { let was = null; const chk = () => { const k = sunNfl(); if (k !== was) { was = k; if (S.bets) goneResort(); } };
+  { let was = null; const chk = () => { const k = sunNfl() + "|" + soloSport(); if (k !== was) { was = k; if (S.bets) goneResort(); } };
     new MutationObserver(chk).observe(document.body, { attributes: true, attributeFilter: ["class"] }); setInterval(chk, 30e3); }
   function saveGone(list) {
     setGone(list);
