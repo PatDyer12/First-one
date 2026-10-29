@@ -14119,11 +14119,12 @@ void main(){
     ["CGY", "EDM", "Battle of Alberta"], ["CHI", "DET", "Original Six"], ["BOS", "TOR", "Original Six"], ["COL", "DET", "Avs–Wings"], ["OTT", "TOR", "Battle of Ontario"], ["PHI", "WSH", "Flyers–Caps"], ["PIT", "WSH", "Caps–Pens"]]
     .map(([x, y, n]) => [[x, y].sort().join(":"), n]));
   const arRiv = (g) => (g && (g.sport === "NBA" || g.sport === "NHL") ? AR_RIV.get([g.a.ab, g.h.ab].sort().join(":")) || "" : "");
+  const SCN = { last: "" };
   window.__sbScene = () => {
     const c = document.body.classList; if (c.contains("baseball")) return null;
     const SP = c.contains("hoops") ? ["NBA", "CBB"] : c.contains("hockey") ? ["NHL"] : ["NFL", "CFB"], fb = (g) => g && SP.includes(g.sport), now = Date.now(), { list } = boardGroups();
     const nb = new Map(list.map((G) => [G.g.id, G.entries.length + (G.legs ? G.legs.length : 0)]));
-    const tm = (t) => ({ id: String(t.id), ab: t.ab, nm: t.nm, fn: t.fn, col: t.col, alt: t.alt, lg: t.lg, sc: t.sc, rk: t.rk });
+    const tm = (t) => ({ id: String(t.id), ab: t.ab, nm: t.nm, fn: t.fn, col: t.col, alt: t.alt, lg: t.lg, sc: t.sc, rk: t.rk, jn: t.jn || [] });
     const gm = (g) => ({ id: g.id, sport: g.sport, st: g.st, d: g.d, t: g.t, a: tm(g.a), h: tm(g.h), ven: g.ven, neu: !!g.abroad, net: g.net, riv: g.sport === "CFB" ? cfRiv(g) : arRiv(g), n: nb.get(g.id) || 0,
       sit: g.sit ? { pos: g.sit.pos, rz: g.sit.rz, yl: g.sit.yl, dd: g.sit.dd } : null });
     const all = [...S.games.values()].filter(fb);
@@ -14132,10 +14133,18 @@ void main(){
     const soon = mine.filter((g) => g.st === "pre" && g.t - now < 90 * 60e3);
     const betOn = mine.filter((g) => g.st === "in" || (g.st === "pre" && g.t - now < 20 * 60e3));
     let pick = betOn.length === 1 ? betOn[0] : betOn.length > 1 ? null : on.length === 1 ? on[0] : !on.length && soon.length === 1 ? soon[0] : null;
+    // a moneyline on an NBA game that's on: that game's arena first, whatever else the room's on (two of them: the one
+    // with more moneylines on it, then more bets; the one up already stays up while it still has one)
+    const mlN = (G) => G.entries.filter((e) => e.b.status === "open" && e.leg == null && e.sel && e.sel.m === "ml").length;
+    const mlOn = list.filter((G) => fb(G.g) && G.g.sport === "NBA" && (G.g.st === "in" || (G.g.st === "pre" && G.g.t - now < 20 * 60e3)) && mlN(G))
+      .sort((x, y) => mlN(y) - mlN(x) || (nb.get(y.g.id) || 0) - (nb.get(x.g.id) || 0));
+    const mlG = (mlOn.find((G) => G.g.id === SCN.last) || mlOn[0] || {}).g;
+    if (mlG) pick = mlG;
     const riv = on.filter((g) => (g.sport === "CFB" ? cfRiv(g) : arRiv(g)) && nb.get(g.id)).sort((x, y) => nb.get(y.id) - nb.get(x.id))[0];
     if (!pick && riv) pick = riv;
     const games = [...on].sort((x, y) => (nb.get(y.id) || 0) - (nb.get(x.id) || 0) || x.t - y.t);
     for (const g of mine) if (!games.includes(g) && g.t - now < 6 * 3600e3) games.push(g);
+    SCN.last = pick ? pick.id : "";
     return { kind: pick ? "stadium" : "room", game: pick ? gm(pick) : null, games: games.slice(0, 12).map(gm) };
   };
   window.__sbGame = (a, h) => { for (const g of S.games.values()) if (g.a && g.h && g.a.ab === a && g.h.ab === h) return g; return null; };
@@ -14532,7 +14541,7 @@ void main(){
   // ---------- sheets ----------
   function openSheet(id) { $(id).hidden = false; }
   // keep every open screen current: when a new version is up, reload it (never mid-form or mid-animation)
-  const BUILD = "20261029014650";
+  const BUILD = "20261029021535";
   function checkBuild() {
     if (BUILD === "dev") return;
     fetch("version.json?t=" + Date.now(), { cache: "no-store" }).then((r) => (r.ok ? r.json() : null)).then((j) => {
@@ -15302,7 +15311,8 @@ void main(){
     const c = e.competitions[0], t = {};
     for (const x of c.competitors) t[x.homeAway] = x;
     const st = e.status.type;
-    const team = (k) => { const x = t[k], tm = x.team; return { id: tm.id, rec: (((x.records || [])[0] || {}).summary || "").replace(/^0-0(-0)?$/, ""), rk: x.curatedRank && x.curatedRank.current <= 25 ? x.curatedRank.current : 0, ab: tm.abbreviation || "", nm: tm.shortDisplayName || tm.name || "", fn: tm.displayName || "", loc: tm.location || "", cf: tm.conferenceId != null ? String(tm.conferenceId) : "", lg: dkLg(tm.logo), col: tm.color ? "#" + tm.color : "", alt: tm.alternateColor ? "#" + tm.alternateColor : "", sc: /^\d+$/.test(String(x.score)) ? Number(x.score) : null }; };
+    const team = (k) => { const x = t[k], tm = x.team; return { id: tm.id, rec: (((x.records || [])[0] || {}).summary || "").replace(/^0-0(-0)?$/, ""), rk: x.curatedRank && x.curatedRank.current <= 25 ? x.curatedRank.current : 0, ab: tm.abbreviation || "", nm: tm.shortDisplayName || tm.name || "", fn: tm.displayName || "", loc: tm.location || "", cf: tm.conferenceId != null ? String(tm.conferenceId) : "", lg: dkLg(tm.logo), col: tm.color ? "#" + tm.color : "", alt: tm.alternateColor ? "#" + tm.alternateColor : "", sc: /^\d+$/.test(String(x.score)) ? Number(x.score) : null,
+      jn: [...new Set((x.leaders || []).map((L) => ((((L.leaders || [])[0] || {}).athlete || {}).jersey) || "").filter(Boolean))].slice(0, 3) }; };
     const g = { id: String(e.id), sport, t: Date.parse(e.date), st: st.state || "pre", d: st.shortDetail || "", a: team("away"), h: team("home"), pd: e.status.period || 0, clk: e.status.clock, sty: (e.season && e.season.type) || 0, nt: ((c.notes || [])[0] || {}).headline || "" };
     g.net = ((((c.broadcasts || [])[0] || {}).names) || [])[0] || "";
     g.ven = c.venue ? { nm: c.venue.fullName || "", indoor: !!c.venue.indoor } : null;
@@ -25290,6 +25300,299 @@ function wdFansTick(st, t) {
 }
 // a team scores, a bet hits: their fans go up (team index into the shirts)
 function wdFansCheer(st, team, k) { if (st.fans && team >= 0 && team < 8) st.fans.ch[team] = Math.max(st.fans.ch[team], k || 1.4); }
+// ---- the war room's crowd: a few hundred people up close, so each is a whole person (legs, shoes, hands, a face, hair or a
+// hat) dressed as a fan of one of the teams on (a tee, a hoodie, or one of tonight's leaders' jerseys with his number on the
+// back), in costume, or holding up a sign. Between the moments nobody stands still: each runs through a loop of moves of
+// their own (claps, fist pumps, a dab, a phone up, the griddy, a towel twirl, hands on head sweating a bet...) and eases from
+// one into the next. The same reactions as the stadium's fans: a score gets that team's fans jumping, a cash the whole room,
+// a miss hands on heads, the wave, a DJ set bouncing on the beat ----
+const WD_CROWD_VS = `attribute vec4 aP, aLk, aR; attribute vec3 aCol, aCol2, aCol3, aSkin, aHairC;
+uniform float uT, uParty, uBeat, uSad, uWave, uWaveU, uBurst, uK; uniform float uCh[8];
+varying vec3 vC, vC2; varying float vL, vD, vK, vNum, vFx; varying vec2 vUv;
+float h1(float n){ return fract(sin(n * 91.345) * 43758.5453); }
+float bt(float f, float b){ return mod(floor(f / exp2(b) + .001), 2.); }
+vec3 rX(vec3 v, float a){ float c = cos(a), s = sin(a); return vec3(v.x, c * v.y - s * v.z, s * v.y + c * v.z); }
+vec3 rY(vec3 v, float a){ float c = cos(a), s = sin(a); return vec3(c * v.x + s * v.z, v.y, -s * v.x + c * v.z); }
+vec3 rZ(vec3 v, float a){ float c = cos(a), s = sin(a); return vec3(c * v.x - s * v.y, s * v.x + c * v.y, v.z); }
+// a pose: A the shoulders (left out, left forward, right out, right forward), Y the arms swung in across the body, B the
+// elbows and knees, H the head (nod, turn, tilt) and a lift off the floor, T the body (twist, lean, sway)
+void mv(float m, float t, out vec4 A, out vec2 Y, out vec4 B, out vec4 H, out vec3 T){
+  A = vec4(.1, .05, .1, .05); Y = vec2(0.); B = vec4(.2, .2, 0., 0.); H = vec4(0.); T = vec3(0.);
+  if (m < .5) { H = vec4(.05 + .04 * sin(t * .5), .35 * sin(t * .37), .04 * sin(t * .6), 0.); T = vec3(.08 * sin(t * .3), 0., .03 * sin(t * .8)); }
+  else if (m < 1.5) { float c = .5 + .5 * sin(t * 11.); A = vec4(0., .6, 0., .6); Y = vec2(.62 + .3 * c); B = vec4(1.2, 1.2, 0., 0.); H = vec4(-.05, 0., 0., .015 * c); }
+  else if (m < 2.5) { float f = max(0., sin(t * 6.5)); A = vec4(.12, .05, .6 + 1.9 * f, .3); B = vec4(.2, 1.7 - .9 * f, 0., 0.); H = vec4(-.12 * f, 0., 0., .05 * f); T = vec3(.1 * f, 0., 0.); }
+  else if (m < 3.5) { float w = sin(t * 7.); A = vec4(2.45 + .18 * w, .25, 2.45 + .18 * w, .25); B = vec4(1.5, 1.5, 0., 0.); H = vec4(-.1, 0., .08 * w, .05 * abs(w)); T = vec3(0., 0., .06 * w); }
+  else if (m < 4.5) { A = vec4(.1, .05, 0., 1.35); Y = vec2(0., .2); B = vec4(.2, .95, 0., 0.); H = vec4(.12, 0., 0., 0.); T = vec3(.05 * sin(t * .4), 0., 0.); }
+  else if (m < 5.5) { float d = smoothstep(-.2, .4, sin(t * 1.3)); A = vec4(.05, 1.25 * d, 2. * d + .1, .4 * d); Y = vec2(.95 * d, 0.); B = vec4(2.1 * d + .2, .05, 0., 0.); H = vec4(.55 * d, -.45 * d, .25 * d, 0.); T = vec3(-.2 * d, .15 * d, 0.); }
+  else if (m < 6.5) { A = vec4(.1, .05, .05, 1.95 + .12 * sin(t * 3.)); B = vec4(.25, .05, 0., 0.); H = vec4(-.12, 0., 0., 0.); T = vec3(0., -.03, 0.); }
+  else if (m < 7.5) { float s = sin(t * 5.5); A = vec4(.35, .55 + .45 * s, .35, .55 - .45 * s); B = vec4(1.5, 1.5, .3 * max(0., s), .3 * max(0., -s)); H = vec4(.08 * s, .15 * sin(t * 2.75), .1 * s, .06 * abs(s)); T = vec3(.25 * sin(t * 2.75), 0., .08 * s); }
+  else if (m < 8.5) { float j = max(0., sin(t * 6.)); A = vec4(2.7, .2, 2.7, .2); B = vec4(.2, .2, .35 * j, .35 * j); H = vec4(-.2, 0., 0., .3 * j); T = vec3(0., -.05, 0.); }
+  else if (m < 9.5) { float s = sin(t * 7.); A = vec4(.15, .9 * s, .15, -.9 * s); B = vec4(1.4, 1.4, .95 * max(0., s), .95 * max(0., -s)); H = vec4(.1, 0., 0., .04 * abs(s)); T = vec3(.15 * s, .15, 0.); }
+  else if (m < 10.5) { A = vec4(.5, 2.1, .5, 2.1); Y = vec2(.15); B = vec4(2.15, 2.15, 0., 0.); H = vec4(.18 + .06 * sin(t * 3.), 0., 0., 0.); T = vec3(0., .06, .03 * sin(t * 2.)); }
+  else if (m < 11.5) { A = vec4(0., .25, 0., .25); Y = vec2(1.15); B = vec4(1.6, 1.6, 0., 0.); H = vec4(-.05, .25 * sin(t * .4), 0., 0.); }
+  else if (m < 12.5) { A = vec4(.1, .05, 2.5 + .25 * cos(t * 9.), .25 * sin(t * 9.)); B = vec4(.2, .35, 0., 0.); H = vec4(-.15, 0., 0., .03 * abs(sin(t * 4.5))); T = vec3(0., 0., .05 * sin(t * 4.5)); }
+  else if (m < 13.5) { A = vec4(.1, .05, .2, .55 + .25 * sin(t * 4.)); Y = vec2(0., .3); B = vec4(.2, 1.3 + .2 * sin(t * 4.), 0., 0.); H = vec4(0., .75, .1 * sin(t * 2.), 0.); T = vec3(.45, 0., 0.); }
+  else if (m < 14.5) { float s = sin(t * 16.); A = vec4(.7, .3, .7, .3); B = vec4(1.3, 1.3, .1, .1); H = vec4(.1, 0., 0., .02); T = vec3(.22 * s, .1, 0.); }
+  else if (m < 15.5) { A = vec4(.1, .05, 2.25, .3); Y = vec2(0., .5 * sin(t * 8.)); B = vec4(.2, .5, 0., 0.); H = vec4(-.1, 0., .08 * sin(t * 4.), 0.); }
+  else if (m < 16.5) { A = vec4(.45, .05, 2.95, .1); B = vec4(1.7, 0., 0., 0.); H = vec4(-.18, .2, 0., 0.); T = vec3(0., -.08, 0.); }
+  else if (m < 17.5) { A = vec4(0., 1.5 + .1 * sin(t * 2.), 0., 1.5 + .1 * sin(t * 2. + 1.)); Y = vec2(.15); B = vec4(.1, .1, 0., 0.); H = vec4(.1, .3 * sin(t * .8), .2 * sin(t * 1.1), .05 * abs(sin(t * 1.6))); T = vec3(.1 * sin(t * .8), .1, .08 * sin(t * 1.6)); }
+  else if (m < 18.5) { A = vec4(0., 2.75, 0., 2.75); Y = vec2(.1); B = vec4(.35, .35, 0., 0.); H = vec4(-.15, 0., 0., .04 * abs(sin(t * 3.))); T = vec3(0., 0., .07 * sin(t * 1.5)); }
+  else { float s = sin(t * 3.); A = vec4(.1, .1, .3, 1.2 + s); Y = vec2(0., .3 * s); B = vec4(.2, .4, 0., 0.); H = vec4(0., .2 * s, 0., 0.); T = vec3(.3 * s, .05, 0.); }
+}
+void main(){
+  vec3 p = position, n = normal; float part = aP.x, kind = aP.y, need = aP.z, ft = aLk.y;
+  float ph = aR.x * 6.2831, sp = .85 + aR.y * .35, tm = aR.z, t = uT * sp + ph;
+  bool sg = bt(ft, 13.) > .5, saber = bt(ft, 5.) > .5, mask = bt(ft, 2.) > .5;
+  // this cycle's move (about 8 s each), eased in from standing and back out before the next one
+  float cyc = uT * .13 + aR.x * 7., cf = fract(cyc), r = h1(floor(cyc) * 3.7 + aR.x * 61.);
+  float m = r < .22 || (aR.y < .18 && r < .6) ? 0. : 1. + floor((r - .22) / .78 * 15.);
+  if (bt(ft, 0.) > .5 && bt(ft, 15.) > .5 && r > .7) m = 16.;
+  if (bt(ft, 18.) > .5 && r > .5) m = 17.;
+  if (saber && r > .45) m = 19.;
+  float e = sg ? 1. : smoothstep(0., .12, cf) * (1. - smoothstep(.86, 1., cf));
+  if (sg) m = 18.;
+  // the pieces this person doesn't have: hair styles, costume parts, the phone and the towel when they're not out
+  float showPh = (abs(m - 4.) < .5 && e > .05) || (uParty > .2 && aR.y > .6) ? 1. : 0.;
+  bool vis = need < 0.
+    || (need < 150. && (abs(need - 100. - aLk.x) < .5 || (abs(need - 101.) < .5 && abs(aLk.x - 7.) < .5)))
+    || (need > 199. && need < 250. && bt(ft, need - 200.) > .5)
+    || (need > 299. && need < 350. && bt(ft, need - 300.) < .5)
+    || (abs(need - 400.) < .5 && showPh > .5)
+    || (abs(need - 401.) < .5 && abs(m - 12.) < .5 && e > .05 && !saber);
+  if (!vis) { gl_Position = vec4(0., 0., 2., 1.); return; }
+  vec4 A, B, H; vec2 Y; vec3 T;
+  mv(m, t, A, Y, B, H, T);
+  A = mix(vec4(.1, .05, .1, .05), A, e); Y *= e; B = mix(vec4(.2, .2, 0., 0.), B, e); H *= e; T *= e;
+  // the moments: a DJ set (the keen ones' arms up), a miss (hands on heads), a score or a cash (arms up, jumping), the wave
+  float ch = 0.; for (int i = 0; i < 8; i++) if (abs(float(i) - tm) < .5) ch = uCh[i];
+  float wv = uWave * exp(-pow((fract(aR.w - uWaveU) - .5) * 26.0, 2.0));
+  float cheer = clamp(max(ch, uBurst * (.45 + .55 * aR.y)), 0., 1.);
+  float beat = uParty * pow(1. - fract(uBeat + aR.x * .08), 3.);
+  float pk = uParty * step(.35, aR.y) * (sg ? 0. : 1.);
+  A = mix(A, vec4(2.3 + .3 * sin(uT * 2.2 + ph), .4, showPh > .5 ? .05 : 2.3 + .3 * sin(uT * 2.2 + ph + 2.), showPh > .5 ? 1.35 : .4), pk); B = mix(B, vec4(.5, showPh > .5 ? .95 : .5, 0., 0.), pk);
+  float sad = clamp(uSad * step(aR.y, .85), 0., 1.) * (1. - cheer);
+  A = mix(A, vec4(.5, 2.1, .5, 2.1), sad); Y = mix(Y, vec2(.15), sad); B = mix(B, vec4(2.15, 2.15, 0., 0.), sad); H = mix(H, vec4(.4, 0., 0., 0.), sad);
+  float j = abs(sin(uT * sp * 3.4 + ph));
+  vec4 chA = sg ? vec4(0., 2.75, 0., 2.75) : vec4(2.6 + .25 * sin(uT * 9. + ph), .3, 2.6 + .25 * sin(uT * 9. + ph + 1.), .3);
+  A = mix(A, chA, cheer); Y = mix(Y, vec2(0.), cheer); B = mix(B, vec4(.3, .3, .2 * j, .2 * j), cheer); H = mix(H, vec4(-.25, .2 * sin(uT * 3. + ph), 0., .3 * j), cheer); T = mix(T, vec3(.1 * sin(uT * 4. + ph), -.05, 0.), cheer);
+  A = mix(A, sg ? A : vec4(2.7, .2, 2.7, .2), wv); H.w += wv * .2 + beat * .12 + sin(uT * .7 + ph) * .01;
+  // the skeleton: arms (shoulder, elbow), legs (hip, knee), the head on the neck, the cape off the shoulders; then the body's
+  // twist and lean at the hips, its sway, a jump
+  if (abs(part - 2.) < .5 || abs(part - 5.) < .5) { vec3 S = vec3(-.29, 1.37, 0.), E = vec3(-.29, 1.11, 0.);
+    if (part > 4.5) { p = E + rX(p - E, -B.x); n = rX(n, -B.x); }
+    p = S + rX(p - S, -A.y); n = rX(n, -A.y); p = S + rY(p - S, Y.x); n = rY(n, Y.x); p = S + rZ(p - S, -A.x); n = rZ(n, -A.x); }
+  if (abs(part - 3.) < .5 || abs(part - 6.) < .5) { vec3 S = vec3(.29, 1.37, 0.), E = vec3(.29, 1.11, 0.);
+    if (part > 5.5) { p = E + rX(p - E, -B.y); n = rX(n, -B.y); }
+    p = S + rX(p - S, -A.w); n = rX(n, -A.w); p = S + rY(p - S, -Y.y); n = rY(n, -Y.y); p = S + rZ(p - S, A.z); n = rZ(n, A.z); }
+  if (abs(part - 7.) < .5 || abs(part - 9.) < .5) { vec3 Hp = vec3(-.1, .87, 0.), K = vec3(-.1, .45, 0.);
+    if (part > 8.5) { p = K + rX(p - K, B.z * 1.7); n = rX(n, B.z * 1.7); } p = Hp + rX(p - Hp, -B.z); n = rX(n, -B.z); }
+  if (abs(part - 8.) < .5 || abs(part - 10.) < .5) { vec3 Hp = vec3(.1, .87, 0.), K = vec3(.1, .45, 0.);
+    if (part > 9.5) { p = K + rX(p - K, B.w * 1.7); n = rX(n, B.w * 1.7); } p = Hp + rX(p - Hp, -B.w); n = rX(n, -B.w); }
+  if (abs(part - 1.) < .5) { vec3 Nk = vec3(0., 1.47, 0.); p = Nk + rY(p - Nk, H.y); n = rY(n, H.y); p = Nk + rX(p - Nk, H.x); n = rX(n, H.x); p = Nk + rZ(p - Nk, H.z); n = rZ(n, H.z); }
+  if (abs(part - 11.) < .5) { vec3 C = vec3(0., 1.4, -.14); float f = .12 + .08 * sin(uT * 3. + ph) + 1.5 * H.w + .3 * cheer; p = C + rX(p - C, f); n = rX(n, f); }
+  if (part < 6.5 || part > 10.5) { vec3 Hp = vec3(0., .87, 0.); p = Hp + rY(p - Hp, T.x); n = rY(n, T.x); p = Hp + rX(p - Hp, T.y); n = rX(n, T.y); }
+  p = rZ(p, T.z); n = rZ(n, T.z); p.y += H.w;
+  vec4 w = modelMatrix * instanceMatrix * vec4(p * uK, 1.0);
+  vec4 mvp = viewMatrix * w; vD = -mvp.z; gl_Position = projectionMatrix * mvp;
+  vec3 nw = normalize(mat3(modelMatrix * instanceMatrix) * n);
+  vL = .48 + .38 * max(dot(nw, normalize(vec3(.3, .9, .25))), 0.) + .12 * nw.y + .22 * max(dot(nw, normalize(vec3(-.2, .3, -1.))), 0.);
+  // the colors: each piece's kind of thing (shirt, skin, pants, hair, trim, shoes, hat...), worn as this person wears it
+  vec3 dark = vec3(.05, .05, .06), sk = aSkin, c = aCol;
+  bool glv = bt(ft, 12.) > .5;
+  if (kind < .5) c = aCol;
+  else if (kind < 1.5) c = sk;
+  else if (kind < 2.5) c = aCol3;
+  else if (kind < 3.5) c = vec3(.75, .88, 1.) * 1.6;
+  else if (kind < 4.5) c = aHairC;
+  else if (kind < 5.5) c = aCol2;
+  else if (kind < 6.5) c = bt(ft, 19.) > .5 ? aCol2 : h1(aR.x * 13.) > .45 ? vec3(.9, .9, .88) : vec3(.07, .07, .08);
+  else if (kind < 7.5) c = aCol2;
+  else if (kind < 8.5) c = bt(ft, 10.) > .5 ? sk : aCol;
+  else if (kind < 9.5) c = bt(ft, 11.) > .5 ? aCol : sk;
+  else if (kind < 10.5) c = mask ? aHairC : dark;
+  else if (kind < 12.5) c = aCol;
+  else if (kind < 13.5) c = aCol2 * 1.8 + .25;
+  else if (kind < 14.5) c = vec3(1.);
+  else if (kind < 15.5) c = mask ? (saber ? aCol : aCol2) : sk;
+  else if (kind < 16.5) c = vec3(.35, .36, .4);
+  else if (kind < 17.5) c = vec3(.92, .92, .9);
+  else if (kind < 18.5) c = vec3(.2, .45, .12);
+  else if (kind < 19.5) c = bt(ft, 14.) > .5 ? sk : aCol3;
+  else c = glv ? (saber ? dark : aCol2) : sk;
+  vC = c; vC2 = aCol2; vK = kind; vUv = uv; vNum = aLk.z; vFx = bt(ft, 16.) + 2. * bt(ft, 15.);
+}`;
+const WD_CROWD_FS = `uniform float uLit, uFlash, uFl; uniform vec3 uFc, uHaze; uniform sampler2D uSign;
+varying vec3 vC, vC2; varying float vL, vD, vK, vNum, vFx; varying vec2 vUv;
+float bt(float f, float b){ return mod(floor(f / exp2(b) + .001), 2.); }
+float segs(float d){ return d < .5 ? 63. : d < 1.5 ? 6. : d < 2.5 ? 91. : d < 3.5 ? 79. : d < 4.5 ? 102. : d < 5.5 ? 109. : d < 6.5 ? 125. : d < 7.5 ? 7. : d < 8.5 ? 127. : 111.; }
+float rc(vec2 q, vec4 r){ return step(r.x, q.x) * step(q.x, r.z) * step(r.y, q.y) * step(q.y, r.w); }
+// a jersey number: block digits, like the ones sewn on
+float dg(vec2 q, float d){
+  if (q.x < 0. || q.x > 1. || q.y < 0. || q.y > 1.) return 0.;
+  float m = segs(d), o = 0.;
+  o += bt(m, 0.) * rc(q, vec4(.08, .82, .92, 1.)); o += bt(m, 1.) * rc(q, vec4(.76, .5, 1., .96)); o += bt(m, 2.) * rc(q, vec4(.76, .04, 1., .5));
+  o += bt(m, 3.) * rc(q, vec4(.08, 0., .92, .18)); o += bt(m, 4.) * rc(q, vec4(0., .04, .24, .5)); o += bt(m, 5.) * rc(q, vec4(0., .5, .24, .96)); o += bt(m, 6.) * rc(q, vec4(.08, .41, .92, .59));
+  return min(o, 1.);
+}
+float num(vec2 uv, float n){
+  if (n < 0.) return 0.;
+  vec2 q = (uv - .5) / vec2(.86, .8) + .5;
+  if (n < 9.5) return dg(vec2((q.x - .27) / .46, q.y), n);
+  float a = floor(n / 10.), b = n - a * 10.;
+  return max(dg(vec2(q.x / .46, q.y), a), dg(vec2((q.x - .54) / .46, q.y), b));
+}
+void main(){
+  // the number comes through interpolated, a hair off a whole number: round it before it picks a digit or a sign
+  vec3 c = vC; float nm = floor(vNum + .5);
+  if (vK > 10.5 && vK < 12.5) {
+    if (vFx > 1.5 && vK > 11.5) { vec2 q = abs(vUv - .5); c = mix(c, mix(vC2, vec3(1., .84, .2), step(q.x + q.y, .3)), step(q.x + q.y, .44)); }
+    else c = mix(vC, vC2, num(vUv, vNum < -.5 ? -1. : nm));
+  }
+  if (vK > 13.5 && vK < 14.5) c = texture2D(uSign, (vec2(mod(nm, 2.), floor(nm / 2. + .01)) + vUv) / vec2(2., 4.)).rgb;
+  if (vK < .5 && mod(vFx, 2.) > .5) c = mix(c, vC2, min(1., step(fract(vUv.y * 6.), .38) * step(abs(vUv.x - .5), .36) + step(abs(vUv.x - .5), .05)));
+  bool glow = (vK > 2.5 && vK < 3.5) || (vK > 12.5 && vK < 13.5);
+  if (!glow) c = c * vL * uLit + uFc * uFlash * .22;
+  c = mix(c, uHaze, smoothstep(40.0, uFl, vD) * .5);
+  gl_FragColor = vec4(c, 1.0);
+}`;
+// one person, standing 1.8 m (feet at 0, facing +z): every piece a box (no undersides) or a panel, tagged with the joint it
+// hangs off, what it's made of, and who has it (a hair style, a costume part, the phone, the towel)
+function wdCrowdGeo(THREE) {
+  const P = [], N = [], U = [], A = [], I = [];
+  const put = (g, part, kind, need, faces) => {
+    const pos = g.attributes.position.array, nrm = g.attributes.normal.array, uv = g.attributes.uv.array, idx = g.index.array;
+    const grs = g.groups.length ? g.groups : [{ start: 0, count: idx.length, materialIndex: 0 }];
+    for (const gr of grs) { if (faces && !faces.includes(gr.materialIndex)) continue; const map = new Map();
+      for (let k = gr.start; k < gr.start + gr.count; k++) { const i = idx[k];
+        if (!map.has(i)) { map.set(i, P.length / 3); P.push(pos[i * 3], pos[i * 3 + 1], pos[i * 3 + 2]); N.push(nrm[i * 3], nrm[i * 3 + 1], nrm[i * 3 + 2]); U.push(uv[i * 2], uv[i * 2 + 1]); A.push(part, kind, need, 0); }
+        I.push(map.get(i)); } }
+    g.dispose();
+  };
+  const box = (x, y, z, w, h, d, part, kind, need) => { const g = new THREE.BoxGeometry(w, h, d); g.translate(x, y, z); put(g, part, kind, need ?? -1, [0, 1, 2, 4, 5]); };
+  const panel = (x, y, z, w, h, back, part, kind, need) => { const g = new THREE.PlaneGeometry(w, h); if (back) g.rotateY(Math.PI); g.translate(x, y, z); put(g, part, kind, need ?? -1); };
+  // legs: thighs off the hips, shins and shoes off the knees; a robe over them for the costumes that have one
+  for (const [s, th, sh] of [[-1, 7, 9], [1, 8, 10]]) { box(s * 0.1, 0.66, 0, 0.17, 0.42, 0.2, th, 2); box(s * 0.1, 0.25, 0, 0.15, 0.42, 0.18, sh, 19); box(s * 0.1, 0.045, 0.04, 0.16, 0.09, 0.28, sh, 6); }
+  box(0, 0.5, 0, 0.52, 0.82, 0.32, 0, 0, 209);
+  // the body: hips, the shirt, its collar, the number on the back, the chest (a small number, or a costume's emblem)
+  box(0, 0.9, 0, 0.4, 0.14, 0.23, 0, 2); box(0, 1.15, 0, 0.46, 0.52, 0.25, 0, 0); box(0, 1.405, 0, 0.3, 0.03, 0.2, 0, 5);
+  panel(0, 1.15, -0.127, 0.32, 0.32, true, 0, 11); panel(0, 1.25, 0.127, 0.16, 0.16, false, 0, 12);
+  // the head on its neck: a face (two eyes), or a pumpkin
+  box(0, 1.45, 0, 0.12, 0.08, 0.12, 1, 1); box(0, 1.62, 0, 0.25, 0.27, 0.26, 1, 15, 306);
+  for (const s of [-1, 1]) box(s * 0.055, 1.645, 0.131, 0.04, 0.03, 0.012, 1, 10, 306);
+  // hair: short, an afro, long, a cap, a cap on backwards, a beanie, a headband
+  box(0, 1.765, -0.01, 0.265, 0.04, 0.275, 1, 4, 101); box(0, 1.66, -0.128, 0.265, 0.2, 0.03, 1, 4, 101);
+  box(0, 1.75, -0.02, 0.36, 0.23, 0.35, 1, 4, 102);
+  box(0, 1.765, -0.01, 0.27, 0.045, 0.28, 1, 4, 103); box(0, 1.53, -0.14, 0.28, 0.46, 0.04, 1, 4, 103); for (const s of [-1, 1]) box(s * 0.137, 1.6, -0.03, 0.02, 0.3, 0.2, 1, 4, 103);
+  box(0, 1.775, 0, 0.275, 0.07, 0.28, 1, 7, 104); box(0, 1.752, 0.19, 0.24, 0.02, 0.13, 1, 7, 104);
+  box(0, 1.775, 0, 0.275, 0.07, 0.28, 1, 7, 105); box(0, 1.752, -0.19, 0.24, 0.02, 0.13, 1, 7, 105);
+  box(0, 1.78, -0.005, 0.28, 0.11, 0.285, 1, 7, 106); box(0, 1.86, 0, 0.06, 0.05, 0.06, 1, 5, 106);
+  box(0, 1.71, 0, 0.27, 0.035, 0.275, 1, 5, 107);
+  // costume parts: a cape, a cowl with ears, goggles, a mustache, a lightsaber, a pumpkin head, a witch's hat, a visor, a sign
+  box(0, 0.92, -0.16, 0.5, 1.0, 0.03, 11, 5, 200);
+  box(0, 1.69, 0, 0.27, 0.16, 0.28, 1, 5, 201); for (const s of [-1, 1]) box(s * 0.08, 1.8, 0, 0.045, 0.08, 0.05, 1, 5, 201);
+  box(0, 1.66, 0, 0.27, 0.05, 0.27, 1, 16, 203); box(0, 1.66, 0.14, 0.12, 0.12, 0.02, 1, 17, 203);
+  box(0, 1.585, 0.135, 0.14, 0.035, 0.02, 1, 4, 204);
+  box(0.29, 0.81, 0.5, 0.035, 0.035, 0.85, 6, 13, 205); box(0.29, 0.81, 0.04, 0.05, 0.05, 0.12, 6, 16, 205);
+  box(0, 1.63, 0, 0.36, 0.32, 0.36, 1, 15, 206); for (const s of [-1, 1]) box(s * 0.07, 1.67, 0.181, 0.07, 0.06, 0.01, 1, 10, 206); box(0, 1.56, 0.181, 0.18, 0.04, 0.01, 1, 10, 206); box(0, 1.81, 0, 0.05, 0.06, 0.05, 1, 18, 206);
+  box(0, 1.77, 0, 0.48, 0.02, 0.48, 1, 7, 207); box(0, 1.86, 0, 0.26, 0.16, 0.26, 1, 7, 207); box(0, 1.99, -0.02, 0.17, 0.14, 0.17, 1, 7, 207); box(0, 2.1, -0.05, 0.08, 0.12, 0.08, 1, 7, 207);
+  box(0, 1.63, 0.132, 0.2, 0.13, 0.012, 1, 10, 217);
+  panel(0, 2.28, 0.02, 0.72, 0.4, false, 12, 14, 213); panel(0, 2.28, 0.0, 0.72, 0.4, true, 12, 14, 213); box(0, 1.95, 0.01, 0.03, 0.34, 0.03, 12, 16, 213);
+  // arms: sleeves off the shoulders, forearms and hands off the elbows; the phone and the rally towel in the right hand
+  for (const [s, up, lo] of [[-1, 2, 5], [1, 3, 6]]) { box(s * 0.29, 1.25, 0, 0.12, 0.28, 0.13, up, 8); box(s * 0.29, 0.98, 0, 0.1, 0.26, 0.11, lo, 9); box(s * 0.29, 0.81, 0, 0.09, 0.1, 0.1, lo, 20); }
+  box(0.29, 0.8, 0.07, 0.075, 0.14, 0.02, 6, 3, 400); box(0.29, 0.6, 0.05, 0.03, 0.38, 0.26, 6, 5, 401);
+  const g = new THREE.BufferGeometry(); g.setAttribute("position", new THREE.Float32BufferAttribute(P, 3)); g.setAttribute("normal", new THREE.Float32BufferAttribute(N, 3));
+  g.setAttribute("uv", new THREE.Float32BufferAttribute(U, 2)); g.setAttribute("aP", new THREE.Float32BufferAttribute(A, 4)); g.setIndex(I);
+  return g;
+}
+// what the signs say (two across, four down; the first row at the bottom of the picture)
+function wdCrowdSigns(THREE, sport) {
+  const W = { nba: ["SWEAT", "BUCKETS", "LOCK IT", "SPLASH", "DEFENSE", "PARLAY", "CASH IT", "LET'S GO"], nhl: ["SWEAT", "GOAL!", "LOCK IT", "BIG SAVE", "DEFENSE", "PARLAY", "CASH IT", "LET'S GO"] }[sport] || ["SWEAT", "TOUCHDOWN", "LOCK IT", "HAMMER", "DEFENSE", "PARLAY", "CASH IT", "LET'S GO"];
+  const C = [["#f5f5f0", "#111"], ["#ffd23f", "#111"], ["#111", "#ffd23f"], ["#f5f5f0", "#d0102a"], ["#1c3fd1", "#fff"], ["#3ee08f", "#06120c"], ["#ff4fa2", "#fff"], ["#f5f5f0", "#111"]];
+  const c = wdCanvas(1024, 512), x = c.getContext("2d"); x.textAlign = "center"; x.textBaseline = "middle";
+  W.forEach((w, i) => { const X = (i % 2) * 512, Y = (3 - Math.floor(i / 2)) * 128; x.fillStyle = C[i][0]; x.fillRect(X, Y, 512, 128); x.strokeStyle = C[i][1]; x.lineWidth = 6; x.strokeRect(X + 8, Y + 8, 496, 112);
+    x.fillStyle = C[i][1]; let f = 92; do { x.font = `900 ${f}px "Barlow Condensed", Inter, sans-serif`; f -= 4; } while (x.measureText(w).width > 450 && f > 40); x.fillText(w, X + 256, Y + 68); });
+  return wdTex(THREE, c, 4);
+}
+// how each person's dressed. teams: the scene's teams on ({ col, alt, jn: tonight's leaders' numbers }); r: a seeded random
+const WD_CROWD_SKIN = [[0.36, 0.24, 0.17], [0.52, 0.36, 0.25], [0.66, 0.48, 0.36], [0.78, 0.6, 0.47], [0.88, 0.7, 0.56], [0.94, 0.78, 0.66]];
+const WD_CROWD_HAIR = [[0.04, 0.035, 0.03], [0.12, 0.08, 0.05], [0.25, 0.16, 0.09], [0.55, 0.42, 0.22], [0.45, 0.2, 0.1], [0.6, 0.6, 0.62]];
+const WD_CROWD_PANTS = [[0.16, 0.22, 0.36], [0.07, 0.07, 0.08], [0.55, 0.48, 0.36], [0.35, 0.36, 0.38], [0.12, 0.14, 0.2]];
+const WD_STARS = { nba: [23, 30, 0, 7, 11, 1, 3, 13, 34, 77, 15, 2, 5, 24, 8, 33, 32, 6, 4, 9], nfl: [12, 15, 17, 9, 87, 13, 1, 99, 26, 18, 22, 14, 10, 7, 3, 11], nhl: [97, 87, 8, 29, 34, 91, 88, 71, 13, 19, 16, 43] };
+// bits: 0 cape, 1 cowl, 2 mask, 3 goggles, 4 mustache, 5 lightsaber, 6 pumpkin head, 7 witch's hat, 9 robe, 10 jersey (bare
+// arms), 11 long sleeves, 12 gloves, 13 a sign, 14 shorts, 15 an emblem, 16 bones, 17 visor, 18 spooky, 19 boots
+const WD_COSTUMES = [
+  { col: "#1f4fd1", c2: "#d62828", c3: "#1f4fd1", f: [0, 11, 15, 19], hs: 1 },                         // the caped hero
+  { col: "#2b2d33", c2: "#0c0d10", c3: "#2b2d33", f: [0, 1, 11, 12, 15, 19], hs: 0 },                  // the dark knight
+  { col: "#c8102e", c2: "#c8102e", c3: "#1d3f9e", f: [2, 11, 12, 19], hs: 0, hc: "#f4f4f4" },          // the web-slinger
+  { col: "#4f9a3a", c2: "#5b2a86", c3: "#5b2a86", f: [14], hs: 1, sk: "#4f9a3a", sc: [1.25, 1.12, 1.2] }, // the green giant
+  { col: "#2c5aa0", c2: "#2c5aa0", c3: "#2c5aa0", f: [3], hs: 0, sk: "#f5d33a", sc: [0.95, 0.78, 0.95] }, // the little yellow guy
+  { col: "#6b4a2f", c2: "#38c8ff", c3: "#4a3424", f: [5, 9, 11], hs: 1 },                              // a Jedi
+  { col: "#6b4a2f", c2: "#4cff6a", c3: "#4a3424", f: [5, 9, 11], hs: 3 },
+  { col: "#101114", c2: "#ff2030", c3: "#101114", f: [0, 2, 5, 9, 11, 12], hs: 0, hc: "#2a2c30" },     // the dark lord
+  { col: "#d7261e", c2: "#d7261e", c3: "#2346b0", f: [4], hs: 4, hc: "#2a1a10" },                       // the plumber
+  { col: "#e9ecef", c2: "#e9ecef", c3: "#e9ecef", f: [2, 11, 12, 17, 19], hs: 0, hc: "#d9a520" },      // the astronaut
+  { col: "#3b2b20", c2: "#ff7a1a", c3: "#222222", f: [6, 11], hs: 0, spooky: 1 },                       // the pumpkin head
+  { col: "#0b0b0d", c2: "#f2f2ee", c3: "#0b0b0d", f: [2, 11, 12, 16, 18], hs: 0, hc: "#050505", spooky: 1 }, // the skeleton
+  { col: "#f4f4f6", c2: "#f4f4f6", c3: "#f4f4f6", f: [2, 9, 11, 12, 18], hs: 0, hc: "#0a0a0a", spooky: 1 }, // the ghost
+  { col: "#1b1420", c2: "#1b1420", c3: "#1b1420", f: [7, 9, 11, 18], hs: 3, hc: "#2b1a3a", sk: "#8fc27a", spooky: 1 }, // the witch
+  { col: "#0d0d10", c2: "#8a0f1c", c3: "#0d0d10", f: [0, 11], hs: 1, sk: "#e8e2da", spooky: 1 },      // the vampire
+  { col: "#5d6b78", c2: "#3a3f48", c3: "#3a3f48", f: [18], hs: 1, sk: "#8aa37a", spooky: 1 },          // the zombie
+];
+function wdCrowdLook(i, team, teams, sport, r) {
+  const tm = teams[team] || null, tc = tm ? wdLift(wdHex(tm.col), 0.1) : [0.7, 0.55, 0.2], ta = tm ? wdLift(wdHex(tm.alt), 0.1) : [0.2, 0.3, 0.6], white = [0.88, 0.88, 0.86], black = [0.08, 0.085, 0.1];
+  const bits = (a) => a.reduce((s, b) => s + 2 ** b, 0), pick = (a, k) => a[Math.floor(r(k) * a.length) % a.length];
+  const now = new Date(), spooky = (now.getMonth() === 9 && now.getDate() >= 15) || (now.getMonth() === 10 && now.getDate() <= 2);
+  const L = { col: tc, c2: ta, c3: pick(WD_CROWD_PANTS, 3), sk: pick(WD_CROWD_SKIN, 4), hc: pick(WD_CROWD_HAIR, 5), hs: Math.floor(r(6) * 8), f: [], num: -1, sc: [1, 0.93 + r(7) * 0.14, 1] };
+  const x = r(1);
+  if (x < 0.15) {
+    // in costume: the heroes and the movies all year, the Halloween ones in the last two weeks of October
+    const list = WD_COSTUMES.filter((c) => !c.spooky || spooky), C = pick(list, 8);
+    Object.assign(L, { col: wdHex(C.col), c2: wdHex(C.c2), c3: wdHex(C.c3), f: C.f.slice(), hs: C.hs, sc: C.sc ? C.sc.map((v, k) => v * (k === 1 ? 0.96 + r(9) * 0.08 : 1)) : L.sc });
+    if (C.sk) L.sk = wdHex(C.sk); if (C.hc) L.hc = wdHex(C.hc);
+  } else if (x < 0.4) {
+    // a jersey: one of tonight's leaders' numbers for that team (or a famous one), home colors, road whites or the other color
+    const jn = (tm && tm.jn) || [], n = jn.length && r(10) < 0.75 ? Number(pick(jn, 11)) : pick(WD_STARS[sport] || WD_STARS.nba, 12), y = r(13);
+    L.col = y < 0.6 ? tc : y < 0.85 ? white : ta;
+    L.c2 = L.col === white ? tc : Math.abs(wdLum(ta) - wdLum(L.col)) > 0.18 ? ta : wdLum(L.col) > 0.5 ? black : white;
+    L.num = isFinite(n) ? Math.max(0, Math.min(99, n)) : 0; if (r(14) < 0.75) L.f.push(10);
+    if (r(15) < 0.18) { L.f.push(14); L.c3 = L.col === white ? tc : L.col; }
+  } else if (x < 0.46) {
+    // a sign
+    L.f.push(13); L.num = Math.floor(r(16) * 8); if (L.hs >= 4 && L.hs <= 6) L.hs = 1;
+  } else if (x < 0.86) {
+    // a tee or a hoodie in the team's colors; a cap or a beanie in the other one
+    const y = r(17); L.col = y < 0.62 ? tc : y < 0.86 ? ta : white; L.c2 = L.col === ta ? tc : ta;
+    if (r(18) < 0.3) L.f.push(11);
+  } else {
+    // just here for it: black, white, grey, a color of their own
+    L.col = pick([black, white, [0.4, 0.42, 0.45], [0.55, 0.12, 0.14], [0.16, 0.36, 0.22], [0.25, 0.2, 0.45]], 19); L.c2 = pick([white, black, [0.9, 0.7, 0.2]], 20);
+    if (r(21) < 0.45) L.f.push(11);
+  }
+  L.f = bits(L.f);
+  return L;
+}
+// the war room's crowd on its seats ([{ p, face, team, u }]); teams: the scene's teams on, by the seats' team index
+function wdCrowdBuild(st, seats, teams, sport) {
+  const THREE = st.THREE, n = seats.length; if (!n) return null;
+  const geo = wdCrowdGeo(THREE), atlas = wdCrowdSigns(THREE, sport); st.tex.push(atlas);
+  const rnd = (i, s) => { const v = Math.sin(i * 12.9898 + s * 78.233) * 43758.5453; return v - Math.floor(v); };
+  const mat = new THREE.ShaderMaterial({ vertexShader: WD_CROWD_VS, fragmentShader: WD_CROWD_FS,
+    uniforms: { uT: { value: 0 }, uParty: { value: 0 }, uBeat: { value: 0 }, uSad: { value: 0 }, uWave: { value: 0 }, uWaveU: { value: 0 }, uBurst: { value: 0 }, uK: { value: 1 }, uCh: { value: new Array(8).fill(0) },
+      uLit: { value: 1 }, uFlash: { value: 0 }, uFl: { value: 420 }, uFc: { value: new THREE.Vector3(1, 1, 1) }, uHaze: { value: new THREE.Vector3(0.03, 0.04, 0.07) }, uSign: { value: atlas } } });
+  const mesh = new THREE.InstancedMesh(geo, mat, n), m4 = new THREE.Matrix4(), q = new THREE.Quaternion(), e = new THREE.Euler(), s3 = new THREE.Vector3(), p3 = new THREE.Vector3();
+  const B = { aCol: new Float32Array(n * 3), aCol2: new Float32Array(n * 3), aCol3: new Float32Array(n * 3), aSkin: new Float32Array(n * 3), aHairC: new Float32Array(n * 3), aLk: new Float32Array(n * 4), aR: new Float32Array(n * 4) };
+  for (let i = 0; i < n; i++) {
+    const S = seats[i], L = wdCrowdLook(i, S.team, teams, sport, (k) => rnd(i, 10 + k)), v = 0.9 + rnd(i, 2) * 0.2;
+    B.aCol.set(L.col.map((c) => c * v), i * 3); B.aCol2.set(L.c2, i * 3); B.aCol3.set(L.c3, i * 3); B.aSkin.set(L.sk, i * 3); B.aHairC.set(L.hc, i * 3);
+    B.aLk.set([L.hs, L.f, L.num, 0], i * 4); B.aR.set([rnd(i, 3), rnd(i, 4), S.team, S.u], i * 4);
+    e.set(0, S.face + (rnd(i, 5) - 0.5) * 0.35, 0); q.setFromEuler(e); s3.set(L.sc[0], L.sc[1], L.sc[2]); p3.set(S.p[0], S.p[1], S.p[2]);
+    m4.compose(p3, q, s3); mesh.setMatrixAt(i, m4);
+  }
+  for (const [k, a] of Object.entries(B)) geo.setAttribute(k, new THREE.InstancedBufferAttribute(a, a.length / n));
+  mesh.frustumCulled = false; st.scene.add(mesh); st.mats.push(mat);
+  st.fans = { mesh, mat, ch: new Array(8).fill(0), n };
+  return st.fans;
+}
 // ---- the home team's mascot, DJing: a 3D cartoon character (toon-shaded) in the team's jersey with headphones and a chain,
 // built from what the team is (a bird, a big cat, a dog, a bear, a horse, a bull or a ram, a hog, a gator, a dolphin, an
 // elephant, a buckeye, or a person in the right hat). On the decks in a set, moving on the song's beat; between sets it hypes
@@ -26364,8 +26667,8 @@ function wdRoomBuild(L, R) {
   };
   bleacher(15, -14, 14, 1, 14); bleacher(-15, 6.5, 16, -1, 11);
   for (let x = -11; x <= 11; x += 0.72) for (let z = 3; z <= 14; z += 0.8) { const i = k++; if (rnd(i + 3) < 0.82) seats.push({ p: [x + (rnd(i) - 0.5) * 0.3, 0, z + (rnd(i + 1) - 0.5) * 0.3], face: Math.PI + (rnd(i + 2) - 0.5) * 0.4, team: tIdx(Math.floor(rnd(i + 5) * 97)), u: (x + 11) / 22 }); }
-  const cols = teamsOn.length ? teamsOn.map((t) => [wdLift(wdHex(t.col), 0.14), wdLift(wdHex(t.alt), 0.14)]) : [[[0.7, 0.55, 0.2], [0.2, 0.3, 0.6]]];
-  const F = wdFansBuild(st, seats, cols, 1.05); if (F) F.mat.uniforms.uFl.value = 140;
+  // the studio crowd up close: whole people, in tees, jerseys (tonight's leaders' numbers), costumes, holding signs
+  const F = wdCrowdBuild(st, seats, teamsOn, R.sport); if (F) F.mat.uniforms.uFl.value = 140;
   st.teamsOn = teamsOn.map((t) => t.ab);
   // fireworks (sparks off the wall in here)
   { const N = 1200, pos = new Float32Array(N * 3), cl = new Float32Array(N * 3), g = new THREE.BufferGeometry(); g.setAttribute("position", new THREE.BufferAttribute(pos, 3)); g.setAttribute("color", new THREE.BufferAttribute(cl, 3));
@@ -27052,7 +27355,7 @@ function wdLoop(now) {
   if (!wdTv() || document.hidden) { WD.r.domElement.style.visibility = "hidden"; return; }
   WD.r.domElement.style.visibility = "";
   // a win or a miss on: the board steps aside, the camera turns to the crowd, and back after
-  if (now - (WD.shAt || 0) > 250) { WD.shAt = now; const on = !!document.querySelector(".cs.v2x.show"); if (on !== !!WD.showing) { WD.showing = on; document.body.classList.toggle("v2w-show", on); wdShowCam(st, on); } }
+  { const on = !!document.querySelector(".cs.v2x.show"); if (on !== !!WD.showing) { WD.showing = on; document.body.classList.toggle("v2w-show", on); wdShowCam(st, on); } }
   // a show over the building: 30 fps, 15 on a screen that's already been turned down or that falls behind during it
   if (WD.mode === "show" && gap < 1000) WD.ss = Math.max(0, Math.min(40, (WD.ss || 0) + (gap > 60 ? 1 : -1)));
   const slowShow = (WD.qb && WD.qb < 0.5) || (WD.ss || 0) > 20;
@@ -27117,7 +27420,6 @@ window.SBW = {
     wdVidOff(st); wdUnproject(st);
     WD.mode = dj ? "dj" : "clip"; document.body.classList.add("v2w-away", "v2w-fly", "v2w-in"); document.body.classList.toggle("v2w-dj", dj); document.body.classList.toggle("v2w-clip", !dj);
     document.body.classList.toggle("v2w-proj", !inWorld); document.body.classList.toggle("v2w-tex", inWorld);
-    wdSize(1);
     const F = dj ? st.djFace() : st.jface(st.cam.position);
     if (st.party) st.party.bpm = o.bpm > 60 ? o.bpm : 124;
     if (inWorld) { const D = st.deck, stage = !!(dj && o.stage && D && D.mg), mcam = !!(dj && !o.house && D && D.masc), scr = st.screens.map((x) => x.material);
@@ -27126,7 +27428,7 @@ window.SBW = {
       for (const m of mats) if (m.uniforms.uStack) m.uniforms.uStack.value = stage ? 1 : 0;
       if (mcam) wdDeckCamOn(st); else if (dj && !stage) wdDeckPlay(st, o.bpm); }
     else st.proj = { F, els: [o.v, document.getElementById("jbWash"), document.getElementById("djCv")].filter(Boolean) };
-    const go = ++WD.go, show = () => { if (go === WD.go) document.body.classList.remove("v2w-fly"); };
+    const go = ++WD.go, show = () => { if (go === WD.go) { document.body.classList.remove("v2w-fly"); if (WD.mode === "clip" || WD.mode === "dj") wdSize(1); } };
     // never leave the panels hidden behind a camera move that didn't finish
     setTimeout(show, 4800);
     wdFly(st, wdFrame(st, F, dj ? 0.46 : 0.44), dj ? 2600 : 2100, WD.V.fwR * (dj ? 0.5 : 0.35), show);
