@@ -14130,7 +14130,8 @@ void main(){
     const on = all.filter((g) => g.st === "in" || (g.st === "pre" && g.t - now < 20 * 60e3 && g.t - now > -3 * 3600e3));
     const mine = list.map((G) => G.g).filter((g) => fb(g) && g.st !== "post");
     const soon = mine.filter((g) => g.st === "pre" && g.t - now < 90 * 60e3);
-    let pick = on.length === 1 ? on[0] : !on.length && soon.length === 1 ? soon[0] : null;
+    const betOn = mine.filter((g) => g.st === "in" || (g.st === "pre" && g.t - now < 20 * 60e3));
+    let pick = betOn.length === 1 ? betOn[0] : betOn.length > 1 ? null : on.length === 1 ? on[0] : !on.length && soon.length === 1 ? soon[0] : null;
     const riv = on.filter((g) => (g.sport === "CFB" ? cfRiv(g) : arRiv(g)) && nb.get(g.id)).sort((x, y) => nb.get(y.id) - nb.get(x.id))[0];
     if (!pick && riv) pick = riv;
     const games = [...on].sort((x, y) => (nb.get(y.id) || 0) - (nb.get(x.id) || 0) || x.t - y.t);
@@ -14531,7 +14532,7 @@ void main(){
   // ---------- sheets ----------
   function openSheet(id) { $(id).hidden = false; }
   // keep every open screen current: when a new version is up, reload it (never mid-form or mid-animation)
-  const BUILD = "20261029002929";
+  const BUILD = "20261029014650";
   function checkBuild() {
     if (BUILD === "dev") return;
     fetch("version.json?t=" + Date.now(), { cache: "no-store" }).then((r) => (r.ok ? r.json() : null)).then((j) => {
@@ -27008,9 +27009,27 @@ async function wdStart() {
     for (const s of ["a", "h"]) if (R.T[s].lg) { const im = new Image(); im.crossOrigin = "anonymous"; im.referrerPolicy = "no-referrer"; im.onload = () => { if (WD.st && WD.st.R.T[s] === R.T[s]) wdRepaint(); }; im.src = R.T[s].lg; R.T[s].img = im; }
     WD.st = wdBuild(L, R); WD.builtAt = Date.now(); wdSize(WD.qb || 0.6, true);
     document.body.classList.add("v2w"); WD.sig = ""; wdIdleArt(true);
+    wdWarm(WD.st);
     if (!WD.raf) WD.raf = requestAnimationFrame(wdLoop);
   } catch (e) { console.warn("world", e); }
-  WD.starting = false;
+  WD.starting = false; wdFadeIn();
+}
+// shaders compile and textures upload the first time they're drawn: do all of it now, while the picture's dark, so the
+// first flight across the building doesn't stutter
+function wdWarm(st) {
+  try { st.cam.updateMatrixWorld(); WD.r.compile(st.scene, st.cam); } catch (e) {}
+  try { for (const t of st.tex) WD.r.initTexture(t); } catch (e) {}
+  try { WD.r.render(st.scene, st.cam); } catch (e) {}
+}
+// a new venue: the building dips to black, the new one's built behind it and comes up (no frozen frame, no hard cut)
+function wdSwap() {
+  if (WD.swap) return; WD.swap = true; const cv = WD.r && WD.r.domElement;
+  if (cv) { cv.style.transition = "opacity .5s ease"; cv.style.opacity = "0"; }
+  setTimeout(() => { WD.swap = false; if (!WD.st) return wdFadeIn(); wdUnproject(WD.st); wdVidOff(WD.st); wdDispose(WD.st); WD.st = null; wdStart(); }, cv ? 520 : 0);
+}
+function wdFadeIn() {
+  const cv = WD.r && WD.r.domElement; if (!cv || cv.style.opacity !== "0" || WD.swap) return;
+  requestAnimationFrame(() => requestAnimationFrame(() => { cv.style.transition = "opacity .7s ease"; cv.style.opacity = ""; }));
 }
 const wdKey = (R) => R.sport + ":" + (R.kind || "") + (R.kind === "room" ? "" : ":" + R.T.a.ab + ":" + R.T.h.ab + ":" + ((R.ven && R.ven.nm) || ""));
 function wdRepaint() {
@@ -27069,7 +27088,7 @@ function wdPoll() {
   // a new venue (the big game changed, or its venue came in): rebuild, but never in the middle of a show, only once the change
   // has held for two looks, and not more than every 15 s
   if (k !== WD.key) { const calm = WD.mode === "board" && !WD.st.fly && !document.querySelector(".cs.show, #cash:not([hidden])") && Date.now() - (WD.builtAt || 0) > 15e3;
-    if (WD.pend === k && calm) { WD.pend = ""; wdDispose(WD.st); WD.st = null; wdStart(); return; } WD.pend = k; } else WD.pend = "";
+    if (WD.pend === k && calm) { WD.pend = ""; wdSwap(); return; } WD.pend = k; } else WD.pend = "";
   const T = WD.st.R.T;
   for (const s of ["a", "h"]) { const was = parseFloat(T[s].sc), now = parseFloat(R.T[s].sc); if (isFinite(was) && isFinite(now) && now > was) wdScore(s, now - was); }
   wdIdleArt(false);
