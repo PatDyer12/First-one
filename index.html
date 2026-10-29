@@ -14541,7 +14541,7 @@ void main(){
   // ---------- sheets ----------
   function openSheet(id) { $(id).hidden = false; }
   // keep every open screen current: when a new version is up, reload it (never mid-form or mid-animation)
-  const BUILD = "20261029021535";
+  const BUILD = "20261029023758";
   function checkBuild() {
     if (BUILD === "dev") return;
     fetch("version.json?t=" + Date.now(), { cache: "no-store" }).then((r) => (r.ok ? r.json() : null)).then((j) => {
@@ -16238,7 +16238,7 @@ void main(){
     try { if (statusSrc) statusSrc.stop(); } catch (e) {}
     statusSrc = null; statusBet = null; $("#lockStop").hidden = true;
     if (whoJb) whoOff();
-    const jb = $("#jumbo"), v = $("#pipVid"), bg = $("#jbBg"); clearTimeout(pipT); clearTimeout(hideT); clearInterval(jbTick); clearInterval(djT); $("#djCv").hidden = true;
+    const jb = $("#jumbo"), v = $("#pipVid"), bg = $("#jbBg"); clearTimeout(pipT); clearTimeout(hideT); clearInterval(jbTick); clearInterval(djT); clearInterval(vidWdT); $("#djCv").hidden = true;
     if (!jb.hidden) { jb.classList.add("out"); hideT = setTimeout(() => { jb.hidden = true; jb.classList.remove("out"); try { v.pause(); bg.pause(); } catch (e) {} }, 400); }
     try { if (window.SBW) SBW.clipEnd(); } catch (e) {}
   }
@@ -16586,9 +16586,9 @@ void main(){
     if (v.videoWidth) go(); else v.addEventListener("loadedmetadata", go, { once: true });
   }
   const vidReady = (v) => new Promise((ok) => {
-    if (v.readyState >= 3) return ok();
-    const f = () => { v.removeEventListener("canplay", f); ok(); };
-    v.addEventListener("canplay", f); setTimeout(f, 4000);
+    if (v.readyState >= 2) return ok();
+    const f = () => { v.removeEventListener("canplay", f); v.removeEventListener("loadeddata", f); ok(); };
+    v.addEventListener("canplay", f); v.addEventListener("loadeddata", f); setTimeout(f, 9000);
   });
   const MOOD_TAG = { up: "Cashing", down: "In trouble", hype: "Hype", vibe: "Vibes", game: "Live" };
   // right-hand rail: group rides, then yours, then the crew's; live ones first, the one this clip is about lit up
@@ -16750,7 +16750,7 @@ void main(){
     v.onended = () => { if (go === pipGo) { try { v.currentTime = D.intro; } catch (e) {} v.play().catch(() => {}); } };
     bg.onended = () => { if (go === pipGo) { try { bg.currentTime = v.currentTime; } catch (e) {} bg.play().catch(() => {}); } };
   }
-  let djT = 0;
+  let djT = 0, vidWdT = 0;
   // start sound and video together once both are loaded
   let npT = 0;
   function showPip(b, P, mood, why, pre) {
@@ -16765,7 +16765,8 @@ void main(){
     const loopOne = null;   // a Spotify house song gets DJ Goldie, never one of the edits with its sound off
     const dj = !!(P.dj && P.bpm), D = dj ? djClip() : null, vbase = loopOne ? loopOne.base : dj ? D.base : P.base, rate = dj && !loopOne ? djRate(P.bpm) : 1;
     const src = P.ext || vidSrc(vbase);
-    v.muted = true; v.onerror = P.ext ? () => { if (go === pipGo) stopStatus(); } : () => { const s0 = v.getAttribute("src") || ""; if (/\.webm/.test(s0)) { const s1 = s0.replace(".webm", ".mp4"); v.src = s1; bg.src = s1; v.load(); bg.load(); } };
+    v.muted = true; v.onerror = P.ext ? () => { if (go === pipGo) stopStatus(); } : () => { const s0 = v.getAttribute("src") || ""; if (/\.webm/.test(s0)) { const s1 = s0.replace(".webm", ".mp4"); v.src = s1; bg.src = s1; v.load(); bg.load(); if (go === pipGo && !jb.hidden) { v.play().catch(() => {}); bg.play().catch(() => {}); } } };
+    v.preload = "auto"; bg.preload = "auto";
     if (v.dataset.base !== vbase || (!P.ext && v.dataset.src !== src)) { v.dataset.base = vbase; v.dataset.src = src; v.src = src; v.load(); bg.src = src; bg.load(); }
     for (const x of [v, bg]) { x.loop = dj && !D.intro; x.defaultPlaybackRate = rate; x.playbackRate = rate; }
     // a DJ break plays off your Spotify playlist when this screen's connected to it (the built-in song when Spotify can't);
@@ -16821,6 +16822,16 @@ void main(){
       jumboBets(); clearInterval(jbTick); jbTick = setInterval(() => { jumboBets(); jbBug(b); }, 5000);
       clearTimeout(clipFadeT); if (!P.full && ms - AL.so * 1000 > CLIP_MAX + 500) clipFadeT = setTimeout(() => { if (go === pipGo) clipFade(c); }, Math.max(0, msL - off - 1100));
       pipT = setTimeout(() => { if (statusBet === betId) stopStatus(); }, msL - off);
+      clearInterval(vidWdT); { let bad = 0, lt = -1; const from = Date.now() + wait + 1500;
+        vidWdT = setInterval(() => {
+          if (go !== pipGo || jb.hidden) { clearInterval(vidWdT); return; } if (Date.now() < from) return;
+          const pic = v.readyState >= 2 && v.videoWidth > 0 && !v.error, run = v.currentTime !== lt; lt = v.currentTime;
+          if (pic && (run || v.ended)) { bad = 0; return; }
+          bad++;
+          if (bad === 3) { try { v.play().catch(() => {}); bg.play().catch(() => {}); } catch (e) {} }
+          if (bad === 6 && (v.error || v.networkState === 3 || v.networkState === 1)) { try { const s0 = v.getAttribute("src") || "", s1 = /\.webm/.test(s0) ? s0.replace(".webm", ".mp4") : s0; const at = v.currentTime; if (s1 !== s0) { v.src = s1; bg.src = s1; } v.load(); bg.load(); v.currentTime = at; v.play().catch(() => {}); bg.play().catch(() => {}); } catch (e) {} }
+          if (bad >= 10) { clearInterval(vidWdT); console.warn("clip: no picture, ended", v.getAttribute("src")); stopStatus(); }
+        }, 1000); }
     });
   }
   // ---------- Spotify: DJ breaks off your own playlist ----------
@@ -27201,12 +27212,14 @@ function wdVidOff(st) {
 }
 function wdVidTick(st, now) {
   const V = st.vid; if (!V) return; const THREE = st.THREE, useCv = V.cv && !V.cv.hidden && V.cv.width > 0, kind = useCv ? "cv" : "v";
-  if (kind !== V.kind) { if (V.tex) V.tex.dispose(); V.kind = kind;
-    V.tex = useCv ? new THREE.CanvasTexture(V.cv) : new THREE.VideoTexture(V.v); V.tex.colorSpace = THREE.NoColorSpace; V.tex.minFilter = THREE.LinearFilter; V.tex.generateMipmaps = false;
-    for (const m of V.mats) m.uniforms.uMap.value = V.tex; }
+  if (kind !== V.kind) { if (V.tex) V.tex.dispose(); V.kind = kind; V.on = false;
+    V.tex = useCv ? new THREE.CanvasTexture(V.cv) : new THREE.VideoTexture(V.v); V.tex.colorSpace = THREE.NoColorSpace; V.tex.minFilter = THREE.LinearFilter; V.tex.generateMipmaps = false; }
+  let got = false;
+  if (useCv) { V.tex.needsUpdate = true; got = true; } else if (V.v.readyState >= 2 && V.v.videoWidth > 0 && V.v.currentTime !== V.lt) { V.lt = V.v.currentTime; V.tex.needsUpdate = true; got = true; }
+  // the screens keep their own picture until the video has a frame to show: never a black or empty screen while it loads
+  if (got && !V.on) { V.on = true; for (const m of V.mats) { m.uniforms.uMap.value = V.tex; if (m.uniforms.uStack) m.uniforms.uStack.value = V.stack ? 1 : 0; } }
   const asp = (useCv ? V.cv.width / Math.max(1, V.cv.height) : V.v.videoWidth / Math.max(1, V.v.videoHeight)) * (V.stack ? 2 : 1);
-  if (asp > 0) for (const m of V.mats) m.uniforms.uAsp.value = asp;
-  if (useCv) V.tex.needsUpdate = true; else if (V.v.readyState >= 2 && V.v.currentTime !== V.lt) { V.lt = V.v.currentTime; V.tex.needsUpdate = true; }
+  if (V.on && asp > 0) for (const m of V.mats) m.uniforms.uAsp.value = asp;
   if (now - (WD.npAt || 0) > 400) { WD.npAt = now; wdNpArt(st); }
 }
 // the song, small in the bottom right corner of the picture
@@ -27425,7 +27438,6 @@ window.SBW = {
     if (inWorld) { const D = st.deck, stage = !!(dj && o.stage && D && D.mg), mcam = !!(dj && !o.house && D && D.masc), scr = st.screens.map((x) => x.material);
       const mats = !dj || !D ? scr : stage ? [D.mgMat, D.led.material, ...scr] : mcam ? [] : [D.led.material, ...scr];
       st.vid = { v: o.v, cv: document.getElementById("djCv"), mats, tex: null, kind: "", stack: stage, clock: dj && !o.house };
-      for (const m of mats) if (m.uniforms.uStack) m.uniforms.uStack.value = stage ? 1 : 0;
       if (mcam) wdDeckCamOn(st); else if (dj && !stage) wdDeckPlay(st, o.bpm); }
     else st.proj = { F, els: [o.v, document.getElementById("jbWash"), document.getElementById("djCv")].filter(Boolean) };
     const go = ++WD.go, show = () => { if (go === WD.go) { document.body.classList.remove("v2w-fly"); if (WD.mode === "clip" || WD.mode === "dj") wdSize(1); } };
