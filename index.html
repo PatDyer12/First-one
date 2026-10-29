@@ -6987,6 +6987,15 @@ body.tv .flash { top: auto !important; bottom: 76px; left: 28px; width: min(780p
   background: linear-gradient(180deg, rgb(16,20,28), rgb(9,11,16)) !important; box-shadow: 0 18px 46px rgba(0,0,0,.6), inset 0 0 0 1px rgba(255,255,255,.08); }
 body.tv .flash.show { transform: none; }
 body.tv .flash .word { border-radius: 12px 0 0 12px; }
+
+.ob-legs li.lg.lgx.cnt, .pp-bet .ob-legs li.lg.lgx.cnt { grid-template-columns: auto minmax(0, 1fr) auto; }
+.ob-legs li.lg.lgx.cnt .lg-t { grid-row: 1; grid-column: 2; }
+.ob-legs li.lg.lgx .lg-n { grid-row: 1; grid-column: 3; align-self: center; justify-self: end; padding: 4px 9px 3px; border-radius: 8px; font: 800 21px/1 var(--f-num); color: #fff; background: rgba(255,255,255,.09); white-space: nowrap; }
+.ob-legs .lg-n i { font-style: normal; font-size: .7em; color: rgba(255,255,255,.55); margin-left: 1px; }
+.ob-legs li.lg.lgx .lg-n.w { color: #3ee08f; background: rgba(62,224,143,.15); }
+.ob-legs li.lg.lgx .lg-n.l { color: #ff6b78; background: rgba(255,77,94,.15); }
+.ob-legs li.lg.lgx .lg-n.h { color: #04130c; background: #3ee08f; } .ob-legs li.lg.lgx .lg-n.h i { color: rgba(4,19,12,.6); }
+.ob-legs li.lg.lgx .lg-n.m { color: rgba(255,255,255,.5); background: rgba(255,77,94,.1); text-decoration: line-through; }
 </style>
 </head>
 <body>
@@ -10074,11 +10083,20 @@ body.tv .flash .word { border-radius: 12px 0 0 12px; }
     return { txt: [sc, gxStatus(g).t.replace(" · ", " "), how].filter(Boolean).join(" · "), cls: !l.st && ev ? (ev.res === "W" ? "lw" : ev.res === "L" ? "ll" : "le") : "" };
   }
 
+  function legCount(l) {
+    const s = l.sel, g = s ? gameOf(s) : null, ev = l.ev;
+    if (!s || !g || g.st === "pre" || !isPP(s.m) || !ev || ev.v == null) return "";
+    const sp = s.sp || g.sport; if (sp !== "NBA" && sp !== "CBB") return "";
+    const ln = Number(ev.l ?? s.l), v = Number(ev.v); if (!Number.isFinite(v) || !(ln >= 1.5)) return "";
+    const k = l.st === "hit" ? "h" : l.st === "miss" ? "m" : ev.res === "W" ? "w" : ev.res === "L" ? "l" : "";
+    return `<span class="lg-n ${k}"><b>${v}</b><i>/${trim(ln)}</i></span>`;
+  }
   function legRow(l, i) {
     const s = l.sel, g = s ? gameOf(s) : null, ev = l.ev, st = l.st, live = !!g && g.st === "in";
     const state = st === "hit" ? "hit" : st === "miss" ? "miss" : live && ev ? (ev.res === "W" ? "lw" : ev.res === "L" ? "ll" : "le") : g && g.st === "post" ? "le" : "pre";
     const T = g && s ? legTeams(s, g) : [], pic = T.map((t) => logo(t, "lg")).join("");
-    return `<li class="lg lgx ${state}${T.length > 1 ? " two" : ""}${pic ? "" : " np"}"><span class="lg-p">${pic}${st === "hit" ? "<b>✓</b>" : st === "miss" ? "<b>✕</b>" : ""}</span><span class="lg-t">${esc(l.t)}</span></li>`;
+    const n = legCount(l);
+    return `<li class="lg lgx ${state}${T.length > 1 ? " two" : ""}${pic ? "" : " np"}${n ? " cnt" : ""}"><span class="lg-p">${pic}${st === "hit" ? "<b>✓</b>" : st === "miss" ? "<b>✕</b>" : ""}</span><span class="lg-t">${esc(l.t)}</span>${n}</li>`;
   }
   function legRowFull(l, i) {
     const s = l.sel, g = s ? gameOf(s) : null, ev = l.ev, st = l.st, pp = !!s && isPP(s.m), td = !!s && isTd(s.m);
@@ -14506,7 +14524,7 @@ void main(){
   // ---------- sheets ----------
   function openSheet(id) { $(id).hidden = false; }
   // keep every open screen current: when a new version is up, reload it (never mid-form or mid-animation)
-  const BUILD = "20261029000428";
+  const BUILD = "20261029002011";
   function checkBuild() {
     if (BUILD === "dev") return;
     fetch("version.json?t=" + Date.now(), { cache: "no-store" }).then((r) => (r.ok ? r.json() : null)).then((j) => {
