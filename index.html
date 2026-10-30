@@ -14542,7 +14542,7 @@ void main(){
   // ---------- sheets ----------
   function openSheet(id) { $(id).hidden = false; }
   // keep every open screen current: when a new version is up, reload it (never mid-form or mid-animation)
-  const BUILD = "20261030210705";
+  const BUILD = "20261030211718";
   function checkBuild() {
     if (BUILD === "dev") return;
     fetch("version.json?t=" + Date.now(), { cache: "no-store" }).then((r) => (r.ok ? r.json() : null)).then((j) => {
@@ -18680,7 +18680,11 @@ void main(){
   const featEt = (t) => { const p = {}; for (const x of new Intl.DateTimeFormat("en-CA", { timeZone: "America/New_York", year: "numeric", month: "2-digit", day: "2-digit", weekday: "short", hour: "2-digit", hourCycle: "h23" }).formatToParts(new Date(t))) p[x.type] = x.value; return { day: `${p.year}-${p.month}-${p.day}`, wd: p.weekday, hr: Number(p.hour) }; };
   function featGame() {
     if (GUEST || PHONE()) return null;
-    const now = Date.now(), cand = [...S.games.values()].filter((g) => (g.sport === "CFB" || g.sport === "NFL") && g.a && g.h && (g.st === "in" || (g.st === "pre" && g.t - now < 30 * 60e3 && now - g.t < 4 * 3600e3)));
+    const now = Date.now(), fbAll = [...S.games.values()].filter((g) => (g.sport === "CFB" || g.sport === "NFL") && g.a && g.h);
+    // a pinned game has the night from 3 hours before its kickoff (nothing earlier that night takes the stadium from it)
+    const pinned = fbAll.find((g) => g.st !== "post" && g.t - now < 3 * 3600e3 && FEAT_PIN.some(([d, a, h]) => featEt(g.t).day === d && g.a.ab === a && g.h.ab === h));
+    if (pinned) { FEAT.id = pinned.id; return pinned; }
+    const cand = fbAll.filter((g) => g.st === "in" || (g.st === "pre" && g.t - now < 30 * 60e3 && now - g.t < 4 * 3600e3));
     if (!cand.length) { FEAT.id = ""; return null; }
     const units = new Map();
     for (const b of S.bets.values()) { if (b.status !== "open" || isGone(b)) continue; const u = Number(b.units) || 0; for (const id of new Set(selsOf(b).map((x) => String(x.g)))) units.set(id, (units.get(id) || 0) + u); }
