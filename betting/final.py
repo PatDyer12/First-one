@@ -37,6 +37,8 @@ BASE_UNITS = {"Strong": 1.0, "Moderate": 0.5, "Weak": 0.5, "Stack only": 0.5}
 MAX_UNITS = 2.0
 MODEL_ONLY_MAX = 1.0   # the model alone hasn't proven itself against closing lines: bigger stakes need stacking
 MAX_ML_DOG = 400
+# angles that are the same rule as a system (same filter, same bets): count once, as the system
+TWINS = {"Rest edge": "Rested home team"}
 
 
 def payout(o):
@@ -114,6 +116,9 @@ def build(sport):
         game = f"{a['away']} @ {a['home']}"
         if game not in keys:
             continue
+        twin = TWINS.get(a["angle"])
+        if twin and any(x["name"] == twin for x in sig.get((game, a["market"], a["bet_side"]), [])):
+            continue  # same rule as a system already counted: stacking it would double the stake
         s = a["summary"]
         sig.setdefault((game, a["market"], a["bet_side"]), []).append({
             "type": "angle", "name": a["angle"], "grade": a["grade"], "stack_only": a["stack_only"],
