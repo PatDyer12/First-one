@@ -14140,6 +14140,7 @@ void main(){
       .sort((x, y) => mlN(y) - mlN(x) || (nb.get(y.g.id) || 0) - (nb.get(x.g.id) || 0));
     const mlG = (mlOn.find((G) => G.g.id === SCN.last) || mlOn[0] || {}).g;
     if (mlG) pick = mlG;
+    { const ft = window.__sbFeat && window.__sbFeat(); if (ft && fb(ft)) pick = ft; }
     const riv = on.filter((g) => (g.sport === "CFB" ? cfRiv(g) : arRiv(g)) && nb.get(g.id)).sort((x, y) => nb.get(y.id) - nb.get(x.id))[0];
     if (!pick && riv) pick = riv;
     const games = [...on].sort((x, y) => (nb.get(y.id) || 0) - (nb.get(x.id) || 0) || x.t - y.t);
@@ -14541,7 +14542,7 @@ void main(){
   // ---------- sheets ----------
   function openSheet(id) { $(id).hidden = false; }
   // keep every open screen current: when a new version is up, reload it (never mid-form or mid-animation)
-  const BUILD = "20261029025136";
+  const BUILD = "20261030210705";
   function checkBuild() {
     if (BUILD === "dev") return;
     fetch("version.json?t=" + Date.now(), { cache: "no-store" }).then((r) => (r.ok ? r.json() : null)).then((j) => {
@@ -15505,8 +15506,14 @@ void main(){
     }
     return [...keys];
   }
-  async function pollLive() { if (document.visibilityState === "visible") { loadFollow(); const k = [...new Set([...liveKeys(), ...followKeys()])]; if (k.length) await loadBoards(k); loadLines(); } }
-  setTimeout(() => loadFollow().then(() => { const k = followKeys(); if (k.length) loadBoards(k); }), 1200);
+  function featKeys(now = Date.now()) {
+    if (GUEST || PHONE()) return [];
+    const k = featEt(now), late = k.hr < 4; if (!["Thu", "Fri", "Sat", "Sun", "Mon"].includes(k.wd) && !late) return [];
+    const out = []; for (const d of late ? [now, now - 6 * 3600e3] : [now]) for (const sp of ["CFB", "NFL"]) { const key = sp + "|" + etDate(d); if (now - (boardAt.get(key) || 0) > 25e3) out.push(key); }
+    return out;
+  }
+  async function pollLive() { if (document.visibilityState === "visible") { loadFollow(); const k = [...new Set([...liveKeys(), ...followKeys(), ...featKeys()])]; if (k.length) await loadBoards(k); loadLines(); } }
+  setTimeout(() => loadFollow().then(() => { const k = [...followKeys(), ...featKeys()]; if (k.length) loadBoards(k); }), 1200);
   // ---------- Live lines: DraftKings moneyline / spread / total for every game you're on ----------
   const LINES = new Map(), LCHG = new Map(); // gameId -> latest lines; "gameId:cell" -> { dir, at } when a number moves
   const lineSels = (b) => (b.kind === "parlay" ? (Array.isArray(b.legSel) ? b.legSel : []) : [b.sel]).filter((s) => s && s.g != null);
@@ -18668,8 +18675,32 @@ void main(){
     for (const lg of DIR_LG) { const x = DIR.slate.get(lg); if (x && x.next < Infinity && (!soon || x.next < DIR.slate.get(soon).next)) soon = lg; }
     return soon;
   }
+  const FEAT_PIN = [["2026-10-30", "BAY", "UCF"]];
+  const FEAT = { id: "" };
+  const featEt = (t) => { const p = {}; for (const x of new Intl.DateTimeFormat("en-CA", { timeZone: "America/New_York", year: "numeric", month: "2-digit", day: "2-digit", weekday: "short", hour: "2-digit", hourCycle: "h23" }).formatToParts(new Date(t))) p[x.type] = x.value; return { day: `${p.year}-${p.month}-${p.day}`, wd: p.weekday, hr: Number(p.hour) }; };
+  function featGame() {
+    if (GUEST || PHONE()) return null;
+    const now = Date.now(), cand = [...S.games.values()].filter((g) => (g.sport === "CFB" || g.sport === "NFL") && g.a && g.h && (g.st === "in" || (g.st === "pre" && g.t - now < 30 * 60e3 && now - g.t < 4 * 3600e3)));
+    if (!cand.length) { FEAT.id = ""; return null; }
+    const units = new Map();
+    for (const b of S.bets.values()) { if (b.status !== "open" || isGone(b)) continue; const u = Number(b.units) || 0; for (const id of new Set(selsOf(b).map((x) => String(x.g)))) units.set(id, (units.get(id) || 0) + u); }
+    const uOf = (g) => units.get(g.id) || 0, rk = (t) => (t.rk && t.rk <= 25 ? 26 - t.rk : 0);
+    const big = (g) => (g.sport === "NFL" ? 40 : 0) + (/^(ESPN|ABC|FOX|NBC|CBS|Prime Video|NFL Network|Peacock|Netflix)$/.test(g.net || "") ? 15 : /ESPN2|FS1|BTN|SEC Network|ACC Network/.test(g.net || "") ? 6 : 0) + rk(g.a) + rk(g.h) + (g.st === "in" ? 5 : 0);
+    const pin = cand.find((g) => FEAT_PIN.some(([d, a, h]) => featEt(g.t).day === d && g.a.ab === a && g.h.ab === h));
+    const ok = cand.filter((g) => { const k = featEt(g.t); return k.wd === "Sat" || (["Thu", "Fri", "Sun", "Mon"].includes(k.wd) && (k.hr >= 19 || k.hr < 4)); });
+    let pick = pin || null;
+    if (!pick && ok.length) {
+      ok.sort((x, y) => uOf(y) - uOf(x) || big(y) - big(x));
+      const cur = ok.find((g) => g.id === FEAT.id);
+      pick = cur && uOf(ok[0]) - uOf(cur) < 0.5 ? cur : ok[0];
+    }
+    FEAT.id = pick ? pick.id : "";
+    return pick;
+  }
+  window.__sbFeat = () => featGame();
   function dirWant() {
     const so = soloSport(); if (so) return so;
+    { const ft = featGame(); if (ft) return ft.sport; }
     const b = nightSport();
     if (b && ESPN[b]) return b;
     return dirOnNow() || b || ([0, 1, 4].includes(etDow()) ? "NFL" : "CFB");
@@ -25040,7 +25071,8 @@ function wdDeckSpotFb(st) {
   const fl = Math.hypot(V.cx - p[0], V.cz - p[2]) || 1, f = [(V.cx - p[0]) / fl, (V.cz - p[2]) / fl];
   const gap = (x, z) => { const dx = x - p[0], dz = z - p[2], lz = dx * f[0] + dz * f[1], lx = dx * f[1] - dz * f[0]; return Math.abs(lx) < width / 2 + 2.5 && lz < depth / 2 + 2; };
   const upper = V.tiers.slice(1).some((q) => !q.keep || q.keep(p[0], p[2]));
-  return { p, look: [V.cx, V.cz], base: floor - 5, K, who: "mascot", gap, house: { top: upper ? V.top + 1.5 : floor + 18.5 * K, back: V.outer + 0.4 - oc } };
+  // (a one-bowl stadium's stage sits out past the bowl: its back wall still goes behind it, never in front of the DJ)
+  return { p, look: [V.cx, V.cz], base: floor - 5, K, who: "mascot", gap, house: { top: upper ? V.top + 1.5 : floor + 18.5 * K, back: Math.max(depth / 2 + 1.5, V.outer + 0.4 - oc) } };
 }
 // a ballpark's party deck: out past the outfield in right-center, on top of the bleachers, facing home plate; the upper deck
 // gives way to it there. DJ Goldie (Meegy) plays it, his video with its own matte
@@ -25050,7 +25082,19 @@ function wdDeckSpotPark(st) {
   const look = [0, -12], fl = Math.hypot(look[0] - p[0], look[1] - p[2]) || 1, f = [(look[0] - p[0]) / fl, (look[1] - p[2]) / fl];
   const gap = (x, z) => { const dx = x - p[0], dz = z - p[2], lz = dx * f[0] + dz * f[1], lx = dx * f[1] - dz * f[0]; return Math.abs(lx) < width / 2 + 2.5 && lz < depth / 2 + 2; };
   const top = Math.max(...V.tiers.map((q) => q.y1 || 0)), outer = Math.max(...V.tiers.map((q) => q.o1 || q.o0 || 0));
-  return { p, look, base: floor - 5, K, who: "meegy", gap, house: { top: top + 1.5, back: outer + 0.4 - oc } };
+  return { p, look, base: floor - 5, K, who: "mascot", gap, house: { top: top + 1.5, back: Math.max(depth / 2 + 1.5, outer + 0.4 - oc) } };
+}
+// who DJs: the home team's mascot; in the war room, the lead game's home team's (the scene's record of it gives its name and
+// colors). sport: which league's mascot it is
+function wdDeckTeam(st) {
+  const R = st.R, T = R.T, sc = R.scene, hx = (c) => "#" + c.map((v) => Math.round(Math.max(0, Math.min(1, v)) * 255).toString(16).padStart(2, "0")).join("");
+  const gs = (sc && (sc.game ? [sc.game] : sc.games)) || [], q = gs.find((g) => g.h.ab === T.h.ab || g.a.ab === T.h.ab) || gs[0] || null;
+  const t = q ? (q.a.ab === T.h.ab ? q.a : q.h) : null, team = Object.assign({}, T.h);
+  if (t && t.ab !== T.h.ab) Object.assign(team, { ab: t.ab, col: wdHex(t.col, T.h.col), alt: wdHex(t.alt, T.h.alt), colHex: t.col || "", altHex: t.alt || "", lg: t.lg, img: null });
+  if (t) Object.assign(team, { nm: team.nm || t.nm, fn: team.fn || t.fn });
+  team.colHex = team.colHex || hx(team.col); team.altHex = team.altHex || hx(team.alt);
+  team.sport = (q && q.sport) || { nba: "NBA", nhl: "NHL", mlb: "MLB" }[R.sport] || "NFL";
+  return team;
 }
 function wdDeckBuild(st, o) {
   const THREE = st.THREE, scene = st.scene, K = o.K || 1, depth = 11 * K, width = 30 * K, floor = o.p[1], base = o.base ?? floor - 3 * K;
@@ -25058,7 +25102,7 @@ function wdDeckBuild(st, o) {
   const flat = (c) => new THREE.MeshBasicMaterial({ color: col(...c) });
   const g = new THREE.Group(); g.position.set(o.p[0], floor, o.p[2]); g.lookAt(o.look[0], floor, o.look[1]); scene.add(g);
   const add = (geo, mat, x, y, z) => { const m = new THREE.Mesh(geo, mat); m.position.set(x, y, z); g.add(m); return m; };
-  const dark = flat([0.028, 0.03, 0.04]), steel = flat([0.2, 0.21, 0.245]), T = st.R.T, team = T.h, masc = o.who === "mascot";
+  const dark = flat([0.028, 0.03, 0.04]), steel = flat([0.2, 0.21, 0.245]), team = wdDeckTeam(st), masc = o.who === "mascot";
   // the deck: a block, its top, an LED fascia along the front carrying the board's ribbon
   if (floor - base > 0.2) add(new THREE.BoxGeometry(width, floor - base, depth), dark, 0, -(floor - base) / 2, 0);
   add(new THREE.BoxGeometry(width, 0.12 * K, depth), flat([0.06, 0.064, 0.08]), 0, 0.06 * K, 0);
@@ -25122,7 +25166,7 @@ function wdDeckBuild(st, o) {
   st.laserFace = () => ({ c: g.localToWorld(new THREE.Vector3(0, th - 0.4 * K, tz)), n: n.clone(), w: width * 0.9, h: 6 * K });
   if (masc) {
     // the mascot, lit: a key from out front, the sky, a rim in the set's colour from behind
-    const Hm = 4.6 * K, zb = depth / 2 - 4.2 * K, spec = wdMascSpec(st.R.scene && st.R.scene.game ? st.R.scene.game.sport : "NFL", team);
+    const Hm = 4.6 * K, zb = depth / 2 - 4.2 * K, spec = wdMascSpec(team.sport, team);
     const A = wdMascot(THREE, spec, team); A.root.scale.setScalar(Hm); A.root.position.set(0, 0.12 * K, zb); g.add(A.root);
     const booth = wdMascotBooth(THREE, team, 6.4 * K, 1.95 * K, 1.7 * K); booth.position.set(0, 0.12 * K, zb + 1.25 * K); g.add(booth); st.tex.push(booth.userData.tex, A.jt, A.grad);
     if (!st.lit) { st.lit = true; scene.add(new THREE.HemisphereLight(0xc4d4ff, 0x302018, 1.25)); const key = new THREE.DirectionalLight(0xffffff, 2.0); key.position.set(o.look[0] - o.p[0], 60, o.look[1] - o.p[2]); key.position.normalize().multiplyScalar(100).add(new THREE.Vector3(...o.p)); key.target.position.set(...o.p); scene.add(key, key.target); }
@@ -25702,6 +25746,7 @@ const WD_MASC = {
   "CFB:RUTG": { k: "human", fur: "#e2b08a", acc: "#cc0033", x: { hat: "helmet", hatc: "#cc0033", mask: "#141414", stripe: "#f2f2f2", eyemask: 0, jer: "#cc0033", jer2: "#f2f2f2", txt: "KNIGHTS", num: "" } },   // the Scarlet Knight
   "CFB:LOU": { k: "bird", fur: "#c9001f", acc: "#f5b800", x: { crest: 1, mask: "#141414", jer: "#141414", jer2: "#c9001f", txt: "LOUIE", num: "" } },                      // Louie
   "CFB:ISU": { k: "bird", fur: "#c8102e", acc: "#f1be48", x: { crest: 1, crestc: "#f1be48", jer: "#c8102e", jer2: "#f1be48", txt: "CY", num: "" } },                        // Cy
+  "CFB:UCF": { k: "human", fur: "#e0b08a", acc: "#ba9b37", x: { hat: "trojan", hatc: "#ba9b37", plume: "#111111", chin: 1, cape: "#111111", jer: "#000000", jer2: "#ba9b37", txt: "KNIGHTS", num: "" } }, // Knightro
   "CFB:BAY": { k: "bear", fur: "#5a3a22", acc: "#c8a27a", x: { jer: "#154734", jer2: "#ffb81c", txt: "BAYLOR", num: "" } },                                                 // Bruiser
   "CFB:CAL": { k: "bear", fur: "#c8962a", acc: "#ecd9a8", x: { jer: "#003262", jer2: "#fdb515", txt: "CAL", num: "" } },                                                    // Oski
   "CFB:STAN": { k: "human", fur: "#e8bc96", acc: "#8c1515", x: { hat: "cap", hatc: "#8c1515", hatL: "S", hatLc: "#f2f2f2", jer: "#8c1515", jer2: "#f2f2f2", txt: "STANFORD", num: "" } },   // (the Tree, as a fan)
@@ -25780,7 +25825,7 @@ const WD_MASC = {
 // anyone else, from the name: "Tigers", "Bulldogs", "Wildcats"...
 function wdMascSpec(sport, t) {
   const k = WD_MASC[sport + ":" + t.ab] || (sport === "CBB" ? WD_MASC["CFB:" + t.ab] : null); if (k) return { kind: k.k, fur: k.fur, acc: k.acc, x: k.x };
-  const n = String(t.nm || t.fn || "").toLowerCase(), c1 = t.colHex || "#5a5a5a", c2 = t.altHex || "#f2f2f2";
+  const n = String((t.nm || "") + " " + (t.fn || "")).toLowerCase(), c1 = t.colHex || "#5a5a5a", c2 = t.altHex || "#f2f2f2";
   const S = (kind, fur, acc, x) => ({ kind, fur: fur || c1, acc: acc || c2, x: x || {} });
   if (/buckeye/.test(n)) return S("nut", "#6b3f1f", "#c9a074");
   if (/tide|elephant/.test(n)) return S("ele", "#9e9e9e", "#d9d9d9");
@@ -25992,44 +26037,72 @@ function wdMascot(THREE, spec, team) {
   const A = { root, body, L, R, neck, hd, torso, cur: null, act: null, mats, grad, jt };
   return A;
 }
-// the poses: shoulder (forward/up, out) and elbow per arm, a lean, the head
+// the poses: shoulder (forward/up, out) and elbow per arm, a lean
 const WD_MPOSE = {
   decks: [-0.5, -0.12, -0.62, -0.5, 0.12, -0.62, 0.14],
+  scratch: [-0.5, -0.12, -0.62, -0.62, 0.2, -0.9, 0.16],
+  cans: [-0.5, -0.12, -0.62, -0.3, 1.25, -2.35, 0.08],
   fist: [-0.5, -0.12, -0.62, -2.75, 0.22, -0.2, 0.02],
   up: [-2.75, -0.32, -0.15, -2.75, 0.32, -0.15, -0.06],
+  drop: [-2.9, -0.45, -0.05, -2.9, 0.45, -0.05, -0.12],
   point: [-0.5, -0.12, -0.62, -1.5, 0.35, -0.05, 0.04],
   phones: [-0.3, -1.25, -2.35, -0.5, 0.12, -0.62, 0.1],
   clap: [-2.85, -0.12, -0.35, -2.85, 0.12, -0.35, -0.04],
   wave: [-2.55, -0.3, -0.2, -2.55, 0.3, -0.2, -0.04],
+  roof: [-2.05, -0.62, -1.45, -2.05, 0.62, -1.45, -0.04],
+  shuffle: [-0.6, -0.35, -1.1, -0.6, 0.35, -1.1, 0.06],
+  spin: [-1.2, -1.1, -0.3, -1.2, 1.1, -0.3, 0.0],
   wing: [-0.15, -1.45, -0.1, -0.15, 1.45, -0.1, -0.08],
+  flex: [-1.55, -1.5, -2.25, -1.55, 1.5, -2.25, -0.1],
+  dab: [-1.7, 0.55, -2.45, -2.3, 1.2, -0.08, 0.22],
   sad: [-2.1, -0.95, -2.2, -2.1, 0.95, -2.2, 0.2],
+  facepalm: [-1.95, -0.35, -2.55, -0.4, 0.55, -1.3, 0.28],
   hype: [-0.6, -0.5, -1.2, -2.6, 0.3, -0.25, 0.0],
 };
-// a 64-beat set, and between sets a slower hype loop
-const WD_MSET = [[0, "up"], [4, "decks"], [12, "fist"], [16, "decks"], [24, "point"], [28, "phones"], [32, "clap"], [40, "wave"], [44, "decks"], [56, "wing"], [62, "decks"]];
-const WD_MIDLE = [[0, "decks"], [8, "hype"], [12, "decks"], [20, "clap"], [24, "point"], [28, "up"], [30, "decks"]];
+// a 64-beat set (on the decks, scratching, a hand on the cans, fists, the drop with a jump, raise the roof, a shuffle, a spin),
+// and between sets a 32-beat hype loop
+const WD_MSET = [[0, "drop"], [2, "up"], [4, "decks"], [8, "scratch"], [12, "fist"], [16, "decks"], [20, "cans"], [24, "point"], [28, "roof"], [32, "drop"], [34, "clap"],
+  [38, "decks"], [42, "shuffle"], [46, "spin"], [48, "scratch"], [52, "wave"], [56, "hype"], [60, "decks"]];
+const WD_MIDLE = [[0, "decks"], [6, "hype"], [10, "point"], [14, "roof"], [18, "decks"], [22, "clap"], [26, "flex"], [28, "wave"], [31, "decks"]];
+// the emotes: a score or a cash (arms up, a flex, a dab, the drop) with a jump; a miss (hands on head, a facepalm)
+const WD_MCHEER = ["up", "flex", "dab", "drop"], WD_MSAD = ["sad", "facepalm"];
 function wdMascotTick(A, dt, t, beat, mode, H) {
   if (!A) return;
   const set = mode === "dj", list = set ? WD_MSET : WD_MIDLE, n = set ? 64 : 32, b = ((beat % n) + n) % n;
-  let name = list[0][1]; for (const [k, v] of list) if (b >= k) name = v;
-  if (A.act && A.act.until > t) name = A.act.kind === "sad" ? "sad" : "up";
-  const P = WD_MPOSE[name] || WD_MPOSE.decks, ph = beat % 1, pulse = Math.exp(-ph * 5), sw = Math.sin(beat * Math.PI / 2);
+  let name = list[0][1], from = 0; for (const [k, v] of list) if (b >= k) { name = v; from = k; }
+  const act = A.act && A.act.until > t ? A.act : null;
+  if (act) { const i = Math.floor(act.until * 7) % 4; name = act.kind === "sad" ? WD_MSAD[i % 2] : WD_MCHEER[i]; }
+  const P = WD_MPOSE[name] || WD_MPOSE.decks, ph = ((beat % 1) + 1) % 1, pulse = Math.exp(-ph * 5), sw = Math.sin(beat * Math.PI / 2), half = Math.sin(beat * Math.PI);
   const tg = P.slice();
-  if (name === "decks") { tg[1] += 0.14 * Math.sin(beat * Math.PI * 2 * (b % 4 >= 3 ? 2 : 1)); tg[4] += 0.05 * Math.sin(beat * Math.PI); }
-  if (name === "fist" || name === "up") { tg[5] -= 0.5 * pulse; if (name === "up") tg[2] -= 0.5 * pulse; }
-  if (name === "point") tg[3] -= 0.18 * pulse;
+  if (name === "decks") { tg[1] += 0.14 * Math.sin(beat * Math.PI * 2 * (b % 4 >= 3 ? 2 : 1)); tg[4] += 0.05 * half; }
+  if (name === "scratch") { tg[4] += 0.32 * Math.sin(beat * Math.PI * 4); tg[5] += 0.25 * Math.sin(beat * Math.PI * 4 + 1); }
+  if (name === "cans") tg[1] += 0.1 * half;
+  if (name === "fist" || name === "up" || name === "drop") { tg[5] -= 0.5 * pulse; if (name !== "fist") tg[2] -= 0.5 * pulse; }
+  if (name === "point") { tg[3] -= 0.18 * pulse; tg[4] += 0.45 * Math.sin(beat * Math.PI / 4); }
   if (name === "clap") { const o = Math.sin(Math.PI * ((beat + 0.04) % 1)); tg[1] -= 0.18 * o; tg[4] += 0.18 * o; }
   if (name === "wave") { tg[1] += 0.4 * sw; tg[4] += 0.4 * sw; }
-  if (name === "hype") { tg[4] += 0.35 * Math.sin(t * 6); }
+  if (name === "roof") { tg[0] -= 0.35 * pulse; tg[3] -= 0.35 * pulse; tg[2] += 0.55 * pulse; tg[5] += 0.55 * pulse; }
+  if (name === "shuffle") { tg[0] += 0.55 * half; tg[3] -= 0.55 * half; }
+  if (name === "hype") { tg[4] += 0.35 * Math.sin(t * 6); tg[3] -= 0.3 * pulse; }
+  if (name === "flex") { tg[2] -= 0.25 * pulse; tg[5] -= 0.25 * pulse; }
+  if (name === "facepalm") tg[6] += 0.06 * Math.sin(t * 3);
   if (!A.cur) A.cur = tg.slice();
-  const k = 1 - Math.exp(-dt * 11); for (let i = 0; i < tg.length; i++) A.cur[i] += (tg[i] - A.cur[i]) * k;
+  const k = 1 - Math.exp(-dt * 12); for (let i = 0; i < tg.length; i++) A.cur[i] += (tg[i] - A.cur[i]) * k;
   const c = A.cur;
   A.L.sh.rotation.set(c[0], 0, c[1]); A.L.el.rotation.set(c[2], 0, 0); A.R.sh.rotation.set(c[3], 0, c[4]); A.R.el.rotation.set(c[5], 0, 0);
-  A.body.rotation.x = c[6]; A.body.rotation.z = (name === "wave" ? 0.09 : 0.04) * sw;
-  const jump = A.act && A.act.until > t && A.act.kind !== "sad" ? Math.abs(Math.sin(t * 7.5)) * 0.14 : 0;
-  A.body.position.y = 0.018 * pulse * (set ? 1 : 0.6) + jump;
-  A.neck.rotation.x = (name === "sad" ? 0.45 : name === "up" || name === "clap" || name === "wave" ? -0.22 : 0.08) + 0.16 * pulse;
-  A.neck.rotation.y = 0.12 * Math.sin(beat * Math.PI / 4);
+  A.body.rotation.x = c[6];
+  // the whole body: a sway on the beat, a side-step in the shuffle, a full turn in the spin (two beats), a bounce on every beat,
+  // a jump on the drop and on a cheer
+  A.body.rotation.z = (name === "wave" || name === "shuffle" ? 0.1 : 0.045) * sw;
+  const spin = name === "spin" && !act ? Math.min(1, Math.max(0, (b - from) / 2)) : 0, ease = spin < 0.5 ? 2 * spin * spin : 1 - Math.pow(-2 * spin + 2, 2) / 2;
+  A.sy = (A.sy || 0) + ((name === "dab" ? -0.35 : name === "point" ? 0.25 * Math.sin(beat * Math.PI / 4) : 0) - (A.sy || 0)) * k;
+  A.body.rotation.y = ease * Math.PI * 2 + A.sy;
+  A.sx = (A.sx || 0) + ((name === "shuffle" ? 0.07 * sw : 0) - (A.sx || 0)) * k; A.body.position.x = A.sx;
+  const jumpy = name === "drop" || !!(act && act.kind !== "sad");
+  const jump = jumpy ? Math.abs(Math.sin((act ? t * 7.5 : beat * Math.PI))) * (act ? 0.16 : 0.12) : 0;
+  A.body.position.y = (set ? 0.04 : 0.022) * pulse + jump;
+  A.neck.rotation.x = (name === "sad" || name === "facepalm" ? 0.45 : name === "dab" ? 0.55 : name === "up" || name === "clap" || name === "wave" || name === "drop" || name === "flex" ? -0.24 : 0.08) + (set ? 0.24 : 0.14) * pulse;
+  A.neck.rotation.y = name === "dab" ? -0.5 : 0.14 * Math.sin(beat * Math.PI / 4);
 }
 // the booth he's behind: decks, a mixer, the front lit in the team's colors
 function wdMascotBooth(THREE, team, w, h, d) {
@@ -26080,6 +26153,7 @@ const WD_CFS = [
   [/autzen/i, { seat: "#1f5a2c", boards: "both" }], [/kinnick/i, { seat: "#1d1d1d", boards: "both" }], [/sanford/i, { seat: "#9e1b32", boards: "both", up: 2 }],
   [/clemson|memorial stadium \(clemson/i, { up: 0, seat: "#e06a1c", boards: "both", f: ["hills"] }], [/vaught-hemingway/i, { seat: "#1d2a5a", boards: "both", up: 2 }],
   [/lavell edwards/i, { up: 0, seat: "#1d3a6b", boards: "both", f: ["hills"] }], [/kenan/i, { up: 0, seat: "#7bafd4", boards: "both", f: ["pines"] }],
+  [/bounce house|fbc mortgage|spectrum stadium/i, { up: 0, seat: "#18181a", boards: "e", hi: 0.82 }], [/mclane/i, { up: 0, seat: "#154734", boards: "both", f: ["river"] }],
 ];
 // the international games, by the venue's name: roof "ring" is a canopy all the way round; arch is Wembley's, glowwall the
 // Allianz Arena's lit skin, towers the MCG's light towers
@@ -26457,7 +26531,7 @@ function wdDeckSpotAr(st) {
   const oc = lo.o1 + depth / 2 + 0.5, floor = lo.y1 + 0.6, p = [px + nx * oc, floor, pz + nz * oc];
   const fl = Math.hypot(V.cx - p[0], V.cz - p[2]) || 1, f = [(V.cx - p[0]) / fl, (V.cz - p[2]) / fl];
   const gap = (x, z) => { const dx = x - p[0], dz = z - p[2], lz = dx * f[0] + dz * f[1], lx = dx * f[1] - dz * f[0]; return Math.abs(lx) < width / 2 + 1.2 && lz < depth / 2 + 1; };
-  return { p, look: [V.cx, V.cz], base: lo.y1 - 2.5, K, who: "mascot", gap, house: { top: V.top + 1.2, back: V.outer + 0.4 - oc } };
+  return { p, look: [V.cx, V.cz], base: lo.y1 - 2.5, K, who: "mascot", gap, house: { top: V.top + 1.2, back: Math.max(depth / 2 + 1.5, V.outer + 0.4 - oc) } };
 }
 // what goes up after the decks: the outside wall, the roof and its rigging, the banners, the baskets or the nets, the
 // building's own landmarks
@@ -26666,7 +26740,7 @@ function wdRoomBuild(L, R) {
   for (let i = 0; i < 12; i++) { const x = -22 + i * 4; glow([x, 17.5, -12], 1.6, [1, 0.95, 0.85], 0.75); glow([x, 17.5, 8], 1.3, [0.7, 0.8, 1], 0.5); }
   glow([0, 9, -24], 60, [0.35, 0.2, 0.8], 0.22); glow([0, 3, -10], 30, [1, 0.75, 0.4], 0.12);
   // DJ Goldie's deck, off to the left of the wall
-  wdDeckBuild(st, { p: [-24.5, 1.1, -3], look: [0, 5], base: 0, K: 0.55, who: "meegy" });
+  wdDeckBuild(st, { p: [-24.5, 1.1, -3], look: [0, 5], base: 0, K: 0.55, who: "mascot" });
   // bleachers: the right side raked up away from the floor, a smaller one at the back left; the pit in front of the desk
   const seats = [], teamsOn = [], gs = (R.scene && R.scene.games) || [];
   for (const q of gs) for (const s of ["h", "a"]) if (teamsOn.length < 8 && !teamsOn.some((t) => t.ab === q[s].ab)) teamsOn.push(q[s]);
@@ -27177,13 +27251,12 @@ function wdShotFill(st) {
   return { p: F.c.clone().add(F.n.clone().multiplyScalar(d)), l: F.c.clone(), f: fov, F };
 }
 // a screen in frame: F (its center, normal, size) at fr of the picture's width, left of center so the floating panels have the
-// right side. nr: the camera's near plane for the shot, a little over half way to the screen: seats, walls and the roof the
-// camera ends up in or behind are cut away, so the screen's always in clear view from wherever the shot puts the camera
+// right side. d: how far out the camera is
 function wdFrame(st, F, fr) {
   const T = st.THREE, fov = 40, tv = Math.tan(((fov / 2) * Math.PI) / 180), asp = innerWidth / innerHeight;
   const d = F.w / (fr * 2 * tv * asp), right = new T.Vector3(0, 1, 0).cross(F.n).normalize(), off = 0.38 * d * tv * asp, lift = F.h * 0.13;
   const p = F.c.clone().add(F.n.clone().multiplyScalar(d)).add(right.clone().multiplyScalar(off)).add(new T.Vector3(0, F.h * 0.12 + lift, 0));
-  return { p, l: F.c.clone().add(right.multiplyScalar(off)).add(new T.Vector3(0, lift, 0)), f: fov, nr: d * 0.58 };
+  return { p, l: F.c.clone().add(right.multiplyScalar(off)).add(new T.Vector3(0, lift, 0)), f: fov, d };
 }
 // the page's video, glued onto a screen in the building: its four corners projected, a CSS matrix3d mapping the element's box
 // onto them (the video stays the page's own element, sharp, any source)
@@ -27446,7 +27519,11 @@ window.SBW = {
     const go = ++WD.go, show = () => { if (go === WD.go) { document.body.classList.remove("v2w-fly"); if (WD.mode === "clip" || WD.mode === "dj") wdSize(1); } };
     // never leave the panels hidden behind a camera move that didn't finish
     setTimeout(show, 4800);
-    wdFly(st, wdFrame(st, F, dj ? 0.5 : 0.56), dj ? 2600 : 2100, WD.V.fwR * (dj ? 0.5 : 0.35), show);
+    // a video on the board: the near plane a little over half way to the screen, so the seats, walls and roof the camera
+    // ends up in or behind are cut away and the board's in clear view (not at the DJ's stage, built into the stands)
+    // (the DJ's stage is built into the stands: the rows in front of it are cut away too)
+    const to = wdFrame(st, F, dj ? 0.5 : 0.56); to.nr = to.d * (dj ? (st.room ? 0 : 0.62) : 0.58);
+    wdFly(st, to, dj ? 2600 : 2100, WD.V.fwR * (dj ? 0.5 : 0.35), show);
     return true;
   },
   clipEnd() { if (!WD.st || WD.mode === "board" || WD.mode === "back") return; WD.go++; wdBack(false); },
@@ -27464,7 +27541,7 @@ window.SBW = {
       wdCard({ big: "NEW BET", l1: `${nm} · ${pk}`, l2: o.amt || "", c: wdMix(c, [0, 0, 0], 0.4) }, 20e3); }
   },
   // for checking a frame: hold the camera on a shot
-  shot(k) { const st = WD.st; if (!st) return; const s = k === "fill" ? wdShotFill(st) : k === "jview" ? wdFrame(st, st.jface(st.cam.position), 0.6) : k === "dview" ? wdFrame(st, st.djFace(), 0.56) : st.shots[k]; if (!s) return; st.fly = null; st.hold = s; st.holdShot = s; if (st.near0 == null) st.near0 = st.cam.near; st.cam.near = s.nr || st.near0; },
+  shot(k) { const st = WD.st; if (!st) return; const s = k === "fill" ? wdShotFill(st) : k === "jview" ? wdFrame(st, st.jface(st.cam.position), 0.6) : k === "dview" ? wdFrame(st, st.djFace(), 0.56) : st.shots[k]; if (!s) return; if (k === "jview") s.nr = s.d * 0.58; st.fly = null; st.hold = s; st.holdShot = s; if (st.near0 == null) st.near0 = st.cam.near; st.cam.near = s.nr || st.near0; },
   look(p, l, f) { const st = WD.st; if (!st) return; const T = st.THREE, s = { p: new T.Vector3(...p), l: new T.Vector3(...l), f: f || 50 }; st.fly = null; st.hold = st.holdShot = s; },
   st: () => WD.st,
 };
