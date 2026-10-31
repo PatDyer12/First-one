@@ -7022,6 +7022,22 @@ body.v2b .rb-g.hero .rb-gh .mid { padding: 0 clamp(6px, 1.4cqw, 14px); }
 @container (max-width: 480px) { body.v2b .rb-g.hero .rb-gh .sub em { display: none; } }
 
 #updReady { position: fixed; right: 18px; bottom: 58px; z-index: 60; padding: 7px 12px; border-radius: 8px; background: rgba(8,10,14,.82); color: #ffd36a; font: 700 13px Inter, sans-serif; letter-spacing: .02em; box-shadow: inset 0 0 0 1px rgba(255,211,106,.35); pointer-events: none; }
+
+/* Aux: the song playing from Spotify, on the board */
+#auxBtn[aria-pressed="true"] { background: #1db954; color: #04130a; border-color: #1db954; }
+.auxnp { position: fixed; left: 18px; bottom: 62px; z-index: 55; display: flex; align-items: center; gap: 14px; max-width: min(560px, 46vw); padding: 10px 18px 10px 10px; border-radius: 14px;
+  background: rgba(8,10,14,.86); box-shadow: inset 0 0 0 1px rgba(255,255,255,.08), 0 14px 40px rgba(0,0,0,.5); backdrop-filter: blur(10px); transition: opacity .4s ease, transform .4s ease; }
+.auxnp[hidden] { display: none; }
+.auxnp img { width: 64px; height: 64px; border-radius: 8px; object-fit: cover; flex: none; background: #1b1f27; }
+.auxnp .auxtx { min-width: 0; display: grid; gap: 2px; }
+.auxnp em { font: 800 11px Inter, sans-serif; letter-spacing: .16em; text-transform: uppercase; color: #1db954; font-style: normal; display: flex; align-items: center; gap: 6px; }
+.auxnp em i { width: 7px; height: 7px; border-radius: 50%; background: #1db954; box-shadow: 0 0 8px #1db954; animation: auxPulse 1.6s ease-in-out infinite; }
+.auxnp.paused em i { animation: none; opacity: .4; }
+.auxnp b { font: 800 20px Inter, sans-serif; color: #fff; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.auxnp span { font: 600 14px Inter, sans-serif; color: rgba(255,255,255,.7); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.auxnp .auxbar { height: 3px; margin-top: 6px; border-radius: 2px; background: rgba(255,255,255,.14); overflow: hidden; }
+.auxnp .auxbar i { display: block; height: 100%; width: 0; background: #1db954; transition: width .9s linear; }
+@keyframes auxPulse { 50% { opacity: .35; } }
 </style>
 </head>
 <body>
@@ -7089,6 +7105,7 @@ body.v2b .rb-g.hero .rb-gh .mid { padding: 0 clamp(6px, 1.4cqw, 14px); }
     <button type="button" class="chip edit" id="unitChip">1u = $15</button>
     <button type="button" class="chip" id="pfBtn">Profiles</button>
     <button type="button" class="chip" id="sndBtn" aria-pressed="true">Tap for sound</button>
+    <button type="button" class="chip" id="auxBtn" aria-pressed="false" title="Play your Spotify on this screen">Aux</button>
     <button type="button" class="chip lockstop" id="lockStop" hidden>Lock in playing · stop</button>
     <button type="button" class="btn ghost" id="tvBtn">TV mode</button>
     <button type="button" class="btn primary add-top edit" id="addTop">+ Bet</button>
@@ -7510,6 +7527,7 @@ body.v2b .rb-g.hero .rb-gh .mid { padding: 0 clamp(6px, 1.4cqw, 14px); }
 <div class="whotag" id="whoTag" hidden aria-live="polite"><i id="wtAv"></i><b id="wtName"></b><em id="wtSub"></em></div>
 <div class="flash" id="flash" aria-live="polite"><div class="word" id="fl-word"></div><div class="what"><b id="fl-pick"></b><span id="fl-detail"></span></div></div>
 <div class="toast" id="toast" hidden role="status"></div>
+<div class="auxnp" id="auxNp" hidden aria-live="polite"><img id="auxArt" alt="" referrerpolicy="no-referrer"><div class="auxtx"><em><i></i>Aux · Spotify</em><b id="auxSong"></b><span id="auxArtist"></span><div class="auxbar"><i id="auxProg"></i></div></div></div>
 
 <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-auth-compat.js"></script>
@@ -12768,6 +12786,7 @@ body.v2b .rb-g.hero .rb-gh .mid { padding: 0 clamp(6px, 1.4cqw, 14px); }
   }
   // the music: one house edit, its drop landing as the team celebration gets going
   function grpMusic(c) {
+    if (window.__sbAux && window.__sbAux()) return;
     const team = c.acts.find((a) => GRP_TEAM.includes(a.k)), split = c.acts.find((a) => a.k === "gsplit"), pool = houseEdits().filter(hbOf);
     if (!team || !split || !pool.length) return;
     const hit = team.t0 + 400, cand = pool.filter((x) => { const h = hbOf(x); return h[2] && h[3] - h[2] >= (c.T - hit) / 1000; });
@@ -12945,7 +12964,7 @@ body.v2b .rb-g.hero .rb-gh .mid { padding: 0 clamp(6px, 1.4cqw, 14px); }
   const v2Sfx = (name, vol, at) => shAt(at || 0, () => { const h = snSound(name, vol); SHOW.src.push({ s: { stop: () => h.stop(0.2) }, g: { gain: { setTargetAtTime() {} } }, c: { currentTime: 0 } }); });
   // the big ones get a house track from its drop, under the payout
   function v2Music(at, T, peak) {
-    if (!SND.on) return;
+    if (!SND.on || (window.__sbAux && window.__sbAux())) return;
     const pool = houseEdits().filter(hbOf); if (!pool.length) return;
     const B = pickClip(pool); if (!B) return;
     const h = hbOf(B), a = new Audio(), tr = { a, p: { c: B }, go: false };
@@ -14576,7 +14595,7 @@ void main(){
   // ---------- sheets ----------
   function openSheet(id) { $(id).hidden = false; }
   // keep every open screen current: when a new version is up, reload it (never mid-form or mid-animation)
-  const BUILD = "20261031202031";
+  const BUILD = "20261031203831";
   function updReady() {
     if (document.getElementById("updReady")) return; const d = document.createElement("div"); d.id = "updReady"; d.textContent = "Update ready · refresh, then TV + Sound on"; document.body.append(d);
   }
@@ -16800,7 +16819,7 @@ void main(){
   // start sound and video together once both are loaded
   let npT = 0;
   function showPip(b, P, mood, why, pre) {
-    if (PHONE()) return;
+    if (PHONE() || AUX.on) return;
     const jb = $("#jumbo"), v = $("#pipVid"), bg = $("#jbBg"), c = clipCtx(), go = ++pipGo, betId = b.id, team = pipTeam;
     pipTeam = null;
     v.onended = null; bg.onended = null; v.style.opacity = ""; $("#djCv").hidden = true;
@@ -17128,6 +17147,7 @@ void main(){
   setInterval(() => {
     if (!bgmOk()) { bgmStop(); return; }
     const busy = clipBusy() || cardBusy || (typeof SHOW !== "undefined" && SHOW.on);
+    if (AUX.on) { if (BGM.on) bgmStop(); return; }
     if (BGM.on) { if (busy) bgmStop(); return; }
     if (busy || brkLive() || Date.now() - BGM.at < 5e3 || Date.now() - lastAny < 20e3) return;   // a break's music has the room
     bgmPlay();
@@ -17143,13 +17163,65 @@ void main(){
   // that's just starting). Anything Spotify is still playing here with nothing on is paused
   setInterval(() => {
     if (!SP.player || !SP.dev || document.hidden || typeof SP.player.getCurrentState !== "function") return;
-    const owned = () => { const jb = document.getElementById("jumbo"); return BGM.on || Date.now() - (SP.t0 || 0) < 15e3 || !!(statusSrc && statusSrc.sp && jb && !jb.hidden); };
+    const owned = () => { const jb = document.getElementById("jumbo"); return AUX.on || BGM.on || Date.now() - (SP.t0 || 0) < 15e3 || !!(statusSrc && statusSrc.sp && jb && !jb.hidden); };
     if (owned()) return;
     SP.player.getCurrentState().then((st) => {
       if (!st || st.paused || owned()) return;
       SP.on = false; clearInterval(SP.fade); SP.player.pause().catch(() => {}); spApi(`/me/player/pause?device_id=${encodeURIComponent(SP.dev)}`, "PUT").catch(() => {});
     }).catch(() => {});
   }, 3000);
+  // ---- Aux ----
+  const AUX = { on: false, t: 0, poll: 0, last: 0, duck: 0, sig: "" };
+  try { AUX.on = localStorage.getItem("sb-aux") === "on"; } catch (e) {}
+  window.__sbAux = () => AUX.on;
+  function auxUi() { const b = $("#auxBtn"); if (b) { b.setAttribute("aria-pressed", AUX.on ? "true" : "false"); b.textContent = AUX.on ? "Aux on" : "Aux"; } if (!AUX.on) $("#auxNp").hidden = true; }
+  function auxShow(tr, pos, dur, paused) {
+    const np = $("#auxNp"); if (!tr) { np.hidden = true; return; }
+    const sig = tr.name + "|" + tr.artist;
+    if (sig !== AUX.sig) { AUX.sig = sig; $("#auxSong").textContent = tr.name; $("#auxArtist").textContent = tr.artist; const im = $("#auxArt"); if (tr.art) { im.src = tr.art; im.hidden = false; } else im.hidden = true; }
+    $("#auxProg").style.width = (dur ? Math.min(100, (100 * pos) / dur) : 0).toFixed(1) + "%"; np.classList.toggle("paused", !!paused); np.hidden = false;
+  }
+  // the song: from this screen's player when it's playing here, else from wherever the account's playing (and it comes here)
+  async function auxTick() {
+    if (!AUX.on) return;
+    const now = Date.now();
+    if (SP.player && SP.dev && typeof SP.player.getCurrentState === "function") {
+      const st = await SP.player.getCurrentState().catch(() => null);
+      const cur = st && st.track_window && st.track_window.current_track;
+      if (cur) { auxShow({ name: cur.name, artist: (cur.artists || []).map((a) => a.name).join(", "), art: ((cur.album && cur.album.images) || []).slice(-1)[0] ? cur.album.images[0].url : "" }, st.position, st.duration, st.paused); AUX.last = now; }
+    }
+    if (now - AUX.poll < 4000 || !SP.tok) return; AUX.poll = now;
+    const j = await spApi("/me/player").catch(() => null);
+    if (!AUX.on || !j) return;
+    if (j.item && (!j.device || j.device.id !== SP.dev)) {
+      auxShow({ name: j.item.name, artist: (j.item.artists || []).map((a) => a.name).join(", "), art: (j.item.album && j.item.album.images && j.item.album.images[0] && j.item.album.images[0].url) || "" }, j.progress_ms || 0, j.item.duration_ms || 0, !j.is_playing);
+      if (j.is_playing && SP.dev) spApi("/me/player", "PUT", { device_ids: [SP.dev], play: true }).catch(() => {});
+    }
+  }
+  async function auxSet(on) {
+    if (on && !SP.tok) { toast("Connect Spotify on this screen first (Settings, Spotify)"); return; }
+    AUX.on = on; try { localStorage.setItem("sb-aux", on ? "on" : "off"); } catch (e) {}
+    auxUi();
+    if (on) {
+      try { stopStatus(); } catch (e) {} try { if (BGM.on) bgmStop(); } catch (e) {}
+      if (!SP.player) spBoot();
+      try { if (SP.player && SP.player.activateElement) await SP.player.activateElement(); } catch (e) {}
+      const go = () => { if (!AUX.on) return; if (!SP.dev) { setTimeout(go, 1500); return; } SP.player.setVolume(SP_VOL).catch(() => {}); spApi("/me/player", "PUT", { device_ids: [SP.dev], play: true }).catch(() => {}); AUX.poll = 0; auxTick(); };
+      go(); toast("Aux on: play anything on Spotify and it comes out of this screen");
+    } else {
+      $("#auxNp").hidden = true; AUX.sig = "";
+      if (SP.player) { SP.player.pause().catch(() => {}); if (SP.dev) spApi(`/me/player/pause?device_id=${encodeURIComponent(SP.dev)}`, "PUT").catch(() => {}); }
+      toast("Aux off");
+    }
+  }
+  $("#auxBtn").addEventListener("click", () => auxSet(!AUX.on));
+  setInterval(() => { auxTick().catch(() => {}); }, 1000);
+  // a cash's show plays over the song: the song dips under it
+  setInterval(() => {
+    if (!AUX.on || !SP.player || !SP.dev) return; const ce = document.getElementById("cash"), on = !!(ce && !ce.hidden && !ce.classList.contains("out"));
+    const want = on ? 0.28 : SP_VOL; if (want !== AUX.duck) { AUX.duck = want; SP.player.setVolume(want).catch(() => {}); }
+  }, 400);
+  setTimeout(auxUi, 0);
   function spArt(url) { const i = $("#npImg"); if (url) { i.src = url; i.hidden = false; } else { i.hidden = true; i.removeAttribute("src"); } }
   function spShow() {
     const st = $("#spStatus"); if (!st) return;
@@ -17321,7 +17393,7 @@ void main(){
   }
   function reactPre(b, kind, P, why, pre) { clipAt = Date.now(); clipClaim = null; glow(b.id, kind); render(); statusBet = b.id; showPip(b, P, moodOf(kind, P), why, pre); }
   function react(b, kind, P, why) {
-    if (PHONE()) { render(); return; }
+    if (PHONE() || AUX.on) { render(); return; }
     { const v = vibeTake(b, kind, P); if (v) { b = v.b; P = v.P; why = v.why; } }
     { const spx = (gameFor(b) || {}).sport || sportOf(b); if (spx && !sset(spx, "clips")) { render(); return; } }
     if (!clipFree() && clipClaim !== b.id) { glow(b.id, kind); render(); return; }
@@ -17840,7 +17912,7 @@ void main(){
   }
   let lastDj = Date.now() - 3 * 60e3; // first one about a minute after the board opens
   function djBreak(now) {
-    if (PHONE()) return false;
+    if (PHONE() || AUX.on) return false;
     const mine = [...S.bets.values()].filter((b) => b.status === "open"), b = mine.find((x) => phase(x) === "live") || mine[0];
     const P = b && pickClip(newSong(CLIPS.filter((c) => c.dj)));
     if (!P) return false;
