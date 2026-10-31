@@ -7038,6 +7038,9 @@ body.v2b .rb-g.hero .rb-gh .mid { padding: 0 clamp(6px, 1.4cqw, 14px); }
 .auxnp .auxbar { height: 3px; margin-top: 6px; border-radius: 2px; background: rgba(255,255,255,.14); overflow: hidden; }
 .auxnp .auxbar i { display: block; height: 100%; width: 0; background: #1db954; transition: width .9s linear; }
 @keyframes auxPulse { 50% { opacity: .35; } }
+
+.auxnp small { font: 700 12px Inter, sans-serif; color: rgba(255,255,255,.55); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.auxnp small.warn { color: #ffd23f; }
 </style>
 </head>
 <body>
@@ -7527,7 +7530,7 @@ body.v2b .rb-g.hero .rb-gh .mid { padding: 0 clamp(6px, 1.4cqw, 14px); }
 <div class="whotag" id="whoTag" hidden aria-live="polite"><i id="wtAv"></i><b id="wtName"></b><em id="wtSub"></em></div>
 <div class="flash" id="flash" aria-live="polite"><div class="word" id="fl-word"></div><div class="what"><b id="fl-pick"></b><span id="fl-detail"></span></div></div>
 <div class="toast" id="toast" hidden role="status"></div>
-<div class="auxnp" id="auxNp" hidden aria-live="polite"><img id="auxArt" alt="" referrerpolicy="no-referrer"><div class="auxtx"><em><i></i>Aux · Spotify</em><b id="auxSong"></b><span id="auxArtist"></span><div class="auxbar"><i id="auxProg"></i></div></div></div>
+<div class="auxnp" id="auxNp" hidden aria-live="polite"><img id="auxArt" alt="" referrerpolicy="no-referrer"><div class="auxtx"><em><i></i>Aux · Spotify</em><b id="auxSong"></b><span id="auxArtist"></span><small id="auxWhere"></small><div class="auxbar"><i id="auxProg"></i></div></div></div>
 
 <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-auth-compat.js"></script>
@@ -14595,7 +14598,7 @@ void main(){
   // ---------- sheets ----------
   function openSheet(id) { $(id).hidden = false; }
   // keep every open screen current: when a new version is up, reload it (never mid-form or mid-animation)
-  const BUILD = "20261031203831";
+  const BUILD = "20261031210506";
   function updReady() {
     if (document.getElementById("updReady")) return; const d = document.createElement("div"); d.id = "updReady"; d.textContent = "Update ready · refresh, then TV + Sound on"; document.body.append(d);
   }
@@ -15727,7 +15730,7 @@ void main(){
     const b = $("#sndBtn"), live = SND.ctx && SND.ctx.state === "running";
     b.textContent = !SND.on ? "Sound off" : live ? "Sound on" : "Tap for sound";
     b.classList.toggle("wake", SND.on && !live);
-    const w = document.getElementById("sndWake"); if (w) w.hidden = !(SND.on && !live && document.body.classList.contains("tv") && !PHONE());
+    const w = document.getElementById("sndWake"); if (w) w.hidden = !(((SND.on && !live) || (window.__sbAuxBlocked && window.__sbAuxBlocked())) && document.body.classList.contains("tv") && !PHONE());
     b.setAttribute("aria-pressed", String(SND.on));
   }
   function loadBuf(name) {
@@ -16977,7 +16980,7 @@ void main(){
       p.addListener("authentication_error", () => say("Spotify's sign-in didn't take. Hit Reconnect."));
       p.addListener("account_error", () => say("Spotify needs full Premium on the account you connected (Mini and Lite don't work)."));
       p.addListener("playback_error", ({ message }) => say(`Spotify couldn't play that one (${message}).`));
-      p.addListener("autoplay_failed", () => say("The browser stopped Spotify from starting. Click anywhere on the board once."));
+      p.addListener("autoplay_failed", () => { say("The browser stopped Spotify from starting. Click anywhere on the board once."); try { if (window.__sbAuxBlocked) window.__sbAuxBlocked(true); } catch (e) {} });
       SP.player = p; p.connect();
       clearTimeout(SP.bootT); SP.bootT = setTimeout(() => { if (!SP.dev && SP.player === p) say("Spotify's player didn't start on this screen, so the DJ breaks are using the backup tracks. Try Reconnect."); }, 25e3);
       spShow();
@@ -17153,10 +17156,10 @@ void main(){
     bgmPlay();
   }, 1500);
   function spStop() {
-    if (!SP.player) return;
+    if (!SP.player || (window.__sbAux && window.__sbAux())) return;
     const p = SP.player, was = SP.on, s0 = SP.seq; SP.on = false;
     // after the fade: this screen's player pauses, and the account's player too; not if a new song has started since
-    const halt = () => { if (SP.on || SP.seq !== s0) return; p.pause().catch(() => {}); if (SP.dev) spApi(`/me/player/pause?device_id=${encodeURIComponent(SP.dev)}`, "PUT").catch(() => {}); };
+    const halt = () => { if (SP.on || SP.seq !== s0 || (window.__sbAux && window.__sbAux())) return; p.pause().catch(() => {}); if (SP.dev) spApi(`/me/player/pause?device_id=${encodeURIComponent(SP.dev)}`, "PUT").catch(() => {}); };
     if (was) spFade(0.02, 1000, halt); else halt();
   }
   // a song plays only while something has it: a DJ break on the big screen, or Friday's music under the board (or one
@@ -17171,7 +17174,22 @@ void main(){
     }).catch(() => {});
   }, 3000);
   // ---- Aux ----
-  const AUX = { on: false, t: 0, poll: 0, last: 0, duck: 0, sig: "" };
+  const AUX = { on: false, t: 0, poll: 0, last: 0, duck: 0, sig: "", here: false, paused: true, where: "", msg: "", blocked: false, ducked: false, pre: 0, noDev: 0 };
+  window.__sbAuxBlocked = (v) => { if (v === true && AUX.on) { AUX.blocked = true; auxWhere(); try { sndChip(); } catch (e) {} } return AUX.on && AUX.blocked; };
+  // where the song is: this screen, your phone (on its way here), or what's in the way
+  function auxWhere() {
+    const el = $("#auxWhere"); if (!el) return;
+    const err = AUX.msg || (!AUX.here && SP.err ? SP.err : "");
+    const t = AUX.blocked ? "Tap anywhere on the board to start the sound" : AUX.here ? "Playing on this screen" : err ? err : AUX.where ? (SP.dev ? `On ${AUX.where} · moving it to this screen` : `Still on ${AUX.where}: this screen's Spotify player isn't up yet`) : SP.dev ? "Play something on Spotify and it comes here" : "Starting this screen's Spotify player";
+    el.textContent = t; el.classList.toggle("warn", AUX.blocked || (!AUX.here && (!!err || (!!AUX.where && !SP.dev))));
+  }
+  // any tap on the board: Spotify's player gets the browser's go-ahead (and a blocked song starts)
+  const auxTap = () => {
+    if (!AUX.on || !SP.player) return;
+    try { const a = SP.player.activateElement && SP.player.activateElement(); if (a && a.catch) a.catch(() => {}); } catch (e) {}
+    if (AUX.blocked) { AUX.blocked = false; try { const r = SP.player.resume && SP.player.resume(); if (r && r.catch) r.catch(() => {}); } catch (e) {} auxWhere(); try { sndChip(); } catch (e) {} }
+  };
+  document.addEventListener("pointerdown", auxTap, true); document.addEventListener("keydown", auxTap, true);
   try { AUX.on = localStorage.getItem("sb-aux") === "on"; } catch (e) {}
   window.__sbAux = () => AUX.on;
   function auxUi() { const b = $("#auxBtn"); if (b) { b.setAttribute("aria-pressed", AUX.on ? "true" : "false"); b.textContent = AUX.on ? "Aux on" : "Aux"; } if (!AUX.on) $("#auxNp").hidden = true; }
@@ -17179,7 +17197,7 @@ void main(){
     const np = $("#auxNp"); if (!tr) { np.hidden = true; return; }
     const sig = tr.name + "|" + tr.artist;
     if (sig !== AUX.sig) { AUX.sig = sig; $("#auxSong").textContent = tr.name; $("#auxArtist").textContent = tr.artist; const im = $("#auxArt"); if (tr.art) { im.src = tr.art; im.hidden = false; } else im.hidden = true; }
-    $("#auxProg").style.width = (dur ? Math.min(100, (100 * pos) / dur) : 0).toFixed(1) + "%"; np.classList.toggle("paused", !!paused); np.hidden = false;
+    $("#auxProg").style.width = (dur ? Math.min(100, (100 * pos) / dur) : 0).toFixed(1) + "%"; np.classList.toggle("paused", !!paused); np.hidden = false; auxWhere();
   }
   // the song: from this screen's player when it's playing here, else from wherever the account's playing (and it comes here)
   async function auxTick() {
@@ -17188,15 +17206,28 @@ void main(){
     if (SP.player && SP.dev && typeof SP.player.getCurrentState === "function") {
       const st = await SP.player.getCurrentState().catch(() => null);
       const cur = st && st.track_window && st.track_window.current_track;
-      if (cur) { auxShow({ name: cur.name, artist: (cur.artists || []).map((a) => a.name).join(", "), art: ((cur.album && cur.album.images) || []).slice(-1)[0] ? cur.album.images[0].url : "" }, st.position, st.duration, st.paused); AUX.last = now; }
-    }
+      AUX.here = !!cur; AUX.paused = !st || !!st.paused;
+      if (cur) { AUX.where = ""; auxShow({ name: cur.name, artist: (cur.artists || []).map((a) => a.name).join(", "), art: ((cur.album && cur.album.images) || []).slice(-1)[0] ? cur.album.images[0].url : "" }, st.position, st.duration, st.paused); AUX.last = now; }
+    } else AUX.here = false;
+    // this screen's player isn't up: give it another go every 20 s
+    if (!SP.dev && SP.player && SP.tok) { if (!AUX.noDev) AUX.noDev = now; else if (now - AUX.noDev > 20e3) { AUX.noDev = now; try { const c = SP.player.connect(); if (c && c.catch) c.catch(() => {}); } catch (e) {} } } else AUX.noDev = 0;
+    auxWhere();
     if (now - AUX.poll < 4000 || !SP.tok) return; AUX.poll = now;
     const j = await spApi("/me/player").catch(() => null);
     if (!AUX.on || !j) return;
     if (j.item && (!j.device || j.device.id !== SP.dev)) {
+      AUX.where = (j.device && j.device.name) || "another device"; AUX.here = false;
       auxShow({ name: j.item.name, artist: (j.item.artists || []).map((a) => a.name).join(", "), art: (j.item.album && j.item.album.images && j.item.album.images[0] && j.item.album.images[0].url) || "" }, j.progress_ms || 0, j.item.duration_ms || 0, !j.is_playing);
-      if (j.is_playing && SP.dev) spApi("/me/player", "PUT", { device_ids: [SP.dev], play: true }).catch(() => {});
+      if (j.is_playing && SP.dev) auxMove();
     }
+  }
+  function auxMove() {
+    if (!SP.dev) return;
+    spApi("/me/player", "PUT", { device_ids: [SP.dev], play: true }).then(() => { AUX.msg = ""; auxWhere(); }).catch((e) => {
+      AUX.msg = e.status === 404 ? "Spotify lost this screen's player: reconnecting" : e.status === 403 ? "Spotify won't play here (it needs Premium on this account)" : `Spotify didn't move it here (${e.message})`;
+      if (e.status === 404 && SP.player) { try { const c = SP.player.connect(); if (c && c.catch) c.catch(() => {}); } catch (x) {} }
+      auxWhere();
+    });
   }
   async function auxSet(on) {
     if (on && !SP.tok) { toast("Connect Spotify on this screen first (Settings, Spotify)"); return; }
@@ -17204,12 +17235,13 @@ void main(){
     auxUi();
     if (on) {
       try { stopStatus(); } catch (e) {} try { if (BGM.on) bgmStop(); } catch (e) {}
+      clearInterval(SP.fade); SP.seq++; SP.on = false; SP.vol = SP_VOL; AUX.ducked = false; AUX.msg = ""; AUX.blocked = false; AUX.here = false; AUX.where = "";
       if (!SP.player) spBoot();
       try { if (SP.player && SP.player.activateElement) await SP.player.activateElement(); } catch (e) {}
-      const go = () => { if (!AUX.on) return; if (!SP.dev) { setTimeout(go, 1500); return; } SP.player.setVolume(SP_VOL).catch(() => {}); spApi("/me/player", "PUT", { device_ids: [SP.dev], play: true }).catch(() => {}); AUX.poll = 0; auxTick(); };
+      const go = () => { if (!AUX.on) return; if (!SP.dev) { auxWhere(); setTimeout(go, 1500); return; } SP.player.setVolume(SP_VOL).catch(() => {}); auxMove(); AUX.poll = 0; auxTick(); };
       go(); toast("Aux on: play anything on Spotify and it comes out of this screen");
     } else {
-      $("#auxNp").hidden = true; AUX.sig = "";
+      $("#auxNp").hidden = true; AUX.sig = ""; AUX.blocked = false; AUX.ducked = false; try { sndChip(); } catch (e) {}
       if (SP.player) { SP.player.pause().catch(() => {}); if (SP.dev) spApi(`/me/player/pause?device_id=${encodeURIComponent(SP.dev)}`, "PUT").catch(() => {}); }
       toast("Aux off");
     }
@@ -17217,9 +17249,16 @@ void main(){
   $("#auxBtn").addEventListener("click", () => auxSet(!AUX.on));
   setInterval(() => { auxTick().catch(() => {}); }, 1000);
   // a cash's show plays over the song: the song dips under it
-  setInterval(() => {
-    if (!AUX.on || !SP.player || !SP.dev) return; const ce = document.getElementById("cash"), on = !!(ce && !ce.hidden && !ce.classList.contains("out"));
-    const want = on ? 0.28 : SP_VOL; if (want !== AUX.duck) { AUX.duck = want; SP.player.setVolume(want).catch(() => {}); }
+  let auxVolBusy = false;
+  setInterval(async () => {
+    if (!AUX.on || !SP.player || !SP.dev || auxVolBusy) return; auxVolBusy = true;
+    try {
+      const ce = document.getElementById("cash"), show = !!(ce && !ce.hidden && !ce.classList.contains("out"));
+      const v = typeof SP.player.getVolume === "function" ? await SP.player.getVolume().catch(() => null) : null;
+      if (show && !AUX.ducked) { AUX.ducked = true; AUX.pre = v != null && v >= 0.1 ? v : SP_VOL; await SP.player.setVolume(AUX.pre * 0.3).catch(() => {}); }
+      else if (!show && AUX.ducked) { AUX.ducked = false; await SP.player.setVolume(AUX.pre || SP_VOL).catch(() => {}); }
+      else if (!show && AUX.here && !AUX.paused && v != null && v < 0.1) await SP.player.setVolume(SP_VOL).catch(() => {});   // a DJ break's 2%, or Spotify putting it back there
+    } finally { auxVolBusy = false; }
   }, 400);
   setTimeout(auxUi, 0);
   function spArt(url) { const i = $("#npImg"); if (url) { i.src = url; i.hidden = false; } else { i.hidden = true; i.removeAttribute("src"); } }
