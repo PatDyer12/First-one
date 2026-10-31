@@ -14562,7 +14562,7 @@ void main(){
   // ---------- sheets ----------
   function openSheet(id) { $(id).hidden = false; }
   // keep every open screen current: when a new version is up, reload it (never mid-form or mid-animation)
-  const BUILD = "20261031030618";
+  const BUILD = "20261031032610";
   function checkBuild() {
     if (BUILD === "dev") return;
     fetch("version.json?t=" + Date.now(), { cache: "no-store" }).then((r) => (r.ok ? r.json() : null)).then((j) => {
@@ -15529,7 +15529,9 @@ void main(){
   function featKeys(now = Date.now()) {
     if (GUEST || PHONE()) return [];
     const k = featEt(now), late = k.hr < 4; if (!["Thu", "Fri", "Sat", "Sun", "Mon"].includes(k.wd) && !late) return [];
-    const out = []; for (const d of late ? [now, now - 6 * 3600e3] : [now]) for (const sp of ["CFB", "NFL"]) { const key = sp + "|" + etDate(d); if (now - (boardAt.get(key) || 0) > 25e3) out.push(key); }
+    // (and the league of a game pinned for the night, whether or not anybody's on it)
+    const pins = [...new Set(FEAT_PIN.filter(([d, , , sp]) => sp && (d === k.day || (late && d === featEt(now - 6 * 3600e3).day))).map((x) => x[3]))];
+    const out = []; for (const d of late ? [now, now - 6 * 3600e3] : [now]) for (const sp of ["CFB", "NFL", ...pins]) { const key = sp + "|" + etDate(d); if (now - (boardAt.get(key) || 0) > 25e3) out.push(key); }
     return out;
   }
   async function pollLive() { if (document.visibilityState === "visible") { loadFollow(); const k = [...new Set([...liveKeys(), ...followKeys(), ...featKeys()])]; if (k.length) await loadBoards(k); loadLines(); } }
@@ -18695,14 +18697,14 @@ void main(){
     for (const lg of DIR_LG) { const x = DIR.slate.get(lg); if (x && x.next < Infinity && (!soon || x.next < DIR.slate.get(soon).next)) soon = lg; }
     return soon;
   }
-  const FEAT_PIN = [["2026-10-30", "BAY", "UCF"]];
+  const FEAT_PIN = [["2026-10-30", "LAL", "GS", "NBA"]];   // [ET day, away, home, league (when it isn't college or the NFL)]
   const FEAT = { id: "" };
   const featEt = (t) => { const p = {}; for (const x of new Intl.DateTimeFormat("en-CA", { timeZone: "America/New_York", year: "numeric", month: "2-digit", day: "2-digit", weekday: "short", hour: "2-digit", hourCycle: "h23" }).formatToParts(new Date(t))) p[x.type] = x.value; return { day: `${p.year}-${p.month}-${p.day}`, wd: p.weekday, hr: Number(p.hour) }; };
   function featGame() {
     if (GUEST || PHONE()) return null;
     const now = Date.now(), fbAll = [...S.games.values()].filter((g) => (g.sport === "CFB" || g.sport === "NFL") && g.a && g.h);
     // a pinned game has the night from 3 hours before its kickoff (nothing earlier that night takes the stadium from it)
-    const pinned = fbAll.find((g) => g.st !== "post" && g.t - now < 3 * 3600e3 && FEAT_PIN.some(([d, a, h]) => featEt(g.t).day === d && g.a.ab === a && g.h.ab === h));
+    const pinned = [...S.games.values()].find((g) => g.a && g.h && g.st !== "post" && g.t - now < 3 * 3600e3 && FEAT_PIN.some(([d, a, h]) => featEt(g.t).day === d && g.a.ab === a && g.h.ab === h));
     if (pinned) { FEAT.id = pinned.id; return pinned; }
     const cand = fbAll.filter((g) => g.st === "in" || (g.st === "pre" && g.t - now < 30 * 60e3 && now - g.t < 4 * 3600e3));
     if (!cand.length) { FEAT.id = ""; return null; }
@@ -26238,8 +26240,10 @@ function wdFbBuild(st, fs) {
   const flat = (h, k) => new THREE.MeshBasicMaterial({ color: col(h, k) });
   const add = (geo, mat, x, y, z) => { const m = new THREE.Mesh(geo, mat); m.position.set(x, y, z); scene.add(m); return m; };
   const top = V.top, outer = V.outer, A = V.A, B = V.B;
-  // the outside wall of the bowl, up to the top row
-  const fac = wdBand(THREE, C, { o0: outer + 0.4, y0: 0, y1: top + 1.5 }, 360); scene.add(new THREE.Mesh(fac, new THREE.MeshBasicMaterial({ color: col([0.05, 0.055, 0.07]), side: THREE.DoubleSide })));
+  // the outside wall of the bowl, up to the top row; it gives way where the DJ's stage is (on a one-bowl stadium the stage sits
+  // just past the top row, and the wall stood in front of the DJ from the field): so does everything else at the back of the bowl
+  const open = (x, z) => !(st.deckSpot && st.deckSpot.gap(x, z));
+  const fac = wdBand(THREE, C, { o0: outer + 0.4, y0: 0, y1: top + 1.5, keep: open }, 360); scene.add(new THREE.Mesh(fac, new THREE.MeshBasicMaterial({ color: col([0.05, 0.055, 0.07]), side: THREE.DoubleSide })));
   // the roof
   if (V.dome) {
     const rim = Math.max(A, B) + outer + 4, Hh = 26, Rs = (rim * rim + Hh * Hh) / (2 * Hh), th = Math.asin(Math.min(1, rim / Rs));
@@ -26256,8 +26260,8 @@ function wdFbBuild(st, fs) {
     // open: lights all round the rim, and canopies over the sidelines where there are some
     // (none in front of a board standing over the end: they'd sit on its screen)
     const clear = (x, z) => [V.jumbo, V.jumbo2].some((J) => J && !J.hung && J.base != null && Math.abs(z - J.p[2]) < J.w / 2 + 8 && Math.sign(x) === Math.sign(J.p[0]) && Math.abs(x) > A);
-    for (let i = 0; i < 56; i++) { const p = wdNorm(C, (i + 0.5) / 56), o = outer + 1; if (clear(p[0] + p[2] * o, p[1] + p[3] * o)) continue; glow([p[0] + p[2] * o, top + 6, p[1] + p[3] * o], 9, [1, 0.97, 0.9], 0.45); glow([p[0] + p[2] * o, top + 6, p[1] + p[3] * o], 2.6, [1, 1, 1], 0.95); }
-    if (fs.roof === "canopy" || fs.roof === "ring") for (const s of [-1, 1]) { const g = wdBand(THREE, C, { o0: 20, o1: outer + 2, y0: top + 9, y1: top + 6, keep: fs.roof === "ring" ? (x, z) => z * s > 0 || (z === 0 && s > 0) : (x, z) => Math.abs(x) < 64 && z * s > 0 }, 360);
+    for (let i = 0; i < 56; i++) { const p = wdNorm(C, (i + 0.5) / 56), o = outer + 1; if (clear(p[0] + p[2] * o, p[1] + p[3] * o) || !open(p[0] + p[2] * o, p[1] + p[3] * o)) continue; glow([p[0] + p[2] * o, top + 6, p[1] + p[3] * o], 9, [1, 0.97, 0.9], 0.45); glow([p[0] + p[2] * o, top + 6, p[1] + p[3] * o], 2.6, [1, 1, 1], 0.95); }
+    if (fs.roof === "canopy" || fs.roof === "ring") for (const s of [-1, 1]) { const g = wdBand(THREE, C, { o0: 20, o1: outer + 2, y0: top + 9, y1: top + 6, keep: fs.roof === "ring" ? (x, z) => (z * s > 0 || (z === 0 && s > 0)) && open(x, z) : (x, z) => Math.abs(x) < 64 && z * s > 0 && open(x, z) }, 360);
       scene.add(new THREE.Mesh(g, new THREE.MeshBasicMaterial({ color: col([0.16, 0.17, 0.2]), side: THREE.DoubleSide }))); }
   }
   // the second board, at the other end
@@ -26284,7 +26288,7 @@ function wdFbBuild(st, fs) {
   if (F.includes("window")) { const w = add(new THREE.PlaneGeometry(90, 40), new THREE.MeshBasicMaterial({ color: col([0.25, 0.32, 0.45]), transparent: true, opacity: 0.5 }), -(A + outer + 2), top - 8, 0); w.rotation.y = Math.PI / 2; }
   if (F.includes("arch")) { const ar = add(new THREE.TorusGeometry(A + outer * 0.55, 1.8, 10, 64, Math.PI), flat([0.94, 0.94, 0.95]), 0, 0, -(B + outer) * 0.35); ar.rotation.x = -0.3; ar.scale.set(1, 1.05, 1);
     for (let i = 0; i < 14; i++) { const a = (i / 13) * Math.PI, x = Math.cos(a) * (A + outer * 0.55), y = Math.sin(a) * (A + outer * 0.55) * 1.05; glow([x, y * Math.cos(0.3), -(B + outer) * 0.35 - y * Math.sin(0.3)], 10, [1, 1, 1], 0.35); } }
-  if (F.includes("glowwall")) { const gw = wdBand(THREE, C, { o0: outer + 0.9, y0: top - 6, y1: top + 4 }, 360); scene.add(new THREE.Mesh(gw, new THREE.MeshBasicMaterial({ color: col(wdLift(h.col, 0.25), 0.9), side: THREE.DoubleSide })));
+  if (F.includes("glowwall")) { const gw = wdBand(THREE, C, { o0: outer + 0.9, y0: top - 6, y1: top + 4, keep: open }, 360); scene.add(new THREE.Mesh(gw, new THREE.MeshBasicMaterial({ color: col(wdLift(h.col, 0.25), 0.9), side: THREE.DoubleSide })));
     for (let i = 0; i < 48; i++) { const p = wdNorm(C, (i + 0.5) / 48), o = outer + 1.2; glow([p[0] + p[2] * o, top - 1, p[1] + p[3] * o], 16, wdLift(h.col, 0.4), 0.35); } }
   if (F.includes("towers")) for (let i = 0; i < 6; i++) { const a = (i / 6) * Math.PI * 2 + 0.5, x = Math.cos(a) * (A + outer + 14), z = Math.sin(a) * (B + outer + 14), H2 = top + 34;
     add(new THREE.BoxGeometry(2, H2, 2), flat([0.12, 0.13, 0.15]), x, H2 / 2, z); add(new THREE.BoxGeometry(10, 6, 1.5), flat([0.9, 0.9, 0.85]), x, H2 + 2, z).lookAt(0, H2, 0); glow([x, H2 + 2, z], 50, [1, 0.97, 0.88], 0.5); glow([x, H2 + 2, z], 14, [1, 1, 1], 0.9); }
@@ -26859,10 +26863,12 @@ function wdActGeo(st) {
   const T0 = V.tiers && V.tiers[0]; if (!T0 || T0.o1 == null) return null;
   const B = V.B, A = V.A, o0 = T0.o0, o1 = T0.o1, y0 = T0.y0, y1 = T0.y1, top = V.top || y1, outer = V.outer || o1;
   const tifo = { ua: 0.69, ub: 0.81, o0, o1, y0, y1, v0: 0.05, v1: 0.97 };
+  // under a roof (a dome, a closed retractable one, glass) the drones fly over the field below it and there's no rig for banners
+  const roofed = /dome|retract|glass/.test((V.fs && V.fs.roof) || "");
   if (st.R.sport === "nfl") return { kind: "fb", k: 1, sideZ: -(B + 1.6),
     tifo: Object.assign(tifo, { lift: 4.6, cam: { p: v(-6, 15, 20), l: v(0, (y0 + y1) / 2 + 1, -(B + (o0 + o1) / 2)), f: 46 } }),
-    drones: { c: v(0, top + 40, -(B + outer * 0.55)), w: 132, cam: { p: v(0, 5, 26), f: 56 } },
-    banners: { top: top + 30, len: 25, z: -(B + outer + 1.2), xs: [-44, -22, 0, 22, 44], w: 15, cam: { p: v(0, 7, 12), l: v(0, top + 16, -(B + outer)), f: 52 } },
+    drones: roofed ? { c: v(0, top + 9, -B * 0.55), w: Math.min(110, A * 1.4), cam: { p: v(0, 4, 30), f: 56 } } : { c: v(0, top + 40, -(B + outer * 0.55)), w: 132, cam: { p: v(0, 5, 26), f: 56 } },
+    banners: roofed ? null : { top: top + 30, len: 25, z: -(B + outer + 1.2), xs: [-44, -22, 0, 22, 44], w: 15, cam: { p: v(0, 7, 12), l: v(0, top + 16, -(B + outer)), f: top > 35 ? 40 : 52 } },
     jets: [-63, -47, -31, -15, 0, 15, 31, 47, 63].map((x) => v(x, 0, -(B + 1.6))), corners: [-1, 1].flatMap((sx) => [-1, 1].map((sz) => v(sx * (A + outer * 0.5), top + 3, sz * (B + outer * 0.5)))) };
   if (st.R.sport === "nba" || st.R.sport === "nhl") return { kind: "ar", k: 0.3, sideZ: -(B + 0.5),
     tifo: Object.assign(tifo, { lift: 3.8, cam: { p: v(-2.5, 5.5, 9), l: v(0, (y0 + y1) / 2 + 0.6, -(B + (o0 + o1) / 2)), f: 50 } }),
@@ -27038,7 +27044,7 @@ function wdLasers(st, G, o) {
 // ---- the act ----
 function wdActStart(st, o) {
   const G = wdActGeo(st); if (!G) return null;
-  const THREE = st.THREE, menu = WD_ACTS[G.kind], last = WD.actLast || "", lvl = o.lvl || 1;
+  const THREE = st.THREE, menu = WD_ACTS[G.kind].filter((k) => G[k]), last = WD.actLast || "", lvl = o.lvl || 1;
   let kind = menu[(WD.actN = (WD.actN || 0) + 1) % menu.length]; if (kind === last) kind = menu[(WD.actN + 1) % menu.length];
   if (window.__actKind && menu.includes(window.__actKind)) kind = window.__actKind;
   WD.actLast = kind;
