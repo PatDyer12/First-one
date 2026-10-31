@@ -14556,7 +14556,7 @@ void main(){
   // ---------- sheets ----------
   function openSheet(id) { $(id).hidden = false; }
   // keep every open screen current: when a new version is up, reload it (never mid-form or mid-animation)
-  const BUILD = "20261031021109";
+  const BUILD = "20261031022153";
   function checkBuild() {
     if (BUILD === "dev") return;
     fetch("version.json?t=" + Date.now(), { cache: "no-store" }).then((r) => (r.ok ? r.json() : null)).then((j) => {
@@ -21775,6 +21775,7 @@ void main(){
       } else if (b.sel) {
         const ev = evalSel(b.sel);
         if (ev && ev.fin) status = ev.res === "W" ? "won" : ev.res === "L" ? "lost" : "push";
+        else if (ev && b.sel.m === "tot" && b.sel.l != null && ev.g.a.sc + ev.g.h.sc > b.sel.l) status = b.sel.s === "o" ? "won" : "lost";
       }
       if (!status) continue;
       settling.add(b.id);
