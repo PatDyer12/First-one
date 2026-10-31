@@ -7003,6 +7003,20 @@ body.tv .rb-main { -webkit-mask-image: linear-gradient(180deg, transparent 0, #0
 body.tv .rb-games.primeg > .rb-pcol.pr, body.tv .rb-rsc { -webkit-mask-image: linear-gradient(180deg, transparent 0, #000 18px, #000 calc(100% - 10px), transparent 100%); mask-image: linear-gradient(180deg, transparent 0, #000 18px, #000 calc(100% - 10px), transparent 100%); }
 body.tv .rb-games.primeg.mason > .rb-pcol { -webkit-mask-image: linear-gradient(180deg, transparent 0, #000 16px, #000 calc(100% - 10px), transparent 100%); mask-image: linear-gradient(180deg, transparent 0, #000 16px, #000 calc(100% - 10px), transparent 100%); }
 body.tv .pp-list { -webkit-mask-image: linear-gradient(180deg, transparent 0, #000 10px, #000 calc(100% - 10px), transparent 100%); mask-image: linear-gradient(180deg, transparent 0, #000 10px, #000 calc(100% - 10px), transparent 100%); }
+
+/* the hero scoreboard at any width: the score stays inside its team's slab, the name and record give way first */
+body.v2b .rb-g.hero .rb-gh .tm { overflow: hidden; gap: clamp(6px, 1.4cqw, 12px); padding-left: clamp(8px, 1.8cqw, 16px); }
+body.v2b .rb-g.hero .rb-gh .tm.h { padding-left: 0; padding-right: clamp(8px, 1.8cqw, 16px); }
+body.v2b .rb-g.hero .rb-gh .tl { width: clamp(30px, 6.2cqw, 52px); height: clamp(30px, 6.2cqw, 52px); flex: none; }
+body.v2b .rb-g.hero .rb-gh .ab { min-width: 0; flex: 0 1 auto; overflow: hidden; }
+body.v2b .rb-g.hero .rb-gh .tm .nmx { font-size: clamp(17px, 3.6cqw, 30px); white-space: nowrap; overflow: hidden; text-overflow: clip; }
+body.v2b .rb-g.hero .rb-gh .sub, body.v2b .rb-g.hero .rb-gh .sub em { white-space: nowrap; }
+body.v2b .rb-g.hero .rb-gh .sub { flex-wrap: nowrap; min-width: 0; }
+body.v2b .rb-g.hero .rb-gh .ball { flex: none; }
+body.v2b .rb-g.hero .rb-gh .tm .sc { flex: none; min-width: clamp(44px, 8.6cqw, 78px); padding: 0 clamp(4px, 1cqw, 10px); font-size: clamp(34px, 6.6cqw, 56px); }
+body.v2b .rb-g.hero .rb-gh .mid { padding: 0 clamp(6px, 1.4cqw, 14px); }
+@container (max-width: 620px) { body.v2b .rb-g.hero .rb-gh .to { display: none; } }
+@container (max-width: 480px) { body.v2b .rb-g.hero .rb-gh .sub em { display: none; } }
 </style>
 </head>
 <body>
@@ -14542,7 +14556,7 @@ void main(){
   // ---------- sheets ----------
   function openSheet(id) { $(id).hidden = false; }
   // keep every open screen current: when a new version is up, reload it (never mid-form or mid-animation)
-  const BUILD = "20261031011517";
+  const BUILD = "20261031021109";
   function checkBuild() {
     if (BUILD === "dev") return;
     fetch("version.json?t=" + Date.now(), { cache: "no-store" }).then((r) => (r.ok ? r.json() : null)).then((j) => {
@@ -26198,7 +26212,9 @@ function wdFbVenue(fs) {
   const top = Math.max(...V.tiers.map((t) => t.y1)), outer = Math.max(...V.tiers.map((t) => t.o1 || t.o0));
   V.ribs = [{ o: 3.4, y0: 0, y1: 1.9 }].concat(fs.up === 0 ? [] : [{ o: 32.9, y0: 22, y1: 23.5, keep: V.tiers[1].keep }]);
   // the boards: over the end (or both), hung in the middle, or a halo
-  const endUp = fs.up === 2 && !fs.low, bh = 29.25, bw = 52;
+  // a board at the end sits over the stands when they rise as high as the building (two decks all round, or one big bowl): on
+  // legs behind a big bowl's end the top of the bowl hid a third of it from the field
+  const endUp = (fs.up === 2 || fs.up === 0) && !fs.low, bh = 29.25, bw = 52;
   const endP = (s) => (endUp ? [s * (A + outer + 3), top + bh / 2 + 2, 0] : [s * (A + 46), 31, 0]);
   if (fs.boards === "center" || fs.boards === "halo") V.jumbo = { p: [0, fs.boards === "halo" ? 62 : 52, 0], hung: 1, w: fs.boards === "halo" ? 34 : 46, h: fs.boards === "halo" ? 12 : 20, halo: fs.boards === "halo" };
   else V.jumbo = { p: endP(1), face: [-1, 0, 0], w: bw, h: bh, legs: endUp ? 0 : 1, base: endUp ? top : null };
@@ -26231,7 +26247,9 @@ function wdFbBuild(st, fs) {
     for (let i = 0; i < 24; i++) { const a = (i / 24) * Math.PI * 2; glow([Math.cos(a) * (A + 24), top + 18, Math.sin(a) * (B + 22)], 20, [1, 0.97, 0.9], 0.45); }
   } else {
     // open: lights all round the rim, and canopies over the sidelines where there are some
-    for (let i = 0; i < 56; i++) { const p = wdNorm(C, (i + 0.5) / 56), o = outer + 1; glow([p[0] + p[2] * o, top + 6, p[1] + p[3] * o], 9, [1, 0.97, 0.9], 0.45); glow([p[0] + p[2] * o, top + 6, p[1] + p[3] * o], 2.6, [1, 1, 1], 0.95); }
+    // (none in front of a board standing over the end: they'd sit on its screen)
+    const clear = (x, z) => [V.jumbo, V.jumbo2].some((J) => J && !J.hung && J.base != null && Math.abs(z - J.p[2]) < J.w / 2 + 8 && Math.sign(x) === Math.sign(J.p[0]) && Math.abs(x) > A);
+    for (let i = 0; i < 56; i++) { const p = wdNorm(C, (i + 0.5) / 56), o = outer + 1; if (clear(p[0] + p[2] * o, p[1] + p[3] * o)) continue; glow([p[0] + p[2] * o, top + 6, p[1] + p[3] * o], 9, [1, 0.97, 0.9], 0.45); glow([p[0] + p[2] * o, top + 6, p[1] + p[3] * o], 2.6, [1, 1, 1], 0.95); }
     if (fs.roof === "canopy" || fs.roof === "ring") for (const s of [-1, 1]) { const g = wdBand(THREE, C, { o0: 20, o1: outer + 2, y0: top + 9, y1: top + 6, keep: fs.roof === "ring" ? (x, z) => z * s > 0 || (z === 0 && s > 0) : (x, z) => Math.abs(x) < 64 && z * s > 0 }, 360);
       scene.add(new THREE.Mesh(g, new THREE.MeshBasicMaterial({ color: col([0.16, 0.17, 0.2]), side: THREE.DoubleSide }))); }
   }
@@ -26716,7 +26734,7 @@ function wdRoomBuild(L, R) {
   const back = onArc(0, SY); add(new THREE.BoxGeometry(SW + 1.2, SH + 1.2, 0.6), flat([0.02, 0.022, 0.03]), back.p[0], SY, back.p[2] - 0.4);
   const scr = add(new THREE.PlaneGeometry(SW, SH), wdScreenMat(THREE, jtex, SW / SH, otex), back.p[0], SY, back.p[2]); scr.material.uniforms.uLed.value = 0.45; st.screens = [scr];
   const sn = new THREE.Vector3(0, 0, 1);
-  st.jface = () => ({ c: scr.position.clone(), n: sn.clone(), w: SW, h: SH });
+  st.jface = () => ({ c: scr.position.clone(), n: sn.clone(), w: SW, h: SH, m: 0.6 });
   const TW = 7.4, TH = 4.16, tiles = []; st.blank = wdTex(THREE, wdCanvas(2, 2)); st.tex.push(st.blank);
   for (const side of [-1, 1]) for (let ci = 0; ci < 2; ci++) for (let ri = 0; ri < 3; ri++) {
     const s = side * (SW / 2 + 0.6 + TW / 2 + ci * (TW + 0.5)), y = 3.0 + ri * (TH + 0.44), q = onArc(s, y);
@@ -27227,18 +27245,18 @@ function wdBuild(L, R) {
     const rb = new THREE.Mesh(rg, new THREE.MeshBasicMaterial({ map: rtex })); rb.position.y = -J.h / 2 - 0.8; jg.add(rb);
     for (let i = 0; i < 4; i++) { const a = (i / 4) * Math.PI * 2 + sa / 2, cab = new THREE.Mesh(new THREE.CylinderGeometry(0.06, 0.06, V.roof - J.p[1], 4), dark); cab.position.set(Math.sin(a) * R0, (V.roof - J.p[1]) / 2, Math.cos(a) * R0); jg.add(cab); }
     st.jface = (camPos) => { const d = camPos ? camPos.clone().sub(jg.position) : new THREE.Vector3(0, 0, 1); const a = Math.round(Math.atan2(d.x, d.z) / sa) * sa;
-      return { c: new THREE.Vector3(jg.position.x + Math.sin(a) * (R0 + 0.01), jg.position.y, jg.position.z + Math.cos(a) * (R0 + 0.01)), n: new THREE.Vector3(Math.sin(a), 0, Math.cos(a)), w: J.w, h: J.h }; };
+      return { c: new THREE.Vector3(jg.position.x + Math.sin(a) * (R0 + 0.01), jg.position.y, jg.position.z + Math.cos(a) * (R0 + 0.01)), n: new THREE.Vector3(Math.sin(a), 0, Math.cos(a)), w: J.w, h: J.h, m: 0.3 }; };
   } else if (J.hung) {
     const box = new THREE.Mesh(new THREE.BoxGeometry(J.w + 0.6, J.h + 0.6, J.w + 0.6), dark); jg.add(box);
     for (let i = 0; i < 4; i++) { const s = screen(J.w, J.h), a = (i / 4) * Math.PI * 2; s.position.set(Math.sin(a) * (J.w / 2 + 0.31), 0, Math.cos(a) * (J.w / 2 + 0.31)); s.rotation.y = a; jg.add(s); }
     const ring = new THREE.Mesh(new THREE.CylinderGeometry(J.w * 0.78, J.w * 0.78, 0.9, 40, 1, true), new THREE.MeshBasicMaterial({ map: rtex })); ring.position.y = -J.h / 2 - 1; jg.add(ring);
     const cab = new THREE.Mesh(new THREE.CylinderGeometry(0.06, 0.06, V.roof - J.p[1], 4), dark); cab.position.y = (V.roof - J.p[1]) / 2; jg.add(cab);
-    st.jface = (camPos) => { const d = camPos.clone().sub(jg.position); d.y = 0; const a = Math.round(Math.atan2(d.x, d.z) / (Math.PI / 2)) * (Math.PI / 2); return { c: new THREE.Vector3(jg.position.x + Math.sin(a) * (J.w / 2 + 0.31), jg.position.y, jg.position.z + Math.cos(a) * (J.w / 2 + 0.31)), n: new THREE.Vector3(Math.sin(a), 0, Math.cos(a)), w: J.w, h: J.h }; };
+    st.jface = (camPos) => { const d = camPos.clone().sub(jg.position); d.y = 0; const a = Math.round(Math.atan2(d.x, d.z) / (Math.PI / 2)) * (Math.PI / 2); return { c: new THREE.Vector3(jg.position.x + Math.sin(a) * (J.w / 2 + 0.31), jg.position.y, jg.position.z + Math.cos(a) * (J.w / 2 + 0.31)), n: new THREE.Vector3(Math.sin(a), 0, Math.cos(a)), w: J.w, h: J.h, m: 0.3 }; };
   } else {
     const n = v3(J.face), box = new THREE.Mesh(new THREE.BoxGeometry(J.w + 3, J.h + 3, 2), dark); jg.add(box); jg.lookAt(jg.position.clone().add(n));
     const s = screen(J.w, J.h); s.position.z = 1.02; jg.add(s);
     const top = new THREE.Mesh(new THREE.BoxGeometry(J.w + 3.3, 0.5, 2.2), trim); top.position.y = J.h / 2 + 1.5; jg.add(top);
-    const sign = wdTex(THREE, wdNeonArt("SWEAT BOARD", "#ffc94d")); st.tex.push(sign); const sg = new THREE.Mesh(new THREE.PlaneGeometry(J.w * 0.6, J.w * 0.15), new THREE.MeshBasicMaterial({ map: sign, transparent: true, blending: THREE.AdditiveBlending, depthWrite: false })); sg.position.set(0, J.h / 2 + 5.5, 1.1); jg.add(sg);
+    const sign = wdTex(THREE, wdNeonArt("SWEAT BOARD", "#ffc94d")); st.tex.push(sign); const sg = new THREE.Mesh(new THREE.PlaneGeometry(J.w * 0.6, J.w * 0.15), new THREE.MeshBasicMaterial({ map: sign, transparent: true, blending: THREE.AdditiveBlending, depthWrite: false })); sg.position.set(0, J.h / 2 + 5.5, 1.1); jg.add(sg); st.jsign = sg;
     if (J.base != null) { const hh = J.p[1] - J.h / 2 - (J.base - 3); const sup = new THREE.Mesh(new THREE.BoxGeometry(J.w + 2.6, hh, 6), dark); sup.position.set(0, -J.h / 2 - hh / 2 - 0.02, -2.6); jg.add(sup); }
     if (J.legs) for (const s2 of [-1, 1]) { const leg = new THREE.Mesh(new THREE.BoxGeometry(2, J.p[1], 2), dark); leg.position.set(s2 * J.w * 0.3, -J.p[1] / 2, -0.5); jg.add(leg); }
     st.jface = () => ({ c: jg.localToWorld(new THREE.Vector3(0, 0, 1.02)), n: n.clone(), w: J.w, h: J.h });
@@ -27307,12 +27325,50 @@ function wdFrame(st, F, fr, offK) {
   const p = F.c.clone().add(F.n.clone().multiplyScalar(d)).add(right.clone().multiplyScalar(off)).add(new T.Vector3(0, F.h * 0.12 + lift, 0));
   return { p, l: F.c.clone().add(right.multiplyScalar(off)).add(new T.Vector3(0, lift, 0)), f: fov, d };
 }
+// a video on the jumbotron: the camera on the screen and still, the whole board (its frame too) in the space the floating
+// panels leave (under the title plate, left of the room's bets, above the score bug) with the crowd round it, so nothing sits
+// on the picture and the picture covers nothing. The team's plate goes beside the bug (over it when there's no room). null: no space for it
+function wdFit(st, F) {
+  const T = st.THREE, W = innerWidth, H = innerHeight, tv = Math.tan((20 * Math.PI) / 180), tm = document.getElementById("jbTeam");
+  if (tm) wdTeamFree();
+  const r = (q) => { const e = document.querySelector(q); if (!e || e.hidden) return null; const b = e.getBoundingClientRect(); return b.width > 4 && b.height > 4 ? b : null; };
+  const head = r("#jumbo .jb-head"), side = document.body.classList.contains("v2w-wide") ? null : r("#jumbo .jb-side"), bug = r("#jbBug"), g = Math.max(12, Math.round(H * 0.022));
+  const L = g * 1.5, Rt = side && side.left > W * 0.5 ? side.left - g * 1.5 : W - g * 1.5, Tp = (head && head.bottom < H * 0.3 ? head.bottom : H * 0.07) + g;
+  let Bt = (bug && bug.top > H * 0.5 ? bug.top : H * 0.88) - g;
+  if (tm && !tm.hidden && bug && bug.top > H * 0.5) { const w = tm.offsetWidth, h = tm.offsetHeight; let x = bug.right + g, y = bug.bottom - h;
+    if (x + w > Rt) { x = bug.left; y = bug.top - g * 0.6 - h; Bt = y - g; }
+    Object.assign(tm.style, { position: "fixed", left: Math.round(x) + "px", top: Math.round(y) + "px", right: "auto", bottom: "auto", margin: "0" }); }
+  if (Rt - L < W * 0.3 || Bt - Tp < H * 0.3) return null;
+  // the camera a little above the board, looking down over the seats in front of it; the board's corners projected and the
+  // shot sized and moved until they sit in the space (a few passes: looking down, the board isn't a perfect rectangle)
+  const m = F.m ?? 1.5, up = new T.Vector3(0, 1, 0), right = up.clone().cross(F.n).normalize(), cam = st.fitCam || (st.fitCam = new T.PerspectiveCamera(40, 1, 0.5, 5000));
+  const K = [[-1, 1], [1, 1], [1, -1], [-1, -1]].map(([x, y]) => F.c.clone().add(right.clone().multiplyScalar(x * (F.w / 2 + m))).add(up.clone().multiplyScalar(y * (F.h / 2 + m))));
+  // the board in about two thirds of the space, high in it: the crowd round it and under it stays in the picture
+  const bw = (Rt - L) * 0.68, bh = (Bt - Tp) * 0.7, bL = L + (Rt - L - bw) / 2, bR = bL + bw, bT = Tp + (Bt - Tp - bh) * 0.3, bB = bT + bh;
+  let s = Math.min(bw / (F.w + 2 * m), bh / (F.h + 2 * m)), d = H / (2 * s * tv), ox = -((bL + bR) / 2 - W / 2) / s, oy = ((bT + bB) / 2 - H / 2) / s, p, l;
+  cam.aspect = W / H; cam.updateProjectionMatrix();
+  for (let i = 0; i < 6; i++) {
+    l = F.c.clone().add(right.clone().multiplyScalar(ox)).add(up.clone().multiplyScalar(oy)); p = l.clone().add(F.n.clone().multiplyScalar(d)).add(up.clone().multiplyScalar(d * 0.12));
+    cam.position.copy(p); cam.lookAt(l); cam.updateMatrixWorld();
+    const q = K.map((v) => { const u = v.clone().project(cam); return [((u.x + 1) / 2) * W, ((1 - u.y) / 2) * H]; }), x0 = Math.min(...q.map((z) => z[0])), x1 = Math.max(...q.map((z) => z[0])), y0 = Math.min(...q.map((z) => z[1])), y1 = Math.max(...q.map((z) => z[1]));
+    const k = Math.min(bw / (x1 - x0), bh / (y1 - y0)), sn = (x1 - x0) / (F.w + 2 * m);
+    if (i % 2 === 0) d /= k; else { ox -= ((bL + bR) / 2 - (x0 + x1) / 2) / sn; oy += ((bT + bB) / 2 - (y0 + y1) / 2) / sn; }
+  }
+  return { p, l, f: 40, d, nr: d * 0.58, fit: 1 };
+}
+function wdTeamFree() { const tm = document.getElementById("jbTeam"); if (tm) for (const k of ["position", "left", "top", "right", "bottom", "margin"]) tm.style[k] = ""; }
+// the panels moved (the team's plate came in, the screen was resized): the camera goes to the new fit, mid-flight or not
+function wdRefit() {
+  const st = WD.st; if (!st || WD.mode !== "clip" || !WD.fitF) return; const s = wdFit(st, WD.fitF); if (!s) return;
+  if (st.fly) { st.fly.b.copy(s.p); st.fly.bl.copy(s.l); st.fly.bn = s.nr; } else if (st.hold) { st.hold = s; st.cam.near = s.nr; }
+  st.holdShot = s;
+}
 // the page's video, glued onto a screen in the building: its four corners projected, a CSS matrix3d mapping the element's box
 // onto them (the video stays the page's own element, sharp, any source)
 const WD_PW = 1280, WD_PH = 720;
 function wdProject(st) {
   const P = st.proj; if (!P) return; const T = st.THREE, F = P.F, up = new T.Vector3(0, 1, 0), right = up.clone().cross(F.n).normalize();
-  const hw = F.w / 2, hh = F.h / 2, W = innerWidth, H = innerHeight;
+  const va = WD_PW / WD_PH, hw = Math.min(F.w, F.h * va) / 2, hh = Math.min(F.h, F.w / va) / 2, W = innerWidth, H = innerHeight;
   const pts = [[-hw, hh], [hw, hh], [hw, -hh], [-hw, -hh]].map(([x, y]) => { const v = F.c.clone().add(right.clone().multiplyScalar(x)).add(up.clone().multiplyScalar(y)).project(st.cam); return [((v.x + 1) / 2) * W, ((1 - v.y) / 2) * H, v.z]; });
   const behind = pts.some((q) => q[2] > 1 || q[2] < -1);
   const [[x0, y0], [x1, y1], [x2, y2], [x3, y3]] = pts;
@@ -27377,7 +27433,7 @@ function wdCam(st, now) {
     if (F.an !== F.bn) cam.near = F.bn > F.an ? F.an + (F.bn - F.an) * Math.pow(e, 3) : F.bn + (F.an - F.bn) * Math.pow(1 - e, 3);
     if (k >= 1) { st.fly = null; st.hold = st.holdShot; st.holdT = now; if (F.done) try { F.done(); } catch (e2) { console.warn(e2); } }
   } else if (st.hold) {
-    const H = st.hold, t = now / 1000, a = WD.mode === "board" ? Math.max(1.2, H.p.distanceTo(H.l) * 0.035) : H.p.distanceTo(H.l) * (WD.mode === "dj" ? 0.02 : 0.012);
+    const H = st.hold, t = now / 1000, a = WD.mode === "board" ? Math.max(1.2, H.p.distanceTo(H.l) * 0.035) : H.p.distanceTo(H.l) * (WD.mode === "dj" ? 0.02 : WD.mode === "clip" && WD.fitF ? 0 : 0.012);
     cam.position.set(H.p.x + Math.sin(t * 0.11) * a, H.p.y + Math.sin(t * 0.07) * a * 0.35, H.p.z + Math.cos(t * 0.09) * a * 0.6);
     st.look.copy(H.l); cam.fov += (H.f - cam.fov) * 0.1;
   }
@@ -27444,7 +27500,7 @@ async function wdStart() {
       WD.r = new THREE.WebGLRenderer({ canvas: cv, antialias: false, alpha: false, powerPreference: "high-performance" });
       WD.r.outputColorSpace = THREE.LinearSRGBColorSpace; WD.r.setPixelRatio(1);
       cv.addEventListener("webglcontextlost", (e) => { e.preventDefault(); wdStop(); });
-      addEventListener("resize", () => wdSize(WD.q || WD.qb || wdQmax(), true));
+      addEventListener("resize", () => { wdSize(WD.q || WD.qb || wdQmax(), true); wdRefit(); });
     }
     const R = wdRead(); WD.key = wdKey(R);
     for (const s of ["a", "h"]) if (R.T[s].lg) { const im = new Image(); im.crossOrigin = "anonymous"; im.referrerPolicy = "no-referrer"; im.onload = () => { if (WD.st && WD.st.R.T[s] === R.T[s]) wdRepaint(); }; im.src = R.T[s].lg; R.T[s].img = im; }
@@ -27513,6 +27569,7 @@ function wdLoop(now) {
   for (const m of st.suites) { m.uniforms.uT.value = t; m.uniforms.uLit.value = lit; }
   st.sky.material.uniforms.uT.value = t; st.sky.material.uniforms.uFlash.value = st.flash; st.sky.material.uniforms.uFc.value.set(...st.fc);
   for (const g of st.glows) { const k = Math.min(1, st.flash); g.m.color.setRGB(...wdMix(g.base, st.fc, k * 0.7).map((v) => v * lit), st.THREE.LinearSRGBColorSpace); g.m.opacity = g.op * (1 + k * 0.6); }
+  if (st.jsign) { const o = st.jsign.material, k = WD.mode === "clip" && WD.fitF ? 0 : 1; o.opacity += (k - o.opacity) * Math.min(1, dt * 3); st.jsign.visible = o.opacity > 0.01; }
   if (st.rtex) st.rtex.offset.x = (st.rtex.offset.x + dt * (WD.ribAt ? 0.05 : 0.025)) % 1;
   const on = WD.mode === "dj"; for (const b of st.beams) { b.bm.material.opacity += ((on ? 0.08 : 0) - b.bm.material.opacity) * Math.min(1, dt * 3); b.piv.rotation.z = Math.sin(t * 1.3 + b.s) * 0.7 * b.s; b.piv.rotation.x = 0.9 + Math.sin(t * 0.9 + b.s * 2) * 0.35; }
   if (WD.glow) { const o = Math.min(0.5, st.flash * 0.32) * (WD.mode === "board" ? 1 : 0); if (Math.abs(o - (WD.glowO || 0)) > 0.015) { WD.glowO = o; WD.glow.style.opacity = o.toFixed(3); WD.glow.style.setProperty("--wfc", st.fc.map((v) => Math.round(v * 255)).join(",")); } }
@@ -27559,7 +27616,7 @@ function wdBack(now) {
   const st = WD.st; WD.mode = "back"; document.body.classList.remove("v2w-dj", "v2w-clip", "v2w-fly");
   if (!st) { WD.mode = "board"; document.body.classList.remove("v2w-away"); return; }
   document.body.classList.remove("v2w-wide");
-  const fin = () => { WD.mode = "board"; document.body.classList.remove("v2w-away"); wdUnproject(st); wdVidOff(st); wdSize(WD.qb || wdQmax()); WD.sig = ""; wdIdleArt(true); };
+  const fin = () => { WD.mode = "board"; WD.fitF = null; wdTeamFree(); document.body.classList.remove("v2w-away"); wdUnproject(st); wdVidOff(st); wdSize(WD.qb || wdQmax()); WD.sig = ""; wdIdleArt(true); };
   setTimeout(() => { if (WD.mode !== "clip" && WD.mode !== "dj") wdUnproject(st); }, 520);
   if (now) { st.fly = null; st.hold = st.shots.board; if (st.near0 != null) st.cam.near = st.near0; fin(); return; }
   wdFly(st, st.shots.board, 2100, WD.V.fwR * 0.6, fin);
@@ -27587,8 +27644,10 @@ window.SBW = {
     // a video on the board: the near plane a little over half way to the screen, so the seats, walls and roof the camera
     // ends up in or behind are cut away and the board's in clear view (not at the DJ's stage, built into the stands)
     // (the DJ's stage is built into the stands: the rows in front of it are cut away too)
-    const to = wdFrame(st, F, dj ? 0.5 : 0.56, dj && !st.room ? 0.1 : undefined); to.nr = to.d * (dj ? (st.room ? 0 : 0.7) : 0.58);
+    wdTeamFree(); WD.fitF = dj ? null : F;
+    const to = (!dj && wdFit(st, F)) || wdFrame(st, F, dj ? 0.5 : 0.56, dj && !st.room ? 0.1 : undefined); if (!to.fit) to.nr = to.d * (dj ? (st.room ? 0 : 0.7) : 0.58);
     wdFly(st, to, dj ? 2600 : 2100, WD.V.fwR * (dj ? 0.5 : 0.35), show);
+    if (!dj) for (const ms of [60, 700, 2300]) setTimeout(() => { if (go === WD.go) wdRefit(); }, ms);
     return true;
   },
   clipEnd() { if (!WD.st || WD.mode === "board" || WD.mode === "back") return; WD.go++; wdBack(false); },
