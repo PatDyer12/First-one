@@ -6952,8 +6952,8 @@ body.v2w.v2w-in #jumbo .jb-x { position: fixed; top: 12px; right: 18px; margin: 
 /* our own videos play in the building (a texture on the jumbotron, the suite's glass); the page's copies just keep time */
 body.v2w.v2w-tex #pipVid, body.v2w.v2w-tex #jbWash, body.v2w.v2w-tex #djCv, body.v2w.v2w-tex #jbNp { opacity: .001 !important; }
 /* a cash: the building's own moment plays first, the show's frame stays clear until the card comes out */
-body.v2w .cs.v2x.wact { background: none !important; }
-.cs.v2x.wact .v2-st, .cs.v2x.wact .v2-gl, .cs.v2x.wact .v2-flash { opacity: 0 !important; }
+body.v2w .cs.wact { background: none !important; }
+.cs.wact > *, .cs.v2x.wact .v2-st, .cs.v2x.wact .v2-gl, .cs.v2x.wact .v2-flash { opacity: 0 !important; }
 /* a win or a miss plays in the building: the show draws only its light, the world shows through behind a soft vignette, and
    the board steps out of the way while it's on */
 body.v2w .cs.v2x { background: radial-gradient(ellipse 78% 72% at 50% 52%, rgba(2,3,6,.36), rgba(2,3,6,.72) 100%); }
@@ -7020,6 +7020,8 @@ body.v2b .rb-g.hero .rb-gh .tm .sc { flex: none; min-width: clamp(44px, 8.6cqw, 
 body.v2b .rb-g.hero .rb-gh .mid { padding: 0 clamp(6px, 1.4cqw, 14px); }
 @container (max-width: 620px) { body.v2b .rb-g.hero .rb-gh .to { display: none; } }
 @container (max-width: 480px) { body.v2b .rb-g.hero .rb-gh .sub em { display: none; } }
+
+#updReady { position: fixed; right: 18px; bottom: 58px; z-index: 60; padding: 7px 12px; border-radius: 8px; background: rgba(8,10,14,.82); color: #ffd36a; font: 700 13px Inter, sans-serif; letter-spacing: .02em; box-shadow: inset 0 0 0 1px rgba(255,211,106,.35); pointer-events: none; }
 </style>
 </head>
 <body>
@@ -12800,10 +12802,12 @@ body.v2b .rb-g.hero .rb-gh .mid { padding: 0 clamp(6px, 1.4cqw, 14px); }
     el.style.setProperty("--c", c.grp.R[0].col); el.style.setProperty("--pk", "0");
     el.innerHTML = `<div class="cs-bg"></div><div class="cs-box">${grpChrome(c)}<div class="cs-acts"></div></div>`;
     showFit(el); SHOW.fr = { n: 0, t: 0 };
-    el.hidden = false; void el.offsetWidth; el.classList.add("on");
+    el.hidden = false; void el.offsetWidth;
     SHOW.on = true; SHOW.t0 = performance.now(); SHOW.fxId = fxRun; SHOW.slot = 0; document.body.classList.add("cs-live");
     el.style.pointerEvents = "auto"; el.onclick = showSkip; document.addEventListener("keydown", showKey, true);
-    grpMusic(c);
+    const D = cashAct(lead, tot, { lvl, call: "Group win", nm: names.slice(0, 3).join(" + "), pick: lead.pick, amt: fU(tot, true), usd: fUSD(tot * U, true), odds: `${R.length} riding` });
+    if (D) { el.classList.add("wact"); SHOW.t0 += D; T += D; snSound("whoosh", 0.5, 0); shAt(D - 250, () => { el.classList.remove("wact"); el.classList.add("on"); }); } else el.classList.add("on");
+    if (D) shAt(D, () => grpMusic(c)); else grpMusic(c);
     if (want3) {
       const id = SHOW.id, giveUp = setTimeout(() => el.classList.remove("wait3d"), 2500);
       SB3D.start(el.querySelector(".cs-box"), Object.assign(show3Info(c, el), { grp: c.grp, call: "Group win", name: names.join(" + ") })).then((st) => {
@@ -12813,7 +12817,7 @@ body.v2b .rb-g.hero .rb-gh .mid { padding: 0 clamp(6px, 1.4cqw, 14px); }
         if (c.curAct) SB3D.act(c.curAct.k, c.curAct.ms - (performance.now() - c.curAct.at));
       }).catch(() => { clearTimeout(giveUp); el.classList.remove("wait3d"); });
     }
-    acts.forEach((a, i) => shAt(a.t0, () => showAct3(el, c, a, i)));
+    acts.forEach((a, i) => shAt(a.t0 + D, () => showAct3(el, c, a, i)));
     showLoop(el);
     el._t = setTimeout(() => { el.classList.add("out"); el._t2 = setTimeout(() => { showClear(); el.hidden = true; el.innerHTML = ""; el.style.pointerEvents = ""; el.onclick = null; }, 600); }, T - 600);
     return T;
@@ -13116,6 +13120,12 @@ void main(){
     const el = (typeof ED_KIND !== "undefined" && ED_KIND[a.k]) || "gold", tier = V2_TIER.find(([n]) => a.n >= n), pips = a.isNew ? 0 : a.n >= 10 ? 3 : a.n >= 5 ? 2 : a.n >= 3 ? 1 : 0;
     return `<div class="v2-ach bt-c-${a.k} ak-${el}${a.isNew ? " new" : " rep"}"><div class="v2-ach-md"><i class="v2-ach-fx"></i><svg viewBox="0 0 120 120"><circle class="trk" cx="60" cy="60" r="54"/><circle class="fil" cx="60" cy="60" r="54"/></svg><i class="v2-ach-ic">${BT_DEF[a.k][0]}</i>${a.isNew ? "<b>NEW</b>" : ""}</div>
       <div class="v2-ach-t"><em>${a.isNew ? "Achievement unlocked" : "Achievement"}</em><b>${a.lv ? "Live " : ""}${esc(BT_DEF[a.k][1])}</b><small>${a.isNew ? esc(BT_HOW[a.k] || "") : esc(`×${a.n} career${tier ? " · " + tier[1] : ""}`)}</small>${pips ? `<span class="v2-ach-pp">${[1, 2, 3].map((i) => `<i class="${i <= pips ? "on" : ""}"></i>`).join("")}</span>` : ""}</div></div>`;
+  }
+  // the building's own set piece for a cash that isn't a single card (several at once, a group ride): the bet that leads it
+  // gives the colors and the team; o: what's written on it. The ms it holds the floor (0: none here)
+  function cashAct(b, n, o) {
+    try { if (!window.SBW || !SBW.act) return 0; const g = b.sel ? gameOf(b.sel) : null, t = v2Team(b.sel, g), P = v2Pal(t, personCol(b)), lvl = Math.max(2, showLevel(b, flexOf(b), n));
+      return SBW.act(Object.assign({ lvl, call: "Cashed", nm: personName(b), pick: b.pick, amt: fU(n, true), usd: fUSD(n * S.unit, true), odds: fOdds(b.odds), P, t }, o)) || 0; } catch (e) { return 0; }
   }
   function hitV2({ b, n, names }) {
     showClear();
@@ -14161,6 +14171,8 @@ void main(){
     const mlG = (mlOn.find((G) => G.g.id === SCN.last) || mlOn[0] || {}).g;
     if (mlG) pick = mlG;
     { const ft = window.__sbFeat && window.__sbFeat(); if (ft && fb(ft)) pick = ft; }
+    if (window.__sbSunRoom && window.__sbSunRoom()) pick = null;
+    else if (!pick && on.length) pick = [...on].sort((x, y) => (nb.get(y.id) || 0) - (nb.get(x.id) || 0) || x.t - y.t)[0];
     const riv = on.filter((g) => (g.sport === "CFB" ? cfRiv(g) : arRiv(g)) && nb.get(g.id)).sort((x, y) => nb.get(y.id) - nb.get(x.id))[0];
     if (!pick && riv) pick = riv;
     const games = [...on].sort((x, y) => (nb.get(y.id) || 0) - (nb.get(x.id) || 0) || x.t - y.t);
@@ -14244,11 +14256,13 @@ void main(){
     el.innerHTML = `<div class="cs-bg"></div><div class="cs-hud"><i class="c1"></i><i class="c2"></i><i class="c3"></i><i class="c4"></i><span class="cs-l"><i></i>Sweep · ${items.length} cashed</span><span class="cs-r">${esc(etClock(Date.now()))}</span></div>
       <div class="cs-sw">${items.slice(0, 5).map((x, i) => `<div class="cs-swc" style="--i:${i}">${x.b.kind === "parlay" ? ppParlay(x.b) : ppTicket(x.b)}<div class="cs-stamp"><span>Cashed</span></div><b class="num">${fU(x.n, true)}</b></div>`).join("")}</div>
       <div class="cs-pay sw"><b class="num" id="csAmt">+0u</b><span>${esc(people.join(" · "))}</span></div>`;
-    el.hidden = false; void el.offsetWidth; el.classList.add("on");
-    items.slice(0, 5).forEach((_, i) => snSound("slam", 0.6, 700 + i * 260));
-    setTimeout(() => { playWin(); playSfx("coins", 0.6); }, 900);
-    cashCount(el, "#csAmt", tot, 900 + items.length * 260, 1400);
-    const T = 6200 + Math.min(5, items.length) * 260;
+    el.hidden = false; void el.offsetWidth;
+    const lead = items.slice().sort((x, y) => y.n - x.n)[0], D = cashAct(lead.b, lead.n, { lvl: Math.max(3, items.length), call: "Sweep", nm: people.slice(0, 2).join(" + "), pick: `${items.length} cashed`, amt: fU(tot, true), usd: fUSD(tot * S.unit, true), odds: `${items.length} for ${items.length}` });
+    if (D) { el.classList.add("wact"); snSound("whoosh", 0.5, 0); setTimeout(() => { el.classList.remove("wact"); el.classList.add("on"); }, D - 250); } else el.classList.add("on");
+    items.slice(0, 5).forEach((_, i) => snSound("slam", 0.6, D + 700 + i * 260));
+    setTimeout(() => { playWin(); playSfx("coins", 0.6); }, D + 900);
+    cashCount(el, "#csAmt", tot, D + 900 + items.length * 260, 1400);
+    const T = D + 6200 + Math.min(5, items.length) * 260;
     el._t = setTimeout(() => { el.classList.add("out"); el._t2 = setTimeout(() => { el.hidden = true; el.innerHTML = ""; }, 600); }, T - 600);
     return T;
   }
@@ -14562,12 +14576,15 @@ void main(){
   // ---------- sheets ----------
   function openSheet(id) { $(id).hidden = false; }
   // keep every open screen current: when a new version is up, reload it (never mid-form or mid-animation)
-  const BUILD = "20261031032610";
+  const BUILD = "20261031202031";
+  function updReady() {
+    if (document.getElementById("updReady")) return; const d = document.createElement("div"); d.id = "updReady"; d.textContent = "Update ready · refresh, then TV + Sound on"; document.body.append(d);
+  }
   function checkBuild() {
     if (BUILD === "dev") return;
     fetch("version.json?t=" + Date.now(), { cache: "no-store" }).then((r) => (r.ok ? r.json() : null)).then((j) => {
       if (!j || !j.v || j.v === BUILD) return;
-      if (document.body.classList.contains("tv") && SND.on && SND.ctx && SND.ctx.state === "running" && [...S.games.values()].some((g) => g.st === "in") && Date.now() - (window.__sbLoad || 0) < 10 * 3600e3) { setTimeout(checkBuild, 5 * 60e3); return; }
+      if (document.body.classList.contains("tv") && SND.on && SND.ctx && SND.ctx.state === "running" && [...S.games.values()].some((g) => g.st === "in") && Date.now() - (window.__sbLoad || 0) < 10 * 3600e3) { updReady(); setTimeout(checkBuild, 5 * 60e3); return; }
       if (fxBusy || !$("#addSheet").hidden || !$("#setSheet").hidden || !$("#jumbo").hidden) { setTimeout(checkBuild, 20000); return; }
       // one try per version every 5 minutes, so a slow CDN can't cause a reload loop
       let tried = ""; try { tried = sessionStorage.getItem("sb-upd") || ""; } catch (e) {}
@@ -18699,26 +18716,35 @@ void main(){
   }
   const FEAT_PIN = [["2026-10-30", "LAL", "GS", "NBA"]];   // [ET day, away, home, league (when it isn't college or the NFL)]
   const FEAT = { id: "" };
-  const featEt = (t) => { const p = {}; for (const x of new Intl.DateTimeFormat("en-CA", { timeZone: "America/New_York", year: "numeric", month: "2-digit", day: "2-digit", weekday: "short", hour: "2-digit", hourCycle: "h23" }).formatToParts(new Date(t))) p[x.type] = x.value; return { day: `${p.year}-${p.month}-${p.day}`, wd: p.weekday, hr: Number(p.hour) }; };
+  const featEt = (t) => { const p = {}; for (const x of new Intl.DateTimeFormat("en-CA", { timeZone: "America/New_York", year: "numeric", month: "2-digit", day: "2-digit", weekday: "short", hour: "2-digit", minute: "2-digit", hourCycle: "h23" }).formatToParts(new Date(t))) p[x.type] = x.value; return { day: `${p.year}-${p.month}-${p.day}`, wd: p.weekday, hr: Number(p.hour), mi: Number(p.minute) }; };
+  // the war room is Sunday's 1 o'clock NFL window's (12:30 till the 4 o'clock kickoffs); every other time it's a building
+  const sunRoom = (now = Date.now()) => { const k = featEt(now), m = k.hr * 60 + k.mi; return k.wd === "Sun" && m >= 12 * 60 + 30 && m < 16 * 60 + 5; };
+  window.__sbSunRoom = () => sunRoom();
   function featGame() {
     if (GUEST || PHONE()) return null;
     const now = Date.now(), fbAll = [...S.games.values()].filter((g) => (g.sport === "CFB" || g.sport === "NFL") && g.a && g.h);
     // a pinned game has the night from 3 hours before its kickoff (nothing earlier that night takes the stadium from it)
     const pinned = [...S.games.values()].find((g) => g.a && g.h && g.st !== "post" && g.t - now < 3 * 3600e3 && FEAT_PIN.some(([d, a, h]) => featEt(g.t).day === d && g.a.ab === a && g.h.ab === h));
     if (pinned) { FEAT.id = pinned.id; return pinned; }
-    const cand = fbAll.filter((g) => g.st === "in" || (g.st === "pre" && g.t - now < 30 * 60e3 && now - g.t < 4 * 3600e3));
+    if (sunRoom(now)) { FEAT.id = ""; return null; }
+    const live = (g) => g.st === "in" || (g.st === "pre" && g.t - now < 30 * 60e3 && now - g.t < 4 * 3600e3);
+    const cand = [...S.games.values()].filter((g) => g.a && g.h && /^(NFL|CFB|NBA|NHL|CBB|MLB)$/.test(g.sport || "") && live(g));
     if (!cand.length) { FEAT.id = ""; return null; }
-    const units = new Map();
-    for (const b of S.bets.values()) { if (b.status !== "open" || isGone(b)) continue; const u = Number(b.units) || 0; for (const id of new Set(selsOf(b).map((x) => String(x.g)))) units.set(id, (units.get(id) || 0) + u); }
-    const uOf = (g) => units.get(g.id) || 0, rk = (t) => (t.rk && t.rk <= 25 ? 26 - t.rk : 0);
+    // the game with the most of your units on it (then the room's): its building, whatever the sport. It holds until
+    // another one's ahead by half a unit
+    const mine = new Map(), room = new Map();
+    for (const b of S.bets.values()) { if (b.status !== "open" || isGone(b)) continue; const u = Number(b.units) || 0;
+      for (const id of new Set(selsOf(b).map((x) => String(x.g)))) { room.set(id, (room.get(id) || 0) + u); if (isMe(b)) mine.set(id, (mine.get(id) || 0) + u); } }
+    const mU = (g) => mine.get(g.id) || 0, rU = (g) => room.get(g.id) || 0, rk = (t) => (t.rk && t.rk <= 25 ? 26 - t.rk : 0);
     const big = (g) => (g.sport === "NFL" ? 40 : 0) + (/^(ESPN|ABC|FOX|NBC|CBS|Prime Video|NFL Network|Peacock|Netflix)$/.test(g.net || "") ? 15 : /ESPN2|FS1|BTN|SEC Network|ACC Network/.test(g.net || "") ? 6 : 0) + rk(g.a) + rk(g.h) + (g.st === "in" ? 5 : 0);
-    const pin = cand.find((g) => FEAT_PIN.some(([d, a, h]) => featEt(g.t).day === d && g.a.ab === a && g.h.ab === h));
-    const ok = cand.filter((g) => { const k = featEt(g.t); return k.wd === "Sat" || (["Thu", "Fri", "Sun", "Mon"].includes(k.wd) && (k.hr >= 19 || k.hr < 4)); });
-    let pick = pin || null;
-    if (!pick && ok.length) {
-      ok.sort((x, y) => uOf(y) - uOf(x) || big(y) - big(x));
-      const cur = ok.find((g) => g.id === FEAT.id);
-      pick = cur && uOf(ok[0]) - uOf(cur) < 0.5 ? cur : ok[0];
+    const ahead = (x, y) => mU(x) - mU(y) >= 0.5 || (Math.abs(mU(x) - mU(y)) < 0.5 && rU(x) - rU(y) >= 0.5);
+    let pick = null;
+    const on = cand.filter((g) => rU(g) > 0).sort((x, y) => mU(y) - mU(x) || rU(y) - rU(x) || big(y) - big(x));
+    if (on.length) { const cur = on.find((g) => g.id === FEAT.id); pick = cur && !ahead(on[0], cur) ? cur : on[0]; }
+    else {
+      // nobody's on anything: the biggest football game on in prime time (or on a Saturday)
+      const ok = cand.filter((g) => (g.sport === "CFB" || g.sport === "NFL") && ((k) => k.wd === "Sat" || (["Thu", "Fri", "Sun", "Mon"].includes(k.wd) && (k.hr >= 19 || k.hr < 4)))(featEt(g.t)));
+      if (ok.length) { ok.sort((x, y) => big(y) - big(x)); const cur = ok.find((g) => g.id === FEAT.id); pick = cur || ok[0]; }
     }
     FEAT.id = pick ? pick.id : "";
     return pick;
@@ -27093,7 +27119,7 @@ function wdActTick(st, dt) {
   // on the clock, not the frames: it's done when the card comes out however the machine's keeping up (__actDt: frame by frame, for checking)
   const A = st.act; if (!A) return; A.t = window.__actDt ? A.t + dt : (performance.now() - A.t0) / 1000; const t = A.t, THREE = st.THREE;
   // the show's gone (over, or skipped): everything goes, the camera back to the board
-  const on = !!document.querySelector(".cs.v2x.show:not([hidden]):not(.out)");
+  const ce = document.getElementById("cash"), on = !!(ce && !ce.hidden && !ce.classList.contains("out"));
   if (!A.out && (!on && t > 0.5 || t > A.ms + 40)) { A.out = t; if (WD.mode === "act" || WD.mode === "show") { WD.mode = "board"; WD.showing = false; document.body.classList.remove("v2w-show"); wdFly(st, st.shots.board, 2000, (WD.V.fwR || 30) * 0.3); } }
   // its own time's up but the card's still on: the camera goes to the show's shot, the piece stays up behind it
   if (!A.out && !A.held && t >= A.ms) { A.held = true; if (WD.mode === "act") { WD.mode = "show"; WD.showing = true; wdFly(st, st.shots.cel || st.shots.board, 1700, (WD.V.fwR || 30) * 0.25); } document.body.classList.remove("v2w-act"); }
@@ -27850,7 +27876,7 @@ function wdLoop(now) {
   if (!wdTv() || document.hidden) { WD.r.domElement.style.visibility = "hidden"; return; }
   WD.r.domElement.style.visibility = "";
   // a win or a miss on: the board steps aside, the camera turns to the crowd, and back after
-  { const on = !!document.querySelector(".cs.v2x.show:not([hidden]):not(.out)"); if (on !== !!WD.showing) { WD.showing = on; document.body.classList.toggle("v2w-show", on); wdShowCam(st, on); } }
+  { const on = !!document.querySelector(".cs.v2x.show:not([hidden]):not(.out), .cs.wact:not([hidden])"); if (on !== !!WD.showing) { WD.showing = on; document.body.classList.toggle("v2w-show", on); wdShowCam(st, on); } }
   // a show over the building: 30 fps, 15 on a screen that's already been turned down or that falls behind during it
   if (WD.mode === "show" && gap < 1000) WD.ss = Math.max(0, Math.min(40, (WD.ss || 0) + (gap > 60 ? 1 : -1)));
   const slowShow = (WD.qb && WD.qb < 0.5) || (WD.ss || 0) > 20;
