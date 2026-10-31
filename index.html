@@ -14542,7 +14542,7 @@ void main(){
   // ---------- sheets ----------
   function openSheet(id) { $(id).hidden = false; }
   // keep every open screen current: when a new version is up, reload it (never mid-form or mid-animation)
-  const BUILD = "20261030211718";
+  const BUILD = "20261031005251";
   function checkBuild() {
     if (BUILD === "dev") return;
     fetch("version.json?t=" + Date.now(), { cache: "no-store" }).then((r) => (r.ok ? r.json() : null)).then((j) => {
@@ -27448,7 +27448,7 @@ function wdLoop(now) {
   if (!wdTv() || document.hidden) { WD.r.domElement.style.visibility = "hidden"; return; }
   WD.r.domElement.style.visibility = "";
   // a win or a miss on: the board steps aside, the camera turns to the crowd, and back after
-  { const on = !!document.querySelector(".cs.v2x.show"); if (on !== !!WD.showing) { WD.showing = on; document.body.classList.toggle("v2w-show", on); wdShowCam(st, on); } }
+  { const on = !!document.querySelector(".cs.v2x.show:not([hidden]):not(.out)"); if (on !== !!WD.showing) { WD.showing = on; document.body.classList.toggle("v2w-show", on); wdShowCam(st, on); } }
   // a show over the building: 30 fps, 15 on a screen that's already been turned down or that falls behind during it
   if (WD.mode === "show" && gap < 1000) WD.ss = Math.max(0, Math.min(40, (WD.ss || 0) + (gap > 60 ? 1 : -1)));
   const slowShow = (WD.qb && WD.qb < 0.5) || (WD.ss || 0) > 20;
@@ -27477,7 +27477,20 @@ function wdShowCam(st, on) {
   else if (!on && WD.mode === "show") { WD.mode = "board"; wdFly(st, st.shots.board, 2000, (WD.V.fwR || 30) * 0.3); }
 }
 // keep up with the board: start or stop with TV, rebuild when the sport or the teams change, scores that light it up
+// the board is never left set aside: with nothing on (no video or set up, no celebration, no card), anything still hiding
+// it two looks running (4 s) is cleared and the camera comes back
+function wdHeal() {
+  const b = document.body, jb = document.getElementById("jumbo"), cs = document.getElementById("cash");
+  const clip = !!(jb && !jb.hidden && !jb.classList.contains("out")), show = !!document.querySelector(".cs.v2x.show:not([hidden]):not(.out)") || !!(cs && !cs.hidden && cs.classList.contains("show") && !cs.classList.contains("out"));
+  const card = ["playCard", "legCard"].some((id) => { const e = document.getElementById(id); return e && !e.hidden; });
+  const stuck = !clip && !show && !card && (b.classList.contains("v2w-away") || b.classList.contains("v2w-show") || b.classList.contains("covered"));
+  WD.healN = stuck ? (WD.healN || 0) + 1 : 0; if (WD.healN < 2) return;
+  WD.healN = 0; console.warn("board: set aside with nothing on, back");
+  b.classList.remove("v2w-show", "covered"); WD.showing = false;
+  if (WD.st && (WD.mode === "clip" || WD.mode === "dj" || WD.mode === "show")) { WD.go++; wdBack(false); } else b.classList.remove("v2w-away", "v2w-fly", "v2w-in", "v2w-dj", "v2w-clip", "v2w-proj", "v2w-tex");
+}
 function wdPoll() {
+  try { wdHeal(); } catch (e) {}
   if (!wdOn() || !wdTv()) { if (WD.st) wdStop(); return; }
   if (!WD.st) { wdStart(); return; }
   const R = wdRead(), k = wdKey(R);
