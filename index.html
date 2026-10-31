@@ -14542,7 +14542,7 @@ void main(){
   // ---------- sheets ----------
   function openSheet(id) { $(id).hidden = false; }
   // keep every open screen current: when a new version is up, reload it (never mid-form or mid-animation)
-  const BUILD = "20261031005251";
+  const BUILD = "20261031011517";
   function checkBuild() {
     if (BUILD === "dev") return;
     fetch("version.json?t=" + Date.now(), { cache: "no-store" }).then((r) => (r.ok ? r.json() : null)).then((j) => {
@@ -25029,10 +25029,13 @@ function wdPartyBuild(st) {
 // the shots around the room during a set
 function wdPartyShot(st, k) {
   const THREE = st.THREE, F = st.djFace(), right = new THREE.Vector3(0, 1, 0).cross(F.n).normalize(), d = F.w * 1.4, ctr = new THREE.Vector3(st.V.cx, 0, st.V.cz), R = st.V.fwR || 30;
-  if (k === 0) return wdFrame(st, F, 0.46);
-  if (k === 1) return { p: F.c.clone().add(F.n.clone().multiplyScalar(d * 3.4)).setY(Math.max(4, F.c.y * 0.35)), l: F.c.clone().add(new THREE.Vector3(0, F.h * 0.6, 0)), f: 58 };
+  // the stage is built into the stands: every shot of it cuts away what's between the camera and the DJ (the rows in front,
+  // the stage's own side walls), its near plane a little past half way there
+  const cut = (sh, k2) => Object.assign(sh, { nr: sh.p.distanceTo(F.c) * (k2 || 0.6) });
+  if (k === 0) { const s0 = wdFrame(st, F, 0.5, 0.1); s0.nr = s0.d * 0.7; return s0; }
+  if (k === 1) return cut({ p: F.c.clone().add(F.n.clone().multiplyScalar(d * 1.25)).add(right.clone().multiplyScalar(-d * 0.95)).add(new THREE.Vector3(0, F.h * 1.05, 0)), l: F.c.clone().add(right.clone().multiplyScalar(-d * 0.12)).add(new THREE.Vector3(0, F.h * 0.2, 0)), f: 50 }, 0.74);
   if (k === 2) return { p: ctr.clone().add(F.n.clone().multiplyScalar(-R * 0.5)).add(new THREE.Vector3(0, R * 2.4, 0)), l: ctr.clone().add(F.n.clone().multiplyScalar(-R * 0.9)), f: 62 };
-  return { p: F.c.clone().add(F.n.clone().multiplyScalar(d * 1.6)).add(right.clone().multiplyScalar(d * 1.3)).add(new THREE.Vector3(0, F.h * 0.4, 0)), l: F.c.clone().add(right.clone().multiplyScalar(-d * 0.4)), f: 50 };
+  return cut({ p: F.c.clone().add(F.n.clone().multiplyScalar(d * 1.15)).add(right.clone().multiplyScalar(d * 0.6)).add(new THREE.Vector3(0, F.h * 1.0, 0)), l: F.c.clone().add(new THREE.Vector3(0, F.h * 0.15, 0)), f: 46 }, 0.74);
 }
 function wdPartyTick(st, now, dt, t) {
   const P = st.party; if (!P) return 0;
@@ -26274,7 +26277,7 @@ function wdFbBoard(st, J) {
   g.add(new THREE.Mesh(new THREE.BoxGeometry(J.w + 3, J.h + 3, 2), dark));
   const m = wdScreenMat(THREE, st.jtex, J.w / J.h, st.otex), s = new THREE.Mesh(new THREE.PlaneGeometry(J.w, J.h), m); s.position.z = 1.02; g.add(s); st.screens.push(s);
   if (J.legs) for (const s2 of [-1, 1]) { const leg = new THREE.Mesh(new THREE.BoxGeometry(2, J.p[1], 2), dark); leg.position.set(s2 * J.w * 0.3, -J.p[1] / 2, -0.5); g.add(leg); }
-  if (J.base != null) { const hh = J.p[1] - J.h / 2 - (J.base - 3); const sup = new THREE.Mesh(new THREE.BoxGeometry(J.w + 3, hh, 6), dark); sup.position.set(0, -J.h / 2 - hh / 2, -2.5); g.add(sup); }
+  if (J.base != null) { const hh = J.p[1] - J.h / 2 - (J.base - 3); const sup = new THREE.Mesh(new THREE.BoxGeometry(J.w + 2.6, hh, 6), dark); sup.position.set(0, -J.h / 2 - hh / 2 - 0.02, -2.6); g.add(sup); }
   const prev = st.jface; st.jface2 = () => ({ c: g.localToWorld(new THREE.Vector3(0, 0, 1.02)), n: n.clone(), w: J.w, h: J.h });
   st.jface = (camPos) => { const a = prev(camPos), b = st.jface2(); return !camPos || a.c.distanceTo(camPos) <= b.c.distanceTo(camPos) ? a : b; };
 }
@@ -26925,20 +26928,53 @@ function wdTeamArt(ctx, t, x, y, size, rot) {
   else { ctx.font = `900 ${Math.round(size * 0.42)}px "Barlow Condensed", Inter, sans-serif`; ctx.textAlign = "center"; ctx.textBaseline = "middle"; ctx.lineWidth = size * 0.04; ctx.strokeStyle = wdCss(t.alt); ctx.fillStyle = "#fff"; ctx.strokeText(t.ab, 0, 0); ctx.fillText(t.ab, 0, 0); }
   ctx.restore();
 }
+// the turf, made once: grass in close (blades, clumps, the odd darker patch) as a tile the field and the ground around it use
+function wdTurfTile(sz, seed) {
+  const c = wdCanvas(sz, sz), x = c.getContext("2d"), im = x.createImageData(sz, sz), d = im.data;
+  let r = seed || 7; const rnd = () => ((r = (r * 16807) % 2147483647) / 2147483647);
+  for (let i = 0; i < sz * sz; i++) { const v = 128 + (rnd() - 0.5) * 34; d[i * 4] = d[i * 4 + 1] = d[i * 4 + 2] = v; d[i * 4 + 3] = 255; }
+  x.putImageData(im, 0, 0);
+  // blades: short strokes, mostly upright, lighter and darker, wrapped at the edges so the tile repeats without a seam
+  for (let i = 0; i < sz * sz * 0.06; i++) { const px = rnd() * sz, py = rnd() * sz, l = 2 + rnd() * 5, a = (rnd() - 0.5) * 0.9, v = rnd() < 0.5 ? 168 + rnd() * 50 : 70 + rnd() * 40;
+    x.strokeStyle = `rgba(${v},${v},${v},${0.35 + rnd() * 0.4})`; x.lineWidth = 0.6 + rnd() * 0.6;
+    for (const [ox, oy] of [[0, 0], [-sz, 0], [0, -sz], [-sz, -sz]]) { x.beginPath(); x.moveTo(px + ox, py + oy); x.lineTo(px + ox + Math.sin(a) * l, py + oy - Math.cos(a) * l); x.stroke(); } }
+  // clumps, soft
+  for (let i = 0; i < 26; i++) { const px = rnd() * sz, py = rnd() * sz, rr = sz * (0.04 + rnd() * 0.1), dark = rnd() < 0.5;
+    for (const [ox, oy] of [[0, 0], [-sz, 0], [0, -sz], [-sz, -sz], [sz, 0], [0, sz]]) { const g = x.createRadialGradient(px + ox, py + oy, 0, px + ox, py + oy, rr); g.addColorStop(0, dark ? "rgba(0,0,0,.12)" : "rgba(255,255,255,.08)"); g.addColorStop(1, "rgba(0,0,0,0)"); x.fillStyle = g; x.fillRect(px + ox - rr, py + oy - rr, rr * 2, rr * 2); } }
+  return c;
+}
+const WD_TURF = {};
+const wdTurf = (sz, seed) => WD_TURF[sz + ":" + seed] || (WD_TURF[sz + ":" + seed] = wdTurfTile(sz, seed));
+// the field at 4096 across (34 px a yard): mowed stripes every 5 yards with a cross-cut sheen, grass all over it (two tiles at
+// different scales so nothing repeats), painted lines with a little of the grass through them, the end zones in the teams'
+// colors, numbers with their arrows, hash marks, the midfield logo
 function wdFieldNFL(T) {
-  const W = 2400, H = Math.round((W * 53.33) / 120), c = wdCanvas(W, H), x = c.getContext("2d"), k = W / 120;
-  for (let i = 0; i < 24; i++) { x.fillStyle = i % 2 ? "#2f7a37" : "#2a6f32"; x.fillRect(i * 5 * k, 0, 5 * k + 1, H); }
-  for (let i = 0; i < 2600; i++) { x.fillStyle = `rgba(0,0,0,${Math.random() * 0.05})`; x.fillRect(Math.random() * W, Math.random() * H, 3, 3); }
+  const W = 4096, H = Math.round((W * 53.33) / 120), c = wdCanvas(W, H), x = c.getContext("2d"), k = W / 120;
+  for (let i = 0; i < 24; i++) { x.fillStyle = i % 2 ? "#2f7d36" : "#2a7031"; x.fillRect(i * 5 * k, 0, 5 * k + 1, H); }
+  for (let j = 0; j < 6; j++) { x.fillStyle = j % 2 ? "rgba(255,255,255,.025)" : "rgba(0,0,0,.025)"; x.fillRect(10 * k, (j * H) / 6, 100 * k, H / 6 + 1); }
+  const sh = x.createLinearGradient(0, 0, W, H); sh.addColorStop(0, "rgba(255,255,255,.04)"); sh.addColorStop(0.5, "rgba(0,0,0,0)"); sh.addColorStop(1, "rgba(0,0,0,.08)"); x.fillStyle = sh; x.fillRect(0, 0, W, H);
+  for (const [t, a] of [[wdTurf(512, 11), 0.5], [wdTurf(331, 29), 0.35]]) { x.save(); x.globalCompositeOperation = "overlay"; x.globalAlpha = a; x.fillStyle = x.createPattern(t, "repeat"); x.fillRect(0, 0, W, H); x.restore(); }
+  // wear: a little darker between the hashes at midfield and in front of each goal line
+  for (const [cx, rw] of [[60, 26], [16, 8], [104, 8]]) { const g = x.createRadialGradient(cx * k, H / 2, 0, cx * k, H / 2, rw * k); g.addColorStop(0, "rgba(40,30,10,.07)"); g.addColorStop(1, "rgba(0,0,0,0)"); x.fillStyle = g; x.fillRect((cx - rw) * k, 0, rw * 2 * k, H); }
   for (const [s, x0] of [["a", 0], ["h", 110]]) { const t = T[s]; x.fillStyle = wdCss(t.col); x.fillRect(x0 * k, 0, 10 * k, H);
+    x.save(); x.globalCompositeOperation = "overlay"; x.globalAlpha = 0.35; x.fillStyle = x.createPattern(wdTurf(512, 11), "repeat"); x.fillRect(x0 * k, 0, 10 * k, H); x.restore();
     x.save(); x.translate((x0 + 5) * k, H / 2); x.rotate(s === "a" ? -Math.PI / 2 : Math.PI / 2); x.font = `900 ${Math.round(6.6 * k)}px "Barlow Condensed", Inter, sans-serif`; x.textAlign = "center"; x.textBaseline = "middle";
-    x.lineWidth = 0.5 * k; x.strokeStyle = wdCss(t.alt); x.fillStyle = "#fff"; const nm = (t.nm || t.ab).toUpperCase(); x.strokeText(nm, 0, 0); x.fillText(nm, 0, 0); x.restore(); }
-  x.strokeStyle = "#f4f6f2"; x.lineWidth = 0.25 * k;
-  for (let yd = 10; yd <= 110; yd += 5) { x.lineWidth = (yd === 10 || yd === 110 ? 0.45 : 0.22) * k; x.beginPath(); x.moveTo(yd * k, 0.3 * k); x.lineTo(yd * k, H - 0.3 * k); x.stroke(); }
-  x.lineWidth = 0.14 * k;
-  for (let yd = 11; yd < 110; yd++) { if (yd % 5 === 0) continue; for (const z of [0.4, 23.58, 29.75 - 0.6, 53.33 - 1.0]) { x.beginPath(); x.moveTo(yd * k, z * k); x.lineTo(yd * k, (z + 0.6) * k); x.stroke(); } }
-  x.lineWidth = 0.5 * k; x.strokeRect(0.25 * k, 0.25 * k, W - 0.5 * k, H - 0.5 * k);
-  x.fillStyle = "#f4f6f2"; x.font = `700 ${Math.round(2 * k)}px "Barlow Condensed", Inter, sans-serif`; x.textAlign = "center"; x.textBaseline = "middle";
-  for (let yd = 20; yd <= 100; yd += 10) { const n = String(50 - Math.abs(60 - yd)); for (const [z, r] of [[12, 0], [53.33 - 12, Math.PI]]) { x.save(); x.translate(yd * k, z * k); x.rotate(r); x.fillText(n, 0, 0); x.restore(); } }
+    x.lineJoin = "round"; x.lineWidth = 0.55 * k; x.strokeStyle = wdCss(t.alt); x.fillStyle = "#f6f6f2"; const nm = (t.nm || t.ab).toUpperCase(); x.strokeText(nm, 0, 0); x.fillText(nm, 0, 0); x.restore(); }
+  x.strokeStyle = "rgba(246,246,240,.94)"; x.fillStyle = "rgba(246,246,240,.94)"; x.lineCap = "butt";
+  for (let yd = 10; yd <= 110; yd += 5) { x.lineWidth = (yd === 10 || yd === 110 ? 0.22 : 0.11) * k; x.beginPath(); x.moveTo(yd * k, 0.6 * k); x.lineTo(yd * k, H - 0.6 * k); x.stroke(); }
+  x.lineWidth = 0.11 * k;
+  for (let yd = 11; yd < 110; yd++) { if (yd % 5 === 0) continue; for (const z of [0.6, 23.58, 29.75 - 0.67, 53.33 - 1.27]) { x.beginPath(); x.moveTo(yd * k, z * k); x.lineTo(yd * k, (z + 0.67) * k); x.stroke(); } }
+  // the two-point marks and the border
+  for (const yd of [13, 107]) { x.beginPath(); x.moveTo(yd * k, (53.33 / 2) * k); x.lineTo(yd * k + 0.33 * k * (yd < 60 ? 1 : -1), (53.33 / 2) * k); x.lineWidth = 0.33 * k; x.stroke(); }
+  x.lineWidth = 0.6 * k; x.strokeRect(0.3 * k, 0.3 * k, W - 0.6 * k, H - 0.6 * k);
+  // the numbers (six feet tall, their tops toward the sidelines) and the arrows pointing to the nearer goal
+  x.font = `700 ${Math.round(2 * k)}px "Barlow Condensed", Inter, sans-serif`; x.textAlign = "center"; x.textBaseline = "middle";
+  for (let yd = 20; yd <= 100; yd += 10) { const nv = 50 - Math.abs(60 - yd), n = String(nv);
+    for (const [z, r] of [[12, 0], [53.33 - 12, Math.PI]]) { x.save(); x.translate(yd * k, z * k); x.rotate(r); x.fillText(n, 0, 0);
+      if (nv !== 50) { const dir = (yd < 60 ? -1 : 1) * (r ? -1 : 1), ax = dir * 1.55 * k; x.beginPath(); x.moveTo(ax + dir * 0.5 * k, -0.62 * k); x.lineTo(ax, -0.9 * k); x.lineTo(ax, -0.34 * k); x.closePath(); x.fill(); }
+      x.restore(); } }
+  // grass through the paint, a touch
+  x.save(); x.globalCompositeOperation = "multiply"; x.globalAlpha = 0.12; x.fillStyle = x.createPattern(wdTurf(331, 29), "repeat"); x.fillRect(0, 0, W, H); x.restore();
   wdTeamArt(x, T.h, W / 2, H / 2, 13 * k);
   return c;
 }
@@ -27078,7 +27114,7 @@ function wdBuild(L, R) {
   const THREE = L.THREE, pf = R.sport === "mlb" ? wdPark(R) : null, V = fs ? wdFbVenue(fs) : as ? wdArVenue(as, R.sport) : pf ? Object.assign({}, WD_V.mlb, { tiers: WD_V.mlb.tiers.map((q) => Object.assign({}, q)), dome: pf.roof !== "open" ? 1 : 0, towers: pf.roof !== "open" ? [] : WD_V.mlb.towers }) : WD_V[R.sport];
   WD.V = V; const C = pf ? wdParkContour(pf) : wdContour(V), wallH = pf ? wdParkWall(pf) : null;
   if (pf) { WD.V = V; const cp = wdNorm(C, 0.125), w = 50, h = 28.1; V.jumbo = { p: [cp[0] + cp[2] * 31, 16 + h / 2 + 1.5, cp[1] + cp[3] * 31], face: [-cp[2], 0, -cp[3]], w, h, legs: 0, base: 16 }; }
-  const scene = new THREE.Scene(), cam = new THREE.PerspectiveCamera(V.board.f, innerWidth / innerHeight, 0.5, 4000), T = R.T, aniso = Math.min(8, WD.r.capabilities.getMaxAnisotropy());
+  const scene = new THREE.Scene(), cam = new THREE.PerspectiveCamera(V.board.f, innerWidth / innerHeight, R.sport === "nfl" || R.sport === "mlb" ? 1.6 : 0.5, 4000), T = R.T, aniso = Math.min(16, WD.r.capabilities.getMaxAnisotropy());
   const C1 = wdLift(T.h.col, 0.16), C2 = wdLift(T.h.alt, 0.2), C3 = wdLift(T.a.col, 0.16), haze = [0.03, 0.04, 0.07];
   const st = { THREE, scene, cam, V, C, R, mats: [], tex: [], disp: [], t0: performance.now(), look: new THREE.Vector3(...V.board.l), fly: null, hold: null, glows: [], fw: null, flash: 0, fc: [1, 1, 1], wave: 0, burst: 0, dim: 0 };
   const v3 = (a) => new THREE.Vector3(a[0], a[1], a[2]);
@@ -27099,7 +27135,16 @@ function wdBuild(L, R) {
   const court = () => (as ? wdArCourt(T, V, as) : wdCourt(T, V));
   const art = R.sport === "nfl" ? wdFieldNFL(T) : R.sport === "mlb" ? wdFieldMLB(V, C, pf) : R.sport === "nba" ? court() : wdRink(T, V);
   const ftex = wdTex(THREE, art, aniso); st.tex.push(ftex); st.fieldArt = () => (R.sport === "nfl" ? wdFieldNFL(T) : R.sport === "nba" ? court() : R.sport === "nhl" ? wdRink(T, V) : null);
-  const [fw, fh, fx0, fz0] = V.field, field = new THREE.Mesh(new THREE.PlaneGeometry(fw, fh), new THREE.MeshBasicMaterial({ map: ftex }));
+  const [fw, fh, fx0, fz0] = V.field, fmat = new THREE.MeshBasicMaterial({ map: ftex }), field = new THREE.Mesh(new THREE.PlaneGeometry(fw, fh), fmat);
+  // football: grass in close over the painted field (a fine tile every yard and a bit), and the same grass on the ground
+  // round it, so neither turns to flat colour on a 4K screen
+  if (R.sport === "nfl") {
+    const det = new THREE.CanvasTexture(wdTurf(256, 47)); det.wrapS = det.wrapT = THREE.RepeatWrapping; det.colorSpace = THREE.NoColorSpace; det.anisotropy = aniso; st.tex.push(det);
+    fmat.onBeforeCompile = (sh) => { sh.uniforms.uDet = { value: det }; sh.uniforms.uRep = { value: new THREE.Vector2(fw / 1.3, fh / 1.3) };
+      sh.fragmentShader = "uniform sampler2D uDet; uniform vec2 uRep;\n" + sh.fragmentShader.replace("#include <map_fragment>", "#include <map_fragment>\n  diffuseColor.rgb *= 0.7 + 0.6 * texture2D(uDet, vMapUv * uRep).r;"); };
+    if (!V.roof) { const gt = new THREE.CanvasTexture(wdTurf(256, 83)); gt.wrapS = gt.wrapT = THREE.RepeatWrapping; gt.colorSpace = THREE.NoColorSpace; gt.anisotropy = aniso; const rr = Math.max(V.A, V.B) * 3; gt.repeat.set(rr / 1.6, rr / 1.6); st.tex.push(gt);
+      ground.material.map = gt; ground.material.color.multiplyScalar(1.9); ground.material.needsUpdate = true; }
+  }
   field.rotation.x = -Math.PI / 2; field.position.set(fx0, 0, fz0); scene.add(field); st.field = field;
   // the decks
   const crowdU = () => ({ uSO: { value: 0 }, uT: { value: 0 }, uSeat: { value: R.sport === "nfl" ? 0.62 : 0.56 }, uRow: { value: 20 }, uWave: { value: 0 }, uWX: { value: 120 }, uFl: { value: V.roof ? 140 : 420 }, uLit: { value: 1 }, uFlash: { value: 0 }, uBurst: { value: 0 },
@@ -27192,9 +27237,9 @@ function wdBuild(L, R) {
   } else {
     const n = v3(J.face), box = new THREE.Mesh(new THREE.BoxGeometry(J.w + 3, J.h + 3, 2), dark); jg.add(box); jg.lookAt(jg.position.clone().add(n));
     const s = screen(J.w, J.h); s.position.z = 1.02; jg.add(s);
-    const top = new THREE.Mesh(new THREE.BoxGeometry(J.w + 3, 0.5, 2.1), trim); top.position.y = J.h / 2 + 1.5; jg.add(top);
+    const top = new THREE.Mesh(new THREE.BoxGeometry(J.w + 3.3, 0.5, 2.2), trim); top.position.y = J.h / 2 + 1.5; jg.add(top);
     const sign = wdTex(THREE, wdNeonArt("SWEAT BOARD", "#ffc94d")); st.tex.push(sign); const sg = new THREE.Mesh(new THREE.PlaneGeometry(J.w * 0.6, J.w * 0.15), new THREE.MeshBasicMaterial({ map: sign, transparent: true, blending: THREE.AdditiveBlending, depthWrite: false })); sg.position.set(0, J.h / 2 + 5.5, 1.1); jg.add(sg);
-    if (J.base != null) { const hh = J.p[1] - J.h / 2 - (J.base - 3); const sup = new THREE.Mesh(new THREE.BoxGeometry(J.w + 3, hh, 6), dark); sup.position.set(0, -J.h / 2 - hh / 2, -2.5); jg.add(sup); }
+    if (J.base != null) { const hh = J.p[1] - J.h / 2 - (J.base - 3); const sup = new THREE.Mesh(new THREE.BoxGeometry(J.w + 2.6, hh, 6), dark); sup.position.set(0, -J.h / 2 - hh / 2 - 0.02, -2.6); jg.add(sup); }
     if (J.legs) for (const s2 of [-1, 1]) { const leg = new THREE.Mesh(new THREE.BoxGeometry(2, J.p[1], 2), dark); leg.position.set(s2 * J.w * 0.3, -J.p[1] / 2, -0.5); jg.add(leg); }
     st.jface = () => ({ c: jg.localToWorld(new THREE.Vector3(0, 0, 1.02)), n: n.clone(), w: J.w, h: J.h });
   }
@@ -27256,9 +27301,9 @@ function wdShotFill(st) {
 }
 // a screen in frame: F (its center, normal, size) at fr of the picture's width, left of center so the floating panels have the
 // right side. d: how far out the camera is
-function wdFrame(st, F, fr) {
+function wdFrame(st, F, fr, offK) {
   const T = st.THREE, fov = 40, tv = Math.tan(((fov / 2) * Math.PI) / 180), asp = innerWidth / innerHeight;
-  const d = F.w / (fr * 2 * tv * asp), right = new T.Vector3(0, 1, 0).cross(F.n).normalize(), off = 0.38 * d * tv * asp, lift = F.h * 0.13;
+  const d = F.w / (fr * 2 * tv * asp), right = new T.Vector3(0, 1, 0).cross(F.n).normalize(), off = (offK ?? 0.38) * d * tv * asp, lift = F.h * 0.13;
   const p = F.c.clone().add(F.n.clone().multiplyScalar(d)).add(right.clone().multiplyScalar(off)).add(new T.Vector3(0, F.h * 0.12 + lift, 0));
   return { p, l: F.c.clone().add(right.multiplyScalar(off)).add(new T.Vector3(0, lift, 0)), f: fov, d };
 }
@@ -27399,11 +27444,11 @@ async function wdStart() {
       WD.r = new THREE.WebGLRenderer({ canvas: cv, antialias: false, alpha: false, powerPreference: "high-performance" });
       WD.r.outputColorSpace = THREE.LinearSRGBColorSpace; WD.r.setPixelRatio(1);
       cv.addEventListener("webglcontextlost", (e) => { e.preventDefault(); wdStop(); });
-      addEventListener("resize", () => wdSize(WD.q || WD.qb || 0.6, true));
+      addEventListener("resize", () => wdSize(WD.q || WD.qb || wdQmax(), true));
     }
     const R = wdRead(); WD.key = wdKey(R);
     for (const s of ["a", "h"]) if (R.T[s].lg) { const im = new Image(); im.crossOrigin = "anonymous"; im.referrerPolicy = "no-referrer"; im.onload = () => { if (WD.st && WD.st.R.T[s] === R.T[s]) wdRepaint(); }; im.src = R.T[s].lg; R.T[s].img = im; }
-    WD.st = wdBuild(L, R); WD.builtAt = Date.now(); wdSize(WD.qb || 0.6, true);
+    WD.st = wdBuild(L, R); WD.builtAt = Date.now(); wdSize(WD.qb || wdQmax(), true);
     document.body.classList.add("v2w"); WD.sig = ""; wdIdleArt(true);
     wdWarm(WD.st);
     if (!WD.raf) WD.raf = requestAnimationFrame(wdLoop);
@@ -27437,6 +27482,9 @@ function wdStop() {
   if (stg) try { if (window.__sbPipStop) window.__sbPipStop(); } catch (e) {}
   wdUnproject(WD.st); wdVidOff(WD.st); wdDispose(WD.st); WD.st = null; document.body.classList.remove("v2w", "v2w-away", "v2w-dj", "v2w-clip", "v2w-fly", "v2w-in");
 }
+// the picture at the screen's own resolution (a 4K TV's 3840 x 2160 when the page is 1920 wide at 2x), stepped down only if
+// this machine can't keep up
+const wdQmax = () => Math.min(2, Math.max(1, window.devicePixelRatio || 1));
 function wdSize(q, force) {
   if (!WD.r || (!force && q === WD.q)) return; WD.q = q;
   WD.r.setSize(Math.round(innerWidth * q), Math.round(innerHeight * q), false);
@@ -27455,7 +27503,7 @@ function wdLoop(now) {
   const showing = WD.mode === "board" && !!document.querySelector(".cs.show"), fps = WD.mode === "show" ? (slowShow ? 15 : st.fly ? 60 : 30) : st.fly ? 60 : WD.mode !== "board" ? 60 : showing ? 10 : 30;
   // a screen that can't keep up: draw it smaller, and if that's not enough, go back to the flat backgrounds
   if (WD.mode === "board" && !showing && !st.fly && gap < 1000) { WD.slow = Math.max(0, (WD.slow || 0) + (gap > 48 ? 1 : -1));
-    if (WD.slow > 240) { WD.slow = 0; if (WD.q > 0.46) { WD.qb = 0.45; wdSize(0.45, true); } else { WD.off = true; wdStop(); console.warn("world: too slow here, flat backgrounds"); return; } } }
+    if (WD.slow > 240) { WD.slow = 0; if (WD.q > 0.61) { WD.qb = Math.max(0.6, Math.round(WD.q * 78) / 100); wdSize(WD.qb, true); console.warn("world: stepping the picture down to", WD.qb); } else if (WD.q > 0.46) { WD.qb = 0.45; wdSize(0.45, true); } else { WD.off = true; wdStop(); console.warn("world: too slow here, flat backgrounds"); return; } } }
   if (now - WD.last < 1000 / fps - 3) return;
   const dt = Math.min(0.1, (now - (WD.last || now)) / 1000); WD.last = now; const t = (now - st.t0) / 1000;
   // the building's mood: flashes decay, the wave runs out, a miss dims the lights
@@ -27511,7 +27559,7 @@ function wdBack(now) {
   const st = WD.st; WD.mode = "back"; document.body.classList.remove("v2w-dj", "v2w-clip", "v2w-fly");
   if (!st) { WD.mode = "board"; document.body.classList.remove("v2w-away"); return; }
   document.body.classList.remove("v2w-wide");
-  const fin = () => { WD.mode = "board"; document.body.classList.remove("v2w-away"); wdUnproject(st); wdVidOff(st); wdSize(WD.qb || 0.6); WD.sig = ""; wdIdleArt(true); };
+  const fin = () => { WD.mode = "board"; document.body.classList.remove("v2w-away"); wdUnproject(st); wdVidOff(st); wdSize(WD.qb || wdQmax()); WD.sig = ""; wdIdleArt(true); };
   setTimeout(() => { if (WD.mode !== "clip" && WD.mode !== "dj") wdUnproject(st); }, 520);
   if (now) { st.fly = null; st.hold = st.shots.board; if (st.near0 != null) st.cam.near = st.near0; fin(); return; }
   wdFly(st, st.shots.board, 2100, WD.V.fwR * 0.6, fin);
@@ -27533,13 +27581,13 @@ window.SBW = {
       st.vid = { v: o.v, cv: document.getElementById("djCv"), mats, tex: null, kind: "", stack: stage, clock: dj && !o.house };
       if (mcam) wdDeckCamOn(st); else if (dj && !stage) wdDeckPlay(st, o.bpm); }
     else st.proj = { F, els: [o.v, document.getElementById("jbWash"), document.getElementById("djCv")].filter(Boolean) };
-    const go = ++WD.go, show = () => { if (go === WD.go) { document.body.classList.remove("v2w-fly"); if (WD.mode === "clip" || WD.mode === "dj") wdSize(1); } };
+    const go = ++WD.go, show = () => { if (go === WD.go) { document.body.classList.remove("v2w-fly"); if (WD.mode === "clip" || WD.mode === "dj") wdSize(Math.max(WD.qb || wdQmax(), Math.min(1, wdQmax()))); } };
     // never leave the panels hidden behind a camera move that didn't finish
     setTimeout(show, 4800);
     // a video on the board: the near plane a little over half way to the screen, so the seats, walls and roof the camera
     // ends up in or behind are cut away and the board's in clear view (not at the DJ's stage, built into the stands)
     // (the DJ's stage is built into the stands: the rows in front of it are cut away too)
-    const to = wdFrame(st, F, dj ? 0.5 : 0.56); to.nr = to.d * (dj ? (st.room ? 0 : 0.62) : 0.58);
+    const to = wdFrame(st, F, dj ? 0.5 : 0.56, dj && !st.room ? 0.1 : undefined); to.nr = to.d * (dj ? (st.room ? 0 : 0.7) : 0.58);
     wdFly(st, to, dj ? 2600 : 2100, WD.V.fwR * (dj ? 0.5 : 0.35), show);
     return true;
   },
@@ -27558,7 +27606,7 @@ window.SBW = {
       wdCard({ big: "NEW BET", l1: `${nm} · ${pk}`, l2: o.amt || "", c: wdMix(c, [0, 0, 0], 0.4) }, 20e3); }
   },
   // for checking a frame: hold the camera on a shot
-  shot(k) { const st = WD.st; if (!st) return; const s = k === "fill" ? wdShotFill(st) : k === "jview" ? wdFrame(st, st.jface(st.cam.position), 0.6) : k === "dview" ? wdFrame(st, st.djFace(), 0.56) : st.shots[k]; if (!s) return; if (k === "jview") s.nr = s.d * 0.58; st.fly = null; st.hold = s; st.holdShot = s; if (st.near0 == null) st.near0 = st.cam.near; st.cam.near = s.nr || st.near0; },
+  shot(k) { const st = WD.st; if (!st) return; const s = /^party\d$/.test(k) ? (st.partyShot || wdPartyShot)(st, +k.slice(5)) : k === "fill" ? wdShotFill(st) : k === "jview" ? wdFrame(st, st.jface(st.cam.position), 0.6) : k === "dview" ? wdFrame(st, st.djFace(), 0.56) : st.shots[k]; if (!s) return; if (k === "jview") s.nr = s.d * 0.58; st.fly = null; st.hold = s; st.holdShot = s; if (st.near0 == null) st.near0 = st.cam.near; st.cam.near = s.nr || st.near0; },
   look(p, l, f) { const st = WD.st; if (!st) return; const T = st.THREE, s = { p: new T.Vector3(...p), l: new T.Vector3(...l), f: f || 50 }; st.fly = null; st.hold = st.holdShot = s; },
   st: () => WD.st,
 };
