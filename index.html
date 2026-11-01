@@ -7582,9 +7582,13 @@ body.v2b .rb-g.hero .rb-gh .mid { padding: 0 clamp(6px, 1.4cqw, 14px); }
     return n > 0.004 ? "W" : n < -0.004 ? "L" : "P";
   }
   function dayStart(t) {
-    const d = new Date(t); d.setHours(4, 0, 0, 0);
+    const d = new Date(t); d.setHours(8, 0, 0, 0);   // a day on the board runs 8 AM to 8 AM
     if (t < d.getTime()) d.setDate(d.getDate() - 1);
     return d;
+  }
+  function bdT(t) {
+    if (t == null) t = Date.now(); const f = bdT.f || (bdT.f = new Intl.DateTimeFormat("en-US", { timeZone: "America/New_York", hour: "numeric", hourCycle: "h23" }));
+    return Number(f.format(new Date(t))) < 8 ? t - 12 * 3600e3 : t;
   }
   function rangeStart(r) {
     if (r === "all") return 0;
@@ -8182,7 +8186,7 @@ body.v2b .rb-g.hero .rb-gh .mid { padding: 0 clamp(6px, 1.4cqw, 14px); }
   function renderHero(settled, settledAll) {
     const s = stats(settled);
     $("#h-label").textContent = RANGE_LABEL[S.range];
-    $("#h-day").textContent = S.range === "day" ? new Date().toLocaleDateString([], { weekday: "long", month: "short", day: "numeric" }) : "";
+    $("#h-day").textContent = S.range === "day" ? new Date(bdT()).toLocaleDateString([], { weekday: "long", month: "short", day: "numeric" }) : "";
     const big = $("#h-net");
     big.dataset.sign = s.net > 0.004 ? "pos" : s.net < -0.004 ? "neg" : "zero";
     animateNum(big, s.net, (v) => fU(v, true));
@@ -14598,7 +14602,7 @@ void main(){
   // ---------- sheets ----------
   function openSheet(id) { $(id).hidden = false; }
   // keep every open screen current: when a new version is up, reload it (never mid-form or mid-animation)
-  const BUILD = "20261031210506";
+  const BUILD = "20261101043713";
   function updReady() {
     if (document.getElementById("updReady")) return; const d = document.createElement("div"); d.id = "updReady"; d.textContent = "Update ready · refresh, then TV + Sound on"; document.body.append(d);
   }
@@ -15567,10 +15571,10 @@ void main(){
   }
   function featKeys(now = Date.now()) {
     if (GUEST || PHONE()) return [];
-    const k = featEt(now), late = k.hr < 4; if (!["Thu", "Fri", "Sat", "Sun", "Mon"].includes(k.wd) && !late) return [];
+    const k = featEt(now), late = k.hr < 8; if (!["Thu", "Fri", "Sat", "Sun", "Mon"].includes(k.wd) && !late) return [];
     // (and the league of a game pinned for the night, whether or not anybody's on it)
-    const pins = [...new Set(FEAT_PIN.filter(([d, , , sp]) => sp && (d === k.day || (late && d === featEt(now - 6 * 3600e3).day))).map((x) => x[3]))];
-    const out = []; for (const d of late ? [now, now - 6 * 3600e3] : [now]) for (const sp of ["CFB", "NFL", ...pins]) { const key = sp + "|" + etDate(d); if (now - (boardAt.get(key) || 0) > 25e3) out.push(key); }
+    const pins = [...new Set(FEAT_PIN.filter(([d, , , sp]) => sp && (d === k.day || (late && d === featEt(bdT(now)).day))).map((x) => x[3]))];
+    const out = []; for (const d of late ? [now, bdT(now)] : [now]) for (const sp of ["CFB", "NFL", ...pins]) { const key = sp + "|" + etDate(d); if (now - (boardAt.get(key) || 0) > 25e3) out.push(key); }
     return out;
   }
   async function pollLive() { if (document.visibilityState === "visible") { loadFollow(); const k = [...new Set([...liveKeys(), ...followKeys(), ...featKeys()])]; if (k.length) await loadBoards(k); loadLines(); } }
@@ -15673,7 +15677,7 @@ void main(){
   // the bet form needs today's and tomorrow's games for every sport
   function loadPickerGames() {
     const now = Date.now(), keys = [];
-    for (const day of [now, now + 864e5]) for (const sp of Object.keys(ESPN)) { const k = sp + "|" + etDate(day); if (now - (boardAt.get(k) || 0) > 120e3) keys.push(k); }
+    for (const day of [bdT(now), now, now + 864e5]) for (const sp of Object.keys(ESPN)) { const k = sp + "|" + etDate(day); if (now - (boardAt.get(k) || 0) > 120e3 && !keys.includes(k)) keys.push(k); }
     return keys.length ? loadBoards(keys) : Promise.resolve();
   }
 
@@ -17410,7 +17414,7 @@ void main(){
   // the play card starts the clip's sound under it; when the card leaves, the video comes in at that same moment
 
   const CLIP_DAYS = new Set([1, 2, 3, 5]);   // Mon, Tue, Wed, Fri
-  const clipEveryNow = () => { const d = ({ Sun: 0, Mon: 1, Tue: 2, Wed: 3, Thu: 4, Fri: 5, Sat: 6 })[new Intl.DateTimeFormat("en-US", { timeZone: "America/New_York", weekday: "short" }).format(new Date(Date.now() - 4 * 3600e3))]; return CLIP_DAYS.has(d) ? 2 * 60e3 : 5 * 60e3; };
+  const clipEveryNow = () => { const d = ({ Sun: 0, Mon: 1, Tue: 2, Wed: 3, Thu: 4, Fri: 5, Sat: 6 })[new Intl.DateTimeFormat("en-US", { timeZone: "America/New_York", weekday: "short" }).format(new Date(bdT()))]; return CLIP_DAYS.has(d) ? 2 * 60e3 : 5 * 60e3; };
   const CLIP_MAX = 30e3; let CLIP_EVERY = clipEveryNow();
   setInterval(() => { CLIP_EVERY = clipEveryNow(); }, 60e3);
   let clipAt = Date.now() - CLIP_EVERY + 90e3, clipForce = false, clipClaim = null, clipTurn = 0, clipFadeT = 0;   // the first one a minute and a half in
@@ -19634,7 +19638,7 @@ void main(){
   const TK = { games: [], alerts: [], news: [], prev: new Map(), newsAt: 0, html: "", pending: null, lg: "" };
   // main sport: CFB, NFL, or auto (NFL on Sunday, Monday and Thursday, college the rest of the week)
   S.focus = S.focus || "auto";
-  const etDow = () => ({ Sun: 0, Mon: 1, Tue: 2, Wed: 3, Thu: 4, Fri: 5, Sat: 6 })[new Intl.DateTimeFormat("en-US", { timeZone: "America/New_York", weekday: "short" }).format(new Date())];
+  const etDow = () => ({ Sun: 0, Mon: 1, Tue: 2, Wed: 3, Thu: 4, Fri: 5, Sat: 6 })[new Intl.DateTimeFormat("en-US", { timeZone: "America/New_York", weekday: "short" }).format(new Date(bdT()))];   // the board's day (8 AM to 8 AM)
   const focusLeague = () => (document.body.classList.contains("hockey") ? "NHL" : document.body.classList.contains("baseball") ? "MLB" : DIR && DIR.sport && ESPN[DIR.sport] ? DIR.sport : [0, 1, 4].includes(etDow()) ? "NFL" : "CFB");
   function showFocus() { const r = document.querySelector(`input[name="focus"][value="${S.focus}"]`); if (r) r.checked = true; }
   function setFocus(v) { if (v === S.focus) return; S.focus = v; showFocus(); loadTicker(); }
@@ -19645,7 +19649,7 @@ void main(){
     try {
       const lg = focusLeague();
       if (lg !== TK.lg) { Object.assign(TK, { games: [], alerts: [], news: [], prev: new Map(), newsAt: 0, html: "", pending: null, lg }); $("#tkLbl").textContent = lg; $("#tkRun").innerHTML = ""; }
-      const r = await fetch(`https://site.api.espn.com/apis/site/v2/sports/${ESPN[lg]}/scoreboard?limit=300${lg === "CFB" ? `&groups=80&dates=${etDate(Date.now())}` : ""}`);
+      const r = await fetch(`https://site.api.espn.com/apis/site/v2/sports/${ESPN[lg]}/scoreboard?limit=300${lg === "CFB" ? `&groups=80&dates=${etDate(bdT())}` : lg === "NFL" ? "" : `&dates=${etDate(bdT())}`}`);
       if (!r.ok || lg !== TK.lg) return;
       const j = await r.json(), d = TK.games.length ? tvDelay() * 1000 : 0;
       if (d) setTimeout(() => tickerApply(j), d); else tickerApply(j);
@@ -25194,7 +25198,9 @@ function wdPartyShot(st, k) {
   const cut = (sh, k2) => Object.assign(sh, { nr: sh.p.distanceTo(F.c) * (k2 || 0.6) });
   if (k === 0) { const s0 = wdFrame(st, F, 0.5, 0.1); s0.nr = s0.d * 0.7; return s0; }
   if (k === 1) return cut({ p: F.c.clone().add(F.n.clone().multiplyScalar(d * 1.25)).add(right.clone().multiplyScalar(-d * 0.95)).add(new THREE.Vector3(0, F.h * 1.05, 0)), l: F.c.clone().add(right.clone().multiplyScalar(-d * 0.12)).add(new THREE.Vector3(0, F.h * 0.2, 0)), f: 50 }, 0.74);
-  if (k === 2) return { p: ctr.clone().add(F.n.clone().multiplyScalar(-R * 0.5)).add(new THREE.Vector3(0, R * 2.4, 0)), l: ctr.clone().add(F.n.clone().multiplyScalar(-R * 0.9)), f: 62 };
+  if (k === 2) { const s2 = { p: ctr.clone().add(F.n.clone().multiplyScalar(-R * 0.5)).add(new THREE.Vector3(0, R * 2.4, 0)), l: ctr.clone().add(F.n.clone().multiplyScalar(-R * 0.9)), f: 62 };
+    if (st.roofAt) { const h0 = s2.p.y - s2.l.y; wdUnder(st, s2.p); const h1 = Math.max(4, s2.p.y - s2.l.y); if (h1 < h0) s2.f = Math.min(88, (2 * Math.atan(Math.tan((31 * Math.PI) / 180) * (h0 / h1)) * 180) / Math.PI); }
+    return s2; }
   return cut({ p: F.c.clone().add(F.n.clone().multiplyScalar(d * 1.15)).add(right.clone().multiplyScalar(d * 0.6)).add(new THREE.Vector3(0, F.h * 1.0, 0)), l: F.c.clone().add(new THREE.Vector3(0, F.h * 0.15, 0)), f: 46 }, 0.74);
 }
 function wdPartyTick(st, now, dt, t) {
@@ -26387,11 +26393,13 @@ function wdFbBuild(st, fs) {
     const mat = new THREE.ShaderMaterial({ side: THREE.BackSide, uniforms: { uSpokes: { value: fs.roof === "retract" ? 6 : 28 }, uRings: { value: 1 }, uT: { value: 0 }, uBase: { value: new THREE.Vector3(...(fs.roof === "retract" ? [0.2, 0.21, 0.24] : [0.55, 0.57, 0.6])) }, uLine: { value: new THREE.Vector3(0.12, 0.13, 0.15) } },
       vertexShader: "varying vec3 vP; void main(){ vP = position; gl_Position = projectionMatrix * modelViewMatrix * vec4(position, 1.0); }", fragmentShader: WD_DOME });
     const d = new THREE.Mesh(new THREE.SphereGeometry(Rs, 72, 18, 0, Math.PI * 2, 0, th), mat); d.scale.set(1, 1, (B + outer + 4) / rim); d.position.set(0, top + 8 + Hh - Rs, 0); scene.add(d); st.mats.push(mat);
+    // the roof's height over (x, z), for the camera (it never goes through it); past the rim, the rim
+    const ry0 = top + 8 + Hh - Rs, kz = (B + outer + 4) / rim; st.roofAt = (x, z) => { const zz = z / kz, r2 = Math.min(rim * rim, x * x + zz * zz); return ry0 + Math.sqrt(Rs * Rs - r2); };
     for (let i = 0; i < 20; i++) { const a = (i / 20) * Math.PI * 2; glow([Math.cos(a) * (A + 20), top + 12, Math.sin(a) * (B + 18)], 22, [1, 0.97, 0.9], 0.5); }
   } else if (fs.roof === "glass") {
     const c = wdCanvas(512, 512), x = c.getContext("2d"); x.fillStyle = "rgba(200,220,255,.08)"; x.fillRect(0, 0, 512, 512); x.strokeStyle = "rgba(220,235,255,.5)"; x.lineWidth = 3; for (let i = 0; i <= 512; i += 64) { x.beginPath(); x.moveTo(i, 0); x.lineTo(i, 512); x.stroke(); x.beginPath(); x.moveTo(0, i); x.lineTo(512, i); x.stroke(); }
     const tx = wdTex(THREE, c); tx.wrapS = tx.wrapT = THREE.RepeatWrapping; tx.repeat.set(8, 5); st.tex.push(tx);
-    const r = add(new THREE.PlaneGeometry((A + outer) * 2.2, (B + outer) * 2.2), new THREE.MeshBasicMaterial({ map: tx, transparent: true, depthWrite: false, side: THREE.DoubleSide }), 0, top + 22, 0); r.rotation.x = Math.PI / 2;
+    const r = add(new THREE.PlaneGeometry((A + outer) * 2.2, (B + outer) * 2.2), new THREE.MeshBasicMaterial({ map: tx, transparent: true, depthWrite: false, side: THREE.DoubleSide }), 0, top + 22, 0); r.rotation.x = Math.PI / 2; st.roofAt = () => top + 22;
     for (let i = 0; i < 24; i++) { const a = (i / 24) * Math.PI * 2; glow([Math.cos(a) * (A + 24), top + 18, Math.sin(a) * (B + 22)], 20, [1, 0.97, 0.9], 0.45); }
   } else {
     // open: lights all round the rim, and canopies over the sidelines where there are some
@@ -26719,10 +26727,12 @@ function wdArBuild(st, as) {
   scene.add(new THREE.Mesh(wdBand(THREE, C, { o0: outer + 0.4, y0: 0, y1: roof }, 360), new THREE.MeshBasicMaterial({ color: col(F.includes("fieldhouse") ? [0.16, 0.07, 0.05] : [0.035, 0.038, 0.05]), side: THREE.DoubleSide })));
   // the roof: dark, a grid of catwalks, lights round the rim; or the Garden's ring, the saddle, Seattle's skylights
   const RW = (A + outer) * 2.3, RD = (B + outer) * 2.3;
+  st.roofAt = () => roof - 1.6;   // the roof, under its catwalks (the camera never goes through it)
   if (as.roof === "saddle") {
     const g = new THREE.PlaneGeometry(RW, RD, 40, 24); g.rotateX(Math.PI / 2); const p = g.attributes.position;
     for (let i = 0; i < p.count; i++) { const x = p.getX(i), z = p.getZ(i); p.setY(i, roof + 2 - 11 * ((x / (RW / 2)) ** 2) + 11 * ((z / (RD / 2)) ** 2)); } g.computeVertexNormals();
     add(g, new THREE.MeshBasicMaterial({ color: col([0.03, 0.032, 0.04]), side: THREE.DoubleSide }), 0, 0, 0);
+    st.roofAt = (x, z) => { const u = Math.min(1, Math.abs(x) / (RW / 2)), w = Math.min(1, Math.abs(z) / (RD / 2)); return roof + 2 - 11 * u * u + 11 * w * w - 1.5; };
     for (let i = 0; i <= 16; i++) { const x = -RW / 2 + (i / 16) * RW; const lg = add(new THREE.BoxGeometry(0.25, 0.25, RD), flat([0.12, 0.12, 0.14]), x, roof + 2.1 - 11 * ((x / (RW / 2)) ** 2) - 0.3, 0); void lg; }
     // the saddle's rim, lit, so the shape reads
     for (let i = 0; i < 40; i++) { const a = (i / 40) * Math.PI * 2, x = Math.cos(a) * RW * 0.42, z = Math.sin(a) * RD * 0.42; glow([x, roof + 2 - 11 * ((x / (RW / 2)) ** 2) + 11 * ((z / (RD / 2)) ** 2) - 0.6, z], 2.4, [1, 0.9, 0.75], 0.9); }
@@ -26874,7 +26884,7 @@ function wdRoomBuild(L, R) {
   for (const s of [-1, 1]) for (let i = 0; i < 3; i++) { const m = add(new THREE.PlaneGeometry(0.25, 40), new THREE.MeshBasicMaterial({ color: col(i === 1 ? [1, 0.75, 0.3] : [0.35, 0.5, 1]), transparent: true, opacity: 0.55, blending: THREE.AdditiveBlending, depthWrite: false }), s * (4 + i * 3.5), 0.02, -2); m.rotation.x = -Math.PI / 2; m.rotation.z = s * 0.06 * (i + 1); }
   // the walls and ceiling of the studio
   add(new THREE.CylinderGeometry(46, 46, 22, 48, 1, true), new THREE.MeshBasicMaterial({ color: col([0.02, 0.024, 0.036]), side: THREE.BackSide }), 0, 11, 0);
-  const ceil = add(new THREE.CircleGeometry(46, 48), flat([0.012, 0.014, 0.02]), 0, 21, 0); ceil.rotation.x = Math.PI / 2;
+  const ceil = add(new THREE.CircleGeometry(46, 48), flat([0.012, 0.014, 0.02]), 0, 21, 0); ceil.rotation.x = Math.PI / 2; st.roofAt = () => 21;
   // the LED wall: on an arc round the room's middle, the big screen at its center and three rows of game tiles either side
   const ARC = { c: [0, 6], r: 28 }, onArc = (s, y) => { const a = s / ARC.r; return { p: [Math.sin(a) * ARC.r + ARC.c[0], y, ARC.c[1] - Math.cos(a) * ARC.r], ry: -a }; };
   const jtex = wdTex(THREE, wdRoomArt(R)), ocv = wdCanvas(1280, 720), otex = wdTex(THREE, ocv); st.tex.push(jtex, otex); st.jtex = jtex; st.ocv = ocv; st.otex = otex; st.jumboArt = wdRoomArt;
@@ -27746,11 +27756,29 @@ function wdDispose(st) {
   if (D && D.rtA) { D.rtA.dispose(); D.rtB.dispose(); }
 }
 
+// ---- the roof: the camera never goes through it ----
+// st.roofAt(x, z): the roof's height there, in a building with one (a dome, a glass roof, an arena, the studio). Every shot and
+// every move stays under it: a shot that would be up there is set just under it, a move that runs into it eases along under
+// it (a soft stop, no bump), and the near plane (which cuts away what's between the camera and a screen) stops short of the
+// roof so it never cuts the ceiling open in the picture
+const WD_RM = 5;
+function wdUnder(st, p) { if (st.roofAt && p) { const c = st.roofAt(p.x, p.z) - WD_RM; if (p.y > c) p.y = c; } return p; }
+function wdCeilPos(st) {
+  if (!st.roofAt) return; const p = st.cam.position, c = st.roofAt(p.x, p.z) - 2, s = 3;
+  if (p.y > c - s) p.y = c - s * Math.exp(-(p.y - (c - s)) / s);
+}
+function wdCeilNear(st) {
+  if (!st.roofAt) return; const cam = st.cam, p = cam.position, v = st.ceilV || (st.ceilV = new st.THREE.Vector3()); let lim = Infinity;
+  cam.updateMatrixWorld(); const step = Math.max(0.5, cam.near / 24);
+  for (const x of [-1, 0, 1]) { v.set(x, 1, -1).unproject(cam).sub(p).normalize();
+    for (let t = step; t < cam.near; t += step) if (p.y + v.y * t >= st.roofAt(p.x + v.x * t, p.z + v.z * t)) { lim = Math.min(lim, t); break; } }
+  if (lim < cam.near) { cam.near = Math.max(0.3, lim * 0.85); cam.updateProjectionMatrix(); }
+}
 // ---- the camera: fly between shots along a crane arc, hold with a slow drift ----
 function wdShotFill(st) {
   const F = st.jface(st.cam.position), cam = st.cam, fov = 40, tv = Math.tan(((fov / 2) * Math.PI) / 180), asp = innerWidth / innerHeight;
   const d = Math.min(F.h / 2 / tv, F.w / 2 / (tv * asp)) * 0.985;
-  return { p: F.c.clone().add(F.n.clone().multiplyScalar(d)), l: F.c.clone(), f: fov, F };
+  return { p: wdUnder(st, F.c.clone().add(F.n.clone().multiplyScalar(d))), l: F.c.clone(), f: fov, F };
 }
 // a screen in frame: F (its center, normal, size) at fr of the picture's width, left of center so the floating panels have the
 // right side. d: how far out the camera is
@@ -27758,7 +27786,7 @@ function wdFrame(st, F, fr, offK) {
   const T = st.THREE, fov = 40, tv = Math.tan(((fov / 2) * Math.PI) / 180), asp = innerWidth / innerHeight;
   const d = F.w / (fr * 2 * tv * asp), right = new T.Vector3(0, 1, 0).cross(F.n).normalize(), off = (offK ?? 0.38) * d * tv * asp, lift = F.h * 0.13;
   const p = F.c.clone().add(F.n.clone().multiplyScalar(d)).add(right.clone().multiplyScalar(off)).add(new T.Vector3(0, F.h * 0.12 + lift, 0));
-  return { p, l: F.c.clone().add(right.multiplyScalar(off)).add(new T.Vector3(0, lift, 0)), f: fov, d };
+  return { p: wdUnder(st, p), l: F.c.clone().add(right.multiplyScalar(off)).add(new T.Vector3(0, lift, 0)), f: fov, d };
 }
 // a video on the jumbotron: the camera on the screen and still, the whole board (its frame too) in the space the floating
 // panels leave (under the title plate, left of the room's bets, above the score bug) with the crowd round it, so nothing sits
@@ -27783,7 +27811,7 @@ function wdFit(st, F) {
   let s = Math.min(bw / (F.w + 2 * m), bh / (F.h + 2 * m)), d = H / (2 * s * tv), ox = -((bL + bR) / 2 - W / 2) / s, oy = ((bT + bB) / 2 - H / 2) / s, p, l;
   cam.aspect = W / H; cam.updateProjectionMatrix();
   for (let i = 0; i < 6; i++) {
-    l = F.c.clone().add(right.clone().multiplyScalar(ox)).add(up.clone().multiplyScalar(oy)); p = l.clone().add(F.n.clone().multiplyScalar(d)).add(up.clone().multiplyScalar(d * 0.12));
+    l = F.c.clone().add(right.clone().multiplyScalar(ox)).add(up.clone().multiplyScalar(oy)); p = wdUnder(st, l.clone().add(F.n.clone().multiplyScalar(d)).add(up.clone().multiplyScalar(d * 0.12)));
     cam.position.copy(p); cam.lookAt(l); cam.updateMatrixWorld();
     const q = K.map((v) => { const u = v.clone().project(cam); return [((u.x + 1) / 2) * W, ((1 - u.y) / 2) * H]; }), x0 = Math.min(...q.map((z) => z[0])), x1 = Math.max(...q.map((z) => z[0])), y0 = Math.min(...q.map((z) => z[1])), y1 = Math.max(...q.map((z) => z[1]));
     const k = Math.min(bw / (x1 - x0), bh / (y1 - y0)), sn = (x1 - x0) / (F.w + 2 * m);
@@ -27854,7 +27882,7 @@ function wdUnproject(st) {
   if (!st || !st.proj) { document.body.classList.remove("v2w-proj", "v2w-in"); return; } for (const el of st.proj.els) { el.style.transform = ""; el.style.visibility = ""; } st.proj = null; document.body.classList.remove("v2w-proj", "v2w-in");
 }
 function wdFly(st, to, ms, lift, done) {
-  const cam = st.cam; if (st.near0 == null) st.near0 = cam.near;
+  const cam = st.cam; if (st.near0 == null) st.near0 = cam.near; wdUnder(st, to.p);
   st.fly = { a: cam.position.clone(), al: st.look.clone(), af: cam.fov, an: cam.near, bn: to.nr || st.near0, b: to.p.clone(), bl: to.l.clone(), bf: to.f, t0: performance.now(), ms, lift: lift || 0, done };
   st.hold = null; st.holdShot = to;
 }
@@ -27872,7 +27900,7 @@ function wdCam(st, now) {
     cam.position.set(H.p.x + Math.sin(t * 0.11) * a, H.p.y + Math.sin(t * 0.07) * a * 0.35, H.p.z + Math.cos(t * 0.09) * a * 0.6);
     st.look.copy(H.l); cam.fov += (H.f - cam.fov) * 0.1;
   }
-  cam.lookAt(st.look); cam.updateProjectionMatrix();
+  wdCeilPos(st); cam.lookAt(st.look); cam.updateProjectionMatrix(); wdCeilNear(st);
 }
 
 // ---- moments: what the room does shows up in the building ----
