@@ -336,12 +336,18 @@ def report(sport):
     return res
 
 
+# graded on paper but not trusted for live bets (reason in the README's edge-hunt table)
+NOT_LIVE = {"cfb": {"Scoreboard luck fade", "Scoreboard bad-luck back"}}  # measures garbage time more than luck
+
+
 def live(sport, season, week, res=None, L=None):
     """This week's triggered angles (only graded ones), with game-specific backup."""
     if res is None:
         _df, L, res = evaluate(sport)
     out = []
     for name, a in res.items():
+        if name in NOT_LIVE.get(sport, ()):
+            continue
         roi_m, n_m = a["with_model"]
         stack_only = not a["grade"] and roi_m is not None and roi_m >= STACK_MIN_ROI and n_m >= STACK_MIN_N
         if not a["grade"] and not stack_only:
