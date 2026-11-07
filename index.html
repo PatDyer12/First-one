@@ -8143,16 +8143,17 @@ body.tv .rc-note { display: none; }
   const TV_W = 1500;
   // TVs that crop the picture (overscan) cut off the board's edges; this pulls everything in from all four sides (percent)
   function tvSafe() { try { const v = parseFloat(localStorage.getItem("sb-safe")); return isFinite(v) ? Math.max(0, Math.min(10, v)) : 0; } catch (e) { return 0; } }
+  let fitSig = "";
   function fitTV() {
     const app = $(".app");
-    if (!document.body.classList.contains("tv")) { app.style.zoom = ""; app.style.height = ""; loopDrop(true); return; }
+    if (!document.body.classList.contains("tv")) { app.style.zoom = ""; app.style.height = ""; fitSig = ""; loopDrop(true); return; }
     const sp = tvSafe() / 100, sx = Math.round(innerWidth * sp), sy = Math.round(innerHeight * sp);
     document.body.style.setProperty("--sx", sx + "px"); document.body.style.setProperty("--sy", sy + "px");
     const z = Math.max(0.6, Math.min(2.4, (innerWidth - 2 * sx) / TV_W));
     app.style.zoom = z.toFixed(4); document.body.style.setProperty("--zm", z.toFixed(4));
     const tk = $("#ticker"), tkh = tk && !tk.hidden ? tk.offsetHeight : 0;
     app.style.height = Math.floor((innerHeight - 2 * sy - tkh) / z) + "px";
-    loopDrop();
+    { const sig = [innerWidth, innerHeight, z.toFixed(4), app.style.height, tkh, sx].join("|"); if (sig !== fitSig) { fitSig = sig; loopDrop(); } }
     densify(); primeFit();
     for (const st of ASC) if (st.el.id !== "jbBets") loopSync(st);
   }
@@ -8253,12 +8254,31 @@ body.tv .rc-note { display: none; }
     if (!st) return;
     loopMark(LOOPMO.takeRecords());
     const el = st.el;
+    // still rolling in its layer: nothing changed, nothing to do; the cards changed but the loop is the same length,
+    // a fresh copy and the animation carries on
+    { const f = st.flow;
+      if (document.body.classList.contains("tv") && st.anim && st.period && f && f.parentNode === el && el.firstChild === f && el.lastChild === f && st.clone && st.clone.parentNode === f && el.offsetParent !== null && st.wh === el.clientWidth + "x" + el.clientHeight) {
+        if (!st.dirty) return;
+        pickFit(f);
+        const kids = [...f.children].filter((k) => k !== st.clone && !k.hidden && getComputedStyle(k).display !== "none");
+        if (kids.length) {
+          const c = document.createElement("div"); c.className = "loopclone"; c.setAttribute("aria-hidden", "true"); c.style.gap = getComputedStyle(f).rowGap;
+          { const top0 = kids[0].offsetTop, need = el.clientHeight + 60; for (const k of [...f.children]) { if (k === st.clone) continue; c.appendChild(k.cloneNode(true)); if (k.offsetTop - top0 > need) break; } }
+          f.replaceChild(c, st.clone); st.clone = c;
+          const per = c.offsetTop - kids[0].offsetTop;
+          if (Math.abs(per - st.period) < 1 && per > el.clientHeight + 2) {
+            st.stops = kids.slice(1).filter((k) => !(k.previousElementSibling && k.previousElementSibling.classList.contains("pp-div"))).map((k) => k.offsetTop - kids[0].offsetTop).filter((v) => v > 0 && v < st.period);
+            st.saved = { period: st.period, stops: st.stops }; st.dirty = false; LOOPMO.takeRecords(); apSoon(); return;
+          }
+        }
+      } }
     flowHalt(st);
     if (st.clone) { st.kept = st.clone; st.clone.remove(); st.clone = null; }
     const kept = st.kept, saved = st.saved; st.kept = null;
     st.period = 0;
     if (!document.body.classList.contains("tv") || !el.isConnected || el.offsetParent === null) { if (!document.body.classList.contains("tv")) flowUnwrap(st); LOOPMO.takeRecords(); return; }
     flowWrap(st); pickFit(st.flow); LOOPMO.takeRecords();   // moving the cards into the layer isn't a change to them
+    st.wh = el.clientWidth + "x" + el.clientHeight;
     const box = st.flow;
     // nothing in it changed and it's the same size: the copy it had goes back as it was
     const sz = el.clientWidth + "x" + el.clientHeight + "x" + el.scrollHeight;
@@ -8287,6 +8307,21 @@ body.tv .rc-note { display: none; }
     LOOPMO.takeRecords(); st.dirty = false; flowStart(st); apSoon();
   }
   const loopSyncEl = (el) => loopSync(ASC.find((s) => s.el === el));
+  // a rolling column's cards, as html: nothing happens when they're the same; new ones go in its rolling layer (which
+  // keeps rolling) instead of replacing the column
+  function flowSet(el, html) {
+    if (!el) return false;
+    if (el._fh === html && el.firstChild) return false;
+    el._fh = html;
+    const st = ASC.find((x) => x.el === el), f = st && st.flow;
+    if (f && f.parentNode === el && el.firstChild === f && el.lastChild === f && document.body.classList.contains("tv")) {
+      for (const n of [...f.childNodes]) if (n !== st.clone) n.remove();
+      const t = document.createElement("template"); t.innerHTML = html;
+      f.insertBefore(t.content, st.clone && st.clone.parentNode === f ? st.clone : null);
+      return true;
+    }
+    el.innerHTML = html; return true;
+  }
   const APIO = typeof IntersectionObserver === "function" ? new IntersectionObserver((es) => { for (const e of es) e.target.classList.toggle("offv", !e.isIntersecting); }, { rootMargin: "80px 0px" }) : null;
   let apEls = [], apT = 0;
   function apScan() {
@@ -8329,7 +8364,8 @@ body.tv .rc-note { display: none; }
   let fitT = 0;
   const refit = () => { clearTimeout(fitT); fitT = setTimeout(fitTV, 120); };
   window.addEventListener("resize", refit);
-  document.addEventListener("load", (e) => { if (e.target.tagName === "IMG") refit(); }, true); // team logos change the height once they arrive
+  try { document.fonts && document.fonts.addEventListener("loadingdone", () => { for (const st of ASC) st.dirty = true; refit(); }); } catch (e) {}
+  document.addEventListener("load", (e) => { if (e.target.tagName === "IMG") { for (const st of ASC) if (st.el.contains(e.target) && !(st.clone && st.clone.contains(e.target))) st.dirty = true; refit(); } }, true); // team logos change the height once they arrive
 
   function renderChrome(all) {
     document.querySelectorAll("#range button").forEach((b) => b.setAttribute("aria-pressed", String(b.dataset.r === S.range)));
@@ -10442,6 +10478,11 @@ body.tv .rc-note { display: none; }
   // the game column holds still: step it down until it fits the screen (the followed game's extras first, then the
   // win-probability caption, a followed team that isn't playing right now, then older scoring plays). Only then does it roll
   function primeFit() {
+    const L = $("#rbColL"), snap = (x) => (x && x.isConnected ? x.className + "|" + flowKids(x).map((k) => k.style.transform + "," + k.style.marginBottom).join(";") : "");
+    const was = snap(L); primeFit0();
+    if (L && L.isConnected && snap(L) === was) { const near = (t) => t === L || t.parentNode === L || (t.parentNode && t.parentNode.parentNode === L); loopMark(LOOPMO.takeRecords().filter((r) => !(r.type === "attributes" && near(r.target)))); }
+  }
+  function primeFit0() {
     const L = $("#rbColL"); if (!L || !L.isConnected) return;
     const F = ["f1", "f2", "f3", "f4", "f5", "f6", "f7", "f8", "f9", "f10"]; L.classList.remove(...F, "many", "duo");
     const kids = flowKids(L); kids.forEach((k) => { k.style.transform = ""; k.style.marginBottom = ""; });
@@ -10579,9 +10620,10 @@ body.tv .rc-note { display: none; }
   }
   // as many of them as fit under the big cards (none if they don't)
   function laterFit(L) {
+    L.querySelectorAll("[data-later]").forEach((x) => { if (!x.closest(".loopclone")) x.remove(); });
     for (let k = 8; k >= 2; k--) {
       const h = laterCard(k); if (!h) return;
-      const box = document.createElement("div"); box.innerHTML = h; const el = box.firstElementChild;
+      const box = document.createElement("div"); box.innerHTML = h; const el = box.firstElementChild; el.dataset.later = "1";
       L.appendChild(el);
       if (L.scrollHeight <= L.clientHeight + 2) return;
       el.remove();
@@ -11209,9 +11251,9 @@ body.tv .rc-note { display: none; }
       if (two) {
         // the scores: live first, then the ones still to come, then the finals; the other games on now after them
         const rk = (G) => (G.g.st === "in" ? 0 : G.g.st === "pre" ? 1 : 2), ord = [...list].sort((x, y) => rk(x) - rk(y) || (x.g.t || 0) - (y.g.t || 0));
-        L.dataset.n = "0"; L.innerHTML = ord.map((G) => gameCard(G, false, true)).join("") + nowG.map(onNowCard).join("") + fol; R.classList.toggle("ppr", pplG); if (pplG) { R.hidden = false; peopleBoard(R); } else { R.innerHTML = rest; R.hidden = !rest; }
+        if (L.dataset.n !== "0") L.dataset.n = "0"; flowSet(L, ord.map((G) => gameCard(G, false, true)).join("") + nowG.map(onNowCard).join("") + fol); R.classList.toggle("ppr", pplG); if (pplG) { R._fh = null; if (R.hidden) R.hidden = false; peopleBoard(R); } else { flowSet(R, rest); if (R.hidden !== !rest) R.hidden = !rest; }
       } else {
-      L.dataset.n = String(heroes.length); L.innerHTML = heroes.map((G) => gameCard(G, true, split)).join("") + fol; R.classList.toggle("ppr", pplG); if (pplG) { R.hidden = false; peopleBoard(R); } else { R.innerHTML = rest; R.hidden = !rest; }
+      if (L.dataset.n !== String(heroes.length)) L.dataset.n = String(heroes.length); flowSet(L, heroes.map((G) => gameCard(G, true, split)).join("") + fol); R.classList.toggle("ppr", pplG); if (pplG) { R._fh = null; if (R.hidden) R.hidden = false; peopleBoard(R); } else { flowSet(R, rest); if (R.hidden !== !rest) R.hidden = !rest; }
       primeFit();
       if (heroes.length <= 2) laterFit(L);
       }
@@ -14857,7 +14899,7 @@ void main(){
   // ---------- sheets ----------
   function openSheet(id) { $(id).hidden = false; }
   // keep every open screen current: when a new version is up, reload it (never mid-form or mid-animation)
-  const BUILD = "20261107183212";
+  const BUILD = "20261107192355";
   function updReady() {
     if (document.getElementById("updReady")) return; const d = document.createElement("div"); d.id = "updReady"; d.textContent = "Update ready · refresh, then TV + Sound on"; document.body.append(d);
   }
