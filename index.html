@@ -7041,6 +7041,37 @@ body.v2b .rb-g.hero .rb-gh .mid { padding: 0 clamp(6px, 1.4cqw, 14px); }
 
 .auxnp small { font: 700 12px Inter, sans-serif; color: rgba(255,255,255,.55); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
 .auxnp small.warn { color: #ffd23f; }
+
+/* smooth: the rolling columns' layer */
+/* the layer takes the column's own box (cards sized to the column lay out as before; the rest overflows it, as it overflowed the column) */
+.flowin { flex: none; min-width: 0; width: 100%; height: 100%; box-sizing: border-box; }
+#jbBets > .flowin > * { flex-shrink: 0; }
+body.tv .sidescroll > .flowin > .panel { flex: none; }
+.pp-list > .flowin > .loopclone { display: flex; flex-direction: column; gap: 10px; }
+.rb-main > .flowin > .loopclone { margin-top: 14px; }
+body.tv .rb-main > .flowin > .loopclone { margin-top: 24px; }
+.rb-games.primeg > .rb-pcol > .flowin > .loopclone { display: flex; flex-direction: column; gap: 14px; }
+.rb-games.primeg.mason > .rb-pcol > .flowin > .loopclone { gap: 24px; }
+@media (max-width: 760px) { .pp-list > .flowin > .loopclone { gap: 8px; } }
+/* smooth: the bet slip */
+@keyframes v2Deal {
+  0% { opacity: 0; transform: translate3d(780px, 70px, 0) rotateY(-62deg) rotateZ(9deg) scale(.8); }
+  55% { opacity: 1; transform: translate3d(-24px, -6px, 0) rotateY(8deg) rotateZ(-1.4deg) scale(1.03); }
+  80% { transform: translate3d(6px, 1px, 0) rotateY(-2.5deg) rotateZ(.3deg) scale(.995); }
+  100% { opacity: 1; transform: none; } }
+.v2pl.on .v2pl-in { animation-timing-function: cubic-bezier(.22,.8,.3,1); will-change: transform, opacity; }
+.v2pl.landed .v2pl-tilt { animation: v2Tilt 3.4s .9s ease-in-out infinite alternate; }
+.v2pl-tilt { position: relative; will-change: transform; }
+.v2pl-tilt::before { content: ""; position: absolute; inset: 0; border-radius: 24px; pointer-events: none; opacity: 0; transition: opacity .3s ease-out;
+  box-shadow: 0 0 0 4px var(--va), 0 0 110px var(--va); will-change: opacity; }
+.v2pl.fly .v2pl-tilt::before { opacity: 1; }
+.v2pl.fly .v2pl-in { box-shadow: 0 0 0 3px var(--va), 0 40px 100px rgba(0,0,0,.7), 0 0 80px var(--vaa); }
+.v2pl-card { will-change: transform, opacity; }
+.v2pl-holo { mix-blend-mode: normal; opacity: .32; }
+.v2pl-holo::before, .v2pl-sheen, .v2pl-word b, .v2pl-burst .ring, .v2pl-burst .sp i, .v2pl-legs li, .v2pl-tag, .v2pl-streaks i, .v2pl-trail i { will-change: transform, opacity; }
+
+/* Super Saturday: the header chip in gold */
+.chip.modechip.super { color: #ffd36b; background: linear-gradient(90deg, rgba(255,190,40,.2), rgba(255,110,40,.14)); box-shadow: inset 0 0 0 1px rgba(255,205,90,.55), 0 0 18px rgba(255,180,40,.18); border-color: transparent; }
 </style>
 </head>
 <body>
@@ -8064,16 +8095,68 @@ body.v2b .rb-g.hero .rb-gh .mid { padding: 0 clamp(6px, 1.4cqw, 14px); }
   // a column that doesn't fit rolls upward forever, like a crawl: its content is followed by a copy of itself, and when the
   // copy reaches the top the column jumps back to the original, so it never stops and never goes back down
   const ASC = [];
+  // A rolling column moves on the graphics card: its cards sit in one layer (.flowin) that the compositor slides up at an
+  // even speed, a fraction of a pixel a frame, whatever the page is busy with. Its place in the roll is the layer's
+  // animation time. A person's column keeps its place when the board is rebuilt round it (somebody new places a bet)
+  const FLOWMEM = new Map();
+  const flowKey = (el) => { const k = el.closest && el.closest("[data-k]"); return (el.id || "") + "|" + (k ? k.dataset.k : "") + "|" + String(el.className).split(" ")[0]; };
+  function flowPos(st) {
+    const a = st.anim; if (!a || !st.period || !st.dur) return st.pos;
+    const t = Number(a.currentTime) || 0, d = st.dur; return ((((t % d) + d) % d) / d) * st.period;
+  }
+  function flowHalt(st) { st.pos = flowPos(st); if (st.anim) { try { st.anim.cancel(); } catch (e) {} st.anim = null; } st.playing = false; }
+  function ascPrune() {
+    for (let i = ASC.length - 1; i >= 0; i--) { const st = ASC[i]; if (st.el.isConnected) continue; FLOWMEM.set(st.key, { pos: flowPos(st), at: performance.now() }); flowHalt(st); ASC.splice(i, 1); }
+  }
   function autoScroll(el, speed) {
     if (!el || ASC.some((s) => s.el === el)) return;
-    const st = { el, pos: 0, user: 0, last: performance.now(), hold: performance.now() + 4000, clone: null, period: 0, speed: speed || 30 };
-    const poke = () => { st.user = performance.now(); st.pos = el.scrollTop; };
+    const now = performance.now(), key = flowKey(el), mem = FLOWMEM.get(key);
+    const st = { el, key, pos: 0, user: -1e9, last: now, hold: now + 4000, clone: null, period: 0, speed: speed || 30, flow: null, anim: null, dur: 0, playing: false };
+    if (mem && now - mem.at < 120e3) { st.pos = mem.pos; st.hold = now + 300; st.keep = true; FLOWMEM.delete(key); }
+    const poke = () => { st.user = performance.now(); if (st.anim && st.playing) { st.pos = flowPos(st); st.anim.pause(); st.playing = false; } };
     LOOPMO.observe(el, { childList: true, subtree: true, characterData: true, attributes: true, attributeOldValue: true });
     for (const ev of ["wheel", "touchstart", "keydown"]) el.addEventListener(ev, poke, { passive: true });
     ASC.push(st);
     return st;
   }
-  function loopDrop(all) { for (const st of ASC) { if (st.el.id === "jbBets" && !all) continue; if (st.clone) { st.kept = st.clone; st.clone.remove(); st.clone = null; } st.period = 0; } }
+  // the cards of a column, wherever they sit (in its rolling layer or straight in it), without the copy
+  function flowKids(el) { const f = el.firstElementChild && el.firstElementChild.classList.contains("flowin") ? el.firstElementChild : el; return [...f.children].filter((k) => !k.classList.contains("loopclone") && !k.classList.contains("flowin")); }
+  // the cards into the rolling layer (it lays them out the way the column did); anything put in the column since goes in too, in order
+  function flowWrap(st) {
+    const el = st.el; let f = st.flow; const fresh = !f || f.parentNode !== el;
+    if (fresh) { f = document.createElement("div"); f.className = "flowin"; st.flow = f; }
+    const cs = getComputedStyle(el);
+    f.style.cssText = /flex/.test(cs.display) ? `display:flex;flex-direction:${cs.flexDirection};flex-wrap:${cs.flexWrap};align-items:${cs.alignItems};justify-content:${cs.justifyContent};row-gap:${cs.rowGap};column-gap:${cs.columnGap}` : "display:flow-root";
+    const before = [], after = []; let seen = fresh;
+    for (const n of [...el.childNodes]) { if (n === f) { seen = true; continue; } (fresh || !seen ? before : after).push(n); }
+    if (before.length) f.prepend(...before);
+    if (after.length) f.append(...after);
+    if (fresh) el.appendChild(f);
+  }
+  // a ticket's play ("Alabama +3") fits its line: a long one is set a little smaller instead of cut off (the line is the
+  // bet). All the measuring first, then all the sizing, so the page lays out once
+  function pickFit(root) {
+    if (!root) return;
+    const els = [...root.querySelectorAll(".ob-pick .t")].filter((e) => !e.closest(".loopclone"));
+    const k = els.map((e) => { const w = e.clientWidth, sw = e.scrollWidth; return w > 0 && sw > w + 1 ? [w / sw, parseFloat(getComputedStyle(e).fontSize) || 38] : null; });
+    els.forEach((e, i) => { if (k[i]) e.style.fontSize = Math.max(k[i][1] * 0.68, k[i][1] * k[i][0] * 0.97).toFixed(1) + "px"; });
+  }
+  // back to a plain column (off the TV)
+  function flowUnwrap(st) {
+    flowHalt(st); const f = st.flow; st.flow = null;
+    if (f && f.parentNode === st.el) { const kids = [...f.childNodes].filter((n) => !(n.nodeType === 1 && n.classList.contains("loopclone"))); f.replaceWith(...kids); }
+  }
+  // the roll: one slide of the layer by one copy's height, round and round; the compositor plays it (ascTick says when)
+  function flowStart(st) {
+    if (!st.flow || !st.period) return;
+    const sp = Math.max(4, Math.min(FLOW_MAX, st.speed)), d = (st.period / sp) * 1000; st.dur = d;
+    st.anim = st.flow.animate([{ transform: "translate3d(0,0,0)" }, { transform: `translate3d(0,${(-st.period).toFixed(2)}px,0)` }], { duration: d, iterations: Infinity });
+    st.anim.currentTime = ((st.pos % st.period) / st.period) * d; st.anim.pause(); st.playing = false;
+  }
+  function loopDrop(all) {
+    for (const st of ASC) { if (st.el.id === "jbBets" && !all) continue; flowHalt(st); if (st.clone) { st.kept = st.clone; st.clone.remove(); st.clone = null; } st.period = 0; if (all) flowUnwrap(st); }
+    LOOPMO.takeRecords();
+  }
   // what changed in a rolling column since its copy was made: anything but the copy itself going in and out, or a card
   // pausing / resuming its animations off screen
   const apCls = (v) => String(v || "").split(/\s+/).filter((x) => x && x !== "offv").join(" ");
@@ -8082,6 +8165,7 @@ body.v2b .rb-g.hero .rb-gh .mid { padding: 0 clamp(6px, 1.4cqw, 14px); }
     for (const r of recs) {
       if (r.type === "childList" && [...r.addedNodes, ...r.removedNodes].every((n) => n.nodeType === 1 && n.classList.contains("loopclone"))) continue;
       if (r.type === "attributes" && r.attributeName === "class" && apCls(r.oldValue) === apCls(r.target.getAttribute && r.target.getAttribute("class"))) continue;
+      if (r.type === "attributes" && r.target.classList && r.target.classList.contains("flowin")) continue;
       for (const st of ASC) {
         if (st.dirty || !(st.el === r.target || st.el.contains(r.target))) continue;
         if ((st.clone && st.clone.contains(r.target)) || (st.kept && st.kept.contains(r.target))) continue;
@@ -8093,41 +8177,38 @@ body.v2b .rb-g.hero .rb-gh .mid { padding: 0 clamp(6px, 1.4cqw, 14px); }
     if (!st) return;
     loopMark(LOOPMO.takeRecords());
     const el = st.el;
+    flowHalt(st);
     if (st.clone) { st.kept = st.clone; st.clone.remove(); st.clone = null; }
     const kept = st.kept, saved = st.saved; st.kept = null;
     st.period = 0;
-    if (!document.body.classList.contains("tv") || !el.isConnected || el.offsetParent === null) return;
+    if (!document.body.classList.contains("tv") || !el.isConnected || el.offsetParent === null) { if (!document.body.classList.contains("tv")) flowUnwrap(st); LOOPMO.takeRecords(); return; }
+    flowWrap(st); pickFit(st.flow); LOOPMO.takeRecords();   // moving the cards into the layer isn't a change to them
+    const box = st.flow;
     // nothing in it changed and it's the same size: the copy it had goes back as it was
     const sz = el.clientWidth + "x" + el.clientHeight + "x" + el.scrollHeight;
     if (kept && saved && !st.dirty && st.sz === sz) {
-      el.appendChild(kept); st.clone = kept; st.period = saved.period; st.stops = saved.stops;
+      box.appendChild(kept); st.clone = kept; st.period = saved.period; st.stops = saved.stops;
       if (st.period > 0) st.pos %= st.period;
-      loopMark(LOOPMO.takeRecords()); apSoon();
+      LOOPMO.takeRecords(); flowStart(st); apSoon();
       return;
     }
     st.dirty = false; st.sz = sz; st.saved = null;
-    const kids = [...el.children].filter((k) => !k.hidden && getComputedStyle(k).display !== "none");
+    const kids = [...box.children].filter((k) => !k.hidden && getComputedStyle(k).display !== "none");
     if (!kids.length || el.scrollHeight <= el.clientHeight + 2) { st.pos = 0; el.scrollTop = 0; return; }
     const c = document.createElement("div");
-    c.className = "loopclone"; c.setAttribute("aria-hidden", "true"); c.style.gap = getComputedStyle(el).rowGap;
-    for (const k of [...el.children]) c.appendChild(k.cloneNode(true));
-    el.appendChild(c); st.clone = c;
+    c.className = "loopclone"; c.setAttribute("aria-hidden", "true"); c.style.gap = getComputedStyle(box).rowGap;
+    // the copy only needs a screenful (what shows as the loop comes round), not the whole column again: half the cards to lay out
+    { const top0 = kids[0].offsetTop, need = el.clientHeight + 60; for (const k of [...box.children]) { c.appendChild(k.cloneNode(true)); if (k.offsetTop - top0 > need) break; } }
+    box.appendChild(c); st.clone = c;
     st.period = c.offsetTop - kids[0].offsetTop;
     st.stops = kids.slice(1).filter((k) => !(k.previousElementSibling && k.previousElementSibling.classList.contains("pp-div"))).map((k) => k.offsetTop - kids[0].offsetTop).filter((v) => v > 0 && v < st.period);
-    if (el.id === "rbMain") {   // the board: a slow roll that holds as each block comes up, a little air above it
-      const grid = el.querySelector("#rbGames"), R = el.getBoundingClientRect(), z = R.height / (el.offsetHeight || 1) || 1;
-      if (grid) {
-        const tops = [...grid.children].map((k) => Math.round((k.getBoundingClientRect().top - R.top) / z + el.scrollTop - 16)).filter((v) => v > 0 && v < st.period).sort((p, q) => p - q);
-        st.stops = []; for (const v of tops) if (v - (st.stops.length ? st.stops[st.stops.length - 1] : 0) >= el.clientHeight * 0.3) st.stops.push(v);
-      }
-      st.dwell = 7000; st.speed = 20;
-    }
-    if (el.classList.contains("mc")) st.dwell = 7000;
-    if (el.classList.contains("pp-list")) { st.dwell = 3600; st.speed = 16; }
+    if (el.id === "rbMain") st.speed = 20;
+    if (el.classList.contains("pp-list")) st.speed = 16;
     if (el.classList.contains("mc") || el.classList.contains("pr")) st.speed = Math.max(el.classList.contains("mc") ? 14 : 13, Math.min(26, st.period / 420));
     if (st.period > 0) st.pos %= st.period;
+    if (el.scrollTop) el.scrollTop = 0;
     st.saved = { period: st.period, stops: st.stops };
-    loopMark(LOOPMO.takeRecords()); st.dirty = false; apSoon();
+    LOOPMO.takeRecords(); st.dirty = false; flowStart(st); apSoon();
   }
   const loopSyncEl = (el) => loopSync(ASC.find((s) => s.el === el));
   const APIO = typeof IntersectionObserver === "function" ? new IntersectionObserver((es) => { for (const e of es) e.target.classList.toggle("offv", !e.isIntersecting); }, { rootMargin: "80px 0px" }) : null;
@@ -8139,7 +8220,7 @@ body.v2b .rb-g.hero .rb-gh .mid { padding: 0 clamp(6px, 1.4cqw, 14px); }
     const seen = new Set(apEls);
     for (const st of ASC) {
       if (!st.el.isConnected) continue;
-      for (const el of st.el.querySelectorAll(":scope > *, :scope > .loopclone > *, .ob-bet, .pp-bet, .bet, .rb-g")) if (!seen.has(el)) { seen.add(el); apEls.push(el); APIO.observe(el); }
+      for (const el of st.el.querySelectorAll(":scope > *, :scope > .loopclone > *, :scope > .flowin > *, :scope > .flowin > .loopclone > *, .ob-bet, .pp-bet, .bet, .rb-g")) if (!seen.has(el)) { seen.add(el); apEls.push(el); APIO.observe(el); }
     }
   }
   const apSoon = () => { if (!apT) apT = requestAnimationFrame(apScan); };
@@ -8149,17 +8230,21 @@ body.v2b .rb-g.hero .rb-gh .mid { padding: 0 clamp(6px, 1.4cqw, 14px); }
   // covered: a show on (or fading out), or a clip or DJ set on the big screen (except the big screen's own list)
   const flowCover = (st) => { const c = document.getElementById("cash"), j = document.getElementById("jumbo"); return !!((c && !c.hidden) || (j && !j.hidden && !j.contains(st.el))); };
   const DWELL = 2600;
-  function ascTick(now) {
-    const on = document.body.classList.contains("tv");
+  // each frame: whether each column rolls (the graphics card does the rolling); cards a renderer put straight into a
+  // rolling column go into its layer before the frame is drawn
+  function ascTick() {
+    const now = performance.now(), on = document.body.classList.contains("tv"), live = document.body.classList.contains("cs-live");
     for (const st of ASC) {
-      const el = st.el, dt = Math.min(0.1, (now - st.last) / 1000); st.last = now;
-      if (!on || !el.isConnected || el.offsetParent === null) continue;
-      if (!st.period) { if (el.scrollTop) el.scrollTop = 0; continue; }
-      if (now - st.user < 15000 || now < st.hold) continue;
-      if (document.body.classList.contains("cs-live") || flowCover(st)) continue;
-      // a steady crawl: no stop at each card, no pause at the top of the loop
-      st.pos = (st.pos + Math.min(FLOW_MAX, st.speed) * dt) % st.period;
-      el.scrollTop = st.pos;
+      const el = st.el; st.last = now;
+      if (!el.isConnected) continue;
+      if (on && st.period && st.flow && (st.flow.parentNode !== el || el.firstChild !== st.flow || el.lastChild !== st.flow)) loopSync(st);
+      if (!st.period) { if (on && el.scrollTop && now - st.user >= 15000) el.scrollTop = 0; continue; }
+      if (!st.anim) continue;
+      const go = on && now - st.user >= 15000 && now >= st.hold && !live && el.offsetParent !== null && !flowCover(st);
+      if (go && !st.playing) {
+        if (el.scrollTop) { st.pos = (flowPos(st) + el.scrollTop) % st.period; el.scrollTop = 0; st.anim.currentTime = (st.pos / st.period) * st.dur; }
+        st.anim.play(); st.playing = true;
+      } else if (!go && st.playing) { st.pos = flowPos(st); st.anim.pause(); st.playing = false; }
     }
     requestAnimationFrame(ascTick);
   }
@@ -10273,7 +10358,7 @@ body.v2b .rb-g.hero .rb-gh .mid { padding: 0 clamp(6px, 1.4cqw, 14px); }
   function primeFit() {
     const L = $("#rbColL"); if (!L || !L.isConnected) return;
     const F = ["f1", "f2", "f3", "f4", "f5", "f6", "f7", "f8", "f9", "f10"]; L.classList.remove(...F, "many", "duo");
-    const kids = [...L.children].filter((k) => !k.classList.contains("loopclone")); kids.forEach((k) => { k.style.transform = ""; k.style.marginBottom = ""; });
+    const kids = flowKids(L); kids.forEach((k) => { k.style.transform = ""; k.style.marginBottom = ""; });
     if (!document.body.classList.contains("tv")) return;
     const n = Number(L.dataset.n || 1), over = () => L.scrollHeight > L.clientHeight + 2;
     // three or more games: tighter cards and the column rolls
@@ -10429,7 +10514,7 @@ body.v2b .rb-g.hero .rb-gh .mid { padding: 0 clamp(6px, 1.4cqw, 14px); }
     if (!A || A.parentNode !== G) {
       G.innerHTML = '<div class="rb-pcol mc" id="rbM1"></div><div class="rb-pcol mc" id="rbM2"></div>';
       A = $("#rbM1"); B = $("#rbM2");
-      for (let i = ASC.length - 1; i >= 0; i--) if (!ASC[i].el.isConnected) ASC.splice(i, 1);
+      ascPrune();
       autoScroll(A, 14); autoScroll(B, 15);
     }
     const by = new Map(parts), keys = masonOrder(parts.map((x) => x[0])), sig = keys.join("|");
@@ -10439,10 +10524,10 @@ body.v2b .rb-g.hero .rb-gh .mid { padding: 0 clamp(6px, 1.4cqw, 14px); }
       let chA = false, chB = false;
       for (const k of keys) {
         const h = by.get(k); if (h === MB.html.get(k)) continue;
-        const old = [...A.children, ...B.children].filter((el) => el.dataset.mk === k), nu = frag(k, h);
+        const old = [...flowKids(A), ...flowKids(B)].filter((el) => el.dataset.mk === k), nu = frag(k, h);
         if (!old.length || !nu.children.length) { MB = null; break; }   // a block appearing or emptying: lay it out again
-        const col = old[0].parentNode; old[0].before(nu); old.forEach((el) => el.remove());
-        MB.html.set(k, h); if (col === A) chA = true; else chB = true;
+        const inA = A.contains(old[0]); old[0].before(nu); old.forEach((el) => el.remove());
+        MB.html.set(k, h); if (inA) chA = true; else chB = true;
       }
       if (MB) { if (chA) loopSyncEl(A); if (chB) loopSyncEl(B); return; }
     }
@@ -10925,9 +11010,9 @@ body.v2b .rb-g.hero .rb-gh .mid { padding: 0 clamp(6px, 1.4cqw, 14px); }
       G.innerHTML = `${host ? "" : '<div class="pp-scores" id="ppScores"></div>'}<div class="pp-cols" id="ppCols" style="--n:${Math.max(1, ppl.length)}"></div>`;
       SC = $("#ppScores"); C = $("#ppCols"); C.dataset.keys = keys;
       C.innerHTML = ppl.length ? ppl.map((p) => `<section class="pp-col" data-k="${esc(p.k)}" style="--c:${p.col}"><header class="pp-h"></header><div class="pp-list"></div></section>`).join("") : `<div class="rb-empty"><b>No bets on the board</b>Log a bet from your phone and it shows up here with everybody's.</div>`;
-      for (let i = ASC.length - 1; i >= 0; i--) if (!ASC[i].el.isConnected) ASC.splice(i, 1);
+      ascPrune();
       // each starts rolling a beat after the one before it, so the columns don't move in step
-      C.querySelectorAll(".pp-list").forEach((el, i) => { const st = autoScroll(el, 16); if (st) st.hold = performance.now() + 4000 + i * 1900; });
+      C.querySelectorAll(".pp-list").forEach((el, i) => { const st = autoScroll(el, 16); if (st && !st.keep) st.hold = performance.now() + 4000 + i * 1900; });
     }
     if (!host) SC.innerHTML = ppScores();
     // in sections: live now (game by game, in kickoff order), the parlays, the ones that start later
@@ -10988,7 +11073,7 @@ body.v2b .rb-g.hero .rb-gh .mid { padding: 0 clamp(6px, 1.4cqw, 14px); }
       if (!L || L.parentNode !== $("#rbGames")) {
         $("#rbGames").innerHTML = '<div class="rb-pcol pl" id="rbColL"></div><div class="rb-pcol pr" id="rbColR"></div>';
         L = $("#rbColL"); R = $("#rbColR");
-        for (let i = ASC.length - 1; i >= 0; i--) if (!ASC[i].el.isConnected) ASC.splice(i, 1);
+        ascPrune();
         autoScroll(L, 13); autoScroll(R, 14);
       }
       if (two) {
@@ -13331,7 +13416,7 @@ void main(){
     const legs = b.kind === "parlay" ? legsOf(b) : [];
     el.className = "v2pl" + (big ? " big" : "") + (vs || (b.tail && b.tail.kind === "fade") ? " vs" : "") + (quick ? " quick" : "") + (F.k === "nuke" ? " nuke" : F.k === "whale" ? " whale" : "");
     v2Vars(el, P); el.style.setProperty("--c", col);
-    const sparks = Array.from({ length: big ? 44 : 30 }, (_, i) => { const a = (i / (big ? 44 : 30)) * 6.283 + Math.random() * 0.3, d = 220 + Math.random() * (big ? 420 : 280);
+    const sparks = Array.from({ length: big ? 32 : 22 }, (_, i) => { const a = (i / (big ? 32 : 22)) * 6.283 + Math.random() * 0.3, d = 220 + Math.random() * (big ? 420 : 280);
       return `<i style="--x:${(Math.cos(a) * d).toFixed(0)}px;--y:${(Math.sin(a) * d * 0.7).toFixed(0)}px;--d:${(Math.random() * 80).toFixed(0)}ms;--s:${(0.5 + Math.random()).toFixed(2)};--k:${["var(--va)", "var(--v2)", "#fff"][i % 3]}"></i>`; }).join("");
     el.innerHTML = `<i class="v2pl-dim"></i><div class="v2pl-st">
       <div class="v2pl-streaks"><i></i><i></i><i></i><i></i></div>
@@ -14181,7 +14266,7 @@ void main(){
     const SP = c.contains("hoops") ? ["NBA", "CBB"] : c.contains("hockey") ? ["NHL"] : ["NFL", "CFB"], fb = (g) => g && SP.includes(g.sport), now = Date.now(), { list } = boardGroups();
     const nb = new Map(list.map((G) => [G.g.id, G.entries.length + (G.legs ? G.legs.length : 0)]));
     const tm = (t) => ({ id: String(t.id), ab: t.ab, nm: t.nm, fn: t.fn, col: t.col, alt: t.alt, lg: t.lg, sc: t.sc, rk: t.rk, jn: t.jn || [] });
-    const gm = (g) => ({ id: g.id, sport: g.sport, st: g.st, d: g.d, t: g.t, a: tm(g.a), h: tm(g.h), ven: g.ven, neu: !!g.abroad, net: g.net, riv: g.sport === "CFB" ? cfRiv(g) : arRiv(g), n: nb.get(g.id) || 0,
+    const gm = (g) => ({ id: g.id, sport: g.sport, st: g.st, d: g.d, t: g.t, a: tm(g.a), h: tm(g.h), ven: g.ven, neu: !!g.abroad, ns: !!g.ns, net: g.net, riv: g.sport === "CFB" ? cfRiv(g) : arRiv(g), n: nb.get(g.id) || 0,
       sit: g.sit ? { pos: g.sit.pos, rz: g.sit.rz, yl: g.sit.yl, dd: g.sit.dd } : null });
     const all = [...S.games.values()].filter(fb);
     const on = all.filter((g) => g.st === "in" || (g.st === "pre" && g.t - now < 20 * 60e3 && g.t - now > -3 * 3600e3));
@@ -14602,7 +14687,7 @@ void main(){
   // ---------- sheets ----------
   function openSheet(id) { $(id).hidden = false; }
   // keep every open screen current: when a new version is up, reload it (never mid-form or mid-animation)
-  const BUILD = "20261101043713";
+  const BUILD = "20261107055647";
   function updReady() {
     if (document.getElementById("updReady")) return; const d = document.createElement("div"); d.id = "updReady"; d.textContent = "Update ready · refresh, then TV + Sound on"; document.body.append(d);
   }
@@ -15379,7 +15464,7 @@ void main(){
       jn: [...new Set((x.leaders || []).map((L) => ((((L.leaders || [])[0] || {}).athlete || {}).jersey) || "").filter(Boolean))].slice(0, 3) }; };
     const g = { id: String(e.id), sport, t: Date.parse(e.date), st: st.state || "pre", d: st.shortDetail || "", a: team("away"), h: team("home"), pd: e.status.period || 0, clk: e.status.clock, sty: (e.season && e.season.type) || 0, nt: ((c.notes || [])[0] || {}).headline || "" };
     g.net = ((((c.broadcasts || [])[0] || {}).names) || [])[0] || "";
-    g.ven = c.venue ? { nm: c.venue.fullName || "", indoor: !!c.venue.indoor } : null;
+    g.ven = c.venue ? { nm: c.venue.fullName || "", indoor: !!c.venue.indoor } : null; g.ns = !!c.neutralSite;
     g.city = (c.venue && c.venue.address && c.venue.address.city) || ""; g.abroad = !!(c.venue && c.venue.address && c.venue.address.country && c.venue.address.country !== "USA");
     const si = c.situation, lp = si && si.lastPlay;
     if (si) g.sit = { rz: !!si.isRedZone, pos: si.possession || null, dd: si.downDistanceText || si.shortDownDistanceText || "", yl: typeof si.yardLine === "number" ? si.yardLine : null, dn: si.down || null, ds: si.distance ?? null,
@@ -18842,7 +18927,8 @@ void main(){
     const pinned = [...S.games.values()].find((g) => g.a && g.h && g.st !== "post" && g.t - now < 3 * 3600e3 && FEAT_PIN.some(([d, a, h]) => featEt(g.t).day === d && g.a.ab === a && g.h.ab === h));
     if (pinned) { FEAT.id = pinned.id; return pinned; }
     if (sunRoom(now)) { FEAT.id = ""; return null; }
-    const live = (g) => g.st === "in" || (g.st === "pre" && g.t - now < 30 * 60e3 && now - g.t < 4 * 3600e3);
+    const betOn = new Set(); for (const b of S.bets.values()) if (b.status === "open" && !isGone(b)) for (const x of selsOf(b)) betOn.add(String(x.g));
+    const live = (g) => g.st === "in" || (g.st === "pre" && g.t - now < (betOn.has(String(g.id)) ? 60 : 30) * 60e3 && now - g.t < 4 * 3600e3);
     const cand = [...S.games.values()].filter((g) => g.a && g.h && /^(NFL|CFB|NBA|NHL|CBB|MLB)$/.test(g.sport || "") && live(g));
     if (!cand.length) { FEAT.id = ""; return null; }
     // the game with the most of your units on it (then the room's): its building, whatever the sport. It holds until
@@ -18854,8 +18940,9 @@ void main(){
     const big = (g) => (g.sport === "NFL" ? 40 : 0) + (/^(ESPN|ABC|FOX|NBC|CBS|Prime Video|NFL Network|Peacock|Netflix)$/.test(g.net || "") ? 15 : /ESPN2|FS1|BTN|SEC Network|ACC Network/.test(g.net || "") ? 6 : 0) + rk(g.a) + rk(g.h) + (g.st === "in" ? 5 : 0);
     const ahead = (x, y) => mU(x) - mU(y) >= 0.5 || (Math.abs(mU(x) - mU(y)) < 0.5 && rU(x) - rU(y) >= 0.5);
     let pick = null;
-    const on = cand.filter((g) => rU(g) > 0).sort((x, y) => mU(y) - mU(x) || rU(y) - rU(x) || big(y) - big(x));
-    if (on.length) { const cur = on.find((g) => g.id === FEAT.id); pick = cur && !ahead(on[0], cur) ? cur : on[0]; }
+    const inG = (g) => (g.st === "in" ? 1 : 0);
+    const on = cand.filter((g) => rU(g) > 0).sort((x, y) => inG(y) - inG(x) || mU(y) - mU(x) || rU(y) - rU(x) || big(y) - big(x));
+    if (on.length) { const cur = on.find((g) => g.id === FEAT.id); pick = cur && !(ahead(on[0], cur) && inG(on[0]) >= inG(cur)) ? cur : on[0]; }
     else {
       // nobody's on anything: the biggest football game on in prime time (or on a Saturday)
       const ok = cand.filter((g) => (g.sport === "CFB" || g.sport === "NFL") && ((k) => k.wd === "Sat" || (["Thu", "Fri", "Sun", "Mon"].includes(k.wd) && (k.hr >= 19 || k.hr < 4)))(featEt(g.t)));
@@ -18996,7 +19083,7 @@ void main(){
     const now = Date.now(), soon = TK.games.filter((g) => g.st === "pre" && ranked(g) && g.t - now < 14 * 3600e3).sort((p, q) => p.t - q.t).slice(0, 6);
     const sec = (h, list, f) => (list.length ? `<section class="rb-sec st-sec"><h3>${h}</h3>${list.map(f).join("")}</section>` : "");
     return sec(`Top 25 · live <span>${live.length}</span>`, live, row) + sec("Upsets today", ups, row) +
-      sec("Tonight", soon, (g) => `<div class="st-n${mine.has(g.id) ? " mine" : ""}"><span class="num">${esc(tm2(g.t))}</span><b>${rk(g.a) ? `<em>${rk(g.a)}</em>` : ""}${esc(g.a.nm || g.a.ab)} <small>at</small> ${rk(g.h) ? `<em>${rk(g.h)}</em>` : ""}${esc(g.h.nm || g.h.ab)}</b><i>${esc(g.net || "")}</i></div>`);
+      sec(new Date().getHours() < 17 ? "Later today" : "Tonight", soon, (g) => `<div class="st-n${mine.has(g.id) ? " mine" : ""}"><span class="num">${esc(tm2(g.t))}</span><b>${rk(g.a) ? `<em>${rk(g.a)}</em>` : ""}${esc(g.a.nm || g.a.ab)} <small>at</small> ${rk(g.h) ? `<em>${rk(g.h)}</em>` : ""}${esc(g.h.nm || g.h.ab)}</b><i>${esc(g.net || "")}</i></div>`);
   }
   const tm2 = (t) => new Date(t).toLocaleTimeString([], { hour: "numeric", minute: "2-digit" });
   // the banner: a ranked team going down, said once for the alert (4th quarter) and once at the final
@@ -19444,12 +19531,23 @@ void main(){
     const n = slateGames();
     return n >= 5 ? "busy" : n >= 2 ? "feature" : "prime";
   }
+  // the board day's college slate: four or more ranked-vs-ranked games make it a Super Saturday (worked out once a minute)
+  let SSAT = { at: 0, v: false };
+  function superSat() {
+    const now = Date.now(); if (now - SSAT.at < 60e3) return SSAT.v;
+    const day = etDate(bdT(now)); let n = 0;
+    for (const g of S.games.values()) if (g.sport === "CFB" && g.a && g.h && g.a.rk && g.h.rk && g.a.rk <= 25 && g.h.rk <= 25 && etDate(bdT(g.t)) === day) n++;
+    SSAT = { at: now, v: etDow() === 6 && n >= 4 }; return SSAT.v;
+  }
+  // which window of a college Saturday it is (by the clock, Eastern)
+  function cfbWindow() { const h = Number(new Intl.DateTimeFormat("en-US", { timeZone: "America/New_York", hour: "numeric", hourCycle: "h23" }).format(new Date())); return h >= 8 && h < 15 ? "Noon window" : h >= 15 && h < 19 ? "Afternoon" : h >= 19 && h < 22 ? "Prime time" : "After dark"; }
   function showMode() {
     const el = $("#modeChip"); if (!el) return;
     const m = slateMode(), n = slateGames();
     el.hidden = !n && slatePin() === "auto";
     el.className = "chip modechip " + m;
-    el.textContent = (document.body.classList.contains("cfb") ? (etDow() === 6 ? "College Saturday" : "College football") : document.body.classList.contains("hockey") ? "Hockey night" : document.body.classList.contains("baseball") ? "Ballpark" : document.body.classList.contains("hoops") || (DIR && (DIR.sport === "NBA" || DIR.sport === "CBB")) ? (DIR && DIR.sport === "CBB" ? "Hoops night" : "NBA night") : nflWindow() || MODE_LABEL[m]) + (n ? ` · ${n} game${n > 1 ? "s" : ""}` : "");
+    const sup = document.body.classList.contains("cfb") && etDow() === 6 && superSat(); el.classList.toggle("super", sup);
+    el.textContent = (document.body.classList.contains("cfb") ? (etDow() === 6 ? (sup ? "Super Saturday · " + cfbWindow() : "College Saturday") : "College football") : document.body.classList.contains("hockey") ? "Hockey night" : document.body.classList.contains("baseball") ? "Ballpark" : document.body.classList.contains("hoops") || (DIR && (DIR.sport === "NBA" || DIR.sport === "CBB")) ? (DIR && DIR.sport === "CBB" ? "Hoops night" : "NBA night") : nflWindow() || MODE_LABEL[m]) + (n && !sup ? ` · ${n} game${n > 1 ? "s" : ""}` : "");
   }
   function autoReact() {
     if (!S.ready) return;
@@ -23158,8 +23256,10 @@ async function S3warm() {
   for (const k of ["drop", "cash", "troph", "party", "out", "play", "career", "rec", "ring", "burn", "ride", "heat", "vault", "lburn", "lshred", "lgrave", "lbeat", "lbust", "lyard", "fbf", "gdrop", "gsplit", "grush", "gspike", "ghuddle", "gpush", "cfband", "cfstorm", "cfflag", "cfpose", ...Object.keys(SIG).map((x) => "sig:" + x)]) {
     if (k.startsWith("sig:")) SIG[k.slice(4)](st, 0); else if (k === "fbf") FBfield(st, { t: 0, ms: 4000 }); else ACT3[k](st, { t: 0, ms: 4000 }); st.t = 0;
     for (const t of [0.4, 1.0, 2.0]) { st.t = t; for (const f of st.tick.slice()) { try { f(t, 0.016); } catch (e) {} } }
-    st.r.compile(st.scene, st.cam); st.comp.render(0.016); S3clear(st);
-    await new Promise((ok) => setTimeout(ok, 30));
+    if (st.r.compileAsync) await st.r.compileAsync(st.scene, st.cam).catch(() => {}); else st.r.compile(st.scene, st.cam);
+    await new Promise((ok) => { const f = () => { const c = document.getElementById("cash"), p = document.getElementById("v2pl"); if ((c && !c.hidden) || (p && !p.hidden)) setTimeout(f, 900); else ok(); }; f(); });
+    st.comp.render(0.016); S3clear(st);
+    await new Promise((ok) => setTimeout(ok, 140));
   }
   st.scene.clear(); S3.warmed = true;
 }
@@ -26328,6 +26428,23 @@ const WD_CFS = [
   [/lavell edwards/i, { up: 0, seat: "#1d3a6b", boards: "both", f: ["hills"] }], [/kenan/i, { up: 0, seat: "#7bafd4", boards: "both", f: ["pines"] }],
   [/bounce house|fbc mortgage|spectrum stadium/i, { up: 0, seat: "#18181a", boards: "e", hi: 0.82 }], [/mclane/i, { up: 0, seat: "#154734", boards: "both", f: ["river"] }],
 ];
+// college home stadiums by the home team (a home game; a neutral site goes by its venue): today's big ones that had the
+// generic build, and Minnesota's (its stadium's name starts like the Browns' and drew Cleveland's lakefront)
+const WD_CFH = {
+  UTAH: { seat: "#b00020", boards: "e", f: ["hills"] },                       // Rice-Eccles: the Wasatch over the east side
+  MIZ: { seat: "#1d1d1f", boards: "e", f: ["hills"] },                        // Faurot Field: black and gold, the rock M hill
+  SC: { seat: "#73000a", boards: "both", up: 2 },                             // Williams-Brice: the big garnet double deck
+  WASH: { seat: "#4b2e83", boards: "e", up: 2, roof: "canopy", f: ["lake"] }, // Husky Stadium: the sideline roofs, Lake Washington
+  TTU: { seat: "#cc0000", boards: "both", up: 2 },                            // Jones AT&T: the new south end zone
+  WIS: { seat: "#c5050c", boards: "e", up: 2 },                               // Camp Randall
+  MSST: { seat: "#5d1725", boards: "both", up: 2 },                           // Davis Wade
+  ASU: { up: 0, seat: "#8c1d40", boards: "e", f: ["hills"] },                 // Sun Devil Stadium: the bowl between the buttes
+  NU: { up: 0, seat: "#4e2a84", boards: "e", hi: 0.86 },                      // the new Ryan Field: compact, close to the field
+  MINN: { seat: "#7a0019", boards: "e", up: 1 },                              // Huntington Bank Stadium (not Cleveland's)
+  CSU: { up: 0, seat: "#1e4d2b", boards: "e", f: ["hills"] },                 // Canvas Stadium: the foothills
+  KSU: { seat: "#512888", boards: "e", up: 1 },                               // Bill Snyder Family Stadium
+  BYU: { up: 0, seat: "#1d3a6b", boards: "both", f: ["hills"] }, OSU: { seat: "#5a5d62", boards: "e", low: "e", f: ["rotunda"] },
+};
 // the international games, by the venue's name: roof "ring" is a canopy all the way round; arch is Wembley's, glowwall the
 // Allianz Arena's lit skin, towers the MCG's light towers
 const WD_INTL = [
@@ -26339,7 +26456,11 @@ const WD_INTL = [
 ];
 function wdFbSpec(R) {
   const S = R.scene && R.scene.game, h = S ? S.h : null, vn = (S && S.ven && S.ven.nm) || (R.ven && R.ven.nm) || "";
-  let fs = null; for (const v of Object.values(WD_FBS)) if (vn && v.nm && vn.toLowerCase().includes(v.nm.toLowerCase().slice(0, 12))) { fs = Object.assign({}, v); break; }
+  let fs = null;
+  // a college game: its college stadium first (by name, then the home team's when it's at home), before the NFL's names
+  if (S && S.sport === "CFB") { for (const [re, v] of WD_CFS) if (re.test(vn)) { fs = Object.assign({ nm: vn }, v); break; }
+    if (!fs && h && !S.ns && !S.neu && WD_CFH[h.ab]) fs = Object.assign({ nm: vn }, WD_CFH[h.ab]); }
+  if (!fs) for (const v of Object.values(WD_FBS)) if (vn && v.nm && vn.toLowerCase().includes(v.nm.toLowerCase().slice(0, 12))) { fs = Object.assign({}, v); break; }
   if (!fs) for (const [re, v] of WD_INTL) if (re.test(vn)) { fs = Object.assign({ nm: vn, intl: 1 }, v); break; }
   if (!fs) for (const [re, v] of WD_CFS) if (re.test(vn)) { fs = Object.assign({ nm: vn }, v); break; }
   if (!fs && h && S.sport === "NFL" && WD_FBS[h.ab]) fs = Object.assign({}, WD_FBS[h.ab]);
