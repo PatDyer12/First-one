@@ -14899,7 +14899,7 @@ void main(){
   // ---------- sheets ----------
   function openSheet(id) { $(id).hidden = false; }
   // keep every open screen current: when a new version is up, reload it (never mid-form or mid-animation)
-  const BUILD = "20261107192355";
+  const BUILD = "20261107214227";
   function updReady() {
     if (document.getElementById("updReady")) return; const d = document.createElement("div"); d.id = "updReady"; d.textContent = "Update ready · refresh, then TV + Sound on"; document.body.append(d);
   }
@@ -16710,8 +16710,10 @@ void main(){
     clip("house/hs43", "Hollywood Ari", "up win vibe", 44.23, { house: 1, lux: 1, music: true, songId: "hs43" }),
     clip("house/hs44", "Celebration", "up win vibe", 12.37, { house: 1, lux: 1, music: true, songId: "hs44" }),
     clip("house/hs45", "Point Break", "up win vibe", 71.1, { house: 1, lux: 1, music: true, songId: "hs45" }),
+    clip("house/hs46", "Day off", "up win vibe", 10.7, { house: 1, lux: 1, music: true, songId: "hs46" }),
     clip("clips/w02", "Car ride laughs", "up win", 22.45),
     clip("clips/w03", "Tiger: Pure.", "up win", 30),
+    clip("clips/w17", "JT: Lower Merion's own", "up win", 30.0),
     clip("clips/w04", "Migos carpool", "up win vibe", 30, { song: "Walk It Talk It", artist: "Migos ft. Drake" }),
     clip("clips/w05", "Melo's Knicks intro", "up win", 30),
     clip("clips/w06", "KD: kiss it", "up win", 26.35),
@@ -16805,6 +16807,8 @@ void main(){
     clip("nba/nba14", "D-Rose: Chicago's own", "up hype", 16.1, { sport: "NBA", fan: "CHI", songId: "nba14" }),
     clip("nba/nba15", "Around the league: the stars", "up hype", 42.3, { sport: "NBA", songId: "nba15" }),
     clip("nba/nba16", "NBA is back", "hype", 69.2, { sport: "NBA", songId: "nba16" }),
+    clip("nba/nba17", "MJ: the rings", "up hype", 28.4, { sport: "NBA", fan: "CHI", songId: "mj95" }),
+    clip("nba/nba18", "MJ: I'm back", "up hype", 30.0, { sport: "NBA", fan: "CHI", songId: "mj95" }),
     clip("cfb/cfb16", "365 days, part 2", "hype up", 31.2, UGA),
     clip("cfb/cfb19", "Dawgs going crazy, part 2", "hype up", 14.6, UGA),
     clip("cfb/cfb17", "I don't lose, part 2", "down comeback", 32),
@@ -16841,6 +16845,7 @@ void main(){
     clip("cfb/cfb45", "Dread it, run from it", "hype up", 31.4, ALA),
     clip("cfb/cfb46", "We Bama, part 3", "hype up", 31.0, ALA),
     clip("cfb/cfb47", "Brady to Ty Simpson", "hype up", 13.2, { ...ALA, pl: "simpson" }),
+    clip("cfb/cfb49", "Beavs: number 12", "hype up", 11.2, cfbTeam("ORST")),
     clip("cfb/cfb48", "Beavs: start paying attention", "hype up", 22.23, cfbTeam("ORST")),
     // NFL edits: highlight reels also play right after a touchdown for you; team reels never when you're against that team
     clip("nfl/nfl01", "Olave highlight reel", "hype up td", 16.6, nflTeam("NO")),
@@ -16899,6 +16904,10 @@ void main(){
     clip("nfl/nfl53", "Stafford: the long road, part 2", "hype up td", 28.6, { ...nflTeam("LAR"), pl: "stafford", songId: "lar26" }),
     clip("nfl/nfl54", "Stafford: MVP stuff", "hype up td", 21.7, { ...nflTeam("LAR"), pl: "stafford", songId: "lar28" }),
     clip("nfl/nfl55", "Stafford: MVP stuff, part 2", "hype up td", 39.1, { ...nflTeam("LAR"), pl: "stafford", songId: "lar28" }),
+    clip("nfl/nfl56", "Red pill: Seahawks and Chiefs", "hype up", 20.15, { songId: "redpill" }),
+    clip("nfl/nfl57", "JSN: red pill, blue pill", "hype up td", 20.1, { ...nflTeam("SEA"), pl: "jsn", songId: "redpill" }),
+    clip("nfl/nfl58", "Skattebo: bully the bully", "hype up td", 30.0, { ...nflTeam("NYG"), pl: "skattebo" }),
+    clip("nfl/nfl59", "Watson: back in short order", "hype up td", 28.6, { ...nflTeam("GB"), pl: "watson" }),
   ];
   // library clips are big once decoded, so only the last couple stay in memory
   const clipBufs = new Map();
@@ -18687,7 +18696,7 @@ void main(){
     step(0);
   }
   // ---------- player edits: his touchdown or his big play brings up his own edit ----------
-  const PL_NAMES = { donald: "Aaron Donald", stafford: "Matthew Stafford", davante: "Davante Adams", puka: "Puka Nacua", kyren: "Kyren Williams" };
+  const PL_NAMES = { donald: "Aaron Donald", stafford: "Matthew Stafford", davante: "Davante Adams", puka: "Puka Nacua", kyren: "Kyren Williams", jsn: "Jaxon Smith-Njigba", skattebo: "Cam Skattebo", watson: "Christian Watson" };
   // play-by-play writes "M.Stafford", scoring plays write "Matthew Stafford": either counts
   const PL_RE = Object.fromEntries(Object.entries(PL_NAMES).map(([k, n]) => { const [f, l] = n.split(" "); return [k, new RegExp(`\\b(?:${f}\\s+|${f[0]}\\.\\s?)${l}\\b`, "i")]; }));
   const plIn = (x) => Object.keys(PL_RE).find((k) => PL_RE[k].test(x || "")) || null;
