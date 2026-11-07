@@ -11323,16 +11323,22 @@ body.tv .rc-note { display: none; }
   }
 
   // ---------- writes ----------
+  const W_LAST = { m: "", t: 0 };
   async function write(fn, local) {
     if (!S.db) { local(); render(); return true; }
     try { await fn(S.db); return true; }
     catch (e) {
       if (e && e.code === "permission-denied") { S.canWrite = false; render(); toast("This account can't change the board. Sign in with yours."); }
-      else toast("Couldn't save that. Check your connection and try again.");
+      else {
+        const m = "Couldn't save that" + (e && e.code ? " (" + e.code + ")" : "") + ". Check your connection and try again.";
+        if (m !== W_LAST.m || Date.now() - W_LAST.t > 120e3) { W_LAST.m = m; W_LAST.t = Date.now(); toast(m); }
+        console.warn("save failed", e); try { window.__saveErr = String((e && (e.code || e.message)) || e); } catch (x) {}
+      }
       return false;
     }
   }
-  const colOf = (id) => (GUEST || (S.bets.get(id) || {})._col === "guestBets" ? "guestBets" : "bets");
+  const colOf = (id) => (GUEST || (S.bets.get(id) || (S.goneBets && S.goneBets.get(id)) || {})._col === "guestBets" ? "guestBets" : "bets");
+  window.__colOf = colOf;
   const guestStamp = (data) => (GUEST ? { ...data, who: "guest", whoName: GUEST.name || "Guest", uid: GUEST.uid, status: data.status || "open" } : data);
   const PRE_ODDS = new Map();   // game id -> { at, pre }: the book's pregame line
   const numOr = (v) => { const n = parseFloat(v); return isFinite(n) ? n : null; };
@@ -14847,7 +14853,7 @@ void main(){
   // ---------- sheets ----------
   function openSheet(id) { $(id).hidden = false; }
   // keep every open screen current: when a new version is up, reload it (never mid-form or mid-animation)
-  const BUILD = "20261107175643";
+  const BUILD = "20261107182326";
   function updReady() {
     if (document.getElementById("updReady")) return; const d = document.createElement("div"); d.id = "updReady"; d.textContent = "Update ready · refresh, then TV + Sound on"; document.body.append(d);
   }
@@ -22106,7 +22112,7 @@ void main(){
   $("#lossTest").addEventListener("click", () => playLoss());
 
   // ---------- auto-settle bets once their games are final ----------
-  const settling = new Set();
+  const settling = new Set(), settleFail = new Map();
   const GONE_SEEDS = [{ id: "1018", day: "2026-10-18", add: ["~farb", "~lucas"] }, { id: "1018b", day: "2026-10-18", add: ["^brad"] }, { id: "1025m", day: "2026-10-25", add: [], del: ["~lucas", "^brad", "guest:brad", "guest:lucas", "guest:mozel", "guest:bart"] }];
   S.gone = S.gone || new Set(); S.goneBets = S.goneBets || new Map();
   const goneNm = (b) => String(personName(b) || "").toLowerCase().replace(/[^a-z0-9]/g, "");
@@ -22185,7 +22191,7 @@ void main(){
   function autoSettle() {
     if (!S.db || !S.canWrite || !S.ready || GUEST) return;
     for (const b of [...S.bets.values(), ...S.goneBets.values()]) {
-      if (b.status !== "open" || b.noAuto || b.trial || settling.has(b.id) || tdHold.has(b.id) || tdWait(b)) continue;
+      if (b.status !== "open" || b.noAuto || b.trial || settling.has(b.id) || tdHold.has(b.id) || tdWait(b) || (settleFail.get(b.id) || 0) > Date.now()) continue;
       if (cardBusy && b.sel && isTd(b.sel.m)) continue; // let his touchdown card play first
       let status = null;
       if (b.kind === "parlay") {
@@ -22200,7 +22206,7 @@ void main(){
       }
       if (!status) continue;
       settling.add(b.id);
-      patchBet(b.id, { status, settledAt: Date.now(), net: netOf({ ...b, status }), auto: true, ...hoopStoryPatch(b, status) }).finally(() => settling.delete(b.id));
+      patchBet(b.id, { status, settledAt: Date.now(), net: netOf({ ...b, status }), auto: true, ...hoopStoryPatch(b, status) }).then((ok) => { if (!ok) settleFail.set(b.id, Date.now() + 15 * 60e3); }).finally(() => settling.delete(b.id));
     }
   }
 
