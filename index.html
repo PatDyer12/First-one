@@ -7300,6 +7300,11 @@ body.tv .rb-main > .flowin > .loopclone { margin-top: 24px; }
       </div>
       <span class="hint">The bet flips to LIVE on the board at this time. For a parlay, use the first game.</span>
     </div>
+    <div class="field" id="f-whenW" hidden>
+      <label>Placed</label>
+      <div class="seg" role="group" aria-label="When the bet went in" id="f-when"><button type="button" data-v="pre" aria-pressed="true">Before kickoff</button><button type="button" data-v="live" aria-pressed="false">During the game</button></div>
+      <span class="hint">The game's already on. Before kickoff keeps it a pregame bet; During the game makes it a live one.</span>
+    </div>
     <div class="preview num" id="f-preview"></div>
     <div class="err" id="f-err" role="alert"></div>
     <button type="submit" class="btn primary" id="f-submit">Add bet</button>
@@ -10755,8 +10760,16 @@ body.tv .rb-main > .flowin > .loopclone { margin-top: 24px; }
     return btDm(b.sel) || BT_EXACT.test(b.pick || "") || BT_NEXT.test(b.pick || "");
   }
   // live: put in after its game (a parlay: its first game) kicked off
+  setTimeout(() => { const pass = async () => {
+    if (GUEST || !S.db || !S.ready) return;
+    for (const b of [...S.bets.values()]) {
+      if (b.status !== "open" || b.pre != null || !b.placedAt || Date.now() - b.placedAt > 18 * 3600e3 || !btLive(b)) continue;
+      const d = await preMark({ ...b }); if (d.pre == null) continue;
+      try { await S.db.doc(colOf(b.id) + "/" + b.id).update({ pre: d.pre }); const x = S.bets.get(b.id); if (x) x.pre = d.pre; } catch (e) {}
+    }
+  }; pass(); setInterval(pass, 60e3); }, 9000);
   function btLive(b) {
-    const pa = Number(b.placedAt) || 0; if (!pa) return false;
+    const pa = Number(b.placedAt) || 0; if (!pa || b.pre === true) return false;
     const tOf = (x) => x && (x.t || (gameOf(x) || {}).t);
     const t = b.kind === "parlay" ? Math.min(...(b.legSel || []).map(tOf).filter(Boolean), b.startAt || Infinity) : tOf(b.sel) || b.startAt;
     return !!t && isFinite(t) && pa > t + 60e3;
@@ -11208,7 +11221,41 @@ body.tv .rb-main > .flowin > .loopclone { margin-top: 24px; }
   }
   const colOf = (id) => (GUEST || (S.bets.get(id) || {})._col === "guestBets" ? "guestBets" : "bets");
   const guestStamp = (data) => (GUEST ? { ...data, who: "guest", whoName: GUEST.name || "Guest", uid: GUEST.uid, status: data.status || "open" } : data);
-  const putBet = (id, data0) => { const data = guestStamp(data0); return write((db) => db.collection(GUEST ? "guestBets" : "bets").doc(id).set(data), () => S.bets.set(id, oneJulian({ id, ...data }))); };
+  const PRE_ODDS = new Map();   // game id -> { at, pre }: the book's pregame line
+  const numOr = (v) => { const n = parseFloat(v); return isFinite(n) ? n : null; };
+  async function preLine(g) {
+    const c = PRE_ODDS.get(g.id); if (c && Date.now() - c.at < 10 * 60e3) return c.pre;
+    let pre = null;
+    try {
+      const [sport, league] = ESPN[g.sport].split("/"), ctl = new AbortController(), tm = setTimeout(() => ctl.abort(), 3000);
+      const r = await fetch(`https://sports.core.api.espn.com/v2/sports/${sport}/leagues/${league}/events/${g.id}/competitions/${g.id}/odds`, { signal: ctl.signal }); clearTimeout(tm);
+      if (r.ok) { const it = ((await r.json()).items || []).find((x) => !/live/i.test((x.provider && x.provider.name) || ""));
+        if (it) { const H = it.homeTeamOdds || {}, A = it.awayTeamOdds || {}; pre = { sp: numOr(it.spread), tot: numOr(it.overUnder), spO: numOr(H.open && H.open.pointSpread && (H.open.pointSpread.american || H.open.pointSpread.alternateDisplayValue)), mlH: numOr(H.moneyLine), mlA: numOr(A.moneyLine) }; } }
+    } catch (e) {}
+    PRE_ODDS.set(g.id, { at: Date.now(), pre }); return pre;
+  }
+  // a leg against the pregame line: true it's the pregame number, false a live one, null can't tell
+  function preLeg(x, odds1, pre) {
+    if (!pre) return null;
+    if ((x.m === "sp" || x.m === "tot") && odds1 && Math.abs(odds1) > 150) return null;   // an alt line
+    if (x.m === "sp" && x.l != null && pre.sp != null) { const w = x.s === "h" ? pre.sp : -pre.sp, wo = pre.spO != null ? (x.s === "h" ? pre.spO : -pre.spO) : null; return Math.abs(x.l - w) <= 1.5 || (wo != null && Math.abs(x.l - wo) <= 1.5); }
+    if (x.m === "tot" && x.l != null && pre.tot != null) return Math.abs(x.l - pre.tot) <= 3;
+    if (x.m === "ml" && odds1) { const m = x.s === "h" ? pre.mlH : x.s === "a" ? pre.mlA : null; if (m == null) return null;
+      return Math.sign(m) === Math.sign(odds1) ? Math.abs(Math.abs(m) - Math.abs(odds1)) <= Math.max(40, Math.abs(m) * 0.25) : Math.abs(m) < 135 && Math.abs(odds1) < 135; }
+    return null;
+  }
+  // was this bet in before its game started? (only asked when the game had started by the time it was logged)
+  async function preMark(d) {
+    if (!d || d.pre != null || !d.placedAt) return d;
+    const sels = d.kind === "parlay" ? (d.legSel || []).filter(Boolean) : d.sel ? [d.sel] : [];
+    const on = sels.map((x) => [x, S.games.get(String(x.g))]).filter(([, g]) => g && g.t && d.placedAt > g.t + 60e3);
+    if (!on.length) return d;
+    let v = null;
+    for (const [x, g] of on) { const r = preLeg(x, d.kind === "parlay" ? numOr(x.o) : numOr(d.odds), await preLine(g)); if (r === false) { v = false; break; } if (r === true) v = true; }
+    if (v == null) v = d.placedAt - Math.min(...on.map(([, g]) => g.t)) < 75 * 60e3;
+    d.pre = v; return d;
+  }
+  const putBet = async (id, data0) => { try { await Promise.race([preMark(data0), new Promise((ok) => setTimeout(ok, 3500))]); } catch (e) {} const data = guestStamp(data0); return write((db) => db.collection(GUEST ? "guestBets" : "bets").doc(id).set(data), () => S.bets.set(id, oneJulian({ id, ...data }))); };
   const patchBet = (id, patch) => write((db) => db.doc(colOf(id) + "/" + id).update(patch), () => {
     const b = S.bets.get(id), prev = b && b.status;
     if (b) {
@@ -14687,7 +14734,7 @@ void main(){
   // ---------- sheets ----------
   function openSheet(id) { $(id).hidden = false; }
   // keep every open screen current: when a new version is up, reload it (never mid-form or mid-animation)
-  const BUILD = "20261107055647";
+  const BUILD = "20261107172326";
   function updReady() {
     if (document.getElementById("updReady")) return; const d = document.createElement("div"); d.id = "updReady"; d.textContent = "Update ready · refresh, then TV + Sound on"; document.body.append(d);
   }
@@ -15232,7 +15279,20 @@ void main(){
     const units = parseFloat(String($("#f-units").value).replace(",", "."));
     return { kind, odds, units };
   }
+  // the form's "Placed" question: shown when the picked game (or a leg's) is already on, set to what the line says
+  let whenSeq = 0;
+  function whenSync() {
+    const w = $("#f-whenW"); if (!w) return;
+    const now = Date.now(), sels = F.legs && F.legs.length && document.querySelector('input[name="kind"]:checked') && document.querySelector('input[name="kind"]:checked').value === "parlay" ? F.legs.filter((x) => x.g).map((x) => ({ g: x.g, m: x.m, s: x.s, l: x.l, o: x.o })) : F.sel ? [{ g: F.sel.g, m: F.sel.m, s: F.sel.s, l: F.sel.l }] : [];
+    const on = sels.some((x) => { const g = S.games.get(String(x.g)); return g && g.t && now > g.t + 60e3; });
+    w.hidden = !on; if (!on || F.whenTouched) return;
+    const me = ++whenSeq, fv = formVals(), d = { kind: sels.length > 1 ? "parlay" : "straight", odds: fv.odds, placedAt: now, sel: sels[0], legSel: sels };
+    preMark(d).then(() => { if (me !== whenSeq || F.whenTouched || d.pre == null) return; whenSet(d.pre ? "pre" : "live"); }).catch(() => {});
+  }
+  function whenSet(v) { for (const b of document.querySelectorAll("#f-when button")) b.setAttribute("aria-pressed", b.dataset.v === v ? "true" : "false"); }
+  document.getElementById("f-when").addEventListener("click", (e) => { const b = e.target.closest("button[data-v]"); if (!b) return; F.whenTouched = true; whenSet(b.dataset.v); });
   function updatePreview() {
+    try { whenSync(); } catch (e) {}
     const { odds, units } = formVals();
     document.querySelectorAll("#sign button").forEach((b) => b.setAttribute("aria-pressed", String(Number(b.dataset.s) === S.sign)));
     document.querySelectorAll("#dayseg button").forEach((b) => b.setAttribute("aria-pressed", String(Number(b.dataset.d) === S.day)));
@@ -15323,7 +15383,7 @@ void main(){
     const me = document.querySelector('input[name="who"][value="me"]'); if (me) me.checked = true;
     $("#guestWrap").hidden = true; $("#f-guest").value = ""; renderGuests();
     $("#addForm").reset(); S.sign = -1; S.day = 0; $("#f-odds").value = "110"; $("#f-units").value = "1"; $("#f-err").textContent = "";
-    Object.assign(F, { sel: null, legs: [], q: "", openG: null, custom: false, oddsTouched: false, sport: focusLeague(), tail: null, altG: null });
+    Object.assign(F, { sel: null, legs: [], q: "", openG: null, custom: false, oddsTouched: false, sport: focusLeague(), tail: null, altG: null, whenTouched: false }); whenSet("pre"); $("#f-whenW").hidden = true;
     $("#addForm .sheet-head h3").textContent = "Log a bet";
     scanNote(""); slipBets = [];
     renderPicker(); updatePreview(); openSheet("#addSheet"); loadPickerGames();
@@ -15373,6 +15433,7 @@ void main(){
         data.startAt = d.getTime();
       }
     }
+    { const w = $("#f-whenW"); if (w && !w.hidden) { const on = document.querySelector('#f-when button[aria-pressed="true"]'); data.pre = !on || on.dataset.v === "pre"; } }
     const id = "b" + Date.now().toString(36) + Math.random().toString(36).slice(2, 6);
     $("#f-submit").disabled = true;
     const ok = await putBet(id, data);
@@ -22339,7 +22400,7 @@ void main(){
       if (!added.length) { scanNote(dupes.length ? "<span><b>That slip's already on the board.</b></span>" : "Couldn't add that one. Try the screenshot again, or pick the game below."); return; }
       closeSheets(); scanDone(added, dupes.length); if (fixMsg) toast(fixMsg);
     } catch (err) {
-      scanNote("The slip reader didn't answer (" + esc(String(err.message || err).slice(0, 120)) + "). Try again, or pick the game below.");
+      scanNote(/app check/i.test(String(err.message || err)) ? "The slip reader is switched off by App Check in Firebase (App Check, APIs, Firebase AI Logic: Unenforce). Pick the game below for now." : "The slip reader didn't answer (" + esc(String(err.message || err).slice(0, 120)) + "). Try again, or pick the game below.");
     } finally { btn.classList.remove("busy"); $("#scanLbl").textContent = "Scan a bet slip screenshot"; }
   });
   // what went on the board: each bet, what it couldn't read or link, and an undo
