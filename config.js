@@ -8,3 +8,8 @@ window.SWEAT_FIREBASE = {
   messagingSenderId: "192999019838",
   appId: "1:192999019838:web:96f51bded21a133940c86f",
 };
+
+// reCAPTCHA site key for App Check (Firebase requires it for the slip reader). Site keys are public by design.
+// Registered in Firebase under App Check → Apps → Fraud Defense (reCAPTCHA Enterprise), so the Enterprise provider is used
+window.SWEAT_RECAPTCHA = "6Le_MxUuAAAAAK6OZ6OlGH8JY-3VjYZtPjlEow-D";
+window.SWEAT_RECAPTCHA_ENT = true;

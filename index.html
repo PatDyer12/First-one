@@ -7072,6 +7072,70 @@ body.tv .rb-main > .flowin > .loopclone { margin-top: 24px; }
 
 /* Super Saturday: the header chip in gold */
 .chip.modechip.super { color: #ffd36b; background: linear-gradient(90deg, rgba(255,190,40,.2), rgba(255,110,40,.14)); box-shadow: inset 0 0 0 1px rgba(255,205,90,.55), 0 0 18px rgba(255,180,40,.18); border-color: transparent; }
+
+/* specials: a ranked showdown (gold) or a rivalry (the two teams' colors) */
+.rb-g.sp-rank { outline: 2px solid rgba(255,201,77,.55); outline-offset: -2px; }
+.rb-g.sp-riv { outline: 2px solid color-mix(in srgb, var(--rh, #fff) 55%, transparent); outline-offset: -2px; }
+.sp-ban { position: relative; display: flex; align-items: center; gap: 12px; min-width: 0; padding: 8px 16px; border-radius: 14px 14px 0 0; font: 800 12px/1 var(--f-ui); letter-spacing: .18em; text-transform: uppercase; white-space: nowrap; overflow: hidden; }
+.sp-ban.rank { color: #ffd36b; background: linear-gradient(90deg, rgba(255,196,60,.3), rgba(255,140,40,.12) 55%, rgba(255,140,40,0)); box-shadow: inset 0 -1px 0 rgba(255,210,100,.35); }
+.sp-ban.riv { color: #fff; text-shadow: 0 1px 3px rgba(0,0,0,.7); background: linear-gradient(90deg, var(--ca) 0%, color-mix(in srgb, var(--ca) 55%, transparent) 38%, color-mix(in srgb, var(--ch) 55%, transparent) 62%, var(--ch) 100%); }
+.sp-ban .sp-k { opacity: .78; font-size: 11px; flex: none; }
+.sp-ban .sp-n { font: 900 21px/1 var(--f-display); letter-spacing: .05em; overflow: hidden; text-overflow: ellipsis; }
+.sp-ban .sp-x { margin-left: auto; flex: none; font-size: 11px; opacity: .9; }
+/* on a hero card the banner runs edge to edge across its top and the scoreboard sits under it (the scoreboard
+   used to take that space, pulled up over the card's padding) */
+body.v2b .rb-g.hero > .sp-ban { margin: -18px -20px 0; padding: 9px 22px; }
+body.v2b .rb-g.hero > .sp-ban + .rb-gh { margin-top: 0; }
+.ob-sp { flex: none; margin-left: 8px; padding: 4px 8px; border-radius: 6px; font: 800 10px/1 var(--f-ui); letter-spacing: .14em; text-transform: uppercase; white-space: nowrap; max-width: 150px; overflow: hidden; text-overflow: ellipsis; }
+.ob-sp.rank { color: #ffd36b; background: rgba(255,196,60,.16); box-shadow: inset 0 0 0 1px rgba(255,205,90,.45); }
+.ob-sp.riv { color: #fff; background: linear-gradient(90deg, color-mix(in srgb, var(--ca, #888) 70%, transparent), color-mix(in srgb, var(--ch, #888) 70%, transparent)); }
+/* the open */
+.spo { position: fixed; inset: 0; z-index: 8350; pointer-events: none; overflow: hidden; font-family: var(--f-ui); color: #fff; }
+.spo[hidden] { display: none; }
+.spo-dim { position: absolute; inset: 0; background: rgba(3,5,9,.78); opacity: 0; transition: opacity .35s ease; }
+.spo.on .spo-dim { opacity: 1; } .spo.out .spo-dim { opacity: 0; transition-duration: .6s; }
+.spo-st { position: absolute; left: 50%; top: 50%; width: 1920px; height: 1080px; transform: translate(-50%, -50%) scale(var(--sc, 1)); }
+.spo-bg { position: absolute; top: 0; bottom: 0; width: 62%; opacity: 0; will-change: transform, opacity; }
+.spo-bg.a { left: -6%; background: linear-gradient(100deg, var(--ca) 0%, color-mix(in srgb, var(--ca) 55%, #000) 70%, transparent 100%); transform: translate3d(-100%, 0, 0) skewX(-12deg); }
+.spo-bg.h { right: -6%; background: linear-gradient(-100deg, var(--ch) 0%, color-mix(in srgb, var(--ch) 55%, #000) 70%, transparent 100%); transform: translate3d(100%, 0, 0) skewX(-12deg); }
+.spo.on .spo-bg { animation: spoBg .7s cubic-bezier(.2,.8,.2,1) forwards; }
+@keyframes spoBg { to { opacity: .9; transform: translate3d(0, 0, 0) skewX(-12deg); } }
+.spo-sweep { position: absolute; inset: -20% -40%; background: linear-gradient(105deg, transparent 44%, rgba(255,255,255,.22) 50%, transparent 56%); transform: translate3d(-60%, 0, 0); will-change: transform; }
+.spo.on .spo-sweep { animation: spoSweep 1.4s .55s ease-in-out forwards; }
+@keyframes spoSweep { to { transform: translate3d(60%, 0, 0); } }
+.spo-hd { position: absolute; left: 0; right: 0; top: 150px; text-align: center; }
+.spo-k { display: inline-block; padding: 8px 18px; border-radius: 999px; font: 800 20px/1 var(--f-ui); letter-spacing: .3em; text-transform: uppercase; background: rgba(0,0,0,.45); box-shadow: inset 0 0 0 2px rgba(255,255,255,.35); opacity: 0; transform: translate3d(0, 20px, 0); will-change: transform, opacity; }
+.spo.rank .spo-k { color: #ffd36b; box-shadow: inset 0 0 0 2px rgba(255,205,90,.7); }
+.spo.on .spo-k { animation: spoUp .45s .25s ease-out forwards; }
+.spo-n { display: block; margin-top: 26px; font: 900 150px/.9 var(--f-display); font-style: italic; text-transform: uppercase; letter-spacing: .02em; text-shadow: 0 8px 40px rgba(0,0,0,.6), 0 0 2px rgba(0,0,0,.5); opacity: 0; transform: scale(2.6); will-change: transform, opacity; white-space: nowrap; }
+.spo.rank .spo-n { color: #ffe08a; }
+.spo.on .spo-n { animation: spoSlam .6s .45s cubic-bezier(.2,1.3,.35,1) forwards; }
+@keyframes spoSlam { 0% { opacity: 0; transform: scale(2.6); } 45% { opacity: 1; transform: scale(.94); } 70% { transform: scale(1.03); } 100% { opacity: 1; transform: scale(1); } }
+.spo-x { display: block; margin-top: 18px; font: 800 26px/1 var(--f-ui); letter-spacing: .24em; text-transform: uppercase; color: #ffd36b; opacity: 0; will-change: opacity, transform; transform: translate3d(0, 14px, 0); }
+.spo.on .spo-x { animation: spoUp .45s 1s ease-out forwards; }
+@keyframes spoUp { to { opacity: 1; transform: none; } }
+.spo-t { position: absolute; top: 560px; width: 700px; display: flex; align-items: center; gap: 30px; opacity: 0; will-change: transform, opacity; }
+.spo-t.a { left: 110px; transform: translate3d(-260px, 0, 0); } .spo-t.h { right: 110px; flex-direction: row-reverse; text-align: right; transform: translate3d(260px, 0, 0); }
+.spo.on .spo-t { animation: spoIn .65s 1.15s cubic-bezier(.2,.9,.25,1) forwards; }
+@keyframes spoIn { to { opacity: 1; transform: none; } }
+.spo-lg { width: 190px; height: 190px; flex: none; display: grid; place-items: center; border-radius: 50%; background: rgba(255,255,255,.08); box-shadow: inset 0 0 0 3px rgba(255,255,255,.18); }
+.spo-li { width: 150px; height: 150px; object-fit: contain; }
+.spo-tn { display: grid; gap: 8px; min-width: 0; }
+.spo-tn i { font: 900 44px/1 var(--f-num); font-style: normal; color: #ffd36b; }
+.spo-tn b { font: 900 70px/.95 var(--f-display); text-transform: uppercase; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.spo-tn em { font: 700 26px/1 var(--f-num); font-style: normal; color: rgba(255,255,255,.7); }
+.spo-vs { position: absolute; left: 50%; top: 610px; transform: translate3d(-50%, 0, 0) scale(.4); font: 900 64px/1 var(--f-display); font-style: italic; text-transform: uppercase; color: rgba(255,255,255,.9); opacity: 0; will-change: transform, opacity; }
+.spo.on .spo-vs { animation: spoVs .5s 1.55s cubic-bezier(.2,1.4,.4,1) forwards; }
+@keyframes spoVs { to { opacity: 1; transform: translate3d(-50%, 0, 0) scale(1); } }
+.spo-f { position: absolute; left: 0; right: 0; bottom: 150px; text-align: center; font: 800 24px/1 var(--f-ui); letter-spacing: .28em; text-transform: uppercase; color: rgba(255,255,255,.82); opacity: 0; will-change: opacity; }
+.spo.on .spo-f { animation: spoUp .5s 1.9s ease-out forwards; }
+.spo.out .spo-st { opacity: 0; transition: opacity .55s ease; }
+
+/* reCAPTCHA runs invisibly for the slip reader: no floating badge, the attribution sits under the scanner instead */
+.grecaptcha-badge { visibility: hidden !important; }
+.rc-note { margin: 6px 0 0; font-size: 11px; line-height: 1.4; color: rgba(184,192,204,.6); text-align: center; }
+.rc-note a { color: inherit; text-decoration: underline; }
+body.tv .rc-note { display: none; }
 </style>
 </head>
 <body>
@@ -7223,6 +7287,7 @@ body.tv .rb-main > .flowin > .loopclone { margin-top: 24px; }
     <label class="scan" id="scanBtn" for="scanFile"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 7V5a1 1 0 0 1 1-1h2M17 4h2a1 1 0 0 1 1 1v2M20 17v2a1 1 0 0 1-1 1h-2M7 20H5a1 1 0 0 1-1-1v-2"/><path d="M7 9h10M7 12h10M7 15h6"/></svg><span id="scanLbl">Scan a bet slip screenshot</span></label>
     <input type="file" id="scanFile" accept="image/*" multiple hidden>
     <div class="scan-note" id="scanNote" hidden></div>
+    <p class="rc-note">Slip reader protected by reCAPTCHA · Google <a href="https://policies.google.com/privacy" target="_blank" rel="noopener">Privacy</a> &amp; <a href="https://policies.google.com/terms" target="_blank" rel="noopener">Terms</a></p>
     <div class="field">
       <span class="lbl">Whose bet</span>
       <div class="radios" id="whoRadios">
@@ -7566,11 +7631,13 @@ body.tv .rb-main > .flowin > .loopclone { margin-top: 24px; }
 <div class="whotag" id="whoTag" hidden aria-live="polite"><i id="wtAv"></i><b id="wtName"></b><em id="wtSub"></em></div>
 <div class="flash" id="flash" aria-live="polite"><div class="word" id="fl-word"></div><div class="what"><b id="fl-pick"></b><span id="fl-detail"></span></div></div>
 <div class="toast" id="toast" hidden role="status"></div>
+<div class="spo" id="spOpen" hidden aria-live="polite"></div>
 <div class="auxnp" id="auxNp" hidden aria-live="polite"><img id="auxArt" alt="" referrerpolicy="no-referrer"><div class="auxtx"><em><i></i>Aux · Spotify</em><b id="auxSong"></b><span id="auxArtist"></span><small id="auxWhere"></small><div class="auxbar"><i id="auxProg"></i></div></div></div>
 
 <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-auth-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-check-compat.js"></script>
 <script src="config.js"></script>
 <script>
 (function () {
@@ -9958,6 +10025,15 @@ body.tv .rb-main > .flowin > .loopclone { margin-top: 24px; }
   function onNowCard(g) {
     return `<article class="rb-g in gx nowg${gSit(g)}" style="--ca:${esc(g.a.col || "#445")};--ch:${esc(g.h.col || "#445")};--ra:${esc(bright(g.a))};--rh:${esc(bright(g.h))}">${gxHead(g, g.sport === "CFB" && typeof upsetOf === "function" && upsetOf(g) ? "" : "On now")}${gxPlay(g, "card")}</article>`;
   }
+  function specialOf(g) {
+    if (!g || !g.a || !g.h) return null;
+    const riv = g.sport === "CFB" ? cfRiv(g) : g.sport === "NBA" || g.sport === "NHL" ? arRiv(g) : "";
+    const rk = (t) => (g.sport === "CFB" && t.rk && t.rk <= 25 ? t.rk : 0), ra = rk(g.a), rh = rk(g.h), top = Math.max(ra, rh);
+    const show = ra && rh ? (top <= 5 ? "Top-5 showdown" : top <= 10 ? "Top-10 showdown" : "Ranked showdown") : "";
+    if (!riv && !show) return null;
+    return { k: riv ? "riv" : "rank", nm: riv || show, show, riv, ra, rh, ranks: ra && rh ? `#${ra} vs #${rh}` : "" };
+  }
+  const spBan = (sp) => `<div class="sp-ban ${sp.k}"><span class="sp-k">${sp.k === "riv" ? "Rivalry" : "Spotlight"}</span><b class="sp-n">${esc(sp.nm)}</b>${sp.k === "riv" && sp.show ? `<span class="sp-x">${esc(sp.show)} · ${sp.ranks}</span>` : sp.ranks ? `<span class="sp-x">${sp.ranks}</span>` : ""}</div>`;
   function gameCard(G, hero, bare) {
     if (!hero && !G.entries.length && !(G.legs && G.legs.length && G.g.st === "in")) return "";
     const g = G.g, rows = gamePositions(G.entries);
@@ -9968,12 +10044,12 @@ body.tv .rb-main > .flowin > .loopclone { margin-top: 24px; }
     const dd = !gxBig && onBall && g.sit.dd ? `<span class="dd">${esc(g.sit.dd)}</span>` : "";
     const rz = !gxBig && onBall && g.sit.rz ? '<span class="rz">Red zone</span>' : "";
     const lead = g.st !== "pre" && g.a.sc != null && g.h.sc != null ? (g.a.sc > g.h.sc ? "a" : g.h.sc > g.a.sc ? "h" : "") : "";
-    const cfb = g.sport === "CFB", up = cfb ? upsetOf(g) : null;
+    const cfb = g.sport === "CFB", up = cfb ? upsetOf(g) : null, sp = specialOf(g);
     const subOf = (t, s) => { const to = live && gxFoot(g) && g.sit && g.sit.to && g.sit.to[s] != null ? `<span class="to">${[0, 1, 2].map((i) => `<i class="${i < g.sit.to[s] ? "on" : ""}"></i>`).join("")}</span>` : ""; return t.rec || to ? `<span class="sub">${t.rec ? `<em>${esc(t.rec)}</em>` : ""}${to}</span>` : ""; };
     const tm = (t, s) => `<div class="tm ${s}${lead === s ? " lead" : ""}" style="--tcol:${esc(t.col || "#445")}">${logo(t, "tl")}<span class="ab"><span class="nmx">${cfb && t.rk ? `<i class="rk">${t.rk}</i>` : ""}${((nf) => (nf !== t.ab ? `<span class="nf">${esc(nf)}</span><span class="na">${esc(t.ab)}</span>` : esc(nf)))(cfb && document.body.classList.contains("cfb") ? t.nm || t.ab : t.ab)}</span>${hero ? subOf(t, s) : ""}</span>${pos(t)}${sc(t)}</div>`;
     const mid = `<div class="mid"><span class="clk${live ? " on" : ""}">${esc(clk)}</span>${dd}${rz}${up ? `<span class="ups${up.k === "final" ? " fin" : ""}">${up.k === "final" ? "Upset" : "Upset alert"}</span>` : ""}${cfb && g.net && g.st !== "post" ? `<span class="net">${esc(g.net)}</span>` : ""}</div>`;
-    return `<article class="rb-g ${g.st}${hero ? " hero" : " gx"}${gSit(g)}" style="--ca:${esc(g.a.col || "#445")};--ch:${esc(g.h.col || "#445")};--ra:${esc(bright(g.a))};--rh:${esc(bright(g.h))}">
-      ${hero ? `<header class="rb-gh">${tm(g.a, "a")}${mid}${tm(g.h, "h")}</header>${gxFoot(g) && g.st === "in" && sset(g.sport, "tracker") ? gxPlay(g, "big") : fieldHtml(g)}` : `${gxHead(g)}${gxLine(g)}${heroIds.has(g.id) ? "" : gxPlay(g, "card")}`}
+    return `<article class="rb-g ${g.st}${hero ? " hero" : " gx"}${gSit(g)}${sp ? " sp-" + sp.k : ""}" style="--ca:${esc(g.a.col || "#445")};--ch:${esc(g.h.col || "#445")};--ra:${esc(bright(g.a))};--rh:${esc(bright(g.h))}">
+      ${sp ? spBan(sp) : ""}${hero ? `<header class="rb-gh">${tm(g.a, "a")}${mid}${tm(g.h, "h")}</header>${gxFoot(g) && g.st === "in" && sset(g.sport, "tracker") ? gxPlay(g, "big") : fieldHtml(g)}` : `${gxHead(g)}${gxLine(g)}${heroIds.has(g.id) ? "" : gxPlay(g, "card")}`}
       ${bare ? "" : !hero && document.body.classList.contains("tv") ? `<div class="rb-rows ob-list">${obRows(G)}${G.entries.length ? inParlays(G) : obLegRows(G)}</div>` : `<div class="rb-rows">${rows.map((r) => (r.h2h ? h2hRow(r.h2h[0], r.h2h[1], g) : posRow(r.p, g))).join("")}${G.entries.length ? inParlays(G) : legRows(G)}</div>`}${hero ? scoringHtml(g) : ""}</article>`;
   }
   // the sportsbook number for a leg right now (a parlay logged before leg odds were saved)
@@ -10140,7 +10216,8 @@ body.tv .rb-main > .flowin > .loopclone { margin-top: 24px; }
   function obStrip(g) {
     const s = gxStatus(g), pre = g.st === "pre", cfb = g.sport === "CFB";
     const t = (x) => `<span class="ob-tm">${logo(x, "ob-lg")}${cfb && x.rk ? `<i class="rk">${x.rk}</i>` : ""}<b>${esc(x.ab)}</b>${pre || x.sc == null ? "" : `<span class="sc num">${x.sc}</span>`}</span>`;
-    return `<div class="ob-strip g-${g.st}">${t(g.a)}<i class="ob-at">${pre ? "@" : ""}</i>${t(g.h)}<span class="ob-clk ${s.cls}">${esc(s.t)}</span></div>`;
+    const sp = specialOf(g);
+    return `<div class="ob-strip g-${g.st}${sp ? " sp-" + sp.k : ""}">${t(g.a)}<i class="ob-at">${pre ? "@" : ""}</i>${t(g.h)}${sp ? `<span class="ob-sp ${sp.k}">${esc(sp.k === "riv" ? sp.nm : sp.show.replace(/ showdown/i, ""))}</span>` : ""}<span class="ob-clk ${s.cls}">${esc(s.t)}</span></div>`;
   }
   // where it stands, in a word and a number: the word is what you read from across the room
   const TL_BAND = { NFL: 3, CFB: 3, NBA: 4, CBB: 4, MLB: 1, NHL: 1 };
@@ -10768,6 +10845,42 @@ body.tv .rb-main > .flowin > .loopclone { margin-top: 24px; }
       try { await S.db.doc(colOf(b.id) + "/" + b.id).update({ pre: d.pre }); const x = S.bets.get(b.id); if (x) x.pre = d.pre; } catch (e) {}
     }
   }; pass(); setInterval(pass, 60e3); }, 9000);
+  // ---- a special's kickoff: the open ----
+  const SPO = { seen: new Map(), q: [], busy: false };
+  function spWorth(g) { let n = 0; for (const b of S.bets.values()) if (b.status === "open" && selsOf(b).some((x) => String(x.g) === String(g.id))) n++; const sp = specialOf(g), f = featGame && featGame();
+    return n * 100 + (f && f.id === g.id ? 60 : 0) + (sp.k === "riv" ? 20 : 0) + (sp.ra && sp.rh ? 50 - sp.ra - sp.rh : 0) + (/^(ABC|CBS|FOX|NBC|ESPN)$/i.test(g.net || "") ? 10 : 0); }
+  function spWatch() {
+    if (!document.body.classList.contains("tv") || PHONE() || GUEST) return;
+    const fresh = [];
+    for (const g of S.games.values()) { const was = SPO.seen.get(g.id); SPO.seen.set(g.id, g.st); if (was === "pre" && g.st === "in" && specialOf(g)) fresh.push(g); }
+    if (fresh.length) { for (const g of fresh) SPO.q.push({ g, at: Date.now(), w: spWorth(g) }); SPO.q.sort((x, y) => y.w - x.w); SPO.q.length = Math.min(SPO.q.length, 3); }
+    spNext();
+  }
+  function spNext() {
+    if (SPO.busy || !SPO.q.length) return;
+    SPO.q = SPO.q.filter((x) => Date.now() - x.at < 4 * 60e3); if (!SPO.q.length) return;
+    const c = document.getElementById("cash"), pl = document.getElementById("v2pl"), jb = document.getElementById("jumbo");
+    if ((c && !c.hidden) || (pl && !pl.hidden) || (jb && !jb.hidden) || cardBusy || fxBusy) { setTimeout(spNext, 2000); return; }
+    spOpen(SPO.q.shift().g);
+  }
+  function spOpen(g) {
+    const sp = specialOf(g), el = document.getElementById("spOpen"); if (!sp || !el) return;
+    SPO.busy = true;
+    const tm = (t, s, r) => `<div class="spo-t ${s}"><div class="spo-lg">${logo(t, "spo-li")}</div><div class="spo-tn">${r ? `<i>#${r}</i>` : ""}<b>${esc(t.nm || t.ab)}</b>${t.rec ? `<em>${esc(t.rec)}</em>` : ""}</div></div>`;
+    const foot = ["Kickoff", g.net, g.ven && String(g.ven.nm || "").replace(/\s*\([^)]*\)\s*$/, "")].filter(Boolean).map(esc).join(" · ");
+    el.style.setProperty("--ca", g.a.col || "#445"); el.style.setProperty("--ch", g.h.col || "#445"); el.style.setProperty("--sc", Math.min(innerWidth / 1920, innerHeight / 1080).toFixed(4));
+    el.className = "spo " + sp.k;
+    el.innerHTML = `<i class="spo-dim"></i><div class="spo-st"><i class="spo-bg a"></i><i class="spo-bg h"></i><i class="spo-sweep"></i>
+      <div class="spo-hd"><span class="spo-k">${sp.k === "riv" ? "Rivalry" : "Spotlight"}</span><b class="spo-n">${esc(sp.nm)}</b>${sp.k === "riv" && sp.show ? `<span class="spo-x">${esc(sp.show)}</span>` : sp.ranks ? `<span class="spo-x">${sp.ranks}</span>` : ""}</div>
+      ${tm(g.a, "a", sp.ra)}<b class="spo-vs">${g.ns ? "vs" : "at"}</b>${tm(g.h, "h", sp.rh)}<div class="spo-f">${foot}</div></div>`;
+    el.hidden = false; void el.offsetWidth; el.classList.add("on");
+    try { snSound("whoosh", 0.5, 0); snSound("bc_sting", 0.6, 450); } catch (e) {}
+    try { const f = featGame && featGame(); if (f && f.id === g.id && window.SBW && SBW.special) SBW.special({ k: sp.k === "riv" ? "RIVALRY" : "RANKED", nm: sp.nm, l1: `${sp.ra ? "#" + sp.ra + " " : ""}${g.a.ab} ${g.ns ? "vs" : "at"} ${sp.rh ? "#" + sp.rh + " " : ""}${g.h.ab}`, l2: [g.net, "Kickoff"].filter(Boolean).join(" · "), c: sp.k === "riv" ? g.h.col : "#ffc94d" }); } catch (e) {}
+    setTimeout(() => el.classList.add("out"), 6200);
+    setTimeout(() => { el.hidden = true; el.className = "spo"; el.innerHTML = ""; SPO.busy = false; setTimeout(spNext, 1500); }, 6800);
+  }
+  setInterval(spWatch, 4000);
+  window.__spOpen = (id) => { const g = S.games.get(String(id)); if (g) spOpen(g); };
   function btLive(b) {
     const pa = Number(b.placedAt) || 0; if (!pa || b.pre === true) return false;
     const tOf = (x) => x && (x.t || (gameOf(x) || {}).t);
@@ -14313,7 +14426,7 @@ void main(){
     const SP = c.contains("hoops") ? ["NBA", "CBB"] : c.contains("hockey") ? ["NHL"] : ["NFL", "CFB"], fb = (g) => g && SP.includes(g.sport), now = Date.now(), { list } = boardGroups();
     const nb = new Map(list.map((G) => [G.g.id, G.entries.length + (G.legs ? G.legs.length : 0)]));
     const tm = (t) => ({ id: String(t.id), ab: t.ab, nm: t.nm, fn: t.fn, col: t.col, alt: t.alt, lg: t.lg, sc: t.sc, rk: t.rk, jn: t.jn || [] });
-    const gm = (g) => ({ id: g.id, sport: g.sport, st: g.st, d: g.d, t: g.t, a: tm(g.a), h: tm(g.h), ven: g.ven, neu: !!g.abroad, ns: !!g.ns, net: g.net, riv: g.sport === "CFB" ? cfRiv(g) : arRiv(g), n: nb.get(g.id) || 0,
+    const gm = (g) => ({ id: g.id, sport: g.sport, st: g.st, d: g.d, t: g.t, a: tm(g.a), h: tm(g.h), ven: g.ven, neu: !!g.abroad, ns: !!g.ns, sp: (specialOf(g) || {}).nm || "", net: g.net, riv: g.sport === "CFB" ? cfRiv(g) : arRiv(g), n: nb.get(g.id) || 0,
       sit: g.sit ? { pos: g.sit.pos, rz: g.sit.rz, yl: g.sit.yl, dd: g.sit.dd } : null });
     const all = [...S.games.values()].filter(fb);
     const on = all.filter((g) => g.st === "in" || (g.st === "pre" && g.t - now < 20 * 60e3 && g.t - now > -3 * 3600e3));
@@ -14734,7 +14847,7 @@ void main(){
   // ---------- sheets ----------
   function openSheet(id) { $(id).hidden = false; }
   // keep every open screen current: when a new version is up, reload it (never mid-form or mid-animation)
-  const BUILD = "20261107172326";
+  const BUILD = "20261107175643";
   function updReady() {
     if (document.getElementById("updReady")) return; const d = document.createElement("div"); d.id = "updReady"; d.textContent = "Update ready · refresh, then TV + Sound on"; document.body.append(d);
   }
@@ -22147,9 +22260,28 @@ void main(){
   // the readers, fastest first. Each has 25 s; the next joins in after 8 s without a clean read, or straight away when one
   // fails or comes back with holes. The first clean read wins (the rest are cancelled); otherwise the read with fewest holes
   const SLIP_MODELS = ["gemini-3.5-flash-lite", "gemini-3-flash-preview", "gemini-3.8-flash"], SLIP_TO = 25e3, SLIP_HEDGE = 8e3, SLIP_MAX = 45e3;
+  const AC = { on: null, tok: null };
+  function acKey() { let k = window.SWEAT_RECAPTCHA || ""; try { k = k || localStorage.getItem("sb-recaptcha") || ""; } catch (e) {} return String(k).trim(); }
+  function acStart() {
+    if (AC.on) return AC.on;
+    const k = acKey(); if (!k || !window.firebase || !firebase.appCheck || !firebase.apps || !firebase.apps.length) return null;
+    // Fraud Defense (reCAPTCHA Enterprise) when config.js says so — Firebase only registers new apps that way now — else reCAPTCHA v3
+    try { const ac = firebase.appCheck(), ent = !!window.SWEAT_RECAPTCHA_ENT, P = ent ? firebase.appCheck.ReCaptchaEnterpriseProvider : firebase.appCheck.ReCaptchaV3Provider; if (!P && ent) throw new Error("no enterprise provider"); ac.activate(P ? new P(k) : k, true); AC.on = ac; } catch (e) { console.warn("app check", e); }
+    return AC.on;
+  }
+  // a token for the reader ("" when App Check isn't set up: the read then goes without one and Firebase says why)
+  function acToken() {
+    const ac = acStart(); if (!ac) return Promise.resolve("");
+    if (AC.tok) return AC.tok;
+    AC.tok = Promise.race([ac.getToken(false).then((t) => (t && t.token) || ""), new Promise((ok) => setTimeout(() => ok(""), 10e3))])
+      .catch((e) => { console.warn("app check token", e); return ""; }).finally(() => setTimeout(() => { AC.tok = null; }, 0));
+    return AC.tok;
+  }
+  window.__ac = { key: acKey, token: acToken };
+  const acSay = (m) => /app ?check|unauthenticated|401|403/i.test(String(m || "")) ? (acKey() ? "The slip reader turned this device away (App Check). Reload the page and try again, or pick the game below." : "The slip reader needs App Check: the board's reCAPTCHA key isn't set yet. Pick the game below for now.") : "";
   function slipCall(model, body, ctl) {
     const cfg = readCfg();
-    return fetch(`https://firebasevertexai.googleapis.com/v1beta/projects/${cfg.projectId}/models/${model}:generateContent`, { method: "POST", headers: { "content-type": "application/json", "x-goog-api-key": cfg.apiKey }, body, signal: ctl.signal })
+    return acToken().then((tok) => fetch(`https://firebasevertexai.googleapis.com/v1beta/projects/${cfg.projectId}/models/${model}:generateContent`, { method: "POST", headers: Object.assign({ "content-type": "application/json", "x-goog-api-key": cfg.apiKey }, tok ? { "X-Firebase-AppCheck": tok } : {}), body, signal: ctl.signal }))
       .then(async (r) => {
         const j = await r.json().catch(() => ({}));
         if (!r.ok) throw new Error((j.error && j.error.message) || "HTTP " + r.status);
@@ -22185,6 +22317,7 @@ void main(){
     });
   }
   window.__slip = { read: readSlip, fix: slipFix, gaps: slipGaps };
+  document.addEventListener("pointerdown", (e) => { if (e.target && e.target.closest && e.target.closest("#scanBtn, #gsScan, #addBtn, .gs-scan")) acToken(); }, true);
   const TEAM_NICK = [[/\bsixers\b/g, "76ers"], [/\b(trail )?blazers\b/g, "trail blazers"], [/\bcavs\b/g, "cavaliers"], [/\bmavs\b/g, "mavericks"], [/\b(t ?wolves|wolves)\b/g, "timberwolves"], [/\bnugs\b/g, "nuggets"], [/\bgrizz\b/g, "grizzlies"], [/\bpels\b/g, "pelicans"], [/\bdubs\b/g, "warriors"], [/\bcs\b/g, "celtics"]];
   const normName = (s) => { let x = foldNm(s).toLowerCase().replace(/\bstate\b/g, "st").replace(/[^a-z0-9 ]/g, " ").replace(/\s+/g, " ").trim(); for (const [re, to] of TEAM_NICK) x = x.replace(re, to); return x; };
   function nameHit(slip, t) {
@@ -22400,7 +22533,7 @@ void main(){
       if (!added.length) { scanNote(dupes.length ? "<span><b>That slip's already on the board.</b></span>" : "Couldn't add that one. Try the screenshot again, or pick the game below."); return; }
       closeSheets(); scanDone(added, dupes.length); if (fixMsg) toast(fixMsg);
     } catch (err) {
-      scanNote(/app check/i.test(String(err.message || err)) ? "The slip reader is switched off by App Check in Firebase (App Check, APIs, Firebase AI Logic: Unenforce). Pick the game below for now." : "The slip reader didn't answer (" + esc(String(err.message || err).slice(0, 120)) + "). Try again, or pick the game below.");
+      scanNote(acSay(err && (err.message || err)) || "The slip reader didn't answer (" + esc(String(err.message || err).slice(0, 120)) + "). Try again, or pick the game below.");
     } finally { btn.classList.remove("busy"); $("#scanLbl").textContent = "Scan a bet slip screenshot"; }
   });
   // what went on the board: each bet, what it couldn't read or link, and an undo
@@ -22523,7 +22656,7 @@ void main(){
       if (!n && !GS.res.some((r) => r.dupe)) gsErr("Couldn't add that one. Try the screenshot again.");
       if (navigator.vibrate && n) navigator.vibrate(30);
     } catch (e) {
-      gsErr(esc(String((e && e.message) || e).slice(0, 160)));
+      gsErr(acSay(e && (e.message || e)) || esc(String((e && e.message) || e).slice(0, 160)));
     } finally { GS.busy = false; gsStatus(null, ""); $("#gsScan").classList.toggle("off", !GUEST.name); gsRender(); }
   }
   // put a leg on the game the guest tapped
@@ -22620,7 +22753,8 @@ void main(){
       <label class="gs-scan" id="gsScan">${GS_ICON}<b>Scan your bet slip</b><span>Pick a screenshot of your slip (or the bet in My Bets). It goes straight on the board, live on its game.</span><input id="gsFile" type="file" accept="image/*" multiple></label>
       <div id="gsSt"></div><div id="gsErr"></div><div id="gsRes"></div>
       <div class="gs-h"><span>Your bets on the board</span><span id="gsN"></span></div><div id="gsMine"></div>
-      <p class="gs-foot">Wins, losses and the live sweat play on the TV.</p></div>`);
+      <p class="gs-foot">Wins, losses and the live sweat play on the TV.</p>
+      <p class="rc-note">Protected by reCAPTCHA · Google <a href="https://policies.google.com/privacy" target="_blank" rel="noopener">Privacy</a> &amp; <a href="https://policies.google.com/terms" target="_blank" rel="noopener">Terms</a></p></div>`);
     gsWho(false);
     $("#gsScan").addEventListener("click", (e) => {
       if (GS.busy) { e.preventDefault(); return; }
@@ -28124,7 +28258,9 @@ function wdIdleArt(force) {
   if (!force && sig === WD.sig) return; WD.sig = sig;
   st.jtex.image = (st.jumboArt || wdJumboArt)(st.R, WD.card); st.jtex.needsUpdate = true;
   if (!WD.ribAt || Date.now() > WD.ribAt) {
-    const items = [{ t: "SWEAT BOARD", c: [1, 0.79, 0.3] }]; const vn = (st.pf && st.pf.nm) || (st.R.ven && st.R.ven.nm); if (vn) items.push({ t: vn.toUpperCase(), c: wdLift(st.R.T.h.alt, 0.4) });
+    const items = [{ t: "SWEAT BOARD", c: [1, 0.79, 0.3] }];
+    { const sg = st.R.scene && st.R.scene.game; if (sg && sg.sp) items.push({ t: String(sg.sp).toUpperCase(), c: [1, 0.86, 0.42] }); }   // a special's name (a rivalry, a top-10 showdown)
+    const vn = (st.pf && st.pf.nm) || (st.R.ven && st.R.ven.nm); if (vn) items.push({ t: vn.toUpperCase(), c: wdLift(st.R.T.h.alt, 0.4) });
     if (T.a.sc !== "" && !st.room) items.push({ t: `${T.a.ab} ${T.a.sc}  ${T.h.ab} ${T.h.sc}  ${(T.d || "").toUpperCase()}`, c: [1, 1, 1] });
     for (const x of st.ribExtra || []) items.push(x);
     if (R.pulse) items.push({ t: R.pulse.toUpperCase(), c: [0.24, 0.88, 0.56] });
@@ -28299,6 +28435,13 @@ window.SBW = {
   // a DJ break can be the stage clip (him on the deck) while the building's up
   stage: () => !!(WD.st && WD.st.deck && WD.st.deck.mg && wdTv() && !WD.off),
   // the room's moments. kind: hit, miss, place; o: { c: the person's color hex, nm, pick, amt }
+  // a special's kickoff (a rivalry, two ranked teams) in the featured stadium: its name on the ribbon and the jumbotron
+  special(o) {
+    const st = WD.st; if (!st || !o) return; const c = wdHex(o.c, [1, 0.82, 0.3]);
+    wdRib([{ t: o.k, c: [0.02, 0.03, 0.05], bg: c }, { t: String(o.nm || "").toUpperCase(), c: [1, 1, 1] }, { t: o.l1 || "", c }].filter((x) => x.t), 120e3);
+    wdCard({ big: String(o.nm || "").toUpperCase(), l1: o.l1 || "", l2: o.l2 || "", c: wdMix(c, [0, 0, 0], 0.35) }, 25e3);
+    st.fc = c; st.flash = 1.2; st.burst = 1; st.wave = 1;
+  },
   fx(kind, o) {
     const st = WD.st; if (!st) return; o = o || {}; const c = wdLift(wdHex(o.c, [1, 0.8, 0.3]), 0.3), nm = String(o.nm || "").toUpperCase(), pk = String(o.pick || "").toUpperCase();
     if (kind === "hit") { st.fc = c; st.flash = 1.6; st.wave = 1.4; st.burst = 1; wdDeckAct(st, "cheer", 5000); wdShow(st, [c, [1, 0.82, 0.3], [1, 1, 1]], 10, 5200);
