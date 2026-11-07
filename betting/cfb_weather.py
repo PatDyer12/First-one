@@ -212,7 +212,7 @@ def main():
         if resp is None:
             if len(part) > 1:  # split and retry
                 return forecast(part[:len(part) // 2]) + forecast(part[len(part) // 2:])
-            print("forecast unavailable:", part[0][0].away, "@", part[0][0].home)
+            print("forecast unavailable:", part[0][0].away_team, "@", part[0][0].home_team)
             return []
         data = resp.json()
         data = data if isinstance(data, list) else [data]
