@@ -7136,6 +7136,10 @@ body.v2b .rb-g.hero > .sp-ban + .rb-gh { margin-top: 0; }
 .rc-note { margin: 6px 0 0; font-size: 11px; line-height: 1.4; color: rgba(184,192,204,.6); text-align: center; }
 .rc-note a { color: inherit; text-decoration: underline; }
 body.tv .rc-note { display: none; }
+
+.flowin > * { flex-shrink: 0; }
+.rb-games.primeg > .rb-pcol > .flowin > * { flex-shrink: 0; }
+.rb-games.split2 > .rb-pcol.pl > .flowin > .rb-g.gx { flex: none; }
 </style>
 </head>
 <body>
@@ -14853,7 +14857,7 @@ void main(){
   // ---------- sheets ----------
   function openSheet(id) { $(id).hidden = false; }
   // keep every open screen current: when a new version is up, reload it (never mid-form or mid-animation)
-  const BUILD = "20261107182326";
+  const BUILD = "20261107183212";
   function updReady() {
     if (document.getElementById("updReady")) return; const d = document.createElement("div"); d.id = "updReady"; d.textContent = "Update ready · refresh, then TV + Sound on"; document.body.append(d);
   }
