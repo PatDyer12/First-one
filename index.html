@@ -7140,6 +7140,21 @@ body.tv .rc-note { display: none; }
 .flowin > * { flex-shrink: 0; }
 .rb-games.primeg > .rb-pcol > .flowin > * { flex-shrink: 0; }
 .rb-games.split2 > .rb-pcol.pl > .flowin > .rb-g.gx { flex: none; }
+
+body.tv .rb-games.pplg > .rb-pcol.pr > .flowin > .pp-cols { height: 100%; grid-template-rows: minmax(0, 1fr); }
+body.tv .rb-games.pplg > .rb-pcol.pr > .flowin > .pp-cols > .pp-col { height: 100%; }
+.rb-games.primeg > .rb-pcol > .flowin > * { margin: 0; }
+body.tv .rb-games.primeg > .rb-pcol.duo > .flowin { display: grid !important; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); align-items: start; align-content: start; gap: 14px; }
+.rb-pcol.duo > .flowin > .rb-fol { grid-column: 1 / -1; }
+:is(.pp-pick, .ob-pick) .t.wrap2 { white-space: normal; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; line-height: 1.02; overflow-wrap: anywhere; }
+/* 5. three people next to the games (1 PM): a compact head (name, net, record / up-down / if it holds, what's open) so
+   the column is mostly bets; the scan-to-add card sits low on the games side instead of over someone's bets */
+body.tv.pplg .pp-tiles > div:nth-child(2), body.tv.pplg .pp-tiles > div:nth-child(3), body.tv.pplg .pp-tiles > div:nth-child(6) { display: none; }
+body.tv.pplg .pp-tiles { margin-top: 9px; }
+body.tv.pplg .pp-foot { display: none; }
+body.tv.pplg .pp-foot1 { margin-top: 8px; }
+body.tv.pplg .roomtv:not([hidden]), body.tv.pplg.has-ticker .roomtv:not([hidden]) { right: auto !important; left: calc(var(--sx, 0px) + 30px) !important; grid-template-columns: auto auto; align-items: center; column-gap: 10px; padding: 8px 12px 8px 8px; }
+body.tv.pplg .roomtv:not([hidden]) canvas { width: 84px; height: 84px; grid-row: span 2; }
 </style>
 </head>
 <body>
@@ -8214,9 +8229,10 @@ body.tv .rc-note { display: none; }
   // bet). All the measuring first, then all the sizing, so the page lays out once
   function pickFit(root) {
     if (!root) return;
-    const els = [...root.querySelectorAll(".ob-pick .t")].filter((e) => !e.closest(".loopclone"));
+    const els = [...root.querySelectorAll(".ob-pick .t, .pp-pick .t")].filter((e) => !e.closest(".loopclone") && !e.classList.contains("wrap2"));
     const k = els.map((e) => { const w = e.clientWidth, sw = e.scrollWidth; return w > 0 && sw > w + 1 ? [w / sw, parseFloat(getComputedStyle(e).fontSize) || 38] : null; });
-    els.forEach((e, i) => { if (k[i]) e.style.fontSize = Math.max(k[i][1] * 0.68, k[i][1] * k[i][0] * 0.97).toFixed(1) + "px"; });
+    els.forEach((e, i) => { if (!k[i]) return; const want = k[i][1] * k[i][0] * 0.97;
+      if (want >= k[i][1] * 0.68) e.style.fontSize = want.toFixed(1) + "px"; else { e.style.fontSize = (k[i][1] * 0.82).toFixed(1) + "px"; e.classList.add("wrap2"); } });
   }
   // back to a plain column (off the TV)
   function flowUnwrap(st) {
@@ -11192,12 +11208,12 @@ body.tv .rc-note { display: none; }
     const byGame = (x, y) => t0(x) - t0(y) || (gid(x) < gid(y) ? -1 : gid(x) > gid(y) ? 1 : 0) || x.placedAt - y.placedAt;
     for (const p of ppl) {
       const col = [...C.querySelectorAll(".pp-col")].find((x) => x.dataset.k === p.k); if (!col) continue;
-      col.querySelector(".pp-h").innerHTML = ppHead(p, rank.get(p.k), wk.get(p.k), p.k === lead);
+      { const hh = ppHead(p, rank.get(p.k), wk.get(p.k), p.k === lead), he = col.querySelector(".pp-h"); if (he._h !== hh) { he._h = hh; he.innerHTML = hh; } }
       const by = { live: [], par: [], pre: [] }, L = col.querySelector(".pp-list");
       for (const b of p.open) by[b.kind === "parlay" ? "par" : phase(b) === "pre" ? "pre" : "live"].push(b);
       by.live.sort(byGame); by.pre.sort(byGame); by.par.sort((x, y) => x.placedAt - y.placedAt);
       const secs = [["live", "Live now"], ["par", "Parlays"], ["pre", "Later"]].filter(([k]) => by[k].length);
-      L.innerHTML = secs.map(([k, t]) => (secs.length > 1 ? `<div class="pp-div">${t}<b>${by[k].length}</b></div>` : "") + by[k].map((b) => (k === "par" ? ppParlay(b) : ppTicket(b))).join("")).join("") || `<div class="pp-none">No open bets${p.done.length ? ` · ${p.w}-${p.l}${p.p ? "-" + p.p : ""} today` : ""}</div>`;
+      flowSet(L, secs.map(([k, t]) => (secs.length > 1 ? `<div class="pp-div">${t}<b>${by[k].length}</b></div>` : "") + by[k].map((b) => (k === "par" ? ppParlay(b) : ppTicket(b))).join("")).join("") || `<div class="pp-none">No open bets${p.done.length ? ` · ${p.w}-${p.l}${p.p ? "-" + p.p : ""} today` : ""}</div>`);
       loopSyncEl(L);
     }
   }
@@ -14899,7 +14915,7 @@ void main(){
   // ---------- sheets ----------
   function openSheet(id) { $(id).hidden = false; }
   // keep every open screen current: when a new version is up, reload it (never mid-form or mid-animation)
-  const BUILD = "20261107214227";
+  const BUILD = "20261108054453";
   function updReady() {
     if (document.getElementById("updReady")) return; const d = document.createElement("div"); d.id = "updReady"; d.textContent = "Update ready · refresh, then TV + Sound on"; document.body.append(d);
   }
