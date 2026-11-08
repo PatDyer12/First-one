@@ -441,10 +441,11 @@ def props_block(S):
          f"<div class='propnote'><b>How these are picked.</b> Each player's projection comes from his own games, usage, "
          f"the defense he faces, his team's expected points and the weather, tested on {sum(v['games'] for v in ev.values()):,} "
          f"player-games from 2022–26 it never saw. There's no free history of prop lines, so props can't be backtested for "
-         f"profit like sides: the book's price gets 60% of the say, and a prop only plays when the player's own season agrees "
-         f"and there's no injury, role change or QB question. <b>0.5u max.</b> The pattern behind the unders: players finish "
-         f"under their own season average more often than over ({under} of games since 2022), because a few big games pull "
-         f"the average up.</div>"]
+         f"profit like sides: the book's price gets 60% of the say, and a prop only plays when the player's own season agrees, "
+         f"there's no injury, role change or QB question, and, where Pinnacle (the sharp market) has the prop, our price "
+         f"is within 1% of its fair odds. <b>0.5u max.</b> Why the model leans under: players finish under their own season "
+         f"average more often than over ({under} of games since 2022), because a few big games pull the average up. Books "
+         f"know it too, so an under has to pass the same sharp check as an over.</div>"]
     picks = []
     for p in P.get("picks", []):
         parts = p["game_id"].split("_")
@@ -452,7 +453,7 @@ def props_block(S):
         if S.upcoming(p["game"]):
             picks.append(p)
     if not picks:
-        return h + ["<p class='empty'>No prop cleared the bar this week.</p>"]
+        h.append("<p class='empty'>No prop cleared the bar this week.</p>")
     for p in picks:
         c1, c2 = team_colors(S, p["game"])
         unit = "" if p["market"] == "receptions" else " yds"
@@ -470,10 +471,12 @@ def props_block(S):
                f"Season average {p['season_avg']:g}, last 3 games {p['last3']:g}.{opp}{wind}</li>"
                f"<li><b class='l'>His games vs this line:</b> {p['side']} in {p['hits']} of {p['n']} this season."
                f"<div class='glog'><span class='lbl'>Game log</span>{log}</div></li>"
-               f"<li><b class='l'>The price:</b> our model {p['model_prob']:g}% {p['side']}, {E(p['book'])}'s price implies "
-               f"{p['book_prob']:g}%. Blended {p['prob']:g}%, worth {p['ev']:+.1f}% at {W.fmt_odds(p['odds'])}."
+               f"<li><b class='l'>The price:</b> our model {p['model_prob']:g}% {p['side']}, "
+               f"{'Pinnacle (the sharp market)' if p.get('ref') == 'Pinnacle' else E(p['book'])} prices it at "
+               f"{p['book_prob']:g}% with the margin removed. Blended {p['prob']:g}%, worth {p['ev']:+.1f}% at "
+               f"{W.fmt_odds(p['odds'])} ({E(p['book'])})."
                f"<div class='pbar'><i style='left:{pos(p['line']):.0f}%'></i><b style='left:{pos(p['proj']):.0f}%'></b></div>"
-               f"<span class='meta'>gold = projection · line = book</span></li></ul>")
+               f"<span class='meta'>gold = projection · line = book</span></li>{sharp_li(p)}</ul>")
         h.append(f"<div class='slip' style='--c1:{c1};--c2:{c2}'><div class='stripe'></div><div class='main'>"
                  f"<div class='top'><div class='lg'>{S.logos(p['game'], 26)}</div><div>"
                  f"<div class='pk'>{E(p['player'])} {p['side'].title()} {p['line']:g} {E(p['label'])}"
@@ -482,7 +485,26 @@ def props_block(S):
                  f"<div class='chips'><span class='chip model'>Prop model</span></div>{why}</div>"
                  f"<div class='stub'><div class='units'>{p['units']:g}U</div><div class='usd'>{money(p['units'])}</div>"
                  f"<div class='bk'>{E(p['book'])}</div><div class='tier play'>Prop</div></div></div>")
+    cut = [c for c in P.get("sharp_cut", []) if S.upcoming("{2} @ {3}".format(*c["game_id"].split("_")))]
+    if cut:
+        h.append("<p class='meta'><b>Cut by the sharp check</b> (the model liked them, the price didn't hold up against "
+                 "Pinnacle):</p><ul class='wl'>" + "".join(
+                     f"<li><b>{E(c['player'])} {c['side'].title()} {c['line']:g} {E(c['label'])}</b> {W.fmt_odds(c['odds'])} "
+                     f"{E(c['book'])}: model {c['model_prob']:g}%, Pinnacle {c['sharp_prob']:g}%"
+                     + (f" (from its {c['pin_line']:g})" if c["pin_line"] != c["line"] else "")
+                     + f", {c['ev_sharp']:+.1f}% at our price</li>" for c in cut) + "</ul>")
     return h
+
+
+def sharp_li(p):
+    """The sharp-check line for one prop."""
+    evs = p.get("ev_sharp")
+    if evs is None or evs != evs:
+        return ("<li><b class='l'>Sharp check:</b> Pinnacle doesn't price this prop, so it has to clear a 55% win chance "
+                "instead.</li>")
+    moved = f" (its number is {p['pin_line']:g}, moved to {p['line']:g} along our model's curve)" if p["pin_line"] != p["line"] else ""
+    return (f"<li><b class='l'>Sharp check:</b> Pinnacle makes this side {p['sharp_prob']:g}%{moved}; at "
+            f"{W.fmt_odds(p['odds'])} that's {evs:+.1f}% against the sharp market.</li>")
 
 
 def teaser_block(S):

@@ -100,6 +100,64 @@ def grade(s, first, second):
     return None
 
 
+def real_lines(live, L):
+    """Swap estimated 1H totals for the real FanDuel / DraftKings numbers and check them against Pinnacle's 1H price.
+    Keeps an under only at or above our estimate, only when Pinnacle doesn't lean the other way, and only when our
+    price is no more than 2% worse than Pinnacle's fair price."""
+    import requests
+    import market as MK
+    totals = [p for p in live if " Under " in p["bet"] or " Over " in p["bet"]]
+    key = MK.odds_key()
+    if not totals or not key:
+        return live
+    name = MK.nfl_name()
+    base = "https://api.the-odds-api.com/v4/sports/americanfootball_nfl"
+    events = requests.get(f"{base}/events", params={"apiKey": key}, timeout=30).json()
+    h = L[L["side"] == "home"].dropna(subset=["h1_total", "h1_total_line"])
+    out = []
+    for p in live:
+        if p not in totals:
+            out.append(p)
+            continue
+        away, home = p["game_id"].split("_")[2:4]
+        e = next((x for x in events if x["away_team"] == name(away) and x["home_team"] == name(home)), None)
+        if e is None:
+            out.append(p)
+            continue
+        r = requests.get(f"{base}/events/{e['id']}/odds", params={"apiKey": key, "bookmakers": "fanduel,draftkings,pinnacle",
+                                                                    "markets": "totals_h1", "oddsFormat": "american"}, timeout=30)
+        books = {b["key"]: {o["name"]: (o.get("point"), o["price"]) for m in b["markets"] for o in m["outcomes"]}
+                 for b in r.json().get("bookmakers", [])} if r.status_code == 200 else {}
+        side = "Under" if " Under " in p["bet"] else "Over"
+        est = float(p["bet"].split()[-1])
+        offers = [(k, v[side]) for k, v in books.items() if k in MK.OURS and side in v]
+        if not offers:
+            p["note"] = "no FanDuel/DraftKings 1H total posted yet: bet only at or above the estimate"
+            out.append(p)
+            continue
+        # best number for our side, then best price
+        bk, (line, odds) = max(offers, key=lambda o: ((o[1][0] if side == "Under" else -o[1][0]), MK.payout(o[1][1])))
+        p.update({"bet": f"1H {side} {line:g}", "odds_real": odds, "book_real": MK.OURS[bk], "est": est})
+        if (side == "Under" and line < est) or (side == "Over" and line > est):
+            p["cut"] = f"the real 1H line ({line:g}) is past our estimate ({est:g})"
+        pin = books.get("pinnacle", {})
+        if "Over" in pin and "Under" in pin:
+            pmf = h[(h["h1_total_line"] - line).abs() <= 1.5]["h1_total"].astype(int).value_counts(normalize=True).to_dict()
+            q = MK.novig(pin[side][1], pin["Under" if side == "Over" else "Over"][1])
+            p_up, p_down = MK.convert(pmf, pin["Over"][0], q if side == "Over" else 1 - q, line)
+            pw = p_up if side == "Over" else p_down
+            push = 1 - p_up - p_down
+            win = 100 * pw / max(1 - push, 1e-9)
+            p["sharp"] = {"win": round(win, 1), "ev": round(100 * (pw * MK.payout(odds) - (1 - pw - push)), 1),
+                          "pin": f"{pin['Over'][0]:g} (o{pin['Over'][1]:+d}/u{pin['Under'][1]:+d})"}
+            if win < 48.5:
+                p["cut"] = f"Pinnacle leans the other way ({win:.1f}% at {line:g})"
+            elif p["sharp"]["ev"] < -2.0:   # same floor as final.py's system plays
+                p["cut"] = f"the price is {p['sharp']['ev']:+.1f}% against Pinnacle ({win:.1f}% at {line:g} {odds:+d})"
+        out.append(p)
+    return out
+
+
 def main():
     df, L = A.build("nfl")
     L, fits = estimate_lines(L)
@@ -135,13 +193,15 @@ def main():
             live.append({"angle": name, "game_id": r.game_id, "bet": bet, "units": UNITS, "why": why,
                          "record": v["summary"]["record"], "roi": v["summary"]["roi%"], "recent": v["summary"]["recent_record"],
                          "est_line": True})
+    live = real_lines(live, L)
     out = {"fits": {str(k): v for k, v in fits.items()},
            "angles": {k: {kk: vv for kk, vv in v.items() if kk != "bets_df"} for k, v in res.items()}, "live": live}
     with open(os.path.join(DATA, "first_half.json"), "w") as f:
         json.dump(out, f, indent=1, default=str)
     print(f"\nthis week's 1H plays: {len(live)}")
     for p in live:
-        print("  ", p["bet"], "|", p["angle"])
+        print("  ", p["bet"], p.get("odds_real", ""), p.get("book_real", ""), "|", p["angle"], "| sharp", p.get("sharp"),
+              "| CUT: " + p["cut"] if p.get("cut") else "")
 
 
 if __name__ == "__main__":

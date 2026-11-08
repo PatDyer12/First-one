@@ -30,15 +30,22 @@ import angles as A  # noqa: E402
 
 PREFERRED = "FanDuel"
 MIN_ODDS = {"spread": -115, "total": -115, "ml": -200}
-SYSTEM_GRADE = {"Blowout over": "Strong", "Wind under": "Moderate", "Close road team": "Moderate",
+SYSTEM_GRADE = {"Blowout over": "Strong", "Wind under": "Weak", "Close road team": "Moderate",
                 "Close road team ML": "Moderate", "Buy-low underdog": "Moderate", "Rested home team": "Weak",
-                "Steady wind under": "Moderate", "Steady rain under": "Moderate", "Over-streak fade": "Weak"}
+                "Steady wind under": "Weak", "Steady rain under": "Moderate", "Over-streak fade": "Weak"}
 BASE_UNITS = {"Strong": 1.0, "Moderate": 0.5, "Weak": 0.5, "Stack only": 0.5}
 MAX_UNITS = 2.0
 MODEL_ONLY_MAX = 1.0   # the model alone hasn't proven itself against closing lines: bigger stakes need stacking
 MAX_ML_DOG = 400
 # angles that are the same rule as a system (same filter, same bets): count once, as the system
 TWINS = {"Rest edge": "Rested home team"}
+# totals systems that flipped once the totals market started running low (overs 52-53% since 2024): retired
+RETIRED = {"Over-streak fade": "97-88, +0.1% since 2024", "Primetime under": "76-75, -3.3% since 2024",
+           "Division under (late season)": "57-63, -9.4% since 2024"}
+SHARP_MODEL_MIN_EV = -1.0   # model-only plays: the sharp market has to agree (EV at our price vs Pinnacle fair)
+SHARP_SYSTEM_MIN_WIN = 48.5  # system plays: cut only when the sharp market leans the other way
+SHARP_SYSTEM_MIN_EV = -2.0   # ...or when our price is 2%+ worse than the sharp price (about all a weak system's edge is worth)
+SHARP_FULL_EV = 2.5          # a model-only play stays at 1u only with this much edge against the sharp market
 
 
 def payout(o):
@@ -102,6 +109,8 @@ def build(sport):
             "ev": p["ev%"], "win": p["win%"], "stake": p.get("stake%", 0) / 100,
             "text": None})
     for sy in card.get("systems", []):
+        if sy["name"] in RETIRED:
+            continue
         for g in sy["games"]:
             if g["game"] not in keys:
                 continue
@@ -115,6 +124,8 @@ def build(sport):
     for a in A.live(sport, season, week, res=res):
         game = f"{a['away']} @ {a['home']}"
         if game not in keys:
+            continue
+        if a["angle"] in RETIRED:
             continue
         twin = TWINS.get(a["angle"])
         if twin and any(x["name"] == twin for x in sig.get((game, a["market"], a["bet_side"]), [])):
@@ -193,6 +204,8 @@ def build(sport):
                       "tier": "Best Bet" if units >= 1 else "Play",
                       "signals": [x["name"] for x in live] + (["Model"] if model_bet else []),
                       "model_agrees": bool(agrees), "backup": backup})
+    plays, cut = sharp_check(sport, plays)
+    leans += cut
     # one bet per team per game: the spread by default, the moneyline only when no spread play exists
     spread_sides = {(p["game"], p["side"]) for p in plays if p["market"] == "spread"}
     plays = [p for p in plays if not (p["market"] == "ml" and (p["game"], p["side"]) in spread_sides)]
@@ -233,6 +246,38 @@ def qb_flags(sport):
     except Exception as e:  # network trouble shouldn't kill the card
         print("QB watch unavailable:", e)
         return {}
+
+
+def sharp_check(sport, plays):
+    """Check each play against the sharp market (market.py). Model-only plays need the sharp market to agree;
+    system plays are cut when it leans the other way or our price is 2%+ worse than its fair price. Adds the check
+    to each play's backup."""
+    raw = os.path.join(HERE, "data", f"market_{sport}_raw.json")
+    if not os.path.exists(raw) or (pd.Timestamp.now().timestamp() - os.path.getmtime(raw)) > 12 * 3600:
+        return plays, []
+    import market as MK
+    events = json.load(open(raw))
+    L = MK.Landing(sport)
+    name = MK.nfl_name() if sport == "nfl" else None
+    keep, cut = [], []
+    for p in plays:
+        c = MK.play_check(sport, p, events, L, name)
+        if c is None:
+            keep.append(p)
+            continue
+        p["sharp"] = c
+        model_only = p["signals"] == ["Model"]
+        if (model_only and c["ev"] < SHARP_MODEL_MIN_EV) or (not model_only and (c["win"] < SHARP_SYSTEM_MIN_WIN or c["ev"] < SHARP_SYSTEM_MIN_EV)):
+            cut.append({"game": p["game"], "market": p["market"], "side": p["side"], "why": " + ".join(p["signals"]),
+                        "note": f"cut by the sharp check: {c['ref']} makes it {c['win']:g}% (fair {c['fair_odds']:+d}), "
+                                f"{c['ev']:+.1f}% at {p['odds']:+d}"})
+            continue
+        p["backup"].append({"title": "Sharp check", "text": f"{c['ref']} prices this side at {c['win']:g}% (fair "
+                            f"{c['fair_odds']:+d}); at {p['odds']:+d} that's {c['ev']:+.1f}% against the sharp market."})
+        if model_only and c["ev"] < SHARP_FULL_EV and p["units"] > 0.5:  # model alone: full size only with a sharp edge
+            p["units"], p["tier"] = 0.5, "Play"
+        keep.append(p)
+    return keep, cut
 
 
 def log_plays(sport, plays):

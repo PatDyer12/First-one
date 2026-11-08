@@ -28,6 +28,7 @@ then graded against the result and the **closing line** (CLV). Set `placed` to `
 ```
 python3 betting/fetch.py && python3 betting/model.py --week
 python3 betting/cfb_fetch.py && python3 betting/cfb_rankings.py && python3 betting/cfb_weather.py && python3 betting/cfb_model.py --week
+python3 betting/market.py nfl        # sharp-price scan vs Pinnacle (before final.py; add --derivatives for 1H / team totals)
 python3 betting/final.py            # decision layer -> data/final_nfl.json, data/cfb/final_cfb.json (+ tracker)
 python3 betting/props.py            # NFL player props (after final.py; ~4 Odds API requests per game)
 python3 betting/teasers.py          # NFL 6-point teasers (after final.py)
@@ -121,6 +122,50 @@ Passing yards, rushing yards, receiving yards and receptions, priced against Fan
 - **Honest limit:** there's no free history of prop lines, so props can't be backtested for ROI. 0.5u max.
 - **The pattern behind the unders:** receivers and running backs finish under their own season average 57–58% of the
   time (2022–26), because a few big games pull the average up.
+
+## Sharper, November 2026: the regime check and the sharp-price scanner (`market.py`)
+**Why the card kept saying under.** The under systems were validated on 2011–2023. Since 2024 NFL games have gone
+over the closing total more often (53.3% in 2024, 52.2% in 2025, 52.5% in 2026; about +1 to +1.5 points a game), so
+every totals system was re-graded on 2024–26 alone:
+
+| System | 2011–23 | 2024–26 | Now |
+|---|---|---|---|
+| NFL primetime under | — | 76-75, −3.3% | **Retired** |
+| NFL division under (late season) | — | 57-63, −9.4% | **Retired** |
+| NFL full-game wind under | 305-211, +12.8% | 38-41, −8.2% | **Retired**; 12+ mph games are a 1H watch list |
+| NFL 1H primetime under | +9.6% (2012–18) | 86-66, +8.0% | Still passes (needs a fair real 1H price) |
+| NFL 1H wind under | | 45-34, +8.6% | Watch list (t 1.5 overall, misses the bar) |
+| College over-streak fade | | 97-88, +0.1% | **Retired** |
+| College steady rain under | | 62-49, +6.5% | Moderate |
+| College steady wind under | | +0.7% | Weak |
+| College blowout over | | 158-130, +4.7% | Strong |
+
+Blind overs since 2024 hit about 52–53%, which is break-even at −110, so the fix isn't flipping to overs: it's dropping
+the unders that died and letting the sharp price decide. Prop unders are a different thing: receivers and running
+backs finish under their own season average 55–61% of the time (stable 2019–26), a real skew. Prop price edges vs
+Pinnacle now include overs.
+
+**The scanner** (`python3 betting/market.py nfl|cfb [--no-fetch] [--derivatives]`, 3 Odds API requests):
+- One request per market pulls FanDuel, DraftKings, Pinnacle, Betfair exchange, Matchbook, LowVig, BetOnline, BetMGM,
+  Caesars and BetRivers (naming 10 bookmakers costs the same as one region).
+- Fair price: Pinnacle's no-vig odds; without Pinnacle, the median of 3+ sharp books, else the median of 6+ books.
+- Different numbers are converted through how often games land on each number (2011–25 games with similar lines),
+  so a hook on 3 or 7 is worth what it's really worth.
+- An edge: FanDuel/DraftKings beating the fair price by 2.5%+ (spreads, totals) or 3%+ (moneylines, dogs up to +400).
+  0.5u, 1u at 5%+.
+- `--derivatives`: first-half spreads/totals and team totals vs Pinnacle at the exact same number, 3%+ (3 requests a game).
+
+**The sharp check** in `final.py` (market data under 12 hours old; run `market.py` right before `final.py`):
+- Model-only plays are cut below −1% EV vs the sharp price, and get 1u only at +2.5% or better (else 0.5u).
+- System plays are cut when the sharp market leans the other way (under 48.5%) **or** our price is 2%+ worse than the
+  fair price: a weak system's edge is worth about 2%, so a worse price eats all of it.
+- First half (`first_half.py`): estimated 1H totals are swapped for the real FanDuel/DraftKings 1H line, then cut if
+  the real line is past our estimate, Pinnacle leans the other way, or the price is 2%+ worse than Pinnacle's.
+- Props (`props.py`): Pinnacle's no-vig odds anchor the 60% market share of the blend when it has the same line;
+  FanDuel/DraftKings props beating Pinnacle by 4%+ (either side) show as price edges.
+
+**When edges show up:** mostly early in the week and right after news. By Sunday morning FanDuel and DraftKings sit
+close to Pinnacle, so a Sunday-morning card is short on purpose. Run the routine Wednesday/Thursday too.
 
 ## The strategy search: what actually made money (`systems.py`)
 `python3 betting/systems.py` tests every market/side crossed with one or two situational filters, plus the model at

@@ -48,6 +48,8 @@ MIN_HIT = 0.6         # the player's own games this season have to agree (share 
 MAX_LINE_GAP = 0.3    # skip lines more than 30% off the player's season average (role change, injury we can't see)
 MAX_PROPS = 5
 PROP_UNITS = 0.5
+SHARP_EDGE = 0.04     # a prop price edge vs Pinnacle's no-vig odds (props carry more margin, so a higher bar)
+SHARP_MIN_EV = -1.0   # the sharp check, same rule as the game card's model-only bets: within 1% of Pinnacle's fair price
 
 
 def stats(seasons):
@@ -231,7 +233,7 @@ def fetch_lines(games):
         if (e["away_team"], e["home_team"]) not in want:
             continue
         r = requests.get(f"{base}/events/{e['id']}/odds", params={
-            "apiKey": key, "regions": "us", "bookmakers": "fanduel,draftkings", "oddsFormat": "american",
+            "apiKey": key, "bookmakers": "fanduel,draftkings,pinnacle", "oddsFormat": "american",
             "markets": ",".join(ODDS_MARKETS)}, timeout=30)
         left = r.headers.get("x-requests-remaining", left)
         if r.status_code != 200:
@@ -254,6 +256,20 @@ def payout(o):
 def no_vig(p_over_odds, p_under_odds):
     a, b = 1 / (1 + payout(p_over_odds)), 1 / (1 + payout(p_under_odds))
     return a / (a + b)
+
+
+def pinnacle_over(pin_lines, line, curve):
+    """Pinnacle's no-vig P(over line): its own price at the same number, else its nearest number moved along our
+    model's curve (how much more often the player clears one number than the other). (None, None) when Pinnacle
+    has nothing within max(1, 5% of the line)."""
+    if not pin_lines:
+        return None, None
+    pl = min(pin_lines, key=lambda x: abs(x - line))
+    if abs(pl - line) > max(1.0, 0.05 * line):
+        return None, None
+    if pl == line:
+        return pin_lines[pl], pl
+    return float(min(max(pin_lines[pl] + curve(line) - curve(pl), 0.01), 0.99)), pl
 
 
 # ------------------------------------------------------------------ main
@@ -361,10 +377,18 @@ def main():
         if l.empty:
             continue
         hist_p = hist[(hist["player_id"] == r.player_id) & (hist["season"] == current)]
+        pin_lines = {}
+        for pl, g in l[l["book"] == "Pinnacle"].groupby("line"):
+            o, u = g[g["side"] == "over"], g[g["side"] == "under"]
+            if len(o) and len(u):
+                pin_lines[float(pl)] = no_vig(o["odds"].iloc[0], u["odds"].iloc[0])
+        curve = lambda x, m=m, pred=r.pred: p_over(tab, m, pred, x)  # noqa: E731  (raw shape: isotonic steps are flat)
         for line, ll in l.groupby("line"):
+            pin = ll[ll["book"] == "Pinnacle"]
+            ours = ll[ll["book"] != "Pinnacle"]
             for side in ("over", "under"):
-                offers = ll[ll["side"] == side]
-                other = ll[ll["side"] != side]
+                offers = ours[ours["side"] == side]
+                other = ours[ours["side"] != side]
                 if offers.empty or other.empty:
                     continue
                 po = float(iso[m].predict([p_over(tab, m, r.pred, line)])[0])
@@ -373,9 +397,17 @@ def main():
                 opp = other[other["book"] == best.book]
                 if opp.empty:
                     continue
-                p_book = no_vig(best.odds, opp["odds"].iloc[0])  # no-vig chance of THIS side at that book
+                # market anchor: Pinnacle's no-vig price when it has this exact line, else the same book's own
+                pin_side, pin_other = pin[pin["side"] == side], pin[pin["side"] != side]
+                if len(pin_side) and len(pin_other):
+                    p_book, ref = no_vig(pin_side["odds"].iloc[0], pin_other["odds"].iloc[0]), "Pinnacle"
+                else:
+                    p_book, ref = no_vig(best.odds, opp["odds"].iloc[0]), best.book  # no-vig chance of THIS side
                 p = W_MODEL * p_model + (1 - W_MODEL) * p_book
                 evv = p * payout(best.odds) - (1 - p)
+                p_pin, pin_line = pinnacle_over(pin_lines, float(line), curve)
+                if p_pin is not None and side == "under":
+                    p_pin = 1 - p_pin
                 games = hist_p[STAT[m]].values
                 hits = int((games > line).sum() if side == "over" else (games < line).sum())
                 avg = float(np.mean(games)) if len(games) else np.nan
@@ -402,20 +434,29 @@ def main():
                             "game_id": r.game_id, "market": m, "label": LABEL[m], "side": side, "line": float(line),
                             "book": best.book, "odds": int(best.odds), "proj": round(float(r.pred), 1),
                             "prob": round(100 * p, 1), "model_prob": round(100 * p_model, 1), "book_prob": round(100 * p_book, 1),
+                            "ref": ref,
                             "ev": round(100 * evv, 1), "season_avg": round(float(np.mean(games)), 1) if len(games) else None,
                             "last3": round(float(np.mean(games[-3:])), 1) if len(games) else None,
                             "games": [int(v) for v in games], "hits": hits, "n": int(len(games)),
                             "opp_factor": round(float(r[f"{'passing_yards' if m == 'pass_yds' else 'rushing_yards' if m == 'rush_yds' else 'receiving_yards' if m == 'rec_yds' else 'receptions'}_opp"]), 2)
                             if pd.notna(r[f"{'passing_yards' if m == 'pass_yds' else 'rushing_yards' if m == 'rush_yds' else 'receiving_yards' if m == 'rec_yds' else 'receptions'}_opp"]) else None,
                             "team_pts": round(float(r.team_pts), 1) if pd.notna(r.team_pts) else None,
-                            "wind": float(r.wind), "dome": int(r.dome), "skip": skip})
+                            "wind": float(r.wind), "dome": int(r.dome), "skip": skip,
+                            "ev_sharp": round(100 * (p_pin * payout(best.odds) - (1 - p_pin)), 1) if p_pin is not None else None,
+                            "sharp_prob": round(100 * p_pin, 1) if p_pin is not None else None, "pin_line": pin_line})
     sc = pd.DataFrame(out)
     if sc.empty:
         print("no props matched")
         return
     sc = sc.sort_values("ev", ascending=False)
+    # the sharp check: where Pinnacle prices the prop, our price has to be within 1% of its fair odds (then a plus-money
+    # side is fine: the sharp market backs the price); with no Pinnacle price, the 55% floor stands in for it
+    checked = sc["ev_sharp"].notna()
+    sharp_ok = (checked & (sc["ev_sharp"] >= SHARP_MIN_EV)) | (~checked & (sc["prob"] >= 100 * MIN_PROB))
+    good = sc["skip"].isna() & (sc["ev"] >= 100 * MIN_EDGE)
+    sharp_cut = sc[good & checked & (sc["ev_sharp"] < SHARP_MIN_EV)].drop_duplicates("player").head(8)
     picks, seen_player, seen_game = [], set(), {}
-    for p in sc[sc["skip"].isna() & (sc["ev"] >= 100 * MIN_EDGE) & (sc["prob"] >= 100 * MIN_PROB)].to_dict("records"):
+    for p in sc[good & sharp_ok].to_dict("records"):
         if p["player"] in seen_player or seen_game.get(p["game_id"], 0) >= 2:
             continue
         p["units"] = PROP_UNITS
@@ -424,8 +465,18 @@ def main():
         seen_game[p["game_id"]] = seen_game.get(p["game_id"], 0) + 1
         if len(picks) >= MAX_PROPS:
             break
+    # pure price edges: a FanDuel/DraftKings prop paying more than Pinnacle's no-vig odds, either side, model or not
+    sharp = sc[sc["ev_sharp"].notna() & (sc["pin_line"] == sc["line"]) & (sc["ev_sharp"] >= 100 * SHARP_EDGE)
+               & ~sc["skip"].fillna("").str.startswith("injury")].sort_values("ev_sharp", ascending=False)
+    sharp = sharp[~sharp["player"].isin([p["player"] for p in picks])].drop_duplicates("player").head(MAX_PROPS)
+    sharp_picks = [dict(p, units=PROP_UNITS) for p in sharp.to_dict("records")]
+    print(f"{len(sharp_picks)} prop price edges vs Pinnacle:")
+    for p in sharp_picks:
+        print(f"  {p['player']:22s} {p['side'].title()} {p['line']:g} {p['label']:16s} {p['odds']:+d} {p['book']:10s} "
+              f"Pinnacle {p['book_prob']}%  EV {p['ev_sharp']:+.1f}%  (model {p['model_prob']}%)")
     with open(os.path.join(DATA, "props.json"), "w") as f:
-        json.dump({"week": wk, "season": current, "picks": picks,
+        json.dump({"week": wk, "season": current, "picks": picks, "sharp": sharp_picks,
+                   "sharp_cut": sharp_cut.to_dict("records"),
                    "near": sc[sc["skip"].isna() & (sc["ev"] > 0)].head(15).to_dict("records"),
                    "skipped": sc[sc["skip"].notna() & (sc["ev"] >= 100 * MIN_EDGE)].head(10).to_dict("records"),
                    "summary": summary}, f, indent=1, default=str)
@@ -433,7 +484,12 @@ def main():
     for p in picks:
         print(f"  {p['player']:22s} {p['side'].title()} {p['line']:g} {p['label']:16s} {p['odds']:+d} {p['book']:10s} "
               f"proj {p['proj']:6.1f}  win {p['prob']}% (model {p['model_prob']}%, book {p['book_prob']}%)  ev {p['ev']:+.1f}%  "
-              f"season {p['season_avg']} last3 {p['last3']}  {p['side']} in {p['hits']}/{p['n']}")
+              f"season {p['season_avg']} last3 {p['last3']}  {p['side']} in {p['hits']}/{p['n']}"
+              + (f"  vs Pinnacle {p['ev_sharp']:+.1f}%" if p.get("ev_sharp") is not None and p["ev_sharp"] == p["ev_sharp"] else ""))
+    print(f"cut by the sharp check (more than {-SHARP_MIN_EV:g}% worse than Pinnacle's fair price):")
+    for p in sharp_cut.to_dict("records"):
+        print(f"  {p['player']:22s} {p['side'].title()} {p['line']:g} {p['label']:16s} {p['odds']:+d} {p['book']:10s} "
+              f"model {p['model_prob']}%  Pinnacle {p['sharp_prob']}% at {p['pin_line']:g}  vs Pinnacle {p['ev_sharp']:+.1f}%")
 
 
 if __name__ == "__main__":

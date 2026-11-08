@@ -337,7 +337,8 @@ def report(sport):
 
 
 # graded on paper but not trusted for live bets (reason in the README's edge-hunt table)
-NOT_LIVE = {"cfb": {"Scoreboard luck fade", "Scoreboard bad-luck back"}}  # measures garbage time more than luck
+NOT_LIVE = {"cfb": {"Scoreboard luck fade", "Scoreboard bad-luck back"},  # measures garbage time more than luck
+            "nfl": {"Primetime under", "Division under (late season)"}}    # flipped since 2024 (totals market runs low)
 
 
 def live(sport, season, week, res=None, L=None):
