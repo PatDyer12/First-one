@@ -42,3 +42,4 @@ logged,tier,game_id,game,market,side,book,bet,line,odds,win_prob,ev,stake,placed
 2026-11-08 05:31,BET,2026_09_ARI_SEA,ARI @ SEA,total,under,DraftKings,Under 39.5,39.5,-108,0.5379999999999999,0.036000000000000004,0.0096,yes,39.5,-108.0,0.0,,,
 2026-11-08 05:31,Close road team,2026_09_CLE_NO,CLE @ NO,spread,away,DraftKings,CLE +3,3.0,100,0.0,0.0,0.005,yes,3.0,100.0,0.0,,,
 2026-11-08 05:31,Close road team ML,2026_09_CLE_NO,CLE @ NO,ml,away,DraftKings,CLE ML,,142,0.0,0.0,0.005,yes,,142.0,,-0.0237,,
+2026-11-08 05:38,Close road team,2026_09_NYG_PHI,NYG @ PHI,spread,away,FanDuel,NYG -3,-3.0,-110,0.0,0.0,0.005,yes,-3.0,-112.0,0.0,,,
