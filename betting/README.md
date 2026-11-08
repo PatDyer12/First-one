@@ -31,6 +31,8 @@ python3 betting/cfb_fetch.py && python3 betting/cfb_rankings.py && python3 betti
 python3 betting/final.py            # decision layer -> data/final_nfl.json, data/cfb/final_cfb.json (+ tracker)
 python3 betting/props.py            # NFL player props (after final.py; ~4 Odds API requests per game)
 python3 betting/teasers.py          # NFL 6-point teasers (after final.py)
+python3 betting/halves.py && python3 betting/first_half.py   # NFL first-half history + 1H angles
+python3 betting/share/nfl_v2.py     # NFL card v2: one-sheet page 1, bet detail, 1H, teasers, props, game-by-game trends
 python3 betting/share/cards.py      # -> betting/share/nfl_week<N>.pdf, cfb_week<N>.pdf
 ```
 `angles.py` has separate NFL and college angle books, each defined up front with a reason and graded on 2011–2026
@@ -93,6 +95,17 @@ Every idea written down with its threshold before testing, graded against closin
 
 The lesson: against closing lines the market already prices public information (luck, injuries, refs, records).
 What's left is structural: key numbers (teasers), weather the totals under-react to, and blowout overs in college.
+
+## NFL card v2 (`share/nfl_v2.py`, `first_half.py`, `trends.py`)
+- **Page 1, the Sheet:** every bet by kickoff (sides, totals, first halves, teasers, props) and a pass list with why.
+- **Bet detail:** each bet's signals, records and price; first-half bets; teasers; props (with an Odds API key).
+- **Game by game:** a trends panel for every game (record, ATS, over-under, last 5, home/road and fav/dog splits,
+  points last 3, offense/defense EPA ranks, streaks, last 3 meetings, any tested signal). Context, never a trigger.
+- **First half:** halftime scores since 2011 (`halves.py`); 1H lines estimated walk-forward (~0.51 × total,
+  ~0.57 × spread); ten 1H ideas graded at -110 with a stricter bar (t >= 2, profitable 2012–18 and 2019+, not
+  losing 2025–26). Passed: **1H primetime under** 475-363 (+8.0%), 54-36 in 2025–26. Failed: 1H favorites −3.7%,
+  dome overs −6.7%, road favorites −5.9%, west-coast early fade, home dogs, off-bye, high-total under, low-total over;
+  1H wind under +5.3% (t 1.5) just missed.
 
 ## NFL player props (`props.py`)
 Passing yards, rushing yards, receiving yards and receptions, priced against FanDuel/DraftKings prop lines.
