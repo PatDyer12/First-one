@@ -14916,7 +14916,7 @@ void main(){
   // ---------- sheets ----------
   function openSheet(id) { $(id).hidden = false; }
   // keep every open screen current: when a new version is up, reload it (never mid-form or mid-animation)
-  const BUILD = "20261108173015";
+  const BUILD = "20261108175354";
   function updReady() {
     if (document.getElementById("updReady")) return; const d = document.createElement("div"); d.id = "updReady"; d.textContent = "Update ready · refresh, then TV + Sound on"; document.body.append(d);
   }
@@ -22204,7 +22204,13 @@ void main(){
   }
   function spBet(b, sp) { return b.kind === "parlay" ? b.sport === sp || (Array.isArray(b.legSel) && b.legSel.some((x) => x && x.sp === sp)) : ((b.sel && b.sel.sp) || b.sport) === sp; }
   function nflBet(b) { return b.kind === "parlay" ? b.sport === "NFL" || (Array.isArray(b.legSel) && b.legSel.some((x) => x && x.sp === "NFL")) : ((b.sel && b.sel.sp) || b.sport) === "NFL"; }
-  function isGone(b) { if (!b) return false; const so = soloSport(); return (sunNfl() && !nflBet(b)) || (!!so && !spBet(b, so)) || listGone(b); }
+  function offNfl(b) {
+    if (nflBet(b)) return false;
+    const sps = b.kind === "parlay" ? (Array.isArray(b.legSel) ? b.legSel.filter(Boolean).map((x) => x.sp) : []) : b.sel && b.sel.sp ? [b.sel.sp] : [];
+    if (sps.length) return !sps.includes("NFL");
+    return !!b.sport && !["NFL", "Mixed", "OTHER"].includes(b.sport);
+  }
+  function isGone(b) { if (!b) return false; const so = soloSport(); return (sunNfl() && offNfl(b)) || (!!so && !spBet(b, so)) || listGone(b); }
   function listGone(b) {
     if (!b || isMe(b) || !S.gone.size) return false;
     if (S.gone.has(personKey(b))) return true;
@@ -22342,7 +22348,7 @@ void main(){
   const slipGaps = (bets) => (bets || []).reduce((n, b) => n + (b.odds ? 0 : 1) + (b.stake ? 0 : 1) + (b.legs || []).filter((l) => l && ((["spread", "total", "prop"].includes(l.market) && l.line == null) || (l.market === "prop" && (!l.stat || !l.side)))).length, 0);
   // the readers, fastest first. Each has 25 s; the next joins in after 8 s without a clean read, or straight away when one
   // fails or comes back with holes. The first clean read wins (the rest are cancelled); otherwise the read with fewest holes
-  const SLIP_MODELS = ["gemini-3.5-flash-lite", "gemini-3-flash-preview", "gemini-3.8-flash"], SLIP_TO = 25e3, SLIP_HEDGE = 8e3, SLIP_MAX = 45e3;
+  const SLIP_MODELS = ["gemini-3.5-flash-lite", "gemini-3-flash-preview"], SLIP_TO = 16e3, SLIP_HEDGE = 6e3, SLIP_MAX = 24e3, SLIP_GRACE = 6e3;
   const AC = { on: null, tok: null };
   function acKey() { let k = window.SWEAT_RECAPTCHA || ""; try { k = k || localStorage.getItem("sb-recaptcha") || ""; } catch (e) {} return String(k).trim(); }
   function acStart() {
@@ -22380,21 +22386,29 @@ void main(){
       generationConfig: { responseMimeType: "application/json", responseSchema: SLIP_SCHEMA, temperature: 0 },
     });
     return new Promise((resolve, reject) => {
-      let best = null, empty = false, err = "", next = 0, running = 0, over = false, hedge = 0;
-      const ctls = [];
-      const end = () => { if (over) return; over = true; clearTimeout(hedge); clearTimeout(cap); ctls.forEach((c) => { try { c.abort(); } catch (e) {} }); if (best) resolve(best.bets); else if (empty) resolve([]); else reject(new Error(err || "the slip reader didn't answer")); };
+      let best = null, empty = false, err = "", next = 0, running = 0, over = false, hedge = 0, grace = 0, busy = false, retried = false;
+      const ctls = [], queue = SLIP_MODELS.slice();
+      const end = () => { if (over) return; over = true; clearTimeout(hedge); clearTimeout(cap); clearTimeout(grace); ctls.forEach((c) => { try { c.abort(); } catch (e) {} }); if (best) resolve(best.bets); else if (empty) resolve([]); else reject(new Error(err || "the slip reader didn't answer")); };
       const cap = setTimeout(end, SLIP_MAX);
       const launch = () => {
         if (over) return;
-        if (next >= SLIP_MODELS.length) { if (!running) end(); return; }
-        const model = SLIP_MODELS[next++], c = new AbortController(), tm = setTimeout(() => c.abort(), SLIP_TO); ctls.push(c); running++;
+        if (next >= queue.length) {
+          if (!running && !best && busy && !retried) { retried = true; queue.push(SLIP_MODELS[0]); setTimeout(launch, 1500); return; }
+          if (!running) end(); return;
+        }
+        const model = queue[next++], c = new AbortController(), tm = setTimeout(() => c.abort(), SLIP_TO); ctls.push(c); running++;
         clearTimeout(hedge); hedge = setTimeout(launch, SLIP_HEDGE);
         slipCall(model, body, c).then((bets) => {
           if (!bets.length) { empty = true; return; }
           const gaps = slipGaps(bets);
           if (!best || gaps < best.gaps) best = { bets, gaps, model };
-        }, (e) => { err = e && e.name === "AbortError" ? "the slip reader took too long" : String((e && e.message) || e); })
-          .finally(() => { clearTimeout(tm); running--; if (over) return; if (best && best.gaps === 0) end(); else launch(); });
+        }, (e) => { const m = String((e && e.message) || e); if (/quota|429|exhaust|rate limit|overloaded|503|unavailable/i.test(m)) { busy = true; err = "The slip reader is busy for a second. Try the screenshot again."; } else err = e && e.name === "AbortError" ? "the slip reader took too long" : m; })
+          .finally(() => { clearTimeout(tm); running--; if (over) return;
+            if (best && best.gaps === 0) { end(); return; }
+            // a read with holes (a slip that doesn't show the stake, say) stands after a short second look
+            if (best && !grace) grace = setTimeout(end, SLIP_GRACE);
+            if (best && running) return;
+            launch(); });
       };
       launch();
     });
@@ -22596,8 +22610,8 @@ void main(){
       if (!bets.length) { scanNote("Couldn't find a bet on that image. Try a screenshot of the slip or the bet in My Bets."); return; }
       $("#scanLbl").textContent = "Finding the games…";
       const legs = bets.flatMap((b) => b.legs.filter(Boolean));
-      const far = legs.filter((l) => !gsFound(l)); if (far.length) await gsMore(far);
-      if (legs.some(gsTdish)) await resolveTdLegs(bets);
+      const far = legs.filter((l) => !gsFound(l)); if (far.length) await Promise.race([gsMore(far), new Promise((r) => setTimeout(r, 5000))]);
+      if (legs.some(gsTdish)) await Promise.race([new Promise((r) => setTimeout(r, 6000)), resolveTdLegs(bets)]);
       const book = (document.querySelector('input[name="book"]:checked') || {}).value || "FD", who = whoFields();
       const added = [], dupes = [], fixed = [];
       for (const pb of bets) {
@@ -22727,8 +22741,8 @@ void main(){
       if (!all.length) { gsErr("Couldn't find a bet on that. Screenshot the bet slip (or the bet in My Bets) and try again."); return; }
       gsStatus(files[0], "Finding the games…", all.length === 1 ? "1 bet" : all.length + " bets");
       const legs = all.flatMap((b) => b.legs.filter(Boolean));
-      const far = legs.filter((l) => !gsFound(l)); if (far.length) await gsMore(far);
-      if (legs.some(gsTdish)) await resolveTdLegs(all);
+      const far = legs.filter((l) => !gsFound(l)); if (far.length) await Promise.race([gsMore(far), new Promise((r) => setTimeout(r, 5000))]);
+      if (legs.some(gsTdish)) await Promise.race([new Promise((r) => setTimeout(r, 6000)), resolveTdLegs(all)]);
       let n = 0;
       for (const pb of all) {
         const r = gsBuild(pb); if (!r) continue;
@@ -22984,8 +22998,9 @@ void main(){
         S.ready = true; render(); autoReact(); autoSettle(); if (!LINES.size) loadLines(); else renderLines();
         if (!wasReady) { const k = liveKeys(); if (k.length) loadBoards(k); }
       }, onErr));
-      unsub.push(db.collection("guestBets").onSnapshot((snap) => {
-        const first = !GB_READY;
+      let gbFresh = true;
+      const gbSnap = (snap) => {
+        const first = !GB_READY || gbFresh; gbFresh = false;
         for (const ch of snap.docChanges()) {
           const prev = S.bets.get(ch.doc.id);
           if (ch.type === "removed") { S.bets.delete(ch.doc.id); S.goneBets.delete(ch.doc.id); continue; }
@@ -22997,7 +23012,9 @@ void main(){
           else if (!prev && d.status === "open") announce(d);
         }
         GB_READY = true; render(); autoReact(); autoSettle();
-      }, () => {}));
+      };
+      const gbSub = () => unsub.push(db.collection("guestBets").onSnapshot(gbSnap, (e) => { console.warn("guest bets", e); gbFresh = true; setTimeout(gbSub, 5000); }));
+      gbSub();
       unsub.push(db.doc("config/room").onSnapshot((r) => { const o = !(r.exists && r.data().open === false); if (o !== S.roomOpen) { S.roomOpen = o; $("#f-roomOpen").checked = o; showRoom(); } }, () => {}));
       unsub.push(db.doc("config/settings").onSnapshot((s) => {
         const v = s.exists ? Number(s.data().unitSize) : NaN;
