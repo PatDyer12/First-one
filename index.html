@@ -14915,7 +14915,7 @@ void main(){
   // ---------- sheets ----------
   function openSheet(id) { $(id).hidden = false; }
   // keep every open screen current: when a new version is up, reload it (never mid-form or mid-animation)
-  const BUILD = "20261108054453";
+  const BUILD = "20261108163812";
   function updReady() {
     if (document.getElementById("updReady")) return; const d = document.createElement("div"); d.id = "updReady"; d.textContent = "Update ready · refresh, then TV + Sound on"; document.body.append(d);
   }
@@ -25638,7 +25638,10 @@ function wdDeckTeam(st) {
   if (t && t.ab !== T.h.ab) Object.assign(team, { ab: t.ab, col: wdHex(t.col, T.h.col), alt: wdHex(t.alt, T.h.alt), colHex: t.col || "", altHex: t.alt || "", lg: t.lg, img: null });
   if (t) Object.assign(team, { nm: team.nm || t.nm, fn: team.fn || t.fn });
   team.colHex = team.colHex || hx(team.col); team.altHex = team.altHex || hx(team.alt);
-  team.sport = (q && q.sport) || { nba: "NBA", nhl: "NHL", mlb: "MLB" }[R.sport] || "NFL";
+  // the league: the game's own, else the board's featured game's (when it's this team's), else an NFL Sunday's; only then the
+  // world's (that's read once at build, and the board can look like a hoops night for a moment before the football loads)
+  const fe = (() => { try { return window.__sbFeat && window.__sbFeat(); } catch (e) { return null; } })(), fsp = fe && fe.sport && fe.h && fe.a && (fe.h.ab === team.ab || fe.a.ab === team.ab) ? fe.sport : "";
+  team.sport = (q && q.sport) || fsp || (document.body.classList.contains("nflday") ? "NFL" : "") || { nba: "NBA", nhl: "NHL", mlb: "MLB" }[R.sport] || "NFL";
   return team;
 }
 function wdDeckBuild(st, o) {
@@ -25677,15 +25680,17 @@ function wdDeckBuild(st, o) {
   const stx = wdTex(THREE, sc); st.tex.push(stx); const spk = new THREE.MeshBasicMaterial({ map: stx });
   for (const s of [-1, 1]) for (let k = 0; k < 2; k++) add(new THREE.BoxGeometry(2.8 * K, 3.7 * K, 2.6 * K), [dark, dark, dark, dark, spk, dark], s * (width / 2 - 2.4 * K), 1.85 * K + k * 3.75 * K, -0.6 * K + (k ? -0.2 * K : 0));
   // the truss: four posts, beams round the top, moving heads along the front, the sign on top
-  const th = 15 * K, tz = depth / 2 - 0.7 * K, tb = -depth / 2 + 0.5 * K, tx0 = width / 2 - 0.6 * K, pw = 0.5 * K;
-  for (const s of [-1, 1]) for (const z of [tz, tb]) add(new THREE.BoxGeometry(pw, th, pw), steel, s * tx0, th / 2, z);
-  for (const z of [tz, tb]) add(new THREE.BoxGeometry(width - 0.6 * K, pw, pw), steel, 0, th, z);
-  for (const s of [-1, 1]) add(new THREE.BoxGeometry(pw, pw, tz - tb), steel, s * tx0, th, (tz + tb) / 2);
+  // (slim, in the war room: no frame, it crossed the screens on the wall; the heads ride a bar on top of the LED wall)
+  const slim = !!o.slim, th = slim ? ly + lh / 2 + 1.1 * K : 15 * K, tz = slim ? lz + 0.9 * K : depth / 2 - 0.7 * K, tb = -depth / 2 + 0.5 * K, tx0 = width / 2 - 0.6 * K, pw = 0.5 * K;
+  if (slim) add(new THREE.BoxGeometry(lw + 0.8 * K, pw, pw * 1.6), steel, 0, th - 0.2 * K, tz);
+  else { for (const s of [-1, 1]) for (const z of [tz, tb]) add(new THREE.BoxGeometry(pw, th, pw), steel, s * tx0, th / 2, z);
+    for (const z of [tz, tb]) add(new THREE.BoxGeometry(width - 0.6 * K, pw, pw), steel, 0, th, z);
+    for (const s of [-1, 1]) add(new THREE.BoxGeometry(pw, pw, tz - tb), steel, s * tx0, th, (tz + tb) / 2); }
   const fade = (() => { const c = wdCanvas(4, 128), x2 = c.getContext("2d"), g2 = x2.createLinearGradient(0, 0, 0, 128); g2.addColorStop(0, "rgba(255,255,255,0)"); g2.addColorStop(0.8, "rgba(255,255,255,.6)"); g2.addColorStop(1, "rgba(255,255,255,1)"); x2.fillStyle = g2; x2.fillRect(0, 0, 4, 128); const tt = new THREE.CanvasTexture(c); st.tex.push(tt); return tt; })();
   const glowT = wdGlowTex(THREE); st.tex.push(glowT);
   const heads = [], BL = 40 * K;
   for (let i = 0; i < 8; i++) {
-    const hx = (i / 7 - 0.5) * (width - 4 * K), piv = new THREE.Group(); piv.position.set(hx, th - 0.7 * K, tz); g.add(piv);
+    const hx = (i / 7 - 0.5) * (slim ? lw - 1.5 * K : width - 4 * K), piv = new THREE.Group(); piv.position.set(hx, th - 0.7 * K, tz); g.add(piv);
     piv.add(new THREE.Mesh(new THREE.BoxGeometry(0.9 * K, 1.0 * K, 0.9 * K), dark));
     const m = new THREE.MeshBasicMaterial({ map: fade, color: col(...WD_PCOL[i % 5]), transparent: true, opacity: 0, blending: THREE.AdditiveBlending, depthWrite: false, side: THREE.DoubleSide });
     const cg = new THREE.ConeGeometry(BL * 0.07, BL, 16, 1, true); cg.translate(0, -BL / 2, 0); piv.add(new THREE.Mesh(cg, m));
@@ -26222,10 +26227,10 @@ const WD_MASC = {
   "NFL:MIA": { k: "fish", fur: "#5fb8b8", acc: "#f2f2f2", x: { kind: "dolphin", jer: "#f2f2f2", jer2: "#008e97", num: "1" } },                                                // T.D.
   "NFL:MIN": { k: "human", fur: "#e6b48f", acc: "#ffc62f", x: { hat: "viking", hatc: "#4f2683", hornc: "#ffc62f", beard: "#ffc62f", stache: "#ffc62f", jer: "#4f2683", jer2: "#ffc62f", num: "1" } },   // Viktor
   "NFL:NE": { k: "human", fur: "#f0c4a0", acc: "#002244", x: { hat: "tricorn", hatc: "#002244", chin: 1, jer: "#002244", jer2: "#c60c30", num: "1" } },                      // Pat Patriot
-  "NFL:NO": { k: "dog", fur: "#a86a3a", acc: "#f2e6d0", x: { ears: "flop", jowl: 1, jer: "#f2f2f2", jer2: "#b39b6a", num: "00" } },                                          // Gumbo
+  "NFL:NO": { k: "dog", fur: "#a86a3a", acc: "#f6efe2", x: { ears: "flop", jowl: 1, cheeks: "#f6efe2", jer: "#f2f2f2", jer2: "#b39b6a", num: "00" } },                                          // Gumbo
   "NFL:NYG": { k: "human", fur: "#e8c0a0", acc: "#0b2265", x: { hat: "helmet", hatc: "#0b2265", mask: "#c8c8c8", stripe: "#a71930", big: 1, jer: "#0b2265", jer2: "#f2f2f2", txt: "GIANTS", num: "" } },  // (none: the big-head fan)
   "NFL:NYJ": { k: "bear", fur: "#8a6a4a", acc: "#d8bc98", x: { jer: "#125740", jer2: "#f2f2f2", num: "13" } },                                                               // (none: the bear in the 13)
-  "NFL:PHI": { k: "bird", fur: "#d4d8dc", acc: "#f5b800", x: { head: "#f4f4f4", jer: "#004c54", jer2: "#f2f2f2", num: "00" } },                                             // Swoop
+  "NFL:PHI": { k: "bird", fur: "#3b3128", acc: "#f5b800", x: { head: "#f4f4f4", eye: "#1b3a2a", jer: "#004c54", jer2: "#f2f2f2", num: "00" } },                                             // Swoop
   "NFL:PIT": { k: "human", fur: "#e6b48f", acc: "#ffb612", x: { hat: "hard", hatc: "#ffb612", stache: "#3a2a1a", chin: 1, jer: "#ffb612", over: "#16181c", jer2: "#16181c", num: "" } },   // Steely McBeam
   "NFL:SF": { k: "human", fur: "#f0c4a0", acc: "#6b4423", x: { hat: "cowboy", hatc: "#6b4423", band: "#aa0000", beard: "#b5462a", stache: "#b5462a", jer: "#aa0000", jer2: "#f2f2f2", num: "49" } },   // Sourdough Sam
   "NFL:SEA": { k: "bird", fur: "#1a3a6b", acc: "#a5acaf", x: { crest: 1, crestc: "#69be28", eye: "#69be28", jer: "#002244", jer2: "#69be28", num: "0" } },                 // Blitz
@@ -26401,14 +26406,17 @@ function wdMascSpec(sport, t) {
 function wdMascot(THREE, spec, team) {
   const lin = (h) => { const c = wdHex(h, [0.5, 0.5, 0.5]); return new THREE.Color().setRGB(c[0], c[1], c[2], THREE.LinearSRGBColorSpace); };
   const grad = new THREE.DataTexture(new Uint8Array([90, 90, 90, 255, 175, 175, 175, 255, 255, 255, 255, 255]), 3, 1); grad.minFilter = grad.magFilter = THREE.NearestFilter; grad.needsUpdate = true;
-  const mats = {}; const M = (h, emi) => { const k = h + (emi || ""); if (!mats[k]) { const o = { color: lin(h), gradientMap: grad }; if (emi) { o.emissive = lin(emi); o.emissiveIntensity = 0.6; } mats[k] = new THREE.MeshToonMaterial(o); } return mats[k]; };
+  // a little of its own colour lit from within, so a mascot reads as itself (the jersey, the face) under a stage's coloured lights
+  const mats = {}; const M = (h, emi) => { const k = h + (emi || ""); if (!mats[k]) { const o = { color: lin(h), gradientMap: grad }; if (emi) { o.emissive = lin(emi); o.emissiveIntensity = 0.6; } else { const q = wdHex(h, [0.5, 0.5, 0.5]), lu = 0.3 * q[0] + 0.55 * q[1] + 0.15 * q[2]; o.emissive = lin(h); o.emissiveIntensity = 0.26 * Math.max(0.15, 1 - lu * 1.05); } mats[k] = new THREE.MeshToonMaterial(o); } return mats[k]; };
   const X = spec.x || {}, fur = spec.fur, acc = spec.acc, jer = X.jer || team.colHex || "#333333", jer2 = X.jer2 || team.altHex || "#f2f2f2";
   const root = new THREE.Group(), body = new THREE.Group(); root.add(body);
   const mesh = (geo, mat, x, y, z, parent) => { const m = new THREE.Mesh(geo, mat); m.position.set(x || 0, y || 0, z || 0); (parent || body).add(m); return m; };
-  const sph = (r, ws, hs) => new THREE.SphereGeometry(r, ws || 18, hs || 14);
+  const sph = (r, ws, hs) => new THREE.SphereGeometry(r, Math.max(ws || 28, 12), Math.max(hs || 20, 10));
   // legs, then the jersey (a number on the front, the team's letters), the chain
   for (const s of [-1, 1]) { mesh(new THREE.CapsuleGeometry(0.055, 0.26, 4, 10), M("#22252c"), s * 0.075, 0.2, 0); mesh(new THREE.BoxGeometry(0.1, 0.06, 0.17), M("#f2f2f2"), s * 0.075, 0.03, 0.03); }
-  const torso = mesh(new THREE.CapsuleGeometry(0.15, 0.14, 6, 16), M(jer), 0, 0.56, 0); torso.scale.set(1, 1, 0.82);
+  const torso = mesh(new THREE.CapsuleGeometry(0.15, 0.14, 8, 24), M(jer), 0, 0.56, 0); torso.scale.set(1, 1, 0.82);
+  { const pad = mesh(new THREE.CapsuleGeometry(0.068, 0.2, 6, 18), M(jer), 0, 0.655, 0); pad.rotation.z = Math.PI / 2; pad.scale.set(1, 1, 0.9);
+    const col = mesh(new THREE.TorusGeometry(0.088, 0.016, 8, 26), M(jer2), 0, 0.712, 0.012); col.rotation.x = Math.PI / 2 - 0.12; }
   const jc = wdCanvas(256, 256), jx = jc.getContext("2d"); jx.textAlign = "center"; jx.textBaseline = "middle"; jx.font = `900 150px "Barlow Condensed", Inter, sans-serif`; jx.lineWidth = 10; jx.strokeStyle = jer; jx.fillStyle = jer2;
   const num = X.num != null ? String(X.num) : String(team.num || (team.ab ? (team.ab.charCodeAt(0) % 89) + 1 : 1)), top = String(X.txt || team.ab || "").toUpperCase();
   if (X.paw) { jx.beginPath(); jx.ellipse(128, 160, 44, 38, 0, 0, Math.PI * 2); jx.fill(); for (const [px, py] of [[78, 108], [108, 86], [148, 86], [178, 108]]) { jx.beginPath(); jx.ellipse(px, py, 17, 21, 0, 0, Math.PI * 2); jx.fill(); } }
@@ -26430,10 +26438,12 @@ function wdMascot(THREE, spec, team) {
   // arms: shoulder and elbow pivots, the sleeve in the jersey, the forearm and hand in fur (gloves on a person or a bird)
   const arm = (s) => {
     const sh = new THREE.Group(); sh.position.set(s * 0.17, 0.66, 0); body.add(sh);
-    mesh(new THREE.CapsuleGeometry(0.05, 0.12, 4, 10), M(jer), 0, -0.08, 0, sh);
+    mesh(new THREE.CapsuleGeometry(0.05, 0.12, 6, 16), M(jer), 0, -0.08, 0, sh);
+    const trim = mesh(new THREE.TorusGeometry(0.05, 0.011, 6, 20), M(jer2), 0, -0.152, 0, sh); trim.rotation.x = Math.PI / 2;
     const el = new THREE.Group(); el.position.set(0, -0.17, 0); sh.add(el);
     mesh(new THREE.CapsuleGeometry(0.042, 0.1, 4, 10), M(spec.kind === "human" ? spec.fur : fur), 0, -0.07, 0, el);
-    mesh(sph(0.052, 12, 10), M(spec.kind === "human" || spec.kind === "bird" ? "#f4f4f4" : fur), 0, -0.165, 0.01, el);
+    const hm = M(spec.kind === "human" || spec.kind === "bird" ? "#f4f4f4" : fur);
+    mesh(sph(0.052, 18, 14), hm, 0, -0.165, 0.01, el).scale.set(1, 0.92, 0.82); mesh(sph(0.022, 12, 10), hm, -s * 0.042, -0.15, 0.03, el);
     return { sh, el };
   };
   const L = arm(-1), R = arm(1);
@@ -26441,7 +26451,7 @@ function wdMascot(THREE, spec, team) {
   const neck = new THREE.Group(); neck.position.set(0, 0.74, 0); body.add(neck);
   const hd = new THREE.Group(); hd.position.set(0, 0.16, 0); hd.scale.setScalar(1.32); neck.add(hd);
   const H = (geo, mat, x, y, z) => mesh(geo, mat, x, y, z, hd);
-  const eyes = (y, z, sp, r, col) => { const ek = X.eyeS || 1; r *= ek; sp *= 1 + (ek - 1) * 0.55; z += (ek - 1) * 0.03; for (const s of [-1, 1]) { H(sph(r, 12, 10), M("#ffffff"), s * sp, y, z); H(sph(r * 0.55, 10, 8), M(col || "#111111"), s * sp, y, z + r * 0.62); } };
+  const eyes = (y, z, sp, r, col) => { const ek = X.eyeS || 1; r *= ek; sp *= 1 + (ek - 1) * 0.55; z += (ek - 1) * 0.03; for (const s of [-1, 1]) { H(sph(r, 20, 16), M("#ffffff"), s * sp, y, z); H(sph(r * 0.55, 16, 12), M(col || "#111111"), s * sp, y, z + r * 0.62); H(sph(r * 0.17, 8, 6), M("#ffffff", "#ffffff"), s * sp + r * 0.2, y + r * 0.24, z + r * 1.08); } };
   const K = spec.kind;
   if (K === "bird") {
     const hc = X.head || fur; const h0 = H(sph(0.15), M(hc)); h0.scale.set(1, 1.02, 1.05);
@@ -26467,6 +26477,8 @@ function wdMascot(THREE, spec, team) {
     if (X.cheeks) for (const s of [-1, 1]) H(sph(0.045, 10, 8), M(X.cheeks), s * 0.085, 0.0, 0.095).scale.set(0.7, 1.4, 0.5);
     if (K === "coon") { const mk = H(new THREE.BoxGeometry(0.26, 0.06, 0.02), M("#1b1b1b"), 0, 0.035, 0.13); mk.rotation.x = -0.1; }
     eyes(0.035, 0.115, 0.058, 0.03, X.eye);
+    for (const s of [-1, 1]) { const bw = H(new THREE.BoxGeometry(0.075, 0.016, 0.018), M(((c) => "#" + c.map((v) => Math.round(Math.max(0, Math.min(1, v * 0.42)) * 255).toString(16).padStart(2, "0")).join(""))(wdHex(fur, [0.4, 0.4, 0.4]))), s * 0.058, 0.085, 0.118); bw.rotation.z = s * 0.28; }
+    { const gr = H(new THREE.TorusGeometry(0.034, 0.0075, 6, 16, Math.PI), M("#2a1508"), 0, -0.078, mz + (K === "dog" ? 0.09 : 0.062)); gr.rotation.z = Math.PI; }
     if (X.tongue) { const tg = H(sph(0.03, 10, 8), M("#e8708a"), 0, -0.085, mz + 0.05); tg.scale.set(1, 0.5, 1.2); }
     for (const s of [-1, 1]) {
       if (K === "bear" || K === "coon") H(sph(0.045), M(fur), s * 0.1, 0.12, -0.01);
@@ -26549,10 +26561,11 @@ function wdMascot(THREE, spec, team) {
     else if (hat === "cap") { const d = H(new THREE.SphereGeometry(0.15, 20, 10, 0, Math.PI * 2, 0, Math.PI * 0.5), a2, 0, 0.085, -0.01); d.scale.set(1.04, 0.8, 1.04); H(new THREE.BoxGeometry(0.16, 0.012, 0.11), a2, 0, 0.092, 0.16).rotation.x = -0.12; if (X.hatL) lt(X.hatL, X.hatLc || "#fff", 0.1, 0, 0.16, 0.115).rotation.x = -0.55; }
     else if (hat === "cowboy") { H(new THREE.CylinderGeometry(0.25, 0.25, 0.015, 24), a2, 0, 0.1, 0); H(new THREE.CylinderGeometry(0.1, 0.125, 0.15, 18), a2, 0, 0.185, 0); if (X.band) H(new THREE.CylinderGeometry(0.127, 0.127, 0.035, 18), M(X.band), 0, 0.13, 0);
       if (X.star) lt("★", "#041e42", 0.1, 0, 0.19, 0.105); }
-    else if (hat === "tricorn") { H(sph(0.13), a2, 0, 0.12, -0.01).scale.set(1, 0.62, 1);
-      for (let i = 0; i < 3; i++) { const a = (i / 3) * Math.PI * 2, f = new THREE.Group(); f.position.set(0, 0.13, 0); f.rotation.y = a + Math.PI / 3; hd.add(f);
-        const fl = new THREE.Mesh(new THREE.BoxGeometry(0.2, 0.11, 0.018), a2); fl.position.set(0, 0.025, 0.12); fl.rotation.x = -0.35; f.add(fl);
-        const tr = new THREE.Mesh(new THREE.BoxGeometry(0.2, 0.014, 0.022), M("#f2f2f2")); tr.position.set(0, 0.08, 0.1); tr.rotation.x = -0.35; f.add(tr); } }
+    else if (hat === "tricorn") { H(sph(0.122), a2, 0, 0.13, -0.01).scale.set(1, 0.6, 1);
+      const br = H(new THREE.CylinderGeometry(0.205, 0.205, 0.018, 3), a2, 0, 0.1, -0.01); br.rotation.y = Math.PI / 2;
+      for (let i = 0; i < 3; i++) { const a = Math.PI / 2 + Math.PI / 3 + (i * 2 * Math.PI) / 3, f = new THREE.Group(); f.position.set(0, 0.1, -0.01); f.rotation.y = a; hd.add(f);
+        const wl = new THREE.Mesh(new THREE.BoxGeometry(0.3, 0.085, 0.016), a2); wl.position.set(0, 0.036, 0.098); wl.rotation.x = 0.32; f.add(wl);
+        const tr = new THREE.Mesh(new THREE.BoxGeometry(0.3, 0.014, 0.02), M("#f2f2f2")); tr.position.set(0, 0.078, 0.112); tr.rotation.x = 0.32; f.add(tr); } }
     else if (hat === "viking") { H(new THREE.SphereGeometry(0.15, 18, 10, 0, Math.PI * 2, 0, Math.PI * 0.5), a2, 0, 0.03, 0); H(new THREE.TorusGeometry(0.15, 0.015, 6, 24), M(X.hornc || "#ffc62f"), 0, 0.035, 0).rotation.x = Math.PI / 2;
       for (const sd of [-1, 1]) { const h = H(new THREE.ConeGeometry(0.04, 0.2, 10), M(X.hornc || "#f4efe0"), sd * 0.17, 0.15, 0); h.rotation.z = -sd * 0.75; } }
     else if (hat === "pirate") { const c = H(new THREE.CylinderGeometry(0.21, 0.21, 0.08, 3), M(X.hatc || "#141414"), 0, 0.14, 0); c.rotation.y = Math.PI; H(sph(0.025, 8, 6), M("#f2f2f2"), 0, 0.17, 0.11); H(new THREE.BoxGeometry(0.3, 0.03, 0.03), M("#141414"), 0, 0.1, 0.06); }
@@ -26576,10 +26589,15 @@ function wdMascot(THREE, spec, team) {
     if (X.eyemask && hat !== "helmet") H(new THREE.BoxGeometry(0.24, 0.055, 0.02), M("#141414"), 0, 0.03, 0.105);
     if (X.shades) { for (const sd of [-1, 1]) H(new THREE.BoxGeometry(0.075, 0.045, 0.02), M("#101014"), sd * 0.055, 0.04, 0.135); H(new THREE.BoxGeometry(0.05, 0.012, 0.02), M("#101014"), 0, 0.05, 0.138); }
   }
-  // headphones on everyone
+  // headphones on everyone (the outline goes on after them)
   const hp = M("#16181d"), hb = H(new THREE.TorusGeometry(0.16, 0.014, 6, 24, Math.PI), hp, 0, 0.02, -0.01); hb.rotation.z = 0;
   for (const s of [-1, 1]) { const cup = H(new THREE.CylinderGeometry(0.055, 0.055, 0.04, 16), hp, s * 0.16, 0.0, 0); cup.rotation.z = Math.PI / 2; H(new THREE.CylinderGeometry(0.035, 0.035, 0.042, 14), M(jer2, jer2), s * 0.162, 0.0, 0).rotation.z = Math.PI / 2; }
-  const A = { root, body, L, R, neck, hd, torso, cur: null, act: null, mats, grad, jt };
+  { const OL = new THREE.MeshBasicMaterial({ color: new THREE.Color().setRGB(0.01, 0.012, 0.018, THREE.LinearSRGBColorSpace), side: THREE.BackSide }), list = [];
+    root.traverse((o) => { if (o.isMesh && o.material && o.material.isMeshToonMaterial) list.push(o); });
+    for (const o of list) { const g = o.geometry; if (!g.boundingSphere) g.computeBoundingSphere(); const r = g.boundingSphere.radius; if (r < 0.022) continue;
+      if (g.type === "TorusGeometry") continue; if (g.type === "BoxGeometry") { const pr = g.parameters; if (Math.min(pr.width, pr.height, pr.depth) < 0.03) continue; }
+      const ol = new THREE.Mesh(g, OL); ol.scale.setScalar(Math.min(1.32, Math.max(1.035, 1 + 0.0085 / r))); ol.userData.ol = 1; o.add(ol); } }
+  const A = { root, body, L, R, neck, hd, torso, cur: null, vel: null, act: null, mats, grad, jt };
   return A;
 }
 // the poses: shoulder (forward/up, out) and elbow per arm, a lean
@@ -26604,50 +26622,55 @@ const WD_MPOSE = {
   facepalm: [-1.95, -0.35, -2.55, -0.4, 0.55, -1.3, 0.28],
   hype: [-0.6, -0.5, -1.2, -2.6, 0.3, -0.25, 0.0],
 };
-// a 64-beat set (on the decks, scratching, a hand on the cans, fists, the drop with a jump, raise the roof, a shuffle, a spin),
-// and between sets a 32-beat hype loop
-const WD_MSET = [[0, "drop"], [2, "up"], [4, "decks"], [8, "scratch"], [12, "fist"], [16, "decks"], [20, "cans"], [24, "point"], [28, "roof"], [32, "drop"], [34, "clap"],
-  [38, "decks"], [42, "shuffle"], [46, "spin"], [48, "scratch"], [52, "wave"], [56, "hype"], [60, "decks"]];
-const WD_MIDLE = [[0, "decks"], [6, "hype"], [10, "point"], [14, "roof"], [18, "decks"], [22, "clap"], [26, "flex"], [28, "wave"], [31, "decks"]];
-// the emotes: a score or a cash (arms up, a flex, a dab, the drop) with a jump; a miss (hands on head, a facepalm)
-const WD_MCHEER = ["up", "flex", "dab", "drop"], WD_MSAD = ["sad", "facepalm"];
+// a 64-beat set, the way a DJ really plays one: mostly on the decks (a hand riding the platter, the other on the mixer),
+// scratching, a hand to the cans, pointing out at the crowd, a hand up to hype them, both up on the drop, a clap over the
+// head into the next one. Between sets a 32-beat hype loop
+const WD_MSET = [[0, "decks"], [8, "scratch"], [12, "decks"], [16, "cans"], [20, "decks"], [24, "point"], [28, "decks"], [32, "scratch"], [36, "decks"],
+  [40, "hype"], [44, "decks"], [48, "up"], [50, "clap"], [52, "decks"], [56, "fist"], [60, "decks"]];
+const WD_MIDLE = [[0, "decks"], [6, "hype"], [10, "point"], [14, "decks"], [18, "clap"], [22, "wave"], [26, "decks"]];
+// the emotes: a score or a cash (arms up, a flex, a fist pump, the drop) with a jump; a miss (hands on head, a facepalm)
+const WD_MCHEER = ["up", "flex", "fist", "drop"], WD_MSAD = ["sad", "facepalm"];
 function wdMascotTick(A, dt, t, beat, mode, H) {
   if (!A) return;
   const set = mode === "dj", list = set ? WD_MSET : WD_MIDLE, n = set ? 64 : 32, b = ((beat % n) + n) % n;
-  let name = list[0][1], from = 0; for (const [k, v] of list) if (b >= k) { name = v; from = k; }
+  let name = list[0][1]; for (const [k, v] of list) if (b >= k) name = v;
   const act = A.act && A.act.until > t ? A.act : null;
   if (act) { const i = Math.floor(act.until * 7) % 4; name = act.kind === "sad" ? WD_MSAD[i % 2] : WD_MCHEER[i]; }
-  const P = WD_MPOSE[name] || WD_MPOSE.decks, ph = ((beat % 1) + 1) % 1, pulse = Math.exp(-ph * 5), sw = Math.sin(beat * Math.PI / 2), half = Math.sin(beat * Math.PI);
+  const P = WD_MPOSE[name] || WD_MPOSE.decks, ph = ((beat % 1) + 1) % 1, T2 = Math.PI * 2;
+  // the groove under everything: a hard nod and a dip at the knees on the beat that eases back up, the shoulders swaying
+  // on the bar, the torso turning a little on the half-beat
+  const nod = ph < 0.1 ? ph / 0.1 : Math.exp(-(ph - 0.1) * 5.5), sw = Math.sin(beat * Math.PI / 2), half = Math.sin(beat * Math.PI);
   const tg = P.slice();
-  if (name === "decks") { tg[1] += 0.14 * Math.sin(beat * Math.PI * 2 * (b % 4 >= 3 ? 2 : 1)); tg[4] += 0.05 * half; }
-  if (name === "scratch") { tg[4] += 0.32 * Math.sin(beat * Math.PI * 4); tg[5] += 0.25 * Math.sin(beat * Math.PI * 4 + 1); }
-  if (name === "cans") tg[1] += 0.1 * half;
-  if (name === "fist" || name === "up" || name === "drop") { tg[5] -= 0.5 * pulse; if (name !== "fist") tg[2] -= 0.5 * pulse; }
-  if (name === "point") { tg[3] -= 0.18 * pulse; tg[4] += 0.45 * Math.sin(beat * Math.PI / 4); }
-  if (name === "clap") { const o = Math.sin(Math.PI * ((beat + 0.04) % 1)); tg[1] -= 0.18 * o; tg[4] += 0.18 * o; }
-  if (name === "wave") { tg[1] += 0.4 * sw; tg[4] += 0.4 * sw; }
-  if (name === "roof") { tg[0] -= 0.35 * pulse; tg[3] -= 0.35 * pulse; tg[2] += 0.55 * pulse; tg[5] += 0.55 * pulse; }
-  if (name === "shuffle") { tg[0] += 0.55 * half; tg[3] -= 0.55 * half; }
-  if (name === "hype") { tg[4] += 0.35 * Math.sin(t * 6); tg[3] -= 0.3 * pulse; }
-  if (name === "flex") { tg[2] -= 0.25 * pulse; tg[5] -= 0.25 * pulse; }
+  if (name === "decks") { tg[1] += 0.07 * Math.sin(beat * T2); tg[2] += 0.12 * Math.cos(beat * T2); tg[4] += 0.07 * Math.sin(beat * Math.PI); tg[3] += 0.05 * Math.sin(beat * T2 + 1.2); }
+  if (name === "scratch") { const q = Math.sin(beat * T2 * 2); tg[3] += 0.16 * q; tg[5] += 0.32 * Math.sin(beat * T2 * 2 + 0.6); tg[1] += 0.05 * Math.sign(Math.sin(beat * T2 * 4)); }
+  if (name === "cans") { tg[1] += 0.07 * Math.sin(beat * T2); tg[2] += 0.1 * Math.cos(beat * T2); }
+  if (name === "fist" || name === "hype") { tg[3] -= 0.42 * nod; tg[5] -= 0.35 * nod; if (name === "hype") tg[4] += 0.2 * Math.sin(beat * Math.PI / 2); }
+  if (name === "up" || name === "drop") { tg[0] -= 0.25 * nod; tg[3] -= 0.25 * nod; tg[2] -= 0.4 * nod; tg[5] -= 0.4 * nod; }
+  if (name === "point") { tg[3] -= 0.16 * nod; tg[4] += 0.42 * Math.sin(beat * Math.PI / 4); tg[1] += 0.07 * Math.sin(beat * T2); }
+  if (name === "clap") { const o = Math.sin(Math.PI * ((beat + 0.04) % 1)); tg[1] -= 0.2 * o; tg[4] += 0.2 * o; }
+  if (name === "wave") { tg[1] += 0.38 * sw; tg[4] += 0.38 * sw; }
+  if (name === "flex") { tg[2] -= 0.25 * nod; tg[5] -= 0.25 * nod; }
   if (name === "facepalm") tg[6] += 0.06 * Math.sin(t * 3);
-  if (!A.cur) A.cur = tg.slice();
-  const k = 1 - Math.exp(-dt * 12); for (let i = 0; i < tg.length; i++) A.cur[i] += (tg[i] - A.cur[i]) * k;
+  // every joint follows its target on a critically damped spring: moves blend into each other, nothing snaps
+  if (!A.cur) { A.cur = tg.slice(); A.vel = tg.map(() => 0); }
+  const w = 12, h = Math.min(dt, 0.05);
+  for (let i = 0; i < tg.length; i++) { A.vel[i] += ((tg[i] - A.cur[i]) * w * w - A.vel[i] * 2 * w) * h; A.cur[i] += A.vel[i] * h; }
   const c = A.cur;
   A.L.sh.rotation.set(c[0], 0, c[1]); A.L.el.rotation.set(c[2], 0, 0); A.R.sh.rotation.set(c[3], 0, c[4]); A.R.el.rotation.set(c[5], 0, 0);
-  A.body.rotation.x = c[6];
-  // the whole body: a sway on the beat, a side-step in the shuffle, a full turn in the spin (two beats), a bounce on every beat,
-  // a jump on the drop and on a cheer
-  A.body.rotation.z = (name === "wave" || name === "shuffle" ? 0.1 : 0.045) * sw;
-  const spin = name === "spin" && !act ? Math.min(1, Math.max(0, (b - from) / 2)) : 0, ease = spin < 0.5 ? 2 * spin * spin : 1 - Math.pow(-2 * spin + 2, 2) / 2;
-  A.sy = (A.sy || 0) + ((name === "dab" ? -0.35 : name === "point" ? 0.25 * Math.sin(beat * Math.PI / 4) : 0) - (A.sy || 0)) * k;
-  A.body.rotation.y = ease * Math.PI * 2 + A.sy;
-  A.sx = (A.sx || 0) + ((name === "shuffle" ? 0.07 * sw : 0) - (A.sx || 0)) * k; A.body.position.x = A.sx;
+  const g = set ? 1 : 0.6;
+  A.body.rotation.x = c[6] + 0.05 * nod * g;
+  A.body.rotation.z = 0.045 * sw * g;
+  A.tw = (A.tw || 0) + ((name === "point" ? 0.22 * Math.sin(beat * Math.PI / 4) : 0.09 * half * g) - (A.tw || 0)) * (1 - Math.exp(-dt * 8));
+  A.body.rotation.y = A.tw;
+  A.body.position.x = 0.012 * half * g;
   const jumpy = name === "drop" || !!(act && act.kind !== "sad");
-  const jump = jumpy ? Math.abs(Math.sin((act ? t * 7.5 : beat * Math.PI))) * (act ? 0.16 : 0.12) : 0;
-  A.body.position.y = (set ? 0.04 : 0.022) * pulse + jump;
-  A.neck.rotation.x = (name === "sad" || name === "facepalm" ? 0.45 : name === "dab" ? 0.55 : name === "up" || name === "clap" || name === "wave" || name === "drop" || name === "flex" ? -0.24 : 0.08) + (set ? 0.24 : 0.14) * pulse;
-  A.neck.rotation.y = name === "dab" ? -0.5 : 0.14 * Math.sin(beat * Math.PI / 4);
+  const jump = jumpy ? Math.abs(Math.sin(act ? t * 7.5 : beat * Math.PI)) * (act ? 0.15 : 0.1) : 0;
+  A.body.position.y = -(set ? 0.028 : 0.016) * nod + jump;
+  const look = name === "sad" || name === "facepalm" ? 0.45 : name === "up" || name === "clap" || name === "wave" || name === "drop" || name === "flex" ? -0.22 : name === "decks" || name === "scratch" ? 0.1 : 0.04;
+  A.lk = (A.lk || look) + (look - (A.lk || look)) * (1 - Math.exp(-dt * 7));
+  A.neck.rotation.x = A.lk + (set ? 0.2 : 0.12) * nod;
+  A.neck.rotation.y = name === "point" ? 0.3 * Math.sin(beat * Math.PI / 4) : 0.12 * Math.sin(beat * Math.PI / 4);
+  A.neck.rotation.z = name === "cans" ? -0.16 : 0.04 * sw;
 }
 // the booth he's behind: decks, a mixer, the front lit in the team's colors
 function wdMascotBooth(THREE, team, w, h, d) {
@@ -26807,13 +26830,30 @@ function wdFbBuild(st, fs) {
   // landmarks
   const F = fs.f, h = T.h;
   const sign = (txt, c2, w, x, y, z, ry) => { const tx = wdTex(THREE, wdNeonArt(txt, c2)); st.tex.push(tx); const m = add(new THREE.PlaneGeometry(w, w / 4), new THREE.MeshBasicMaterial({ map: tx, transparent: true, blending: THREE.AdditiveBlending, depthWrite: false, side: THREE.DoubleSide }), x, y, z); m.rotation.y = ry || 0; return m; };
-  if (F.includes("colonnade")) for (const s of [-1, 1]) for (let i = 0; i < 12; i++) add(new THREE.CylinderGeometry(1.2, 1.4, 22, 12), flat([0.72, 0.7, 0.66]), -55 + i * 10, top + 9, s * (B + outer + 3));
-  if (F.includes("lighthouse")) { const lx = A + 40, lz = -30; add(new THREE.CylinderGeometry(2.2, 3.4, 44, 16), flat([0.92, 0.92, 0.9]), lx, 22, lz); add(new THREE.CylinderGeometry(2.6, 2.6, 4, 16), flat([0.2, 0.22, 0.26]), lx, 46, lz); glow([lx, 46, lz], 34, [1, 0.95, 0.75], 0.9); }
+  if (F.includes("colonnade")) { const stone = flat([0.6, 0.58, 0.53]), shade = flat([0.4, 0.38, 0.35]), y0 = top - 6, y1 = top + 15;
+    for (const s of [-1, 1]) { const z = s * (B + outer + 3);
+      for (let i = 0; i < 16; i++) { for (const dz of [-1.6, 1.6]) { const x = -60 + i * 8, zz = z + dz;
+          add(new THREE.CylinderGeometry(0.95, 1.1, y1 - y0, 16), stone, x, (y0 + y1) / 2, zz); add(new THREE.BoxGeometry(2.6, 0.8, 2.6), shade, x, y1 + 0.4, zz); add(new THREE.BoxGeometry(2.8, 1, 2.8), shade, x, y0 + 0.5, zz); }
+        glow([-60 + i * 8, top + 2, z - s * 1], 7, [1, 0.86, 0.6], 0.35); }
+      add(new THREE.BoxGeometry(132, 2.6, 6), stone, -0, y1 + 2.1, z); add(new THREE.BoxGeometry(134, 0.9, 7.2), shade, 0, y1 + 3.8, z); add(new THREE.BoxGeometry(132, 0.5, 6.4), stone, 0, y1 + 4.5, z); } }
+  if (F.includes("lighthouse")) { const lx = -(A + outer + 3), lz = -28, by = top + 3, white = flat([0.93, 0.93, 0.9]), blk = flat([0.08, 0.09, 0.11]), steelB = flat([0.32, 0.34, 0.38]);
+    // the bridge: a deck across the end, its truss sides, lit along the bottom
+    add(new THREE.BoxGeometry(5, 2.2, 150), steelB, lx, by, 0); add(new THREE.BoxGeometry(5.4, 0.6, 150), blk, lx, by + 6.5, 0);
+    for (let i = 0; i <= 15; i++) { const z = -75 + i * 10; add(new THREE.BoxGeometry(0.5, 6.5, 0.5), steelB, lx - 2.5, by + 3.2, z); add(new THREE.BoxGeometry(0.5, 6.5, 0.5), steelB, lx + 2.5, by + 3.2, z); if (i < 15) { const d = add(new THREE.BoxGeometry(0.35, 8.6, 0.35), steelB, lx - 2.5, by + 3.2, z + 5); d.rotation.x = (i % 2 ? 1 : -1) * 0.98; } }
+    for (let i = 0; i < 10; i++) glow([lx - 3, by - 1.4, -68 + i * 15], 6, [0.75, 0.85, 1], 0.4);
+    // the lighthouse, standing on it: tapered white tower, the gallery, the glass lantern, the black cap
+    const h0 = by + 1, H = 34; add(new THREE.CylinderGeometry(2.4, 3.4, H, 24), white, lx, h0 + H / 2, lz); add(new THREE.CylinderGeometry(3.6, 3.6, 0.6, 24), blk, lx, h0 + H + 0.3, lz);
+    add(new THREE.TorusGeometry(3.7, 0.12, 6, 32), blk, lx, h0 + H + 1.4, lz).rotation.x = Math.PI / 2;
+    add(new THREE.CylinderGeometry(2.2, 2.2, 3.6, 16), new THREE.MeshBasicMaterial({ color: col([1, 0.93, 0.66], 1.25) }), lx, h0 + H + 2.4, lz); add(new THREE.ConeGeometry(2.7, 2.6, 16), blk, lx, h0 + H + 5.5, lz);
+    glow([lx, h0 + H + 2.4, lz], 30, [1, 0.92, 0.65], 0.85); glow([lx, h0 + H + 2.4, lz], 9, [1, 1, 0.9], 1);
+    const bm = new THREE.MeshBasicMaterial({ color: col([1, 0.92, 0.7]), transparent: true, opacity: 0.16, blending: THREE.AdditiveBlending, depthWrite: false, side: THREE.DoubleSide });
+    const bg = new THREE.ConeGeometry(7, 90, 20, 1, true); bg.translate(0, -45, 0); const beam = new THREE.Group(); beam.position.set(lx, h0 + H + 2.4, lz); scene.add(beam);
+    const cone = new THREE.Mesh(bg, bm); cone.rotation.z = Math.PI / 2 + 0.08; beam.add(cone); (st.spin = st.spin || []).push((t) => { beam.rotation.y = t * 0.6; }); }
   if (F.includes("ship")) { const sx = -(A + 30), sz = -18; add(new THREE.BoxGeometry(10, 6, 36), flat([0.38, 0.22, 0.12]), sx, 20, sz); for (const k of [-10, 0, 10]) { add(new THREE.CylinderGeometry(0.4, 0.4, 22, 6), flat([0.3, 0.2, 0.1]), sx, 34, sz + k); add(new THREE.PlaneGeometry(9, 10), flat([0.9, 0.88, 0.8]), sx + 0.4, 36, sz + k).rotation.y = Math.PI / 2; } }
   if (F.includes("bronco") || F.includes("torch")) { const bx = A + 46, by = 31 + 29.25 / 2 + 7; if (F.includes("torch")) { add(new THREE.CylinderGeometry(0.8, 1.6, 30, 12), flat([0.75, 0.75, 0.78]), -(A + 34), 26, 0); glow([-(A + 34), 43, 0], 26, [1, 0.6, 0.2], 1); glow([-(A + 34), 43, 0], 10, [1, 0.9, 0.6], 1); }
     void bx; void by; void sign; }
   if (F.includes("flag12")) { add(new THREE.CylinderGeometry(0.4, 0.4, 34, 8), flat([0.8, 0.8, 0.82]), -(A + 34), 17 + top * 0.3, -20); const fc = wdCanvas(256, 160), fx = fc.getContext("2d"); fx.fillStyle = "#002244"; fx.fillRect(0, 0, 256, 160); fx.fillStyle = "#69be28"; fx.font = "900 120px Barlow Condensed, Inter, sans-serif"; fx.textAlign = "center"; fx.textBaseline = "middle"; fx.fillText("12", 128, 86);
-    const ft = wdTex(THREE, fc); st.tex.push(ft); const fl = add(new THREE.PlaneGeometry(12, 7.5), new THREE.MeshBasicMaterial({ map: ft, side: THREE.DoubleSide }), -(A + 34) + 6.2, 17 + top * 0.3 + 13, -20); fl.rotation.y = Math.PI / 2; st.flag = fl; }
+    const ft = wdTex(THREE, fc); st.tex.push(ft); const fl = add(new THREE.PlaneGeometry(12, 7.5), new THREE.MeshBasicMaterial({ map: ft, side: THREE.DoubleSide }), -(A + 34) + 6.2, 17 + top * 0.3 + 13, -20); fl.rotation.y = Math.PI / 2; st.flag = fl; (st.spin = st.spin || []).push((t) => { fl.rotation.y = Math.PI / 2 + Math.sin(t * 1.7) * 0.18; }); }
   if (F.includes("lake") || F.includes("river")) { const w = add(new THREE.PlaneGeometry(900, 500), flat([0.02, 0.06, 0.1]), F.includes("lake") ? 0 : -(A + 300), -0.2, F.includes("lake") ? -(B + 330) : 0); w.rotation.x = -Math.PI / 2; }
   if (F.includes("hills") || F.includes("pines")) for (let i = 0; i < 30; i++) { const a = (i / 30) * Math.PI * 2, r = Math.max(A, B) + outer + 60 + (i % 3) * 20; add(new THREE.ConeGeometry(F.includes("pines") ? 8 : 40, F.includes("pines") ? 40 : 30, 8), flat(F.includes("pines") ? [0.03, 0.08, 0.05] : [0.05, 0.07, 0.06]), Math.cos(a) * r, 12, Math.sin(a) * r); }
   if (F.includes("peristyle")) { for (let i = 0; i < 9; i++) { const z = -32 + i * 8; add(new THREE.BoxGeometry(3, 26, 2.4), flat([0.78, 0.74, 0.66]), A + 38, 13, z); } add(new THREE.BoxGeometry(3.4, 4, 70), flat([0.78, 0.74, 0.66]), A + 38, 27, 0); }
@@ -26830,7 +26870,35 @@ function wdFbBuild(st, fs) {
     for (let i = 0; i < 48; i++) { const p = wdNorm(C, (i + 0.5) / 48), o = outer + 1.2; glow([p[0] + p[2] * o, top - 1, p[1] + p[3] * o], 16, wdLift(h.col, 0.4), 0.35); } }
   if (F.includes("towers")) for (let i = 0; i < 6; i++) { const a = (i / 6) * Math.PI * 2 + 0.5, x = Math.cos(a) * (A + outer + 14), z = Math.sin(a) * (B + outer + 14), H2 = top + 34;
     add(new THREE.BoxGeometry(2, H2, 2), flat([0.12, 0.13, 0.15]), x, H2 / 2, z); add(new THREE.BoxGeometry(10, 6, 1.5), flat([0.9, 0.9, 0.85]), x, H2 + 2, z).lookAt(0, H2, 0); glow([x, H2 + 2, z], 50, [1, 0.97, 0.88], 0.5); glow([x, H2 + 2, z], 14, [1, 1, 1], 0.9); }
-  if (F.includes("tower")) add(new THREE.BoxGeometry(150, 34, 14), flat([0.12, 0.13, 0.16]), 0, top + 10, -(B + outer + 6));
+  if (F.includes("tower")) { const z = -(B + outer + 6), y0 = top - 8, Ht = 40;
+    add(new THREE.BoxGeometry(150, Ht, 14), flat([0.1, 0.11, 0.14]), 0, y0 + Ht / 2, z); add(new THREE.BoxGeometry(156, 1.4, 18), flat([0.75, 0.77, 0.8]), 0, y0 + Ht + 0.7, z + 1);
+    const wc = wdCanvas(1024, 256), wx = wc.getContext("2d"); wx.fillStyle = "#0b0e14"; wx.fillRect(0, 0, 1024, 256);
+    for (let r = 0; r < 6; r++) for (let c = 0; c < 64; c++) { const lit = Math.abs(Math.sin(r * 12.9 + c * 78.2)) % 1; wx.fillStyle = lit > 0.25 ? `rgba(${200 + (c % 3) * 20},${190 + (r % 2) * 25},${150 + (c % 4) * 15},${0.55 + lit * 0.45})` : "rgba(40,50,70,.6)"; wx.fillRect(4 + c * 16, 10 + r * 41, 13, 30); }
+    wx.fillStyle = "#aa0000"; wx.fillRect(0, 252, 1024, 4); const wt = wdTex(THREE, wc); st.tex.push(wt);
+    add(new THREE.PlaneGeometry(148, Ht - 4), new THREE.MeshBasicMaterial({ map: wt }), 0, y0 + Ht / 2, z + 7.05);
+    for (let i = 0; i < 8; i++) glow([-63 + i * 18, y0 + Ht + 2, z + 8], 14, [1, 0.95, 0.85], 0.4); }
+  // on the field: the goalposts (gooseneck, crossbar, uprights, the wind ribbons), the pylons, each team's bench area
+  { const yel = new THREE.MeshBasicMaterial({ color: col([1, 0.8, 0.12]) }), yel2 = new THREE.MeshBasicMaterial({ color: col([0.85, 0.66, 0.08]) }), hw = 18.5 / 6, cb = 10 / 3, up = 35 / 3;
+    for (const sx of [-1, 1]) { const ex = sx * 60, bx = sx * 62.2;
+      add(new THREE.CylinderGeometry(0.17, 0.2, cb - 0.4, 12), yel2, bx, (cb - 0.4) / 2, 0);
+      const arm = add(new THREE.CylinderGeometry(0.15, 0.15, Math.abs(bx - ex), 10), yel2, (bx + ex) / 2, cb - 0.4, 0); arm.rotation.z = Math.PI / 2;
+      add(new THREE.CylinderGeometry(0.13, 0.13, 0.5, 10), yel, ex, cb - 0.15, 0);
+      const cr = add(new THREE.CylinderGeometry(0.12, 0.12, hw * 2, 12), yel, ex, cb, 0); cr.rotation.x = Math.PI / 2;
+      for (const sz of [-1, 1]) { add(new THREE.CylinderGeometry(0.085, 0.1, up, 10), yel, ex, cb + up / 2, sz * hw);
+        const rb = add(new THREE.PlaneGeometry(0.9, 0.22), new THREE.MeshBasicMaterial({ color: col(wdLift(h.col, 0.2)), side: THREE.DoubleSide }), ex + sx * 0.45, cb + up - 0.2, sz * hw);
+        (st.spin = st.spin || []).push((t) => { rb.rotation.y = Math.sin(t * 3.1 + sz + sx) * 0.5; }); }
+      add(new THREE.BoxGeometry(1.3, cb - 0.6, 1.3), new THREE.MeshBasicMaterial({ color: col(wdMix(h.col, [0, 0, 0], 0.25)) }), bx, (cb - 0.6) / 2, 0); }
+    const pyl = new THREE.MeshBasicMaterial({ color: col([1, 0.36, 0.06]) });
+    for (const x of [-60, -50, 50, 60]) for (const z of [-26.67, 26.67]) add(new THREE.BoxGeometry(0.13, 0.5, 0.13), pyl, x, 0.25, z);
+    // the team areas: between the 32s, a white border, the bench in the team's colour, a row of coolers; home on the far side
+    const line = new THREE.MeshBasicMaterial({ color: col([0.92, 0.92, 0.9]) });
+    for (const [sz, t] of [[-1, h], [1, T.a]]) { const z0 = sz * 26.67, zb = sz * 33;
+      for (const zz of [sz * 29.3, sz * 36.3]) { const ln = add(new THREE.PlaneGeometry(36, 0.18), line, 0, 0.03, zz); ln.rotation.x = -Math.PI / 2; }
+      for (const xx of [-18, 18]) { const ln = add(new THREE.PlaneGeometry(0.18, 7), line, xx, 0.03, sz * 32.8); ln.rotation.x = -Math.PI / 2; }
+      add(new THREE.BoxGeometry(30, 0.5, 0.9), new THREE.MeshBasicMaterial({ color: col(wdMix(t.col, [0, 0, 0], 0.2)) }), 0, 0.6, zb + sz * 1.8);
+      add(new THREE.BoxGeometry(30, 1.2, 0.3), new THREE.MeshBasicMaterial({ color: col(wdMix(t.col, [0, 0, 0], 0.45)) }), 0, 1.05, zb + sz * 2.3);
+      for (let i = 0; i < 5; i++) add(new THREE.BoxGeometry(0.9, 0.8, 0.7), new THREE.MeshBasicMaterial({ color: col([1, 0.42, 0.06]) }), -16 + i * 8 + 2, 0.4, z0 + sz * 3.4);
+      void z0; } }
   // the home team on top of the main board: the logo, lit
   if (!V.jumbo.hung && h.lg) { const lc = wdCanvas(512, 512), lx = lc.getContext("2d"), lt = wdTex(THREE, lc); st.tex.push(lt); const J = V.jumbo;
     const m = add(new THREE.PlaneGeometry(22, 22), new THREE.MeshBasicMaterial({ map: lt, transparent: true, depthWrite: false, side: THREE.DoubleSide }), J.p[0] - 1, J.p[1] + J.h / 2 + 13, J.p[2]); m.rotation.y = -Math.PI / 2;
@@ -27316,7 +27384,7 @@ function wdRoomBuild(L, R) {
   for (let i = 0; i < 12; i++) { const x = -22 + i * 4; glow([x, 17.5, -12], 1.6, [1, 0.95, 0.85], 0.75); glow([x, 17.5, 8], 1.3, [0.7, 0.8, 1], 0.5); }
   glow([0, 9, -24], 60, [0.35, 0.2, 0.8], 0.22); glow([0, 3, -10], 30, [1, 0.75, 0.4], 0.12);
   // DJ Goldie's deck, off to the left of the wall
-  wdDeckBuild(st, { p: [-24.5, 1.1, -3], look: [0, 5], base: 0, K: 0.55, who: "mascot" });
+  wdDeckBuild(st, { p: [-24.5, 1.1, -3], look: [0, 5], base: 0, K: 0.55, who: "mascot", slim: 1 });
   // bleachers: the right side raked up away from the floor, a smaller one at the back left; the pit in front of the desk
   const seats = [], teamsOn = [], gs = (R.scene && R.scene.games) || [];
   for (const q of gs) for (const s of ["h", "a"]) if (teamsOn.length < 8 && !teamsOn.some((t) => t.ab === q[s].ab)) teamsOn.push(q[s]);
@@ -27984,7 +28052,7 @@ function wdBuild(L, R) {
     vertexShader: "varying vec3 vP; void main(){ vP = position; gl_Position = projectionMatrix * modelViewMatrix * vec4(position, 1.0); }", fragmentShader: WD_SKY })));
   scene.add(sky); st.sky = sky;
   // the ground around the field
-  const ground = new THREE.Mesh(new THREE.CircleGeometry(Math.max(V.A, V.B) * 3, 48), new THREE.MeshBasicMaterial({ color: new THREE.Color().setRGB(...(V.roof && !V.dome ? [0.035, 0.04, 0.05] : [0.06, 0.14, 0.07]), THREE.LinearSRGBColorSpace) }));
+  const ground = new THREE.Mesh(new THREE.CircleGeometry(Math.max(V.A, V.B) * 3, 48), new THREE.MeshBasicMaterial({ color: new THREE.Color().setRGB(...(V.roof && !V.dome && R.sport !== "nfl" ? [0.035, 0.04, 0.05] : [0.06, 0.14, 0.07]), THREE.LinearSRGBColorSpace) }));
   ground.rotation.x = -Math.PI / 2; ground.position.set(V.cx, -0.05, V.cz); scene.add(ground);
   // the field
   const court = () => (as ? wdArCourt(T, V, as) : wdCourt(T, V));
@@ -27997,7 +28065,7 @@ function wdBuild(L, R) {
     const det = new THREE.CanvasTexture(wdTurf(256, 47)); det.wrapS = det.wrapT = THREE.RepeatWrapping; det.colorSpace = THREE.NoColorSpace; det.anisotropy = aniso; st.tex.push(det);
     fmat.onBeforeCompile = (sh) => { sh.uniforms.uDet = { value: det }; sh.uniforms.uRep = { value: new THREE.Vector2(fw / 1.3, fh / 1.3) };
       sh.fragmentShader = "uniform sampler2D uDet; uniform vec2 uRep;\n" + sh.fragmentShader.replace("#include <map_fragment>", "#include <map_fragment>\n  diffuseColor.rgb *= 0.7 + 0.6 * texture2D(uDet, vMapUv * uRep).r;"); };
-    if (!V.roof) { const gt = new THREE.CanvasTexture(wdTurf(256, 83)); gt.wrapS = gt.wrapT = THREE.RepeatWrapping; gt.colorSpace = THREE.NoColorSpace; gt.anisotropy = aniso; const rr = Math.max(V.A, V.B) * 3; gt.repeat.set(rr / 1.6, rr / 1.6); st.tex.push(gt);
+    if (!V.roof || V.fs) { const gt = new THREE.CanvasTexture(wdTurf(256, 83)); gt.wrapS = gt.wrapT = THREE.RepeatWrapping; gt.colorSpace = THREE.NoColorSpace; gt.anisotropy = aniso; const rr = Math.max(V.A, V.B) * 3; gt.repeat.set(rr / 1.6, rr / 1.6); st.tex.push(gt);
       ground.material.map = gt; ground.material.color.multiplyScalar(1.9); ground.material.needsUpdate = true; }
   }
   field.rotation.x = -Math.PI / 2; field.position.set(fx0, 0, fz0); scene.add(field); st.field = field;
@@ -28409,6 +28477,7 @@ function wdLoop(now) {
   const st = WD.st, gap = now - (WD.tick || now); WD.tick = now; if (!st) return;
   if (!wdTv() || document.hidden) { WD.r.domElement.style.visibility = "hidden"; return; }
   WD.r.domElement.style.visibility = "";
+  if (st.spin) for (const f of st.spin) try { f(now / 1000); } catch (e) {}
   // a win or a miss on: the board steps aside, the camera turns to the crowd, and back after
   { const on = !!document.querySelector(".cs.v2x.show:not([hidden]):not(.out), .cs.wact:not([hidden])"); if (on !== !!WD.showing) { WD.showing = on; document.body.classList.toggle("v2w-show", on); wdShowCam(st, on); } }
   // a show over the building: 30 fps, 15 on a screen that's already been turned down or that falls behind during it
