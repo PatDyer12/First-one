@@ -7155,6 +7155,7 @@ body.tv.pplg .pp-foot { display: none; }
 body.tv.pplg .pp-foot1 { margin-top: 8px; }
 body.tv.pplg .roomtv:not([hidden]), body.tv.pplg.has-ticker .roomtv:not([hidden]) { right: auto !important; left: calc(var(--sx, 0px) + 30px) !important; grid-template-columns: auto auto; align-items: center; column-gap: 10px; padding: 8px 12px 8px 8px; }
 body.tv.pplg .roomtv:not([hidden]) canvas { width: 84px; height: 84px; grid-row: span 2; }
+.gs-scan.busy svg { animation: gsPulse 1s ease-in-out infinite; } @keyframes gsPulse { 50% { opacity: .35; transform: scale(.92); } }
 </style>
 </head>
 <body>
@@ -14915,7 +14916,7 @@ void main(){
   // ---------- sheets ----------
   function openSheet(id) { $(id).hidden = false; }
   // keep every open screen current: when a new version is up, reload it (never mid-form or mid-animation)
-  const BUILD = "20261108163812";
+  const BUILD = "20261108173015";
   function updReady() {
     if (document.getElementById("updReady")) return; const d = document.createElement("div"); d.id = "updReady"; d.textContent = "Update ready · refresh, then TV + Sound on"; document.body.append(d);
   }
@@ -14924,12 +14925,12 @@ void main(){
     fetch("version.json?t=" + Date.now(), { cache: "no-store" }).then((r) => (r.ok ? r.json() : null)).then((j) => {
       if (!j || !j.v || j.v === BUILD) return;
       if (document.body.classList.contains("tv") && SND.on && SND.ctx && SND.ctx.state === "running" && [...S.games.values()].some((g) => g.st === "in") && Date.now() - (window.__sbLoad || 0) < 10 * 3600e3) { updReady(); setTimeout(checkBuild, 5 * 60e3); return; }
-      if (fxBusy || !$("#addSheet").hidden || !$("#setSheet").hidden || !$("#jumbo").hidden) { setTimeout(checkBuild, 20000); return; }
+      if (fxBusy || !$("#addSheet").hidden || !$("#setSheet").hidden || !$("#jumbo").hidden || (window.__gsBusy && window.__gsBusy())) { setTimeout(checkBuild, 20000); return; }
       // one try per version every 5 minutes, so a slow CDN can't cause a reload loop
       let tried = ""; try { tried = sessionStorage.getItem("sb-upd") || ""; } catch (e) {}
       const [tv, tt] = tried.split("|"); if (tv === j.v && Date.now() - Number(tt) < 5 * 60e3) return;
       try { sessionStorage.setItem("sb-upd", j.v + "|" + Date.now()); } catch (e) {}
-      location.replace(location.pathname + "?v=" + encodeURIComponent(j.v));
+      { const q = new URLSearchParams(location.search); q.set("v", j.v); location.replace(location.pathname + "?" + q.toString() + location.hash); }
     }).catch(() => {});
   }
   setInterval(checkBuild, 90000); setTimeout(checkBuild, 4000);
@@ -22284,10 +22285,15 @@ void main(){
   // ---------- scan a bet slip (Gemini via Firebase AI Logic) ----------
   const SLIP_PROMPT = "You read screenshots of sportsbook bet slips and My Bets pages (usually FanDuel, DraftKings or Polymarket) and extract every bet on them, exactly as printed.\nRules:\n- One entry per bet. A parlay (\"Parlay\", \"N Leg Parlay\", \"N Pick Parlay\", a Same Game Parlay / SGP / SGP+) is ONE bet, and every selection row under it is its own leg, in order. Count the rows: never merge two selections into one leg and never drop one. A straight bet has exactly one leg.\n- odds: the American odds of the whole bet as printed (an integer, e.g. -115, 450). If the odds were boosted (\"Profit Boost\", a struck-through price next to a new one), use the new boosted odds.\n- stake: the amount wagered (\"Wager\", \"Stake\", \"Risk\", \"Bet\"). payout: the total paid back INCLUDING the stake (\"Total Payout\", \"To Pay\", \"Payout\", \"Potential Payout\", \"Returns\"). to_win: only when the slip prints the profit (\"To Win\", \"Profit\"). Copy every dollar amount digit for digit, cents included; never work them out.\n- For each leg: pick = the selection as written (team or player and line); line_text = the exact words on the slip that hold this leg's number (e.g. \"Over 27.5\", \"To Score 30+ Points\", \"40+ Pts + Reb + Ast\", \"Rebounds O 10.5\", \"-4.5\", \"Over 221.5\"), else null; team = the team name only (for a player bet, his team if shown); odds = this leg's own odds if printed;\n  market = \"ml\" (moneyline/to win), \"spread\" (point spread, run line, puck line, alt spread), \"total\" (over/under game total, alt total), \"anytime_td\" (anytime touchdown scorer, \"to score a TD\"), \"first_td\" (first touchdown scorer of the game) or \"prop\" (any player stat);\n  player = for player bets, the player's full name exactly as written, accents kept (e.g. \"Nikola Jokić\", \"Bucky Irving\"), else null;\n  side = \"over\" or \"under\" for totals and player stats, else null; line = the signed number for spreads (e.g. -6.5), the total, or the player's stat line. Never leave line null when the leg prints a number;\n  away and home = the game's two teams if shown (\"A @ B\": A away, B home); the legs of a Same Game Parlay all take the game printed on the card;\n  sport = NFL, CFB, NBA, CBB, MLB, NHL or OTHER, judged from the teams, players and market.\n- Milestones: \"N+ <stat>\" (\"30+ Points\", \"To Score 30+ Points\", \"40+ Pts + Reb + Ast\", \"3+ Made Threes\", \"10+ Rebounds\") means side over, line N - 0.5 (30+ is 29.5, 3+ is 2.5). \"Over X\" / \"O X\" is side over, line X; \"Under X\" / \"U X\" is side under, line X.\n- Basketball (NBA / college) player stats: \"points\", \"rebounds\", \"assists\", \"threes\" (made threes, 3-pointers made, 3PM), \"steals\", \"blocks\", \"pra\" (points + rebounds + assists, PRA), \"pts_reb\" (points + rebounds), \"pts_ast\" (points + assists), \"reb_ast\" (rebounds + assists), \"stl_blk\" (steals + blocks, stocks), \"turnovers\", \"double_double\", \"triple_double\" (those two: side over, line 0.5). Read a combined stat word by word: \"Rebounds + Assists\" is reb_ast, not pra.\n- Hockey player props (NHL): market = \"prop\", player = the player's full name, stat = \"goals\", \"assists\", \"points\", \"shots_on_goal\" or \"saves\", side = \"over\" or \"under\", line = the number (\"To score a goal\" / anytime goal scorer = stat goals, side over, line 0.5; \"2+ shots\" = side over, line 1.5; \"1+ point\" = stat points, over 0.5), sport = NHL.\n- Other player props: market = \"prop\", player = the player's full name, sport = MLB, NBA, CBB, NFL or CFB, side = \"over\" or \"under\", line = the number (\"2+ hits\" = over 1.5; \"to hit a home run\" = stat home_runs, over 0.5; \"25+ points\" = over 24.5), stat = MLB: \"hits\", \"home_runs\", \"rbis\", \"runs\", \"walks\", \"hits_runs_rbis\", \"strikeouts\" (pitcher), \"earned_runs\", \"hits_allowed\", \"outs\"; NBA / college basketball: see the basketball rule below; NFL / college football: \"passing_yards\", \"passing_tds\", \"completions\", \"interceptions\", \"rushing_yards\", \"rushing_attempts\", \"receiving_yards\", \"receptions\", \"rush_rec_yards\".\n- book = \"FD\" for FanDuel, \"DK\" for DraftKings, \"PM\" for Polymarket (a prediction market: prices in cents like 62¢, shares, avg price, Buy / Yes / No), null if you can't tell.\n- multiplier = the payout multiplier when the slip prints one with an x (16.88 for \"16.88x\", 1.06 for \"1.06x\"), else null; on a parlay, the whole bet's.\n- Polymarket: price = the price paid per share in cents (e.g. 62 for 62¢; the avg price if shown), and odds = null unless American odds are printed (the multiplier, if shown, goes in multiplier); stake = the amount spent (cost / total); to_win = the profit if it pays (payout minus cost) when shown. The pick is the outcome bought: a team for a moneyline market like \"Bills vs. Rams\", \"Rams -3.5\" for \"Spread: Rams (-3.5)\", \"Over 54.5\" for \"O/U 54.5\"; buying \"No\" on one team of a two-team game means the other team. Take market, line and side from the market title.\n- Use null for anything not visible. Never invent numbers.";
   const SLIP_SCHEMA = {"type": "OBJECT", "properties": {"bets": {"type": "ARRAY", "items": {"type": "OBJECT", "properties": {"book": {"type": "STRING", "enum": ["FD", "DK", "PM"], "nullable": true}, "price": {"type": "NUMBER", "nullable": true}, "kind": {"type": "STRING", "enum": ["straight", "parlay"]}, "odds": {"type": "INTEGER", "nullable": true}, "stake": {"type": "NUMBER", "nullable": true}, "to_win": {"type": "NUMBER", "nullable": true}, "legs": {"type": "ARRAY", "items": {"type": "OBJECT", "properties": {"pick": {"type": "STRING"}, "team": {"type": "STRING", "nullable": true}, "market": {"type": "STRING", "enum": ["ml", "spread", "total", "anytime_td", "first_td", "prop"]}, "player": {"type": "STRING", "nullable": true}, "stat": {"type": "STRING", "enum": ["goals", "assists", "points", "shots_on_goal", "saves", "hits", "home_runs", "rbis", "runs", "walks", "hits_runs_rbis", "strikeouts", "earned_runs", "hits_allowed", "outs", "rebounds", "threes", "steals", "blocks", "pra", "passing_yards", "passing_tds", "completions", "interceptions", "rushing_yards", "rushing_attempts", "receiving_yards", "receptions", "rush_rec_yards", "pts_reb", "pts_ast", "reb_ast", "stl_blk", "turnovers", "double_double", "triple_double"], "nullable": true}, "side": {"type": "STRING", "enum": ["over", "under"], "nullable": true}, "line": {"type": "NUMBER", "nullable": true}, "odds": {"type": "INTEGER", "nullable": true}, "price": {"type": "NUMBER", "nullable": true}, "away": {"type": "STRING", "nullable": true}, "home": {"type": "STRING", "nullable": true}, "sport": {"type": "STRING", "enum": ["NFL", "CFB", "NBA", "CBB", "MLB", "NHL", "OTHER"]}, "line_text": {"type": "STRING", "nullable": true}, "multiplier": {"type": "NUMBER", "nullable": true}}, "required": ["pick", "market", "sport"], "propertyOrdering": ["pick", "line_text", "market", "player", "team", "stat", "side", "line", "odds", "multiplier", "price", "away", "home", "sport"]}}, "payout": {"type": "NUMBER", "nullable": true}, "multiplier": {"type": "NUMBER", "nullable": true}}, "required": ["kind", "legs"], "propertyOrdering": ["book", "kind", "legs", "odds", "multiplier", "stake", "payout", "to_win", "price"]}}}, "required": ["bets"]};
+  const rawB64 = (file) => new Promise((ok, bad) => { const r = new FileReader(); r.onload = () => { const v = String(r.result || ""), b = new String(v.slice(v.indexOf(",") + 1)); b.mime = file.type || "image/heic"; ok(b); }; r.onerror = () => bad(new Error("Couldn't open that picture. Try a screenshot instead.")); r.readAsDataURL(file); });
   async function shrink(file) {
+    try { return await Promise.race([shrink0(file), new Promise((_, bad) => setTimeout(() => bad(new Error("slow")), 15e3))]); }
+    catch (e) { return rawB64(file); }
+  }
+  async function shrink0(file) {
     const url = URL.createObjectURL(file);
     try {
-      const img = await new Promise((ok, bad) => { const i = new Image(); i.onload = () => ok(i); i.onerror = bad; i.src = url; });
+      const img = await new Promise((ok, bad) => { const i = new Image(); i.onload = () => ok(i); i.onerror = () => bad(new Error("decode")); i.src = url; });
       const k = Math.min(1, 2400 / Math.max(img.naturalWidth, img.naturalHeight));
       const c = document.createElement("canvas");
       c.width = Math.round(img.naturalWidth * k); c.height = Math.round(img.naturalHeight * k);
@@ -22369,7 +22375,7 @@ void main(){
   function readSlip(b64) {
     const cfg = readCfg(); if (!cfg) return Promise.reject(new Error("this screen isn't connected to the board's Firebase"));
     const body = JSON.stringify({
-      contents: [{ role: "user", parts: [{ inlineData: { mimeType: "image/jpeg", data: b64 } }, { text: "Extract the bets on this slip." }] }],
+      contents: [{ role: "user", parts: [{ inlineData: { mimeType: (b64 && b64.mime) || "image/jpeg", data: String(b64) } }, { text: "Extract the bets on this slip." }] }],
       systemInstruction: { parts: [{ text: SLIP_PROMPT }] },
       generationConfig: { responseMimeType: "application/json", responseSchema: SLIP_SCHEMA, temperature: 0 },
     });
@@ -22626,7 +22632,8 @@ void main(){
     $("#sctX").onclick = () => { clearTimeout(scanDone.t); el.hidden = true; };
   }
 
-  const GS = { auth: null, ga: null, gated: false, fail: "", busy: false, res: [], pick: null, side: null, sure: null };
+  const GS = { auth: null, ga: null, gated: false, fail: "", busy: false, res: [], pick: null, side: null, sure: null, pickAt: 0 };
+  window.__gsBusy = () => !!GUEST && (GS.busy || Date.now() - (GS.pickAt || 0) < 3 * 60e3);
   const gsSleep = (ms) => new Promise((r) => setTimeout(r, ms));
   // a guest bet carries its dollar stake: the host's board turns it into the host's units
   function gsUsd(d) { if (!GUEST && d && d.usd > 0 && S.unit > 0) d.units = Math.round((d.usd / S.unit) * 100) / 100; return d; }
@@ -22707,9 +22714,11 @@ void main(){
   const gsDupe = (d) => [...S.bets.values()].find((b) => isMe(b) && b.status === "open" && b.slip && b.slip === d.slip) || [...S.bets.values()].find((b) => isMe(b) && b.status === "open" && b.odds === d.odds && Math.abs(b.units - d.units) < 0.01 && b.kind === d.kind && b.pick === d.pick && JSON.stringify(b.legs || []) === JSON.stringify(d.legs || []));
   async function gsScan(files) {
     if (GS.busy || !files.length) return;
-    GS.busy = true; gsErr(""); $("#gsScan").classList.add("off");
+    GS.busy = true; gsErr(""); $("#gsScan").classList.add("off", "busy");
+    { const t = $("#gsScanT"), s2 = $("#gsScanS"); if (t) t.textContent = "Reading your slip…"; if (s2) s2.textContent = files.length > 1 ? files.length + " screenshots · a few seconds" : "A few seconds"; }
     try {
       gsStatus(files[0], "Reading your slip…", files.length > 1 ? `${files.length} screenshots` : "One sec");
+      try { $("#gsSt").scrollIntoView({ behavior: "smooth", block: "center" }); } catch (e) {}
       await Promise.all([gsReady(), loadPickerGames()]);
       const all = [];
       for (const f of files) all.push(...(await readSlip(await shrink(f))).filter((b) => b && Array.isArray(b.legs) && b.legs.length));
@@ -22734,7 +22743,8 @@ void main(){
       if (navigator.vibrate && n) navigator.vibrate(30);
     } catch (e) {
       gsErr(acSay(e && (e.message || e)) || esc(String((e && e.message) || e).slice(0, 160)));
-    } finally { GS.busy = false; gsStatus(null, ""); $("#gsScan").classList.toggle("off", !GUEST.name); gsRender(); }
+    } finally { GS.busy = false; gsStatus(null, ""); $("#gsScan").classList.remove("busy"); $("#gsScan").classList.toggle("off", !GUEST.name); { const t = $("#gsScanT"), s2 = $("#gsScanS"); if (t) t.textContent = "Scan your bet slip"; if (s2) s2.textContent = "Pick a screenshot of your slip (or the bet in My Bets). It goes straight on the board, live on its game."; } gsRender();
+      const er = $("#gsErr"), rs = $("#gsRes"); try { ((er && er.textContent.trim()) ? er : rs).scrollIntoView({ behavior: "smooth", block: "center" }); } catch (e) {} }
   }
   // put a leg on the game the guest tapped
   async function gsLink(r, i, g, side) {
@@ -22827,7 +22837,7 @@ void main(){
     document.body.insertAdjacentHTML("beforeend", `<div id="gs">
       <div class="gs-top"><b>Sweat <i>Zone</i></b><span class="gs-conn" id="gsConn"><i></i><span>Connecting</span></span></div>
       <div class="gs-who" id="gsWho"></div>
-      <label class="gs-scan" id="gsScan">${GS_ICON}<b>Scan your bet slip</b><span>Pick a screenshot of your slip (or the bet in My Bets). It goes straight on the board, live on its game.</span><input id="gsFile" type="file" accept="image/*" multiple></label>
+      <label class="gs-scan" id="gsScan" for="gsFile">${GS_ICON}<b id="gsScanT">Scan your bet slip</b><span id="gsScanS">Pick a screenshot of your slip (or the bet in My Bets). It goes straight on the board, live on its game.</span></label><input id="gsFile" type="file" accept="image/*" multiple hidden>
       <div id="gsSt"></div><div id="gsErr"></div><div id="gsRes"></div>
       <div class="gs-h"><span>Your bets on the board</span><span id="gsN"></span></div><div id="gsMine"></div>
       <p class="gs-foot">Wins, losses and the live sweat play on the TV.</p>
@@ -22835,9 +22845,11 @@ void main(){
     gsWho(false);
     $("#gsScan").addEventListener("click", (e) => {
       if (GS.busy) { e.preventDefault(); return; }
+      GS.pickAt = Date.now();
       if (!GUEST.name) { e.preventDefault(); gsErr("Put your name in first so the board knows whose bets these are."); const i = $("#gsName"); if (i) i.focus(); }
     });
-    $("#gsFile").addEventListener("change", (e) => { const fs = [...(e.target.files || [])]; e.target.value = ""; gsScan(fs); });
+    const gsPicked = (e) => { const fs = [...(e.target.files || [])]; if (!fs.length) return; e.target.value = ""; GS.pickAt = 0; gsScan(fs); };
+    $("#gsFile").addEventListener("change", gsPicked); $("#gsFile").addEventListener("input", gsPicked);
     $("#gs").addEventListener("click", async (e) => {
       const t = e.target.closest("button"); if (!t) return;
       if (t.id === "gsEdit") { gsWho(true); return; }
