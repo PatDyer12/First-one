@@ -34,6 +34,7 @@ V2_CSS = """
             padding:6px 6px; border-bottom:1.5px solid var(--ink); }
 .sheet td { padding:7px 6px; border-bottom:1px solid var(--line); vertical-align:middle; }
 .sheet tr.win td { background:#f6fbf8; }
+.sheet td:nth-child(3) { white-space:nowrap; }
 .sheet .kick { font-variant-numeric:tabular-nums; color:var(--ink2); white-space:nowrap; font-size:8pt; }
 .sheet .sbet { font-family:'Bebas Neue', Impact, sans-serif; font-size:13.5pt; letter-spacing:.02em; line-height:1; white-space:nowrap; }
 .sheet .odds { font-variant-numeric:tabular-nums; white-space:nowrap; }
