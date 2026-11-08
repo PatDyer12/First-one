@@ -36,11 +36,11 @@ V2_CSS = """
 .sheet tr.win td { background:#f6fbf8; }
 .sheet td:nth-child(3) { white-space:nowrap; }
 .sheet .kick { font-variant-numeric:tabular-nums; color:var(--ink2); white-space:nowrap; font-size:8pt; }
-.sheet .sbet { font-family:'Bebas Neue', Impact, sans-serif; font-size:13.5pt; letter-spacing:.02em; line-height:1; white-space:nowrap; }
+.sheet .sbet { font-family:'Bebas Neue', Impact, sans-serif; font-size:13.5pt; letter-spacing:.02em; line-height:1.05; }
 .sheet .odds { font-variant-numeric:tabular-nums; white-space:nowrap; }
 .sheet .su { font-weight:800; white-space:nowrap; text-align:right; }
 .sheet .su small { display:block; color:var(--green); font-weight:700; }
-.sheet .sig { font-size:7.6pt; color:var(--ink2); }
+.sheet .sig { font-size:7.6pt; color:var(--ink2); min-width:130px; }
 .tier { display:inline-block; font-size:6.4pt; font-weight:800; letter-spacing:.08em; text-transform:uppercase;
         border-radius:20px; padding:2px 7px; white-space:nowrap; }
 .tier.best { background:var(--red); color:#fff; } .tier.play { background:var(--soft); color:var(--ink2); border:1px solid var(--line); }
