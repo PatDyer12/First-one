@@ -104,7 +104,7 @@ export function makeWorld(renderer) {
   W.topPx = (key, th = 0, up = 2) => { const Z = W.st.get(key); if (!Z) return null; const p = ring(th, 3.4); _v.set(p[0], 4.2 + up, p[1]); Z.S.localToWorld(_v); _v.project(cam); return [(_v.x * 0.5 + 0.5) * innerWidth, (-_v.y * 0.5 + 0.5) * innerHeight]; };
   W.frame = (t, dt, aspect) => {
     W.t = t; if (cam.aspect !== aspect) { cam.aspect = aspect; cam.updateProjectionMatrix(); }
-    W.punch = Math.max(0, W.punch - dt * 0.9); const ang = Math.sin(t * 0.11) * 0.03 + Math.sin(t * 0.047) * 0.015, d = 15.4 * (1 - 0.03 * W.punch * W.punch);
+    W.punch = Math.max(0, W.punch - dt * 0.9); const ang = Math.sin(t * 0.11) * 0.03 + Math.sin(t * 0.047) * 0.015, d = 15.4 * Math.max(1, 1.74 / aspect) * (1 - 0.03 * W.punch * W.punch);
     cam.position.set(Math.sin(ang) * d, 0.9 + Math.sin(t * 0.09) * 0.2, Math.cos(ang) * d); cam.lookAt(0, 0.55, 0); cam.updateMatrixWorld();
   };
   return W;

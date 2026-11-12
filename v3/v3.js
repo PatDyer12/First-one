@@ -231,7 +231,7 @@ void main(){
     float ring = exp(-pow((d - rad) * 16.0, 2.0)) * (1.0 - age / 2.6); c += uRipC[i] * ring * rp.w * 1.6; }
   c += uFlash.rgb * uFlash.a * (0.35 + 0.65 * band);
   // over the stadium: only the light this adds, and a shade so the bets read
-  if (uOver > 0.5) { vec3 ex = max(c - c0, 0.0) * 0.8; float sh = 0.34 + 0.2 * smoothstep(0.75, 0.2, uv.y) * 0.0 + 0.22 * smoothstep(0.35, 1.0, uv.y); gl_FragColor = vec4(ex, clamp(max(ex.r, max(ex.g, ex.b)) + sh, 0.0, 1.0)); return; }
+  if (uOver > 0.5) { vec3 ex = max(c - c0, 0.0) * 0.8; float sh = 0.06 + 0.2 * smoothstep(0.3, 1.0, uv.y); gl_FragColor = vec4(ex, clamp(max(ex.r, max(ex.g, ex.b)) + sh, 0.0, 1.0)); return; }
   float vg = smoothstep(1.25, 0.35, length((uv - 0.5) * vec2(1.15, 1.0))); c *= 0.55 + 0.45 * vg;
   c += (h(px + uT) - 0.5) * 0.012;
   gl_FragColor = vec4(c, 1.0);
@@ -246,7 +246,7 @@ void main(){
   const P = new THREE.Points(g, pm); P.frustumCulled = false; gl.pscene.add(P); gl.pm = pm;
   r.autoClear = false;
 }
-const featOf = (g) => { const si = g.st === "in" && isFb(g) ? g.sit : null; return { a: g.a.nm || g.a.ab, h: g.h.nm || g.h.ab, aab: g.a.ab, hab: g.h.ab, ca: teamCol(g.a), ch: teamCol(g.h), live: g.st === "in", yl: si && typeof si.yl === "number" ? si.yl : null, pos: si && si.pos ? (String(si.pos) === String(g.h.id) ? "h" : "a") : null, togo: si && typeof si.ds === "number" && si.ds > 0 ? si.ds : null }; };
+const featOf = (g) => { const si = g.st === "in" && isFb(g) ? g.sit : null; return { a: g.a.nm || g.a.ab, h: g.h.nm || g.h.ab, aab: g.a.ab, hab: g.h.ab, ca: teamCol(g.a), ch: teamCol(g.h), live: g.st === "in", yl: si && typeof si.yl === "number" ? 100 - si.yl : null, pos: si && si.pos ? (String(si.pos) === String(g.h.id) ? "h" : "a") : null, togo: si && typeof si.ds === "number" && si.ds > 0 ? si.ds : null }; };
 function dotTex() { const c = document.createElement("canvas"); c.width = c.height = 64; const x = c.getContext("2d"), gr = x.createRadialGradient(32, 32, 0, 32, 32, 32); gr.addColorStop(0, "rgba(255,255,255,1)"); gr.addColorStop(0.3, "rgba(255,255,255,.6)"); gr.addColorStop(1, "rgba(255,255,255,0)"); x.fillStyle = gr; x.fillRect(0, 0, 64, 64); return new THREE.CanvasTexture(c); }
 function ripple(x, y, col, str) { gl.rip.push({ x, y, col, str, t: gl.t || 0 }); if (gl.rip.length > N_RIP) gl.rip.shift(); }
 let flash = { c: [1, 1, 1], a: 0 };
@@ -274,7 +274,7 @@ function glFrame(t, dt) {
   P.g.attributes.position.needsUpdate = true; P.g.attributes.color.needsUpdate = true; gl.pm.size = Math.max(4, 7 * (W / 1920) * k);
   // between stadiums: the globe has the whole screen
   if (flying && globe && globe.frame(performance.now(), W / H)) { r.setClearColor(0x02040a, 1); r.clear(); r.render(globe.scene, globe.cam); r.setClearColor(0x000000, 0); if (world) { world.frame(t, dt, W / H); css3.render(scene3, world.cam); } return; }
-  const cvw = document.getElementById("v2world"), over = !DEMO && !!(cvw && window.SBW && window.SBW.live && window.SBW.live()); u.uOver.value = over ? 1 : 0;
+  const cvw = document.getElementById("v2world"), over = !!(cvw && window.SBW && window.SBW.live && window.SBW.live()); u.uOver.value = over ? 1 : 0;
   r.clear(); r.render(gl.scene, gl.cam);
   if (world) { world.frame(t, dt, W / H); css3.render(scene3, world.cam);
     const list = []; for (const e of lanes) { const ar = e.querySelector(".v3-arena"); if (!ar) continue; const q = ar.getBoundingClientRect(); if (q.width < 4) continue; list.push({ key: e.__L.k, x: q.left + q.width / 2, y: q.top + q.height * 0.56, w: q.width * 0.7, g: featOf(e.__L.g) }); }
@@ -432,10 +432,12 @@ function frame(now) {
   requestAnimationFrame(frame);
   const want = DEMO || (sb && sb.tv()); if (want !== on) setOn(want); if (!on || document.hidden) { last = now; return; }
   const dt = Math.min(0.05, (now - last) / 1000 || 0.016); last = now;
-  if (demo) { demo.step(dt); if (!flying && !showing && now - (frame.flyAt || (frame.flyAt = now - 22000)) > 34000) { frame.flyAt = now; const gs = demo.games(), i = (frame.fi = ((frame.fi ?? -1) + 1) % gs.length), g = gs[i]; if (lastSpot == null && i) lastSpot = { ll: spotOf(gs[i - 1].h.ab), col: teamCol(gs[i - 1].h), name: gs[i - 1].h.nm }; flight({ ab: g.h.ab, h: g.h.nm, a: g.a.nm, ven: "", col: teamCol(g.h) }, null, null); } }
+  if (demo) demo.step(dt);
   if (now - tick > 500) { tick = now; try { render(); } catch (e) { console.warn("v3 render", e); } }
   try { glFrame(now / 1000, dt); fxFrame(dt); } catch (e) { if (!frame.warned) { frame.warned = 1; console.warn("v3 gl", e); } }
 }
+if (demo) { const f = () => demo.feat(); window.__sbFeat = f; window.__sbScene = () => { const g = f(); return { kind: "stadium", game: g, games: [g] }; };
+  setTimeout(() => { try { if (!document.body.classList.contains("tv")) document.getElementById("tvBtn").click(); } catch (e) {} }, 600); }
 build(); setOn(DEMO || (sb && sb.tv())); if (!on) for (const id of ["v3host", "v3gl", "v3fx"]) document.getElementById(id).style.display = "none";
 requestAnimationFrame(frame);
 window.__v3dbg = { fly: (a, b) => { lastSpot = a ? { ll: spotOf(a), col: [0.2, 0.5, 1], name: a } : null; return flight({ ab: b, h: b, a: "Away", ven: b + " Stadium", col: GOLD }, null, null); }, model: () => M, win: (id) => { const b = X.bets().find((x) => x.id === id) || X.bets()[0]; if (b) V.settle(b, "W", b.units * ppu(b.odds)); }, loss: (id) => { const b = X.bets().find((x) => x.id === id) || X.bets()[0]; if (b) V.settle(b, "L", -b.units); }, demo };
@@ -466,14 +468,16 @@ function makeDemo() {
   let acc = 0, placed = 0, pl = 0;
   const settle = (b, o) => { const nn = o === "W" ? b.units * ppu(b.odds) : -b.units; b.status = o === "W" ? "won" : "lost"; net[b.who] += nn; V.settle && V.settle(b, o, nn); bets.delete(b.id); };
   return {
+    feat() { const live = games.filter((g) => g.st === "in"), g = live.length ? live[Math.floor(Date.now() / 45000) % live.length] : games[0]; const VEN = { KC: "GEHA Field at Arrowhead Stadium", DAL: "AT&T Stadium", MIA: "Hard Rock Stadium", CHI: "Soldier Field" };
+      const tm = (t) => ({ id: t.id, ab: t.ab, nm: t.nm, fn: t.nm, col: t.col, alt: t.alt, lg: t.lg, sc: t.sc, rk: 0, jn: [] }); return { id: g.id, sport: "NFL", st: g.st, d: g.d, t: g.t, a: tm(g.a), h: tm(g.h), ven: { nm: VEN[g.h.ab] || "", indoor: false }, net: "NBC", sit: g.sit, n: 3 }; },
     bets: () => [...bets.values()], games: () => games, gameOf: (sel) => G0(sel.g), evalSel: ev, legsOf: legs, done: dn,
     name: (b) => P[b.who][0], col: (b) => P[b.who][1], key: (b) => b.who, me: (b) => b.who === "me", unit: () => 15,
     people: () => Object.keys(P).map((k) => ({ k, name: P[k][0], col: P[k][1], net: net[k], open: [...bets.values()].filter((b) => b.who === k).length })).sort((x, y) => y.net - x.net),
     step(dt) {
       for (const g of games) { if (g.st === "in") { g.clk -= dt * 22; if (g.clk <= 0) { if (g.q >= 4 && g.a.sc !== g.h.sc) { g.st = "post"; g.sit = null; } else { g.q++; g.clk = 900; } } } else if (g.st === "pre" && g.t - Date.now() < 93.6 * 60e3) { g.st = "in"; g.q = 1; g.clk = 900; } g.d = label(g); }
-      acc += dt; if (acc > 5.5) { acc = 0; const live = games.filter((g) => g.st === "in"); if (live.length) { const g = live[Math.floor(Math.random() * live.length)], s = Math.random() < 0.5 ? "a" : "h"; g[s].sc += Math.random() < 0.62 ? 7 : 3; g.sit = { pos: g[s === "a" ? "h" : "a"].id, yl: s === "a" ? 75 : 25, ds: 10, dd: "1st & 10", rz: false, lp: { text: "Kickoff, touchback" } }; } }
-      pl += dt; if (pl > 1.6) { pl = 0; for (const g of games) { if (g.st !== "in") continue; if (!g.sit || g.sit.yl == null) g.sit = { pos: g.a.id, yl: 25, ds: 10, dd: "1st & 10", lp: { text: "" } }; const si = g.sit, dir = si.pos === g.a.id ? 1 : -1, gain = Math.random() < 0.12 ? 18 + Math.floor(Math.random() * 25) : Math.floor(Math.random() * 9) - 1; if (Math.random() < 0.5) continue;
-        si.yl = clamp(si.yl + dir * gain, 3, 97); si.ds = gain >= si.ds ? 10 : si.ds - Math.max(0, gain); const dnn = gain >= 10 ? 1 : ((si.dn || 1) % 4) + 1; si.dn = gain >= si.ds ? 1 : dnn; si.dd = `${["1st", "2nd", "3rd", "4th"][si.dn - 1]} & ${si.ds}`; si.rz = dir > 0 ? si.yl > 80 : si.yl < 20; si.lp = { text: `${["Pass complete", "Rush up the middle", "Screen pass", "Scramble"][Math.floor(Math.random() * 4)]} for ${gain} yard${gain === 1 ? "" : "s"}` }; } }
+      acc += dt; if (acc > 5.5) { acc = 0; const live = games.filter((g) => g.st === "in"); if (live.length) { const g = live[Math.floor(Math.random() * live.length)], s = Math.random() < 0.5 ? "a" : "h"; g[s].sc += Math.random() < 0.62 ? 7 : 3; g.sit = { pos: g[s === "a" ? "h" : "a"].id, yl: s === "a" ? 25 : 75, ds: 10, dd: "1st & 10", rz: false, lp: { text: "Kickoff, touchback" } }; } }
+      pl += dt; if (pl > 1.6) { pl = 0; for (const g of games) { if (g.st !== "in") continue; if (!g.sit || g.sit.yl == null) g.sit = { pos: g.a.id, yl: 75, ds: 10, dd: "1st & 10", lp: { text: "" } }; const si = g.sit, dir = si.pos === g.a.id ? -1 : 1, gain = Math.random() < 0.12 ? 18 + Math.floor(Math.random() * 25) : Math.floor(Math.random() * 9) - 1; if (Math.random() < 0.5) continue;
+        si.yl = clamp(si.yl + dir * gain, 3, 97); si.ds = gain >= si.ds ? 10 : si.ds - Math.max(0, gain); const dnn = gain >= 10 ? 1 : ((si.dn || 1) % 4) + 1; si.dn = gain >= si.ds ? 1 : dnn; si.dd = `${["1st", "2nd", "3rd", "4th"][si.dn - 1]} & ${si.ds}`; si.rz = dir > 0 ? si.yl > 80 : si.yl < 20; si.dn = si.dn || 1; si.lp = { text: `${["Pass complete", "Rush up the middle", "Screen pass", "Scramble"][Math.floor(Math.random() * 4)]} for ${gain} yard${gain === 1 ? "" : "s"}` }; } }
       // a finished game pays its bets, one at a time; a parlay when its last leg is in (or one's dead)
       if (!showing && !Q.length) for (const b of bets.values()) { if (b.kind === "parlay") { const L = legs(b); if (L.some((l) => l.st === "miss")) { settle(b, "L"); break; } if (L.every((l) => l.st === "hit")) { settle(b, "W"); break; } } else { const e = ev(b.sel); if (e && e.fin && e.res !== "P") { settle(b, e.res); break; } } }
       if (!placed && games[0].q >= 3) { placed = 1; const b = bet("ju", "Chiefs −2.5 live", 105, 2, { g: "g1", m: "sp", s: "h", l: -2.5 }); add(b); V.place && V.place(b); }

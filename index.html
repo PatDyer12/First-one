@@ -14933,7 +14933,7 @@ void main(){
   // ---------- sheets ----------
   function openSheet(id) { $(id).hidden = false; }
   // keep every open screen current: when a new version is up, reload it (never mid-form or mid-animation)
-  const BUILD = "20261112034253";
+  const BUILD = "20261112035244";
   function updReady() {
     if (document.getElementById("updReady")) return; const d = document.createElement("div"); d.id = "updReady"; d.textContent = "Update ready · refresh, then TV + Sound on"; document.body.append(d);
   }
@@ -28581,7 +28581,7 @@ async function wdStart() {
     }
     const R = wdRead(); WD.key = wdKey(R);
     for (const s of ["a", "h"]) if (R.T[s].lg) { const im = new Image(); im.crossOrigin = "anonymous"; im.referrerPolicy = "no-referrer"; im.onload = () => { if (WD.st && WD.st.R.T[s] === R.T[s]) wdRepaint(); }; im.src = R.T[s].lg; R.T[s].img = im; }
-    WD.st = wdBuild(L, R); WD.builtAt = Date.now(); wdSize(WD.qb || wdQmax(), true);
+    WD.st = wdBuild(L, R); WD.builtAt = Date.now(); try { await wdFxInit(L, THREE); } catch (e) { console.warn("world fx", e); } wdSize(WD.qb || wdQmax(), true);
     document.body.classList.add("v2w"); WD.sig = ""; wdIdleArt(true);
     wdWarm(WD.st);
     if (!WD.raf) WD.raf = requestAnimationFrame(wdLoop);
@@ -28619,9 +28619,27 @@ function wdStop() {
 // the picture at the screen's own resolution (a 4K TV's 3840 x 2160 when the page is 1920 wide at 2x), stepped down only if
 // this machine can't keep up
 const wdQmax = () => Math.min(2, Math.max(1, window.devicePixelRatio || 1));
+async function wdFxInit(L, THREE) {
+  let off = false; try { off = localStorage.getItem("sb-glow") === "off"; } catch (e) {} if (WD.fx || off) { WD.fxOff = off; return; }
+  const { ShaderPass } = await import("three/addons/postprocessing/ShaderPass.js");
+  const w = WD.r.domElement.width, h = WD.r.domElement.height, comp = new L.EffectComposer(WD.r); comp.setPixelRatio(1); comp.setSize(w, h);
+  const rp = new L.RenderPass(new THREE.Scene(), new THREE.Camera()); comp.addPass(rp);
+  const bloom = new L.UnrealBloomPass(new THREE.Vector2(Math.round(w / 2), Math.round(h / 2)), 0.4, 0.55, 0.74); comp.addPass(bloom);
+  const grade = new ShaderPass({ uniforms: { tDiffuse: { value: null }, uT: { value: 0 } },
+    vertexShader: "varying vec2 vUv; void main(){ vUv = uv; gl_Position = projectionMatrix * modelViewMatrix * vec4(position, 1.0); }",
+    fragmentShader: `uniform sampler2D tDiffuse; uniform float uT; varying vec2 vUv;
+      void main(){ vec3 c = texture2D(tDiffuse, vUv).rgb * 1.32;
+        float l = dot(c, vec3(0.299, 0.587, 0.114)); c = mix(vec3(l), c, 1.28);                 // richer colour
+        c = (c - 0.42) * 1.16 + 0.42;                                                             // more contrast
+        c = mix(c, c * vec3(0.94, 1.0, 1.08), smoothstep(0.5, 0.0, l));                           // cool shadows
+        c = c / (1.0 + max(c - 0.8, 0.0) * 0.6);                                                  // highlights roll off
+        float v = smoothstep(1.15, 0.35, length((vUv - 0.5) * vec2(1.1, 1.0))); c *= 0.62 + 0.38 * v;
+        gl_FragColor = vec4(max(c, 0.0), 1.0); }` }); comp.addPass(grade);
+  WD.fx = { comp, rp, bloom, grade };
+}
 function wdSize(q, force) {
   if (!WD.r || (!force && q === WD.q)) return; WD.q = q;
-  WD.r.setSize(Math.round(innerWidth * q), Math.round(innerHeight * q), false);
+  WD.r.setSize(Math.round(innerWidth * q), Math.round(innerHeight * q), false); if (WD.fx) WD.fx.comp.setSize(Math.round(innerWidth * q), Math.round(innerHeight * q));
   if (WD.st) { WD.st.cam.aspect = innerWidth / innerHeight; WD.st.cam.updateProjectionMatrix(); }
 }
 function wdLoop(now) {
@@ -28654,7 +28672,7 @@ function wdLoop(now) {
   if (WD.glow) { const o = Math.min(0.5, st.flash * 0.32) * (WD.mode === "board" ? 1 : 0); if (Math.abs(o - (WD.glowO || 0)) > 0.015) { WD.glowO = o; WD.glow.style.opacity = o.toFixed(3); WD.glow.style.setProperty("--wfc", st.fc.map((v) => Math.round(v * 255)).join(",")); } }
   wdFansTick(st, t); if (st.room) wdRoomTick(st, dt); if (st.arFl) wdArTick(st, dt);
   wdFwTick(st, dt); if (st.act) wdActTick(st, dt); wdCam(st, now); wdProject(st); wdVidTick(st, now); wdDeckCam(st, now);
-  WD.r.render(st.scene, st.cam);
+  if (WD.fx && !WD.fxOff && WD.q > 0.5) { const F = WD.fx; F.rp.scene = st.scene; F.rp.camera = st.cam; F.grade.uniforms.uT.value = t; F.bloom.strength = (st.room ? 0.26 : 0.36) + Math.min(0.14, st.flash * 0.1); F.comp.render(); } else WD.r.render(st.scene, st.cam);
 }
 function wdShowCam(st, on) {
   if (on && WD.mode === "board" && st.shots.cel) { WD.mode = "show"; wdFly(st, st.shots.cel, 2200, (WD.V.fwR || 30) * 0.3); }
