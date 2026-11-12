@@ -113,16 +113,23 @@ const fieldHtml = (g) => {
   return `<div class="v3-fld${si.rz ? " rz" : ""}"><span class="ez" style="background:${css(teamCol(g.a))}">${esc(g.a.ab)}</span><div class="pf">${ticks}${to != null ? `<i class="fd" style="left:${to}%"></i><i class="need" style="left:${Math.min(x, to)}%;width:${Math.abs(to - x)}%;background:${c}"></i>` : ""}<i class="bl ${awayBall ? "r" : "l"}" style="left:${x}%;--c:${c}"></i></div><span class="ez" style="background:${css(teamCol(g.h))}">${esc(g.h.ab)}</span></div>`;
 };
 const gameHtml = (g) => {
-  const live = g.st !== "pre", tm = (s) => { const t = g[s], o = g[s === "a" ? "h" : "a"], lead = live && t.sc > o.sc, ball = g.st === "in" && g.sit && g.sit.pos && String(g.sit.pos) === String(t.id) ? `<i class="ball${g.sit.rz ? " rz" : ""}"></i>` : "";
-    const lg = t.lg ? `<img src="${esc(t.lg)}" alt="" referrerpolicy="no-referrer" onerror="this.style.visibility='hidden'">` : "", sc = `<span class="sc num" data-s="${s}">${live ? esc(t.sc ?? "") : ""}</span>`, ab = `<span class="ab">${esc(t.ab)}${ball}</span>`;
-    return `<span class="tm ${s}${lead ? " lead" : ""}">${s === "a" ? lg + ab + sc : sc + ab + lg}</span>`; };
-  return `${fieldHtml(g)}<div class="v3-play">${esc(playTxt(g))}</div><div class="v3-sb">${tm("a")}<span class="clk">${esc(g.st === "pre" ? "vs" : g.st === "post" ? "Final" : g.d || "Live")}</span>${tm("h")}</div>`;
+  const live = g.st !== "pre", fin = g.st === "post";
+  const tm = (s) => { const t = g[s], o = g[s === "a" ? "h" : "a"], lead = live && t.sc > o.sc, ball = g.st === "in" && g.sit && g.sit.pos && String(g.sit.pos) === String(t.id) ? `<i class="ball${g.sit.rz ? " rz" : ""}"></i>` : "";
+    const lg = t.lg ? `<img src="${esc(t.lg)}" alt="" referrerpolicy="no-referrer" onerror="this.style.visibility='hidden'">` : "<span></span>";
+    return `<div class="tm ${s}${lead ? " lead" : live && t.sc < o.sc ? " trail" : ""}">${lg}<div class="nmx"><span class="ab">${esc(t.nm || t.ab)}${ball}</span>${t.rec ? `<small>${esc(t.rec)}</small>` : ""}</div><span class="sc num" data-s="${s}">${live ? esc(t.sc ?? "") : ""}</span></div>`; };
+  const clk = g.st === "pre" ? when(g.t) : fin ? "Final" : g.d || "Live", si = g.sit || {};
+  const play = g.st === "in" ? [si.dd, si.lp && si.lp.text].filter(Boolean).join(" · ") : g.st === "pre" ? [g.net, g.ven && g.ven.nm].filter(Boolean).join(" · ") : "";
+  const wp = g.st === "in" && typeof si.wp === "number" ? Math.round(si.wp * 100) : null;
+  const wpH = wp != null ? `<div class="v3-wp"><b class="num">${100 - wp}%</b><i><u style="width:${100 - wp}%;background:${css(teamCol(g.a))}"></u><u style="width:${wp}%;background:${css(teamCol(g.h))}"></u></i><b class="num">${wp}%</b></div>` : "";
+  const L = (g.ldr || []).filter((x) => /^(passing|rushing|receiving)Yards$/.test(x.n)).slice(0, 3), ldr = live && L.length ? `<div class="v3-ldr">${L.map((x) => `<span><em>${x.n[0] === "p" ? "PASS" : x.n[1] === "u" ? "RUSH" : "REC"}</em> ${esc(x.p)} <b class="num">${esc(String(x.v).split(",")[0])}</b></span>`).join("")}</div>` : "";
+  return `<div class="v3-hd"><span class="lg">${esc(g.sport)}${g.net && live ? " · " + esc(g.net) : ""}</span><span class="clk">${esc(clk)}</span></div>${tm("a")}${tm("h")}${fieldHtml(g)}${play ? `<div class="v3-play">${esc(play)}</div>` : ""}${wpH}${ldr}`;
 };
 const meter = (c) => { const p = Math.round(c.p * 1000) / 10; return c.fill ? `<div class="v3-m fill"><i style="left:0;width:${p}%"></i><b style="left:${p}%"></b></div>` : `<div class="v3-m"><i style="left:${Math.min(50, p)}%;width:${Math.abs(p - 50)}%"></i><b style="left:${p}%"></b></div>`; };
 function cardHtml(c) {
-  const hd = `<div class="hd"><span class="who">${esc(c.who)}</span><span>${fU(c.units)} to win ${fU(c.toWin)}</span><span class="od num">${fOdds(c.odds)}</span></div>`;
-  if (c.par) return `${hd}<div class="v3-prog">${c.legs.map((l) => `<i class="${l.st || l.live}"></i>`).join("")}</div><div class="v3-legs">${c.legs.map((l, i) => `<div class="v3-leg ${l.st || l.live}" data-i="${i}"><span class="pip">${l.st === "hit" ? "✓" : l.st === "miss" ? "✕" : ""}</span><span class="t">${esc(l.t)}</span><span class="x">${esc(l.x || "")}</span></div>`).join("")}</div>`;
-  return `${hd}<div class="pk">${esc(c.pick)}</div>${c.ev && c.g && c.g.st !== "pre" ? meter(c) : ""}<div class="stt"><span class="tx">${esc(c.tx || "")}</span></div>`;
+  // two lines a bet: whose, the pick, the price; then how it's going, the meter, what's riding
+  const r1 = (pk) => `<div class="r1"><span class="who">${esc(c.who)}</span><span class="pk">${esc(pk)}</span><span class="od num">${fOdds(c.odds)}</span></div>`, pay = `<span class="pay num">${fU(c.units)} → ${fU(c.toWin)}</span>`;
+  if (c.par) return `${r1(c.pick)}<div class="r2"><span class="tx">${esc(c.tx)}</span><div class="v3-prog">${c.legs.map((l) => `<i class="${l.st || l.live}"></i>`).join("")}</div>${pay}</div><div class="v3-legs">${c.legs.map((l, i) => `<div class="v3-leg ${l.st || l.live}" data-i="${i}"><span class="pip">${l.st === "hit" ? "✓" : l.st === "miss" ? "✕" : ""}</span><span class="t">${esc(l.t)}</span><span class="x">${esc(l.x || "")}</span></div>`).join("")}</div>`;
+  return `${r1(c.pick)}<div class="r2"><span class="tx">${esc(c.tx || "")}</span>${c.ev && c.g && c.g.st !== "pre" ? meter(c) : "<span></span>"}${pay}</div>`;
 }
 function setHtml(el, h) { if (el.__h !== h) { el.__h = h; el.innerHTML = h; return true; } return false; }
 // first, last, invert, play: whatever moved glides to where it is now
@@ -132,7 +139,7 @@ function flip(els, fn) {
   for (const [e, r0] of a) { if (!e.isConnected || !e.offsetParent) continue; const r1 = e.getBoundingClientRect(), sc = r1.width / Math.max(1, e.offsetWidth) || 1, dx = (r0.left - r1.left) / sc, dy = (r0.top - r1.top) / sc; if (Math.abs(dx) + Math.abs(dy) < 3) continue;
     e.animate([{ transform: `translate(${dx}px, ${dy}px)` }, { transform: "none" }], { duration: 650, easing: "cubic-bezier(.2,.8,.2,1)" }); }
 }
-let M = null, page = 0, pages = 1, pageAt = 0, fitSig = "", fitK = 1;
+let M = null, page = 0, pages = 1, pageAt = 0, fitSig = "", fitK = 1, fitAt = 0;
 function render() {
   M = model();
   const n = M.n; const setK = (k) => { root.style.setProperty("--k", k); board.style.setProperty("--k", k); };
@@ -148,10 +155,10 @@ function render() {
       seenL.add(L.k); let el = laneEls.get(L.k);
       if (!el) { el = document.createElement("div"); el.className = "v3-lane" + (L.g ? "" : " plain"); el.innerHTML = `<div class="v3-g${L.g ? "" : " tag"}"></div><div class="v3-cards"></div>`; laneEls.set(L.k, el); }
       el.__L = L; const ge = el.firstChild, ce = el.lastChild;
-      if (L.g) { const g = L.g, ca = teamCol(g.a), ch = teamCol(g.h); ge.style.setProperty("--ca", css(ca)); ge.style.setProperty("--ch", css(ch)); ge.classList.toggle("live", g.st === "in"); setHtml(ge, gameHtml(g)); el.__col = [ca, ch];
+      if (L.g) { const g = L.g, ca = teamCol(g.a), ch = teamCol(g.h); ge.style.setProperty("--ca", css(ca)); ge.style.setProperty("--ch", css(ch)); ge.classList.toggle("live", g.st === "in"); el.classList.toggle("livep", g.st === "in"); el.style.setProperty("--ch", css(ch)); setHtml(ge, gameHtml(g)); el.__col = [ca, ch];
         const k = g.id, was = prevSc.get(k), now = [g.a.sc, g.h.sc]; if (was && g.st !== "pre") ["a", "h"].forEach((s, j) => { if (now[j] != null && was[j] != null && now[j] > was[j]) scored(el, s, j ? ch : ca, now[j] - was[j]); }); prevSc.set(k, now);
       } else setHtml(ge, `<b>${esc(L.tag[0])}</b><small>${esc(L.tag[1])}</small>`);
-      if (lanesEl.children[i] !== el) lanesEl.insertBefore(el, lanesEl.children[i] || null);
+      L.el = el;
       L.cards.forEach((c, j) => {
         seenC.add(c.id); let x = cardEls.get(c.id);
         if (!x) { x = document.createElement("div"); cardEls.set(c.id, x); if (!first) { x.__born = 1; } }
@@ -163,28 +170,28 @@ function render() {
       });
     });
     for (const [k, el] of laneEls) if (!seenL.has(k)) { el.remove(); laneEls.delete(k); }
+    { const n = M.lanes.length, nc = n <= 1 ? 1 : n <= 2 ? 2 : n <= 6 ? 3 : 4; while (lanesEl.children.length < nc) { const d = document.createElement("div"); d.className = "v3-col"; lanesEl.append(d); } while (lanesEl.children.length > nc) { const d = lanesEl.lastChild; while (d.firstChild) lanesEl.firstChild.append(d.firstChild); d.remove(); }
+      const wt = (L) => (L.g ? (L.g.st === "in" ? 3.4 : 2) : 0.9) + L.cards.reduce((a, c) => a + (c.par ? 1 + c.legs.length * 0.45 : 1), 0), load = Array(nc).fill(0), slot = Array.from({ length: nc }, () => []);
+      for (const L of M.lanes) { let b = 0; for (let i = 1; i < nc; i++) if (load[i] < load[b] - 0.01) b = i; load[b] += wt(L); slot[b].push(L.el); }
+      slot.forEach((els, ci) => { const col = lanesEl.children[ci]; els.forEach((el, j) => { if (col.children[j] !== el) col.insertBefore(el, col.children[j] || null); }); }); }
     for (const [k, el] of cardEls) if (!seenC.has(k)) { el.remove(); cardEls.delete(k); prevCls.delete(k); }
     // it all fits on one page if it can (a little smaller first), pages only after that
     // the bets fill the screen: the biggest size at which everything still fits on one page (worked out again only when the
     // board's make-up changes); if even small type won't fit, pages at a readable size
-    const sig = M.lanes.map((l) => l.k + ":" + l.cards.map((c) => c.id + (c.par ? c.legs.length : "")).join(",")).join("|") + "@" + innerWidth + "x" + innerHeight;
-    if (sig !== fitSig && board.isConnected && board.clientHeight > 50 && (!M.lanes.length || lanesEl.firstElementChild.offsetHeight > 0)) { fitSig = sig; let lo = 0.62, hi = 2.4; setK(lo); paginate(); if (pages > 1) fitK = 0.86; else { for (let i = 0; i < 7; i++) { const mid = (lo + hi) / 2; setK(mid); paginate(); if (pages > 1) hi = mid; else lo = mid; } fitK = Math.floor(lo * 50) / 50; } }
-    setK(fitK); paginate();
+    const sig = M.lanes.map((l) => l.k + ":" + (l.g ? l.g.st : "") + l.cards.map((c) => c.id + (c.par ? c.legs.length : "")).join(",")).join("|") + "@" + page + "@" + innerWidth + "x" + innerHeight;
+    paginate();
+    if (sig !== fitSig && board.isConnected && board.clientHeight > 50 && (!M.lanes.length || lanesEl.firstElementChild.offsetHeight > 0)) { fitSig = sig; let lo = 0.5, hi = 1.22; setK(hi); if (!spills()) lo = hi; else for (let i = 0; i < 6; i++) { const mid = (lo + hi) / 2; setK(mid); if (spills()) hi = mid; else lo = mid; } fitK = Math.floor(lo * 50) / 50; }
+    setK(fitK);
+    // a panel grew (the play, the win odds, the leaders came in): step down until it fits again; every so often, size up afresh
+    if (board.isConnected && spills()) { for (let i = 0; i < 12 && fitK > 0.5 && spills(); i++) { fitK = Math.round((fitK - 0.03) * 100) / 100; setK(fitK); } } else if (Date.now() - fitAt > 20000) { fitAt = Date.now(); fitSig = ""; }
   });
-  let em = lanesEl.querySelector(".v3-empty"); if (!M.lanes.length) { if (!em) { em = document.createElement("div"); em.className = "v3-empty"; em.innerHTML = "No open bets<small>Add one from your phone and it lands here</small>"; lanesEl.append(em); } } else if (em) em.remove();
+  let em = board.querySelector(".v3-empty"); if (!M.lanes.length) { if (!em) { em = document.createElement("div"); em.className = "v3-empty"; em.innerHTML = "No open bets<small>Add one from your phone and it lands here</small>"; board.append(em); } } else if (em) em.remove();
   ticker(); first = false;
 }
 // more lanes than the screen holds: pages of them, the live games first, turning every so often
-function paginate() {
-  const H = board.clientHeight - 6, els = [...lanesEl.children].filter((e) => e.classList.contains("v3-lane"));
-  for (const e of els) e.classList.remove("off");
-  let pg = 0, used = 0; const of = [];
-  for (const e of els) { const h = e.offsetHeight + (parseFloat(getComputedStyle(e).marginBottom) || 0); if (used && used + h > H) { pg++; used = 0; } of.push(pg); used += h; }
-  pages = pg + 1; if (page >= pages) page = 0;
-  if (pages > 1 && Date.now() - pageAt > 14000) { if (pageAt) page = (page + 1) % pages; pageAt = Date.now(); }
-  els.forEach((e, i) => e.classList.toggle("off", of[i] !== page));
-  setHtml(pagesEl, pages > 1 ? Array.from({ length: pages }, (_, i) => `<i class="${i === page ? "on" : ""}"></i>`).join("") : "");
-}
+function paginate() { pages = 1; setHtml(pagesEl, ""); }
+// does any column run off the bottom at this size?
+const spills = () => [...lanesEl.children].some((c) => c.scrollHeight > c.clientHeight + 2);
 function ticker() {
   const inLane = new Set(M.lanes.filter((l) => l.g).map((l) => l.g.id)), now = Date.now();
   const gs = X.games().filter((g) => !inLane.has(g.id) && g.a && g.h && (g.st === "in" || (g.st === "post" && now - g.t < 8 * 3600e3) || (g.st === "pre" && g.t - now < 10 * 3600e3 && g.t > now - 3600e3))).sort((x, y) => (x.st === "in" ? 0 : 1) - (y.st === "in" ? 0 : 1) || x.t - y.t).slice(0, 24);
@@ -268,7 +275,7 @@ function glFrame(t, dt) {
   gl.mood += ((M ? M.mood : 0) - gl.mood) * Math.min(1, dt * 0.8); u.uMood.value = gl.mood; gl.surge = Math.max(0, gl.surge - dt * 0.35); u.uSurge.value = gl.surge;
   flash.a = Math.max(0, flash.a - dt * 0.9); u.uFlash.value.set(flash.c[0], flash.c[1], flash.c[2], flash.a);
   // the lanes on screen are the lights
-  const lanes = [...laneEls.values()].filter((e) => e.__L && e.__L.g && !e.classList.contains("off") && e.isConnected);
+  const lanes = [...laneEls.values()].filter((e) => e.__L && e.__L.g && e.isConnected);
   for (let i = 0; i < N_EM; i++) { const e = lanes[i >> 1], em = u.uEm.value[i], ec = u.uEmC.value[i];
     if (!e) { em.z = 0; continue; } const g = e.__L.g, rr = e.firstChild.getBoundingClientRect(), side = i & 1, c = e.__col[side], live = g.st === "in";
     em.set((rr.left + rr.width * (side ? 0.72 : 0.28)) * k, (H - (rr.top + rr.height / 2)) * k, live ? 0.22 : 0.07, live ? 0.2 : 0.14); ec.set(c[0], c[1], c[2]); }
@@ -455,7 +462,7 @@ window.__v3dbg = { fly: (a, b) => { lastSpot = a ? { ll: spotOf(a), col: [0.2, 0
 
 // ---------- the demo: four games that play themselves, three people's bets ----------
 function makeDemo() {
-  const T = (ab, nm, col, alt) => ({ id: ab, ab, nm, col, alt, lg: `https://a.espncdn.com/i/teamlogos/nfl/500-dark/${ab.toLowerCase()}.png`, sc: 0 });
+  const T = (ab, nm, col, alt) => ({ id: ab, ab, nm, col, alt, rec: `${3 + (ab.charCodeAt(0) % 5)}-${2 + (ab.charCodeAt(1) % 4)}`, lg: `https://a.espncdn.com/i/teamlogos/nfl/500-dark/${ab.toLowerCase()}.png`, sc: 0 });
   const now = Date.now(), mk = (id, a, h, st, q, min) => ({ id, sport: "NFL", st, a, h, t: st === "pre" ? now + 95 * 60e3 : now - 3600e3, q, clk: min * 60, d: "", net: "NBC", sit: null });
   const games = [mk("g1", T("DET", "Lions", "#0076b6", "#b0b7bc"), T("KC", "Chiefs", "#e31837", "#ffb612"), "in", 2, 9), mk("g2", T("PHI", "Eagles", "#004c54", "#a5acaf"), T("DAL", "Cowboys", "#002a5c", "#b0b7bc"), "in", 3, 12), mk("g3", T("BUF", "Bills", "#00338d", "#d50a0a"), T("MIA", "Dolphins", "#008e97", "#fc4c02"), "in", 4, 6), mk("g4", T("GB", "Packers", "#204e32", "#ffb612"), T("CHI", "Bears", "#0b162a", "#c83803"), "pre", 0, 15)];
   games[0].a.sc = 10; games[0].h.sc = 14; games[1].a.sc = 17; games[1].h.sc = 13; games[2].a.sc = 24; games[2].h.sc = 23;
@@ -491,6 +498,7 @@ function makeDemo() {
         si.yl = clamp(si.yl + dir * gain, 3, 97); si.ds = gain >= si.ds ? 10 : si.ds - Math.max(0, gain); const dnn = gain >= 10 ? 1 : ((si.dn || 1) % 4) + 1; si.dn = gain >= si.ds ? 1 : dnn; si.dd = `${["1st", "2nd", "3rd", "4th"][si.dn - 1]} & ${si.ds}`; si.rz = dir > 0 ? si.yl > 80 : si.yl < 20; si.dn = si.dn || 1; si.lp = { text: `${["Pass complete", "Rush up the middle", "Screen pass", "Scramble"][Math.floor(Math.random() * 4)]} for ${gain} yard${gain === 1 ? "" : "s"}` }; } }
       // a finished game pays its bets, one at a time; a parlay when its last leg is in (or one's dead)
       if (!showing && !Q.length) for (const b of bets.values()) { if (b.kind === "parlay") { const L = legs(b); if (L.some((l) => l.st === "miss")) { settle(b, "L"); break; } if (L.every((l) => l.st === "hit")) { settle(b, "W"); break; } } else { const e = ev(b.sel); if (e && e.fin && e.res !== "P") { settle(b, e.res); break; } } }
+      for (const g of games) if (g.st === "in") { const dd = g.h.sc - g.a.sc; if (g.sit) g.sit.wp = clamp(0.5 + dd * 0.035 * (1 + dn(g)), 0.03, 0.97); g.ldr = [{ n: "passingYards", v: String(110 + Math.round(dn(g) * 190)), p: "QB One" }, { n: "rushingYards", v: String(30 + Math.round(dn(g) * 70)), p: "R. Back" }, { n: "receivingYards", v: String(40 + Math.round(dn(g) * 80)), p: "W. Out" }]; }
       if (!placed && games[0].q >= 3) { placed = 1; const b = bet("ju", "Chiefs −2.5 live", 105, 2, { g: "g1", m: "sp", s: "h", l: -2.5 }); add(b); V.place && V.place(b); }
     },
   };
