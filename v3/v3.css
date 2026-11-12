@@ -29,11 +29,21 @@
 /* lanes */
 .v3-main { min-height: 0; }
 .v3-lanes { display: block; }
-.v3-lane { position: relative; display: grid; grid-template-columns: calc(var(--u) * 360 * var(--k)) minmax(0, 1fr); gap: calc(var(--u) * 14 * var(--k)); align-items: center; margin-bottom: calc(var(--u) * 12 * var(--k)); }
+.v3-lane { position: relative; display: grid; grid-template-columns: calc(var(--u) * 380 * var(--k)) minmax(0, 1fr); gap: calc(var(--u) * 14 * var(--k)); align-items: center; margin-bottom: calc(var(--u) * 12 * var(--k)); }
 .v3-lane.off { display: none; }
 /* a game: its stadium floats in the open top (3D, behind the page), the play under it, the score along the bottom */
 .v3-g { position: relative; display: grid; gap: calc(var(--u) * 3 * var(--k)); }
-.v3-arena { height: calc(var(--u) * 128 * var(--k)); }
+.v3-fld { display: grid; grid-template-columns: calc(var(--u) * 40 * var(--k)) minmax(0, 1fr) calc(var(--u) * 40 * var(--k)); height: calc(var(--u) * 34 * var(--k)); border-radius: calc(var(--u) * 8); overflow: hidden; border: 1px solid rgba(255, 255, 255, .22); }
+.v3-fld .ez { display: grid; place-items: center; font: 900 calc(var(--u) * 13 * var(--k))/1 "Barlow Condensed", sans-serif; letter-spacing: .04em; color: #fff; text-shadow: 0 1px 2px rgba(0, 0, 0, .6); }
+.v3-fld .pf { position: relative; background: repeating-linear-gradient(90deg, #1f6b33 0 10%, #1a5c2c 10% 20%); }
+.v3-fld .yl { position: absolute; top: 0; bottom: 0; width: 1px; background: rgba(255, 255, 255, .28); } .v3-fld .yl.mid { background: rgba(255, 255, 255, .6); }
+.v3-fld .fd { position: absolute; top: 0; bottom: 0; width: calc(var(--u) * 3); margin-left: calc(var(--u) * -1.5); background: #ffd21f; box-shadow: 0 0 calc(var(--u) * 6) #ffd21f; }
+.v3-fld .need { position: absolute; top: 38%; bottom: 38%; opacity: .55; }
+.v3-fld .bl { position: absolute; top: 50%; width: 0; height: 0; transition: left 1s cubic-bezier(.2, .8, .2, 1); }
+.v3-fld .bl::before { content: ""; position: absolute; left: calc(var(--u) * -8 * var(--k)); top: calc(var(--u) * -8 * var(--k)); width: calc(var(--u) * 16 * var(--k)); height: calc(var(--u) * 16 * var(--k)); border-radius: 50%; background: var(--c); border: 2px solid #fff; box-shadow: 0 0 calc(var(--u) * 10) var(--c); }
+.v3-fld .bl::after { content: ""; position: absolute; top: calc(var(--u) * -5 * var(--k)); border: calc(var(--u) * 5 * var(--k)) solid transparent; }
+.v3-fld .bl.r::after { left: calc(var(--u) * 11 * var(--k)); border-left-color: #fff; } .v3-fld .bl.l::after { right: calc(var(--u) * 11 * var(--k)); border-right-color: #fff; }
+.v3-fld.rz .pf { box-shadow: inset 0 0 0 2px #ff5468; }
 .v3-play { font: 700 calc(var(--u) * 15 * var(--k))/1.1 "Barlow Condensed", sans-serif; letter-spacing: .05em; text-transform: uppercase; color: #c9d5ea; text-align: center; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; text-shadow: 0 1px 4px #000; }
 .v3-sb { display: grid; grid-template-columns: 1fr auto 1fr; align-items: center; gap: calc(var(--u) * 8 * var(--k)); padding: calc(var(--u) * 5 * var(--k)) calc(var(--u) * 10 * var(--k)); border-radius: calc(var(--u) * 14); background: linear-gradient(90deg, color-mix(in srgb, var(--ca) 42%, #0a0e16), #0a0e16 46%, #0a0e16 54%, color-mix(in srgb, var(--ch) 42%, #0a0e16)); border: 1px solid rgba(255, 255, 255, .12); }
 .v3-g.live .v3-sb { border-color: rgba(255, 255, 255, .26); }

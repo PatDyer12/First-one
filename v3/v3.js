@@ -105,11 +105,18 @@ body.v3on #v2world.v3in { transition: transform .95s cubic-bezier(.15, .6, .3, 1
 }
 const isFb = (g) => g.sport === "NFL" || g.sport === "CFB";
 const playTxt = (g) => { if (g.st === "pre") return [when(g.t), g.net || g.sport].filter(Boolean).join(" · "); if (g.st === "post") return "Final"; const si = g.sit || {}, lp = si.lp && si.lp.text ? si.lp.text : ""; return [si.dd, lp].filter(Boolean).join(" · ") || g.sport; };
+// the field as it stands: the ball where it is (in the colour of who has it), the line to gain, which way they're going
+const fieldHtml = (g) => {
+  const si = g.st === "in" && isFb(g) ? g.sit : null; if (!si || typeof si.yl !== "number" || !si.pos) return "";
+  const awayBall = String(si.pos) === String(g.a.id), x = clamp(100 - si.yl, 0, 100), t = awayBall ? g.a : g.h, c = css(teamCol(t)), to = typeof si.ds === "number" && si.ds > 0 ? clamp(x + (awayBall ? 1 : -1) * si.ds, 0, 100) : null;
+  const ticks = [10, 20, 30, 40, 50, 60, 70, 80, 90].map((v) => `<i class="yl${v === 50 ? " mid" : ""}" style="left:${v}%"></i>`).join("");
+  return `<div class="v3-fld${si.rz ? " rz" : ""}"><span class="ez" style="background:${css(teamCol(g.a))}">${esc(g.a.ab)}</span><div class="pf">${ticks}${to != null ? `<i class="fd" style="left:${to}%"></i><i class="need" style="left:${Math.min(x, to)}%;width:${Math.abs(to - x)}%;background:${c}"></i>` : ""}<i class="bl ${awayBall ? "r" : "l"}" style="left:${x}%;--c:${c}"></i></div><span class="ez" style="background:${css(teamCol(g.h))}">${esc(g.h.ab)}</span></div>`;
+};
 const gameHtml = (g) => {
   const live = g.st !== "pre", tm = (s) => { const t = g[s], o = g[s === "a" ? "h" : "a"], lead = live && t.sc > o.sc, ball = g.st === "in" && g.sit && g.sit.pos && String(g.sit.pos) === String(t.id) ? `<i class="ball${g.sit.rz ? " rz" : ""}"></i>` : "";
     const lg = t.lg ? `<img src="${esc(t.lg)}" alt="" referrerpolicy="no-referrer" onerror="this.style.visibility='hidden'">` : "", sc = `<span class="sc num" data-s="${s}">${live ? esc(t.sc ?? "") : ""}</span>`, ab = `<span class="ab">${esc(t.ab)}${ball}</span>`;
     return `<span class="tm ${s}${lead ? " lead" : ""}">${s === "a" ? lg + ab + sc : sc + ab + lg}</span>`; };
-  return `<div class="v3-arena"></div><div class="v3-play">${esc(playTxt(g))}</div><div class="v3-sb">${tm("a")}<span class="clk">${esc(g.st === "pre" ? "vs" : g.st === "post" ? "Final" : g.d || "Live")}</span>${tm("h")}</div>`;
+  return `${fieldHtml(g)}<div class="v3-play">${esc(playTxt(g))}</div><div class="v3-sb">${tm("a")}<span class="clk">${esc(g.st === "pre" ? "vs" : g.st === "post" ? "Final" : g.d || "Live")}</span>${tm("h")}</div>`;
 };
 const meter = (c) => { const p = Math.round(c.p * 1000) / 10; return c.fill ? `<div class="v3-m fill"><i style="left:0;width:${p}%"></i><b style="left:${p}%"></b></div>` : `<div class="v3-m"><i style="left:${Math.min(50, p)}%;width:${Math.abs(p - 50)}%"></i><b style="left:${p}%"></b></div>`; };
 function cardHtml(c) {
@@ -277,7 +284,7 @@ function glFrame(t, dt) {
   const cvw = document.getElementById("v2world"), over = !!(cvw && window.SBW && window.SBW.live && window.SBW.live()); u.uOver.value = over ? 1 : 0;
   r.clear(); r.render(gl.scene, gl.cam);
   if (world) { world.frame(t, dt, W / H); css3.render(scene3, world.cam);
-    const list = []; for (const e of lanes) { const ar = e.querySelector(".v3-arena"); if (!ar) continue; const q = ar.getBoundingClientRect(); if (q.width < 4) continue; list.push({ key: e.__L.k, x: q.left + q.width / 2, y: q.top + q.height * 0.56, w: q.width * 0.7, g: featOf(e.__L.g) }); }
+    const list = [];
     world.sync(list, t, dt); r.clearDepth(); r.render(world.scene, world.cam); }
   r.clearDepth(); r.render(gl.pscene, gl.pcam);
 }
