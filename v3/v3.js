@@ -97,7 +97,7 @@ body.v3on #v2world.v3in { transition: transform .95s cubic-bezier(.15, .6, .3, 1
     <div class="v3-main"></div><div class="v3-tick" id="v3tick"></div>`;
   board = document.createElement("div"); board.className = "v3-board"; board.innerHTML = `<div class="v3-lanes" id="v3lanes"></div><div class="v3-pages" id="v3pages"></div>`;
   stageEl = document.createElement("div"); stageEl.className = "v3-stage";
-  css3 = new CSS3DRenderer(); css3.domElement.className = "v3-css3"; scene3 = new THREE.Scene(); const bo = new CSS3DObject(board); bo.position.set(0, 1.3, 0); bo.scale.setScalar(0.0095); bo.rotation.x = -0.05; scene3.add(bo);
+  css3 = new CSS3DRenderer(); css3.domElement.className = "v3-css3"; scene3 = new THREE.Scene(); const bo = new CSS3DObject(board); bo.position.set(0, 0.86, 0); bo.scale.setScalar(0.0095); bo.rotation.x = -0.05; scene3.add(bo);
   SR.append(css3.domElement, root, stageEl); document.body.append(gl, host, fx);
   lanesEl = board.querySelector("#v3lanes"); tickEl = $("#v3tick"); pagesEl = board.querySelector("#v3pages");
   $("#v3x").addEventListener("click", () => { try { localStorage.removeItem("sb-v3"); } catch (e) {} location.replace(location.pathname); });
@@ -132,10 +132,10 @@ function flip(els, fn) {
   for (const [e, r0] of a) { if (!e.isConnected || !e.offsetParent) continue; const r1 = e.getBoundingClientRect(), sc = r1.width / Math.max(1, e.offsetWidth) || 1, dx = (r0.left - r1.left) / sc, dy = (r0.top - r1.top) / sc; if (Math.abs(dx) + Math.abs(dy) < 3) continue;
     e.animate([{ transform: `translate(${dx}px, ${dy}px)` }, { transform: "none" }], { duration: 650, easing: "cubic-bezier(.2,.8,.2,1)" }); }
 }
-let M = null, page = 0, pages = 1, pageAt = 0;
+let M = null, page = 0, pages = 1, pageAt = 0, fitSig = "", fitK = 1;
 function render() {
   M = model();
-  const n = M.n; let kk = n <= 5 ? 1.22 : n <= 9 ? 1.08 : n <= 14 ? 0.96 : n <= 22 ? 0.86 : 0.78; const setK = (k) => { root.style.setProperty("--k", k); board.style.setProperty("--k", k); }; setK(kk);
+  const n = M.n; const setK = (k) => { root.style.setProperty("--k", k); board.style.setProperty("--k", k); };
   // header
   $("#v3clock").textContent = new Date().toLocaleTimeString([], { hour: "numeric", minute: "2-digit" });
   setHtml($("#v3sum"), n ? `<div class="v3-chip"><b>${n}</b><em>open</em></div><div class="v3-chip"><b>${fU(M.risk)}</b><em>riding</em></div>${M.liveN ? `<div class="v3-chip ${M.hold > 0.004 ? "g" : M.hold < -0.004 ? "r" : ""}"><b>${fU(M.hold, true)}</b><em>if it holds · ${M.up} up ${M.dn} down</em></div>` : `<div class="v3-chip"><b>${fU(M.toWin)}</b><em>to win</em></div>`}` : "");
@@ -165,7 +165,11 @@ function render() {
     for (const [k, el] of laneEls) if (!seenL.has(k)) { el.remove(); laneEls.delete(k); }
     for (const [k, el] of cardEls) if (!seenC.has(k)) { el.remove(); cardEls.delete(k); prevCls.delete(k); }
     // it all fits on one page if it can (a little smaller first), pages only after that
-    for (paginate(); pages > 1 && kk > 0.74; paginate()) { kk = Math.round((kk - 0.07) * 100) / 100; setK(kk); }
+    // the bets fill the screen: the biggest size at which everything still fits on one page (worked out again only when the
+    // board's make-up changes); if even small type won't fit, pages at a readable size
+    const sig = M.lanes.map((l) => l.k + ":" + l.cards.map((c) => c.id + (c.par ? c.legs.length : "")).join(",")).join("|") + "@" + innerWidth + "x" + innerHeight;
+    if (sig !== fitSig && board.isConnected && board.clientHeight > 50 && (!M.lanes.length || lanesEl.firstElementChild.offsetHeight > 0)) { fitSig = sig; let lo = 0.62, hi = 2.4; setK(lo); paginate(); if (pages > 1) fitK = 0.86; else { for (let i = 0; i < 7; i++) { const mid = (lo + hi) / 2; setK(mid); paginate(); if (pages > 1) hi = mid; else lo = mid; } fitK = Math.floor(lo * 50) / 50; } }
+    setK(fitK); paginate();
   });
   let em = lanesEl.querySelector(".v3-empty"); if (!M.lanes.length) { if (!em) { em = document.createElement("div"); em.className = "v3-empty"; em.innerHTML = "No open bets<small>Add one from your phone and it lands here</small>"; lanesEl.append(em); } } else if (em) em.remove();
   ticker(); first = false;

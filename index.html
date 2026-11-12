@@ -14933,7 +14933,7 @@ void main(){
   // ---------- sheets ----------
   function openSheet(id) { $(id).hidden = false; }
   // keep every open screen current: when a new version is up, reload it (never mid-form or mid-animation)
-  const BUILD = "20261112035651";
+  const BUILD = "20261112040357";
   function updReady() {
     if (document.getElementById("updReady")) return; const d = document.createElement("div"); d.id = "updReady"; d.textContent = "Update ready · refresh, then TV + Sound on"; document.body.append(d);
   }
@@ -25460,7 +25460,9 @@ const wdEase = (x) => (x < 0.5 ? 4 * x * x * x : 1 - Math.pow(-2 * x + 2, 3) / 2
 // what's on: the sport from the board's mode, the teams from the big game's card
 function wdRead() {
   let force = ""; try { force = localStorage.getItem("sb-world-sport") || ""; } catch (e) {}
-  const c = document.body.classList, sport = WD_V[force] ? force : c.contains("baseball") ? "mlb" : c.contains("hoops") ? "nba" : c.contains("hockey") ? "nhl" : "nfl";
+  const c = document.body.classList; let sport = WD_V[force] ? force : c.contains("baseball") ? "mlb" : c.contains("hoops") ? "nba" : c.contains("hockey") ? "nhl" : "nfl";
+  // V3: the building is the featured game's kind, whatever the page thinks tonight is (a football game never gets an arena)
+  if (!WD_V[force]) try { const ft = window.__v3 && window.__v3.on && window.__sbFeat && window.__sbFeat(), m = ft && { NFL: "nfl", CFB: "nfl", NBA: "nba", CBB: "nba", NHL: "nhl", MLB: "mlb" }[ft.sport]; if (m) sport = m; } catch (e) {}
   const g = document.querySelector("#rbGames .rb-g.hero") || document.querySelector("#rbGames .rb-g") || document.querySelector(".pp-g, .rb-g");
   const T = { a: { ab: "SWEAT", col: [0.1, 0.16, 0.32], alt: [1, 0.79, 0.3], sc: "", lg: "" }, h: { ab: "BOARD", col: [0.5, 0.1, 0.16], alt: [1, 0.79, 0.3], sc: "", lg: "" }, d: "" };
   if (g) {
