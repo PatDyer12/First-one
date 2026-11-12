@@ -7666,6 +7666,11 @@ body.tv.pplg .roomtv:not([hidden]) canvas { width: 84px; height: 84px; grid-row:
 <script>
 (function () {
   "use strict";
+  // V3: the new TV display (v3/v3.js). ?v3 turns it on for this screen, ?v3=off turns it back off
+  try { const q = new URLSearchParams(location.search); if (q.has("v3")) { if (q.get("v3") === "off") localStorage.removeItem("sb-v3"); else localStorage.setItem("sb-v3", "on"); } } catch (e) {}
+  window.__v3 = { on: false, want: (() => { try { return localStorage.getItem("sb-v3") === "on"; } catch (e) { return false; } })() };
+  const V3 = () => !!window.__v3.on;
+  const v3do = (k, ...a) => { try { if (window.__v3[k]) window.__v3[k](...a); } catch (e) { console.warn("v3", k, e); } };
   try { if (localStorage.getItem("sb-v2") !== "off") document.body.classList.add("v2b"); } catch (e) { document.body.classList.add("v2b"); }
   // V2: a looping animation on the board (named v2l...) is set by the clock, not by when its element was drawn, so a redraw
   // never sends a spinning edge or a breathing glow back to the start; each ticket gets its own offset
@@ -11486,7 +11491,7 @@ body.tv.pplg .roomtv:not([hidden]) canvas { width: 84px; height: 84px; grid-row:
   const fxLog = [];
   const fxRush = () => { const t = Date.now(); while (fxLog.length && t - fxLog[0] > 120e3) fxLog.shift(); return fxLog.length >= 2 || fxQ.length >= 2; };
   const flQ = []; let flT = 0;
-  function qFlash(...a) { flQ.push(a); if (!flT) flStep(); }
+  function qFlash(...a) { if (V3()) return; flQ.push(a); if (!flT) flStep(); }
   function flStep() { const a = flQ.shift(); if (!a) { flT = 0; return; } flash(...a); flT = setTimeout(flStep, 2900); }
 
   const CASH = { q: [], t: 0 };
@@ -14641,6 +14646,7 @@ void main(){
     fx(afterCard(() => grpRun(q.list)));
   }
   function celebrate(b, solo) {
+    if (V3()) { const o = outcome(b); if (o === "W") playWin(); else if (o === "L" && isMe(b)) playLoss(); v3do("settle", b, o, netOf(b)); return; }
     if (!solo && grpTake(b)) return;
     try { if (window.sbCrowd) window.sbCrowd.pop(); } catch (e) {}
     try { if (document.body.classList.contains("hoops")) HC.boost = Math.min(1.6, HC.boost + 1); } catch (e) {}
@@ -14700,6 +14706,7 @@ void main(){
     el.classList.remove("on"); setTimeout(() => { if (!el.classList.contains("on")) el.hidden = true; }, 600);
   }
   function announce(b) {
+    if (V3()) { v3do("place", b); return; }
     if (v2On()) { wdFx("place", b); placeV2(b); return; }
     const tag = isMe(b) ? null : { name: personName(b), sub: "just bet", col: personCol(b) };
     const T = flexOf(b);
@@ -14758,6 +14765,7 @@ void main(){
     }
   }
   function legFx(b, legs, i) {
+    if (V3()) { v3do("leg", b, i, legs[i] && legs[i].st); return; }
     const l = legs[i], hits = legs.filter((x) => x.st === "hit").length, who = isMe(b) ? "" : personName(b).toUpperCase() + " · ";
     if (!isMe(b) && l.st === "hit" && tdCard.delete(b.id)) return;
     if (l.st === "miss") { flash("L", who + "LEG ✕", l.t, `${b.pick} · parlay's dead`, isMe(b)); return; }
@@ -14925,7 +14933,7 @@ void main(){
   // ---------- sheets ----------
   function openSheet(id) { $(id).hidden = false; }
   // keep every open screen current: when a new version is up, reload it (never mid-form or mid-animation)
-  const BUILD = "20261108182912";
+  const BUILD = "20261112031048";
   function updReady() {
     if (document.getElementById("updReady")) return; const d = document.createElement("div"); d.id = "updReady"; d.textContent = "Update ready · refresh, then TV + Sound on"; document.body.append(d);
   }
@@ -16153,7 +16161,7 @@ void main(){
 
   // ---------- big-bet effects queue: one full-screen effect at a time ----------
   const fxQ = []; let fxBusy = false;
-  function fx(run) { if (PHONE()) return; fxQ.push(run); if (!fxBusy) fxNext(); }
+  function fx(run) { if (PHONE() || V3()) return; fxQ.push(run); if (!fxBusy) fxNext(); }
   // a full-screen effect that holds its place in line until the play card on screen is done
   const afterCard = (run) => { const w = () => (cardBusy ? (fxQ.unshift(w), 250) : run()); return w; };
   let fxT = 0, fxRun = 0;
@@ -17782,6 +17790,7 @@ void main(){
   }
   function reactPre(b, kind, P, why, pre) { clipAt = Date.now(); clipClaim = null; glow(b.id, kind); render(); statusBet = b.id; showPip(b, P, moodOf(kind, P), why, pre); }
   function react(b, kind, P, why) {
+    if (V3()) return;
     if (PHONE() || AUX.on) { render(); return; }
     { const v = vibeTake(b, kind, P); if (v) { b = v.b; P = v.P; why = v.why; } }
     { const spx = (gameFor(b) || {}).sport || sportOf(b); if (spx && !sset(spx, "clips")) { render(); return; } }
@@ -18301,6 +18310,7 @@ void main(){
   }
   let lastDj = Date.now() - 3 * 60e3; // first one about a minute after the board opens
   function djBreak(now) {
+    if (V3()) return;
     if (PHONE() || AUX.on) return false;
     const mine = [...S.bets.values()].filter((b) => b.status === "open"), b = mine.find((x) => phase(x) === "live") || mine[0];
     const P = b && pickClip(newSong(CLIPS.filter((c) => c.dj)));
@@ -23103,6 +23113,8 @@ void main(){
       }, onErr));
     });
   }
+  window.__sb3 = { S, BUILD, legsOf, evalSel, gameOf, isMe, personKey, personName, personCol, phase, fOdds, fU, fUSD, ppu, netOf, outcome, standings, startLabel, mktName, flexOf, hasBall, gameDone, bookKey, tv: () => document.body.classList.contains("tv") && !PHONE() };
+  if (window.__v3.want || /[?&]v3demo/.test(location.search)) import("./v3/v3.js?v=" + BUILD).catch((e) => console.warn("v3", e));
 })();
 </script>
 <script>
@@ -25436,7 +25448,7 @@ Object.assign(SIG_OF, { maction: "lightning", funbelt: "fireworks", sickos: "gal
 // scores light the place up: ribbons, the jumbotron, the crowd, fireworks. localStorage sb-world = off (or sb-v2 = off) keeps
 // the flat backgrounds.
 const WD = { st: null, starting: false, key: "", mode: "board", last: 0, raf: 0, q: 0, go: 0, sig: "", card: null, cardTo: 0, ribAt: 0 };
-const wdOn = () => { if (WD.off) return false; try { return localStorage.getItem("sb-v2") !== "off" && localStorage.getItem("sb-world") !== "off"; } catch (e) { return true; } };
+const wdOn = () => { if (WD.off || (window.__v3 && window.__v3.on)) return false; try { return localStorage.getItem("sb-v2") !== "off" && localStorage.getItem("sb-world") !== "off"; } catch (e) { return true; } };
 const wdTv = () => document.body.classList.contains("tv") && !document.body.classList.contains("phone");
 const wdHex = (h, d) => { const m = /^#?([0-9a-f]{6})$/i.exec(String(h || "").trim()); if (!m) return d || [0.3, 0.32, 0.38]; const n = parseInt(m[1], 16); return [((n >> 16) & 255) / 255, ((n >> 8) & 255) / 255, (n & 255) / 255]; };
 const wdLum = (c) => 0.299 * c[0] + 0.587 * c[1] + 0.114 * c[2];
