@@ -14933,7 +14933,7 @@ void main(){
   // ---------- sheets ----------
   function openSheet(id) { $(id).hidden = false; }
   // keep every open screen current: when a new version is up, reload it (never mid-form or mid-animation)
-  const BUILD = "20261112033711";
+  const BUILD = "20261112034253";
   function updReady() {
     if (document.getElementById("updReady")) return; const d = document.createElement("div"); d.id = "updReady"; d.textContent = "Update ready · refresh, then TV + Sound on"; document.body.append(d);
   }
@@ -26998,7 +26998,7 @@ function wdFbBuild(st, fs) {
       for (const xx of [-18, 18]) { const ln = add(new THREE.PlaneGeometry(0.18, 7), line, xx, 0.03, sz * 32.8); ln.rotation.x = -Math.PI / 2; }
       add(new THREE.BoxGeometry(30, 0.5, 0.9), new THREE.MeshBasicMaterial({ color: col(wdMix(t.col, [0, 0, 0], 0.2)) }), 0, 0.6, zb + sz * 1.8);
       add(new THREE.BoxGeometry(30, 1.2, 0.3), new THREE.MeshBasicMaterial({ color: col(wdMix(t.col, [0, 0, 0], 0.45)) }), 0, 1.05, zb + sz * 2.3);
-      for (let i = 0; i < 5; i++) add(new THREE.BoxGeometry(0.9, 0.8, 0.7), new THREE.MeshBasicMaterial({ color: col([1, 0.42, 0.06]) }), -16 + i * 8 + 2, 0.4, z0 + sz * 3.4);
+      for (let i = 0; i < 5; i++) add(new THREE.BoxGeometry(0.5, 0.6, 0.45), new THREE.MeshBasicMaterial({ color: col([1, 0.42, 0.06]) }), -16 + i * 8 + 2, 0.4, z0 + sz * 3.4);
       void z0; } }
   // the home team on top of the main board: the logo, lit
   if (!V.jumbo.hung && h.lg) { const lc = wdCanvas(512, 512), lx = lc.getContext("2d"), lt = wdTex(THREE, lc); st.tex.push(lt); const J = V.jumbo;
@@ -27016,6 +27016,56 @@ function wdFbBoard(st, J) {
   if (J.base != null) { const hh = J.p[1] - J.h / 2 - (J.base - 3); const sup = new THREE.Mesh(new THREE.BoxGeometry(J.w + 2.6, hh, 6), dark); sup.position.set(0, -J.h / 2 - hh / 2 - 0.02, -2.6); g.add(sup); }
   const prev = st.jface; st.jface2 = () => ({ c: g.localToWorld(new THREE.Vector3(0, 0, 1.02)), n: n.clone(), w: J.w, h: J.h });
   st.jface = (camPos) => { const a = prev(camPos), b = st.jface2(); return !camPos || a.c.distanceTo(camPos) <= b.c.distanceTo(camPos) ? a : b; };
+}
+function wdPolish(st, fs) {
+  const THREE = st.THREE, V = st.V, scene = st.scene, T = st.R.T, top = V.top, outer = V.outer, A = V.A, B = V.B;
+  const col = (c, k = 1) => new THREE.Color().setRGB(Math.min(1, c[0] * k), Math.min(1, c[1] * k), Math.min(1, c[2] * k), THREE.LinearSRGBColorSpace);
+  const flat = (c, k) => new THREE.MeshBasicMaterial({ color: col(c, k) });
+  const vis = (c) => { const l = 0.3 * c[0] + 0.59 * c[1] + 0.11 * c[2]; return l < 0.16 ? c.map((v) => v + (0.2 - l)) : c; };
+  const hc = vis(T.h.col), ac0 = vis(T.a.col), ac = Math.hypot(hc[0] - ac0[0], hc[1] - ac0[1], hc[2] - ac0[2]) < 0.28 ? [0.93, 0.93, 0.95] : ac0;   // the visitors in white when the colours clash
+  // people: a body, a helmet, legs; drawn as three instanced meshes a group
+  const HT = 2.7, gB = new THREE.CapsuleGeometry(0.52, 0.75, 3, 8), gH = new THREE.SphereGeometry(0.4, 10, 8), gL = new THREE.CapsuleGeometry(0.4, 0.55, 3, 8), _m = new THREE.Matrix4(), _q = new THREE.Quaternion(), _e = new THREE.Euler(), _p = new THREE.Vector3(), _s = new THREE.Vector3();
+  const crew = (n, body, helm, legs) => { const mk = (g, c) => { const m = new THREE.InstancedMesh(g, flat(c), n); m.frustumCulled = false; scene.add(m); return m; }, Bm = mk(gB, body), Hm = mk(gH, helm), Lm = mk(gL, legs);
+    return { n, set(i, x, z, ry, hop = 0, k = 1) { _e.set(0, ry, 0); _q.setFromEuler(_e); _s.set(k, k, k); for (const [m, y] of [[Lm, 0.62], [Bm, 1.55], [Hm, 2.42]]) { _p.set(x, (y + hop) * k * (HT / 2.8), z); _m.compose(_p, _q, _s); m.setMatrixAt(i, _m); } }, done() { Bm.instanceMatrix.needsUpdate = Hm.instanceMatrix.needsUpdate = Lm.instanceMatrix.needsUpdate = true; } }; };
+  const home = crew(11, hc, hc.map((v) => v * 0.8), [0.92, 0.92, 0.95]), away = crew(11, ac, ac.map((v) => v * 0.85), [0.75, 0.76, 0.8]), refs = crew(5, [0.95, 0.95, 0.95], [0.08, 0.08, 0.1], [0.1, 0.1, 0.12]);
+  // who stands where off the ball: [yards behind the line, yards across]
+  const OFF = [[0.8, -2], [0.8, -1], [0.8, 0], [0.8, 1], [0.8, 2], [0.9, 3.3], [5, 0], [6, 1.8], [1, -16], [1.6, -9], [1, 16]];
+  const DEF = [[1.1, -3], [1.1, -1], [1.1, 1], [1.1, 3], [4.6, -4.5], [4.6, 0], [4.6, 4.5], [6, -16], [6, 16], [12, -7], [12, 7]];
+  const REF = [[-7, 0], [16, -20], [16, 20], [1, -25], [1, 25]];
+  // the ball, the line of scrimmage, the line to gain
+  const ball = new THREE.Mesh(new THREE.SphereGeometry(0.3, 10, 8), flat([0.5, 0.25, 0.1])); ball.scale.set(1.5, 0.9, 0.9); scene.add(ball);
+  const lineM = (c, o) => new THREE.MeshBasicMaterial({ color: col(c), transparent: true, opacity: o, depthWrite: false });
+  const los = new THREE.Mesh(new THREE.PlaneGeometry(0.28, 53.33), lineM([0.25, 0.55, 1], 0.85)), ltg = new THREE.Mesh(new THREE.PlaneGeometry(0.34, 53.33), lineM([1, 0.84, 0.1], 0.95));
+  for (const l of [los, ltg]) { l.rotation.x = -Math.PI / 2; l.position.y = 0.05; scene.add(l); }
+  // along the benches: the rest of both teams and the staff
+  { const N = 26, sideH = crew(N, hc, hc.map((v) => v * 0.8), [0.92, 0.92, 0.95]), sideA = crew(N, ac, ac.map((v) => v * 0.85), [0.75, 0.76, 0.8]);
+    for (let i = 0; i < N; i++) { const x = -15.5 + (i % 13) * 2.6 + ((i * 7) % 3) * 0.3, row = i < 13 ? 0 : 1; sideH.set(i, x, -(26.67 + 3.2 + row * 1.9), 0, 0, 0.92); sideA.set(i, x, 26.67 + 3.2 + row * 1.9, Math.PI, 0, 0.92); } sideH.done(); sideA.done(); }
+  // flags on the rim, in the home colours, flying
+  const flags = [], fg = new THREE.PlaneGeometry(5.2, 3, 6, 1); fg.translate(2.6, 0, 0);
+  for (let i = 0; i < 26; i++) { const p = wdNorm(st.C, (i + 0.5) / 26), o = outer + 1.2, x = p[0] + p[2] * o, z = p[1] + p[3] * o; if (st.deckSpot && st.deckSpot.gap(x, z)) continue;
+    if (V.dome || V.roof) break; const pole = new THREE.Mesh(new THREE.CylinderGeometry(0.12, 0.12, 7, 5), flat([0.75, 0.76, 0.8])); pole.position.set(x, top + 4.5, z); scene.add(pole);
+    const f = new THREE.Mesh(fg, new THREE.MeshBasicMaterial({ color: col(i % 2 ? hc : vis(T.h.alt || [1, 1, 1])), side: THREE.DoubleSide })); f.position.set(x, top + 6.4, z); f.rotation.y = 0.6 + i; scene.add(f); flags.push(f); }
+  // shafts of light down onto the field from the rim, and a pool of it at midfield
+  if (!V.dome) for (let i = 0; i < 8; i++) { const p = wdNorm(st.C, (i + 0.5) / 8), o = outer, x = p[0] + p[2] * o, z = p[1] + p[3] * o, y = top + 6, len = Math.hypot(x, y, z) * 0.92;
+    const g = new THREE.ConeGeometry(len * 0.2, len, 40, 1, true); g.translate(0, -len / 2, 0); g.rotateX(Math.PI / 2);
+    const m = new THREE.Mesh(g, new THREE.MeshBasicMaterial({ color: col([1, 0.97, 0.88]), transparent: true, opacity: 0.013, blending: THREE.AdditiveBlending, depthWrite: false, side: THREE.FrontSide })); m.position.set(x, y, z); m.lookAt(x * 0.2, 0, z * 0.2); m.rotateY(Math.PI); scene.add(m); }
+  // the game as it stands, looked up once a second
+  const S = { x: 0, tx: 0, dir: 1, has: false, togo: null, at: 0, run: 0 };
+  const read = () => { let g = null; try { const f = window.__sbFeat && window.__sbFeat(); if (f && f.h && f.h.ab === T.h.ab) g = f; } catch (e) {} if (!g) g = st.R.scene && st.R.scene.game;
+    const si = g && g.st === "in" ? g.sit : null; S.has = !!(si && typeof si.yl === "number" && si.pos); if (!S.has) return;
+    const awayBall = String(si.pos) === String(g.a.id); S.dir = awayBall ? 1 : -1; const nx = 50 - si.yl; if (Math.abs(nx - S.tx) > 0.4) S.run = 1; S.tx = nx; S.togo = typeof si.ds === "number" && si.ds > 0 ? si.ds : null; };
+  (st.spin = st.spin || []).push((t) => {
+    if (t - S.at > 1) { S.at = t; read(); }
+    S.x += (S.tx - S.x) * 0.045; S.run = Math.max(0, S.run - 0.012); const mv = Math.min(1, Math.abs(S.tx - S.x) / 3 + S.run * 0.4), d = S.dir;
+    const offT = d > 0 ? away : home, defT = d > 0 ? home : away, ph = (i) => Math.abs(Math.sin(t * (2 + mv * 9) + i * 1.7)) * (0.05 + mv * 0.3);
+    if (S.has) { OFF.forEach(([b, z], i) => offT.set(i, S.x - d * b, z, d > 0 ? Math.PI / 2 : -Math.PI / 2, ph(i))); DEF.forEach(([b, z], i) => defT.set(i, S.x + d * b, z, d > 0 ? -Math.PI / 2 : Math.PI / 2, ph(i + 11)));
+      REF.forEach(([b, z], i) => refs.set(i, S.x + d * b, z, 0, 0)); }
+    else { for (let i = 0; i < 11; i++) { const a = (i / 11) * Math.PI * 2 + t * 0.15; home.set(i, 14 + Math.cos(a) * 2.6, Math.sin(a) * 2.6, -a, ph(i) * 0.4); away.set(i, -14 + Math.cos(a) * 2.6, Math.sin(a) * 2.6, -a, ph(i) * 0.4); } REF.forEach(([b, z], i) => refs.set(i, (i - 2) * 3, -24, 0, 0)); }
+    home.done(); away.done(); refs.done();
+    ball.visible = los.visible = S.has; ltg.visible = S.has && S.togo != null; ball.position.set(S.x, 0.35 + Math.sin(Math.min(1, mv) * Math.PI) * 1.2 * (mv > 0.05 ? 1 : 0), 0); los.position.x = S.x; if (S.togo != null) ltg.position.x = Math.max(-50, Math.min(50, S.x + d * S.togo));
+    for (let i = 0; i < flags.length; i++) { const f = flags[i], p = f.geometry.attributes.position; f.rotation.y = 0.6 + i + Math.sin(t * 0.7 + i) * 0.25; }
+  });
+  read(); S.x = S.tx;
 }
 // fans in the seats: the home side mostly, the visitors in a pocket (a neutral site split down the middle), a few neutral
 function wdFbFans(st) {
@@ -28267,7 +28317,7 @@ function wdBuild(L, R) {
     if (J.legs) for (const s2 of [-1, 1]) { const leg = new THREE.Mesh(new THREE.BoxGeometry(2, J.p[1], 2), dark); leg.position.set(s2 * J.w * 0.3, -J.p[1] / 2, -0.5); jg.add(leg); }
     st.jface = () => ({ c: jg.localToWorld(new THREE.Vector3(0, 0, 1.02)), n: n.clone(), w: J.w, h: J.h });
   }
-  if (fs || as || pf) { if (fs || as) try { if (fs) wdFbBuild(st, fs); else wdArBuild(st, as); } catch (e) { console.warn(fs ? "stadium" : "arena", e); } wdDeckBuild(st, st.deckSpot); }
+  if (fs || as || pf) { if (fs || as) try { if (fs) wdFbBuild(st, fs); else wdArBuild(st, as); } catch (e) { console.warn(fs ? "stadium" : "arena", e); } if (fs) try { wdPolish(st, fs); } catch (e) { console.warn("polish", e); } wdDeckBuild(st, st.deckSpot); }
   else {
   // the DJ's suite, on the far side, lit up in purple
   {
