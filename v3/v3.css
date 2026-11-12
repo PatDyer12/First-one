@@ -1,9 +1,12 @@
 /* Sweat Board V3: the TV display (inside its own shadow root). Everything is sized off --u (1px at 1920 wide) times --k (density) */
-#v3, .v3-ghost, .v3-bill, .v3-note, .v3-stage { --u: calc(100vw / 1920); --g: #35e08a; --r: #ff5468; --a: #ffc247; --ink: #f4f7fb; --dim: #8e9bb0; }
+#v3, .v3-board, .v3-ghost, .v3-bill, .v3-note, .v3-stage { --u: calc(100vw / 1920); --g: #35e08a; --r: #ff5468; --a: #ffc247; --ink: #f4f7fb; --dim: #8e9bb0; }
 #v3 { --k: 1; --k: 1;
   position: fixed; inset: 0; z-index: 1; color: var(--ink); font-family: Inter, system-ui, sans-serif; display: grid; grid-template-rows: auto minmax(0, 1fr) auto; overflow: hidden; cursor: none; }
-#v3 * { box-sizing: border-box; }
-#v3 .num { font-variant-numeric: tabular-nums; }
+#v3 *, .v3-board, .v3-board * { box-sizing: border-box; }
+#v3 .num, .v3-board .num { font-variant-numeric: tabular-nums; }
+.v3-css3 { position: fixed !important; inset: 0; z-index: 0; pointer-events: none; }
+.v3-board { --u: 1px; --k: 1; width: 1864px; height: 870px; color: var(--ink); font-family: Inter, system-ui, sans-serif; transition: filter .5s; }
+.v3-board.dim { filter: saturate(.5) brightness(.5); }
 /* header */
 .v3-top { display: flex; align-items: center; gap: calc(var(--u) * 22); padding: calc(var(--u) * 16) calc(var(--u) * 28) calc(var(--u) * 10); }
 .v3-brand { font: 900 calc(var(--u) * 34)/1 "Big Shoulders Display", "Barlow Condensed", sans-serif; letter-spacing: .14em; white-space: nowrap; }
@@ -24,32 +27,32 @@
 .v3-x { opacity: 0; position: absolute; top: 0; right: 0; width: calc(var(--u) * 120); height: calc(var(--u) * 60); background: none; border: 0; color: #fff; cursor: pointer; font: 700 calc(var(--u) * 16)/1 Inter, sans-serif; }
 .v3-x:hover, .v3-x:focus-visible { opacity: 1; }
 /* lanes */
-.v3-main { position: relative; min-height: 0; padding: calc(var(--u) * 4) calc(var(--u) * 28) calc(var(--u) * 8); }
-.v3-lanes { display: flex; flex-direction: column; gap: calc(var(--u) * 12 * var(--k)); height: 100%; justify-content: flex-start; }
-.v3-lane { position: relative; display: grid; grid-template-columns: calc(var(--u) * 330 * var(--k)) minmax(0, 1fr); gap: calc(var(--u) * 14 * var(--k)); align-items: stretch; }
+.v3-main { min-height: 0; }
+.v3-lanes { display: block; }
+.v3-lane { position: relative; display: grid; grid-template-columns: calc(var(--u) * 360 * var(--k)) minmax(0, 1fr); gap: calc(var(--u) * 14 * var(--k)); align-items: center; margin-bottom: calc(var(--u) * 12 * var(--k)); }
 .v3-lane.off { display: none; }
-.v3-g { position: relative; border-radius: calc(var(--u) * 18); padding: calc(var(--u) * 12 * var(--k)) calc(var(--u) * 16 * var(--k)); background: linear-gradient(135deg, color-mix(in srgb, var(--ca) 34%, #0a0e16) 0%, #0a0e16 48%, color-mix(in srgb, var(--ch) 34%, #0a0e16) 100%); border: 1px solid rgba(255, 255, 255, .1); display: grid; align-content: center; gap: calc(var(--u) * 6 * var(--k)); overflow: hidden; }
-.v3-g.live { border-color: rgba(255, 255, 255, .22); box-shadow: 0 0 calc(var(--u) * 30) color-mix(in srgb, var(--ch) 30%, transparent); }
-.v3-g .row { display: grid; grid-template-columns: calc(var(--u) * 44 * var(--k)) minmax(0, 1fr) auto; align-items: center; gap: calc(var(--u) * 10 * var(--k)); }
-.v3-g img { width: calc(var(--u) * 44 * var(--k)); height: calc(var(--u) * 44 * var(--k)); object-fit: contain; filter: drop-shadow(0 2px 6px rgba(0, 0, 0, .6)); }
-.v3-g .ab { font: 800 calc(var(--u) * 30 * var(--k))/1 "Barlow Condensed", sans-serif; letter-spacing: .04em; display: flex; align-items: center; gap: .35em; }
-.v3-g .ab .ball { width: .34em; height: .34em; border-radius: 50%; background: var(--a); box-shadow: 0 0 .5em var(--a); }
-.v3-g .ab .ball.rz { background: var(--r); box-shadow: 0 0 .6em var(--r); animation: v3blink 1s infinite; }
-.v3-g .sc { font: 900 calc(var(--u) * 46 * var(--k))/1 "Big Shoulders Display", "Barlow Condensed", sans-serif; min-width: 1.2em; text-align: right; display: inline-block; }
-.v3-g .row.lead .sc { text-shadow: 0 0 calc(var(--u) * 18) rgba(255, 255, 255, .5); } .v3-g .row.trail { opacity: .72; }
+/* a game: its stadium floats in the open top (3D, behind the page), the play under it, the score along the bottom */
+.v3-g { position: relative; display: grid; gap: calc(var(--u) * 3 * var(--k)); }
+.v3-arena { height: calc(var(--u) * 128 * var(--k)); }
+.v3-play { font: 700 calc(var(--u) * 15 * var(--k))/1.1 "Barlow Condensed", sans-serif; letter-spacing: .05em; text-transform: uppercase; color: #c9d5ea; text-align: center; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; text-shadow: 0 1px 4px #000; }
+.v3-sb { display: grid; grid-template-columns: 1fr auto 1fr; align-items: center; gap: calc(var(--u) * 8 * var(--k)); padding: calc(var(--u) * 5 * var(--k)) calc(var(--u) * 10 * var(--k)); border-radius: calc(var(--u) * 14); background: linear-gradient(90deg, color-mix(in srgb, var(--ca) 42%, #0a0e16), #0a0e16 46%, #0a0e16 54%, color-mix(in srgb, var(--ch) 42%, #0a0e16)); border: 1px solid rgba(255, 255, 255, .12); }
+.v3-g.live .v3-sb { border-color: rgba(255, 255, 255, .26); }
+.v3-sb .tm { display: flex; align-items: center; gap: calc(var(--u) * 6 * var(--k)); min-width: 0; } .v3-sb .tm.h { justify-content: flex-end; }
+.v3-sb img { width: calc(var(--u) * 30 * var(--k)); height: calc(var(--u) * 30 * var(--k)); object-fit: contain; }
+.v3-sb .ab { font: 800 calc(var(--u) * 21 * var(--k))/1 "Barlow Condensed", sans-serif; letter-spacing: .04em; display: flex; align-items: center; gap: .3em; opacity: .85; }
+.v3-sb .ball { width: .4em; height: .4em; border-radius: 50%; background: var(--a); box-shadow: 0 0 .5em var(--a); } .v3-sb .ball.rz { background: var(--r); box-shadow: 0 0 .6em var(--r); animation: v3blink 1s infinite; }
+.v3-sb .sc { font: 900 calc(var(--u) * 38 * var(--k))/1 "Big Shoulders Display", "Barlow Condensed", sans-serif; min-width: 1em; text-align: center; display: inline-block; opacity: .8; }
+.v3-sb .tm.lead .sc { opacity: 1; text-shadow: 0 0 calc(var(--u) * 16) rgba(255, 255, 255, .55); } .v3-sb .tm.lead .ab { opacity: 1; }
 .v3-g .sc.flip { animation: v3flip .9s cubic-bezier(.2, 1.5, .4, 1); }
 @keyframes v3flip { 0% { transform: translateY(-.5em) scale(1.7); color: var(--a); filter: blur(2px); } 60% { color: var(--a); } }
-.v3-g .st { display: flex; justify-content: space-between; gap: 1em; font: 700 calc(var(--u) * 17 * var(--k))/1.1 "Barlow Condensed", sans-serif; letter-spacing: .07em; text-transform: uppercase; color: var(--dim); white-space: nowrap; }
-.v3-g.live .st b { color: var(--r); } .v3-g .st b::before { content: ""; display: none; }
-.v3-g.live .st b::before { display: inline-block; width: .5em; height: .5em; border-radius: 50%; background: var(--r); margin-right: .4em; animation: v3blink 1.2s infinite; }
-.v3-g .st span { overflow: hidden; text-overflow: ellipsis; }
+.v3-sb .clk { font: 800 calc(var(--u) * 15 * var(--k))/1 "Barlow Condensed", sans-serif; letter-spacing: .06em; text-transform: uppercase; color: var(--dim); white-space: nowrap; }
+.v3-g.live .clk { color: var(--r); }
 @keyframes v3blink { 50% { opacity: .25; } }
-.v3-lane.scored .v3-g { animation: v3scored 1.4s ease-out; }
+.v3-lane.scored .v3-sb { animation: v3scored 1.4s ease-out; }
 @keyframes v3scored { 0% { transform: scale(1.06); box-shadow: 0 0 calc(var(--u) * 90) var(--sc, #fff); border-color: #fff; } }
 .v3-lane.scored .v3-c { animation: v3bump .7s ease-out; }
 @keyframes v3bump { 30% { transform: translateY(calc(var(--u) * -6)); } }
-.v3-lane.plain { grid-template-columns: calc(var(--u) * 330 * var(--k)) minmax(0, 1fr); }
-.v3-g.tag { background: #0a0e16; justify-items: start; }
+.v3-g.tag { justify-items: start; padding: calc(var(--u) * 14 * var(--k)); border-radius: calc(var(--u) * 14); background: rgba(10, 14, 22, .85); border: 1px solid rgba(255, 255, 255, .1); }
 .v3-g.tag b { font: 900 calc(var(--u) * 30 * var(--k))/1 "Big Shoulders Display", sans-serif; letter-spacing: .1em; text-transform: uppercase; } .v3-g.tag small { color: var(--dim); font: 600 calc(var(--u) * 15 * var(--k))/1.2 Inter, sans-serif; }
 /* bet cards */
 .v3-cards { display: flex; flex-wrap: wrap; gap: calc(var(--u) * 12 * var(--k)); align-content: flex-start; }
@@ -87,7 +90,7 @@
 .v3-leg.lw .x { color: var(--g); } .v3-leg.ll .x { color: var(--r); } .v3-leg.le .x { color: var(--a); }
 .v3-leg.pop .pip { animation: v3pip .8s cubic-bezier(.2, 1.8, .4, 1); } @keyframes v3pip { 30% { transform: scale(2.1); } }
 .v3-prog { display: flex; gap: calc(var(--u) * 4); } .v3-prog i { flex: 1; height: calc(var(--u) * 6 * var(--k)); border-radius: 9px; background: rgba(255, 255, 255, .1); } .v3-prog i.hit { background: var(--g); box-shadow: 0 0 calc(var(--u) * 10) var(--g); } .v3-prog i.miss { background: var(--r); } .v3-prog i.lw { background: rgba(53, 224, 138, .4); } .v3-prog i.ll { background: rgba(255, 84, 104, .4); } .v3-prog i.le { background: rgba(255, 194, 71, .4); }
-.v3-pages { position: absolute; right: calc(var(--u) * 30); bottom: calc(var(--u) * 2); display: flex; gap: calc(var(--u) * 6); } .v3-pages i { width: calc(var(--u) * 26); height: calc(var(--u) * 4); border-radius: 4px; background: rgba(255, 255, 255, .18); } .v3-pages i.on { background: var(--a); }
+.v3-pages { position: absolute; right: calc(var(--u) * 8); bottom: calc(var(--u) * -14); display: flex; gap: calc(var(--u) * 6); } .v3-pages i { width: calc(var(--u) * 26); height: calc(var(--u) * 4); border-radius: 4px; background: rgba(255, 255, 255, .18); } .v3-pages i.on { background: var(--a); }
 .v3-empty { margin: auto; text-align: center; font: 800 calc(var(--u) * 46)/1.1 "Big Shoulders Display", sans-serif; letter-spacing: .08em; text-transform: uppercase; color: #5f6c82; } .v3-empty small { display: block; margin-top: .6em; font: 600 calc(var(--u) * 20)/1.3 Inter, sans-serif; letter-spacing: 0; text-transform: none; }
 /* ticker */
 .v3-tick { height: calc(var(--u) * 46); display: flex; align-items: center; overflow: hidden; background: rgba(6, 9, 15, .82); border-top: 1px solid rgba(255, 255, 255, .08); white-space: nowrap; }
@@ -97,7 +100,7 @@
 /* the show: a settled bet takes the stage */
 .v3-stage { position: fixed; inset: 0; z-index: 5; pointer-events: none; background: radial-gradient(ellipse at center, rgba(4, 6, 11, .35), rgba(4, 6, 11, .9)); opacity: 0; transition: opacity .45s; perspective: calc(var(--u) * 1600); }
 .v3-stage.on { opacity: 1; }
-#v3.dim .v3-main, #v3.dim .v3-tick { filter: saturate(.5) brightness(.55); transition: filter .5s; }
+#v3.dim .v3-tick { filter: saturate(.5) brightness(.55); transition: filter .5s; }
 .v3-ghost { position: fixed; z-index: 30; box-sizing: border-box; color: #f4f7fb; font-family: Inter, system-ui, sans-serif; margin: 0; transform-origin: center; will-change: transform, opacity; }
 .v3-ghost.v3-c { max-width: none; }
 .v3-bill { position: fixed; left: 0; right: 0; z-index: 40; text-align: center; pointer-events: none; }
@@ -114,3 +117,8 @@
 .v3-note.in { transform: translate(-50%, 0); } .v3-note b { color: var(--c, #fff); } .v3-note em { font-style: normal; color: var(--dim); }
 
 .v3-ghost *, .v3-bill *, .v3-note * { box-sizing: border-box; } .v3-ghost .num, .v3-bill .num, .v3-note .num { font-variant-numeric: tabular-nums; }
+.v3-venue { position: fixed; left: 50%; bottom: calc(var(--u) * 120); z-index: 45; --u: calc(100vw / 1920); transform: translate(-50%, calc(var(--u) * 60)); opacity: 0; text-align: center; padding: calc(var(--u) * 18) calc(var(--u) * 46); border-radius: calc(var(--u) * 22); background: rgba(6, 9, 16, .78); border: 1px solid rgba(255, 255, 255, .18); box-shadow: 0 0 calc(var(--u) * 60) rgba(80, 140, 255, .35); color: #f4f7fb; transition: transform .6s cubic-bezier(.2, 1.3, .4, 1), opacity .4s; white-space: nowrap; }
+.v3-venue.in { transform: translate(-50%, 0); opacity: 1; }
+.v3-venue small { display: block; font: 800 calc(var(--u) * 22)/1 "Barlow Condensed", sans-serif; letter-spacing: .3em; text-transform: uppercase; color: #ffc247; }
+.v3-venue b { display: block; margin: calc(var(--u) * 8) 0; font: 900 calc(var(--u) * 72)/1 "Big Shoulders Display", "Barlow Condensed", sans-serif; letter-spacing: .04em; text-transform: uppercase; }
+.v3-venue span { font: 700 calc(var(--u) * 26)/1 "Barlow Condensed", sans-serif; letter-spacing: .14em; text-transform: uppercase; color: #aab6cb; }

@@ -4,6 +4,9 @@
 // leans green or red with how the room's doing), and the shows when a bet's placed, a leg hits, a bet cashes or dies (3D).
 // ?v3demo runs it on made-up games and bets, no sign-in needed.
 import * as THREE from "three";
+import { CSS3DRenderer, CSS3DObject } from "three/addons/renderers/CSS3DRenderer.js";
+const VER = (window.__sb3 && window.__sb3.BUILD) || Date.now();
+const { makeWorld } = await import("./world.js?v=" + VER), { makeGlobe, spotOf } = await import("./globe.js?v=" + VER);
 
 const sb = window.__sb3, V = window.__v3, DEMO = /[?&]v3demo/.test(location.search);
 let SR = null;   // the display lives in a shadow root: none of the page's own styles reach it
@@ -72,12 +75,18 @@ function model() {
 }
 
 // ---------- the DOM ----------
-let root, lanesEl, tickEl, pagesEl, stageEl, first = true;
+let root, board, lanesEl, tickEl, pagesEl, stageEl, first = true, css3 = null, scene3 = null, world = null, globe = null, flying = false, lastSpot = null;
+const dim = (v) => { root.classList.toggle("dim", v); board.classList.toggle("dim", v); };
 const laneEls = new Map(), cardEls = new Map(), prevSc = new Map(), prevCls = new Map();
 function build() {
   const out = document.createElement("style"); out.textContent = `body.v3on { background: #04060b !important; overflow: hidden !important; }
-body.v3on > :not(#v3host):not(#v3gl):not(#v3fx):not(#toast):not(#updReady):not(script):not(style) { visibility: hidden !important; pointer-events: none !important; }
+body.v3on > :not(#v3host):not(#v3gl):not(#v3fx):not(#v2world):not(#toast):not(#updReady):not(script):not(style) { visibility: hidden !important; pointer-events: none !important; }
 body.v3on > :not(#v3host):not(#v3gl):not(#v3fx) * { animation: none !important; transition: none !important; }
+body.v3on #v2world { transform-origin: 50% 52%; transition: transform .85s cubic-bezier(.45, 0, .85, .45), opacity .85s ease-in, filter .85s ease, border-radius .85s ease !important; }
+body.v3on #v2world.v3top { z-index: 9050 !important; }
+body.v3on #v2world.v3out { transform: scale(.03) rotate(8deg) !important; opacity: 0 !important; border-radius: 50%; filter: blur(5px) brightness(1.7); }
+body.v3on #v2world.v3in0 { transform: scale(.03) rotate(-8deg) !important; opacity: 0 !important; border-radius: 50%; filter: blur(5px) brightness(1.7); transition: none !important; }
+body.v3on #v2world.v3in { transition: transform .95s cubic-bezier(.15, .6, .3, 1), opacity .5s ease-out, filter .9s ease, border-radius .9s ease !important; }
 #v3gl, #v3fx { position: fixed; inset: 0; width: 100vw; height: 100vh; display: block; pointer-events: none; } #v3gl { z-index: 9000; } #v3fx { z-index: 9200; }
 #v3host { position: fixed; inset: 0; z-index: 9100; }`; document.head.append(out);
   const host = document.createElement("div"); host.id = "v3host"; SR = host.attachShadow({ mode: "open" });
@@ -85,19 +94,22 @@ body.v3on > :not(#v3host):not(#v3gl):not(#v3fx) * { animation: none !important; 
   const gl = document.createElement("canvas"); gl.id = "v3gl"; const fx = document.createElement("canvas"); fx.id = "v3fx";
   root = document.createElement("div"); root.id = "v3";
   root.innerHTML = `<div class="v3-top"><div class="v3-brand">SWEAT <i>BOARD</i></div><div class="v3-clock" id="v3clock"></div><div class="v3-sum" id="v3sum"></div><div class="v3-ppl" id="v3ppl"></div><button class="v3-x" id="v3x" type="button">Exit V3</button></div>
-    <div class="v3-main"><div class="v3-lanes" id="v3lanes"></div><div class="v3-pages" id="v3pages"></div></div><div class="v3-tick" id="v3tick"></div>`;
+    <div class="v3-main"></div><div class="v3-tick" id="v3tick"></div>`;
+  board = document.createElement("div"); board.className = "v3-board"; board.innerHTML = `<div class="v3-lanes" id="v3lanes"></div><div class="v3-pages" id="v3pages"></div>`;
   stageEl = document.createElement("div"); stageEl.className = "v3-stage";
-  SR.append(root, stageEl); document.body.append(gl, host, fx);
-  lanesEl = $("#v3lanes"); tickEl = $("#v3tick"); pagesEl = $("#v3pages");
+  css3 = new CSS3DRenderer(); css3.domElement.className = "v3-css3"; scene3 = new THREE.Scene(); const bo = new CSS3DObject(board); bo.position.set(0, 1.3, 0); bo.scale.setScalar(0.0095); bo.rotation.x = -0.05; scene3.add(bo);
+  SR.append(css3.domElement, root, stageEl); document.body.append(gl, host, fx);
+  lanesEl = board.querySelector("#v3lanes"); tickEl = $("#v3tick"); pagesEl = board.querySelector("#v3pages");
   $("#v3x").addEventListener("click", () => { try { localStorage.removeItem("sb-v3"); } catch (e) {} location.replace(location.pathname); });
   glInit(gl); fxInit(fx);
 }
+const isFb = (g) => g.sport === "NFL" || g.sport === "CFB";
+const playTxt = (g) => { if (g.st === "pre") return [when(g.t), g.net || g.sport].filter(Boolean).join(" · "); if (g.st === "post") return "Final"; const si = g.sit || {}, lp = si.lp && si.lp.text ? si.lp.text : ""; return [si.dd, lp].filter(Boolean).join(" · ") || g.sport; };
 const gameHtml = (g) => {
-  const row = (s) => { const t = g[s], o = g[s === "a" ? "h" : "a"], live = g.st !== "pre", lead = live && t.sc > o.sc, trail = live && t.sc < o.sc;
-    const ball = g.st === "in" && g.sit && g.sit.pos && String(g.sit.pos) === String(t.id) ? `<i class="ball${g.sit.rz ? " rz" : ""}"></i>` : "";
-    return `<div class="row${lead ? " lead" : trail ? " trail" : ""}">${t.lg ? `<img src="${esc(t.lg)}" alt="" referrerpolicy="no-referrer" onerror="this.style.visibility='hidden'">` : "<span></span>"}<span class="ab">${esc(t.ab)}${ball}</span><span class="sc num" data-s="${s}">${live ? esc(t.sc ?? "") : ""}</span></div>`; };
-  const sit = g.st === "in" && g.sit && g.sit.dd ? g.sit.dd : g.st === "pre" ? g.net || g.sport : g.sport;
-  return `${row("a")}${row("h")}<div class="st"><b>${esc(g.st === "pre" ? when(g.t) : g.st === "post" ? "Final" : g.d || "Live")}</b><span>${esc(sit || "")}</span></div>`;
+  const live = g.st !== "pre", tm = (s) => { const t = g[s], o = g[s === "a" ? "h" : "a"], lead = live && t.sc > o.sc, ball = g.st === "in" && g.sit && g.sit.pos && String(g.sit.pos) === String(t.id) ? `<i class="ball${g.sit.rz ? " rz" : ""}"></i>` : "";
+    const lg = t.lg ? `<img src="${esc(t.lg)}" alt="" referrerpolicy="no-referrer" onerror="this.style.visibility='hidden'">` : "", sc = `<span class="sc num" data-s="${s}">${live ? esc(t.sc ?? "") : ""}</span>`, ab = `<span class="ab">${esc(t.ab)}${ball}</span>`;
+    return `<span class="tm ${s}${lead ? " lead" : ""}">${s === "a" ? lg + ab + sc : sc + ab + lg}</span>`; };
+  return `<div class="v3-arena"></div><div class="v3-play">${esc(playTxt(g))}</div><div class="v3-sb">${tm("a")}<span class="clk">${esc(g.st === "pre" ? "vs" : g.st === "post" ? "Final" : g.d || "Live")}</span>${tm("h")}</div>`;
 };
 const meter = (c) => { const p = Math.round(c.p * 1000) / 10; return c.fill ? `<div class="v3-m fill"><i style="left:0;width:${p}%"></i><b style="left:${p}%"></b></div>` : `<div class="v3-m"><i style="left:${Math.min(50, p)}%;width:${Math.abs(p - 50)}%"></i><b style="left:${p}%"></b></div>`; };
 function cardHtml(c) {
@@ -110,13 +122,13 @@ function setHtml(el, h) { if (el.__h !== h) { el.__h = h; el.innerHTML = h; retu
 function flip(els, fn) {
   const a = new Map(); for (const e of els) if (e.isConnected && e.offsetParent) a.set(e, e.getBoundingClientRect());
   fn();
-  for (const [e, r0] of a) { if (!e.isConnected || !e.offsetParent) continue; const r1 = e.getBoundingClientRect(), dx = r0.left - r1.left, dy = r0.top - r1.top; if (Math.abs(dx) + Math.abs(dy) < 2) continue;
+  for (const [e, r0] of a) { if (!e.isConnected || !e.offsetParent) continue; const r1 = e.getBoundingClientRect(), sc = r1.width / Math.max(1, e.offsetWidth) || 1, dx = (r0.left - r1.left) / sc, dy = (r0.top - r1.top) / sc; if (Math.abs(dx) + Math.abs(dy) < 3) continue;
     e.animate([{ transform: `translate(${dx}px, ${dy}px)` }, { transform: "none" }], { duration: 650, easing: "cubic-bezier(.2,.8,.2,1)" }); }
 }
 let M = null, page = 0, pages = 1, pageAt = 0;
 function render() {
   M = model();
-  const n = M.n; root.style.setProperty("--k", n <= 6 ? 1.3 : n <= 10 ? 1.14 : n <= 16 ? 1 : n <= 24 ? 0.88 : 0.78);
+  const n = M.n; let kk = n <= 5 ? 1.22 : n <= 9 ? 1.08 : n <= 14 ? 0.96 : n <= 22 ? 0.86 : 0.78; const setK = (k) => { root.style.setProperty("--k", k); board.style.setProperty("--k", k); }; setK(kk);
   // header
   $("#v3clock").textContent = new Date().toLocaleTimeString([], { hour: "numeric", minute: "2-digit" });
   setHtml($("#v3sum"), n ? `<div class="v3-chip"><b>${n}</b><em>open</em></div><div class="v3-chip"><b>${fU(M.risk)}</b><em>riding</em></div>${M.liveN ? `<div class="v3-chip ${M.hold > 0.004 ? "g" : M.hold < -0.004 ? "r" : ""}"><b>${fU(M.hold, true)}</b><em>if it holds · ${M.up} up ${M.dn} down</em></div>` : `<div class="v3-chip"><b>${fU(M.toWin)}</b><em>to win</em></div>`}` : "");
@@ -145,17 +157,18 @@ function render() {
     });
     for (const [k, el] of laneEls) if (!seenL.has(k)) { el.remove(); laneEls.delete(k); }
     for (const [k, el] of cardEls) if (!seenC.has(k)) { el.remove(); cardEls.delete(k); prevCls.delete(k); }
-    paginate();
+    // it all fits on one page if it can (a little smaller first), pages only after that
+    for (paginate(); pages > 1 && kk > 0.74; paginate()) { kk = Math.round((kk - 0.07) * 100) / 100; setK(kk); }
   });
-  let em = $(".v3-empty"); if (!M.lanes.length) { if (!em) { em = document.createElement("div"); em.className = "v3-empty"; em.innerHTML = "No open bets<small>Add one from your phone and it lands here</small>"; lanesEl.append(em); } } else if (em) em.remove();
+  let em = lanesEl.querySelector(".v3-empty"); if (!M.lanes.length) { if (!em) { em = document.createElement("div"); em.className = "v3-empty"; em.innerHTML = "No open bets<small>Add one from your phone and it lands here</small>"; lanesEl.append(em); } } else if (em) em.remove();
   ticker(); first = false;
 }
 // more lanes than the screen holds: pages of them, the live games first, turning every so often
 function paginate() {
-  const H = lanesEl.clientHeight, gap = parseFloat(getComputedStyle(lanesEl).rowGap) || 0, els = [...lanesEl.children].filter((e) => e.classList.contains("v3-lane"));
+  const H = board.clientHeight - 6, els = [...lanesEl.children].filter((e) => e.classList.contains("v3-lane"));
   for (const e of els) e.classList.remove("off");
   let pg = 0, used = 0; const of = [];
-  for (const e of els) { const h = e.offsetHeight; if (used && used + gap + h > H) { pg++; used = 0; } of.push(pg); used += (used ? gap : 0) + h; }
+  for (const e of els) { const h = e.offsetHeight + (parseFloat(getComputedStyle(e).marginBottom) || 0); if (used && used + h > H) { pg++; used = 0; } of.push(pg); used += h; }
   pages = pg + 1; if (page >= pages) page = 0;
   if (pages > 1 && Date.now() - pageAt > 14000) { if (pageAt) page = (page + 1) % pages; pageAt = Date.now(); }
   els.forEach((e, i) => e.classList.toggle("off", of[i] !== page));
@@ -176,6 +189,8 @@ function scored(lane, side, col, pts) {
   lane.classList.remove("scored"); void lane.offsetWidth; lane.classList.add("scored"); setTimeout(() => lane.classList.remove("scored"), 1500);
   setTimeout(() => { const s = ge.querySelector(`.sc[data-s="${side}"]`); if (s) { s.classList.add("flip"); setTimeout(() => s.classList.remove("flip"), 950); } }, 0);
   ripple(x, y, col, pts >= 6 ? 1.3 : 0.8); sparks(x, y, col, pts >= 6 ? 90 : 40, 1); gl.surge = Math.min(1.5, gl.surge + 0.6);
+  if (world) { const g = lane.__L.g, big = pts >= 6 || !isFb(g), key = lane.__L.k; world.score(key, col, big, side === "h");
+    for (let i = 0; i < (big ? 3 : 1); i++) setTimeout(() => { const p = world.topPx(key, Math.random() * 6.28, 1 + Math.random() * 3); if (p) firework(p[0], p[1], col); }, 200 + i * 360); }
 }
 function turned(el, good) { if (!el.isConnected || !el.offsetParent) return; el.classList.add("turn"); setTimeout(() => el.classList.remove("turn"), 950); const [x, y] = mid(el); ripple(x, y, good ? G : R, 0.5); sparks(x, y, good ? G : R, 26, 0.7); }
 
@@ -183,14 +198,16 @@ function turned(el, good) { if (!el.isConnected || !el.offsetParent) return; el.
 const gl = { r: null, mat: null, mood: 0, surge: 0, rip: [], pts: null };
 const N_EM = 10, N_RIP = 5;
 function glInit(cv) {
-  const r = new THREE.WebGLRenderer({ canvas: cv, antialias: false, alpha: false, powerPreference: "high-performance" }); r.setPixelRatio(1); gl.r = r;
+  const r = new THREE.WebGLRenderer({ canvas: cv, antialias: true, alpha: true, premultipliedAlpha: true, powerPreference: "high-performance" }); r.setClearColor(0x000000, 0); r.setPixelRatio(1); gl.r = r; r.toneMapping = THREE.ACESFilmicToneMapping; r.toneMappingExposure = 1.05;
+  try { world = makeWorld(r); } catch (e) { console.warn("v3 world", e); }
+  try { globe = makeGlobe(new URL("./", import.meta.url).href); } catch (e) { console.warn("v3 globe", e); }
   gl.scene = new THREE.Scene(); gl.cam = new THREE.OrthographicCamera(-1, 1, 1, -1, 0, 1);
-  gl.mat = new THREE.ShaderMaterial({ depthTest: false, uniforms: { uT: { value: 0 }, uRes: { value: new THREE.Vector2(1, 1) }, uMood: { value: 0 }, uSurge: { value: 0 }, uFlash: { value: new THREE.Vector4(1, 1, 1, 0) },
+  gl.mat = new THREE.ShaderMaterial({ depthTest: false, uniforms: { uT: { value: 0 }, uOver: { value: 0 }, uRes: { value: new THREE.Vector2(1, 1) }, uMood: { value: 0 }, uSurge: { value: 0 }, uFlash: { value: new THREE.Vector4(1, 1, 1, 0) },
       uEm: { value: Array.from({ length: N_EM }, () => new THREE.Vector4(0, 0, 0, 0)) }, uEmC: { value: Array.from({ length: N_EM }, () => new THREE.Vector3()) },
       uRip: { value: Array.from({ length: N_RIP }, () => new THREE.Vector4(0, 0, -99, 0)) }, uRipC: { value: Array.from({ length: N_RIP }, () => new THREE.Vector3()) } },
     vertexShader: "void main(){ gl_Position = vec4(position.xy, 0.0, 1.0); }",
     fragmentShader: `precision highp float;
-uniform float uT, uMood, uSurge; uniform vec2 uRes; uniform vec4 uFlash; uniform vec4 uEm[${N_EM}]; uniform vec3 uEmC[${N_EM}]; uniform vec4 uRip[${N_RIP}]; uniform vec3 uRipC[${N_RIP}];
+uniform float uT, uMood, uSurge, uOver; uniform vec2 uRes; uniform vec4 uFlash; uniform vec4 uEm[${N_EM}]; uniform vec3 uEmC[${N_EM}]; uniform vec4 uRip[${N_RIP}]; uniform vec3 uRipC[${N_RIP}];
 float h(vec2 p){ return fract(sin(dot(p, vec2(127.1, 311.7))) * 43758.5453); }
 float n(vec2 p){ vec2 i = floor(p), f = fract(p); f = f * f * (3.0 - 2.0 * f); return mix(mix(h(i), h(i + vec2(1, 0)), f.x), mix(h(i + vec2(0, 1)), h(i + vec2(1, 1)), f.x), f.y); }
 float fbm(vec2 p){ float a = 0.5, s = 0.0; for (int i = 0; i < 4; i++) { s += a * n(p); p = p * 2.03 + 11.7; a *= 0.5; } return s; }
@@ -202,10 +219,10 @@ void main(){
   float f = fbm(w + vec2(t * 0.7, -t * 0.4)), band = smoothstep(0.42, 0.78, f);
   vec3 cool = vec3(0.07, 0.12, 0.3), good = vec3(0.04, 0.34, 0.2), bad = vec3(0.4, 0.06, 0.1);
   vec3 tone = mix(cool, uMood > 0.0 ? good : bad, min(1.0, abs(uMood)) * 0.85);
-  vec3 c = vec3(0.012, 0.018, 0.035) + tone * band * (0.5 + 0.5 * uSurge) + tone * 0.12;
-  // a floor of lines running off to the horizon, drifting toward you
-  float hz = 0.36; if (uv.y < hz) { float d = (hz - uv.y) / hz, z = 1.0 / max(0.02, d); vec2 g = vec2((uv.x - 0.5) * asp * z * 1.6, z + uT * (0.35 + 0.5 * uSurge));
-    float ln = max(smoothstep(0.94, 1.0, abs(fract(g.x) * 2.0 - 1.0)), smoothstep(0.92, 1.0, abs(fract(g.y) * 2.0 - 1.0))); c += tone * ln * d * 1.5 * (0.5 + uSurge); }
+  vec3 c = vec3(0.012, 0.018, 0.035) + tone * band * (0.42 + 0.5 * uSurge) + tone * 0.1;
+  float hz = 0.3; if (uv.y < hz) { float d = (hz - uv.y) / hz, z = 1.0 / max(0.02, d); vec2 g = vec2((uv.x - 0.5) * asp * z * 1.6, z + uT * (0.35 + 0.5 * uSurge));
+    float ln = max(smoothstep(0.94, 1.0, abs(fract(g.x) * 2.0 - 1.0)), smoothstep(0.92, 1.0, abs(fract(g.y) * 2.0 - 1.0))); c += tone * ln * d * 1.4 * (0.5 + uSurge); }
+  vec3 c0 = c;
   // every game on the board glows where it sits, in its own colours
   for (int i = 0; i < ${N_EM}; i++) { vec4 e = uEm[i]; if (e.z <= 0.0) continue; vec2 dl = (px - e.xy) / uRes.y; dl.x *= 0.55; float d2 = dot(dl, dl);
     c += uEmC[i] * e.z * exp(-d2 / (e.w * e.w)) * (0.8 + 0.2 * sin(uT * 1.7 + float(i) * 2.1)); }
@@ -213,6 +230,8 @@ void main(){
   for (int i = 0; i < ${N_RIP}; i++) { vec4 rp = uRip[i]; float age = uT - rp.z; if (age < 0.0 || age > 2.6) continue; float d = length((px - rp.xy) / uRes.y), rad = age * 0.75;
     float ring = exp(-pow((d - rad) * 16.0, 2.0)) * (1.0 - age / 2.6); c += uRipC[i] * ring * rp.w * 1.6; }
   c += uFlash.rgb * uFlash.a * (0.35 + 0.65 * band);
+  // over the stadium: only the light this adds, and a shade so the bets read
+  if (uOver > 0.5) { vec3 ex = max(c - c0, 0.0) * 0.8; float sh = 0.34 + 0.2 * smoothstep(0.75, 0.2, uv.y) * 0.0 + 0.22 * smoothstep(0.35, 1.0, uv.y); gl_FragColor = vec4(ex, clamp(max(ex.r, max(ex.g, ex.b)) + sh, 0.0, 1.0)); return; }
   float vg = smoothstep(1.25, 0.35, length((uv - 0.5) * vec2(1.15, 1.0))); c *= 0.55 + 0.45 * vg;
   c += (h(px + uT) - 0.5) * 0.012;
   gl_FragColor = vec4(c, 1.0);
@@ -227,12 +246,13 @@ void main(){
   const P = new THREE.Points(g, pm); P.frustumCulled = false; gl.pscene.add(P); gl.pm = pm;
   r.autoClear = false;
 }
+const featOf = (g) => { const si = g.st === "in" && isFb(g) ? g.sit : null; return { a: g.a.nm || g.a.ab, h: g.h.nm || g.h.ab, aab: g.a.ab, hab: g.h.ab, ca: teamCol(g.a), ch: teamCol(g.h), live: g.st === "in", yl: si && typeof si.yl === "number" ? si.yl : null, pos: si && si.pos ? (String(si.pos) === String(g.h.id) ? "h" : "a") : null, togo: si && typeof si.ds === "number" && si.ds > 0 ? si.ds : null }; };
 function dotTex() { const c = document.createElement("canvas"); c.width = c.height = 64; const x = c.getContext("2d"), gr = x.createRadialGradient(32, 32, 0, 32, 32, 32); gr.addColorStop(0, "rgba(255,255,255,1)"); gr.addColorStop(0.3, "rgba(255,255,255,.6)"); gr.addColorStop(1, "rgba(255,255,255,0)"); x.fillStyle = gr; x.fillRect(0, 0, 64, 64); return new THREE.CanvasTexture(c); }
 function ripple(x, y, col, str) { gl.rip.push({ x, y, col, str, t: gl.t || 0 }); if (gl.rip.length > N_RIP) gl.rip.shift(); }
 let flash = { c: [1, 1, 1], a: 0 };
 function glFrame(t, dt) {
   const W = innerWidth, H = innerHeight, r = gl.r, u = gl.mat.uniforms; gl.t = t;
-  if (gl.w !== W || gl.h !== H) { gl.w = W; gl.h = H; const k = W > 2600 ? 0.5 : W > 1400 ? 0.75 : 1; r.setSize(Math.round(W * k), Math.round(H * k), false); gl.k = k; fxSize(W, H); }
+  if (gl.w !== W || gl.h !== H) { gl.w = W; gl.h = H; const k = W > 2600 ? 0.5 : 1; r.setSize(Math.round(W * k), Math.round(H * k), false); gl.k = k; fxSize(W, H); css3.setSize(W, H); }
   const k = gl.k; u.uT.value = t; u.uRes.value.set(W * k, H * k);
   gl.mood += ((M ? M.mood : 0) - gl.mood) * Math.min(1, dt * 0.8); u.uMood.value = gl.mood; gl.surge = Math.max(0, gl.surge - dt * 0.35); u.uSurge.value = gl.surge;
   flash.a = Math.max(0, flash.a - dt * 0.9); u.uFlash.value.set(flash.c[0], flash.c[1], flash.c[2], flash.a);
@@ -252,7 +272,14 @@ function glFrame(t, dt) {
     P.pos[i * 3] = x / W; P.pos[i * 3 + 1] = 1 - y / H; const c = L[2][i & 1], a = Math.sin(uu * Math.PI) * 0.5; P.col[i * 3] = c[0] * a; P.col[i * 3 + 1] = c[1] * a; P.col[i * 3 + 2] = c[2] * a;
   }
   P.g.attributes.position.needsUpdate = true; P.g.attributes.color.needsUpdate = true; gl.pm.size = Math.max(4, 7 * (W / 1920) * k);
-  r.clear(); r.render(gl.scene, gl.cam); r.render(gl.pscene, gl.pcam);
+  // between stadiums: the globe has the whole screen
+  if (flying && globe && globe.frame(performance.now(), W / H)) { r.setClearColor(0x02040a, 1); r.clear(); r.render(globe.scene, globe.cam); r.setClearColor(0x000000, 0); if (world) { world.frame(t, dt, W / H); css3.render(scene3, world.cam); } return; }
+  const cvw = document.getElementById("v2world"), over = !DEMO && !!(cvw && window.SBW && window.SBW.live && window.SBW.live()); u.uOver.value = over ? 1 : 0;
+  r.clear(); r.render(gl.scene, gl.cam);
+  if (world) { world.frame(t, dt, W / H); css3.render(scene3, world.cam);
+    const list = []; for (const e of lanes) { const ar = e.querySelector(".v3-arena"); if (!ar) continue; const q = ar.getBoundingClientRect(); if (q.width < 4) continue; list.push({ key: e.__L.k, x: q.left + q.width / 2, y: q.top + q.height * 0.56, w: q.width * 0.7, g: featOf(e.__L.g) }); }
+    world.sync(list, t, dt); r.clearDepth(); r.render(world.scene, world.cam); }
+  r.clearDepth(); r.render(gl.pscene, gl.pcam);
 }
 
 // ---------- the show layer: 3D over the board (coins, shards, sparks, rings) ----------
@@ -320,14 +347,14 @@ const Q = []; let showing = false;
 const wait = (ms) => new Promise((r) => setTimeout(r, ms));
 function enqueue(fn) { Q.push(fn); if (!showing) nextShow(); }
 async function nextShow() { const fn = Q.shift(); if (!fn) { showing = false; return; } showing = true; try { await fn(); } catch (e) { console.warn("v3 show", e); } cleanup(); await wait(250); nextShow(); }
-function cleanup() { root.classList.remove("dim", "shake"); stageEl.classList.remove("on"); SR.querySelectorAll(".v3-ghost, .v3-bill").forEach((e) => e.remove()); }
+function cleanup() { dim(false); root.classList.remove("shake"); stageEl.classList.remove("on"); SR.querySelectorAll(".v3-ghost, .v3-bill").forEach((e) => e.remove()); }
 // the card as it stood, lifted off the board
 function ghostOf(b, cls) {
   const el = cardEls.get(b.id); let r, g;
   if (el && el.isConnected && el.offsetParent) { r = el.getBoundingClientRect(); g = el.cloneNode(true); el.style.visibility = "hidden"; }
   else { const c = (() => { try { return cardOf(b); } catch (e) { return null; } })(); g = document.createElement("div"); g.className = "v3-c" + (b.kind === "parlay" ? " par" : ""); g.style.setProperty("--c", X.col(b)); g.innerHTML = c ? cardHtml(c) : `<div class="pk">${esc(b.pick)}</div>`; const w = innerWidth * 0.26; r = { left: innerWidth / 2 - w / 2, top: innerHeight * 0.4, width: w, height: 0 }; }
   g.classList.remove("born", "turn", "sweat", "w", "l", "e", "pre", "won", "lost"); g.classList.add("v3-ghost", cls); g.style.left = r.left + "px"; g.style.top = r.top + "px"; g.style.width = r.width + "px";
-  g.style.setProperty("--u", getComputedStyle(root).getPropertyValue("--u")); g.style.setProperty("--k", getComputedStyle(root).getPropertyValue("--k")); for (const v of ["--g", "--r", "--a", "--ink", "--dim"]) g.style.setProperty(v, getComputedStyle(root).getPropertyValue(v)); g.style.color = "#f4f7fb"; g.style.fontFamily = "Inter, system-ui, sans-serif";
+  g.style.setProperty("--u", (el && el.offsetWidth ? r.width / el.offsetWidth : innerWidth / 1920) + "px"); g.style.setProperty("--k", getComputedStyle(board).getPropertyValue("--k")); for (const v of ["--g", "--r", "--a", "--ink", "--dim"]) g.style.setProperty(v, getComputedStyle(root).getPropertyValue(v)); g.style.color = "#f4f7fb"; g.style.fontFamily = "Inter, system-ui, sans-serif";
   SR.append(g); const rr = g.getBoundingClientRect(); return { g, r: rr };
 }
 const bill = (pos, html, col) => { const d = document.createElement("div"); d.className = "v3-bill " + pos; d.style.setProperty("--bc", col); d.style.setProperty("--u", getComputedStyle(root).getPropertyValue("--u")); d.innerHTML = html; SR.append(d); requestAnimationFrame(() => requestAnimationFrame(() => d.classList.add("in"))); return d; };
@@ -335,7 +362,7 @@ const usd = (n) => "$" + (Math.abs(n * X.unit()) >= 100 ? Math.round(Math.abs(n 
 async function showWin(b, n) {
   const par = b.kind === "parlay", dollars = Math.abs(n * X.unit()), tier = dollars >= 150 || (par && b.odds >= 800) ? 3 : dollars >= 40 || par || b.odds >= 250 ? 2 : 1, who = X.name(b), me = X.me(b), col = hex(X.col(b), GOLD);
   const { g, r } = ghostOf(b, "won"), cx = innerWidth / 2, cy = innerHeight * 0.5, sc = Math.min(2.1, (innerWidth * (par ? 0.44 : 0.38)) / r.width);
-  root.classList.add("dim"); stageEl.classList.add("on"); gl.surge = 1.5; ripple(r.left + r.width / 2, r.top + r.height / 2, G, 1.2);
+  dim(true); stageEl.classList.add("on"); const gk = b.sel && b.sel.g != null ? "g" + b.sel.g : null; if (world) world.cheer(gk, GOLD); gl.surge = 1.5; ripple(r.left + r.width / 2, r.top + r.height / 2, G, 1.2);
   // off the board, a full turn in the air, down on centre stage
   const dx = cx - (r.left + r.width / 2), dy = cy - (r.top + r.height / 2);
   await g.animate([{ transform: "perspective(1400px) translate(0,0) rotateY(0) scale(1)" }, { transform: `perspective(1400px) translate(${dx * 0.5}px, ${dy * 0.5 - innerHeight * 0.08}px) rotateY(200deg) scale(${sc * 0.8})`, offset: 0.55 }, { transform: `perspective(1400px) translate(${dx}px, ${dy}px) rotateY(360deg) scale(${sc})` }], { duration: 850, easing: "cubic-bezier(.3,.1,.2,1)", fill: "forwards" }).finished;
@@ -348,10 +375,10 @@ async function showWin(b, n) {
   bill("bot", `<div class="big num">+${usd(n)}</div><div class="sub">${fU(n, true)} · ${esc(fOdds(b.odds))}${par ? ` · ${(b.legs || []).length} legs` : ""}</div>`, css(GOLD));
   // the bigger it is, the longer the sky stays lit
   const hold = tier === 3 ? 6200 : tier === 2 ? 4200 : 2900, t0 = Date.now(); let k = 0;
-  while (Date.now() - t0 < hold) { await wait(tier === 3 ? 480 : 700); if (tier >= 2) { firework(innerWidth * (0.12 + 0.76 * Math.random()), innerHeight * (0.12 + 0.4 * Math.random()), [GOLD, G, col, [0.5, 0.75, 1]][k++ % 4]); } if (tier === 3 && k % 3 === 0) coins(innerWidth * (0.2 + 0.6 * Math.random()), innerHeight * 0.3, 60, 0.7); }
+  while (Date.now() - t0 < hold) { await wait(tier === 3 ? 480 : 700); if (tier >= 2) { firework(innerWidth * (0.12 + 0.76 * Math.random()), innerHeight * (0.12 + 0.4 * Math.random()), [GOLD, G, col, [0.5, 0.75, 1]][k++ % 4]); } if (world && gk) { const p = world.topPx(gk, Math.random() * 6.28, 1 + Math.random() * 3); if (p) firework(p[0], p[1], [GOLD, G, col][k % 3]); world.cheer(gk, GOLD); } if (tier === 3 && k % 3 === 0) coins(innerWidth * (0.2 + 0.6 * Math.random()), innerHeight * 0.3, 60, 0.7); }
   // and it goes home to whoever's it is
   const chip = [...SR.querySelectorAll("#v3ppl .v3-p")].find((e) => e.dataset.k === String(X.key(b))), cr = chip ? chip.getBoundingClientRect() : { left: innerWidth - 200, top: 20, width: 100, height: 40 };
-  SR.querySelectorAll(".v3-bill").forEach((e) => (e.style.opacity = "0", e.style.transition = "opacity .3s")); stageEl.classList.remove("on"); root.classList.remove("dim");
+  SR.querySelectorAll(".v3-bill").forEach((e) => (e.style.opacity = "0", e.style.transition = "opacity .3s")); stageEl.classList.remove("on"); dim(false);
   const gx = cr.left + cr.width / 2 - (r.left + r.width / 2), gy = cr.top + cr.height / 2 - (r.top + r.height / 2);
   await g.animate([{ transform: `perspective(1400px) translate(${dx}px, ${dy}px) rotateY(360deg) scale(${sc})`, opacity: 1 }, { transform: `perspective(1400px) translate(${gx}px, ${gy}px) rotateY(360deg) scale(.12)`, opacity: 0.2 }], { duration: 620, easing: "cubic-bezier(.5,0,.8,.4)", fill: "forwards" }).finished;
   if (chip) { chip.classList.remove("pop"); void chip.offsetWidth; chip.classList.add("pop"); sparks(cr.left + cr.width / 2, cr.top + cr.height / 2, hex(X.col(b), GOLD), 50, 0.6); }
@@ -372,6 +399,26 @@ function note(b, word) {
   d.innerHTML = `<b>${esc(X.name(b))}</b> ${esc(word)} · ${esc(b.kind === "parlay" ? (b.legs || []).length + "-leg parlay" : b.pick)} <em class="num">${esc(fOdds(b.odds))} · ${fU(b.units)}</em>`;
   SR.append(d); requestAnimationFrame(() => requestAnimationFrame(() => d.classList.add("in"))); setTimeout(() => { d.classList.remove("in"); setTimeout(() => d.remove(), 600); }, 4200);
 }
+// ---------- between stadiums: up and out, across the globe, down into the next ----------
+function venueCard(from, to, ms) {
+  const d = document.createElement("div"); d.className = "v3-venue"; d.innerHTML = `<small>${from ? esc(from) + " → " : "Now at"}</small><b>${esc(to.ven || to.h)}</b><span>${esc(to.a)} at ${esc(to.h)}</span>`; SR.append(d);
+  requestAnimationFrame(() => requestAnimationFrame(() => d.classList.add("in"))); setTimeout(() => { d.classList.remove("in"); setTimeout(() => d.remove(), 700); }, ms);
+}
+const featNow = () => { try { const g = window.__sbFeat && window.__sbFeat(); return g && g.h ? { ab: g.h.ab, h: g.h.nm || g.h.ab, a: g.a.nm || g.a.ab, ven: g.ven && g.ven.nm, col: teamCol(g.h) } : null; } catch (e) { return null; } };
+async function flight(to, rebuild, cv) {
+  const b = spotOf(to.ab, to.ven), a = lastSpot, MS = a ? 4600 : 3200, t0 = Date.now();
+  flying = true; globe.start(a ? a.ll : null, b, MS, a ? a.col : null, to.col); venueCard(a ? a.name : "", to, MS + 600);
+  if (cv) { cv.classList.remove("v3in"); cv.classList.add("v3top", "v3out"); }
+  await wait(900); if (rebuild) { try { await rebuild(); } catch (e) { console.warn("v3 rebuild", e); } }
+  await wait(Math.max(200, MS - 850 - (Date.now() - t0)));
+  // down into it
+  if (cv) { cv.classList.add("v3in0"); cv.classList.remove("v3out"); void cv.offsetWidth; cv.classList.add("v3in"); cv.classList.remove("v3in0"); }
+  flash = { c: to.col, a: 0.7 }; ring(innerWidth / 2, innerHeight * 0.52, to.col, 9, 1.1); sparks(innerWidth / 2, innerHeight * 0.52, to.col, 200, 1.8, { white: true, life: 1.1 });
+  await wait(cv ? 700 : 250); flying = false; globe.stop(); if (cv) setTimeout(() => cv.classList.remove("v3top", "v3in"), 400);
+  lastSpot = { ll: b, col: to.col, name: to.ven || to.h };
+}
+// the engine's about to swap the stadium behind the board: fly there while it builds the new one
+V.fly = async (rebuild) => { const to = featNow(), cv = document.getElementById("v2world"); if (!to || !globe || !on || flying) { await rebuild(); if (!to) lastSpot = null; return; } await flight(to, rebuild, cv); };
 // what the engine calls
 V.settle = (b, o, n) => { if (o === "W") enqueue(() => showWin(b, n)); else if (o === "L") enqueue(() => showLoss(b, n)); else note(b, b.status === "cashout" ? "cashed out" : "pushed"); };
 V.place = (b) => { note(b, "is on"); setTimeout(() => { const el = cardEls.get(b.id); if (el && el.offsetParent) { const [x, y] = mid(el); ripple(x, y, hex(X.col(b), A), 0.9); sparks(x, y, hex(X.col(b), A), 60, 0.8); ring(x, y, hex(X.col(b), A), 2.2, 0.8); } }, 700); };
@@ -385,13 +432,13 @@ function frame(now) {
   requestAnimationFrame(frame);
   const want = DEMO || (sb && sb.tv()); if (want !== on) setOn(want); if (!on || document.hidden) { last = now; return; }
   const dt = Math.min(0.05, (now - last) / 1000 || 0.016); last = now;
-  if (demo) demo.step(dt);
+  if (demo) { demo.step(dt); if (!flying && !showing && now - (frame.flyAt || (frame.flyAt = now - 22000)) > 34000) { frame.flyAt = now; const gs = demo.games(), i = (frame.fi = ((frame.fi ?? -1) + 1) % gs.length), g = gs[i]; if (lastSpot == null && i) lastSpot = { ll: spotOf(gs[i - 1].h.ab), col: teamCol(gs[i - 1].h), name: gs[i - 1].h.nm }; flight({ ab: g.h.ab, h: g.h.nm, a: g.a.nm, ven: "", col: teamCol(g.h) }, null, null); } }
   if (now - tick > 500) { tick = now; try { render(); } catch (e) { console.warn("v3 render", e); } }
   try { glFrame(now / 1000, dt); fxFrame(dt); } catch (e) { if (!frame.warned) { frame.warned = 1; console.warn("v3 gl", e); } }
 }
 build(); setOn(DEMO || (sb && sb.tv())); if (!on) for (const id of ["v3host", "v3gl", "v3fx"]) document.getElementById(id).style.display = "none";
 requestAnimationFrame(frame);
-window.__v3dbg = { model: () => M, win: (id) => { const b = X.bets().find((x) => x.id === id) || X.bets()[0]; if (b) V.settle(b, "W", b.units * ppu(b.odds)); }, loss: (id) => { const b = X.bets().find((x) => x.id === id) || X.bets()[0]; if (b) V.settle(b, "L", -b.units); }, demo };
+window.__v3dbg = { fly: (a, b) => { lastSpot = a ? { ll: spotOf(a), col: [0.2, 0.5, 1], name: a } : null; return flight({ ab: b, h: b, a: "Away", ven: b + " Stadium", col: GOLD }, null, null); }, model: () => M, win: (id) => { const b = X.bets().find((x) => x.id === id) || X.bets()[0]; if (b) V.settle(b, "W", b.units * ppu(b.odds)); }, loss: (id) => { const b = X.bets().find((x) => x.id === id) || X.bets()[0]; if (b) V.settle(b, "L", -b.units); }, demo };
 
 // ---------- the demo: four games that play themselves, three people's bets ----------
 function makeDemo() {
@@ -416,7 +463,7 @@ function makeDemo() {
     else { const t = a + h; if (sel.s === "o") { m = t - sel.l; if (m <= 0 && !fin) { const pace = t - sel.l * dn(g); txt = `Needs ${k(sel.l - t)} more · ${pace >= 0 ? "on pace" : "off pace"}`; m = pace; } else txt = "Over by " + k(m); } else { m = sel.l - t; txt = m > 0 ? k(m) + " to spare" : "Over by " + k(m); } }
     const res = m > 0 ? "W" : m < 0 ? "L" : "P"; if (fin) txt = "Final · " + (res === "W" ? "winner" : res === "L" ? "loser" : "push"); return { m, res, fin, txt, g }; };
   const legs = (b) => (b.legs || []).map((t, i) => { const sel = b.legSel[i], e = ev(sel); return { t, st: e && e.fin ? (e.res === "W" ? "hit" : "miss") : null, ev: e, sel }; });
-  let acc = 0, placed = 0;
+  let acc = 0, placed = 0, pl = 0;
   const settle = (b, o) => { const nn = o === "W" ? b.units * ppu(b.odds) : -b.units; b.status = o === "W" ? "won" : "lost"; net[b.who] += nn; V.settle && V.settle(b, o, nn); bets.delete(b.id); };
   return {
     bets: () => [...bets.values()], games: () => games, gameOf: (sel) => G0(sel.g), evalSel: ev, legsOf: legs, done: dn,
@@ -424,7 +471,9 @@ function makeDemo() {
     people: () => Object.keys(P).map((k) => ({ k, name: P[k][0], col: P[k][1], net: net[k], open: [...bets.values()].filter((b) => b.who === k).length })).sort((x, y) => y.net - x.net),
     step(dt) {
       for (const g of games) { if (g.st === "in") { g.clk -= dt * 22; if (g.clk <= 0) { if (g.q >= 4 && g.a.sc !== g.h.sc) { g.st = "post"; g.sit = null; } else { g.q++; g.clk = 900; } } } else if (g.st === "pre" && g.t - Date.now() < 93.6 * 60e3) { g.st = "in"; g.q = 1; g.clk = 900; } g.d = label(g); }
-      acc += dt; if (acc > 5.5) { acc = 0; const live = games.filter((g) => g.st === "in"); if (live.length) { const g = live[Math.floor(Math.random() * live.length)], s = Math.random() < 0.5 ? "a" : "h"; g[s].sc += Math.random() < 0.62 ? 7 : 3; g.sit = { pos: g[s === "a" ? "h" : "a"].id, dd: ["1st & 10", "2nd & 6", "3rd & 2", "1st & Goal"][Math.floor(Math.random() * 4)], rz: Math.random() < 0.3 }; } }
+      acc += dt; if (acc > 5.5) { acc = 0; const live = games.filter((g) => g.st === "in"); if (live.length) { const g = live[Math.floor(Math.random() * live.length)], s = Math.random() < 0.5 ? "a" : "h"; g[s].sc += Math.random() < 0.62 ? 7 : 3; g.sit = { pos: g[s === "a" ? "h" : "a"].id, yl: s === "a" ? 75 : 25, ds: 10, dd: "1st & 10", rz: false, lp: { text: "Kickoff, touchback" } }; } }
+      pl += dt; if (pl > 1.6) { pl = 0; for (const g of games) { if (g.st !== "in") continue; if (!g.sit || g.sit.yl == null) g.sit = { pos: g.a.id, yl: 25, ds: 10, dd: "1st & 10", lp: { text: "" } }; const si = g.sit, dir = si.pos === g.a.id ? 1 : -1, gain = Math.random() < 0.12 ? 18 + Math.floor(Math.random() * 25) : Math.floor(Math.random() * 9) - 1; if (Math.random() < 0.5) continue;
+        si.yl = clamp(si.yl + dir * gain, 3, 97); si.ds = gain >= si.ds ? 10 : si.ds - Math.max(0, gain); const dnn = gain >= 10 ? 1 : ((si.dn || 1) % 4) + 1; si.dn = gain >= si.ds ? 1 : dnn; si.dd = `${["1st", "2nd", "3rd", "4th"][si.dn - 1]} & ${si.ds}`; si.rz = dir > 0 ? si.yl > 80 : si.yl < 20; si.lp = { text: `${["Pass complete", "Rush up the middle", "Screen pass", "Scramble"][Math.floor(Math.random() * 4)]} for ${gain} yard${gain === 1 ? "" : "s"}` }; } }
       // a finished game pays its bets, one at a time; a parlay when its last leg is in (or one's dead)
       if (!showing && !Q.length) for (const b of bets.values()) { if (b.kind === "parlay") { const L = legs(b); if (L.some((l) => l.st === "miss")) { settle(b, "L"); break; } if (L.every((l) => l.st === "hit")) { settle(b, "W"); break; } } else { const e = ev(b.sel); if (e && e.fin && e.res !== "P") { settle(b, e.res); break; } } }
       if (!placed && games[0].q >= 3) { placed = 1; const b = bet("ju", "Chiefs −2.5 live", 105, 2, { g: "g1", m: "sp", s: "h", l: -2.5 }); add(b); V.place && V.place(b); }

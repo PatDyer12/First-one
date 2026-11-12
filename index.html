@@ -14933,7 +14933,7 @@ void main(){
   // ---------- sheets ----------
   function openSheet(id) { $(id).hidden = false; }
   // keep every open screen current: when a new version is up, reload it (never mid-form or mid-animation)
-  const BUILD = "20261112031048";
+  const BUILD = "20261112033711";
   function updReady() {
     if (document.getElementById("updReady")) return; const d = document.createElement("div"); d.id = "updReady"; d.textContent = "Update ready · refresh, then TV + Sound on"; document.body.append(d);
   }
@@ -19189,7 +19189,7 @@ void main(){
   const FEAT = { id: "" };
   const featEt = (t) => { const p = {}; for (const x of new Intl.DateTimeFormat("en-CA", { timeZone: "America/New_York", year: "numeric", month: "2-digit", day: "2-digit", weekday: "short", hour: "2-digit", minute: "2-digit", hourCycle: "h23" }).formatToParts(new Date(t))) p[x.type] = x.value; return { day: `${p.year}-${p.month}-${p.day}`, wd: p.weekday, hr: Number(p.hour), mi: Number(p.minute) }; };
   // the war room is Sunday's 1 o'clock NFL window's (12:30 till the 4 o'clock kickoffs); every other time it's a building
-  const sunRoom = (now = Date.now()) => { const k = featEt(now), m = k.hr * 60 + k.mi; return k.wd === "Sun" && m >= 12 * 60 + 30 && m < 16 * 60 + 5; };
+  const sunRoom = (now = Date.now()) => { if (V3()) return false; const k = featEt(now), m = k.hr * 60 + k.mi; return k.wd === "Sun" && m >= 12 * 60 + 30 && m < 16 * 60 + 5; };
   window.__sbSunRoom = () => sunRoom();
   function featGame() {
     if (GUEST || PHONE()) return null;
@@ -25448,7 +25448,7 @@ Object.assign(SIG_OF, { maction: "lightning", funbelt: "fireworks", sickos: "gal
 // scores light the place up: ribbons, the jumbotron, the crowd, fireworks. localStorage sb-world = off (or sb-v2 = off) keeps
 // the flat backgrounds.
 const WD = { st: null, starting: false, key: "", mode: "board", last: 0, raf: 0, q: 0, go: 0, sig: "", card: null, cardTo: 0, ribAt: 0 };
-const wdOn = () => { if (WD.off || (window.__v3 && window.__v3.on)) return false; try { return localStorage.getItem("sb-v2") !== "off" && localStorage.getItem("sb-world") !== "off"; } catch (e) { return true; } };
+const wdOn = () => { if (WD.off) return false; try { return localStorage.getItem("sb-v2") !== "off" && localStorage.getItem("sb-world") !== "off"; } catch (e) { return true; } };
 const wdTv = () => document.body.classList.contains("tv") && !document.body.classList.contains("phone");
 const wdHex = (h, d) => { const m = /^#?([0-9a-f]{6})$/i.exec(String(h || "").trim()); if (!m) return d || [0.3, 0.32, 0.38]; const n = parseInt(m[1], 16); return [((n >> 16) & 255) / 255, ((n >> 8) & 255) / 255, (n & 255) / 255]; };
 const wdLum = (c) => 0.299 * c[0] + 0.587 * c[1] + 0.114 * c[2];
@@ -28548,6 +28548,7 @@ function wdWarm(st) {
 // a new venue: the building dips to black, the new one's built behind it and comes up (no frozen frame, no hard cut)
 function wdSwap() {
   if (WD.swap) return; WD.swap = true; const cv = WD.r && WD.r.domElement;
+  if (window.__v3 && window.__v3.on && window.__v3.fly) { window.__v3.fly(async () => { if (WD.st) { wdUnproject(WD.st); wdVidOff(WD.st); wdDispose(WD.st); WD.st = null; } await wdStart(); }).catch((e) => console.warn("v3 fly", e)).finally(() => { WD.swap = false; }); return; }
   if (cv) { cv.style.transition = "opacity .5s ease"; cv.style.opacity = "0"; }
   setTimeout(() => { WD.swap = false; if (!WD.st) return wdFadeIn(); wdUnproject(WD.st); wdVidOff(WD.st); wdDispose(WD.st); WD.st = null; wdStart(); }, cv ? 520 : 0);
 }
