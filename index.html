@@ -14933,7 +14933,7 @@ void main(){
   // ---------- sheets ----------
   function openSheet(id) { $(id).hidden = false; }
   // keep every open screen current: when a new version is up, reload it (never mid-form or mid-animation)
-  const BUILD = "20261112120131";
+  const BUILD = "20261112235619";
   function updReady() {
     if (document.getElementById("updReady")) return; const d = document.createElement("div"); d.id = "updReady"; d.textContent = "Update ready · refresh, then TV + Sound on"; document.body.append(d);
   }
@@ -28723,6 +28723,10 @@ function wdBack(now) {
 }
 window.SBW = {
   live: () => !!(WD.st && wdTv()),
+  // V3's prime-time camera: glide to a shot (a place and what it looks at, in the field's yards), or back to the usual one
+  tour(p, l, f, ms) { const st = WD.st; if (!st || st.room || WD.mode !== "board" || st.fly || !wdTv()) return false; const V = st.THREE.Vector3; wdFly(st, { p: new V(p[0], p[1], p[2]), l: new V(l[0], l[1], l[2]), f: f || 46 }, ms || 5000, 5); return true; },
+  home(ms) { const st = WD.st; if (!st || WD.mode !== "board" || st.fly || !st.shots || !st.shots.board) return false; wdFly(st, st.shots.board, ms || 3000, 4); return true; },
+  kind: () => (WD.st ? (WD.st.room ? "room" : WD.st.R.sport) : ""),
   // a video is up: o.dj (the DJ set), o.v (the video element), o.ext (someone else's video: can't go on a texture)
   clip(o) {
     const st = WD.st; if (!st || !wdTv()) return false;

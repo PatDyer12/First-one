@@ -75,6 +75,7 @@ function model() {
 }
 
 // ---------- the DOM ----------
+let primeEl = null;
 let root, board, lanesEl, tickEl, pagesEl, stageEl, first = true, css3 = null, scene3 = null, world = null, globe = null, flying = false, lastSpot = null;
 const dim = (v) => { root.classList.toggle("dim", v); board.classList.toggle("dim", v); };
 const laneEls = new Map(), cardEls = new Map(), prevSc = new Map(), prevCls = new Map();
@@ -95,11 +96,11 @@ body.v3on #v2world.v3in { transition: transform .95s cubic-bezier(.15, .6, .3, 1
   root = document.createElement("div"); root.id = "v3";
   root.innerHTML = `<div class="v3-top"><div class="v3-brand">SWEAT <i>BOARD</i></div><div class="v3-clock" id="v3clock"></div><div class="v3-sum" id="v3sum"></div><div class="v3-ppl" id="v3ppl"></div><button class="v3-x" id="v3x" type="button">Exit V3</button></div>
     <div class="v3-main"></div><div class="v3-tick" id="v3tick"></div>`;
-  board = document.createElement("div"); board.className = "v3-board"; board.innerHTML = `<div class="v3-lanes" id="v3lanes"></div><div class="v3-pages" id="v3pages"></div>`;
+  board = document.createElement("div"); board.className = "v3-board"; board.innerHTML = `<div class="v3-lanes" id="v3lanes"></div><div class="v3-primebox" id="v3prime"></div><div class="v3-pages" id="v3pages"></div>`;
   stageEl = document.createElement("div"); stageEl.className = "v3-stage";
   css3 = new CSS3DRenderer(); css3.domElement.className = "v3-css3"; scene3 = new THREE.Scene(); const bo = new CSS3DObject(board); bo.position.set(0, 0.86, 0); bo.scale.setScalar(0.0095); bo.rotation.x = -0.05; scene3.add(bo);
   SR.append(css3.domElement, root, stageEl); document.body.append(gl, host, fx);
-  lanesEl = board.querySelector("#v3lanes"); tickEl = $("#v3tick"); pagesEl = board.querySelector("#v3pages");
+  lanesEl = board.querySelector("#v3lanes"); tickEl = $("#v3tick"); pagesEl = board.querySelector("#v3pages"); primeEl = board.querySelector("#v3prime");
   $("#v3x").addEventListener("click", () => { try { localStorage.removeItem("sb-v3"); } catch (e) {} location.replace(location.pathname); });
   glInit(gl); fxInit(fx);
 }
@@ -140,13 +141,29 @@ function flip(els, fn) {
     e.animate([{ transform: `translate(${dx}px, ${dy}px)` }, { transform: "none" }], { duration: 650, easing: "cubic-bezier(.2,.8,.2,1)" }); }
 }
 let M = null, page = 0, pages = 1, pageAt = 0, fitSig = "", fitK = 1, fitAt = 0;
+const PRIME_Q = /[?&]v3(demo)?=prime/.test(location.search);
+function primeGame() {
+  if (!M) return null; const now = Date.now(), near = M.lanes.filter((l) => l.g && (l.g.st === "in" || (l.g.st === "pre" && l.g.t - now < 45 * 60e3) || (l.g.st === "post" && now - l.g.t < 5 * 3600e3 && l.cards.some((c) => c.ev && c.b.status === "open"))));
+  const live = near.filter((l) => l.g.st !== "post"); return live.length === 1 ? live[0] : PRIME_Q && near.length ? near[0] : null;
+}
+let mode = "", prime = null;
 function render() {
   M = model();
-  const n = M.n; const setK = (k) => { root.style.setProperty("--k", k); board.style.setProperty("--k", k); };
+  const pl = primeGame(), want = pl ? "prime" : "grid";
+  if (want !== mode) { mode = want; for (const e of cardEls.values()) e.remove(); for (const e of laneEls.values()) e.remove(); cardEls.clear(); laneEls.clear(); prevCls.clear(); lanesEl.innerHTML = ""; primeEl.innerHTML = ""; prime = null; fitSig = ""; board.classList.toggle("prime", mode === "prime"); if (mode !== "prime" && window.SBW && window.SBW.home) window.SBW.home(); }
+  if (mode === "prime") { try { renderHead(); renderPrime(pl); ticker(); } catch (e) { console.warn("v3 prime", e); } first = false; return; }
+  renderHead(); renderGrid();
+}
+function renderHead() {
+  const n = M.n;
+  const setK = (k) => { root.style.setProperty("--k", k); board.style.setProperty("--k", k); };
   // header
   $("#v3clock").textContent = new Date().toLocaleTimeString([], { hour: "numeric", minute: "2-digit" });
   setHtml($("#v3sum"), n ? `<div class="v3-chip"><b>${n}</b><em>open</em></div><div class="v3-chip"><b>${fU(M.risk)}</b><em>riding</em></div>${M.liveN ? `<div class="v3-chip ${M.hold > 0.004 ? "g" : M.hold < -0.004 ? "r" : ""}"><b>${fU(M.hold, true)}</b><em>if it holds · ${M.up} up ${M.dn} down</em></div>` : `<div class="v3-chip"><b>${fU(M.toWin)}</b><em>to win</em></div>`}` : "");
   setHtml($("#v3ppl"), X.people().slice(0, 6).map((p) => `<div class="v3-p" data-k="${esc(p.k)}" style="--c:${esc(p.col)}"><span class="av">${esc(String(p.name || "?").slice(0, 1).toUpperCase())}</span><span class="nm">${esc(p.name)}</span><span class="nt num ${p.net > 0.004 ? "g" : p.net < -0.004 ? "r" : ""}">${fU(p.net, true)}</span>${p.open ? `<span class="op">${p.open} open</span>` : ""}</div>`).join(""));
+}
+const setK = (k) => { root.style.setProperty("--k", k); board.style.setProperty("--k", k); };
+function renderGrid() {
   // lanes and cards, kept by key so they can glide and react instead of being redrawn
   const all = [...laneEls.values(), ...cardEls.values()];
   flip(all, () => {
@@ -199,6 +216,60 @@ function ticker() {
   const sig = gs.map((g) => g.id).join(); if (tickEl.__sig !== sig) { tickEl.__sig = sig; tickEl.innerHTML = gs.length ? `<div class="run" style="--d:${Math.max(30, gs.length * 7)}s">${one}${one}</div>` : ""; tickEl.style.visibility = gs.length ? "" : "hidden"; }
   else if (gs.length) { const sp = tickEl.querySelectorAll("span"), tmp = document.createElement("div"); tmp.innerHTML = one + one; [...tmp.children].forEach((n, i) => { if (sp[i] && sp[i].innerHTML !== n.innerHTML) { sp[i].innerHTML = n.innerHTML; sp[i].className = n.className; } }); }
 }
+// ---------- prime time: one game has the building and the whole board ----------
+const WPH = new Map();   // game -> the home side's win odds over the night
+function card(c, host, i) {
+  let x = cardEls.get(c.id); if (!x) { x = document.createElement("div"); cardEls.set(c.id, x); if (!first) x.__born = 1; }
+  x.__c = c; x.className = `v3-c ${c.cls}${c.par ? " par" : ""}${c.sweat ? " sweat" : ""}`; x.style.setProperty("--c", c.col); setHtml(x, cardHtml(c));
+  if (x.__born === 1) { x.__born = 2; x.classList.add("born"); setTimeout(() => x.classList.remove("born"), 950); }
+  const pc = prevCls.get(c.id), side = (k) => (k === "w" || k === "won" ? 1 : k === "l" || k === "lost" ? -1 : 0); prevCls.set(c.id, c.cls);
+  if (pc && side(pc) !== side(c.cls) && side(c.cls) && !first) { turned(x, side(c.cls) > 0); swing(c, side(c.cls) > 0); }
+  if (host.children[i] !== x) host.insertBefore(x, host.children[i] || null); return x;
+}
+function swing(c, good) { const d = document.createElement("div"); d.className = "v3-swing " + (good ? "g" : "r"); d.style.setProperty("--c", c.col); d.innerHTML = `<b>${esc(c.who)}</b> ${esc(c.pick)} <em>${good ? "now winning" : "now losing"}</em>`; const f = primeEl.querySelector(".pm-feed"); if (!f) return; f.prepend(d); while (f.children.length > 4) f.lastChild.remove(); setTimeout(() => d.classList.add("old"), 9000); setTimeout(() => d.remove(), 30000); }
+function renderPrime(L) {
+  const g = L.g, ca = teamCol(g.a), ch = teamCol(g.h), live = g.st !== "pre", si = g.sit || {};
+  if (!prime || prime.id !== g.id) { prime = { id: g.id, at: Date.now(), shot: 0, shotAt: 0 };
+    primeEl.innerHTML = `<div class="pm-bug"></div><div class="pm-left"><h4>Your bets on this game</h4><div class="pm-list" id="pmMine"></div><div class="pm-feed"></div></div><div class="pm-right"><h4 id="pmRt">Parlays</h4><div class="pm-list" id="pmPar"></div><h4 id="pmEt">Elsewhere</h4><div class="pm-list sm" id="pmElse"></div></div><div class="pm-foot"><div class="pm-fld"></div><div class="pm-wp"></div><div class="pm-ldr"></div><div class="pm-room"></div></div>`;
+    if (!first) { venueIntro(g); } }
+  board.style.setProperty("--ca", css(ca)); board.style.setProperty("--ch", css(ch));
+  // the scorebug
+  const to = (n) => (n == null ? "" : `<span class="to">${[0, 1, 2].map((i) => `<i class="${i < n ? "on" : ""}"></i>`).join("")}</span>`);
+  const tm = (s) => { const t = g[s], o = g[s === "a" ? "h" : "a"], ball = g.st === "in" && si.pos && String(si.pos) === String(t.id);
+    return `<div class="tm ${s}${live && t.sc > o.sc ? " lead" : ""}">${t.lg ? `<img src="${esc(t.lg)}" alt="" referrerpolicy="no-referrer" onerror="this.style.visibility='hidden'">` : ""}<div class="nm"><b>${esc(t.nm || t.ab)}${ball ? `<i class="ball${si.rz ? " rz" : ""}"></i>` : ""}</b><small>${esc(t.rec || "")}${si.to ? to(si.to[s]) : ""}</small></div><span class="sc num" data-s="${s}">${live ? esc(t.sc ?? "") : ""}</span></div>`; };
+  const bug = primeEl.querySelector(".pm-bug"); bug.classList.toggle("live", g.st === "in");
+  setHtml(bug, `${tm("a")}<div class="ctr"><span class="clk">${esc(g.st === "pre" ? when(g.t) : g.st === "post" ? "Final" : g.d || "Live")}</span><span class="dd${si.rz ? " rz" : ""}">${esc(g.st === "in" ? si.dd || g.sport : [g.net, g.ven && g.ven.nm].filter(Boolean).join(" · "))}</span></div>${tm("h")}`);
+  { const was = prevSc.get(g.id), now = [g.a.sc, g.h.sc]; if (was && live) ["a", "h"].forEach((s, j) => { if (now[j] != null && was[j] != null && now[j] > was[j]) primeScore(g, s, j ? ch : ca, now[j] - was[j]); }); prevSc.set(g.id, now); }
+  // the bets: on this game down the left, parlays and everything else down the right
+  const mine = L.cards, pars = (M.lanes.find((l) => l.k === "par") || { cards: [] }).cards, other = M.lanes.filter((l) => l !== L && l.k !== "par").flatMap((l) => l.cards);
+  const all = [...cardEls.values()];
+  flip(all, () => { const seen = new Set(); const put = (list, id) => { const host = primeEl.querySelector(id); list.forEach((c, i) => { seen.add(c.id); card(c, host, i); }); }; put(mine, "#pmMine"); put(pars, "#pmPar"); put(other, "#pmElse");
+    for (const [k, el] of cardEls) if (!seen.has(k)) { el.remove(); cardEls.delete(k); prevCls.delete(k); } });
+  { const n = mine.length, h = primeEl.querySelector("#pmMine"); h.style.setProperty("--k", n <= 2 ? 1.75 : n <= 4 ? 1.5 : n <= 6 ? 1.3 : n <= 10 ? 1.12 : 0.95); h.classList.toggle("two", n > 3); const m = pars.length + other.length, pr = primeEl.querySelector(".pm-right"); pr.style.setProperty("--k", m <= 3 ? 1.2 : m <= 6 ? 1.05 : 0.9); pr.style.display = m ? "" : "none"; primeEl.classList.toggle("solo", !m); }
+  primeEl.querySelector("#pmRt").style.display = pars.length ? "" : "none"; primeEl.querySelector("#pmEt").style.display = other.length ? "" : "none";
+  // along the bottom: the field, the win odds through the night, the leaders, where the room stands on this game
+  setHtml(primeEl.querySelector(".pm-fld"), `<h5>${esc(g.st === "in" ? (si.lp && si.lp.text) || "The drive" : g.st === "pre" ? "Kickoff " + when(g.t) : "Final")}</h5>${fieldHtml(g) || `<div class="v3-fld idle"><span class="ez" style="background:${css(ca)}">${esc(g.a.ab)}</span><div class="pf"></div><span class="ez" style="background:${css(ch)}">${esc(g.h.ab)}</span></div>`}`);
+  const wp = g.st === "in" && typeof si.wp === "number" ? si.wp : null; if (wp != null) { const H = WPH.get(g.id) || []; if (!H.length || Math.abs(H[H.length - 1] - wp) > 0.004 || H.length < 2) { H.push(wp); if (H.length > 240) H.shift(); WPH.set(g.id, H); } }
+  { const H = WPH.get(g.id) || [], n = H.length, pts = H.map((v, i) => `${n > 1 ? ((i / (n - 1)) * 300).toFixed(1) : 300},${(v * 80).toFixed(1)}`).join(" "), cur = wp != null ? Math.round(wp * 100) : null;
+    setHtml(primeEl.querySelector(".pm-wp"), `<h5>Win odds${cur != null ? ` · <b style="color:${css(cur >= 50 ? ch : ca)}">${esc(cur >= 50 ? g.h.ab : g.a.ab)} ${Math.max(cur, 100 - cur)}%</b>` : ""}</h5><svg viewBox="0 0 300 80" preserveAspectRatio="none"><rect x="0" y="0" width="300" height="40" fill="${css(ca)}" opacity=".16"/><rect x="0" y="40" width="300" height="40" fill="${css(ch)}" opacity=".16"/><line x1="0" y1="40" x2="300" y2="40" stroke="rgba(255,255,255,.35)" stroke-dasharray="4 4"/>${n > 1 ? `<polyline points="${pts}" fill="none" stroke="#fff" stroke-width="2.5" vector-effect="non-scaling-stroke"/>` : ""}</svg><div class="ax"><span>${esc(g.a.ab)}</span><span>${esc(g.h.ab)}</span></div>`); }
+  const LD = (g.ldr || []).filter((x) => /^(passing|rushing|receiving)Yards$/.test(x.n)).slice(0, 3);
+  setHtml(primeEl.querySelector(".pm-ldr"), `<h5>Leaders</h5>${LD.length ? LD.map((x) => `<div><em>${x.n[0] === "p" ? "Passing" : x.n[1] === "u" ? "Rushing" : "Receiving"}</em><span>${esc(x.p)}</span><b class="num">${esc(String(x.v).split(",")[0])}</b></div>`).join("") : `<div><span>${esc(g.st === "pre" ? "At kickoff" : "—")}</span></div>`}`);
+  const ppl = new Map(); for (const c of mine) { const k = c.who; if (!ppl.has(k)) ppl.set(k, { col: c.col, v: 0, n: 0 }); const p = ppl.get(k); p.n++; if (c.ev) p.v += c.ev.res === "W" ? c.toWin : c.ev.res === "L" ? -c.units : 0; }
+  setHtml(primeEl.querySelector(".pm-room"), `<h5>${g.st === "pre" ? "Riding on it" : "If it ends now"}</h5>${[...ppl].map(([k, p]) => `<div><i style="background:${esc(p.col)}"></i><span>${esc(k)}</span><b class="num ${p.v > 0.004 ? "g" : p.v < -0.004 ? "r" : ""}">${g.st === "pre" ? p.n + (p.n === 1 ? " bet" : " bets") : fU(p.v, true)}</b></div>`).join("") || "<div><span>No bets on this one</span></div>"}`);
+  // the camera works the stadium: a new angle every so often, always looking at the ball
+  const now = Date.now(); if (window.SBW && window.SBW.tour && !flying && !showing && now - prime.shotAt > 16000 && now - prime.at > 6000) { const bx = g.st === "in" && typeof si.yl === "number" ? 50 - si.yl : 0, d = si.pos && String(si.pos) === String(g.a.id) ? 1 : -1;
+    const SH = [[[bx * 0.4 - 6, 30, 62], [bx, 3, -4], 44], [[bx - d * 46, 15, 6], [bx + d * 14, 2, 0], 48], [[bx + 34, 44, 46], [bx, 0, -4], 40], [[bx, 78, 20], [bx, 0, -2], 38], [[bx - 30, 12, 40], [bx + 4, 4, -10], 52], null];
+    const sh = SH[prime.shot++ % SH.length]; if (sh ? window.SBW.tour(sh[0], sh[1], sh[2], 5200) : window.SBW.home(4200)) prime.shotAt = now; }
+}
+function primeScore(g, side, col, pts) {
+  const bug = primeEl.querySelector(".pm-bug"), [x, y] = mid(bug), t = g[side], fb = isFb(g), big = pts >= 6 || !fb;
+  setTimeout(() => { const s = bug.querySelector(`.sc[data-s="${side}"]`); if (s) { s.classList.add("flip"); setTimeout(() => s.classList.remove("flip"), 950); } }, 0);
+  ripple(x, y, col, 1.3); sparks(x, y, col, 120, 1.2); gl.surge = 1.5; flash = { c: col, a: 0.45 };
+  const d = document.createElement("div"); d.className = "v3-td"; d.style.setProperty("--c", css(col)); d.innerHTML = `<b>${esc(fb ? (pts >= 6 ? "Touchdown" : pts === 3 ? "Field goal" : pts === 2 ? "Safety" : "Extra point") : "Score")}</b><span>${esc(t.nm || t.ab)} · ${esc(g.a.ab)} ${esc(g.a.sc)} – ${esc(g.h.sc)} ${esc(g.h.ab)}</span>`; SR.append(d);
+  requestAnimationFrame(() => requestAnimationFrame(() => d.classList.add("in"))); setTimeout(() => { d.classList.remove("in"); setTimeout(() => d.remove(), 700); }, big ? 4200 : 2600);
+  if (big) for (let i = 0; i < 5; i++) setTimeout(() => firework(innerWidth * (0.3 + 0.4 * Math.random()), innerHeight * (0.25 + 0.3 * Math.random()), i % 2 ? col : [1, 1, 1]), 300 + i * 420);
+}
+function venueIntro(g) { const d = document.createElement("div"); d.className = "v3-venue"; d.innerHTML = `<small>Prime time</small><b>${esc(g.a.nm || g.a.ab)} at ${esc(g.h.nm || g.h.ab)}</b><span>${esc([g.ven && g.ven.nm, g.net].filter(Boolean).join(" · "))}</span>`; SR.append(d); requestAnimationFrame(() => requestAnimationFrame(() => d.classList.add("in"))); setTimeout(() => { d.classList.remove("in"); setTimeout(() => d.remove(), 700); }, 5200); }
 const mid = (el) => { const r = el.getBoundingClientRect(); return [r.left + r.width / 2, r.top + r.height / 2, r]; };
 
 // ---------- reactions on the board ----------
@@ -465,7 +536,8 @@ function makeDemo() {
   const T = (ab, nm, col, alt) => ({ id: ab, ab, nm, col, alt, rec: `${3 + (ab.charCodeAt(0) % 5)}-${2 + (ab.charCodeAt(1) % 4)}`, lg: `https://a.espncdn.com/i/teamlogos/nfl/500-dark/${ab.toLowerCase()}.png`, sc: 0 });
   const now = Date.now(), mk = (id, a, h, st, q, min) => ({ id, sport: "NFL", st, a, h, t: st === "pre" ? now + 95 * 60e3 : now - 3600e3, q, clk: min * 60, d: "", net: "NBC", sit: null });
   const games = [mk("g1", T("DET", "Lions", "#0076b6", "#b0b7bc"), T("KC", "Chiefs", "#e31837", "#ffb612"), "in", 2, 9), mk("g2", T("PHI", "Eagles", "#004c54", "#a5acaf"), T("DAL", "Cowboys", "#002a5c", "#b0b7bc"), "in", 3, 12), mk("g3", T("BUF", "Bills", "#00338d", "#d50a0a"), T("MIA", "Dolphins", "#008e97", "#fc4c02"), "in", 4, 6), mk("g4", T("GB", "Packers", "#204e32", "#ffb612"), T("CHI", "Bears", "#0b162a", "#c83803"), "pre", 0, 15)];
-  games[0].a.sc = 10; games[0].h.sc = 14; games[1].a.sc = 17; games[1].h.sc = 13; games[2].a.sc = 24; games[2].h.sc = 23;
+  if (/v3demo=prime/.test(location.search)) { games.splice(1, 3); }
+  games[0].a.sc = 10; games[0].h.sc = 14; if (false)  { } if (games[1]) { games[1].a.sc = 17; games[1].h.sc = 13; games[2].a.sc = 24; games[2].h.sc = 23; }
   const P = { me: ["You", "#e2c17e"], br: ["Brad", "#f2a65a"], ju: ["Julian", "#6cc4f5"] };
   let n = 0; const bet = (who, pick, odds, units, sel) => ({ id: "d" + ++n, who, pick, odds, units, sel, status: "open", kind: "straight", placedAt: now });
   const bets = new Map(), add = (b) => bets.set(b.id, b);
@@ -475,6 +547,7 @@ function makeDemo() {
   add(bet("br", "Packers −3", -115, 2, { g: "g4", m: "sp", s: "a", l: -3 })); add(bet("me", "Bears ML", 140, 1, { g: "g4", m: "ml", s: "h" }));
   add({ id: "p1", who: "me", kind: "parlay", odds: 650, units: 1, status: "open", pick: "4-leg parlay", legs: ["Lions ML", "Eagles ML", "Bills ML", "Packers ML"], legSel: [{ g: "g1", m: "ml", s: "a" }, { g: "g2", m: "ml", s: "a" }, { g: "g3", m: "ml", s: "a" }, { g: "g4", m: "ml", s: "a" }] });
   add({ id: "p2", who: "br", kind: "parlay", odds: 264, units: 0.5, status: "open", pick: "2-leg parlay", legs: ["Over 47.5 DET/KC", "Dolphins +1.5"], legSel: [{ g: "g1", m: "tot", s: "o", l: 47.5 }, { g: "g3", m: "sp", s: "h", l: 1.5 }] });
+  for (const [k, b] of [...bets]) { const ids = b.kind === "parlay" ? b.legSel.map((x) => x.g) : [b.sel.g]; if (ids.some((id) => !games.find((g) => g.id === id))) bets.delete(k); }
   const net = { me: 1.8, br: -1, ju: 0.9 }, G0 = (id) => games.find((g) => g.id === id);
   const label = (g) => (g.st === "post" ? "Final" : g.st === "pre" ? "" : g.q > 4 ? "OT" : `${Math.floor(g.clk / 60)}:${String(Math.floor(g.clk % 60)).padStart(2, "0")} - ${["1st", "2nd", "3rd", "4th"][g.q - 1]}`);
   const dn = (g) => (g.st === "post" ? 1 : g.st !== "in" ? 0 : Math.min(0.99, ((g.q - 1) * 900 + (900 - g.clk)) / 3600));
@@ -498,7 +571,7 @@ function makeDemo() {
         si.yl = clamp(si.yl + dir * gain, 3, 97); si.ds = gain >= si.ds ? 10 : si.ds - Math.max(0, gain); const dnn = gain >= 10 ? 1 : ((si.dn || 1) % 4) + 1; si.dn = gain >= si.ds ? 1 : dnn; si.dd = `${["1st", "2nd", "3rd", "4th"][si.dn - 1]} & ${si.ds}`; si.rz = dir > 0 ? si.yl > 80 : si.yl < 20; si.dn = si.dn || 1; si.lp = { text: `${["Pass complete", "Rush up the middle", "Screen pass", "Scramble"][Math.floor(Math.random() * 4)]} for ${gain} yard${gain === 1 ? "" : "s"}` }; } }
       // a finished game pays its bets, one at a time; a parlay when its last leg is in (or one's dead)
       if (!showing && !Q.length) for (const b of bets.values()) { if (b.kind === "parlay") { const L = legs(b); if (L.some((l) => l.st === "miss")) { settle(b, "L"); break; } if (L.every((l) => l.st === "hit")) { settle(b, "W"); break; } } else { const e = ev(b.sel); if (e && e.fin && e.res !== "P") { settle(b, e.res); break; } } }
-      for (const g of games) if (g.st === "in") { const dd = g.h.sc - g.a.sc; if (g.sit) g.sit.wp = clamp(0.5 + dd * 0.035 * (1 + dn(g)), 0.03, 0.97); g.ldr = [{ n: "passingYards", v: String(110 + Math.round(dn(g) * 190)), p: "QB One" }, { n: "rushingYards", v: String(30 + Math.round(dn(g) * 70)), p: "R. Back" }, { n: "receivingYards", v: String(40 + Math.round(dn(g) * 80)), p: "W. Out" }]; }
+      for (const g of games) if (g.st === "in") { const dd = g.h.sc - g.a.sc; if (g.sit) g.sit.to = { a: 3, h: 2 }; if (g.sit) g.sit.wp = clamp(0.5 + dd * 0.035 * (1 + dn(g)), 0.03, 0.97); g.ldr = [{ n: "passingYards", v: String(110 + Math.round(dn(g) * 190)), p: "QB One" }, { n: "rushingYards", v: String(30 + Math.round(dn(g) * 70)), p: "R. Back" }, { n: "receivingYards", v: String(40 + Math.round(dn(g) * 80)), p: "W. Out" }]; }
       if (!placed && games[0].q >= 3) { placed = 1; const b = bet("ju", "Chiefs −2.5 live", 105, 2, { g: "g1", m: "sp", s: "h", l: -2.5 }); add(b); V.place && V.place(b); }
     },
   };
