@@ -14936,7 +14936,7 @@ void main(){
   // ---------- sheets ----------
   function openSheet(id) { $(id).hidden = false; }
   // keep every open screen current: when a new version is up, reload it (never mid-form or mid-animation)
-  const BUILD = "20261113011728";
+  const BUILD = "20261113013212";
   function updReady() {
     if (document.getElementById("updReady")) return; const d = document.createElement("div"); d.id = "updReady"; d.textContent = "Update ready · refresh, then TV + Sound on"; document.body.append(d);
   }
@@ -15830,7 +15830,8 @@ void main(){
   function followCard(f, fn, now) {
     // which game: the one on now, last night's final until the morning, else the next one
     const recent = fn.last && now - fn.last.t < 10 * 36e5;
-    const x = fn.live || (recent ? fn.last : null) || fn.next || (fn.last && now - fn.last.t < 48 * 36e5 ? fn.last : null);
+    const soon = fn.next && fn.next.t - now < 7 * 864e5 ? fn.next : null;   // (not next season's opener, months out)
+    const x = fn.live || (recent ? fn.last : null) || soon || (fn.last && now - fn.last.t < 48 * 36e5 ? fn.last : null);
     if (!x || heroIds.has(x.id)) return "";
     const g = S.games.get(x.id), m = (g && g.mlb) || {}, st = g ? g.st : x.st, live = st === "in", pre = st === "pre";
     const A = g ? g.a : x.a, H = g ? g.h : x.h, fav = A.ab === f.ab ? "a" : "h", favT = fav === "a" ? A : H;
