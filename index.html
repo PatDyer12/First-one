@@ -14938,7 +14938,7 @@ void main(){
   // ---------- sheets ----------
   function openSheet(id) { $(id).hidden = false; }
   // keep every open screen current: when a new version is up, reload it (never mid-form or mid-animation)
-  const BUILD = "20261113021909";
+  const BUILD = "20261113052913";
   function updReady() {
     if (document.getElementById("updReady")) return; const d = document.createElement("div"); d.id = "updReady"; d.textContent = "Update ready · refresh, then TV + Sound on"; document.body.append(d);
   }
@@ -25907,7 +25907,7 @@ function wdDeckAct(st, kind, ms) { const D = st && st.deck; if (D && D.masc) D.m
 // They react: the side that scores jumps with its arms up, a bet that cashes gets the whole place up, a miss gets hands on
 // heads, the wave runs round, and in a DJ set they bounce on the beat with their phones up ----
 const WD_FAN_VS = `attribute vec3 aCol; attribute vec4 aR; attribute vec3 aP; varying vec3 vC; varying float vL, vD, vPh;
-uniform float uT, uParty, uBeat, uSad, uWave, uWaveU, uBurst, uK; uniform float uCh[8];
+uniform float uT, uParty, uBeat, uSad, uWave, uWaveU, uBurst, uK, uHum; uniform float uCh[8];
 float h1(float n){ return fract(sin(n * 91.345) * 43758.5453); }
 vec3 rz(vec3 p, vec3 o, float a){ p -= o; float c = cos(a), s = sin(a); return vec3(c * p.x - s * p.y, s * p.x + c * p.y, p.z) + o; }
 vec3 rx(vec3 p, vec3 o, float a){ p -= o; float c = cos(a), s = sin(a); return vec3(p.x, c * p.y - s * p.z, s * p.y + c * p.z) + o; }
@@ -25919,7 +25919,8 @@ void main(){
   float cheer = clamp(max(ch, uBurst * (.45 + .55 * aR.y)), 0., 1.);
   float beat = uParty * pow(1. - fract(uBeat + aR.x * .08), 3.);
   // arms: up and out on a cheer or the wave, waving in a set, hands on heads on a miss
-  float up = clamp(cheer * 1.15 + wv * 1.2 + uParty * (.55 + .45 * sin(uT * 2.2 + ph)) * step(.35, aR.y), 0., 1.);
+  float hum = uHum * step(.5, aR.y) * (.5 + .5 * sin(uT * 1.3 + ph * 3.0));
+  float up = clamp(cheer * 1.15 + wv * 1.2 + hum * .55 + uParty * (.55 + .45 * sin(uT * 2.2 + ph)) * step(.35, aR.y), 0., 1.);
   float sad = uSad * step(aR.y, .8) * (1. - up);
   float sw = sin(uT * sp * 3.3 + ph) * .25 * cheer + sin(uT * 3.1 + ph) * .3 * uParty;
   float aL = -(up * 2.55 + sad * 2.2) - sw * up, aRr = (up * 2.55 + sad * 2.2) - sw * up;
@@ -25928,7 +25929,7 @@ void main(){
   if (part > 3.5) p = mix(vec3(.3, .98, 0.), p, step(.2, uParty) * step(.45, aR.y));
   if (part > .5 && part < 1.5) p = rx(p, vec3(0., 1.02, 0.), sad * .5 - cheer * .15);
   // jumping on a cheer, bouncing in a set, standing up for the wave
-  p.y += cheer * .32 * abs(sin(uT * sp * 3.4 + ph)) + beat * .14 + wv * .25 + sin(uT * .7 + ph) * .015;
+  p.y += cheer * .32 * abs(sin(uT * sp * 3.4 + ph)) + beat * .14 + wv * .25 + sin(uT * .7 + ph) * .03 + hum * .12 * abs(sin(uT * sp * 2.3 + ph));
   vec4 w = modelMatrix * instanceMatrix * vec4(p * uK, 1.0);
   vec4 mv = viewMatrix * w; vD = -mv.z; gl_Position = projectionMatrix * mv;
   vec3 n = normalize(mat3(modelMatrix * instanceMatrix) * normal);
@@ -25937,6 +25938,8 @@ void main(){
   vec3 pants = vec3(.08, .09, .12) + .1 * h1(aR.x * 5.0);
   vC = kind < .5 ? aCol : kind < 1.5 ? skin : kind < 2.5 ? pants : vec3(1.0);
   vPh = kind > 2.5 ? 1. : 0.;
+  float fl = step(.994, h1(floor(uT * 11.0) * .371 + aR.x * 91.7)) * clamp(uBurst * 1.6 + uHum * .12, 0., 1.);
+  vPh = max(vPh, fl * step(.5, kind) * step(kind, 1.5));
 }`;
 const WD_FAN_FS = `uniform float uLit, uFlash, uFl, uParty; uniform vec3 uFc, uHaze; varying vec3 vC; varying float vL, vD, vPh;
 void main(){
@@ -25971,7 +25974,7 @@ function wdFansBuild(st, seats, cols, K) {
   const aCol = new Float32Array(n * 3), aR = new Float32Array(n * 4);
   const rnd = (i, s) => { const x = Math.sin(i * 12.9898 + s * 78.233) * 43758.5453; return x - Math.floor(x); };
   const mat = new THREE.ShaderMaterial({ vertexShader: WD_FAN_VS, fragmentShader: WD_FAN_FS,
-    uniforms: { uT: { value: 0 }, uParty: { value: 0 }, uBeat: { value: 0 }, uSad: { value: 0 }, uWave: { value: 0 }, uWaveU: { value: 0 }, uBurst: { value: 0 }, uK: { value: K || 1 }, uCh: { value: new Array(8).fill(0) },
+    uniforms: { uT: { value: 0 }, uParty: { value: 0 }, uBeat: { value: 0 }, uSad: { value: 0 }, uWave: { value: 0 }, uWaveU: { value: 0 }, uBurst: { value: 0 }, uHum: { value: 0 }, uK: { value: K || 1 }, uCh: { value: new Array(8).fill(0) },
       uLit: { value: 1 }, uFlash: { value: 0 }, uFl: { value: 420 }, uFc: { value: new THREE.Vector3(1, 1, 1) }, uHaze: { value: new THREE.Vector3(0.03, 0.04, 0.07) } } });
   const mesh = new THREE.InstancedMesh(ig, mat, n), m4 = new THREE.Matrix4(), q = new THREE.Quaternion(), e = new THREE.Euler(), s3 = new THREE.Vector3(), p3 = new THREE.Vector3();
   for (let i = 0; i < n; i++) {
@@ -26011,7 +26014,7 @@ function wdFanSeats(C, V, tiers, gap, fill, teamOf) {
 function wdFansTick(st, t) {
   const F = st.fans; if (!F) return; const u = F.mat.uniforms, P = st.party;
   for (let i = 0; i < 8; i++) { F.ch[i] *= 0.985; u.uCh.value[i] = Math.min(1, F.ch[i]); }
-  u.uT.value = t; u.uBurst.value = Math.min(1, st.burst * 0.8); u.uWave.value = Math.min(1, st.wave); u.uWaveU.value = (t * 0.09) % 1;
+  u.uT.value = t; u.uBurst.value = Math.min(1, st.burst * 0.8); u.uWave.value = Math.min(1, st.wave); u.uWaveU.value = (t * 0.09) % 1; if (u.uHum) u.uHum.value = st.hum || 0;
   u.uSad.value = Math.min(1, st.dim * 1.2); u.uFlash.value = st.flash; u.uFc.value.set(...st.fc);
   u.uParty.value = P ? P.on : 0; u.uBeat.value = P && P.beat != null ? P.beat : t * 2;
 }
@@ -27077,6 +27080,7 @@ function wdPolish(st, fs) {
     st.mascot = { F, f: mf2, busy: false, home: HOME, kits: { kh, ka } };
     for (const c of [home, away, refs].concat(bench || [])) for (const m of c.ms) m.visible = false;
     FG = { F, H, Aw, Rf, sh, m4, q, e, pp, one: new THREE.Vector3(1, 1, 1) };
+    try { if (window.__v3env) st.env = window.__v3env(st, F, { home: hc, away: ac, alt: altH }); } catch (e2) { console.warn("env", e2); }
   } catch (e) { console.warn("figures", e); FG = { dead: true }; } };
   const place = (f, role, x, z, ry, t, mv, cheer, i) => { f.g.position.x = x; f.g.position.z = z; f.g.rotation.y = ry; FG.F.posePlayer(f, role, t, mv, cheer); FG.e.set(-Math.PI / 2, 0, 0); FG.q.setFromEuler(FG.e); FG.m4.compose(FG.pp.set(x, 0.06, z), FG.q, FG.one); FG.sh.setMatrixAt(i, FG.m4); };
   // ---- the play, acted out: every new play in the feed is run by the 22 on the field (a run, a pass caught or dropped
@@ -27094,7 +27098,8 @@ function wdPolish(st, fs) {
     if (k === "run") { o.T1 = cl3(1.3 + Math.abs(gain) * 0.1, 1.5, 4.4); o.T = o.T1 + 1.1; }
     else if (k === "pass" || k === "inc" || k === "int") { o.tg = [8, 9, 10, 5][h % 4]; o.cD = k !== "pass" ? 5 + (h % 14) : gain <= 1 ? Math.max(-1, gain) : Math.max(1.5, gain * (td ? 0.82 : 0.72)); o.cz = cl3(OFF[o.tg][1] * 0.7 + (((h >> 3) % 5) - 2), -24, 24); o.cA = 1.8 + Math.abs(o.cD) * 0.028; o.T1 = o.cA + cl3((gain - o.cD) * 0.11, 0.25, 2.6); o.T = k === "pass" ? o.T1 + 1.1 : k === "inc" ? o.cA + 1.4 : o.cA + 2.2; }
     else o.T = k === "sack" ? 3.0 : k === "fg" ? 3.1 : 4.8;
-    Object.assign(PLAY, o); for (const f of FG.H.concat(FG.Aw)) f.px = null; };
+    Object.assign(PLAY, o); for (const f of FG.H.concat(FG.Aw)) f.px = null;
+    if (td || gain >= 18 || k === "int" || k === "sack") { st.wave = Math.max(st.wave || 0, 1); st.burst = Math.max(st.burst || 0, td ? 0.9 : 0.55); } };
   window.__playDbg = () => (PLAY.on ? { k: PLAY.k, from: +PLAY.from.toFixed(1), d: PLAY.d, gain: PLAY.gain, T: PLAY.T, u: +(((performance.now() / 1000) - PLAY.t0) * (window.__actK || 1)).toFixed(2) } : null);
   const playFrame = (t) => { const p = PLAY, u = (t - p.t0) * (window.__actK || 1), d = p.d, k = p.k, g = p.gain, oF = d > 0 ? FG.Aw : FG.H, dF = d > 0 ? FG.H : FG.Aw, face = d > 0 ? Math.PI / 2 : -Math.PI / 2, E = (a) => (a < 0 ? 0 : a > 1 ? 1 : a * a * (3 - 2 * a)), L = (a, b, q) => a + (b - a) * q;
     const O = OFF.map(([b, z], i) => ({ x: -b, z, r: ROLE_O[i], mv: 0 })), D = DEF.map(([b, z], i) => ({ x: b, z, r: ROLE_D[i], mv: 0 })); let bx = 0, by = 0.4, bz = 0;
@@ -27137,7 +27142,7 @@ function wdPolish(st, fs) {
     const si = g && g.st === "in" ? g.sit : null; S.has = !!(si && typeof si.yl === "number" && si.pos); if (!S.has) return;
     const awayBall = String(si.pos) === String(g.a.id), d0 = S.dir, lp = si.lp || null, lid = lp ? String(lp.id != null ? lp.id : lp.text || "") : "";
     if (lid && lid !== S.lp) { const firstLp = S.lp === undefined; S.lp = lid; if (!firstLp && S.shown) S.pend = { lp, d0, aId: String(g.a.id), same: d0 === (awayBall ? 1 : -1), nx: 50 - si.yl }; } S.shown = true;
-    S.dir = awayBall ? 1 : -1; const nx = 50 - si.yl; if (Math.abs(nx - S.tx) > 0.4) S.run = 1; S.tx = nx; S.togo = typeof si.ds === "number" && si.ds > 0 ? si.ds : null; };
+    S.dir = awayBall ? 1 : -1; S.dn = si.dn || 0; const nx = 50 - si.yl; if (Math.abs(nx - S.tx) > 0.4) S.run = 1; S.tx = nx; S.togo = typeof si.ds === "number" && si.ds > 0 ? si.ds : null; };
   (st.spin = st.spin || []).push((t) => {
     if (t - S.at > 1) { S.at = t; read(); }
     if (S.pend && FG && !FG.dead && !PLAY.on) { startPlay(S.pend, t); S.pend = null; } if (PLAY.on && ((t - PLAY.t0) * (window.__actK || 1) > PLAY.T || !S.has)) { PLAY.on = false; S.run = 1; }
@@ -27149,6 +27154,8 @@ function wdPolish(st, fs) {
       else if (S.has) { OFF.forEach(([b, z], i) => place(oF[i], ROLE_O[i], S.x - d * b, z, face, t, mv, cO, i)); DEF.forEach(([b, z], i) => place(dF[i], ROLE_D[i], S.x + d * b, z, -face, t, mv, cD, i + 11)); REF.forEach(([b, z], i) => place(FG.Rf[i], "ref", S.x + d * b, z, z > 0 ? Math.PI : 0, t, 0, 0, i + 22)); }
       else { for (let i = 0; i < 11; i++) { const a = (i / 11) * Math.PI * 2, cx = Math.cos(a) * 3.4, cz = Math.sin(a) * 3.4, ry = Math.atan2(-cx, -cz); place(FG.H[i], i % 3 ? "stand" : "hips", 14 + cx, cz, ry, t, 0, ch, i); place(FG.Aw[i], i % 3 ? "stand" : "hips", -14 + cx, cz, ry, t, 0, 0, i + 11); } REF.forEach(([b, z], i) => place(FG.Rf[i], "ref", (i - 2) * 3, -24, 0, t, 0, 0, i + 22)); }
       FG.sh.instanceMatrix.needsUpdate = true;
+      if (st.env) try { st.env.update(t, S, PLAY.on, ch); } catch (e2) {}
+      st.hum = (st.hum || 0) + ((PLAY.on ? 1 : S.has ? 0.22 : 0.1) - (st.hum || 0)) * 0.04;
       // the mascot works its sideline unless a set piece has borrowed it
       const M = st.mascot; if (M && !M.busy) { const g = M.f.g, dx = M.home[0] + Math.sin(t * 0.21) * 9 - g.position.x, dz = M.home[1] - g.position.z, dist = Math.hypot(dx, dz), dt = Math.min(0.05, t - (M.t || t)); M.t = t;
         if (dist > 0.6) { const sp = Math.min(dist, (dist > 6 ? 17 : 3.2) * dt); g.position.x += (dx / dist) * sp; g.position.z += (dz / dist) * sp; g.rotation.y = Math.atan2(dx, dz); FG.F.poseMascot(M.f, dist > 6 ? "run" : "run", dist > 6 ? t : t * 0.45); } else { g.rotation.y += (0 - g.rotation.y) * 0.1; FG.F.poseMascot(M.f, ch > 0.1 ? "cheer" : "idle", t); } } else if (M) M.t = t; }
@@ -28078,14 +28085,29 @@ void main(){
   gl_FragColor = vec4(c, 1.0);
 }`;
 const WD_SKY = `uniform float uT, uArena; uniform vec3 uTint, uFc; uniform float uFlash; varying vec3 vP; ${WD_H}
+float skN(vec2 p){ vec2 i = floor(p), f = fract(p); f = f * f * (3.0 - 2.0 * f); return mix(mix(h21(i), h21(i + vec2(1., 0.)), f.x), mix(h21(i + vec2(0., 1.)), h21(i + vec2(1., 1.)), f.x), f.y); }
+float skF(vec2 p){ float a = .5, v = 0.; for (int i = 0; i < 4; i++) { v += a * skN(p); p = p * 2.03 + 7.1; a *= .5; } return v; }
 void main(){
-  vec3 d = normalize(vP); float y = d.y;
-  vec3 c = mix(vec3(.05, .07, .12) + uTint * .05, vec3(.006, .008, .02), smoothstep(-.05, .55, y));
-  c += vec3(.25, .22, .18) * exp(-max(y, 0.0) * 9.0) * .35 * (1.0 - uArena);
-  vec2 sp = vec2(atan(d.z, d.x) * 120.0, y * 120.0); float s = step(.9965, h21(floor(sp))) * smoothstep(.15, .5, y) * (1.0 - uArena);
-  c += vec3(s) * (.5 + .5 * sin(uT * 2.0 + h21(floor(sp)) * 30.0));
+  vec3 d = normalize(vP); float y = d.y, az = atan(d.z, d.x), open = 1.0 - uArena;
+  // the night: navy overhead, a band of dusk low in the west, the building's own glow on the haze
+  vec3 c = mix(vec3(.035, .06, .13) + uTint * .05, vec3(.004, .007, .022), smoothstep(-.05, .6, y));
+  float west = .5 + .5 * cos(az - 2.4);
+  c += (vec3(.5, .2, .1) * exp(-max(y, 0.0) * 13.0) * .55 * west * west + vec3(.2, .09, .22) * exp(-max(y, 0.0) * 5.0) * .22 * west) * open;
+  c += (vec3(.22, .2, .17) + uTint * .12) * exp(-max(y, 0.0) * 7.0) * .42 * open;
+  // stars: two sizes, twinkling; a few bright ones
+  vec2 sp = vec2(az * 150.0, y * 150.0); float hs = h21(floor(sp)), s = step(.9945, hs) * smoothstep(.1, .45, y);
+  vec2 sp2 = vec2(az * 60.0, y * 60.0); float hb = h21(floor(sp2) + 3.7), s2 = step(.9965, hb) * smoothstep(.15, .5, y) * smoothstep(.5, .0, length(fract(sp2) - .5));
+  c += (vec3(.75, .82, 1.) * s * (.2 + .5 * sin(uT * 1.7 + hs * 40.0) * sin(uT * 1.7 + hs * 40.0)) + vec3(1., .95, .85) * s2 * 2.2) * open;
+  // the moon, and its halo
+  vec3 md = normalize(vec3(-.55, .52, -.65)); float m = dot(d, md), disc = smoothstep(.99935, .9996, m);
+  float crat = skF(vec2(az, y) * 90.0);
+  c += (vec3(1., .97, .88) * disc * (.75 + .3 * crat) + vec3(.5, .55, .7) * pow(max(m, 0.0), 220.0) * .35 + vec3(.2, .24, .34) * pow(max(m, 0.0), 24.0) * .16) * open;
+  // cloud, drifting, lit from below by the stadium and from above by the moon
+  float cl = skF(vec2(az * 2.6 + uT * .006, y * 7.0 - uT * .002) * 1.7); cl = smoothstep(.5, .78, cl) * smoothstep(.03, .22, y) * smoothstep(.95, .4, y);
+  vec3 cc = mix(vec3(.11, .1, .1) + uTint * .08, vec3(.2, .22, .28), smoothstep(.2, .7, y)) + vec3(.25, .26, .3) * pow(max(m, 0.0), 12.0) * .5;
+  c = mix(c, cc, cl * .55 * open);
   c = mix(c, vec3(.012, .014, .02), uArena * smoothstep(-.2, .3, y));
-  c += uFc * uFlash * .12;
+  c += uFc * uFlash * .12 * (1.0 + cl);
   gl_FragColor = vec4(c, 1.0);
 }`;
 

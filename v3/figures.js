@@ -59,6 +59,48 @@ export function makeFigures(THREE) {
   const cheerA = (t, seed = 0) => { const b = Math.abs(Math.sin(t * 5.2 + seed)); return { lean: -0.08, head: -0.25, th: [-0.25 * (1 - b), -0.25 * (1 - b)], kn: [0.5 * (1 - b), 0.5 * (1 - b)], sh: [-2.75 + Math.sin(t * 10 + seed) * 0.2, -2.75 - Math.sin(t * 10 + seed) * 0.2], el: [-0.25, -0.25], shz: [0.35, 0.35], hop: b * 0.38 }; };
   const danceA = (t) => { const s = Math.sin(t * 6.4), b = Math.abs(Math.sin(t * 6.4)); return { lean: 0.05, head: s * 0.12, look: s * 0.3, twist: s * 0.5, roll: s * 0.1, th: [-0.3 - s * 0.3, -0.3 + s * 0.3], kn: [0.6, 0.6], sh: [-2.5 * (s > 0 ? 1 : 0.25), -2.5 * (s > 0 ? 0.25 : 1)], el: [-0.9, -0.9], shz: [0.3, 0.3], hop: b * 0.22 }; };
 
+  // a figure as it stands now, as one mesh drawn n times (the benches, the photographers)
+  function freeze(f, n) { const sc = f.g.scale.x; f.g.scale.setScalar(1); f.g.position.set(0, 0, 0); f.g.rotation.set(0, 0, 0); f.g.updateMatrixWorld(true); const P = [], N = [], C = [];
+    f.g.traverse((o) => { if (!o.isMesh || !o.geometry.attributes.color) return; const g = o.geometry.clone(); g.applyMatrix4(o.matrixWorld); for (const [arr, k] of [[P, "position"], [N, "normal"], [C, "color"]]) { const a = g.attributes[k].array; for (let q = 0; q < a.length; q++) arr.push(a[q]); } g.dispose(); });
+    const o = new THREE.BufferGeometry(); o.setAttribute("position", new THREE.Float32BufferAttribute(P, 3)); o.setAttribute("normal", new THREE.Float32BufferAttribute(N, 3)); o.setAttribute("color", new THREE.Float32BufferAttribute(C, 3)); o.computeVertexNormals(); f.g.scale.setScalar(sc);
+    const m = new THREE.InstancedMesh(o, matBody, n); m.frustumCulled = false; return m; }
+  // ---- everyone else in the building: a cheerleader, a coach, a camera operator, the chain crew ----
+  // o: { top, bottom, skin, hair, alt, kind: "cheer" | "coach" | "cam" | "crew" }
+  function person(o) {
+    const SK = o.skin || SKINS[3], TP = o.top, BT = o.bottom || DARK, HR = o.hair || [0.12, 0.08, 0.05], AL = o.alt || WHITE, k = o.kind || "crew", cheer = k === "cheer";
+    const head = [part(sph(0.15, 16, 12), SK, [0, 0.14, 0]), part(sph(0.158, 14, 10), HR, [0, 0.175, -0.03], [0, 0, 0], [1, 0.92, 0.98]), part(sph(0.02, 6, 5), DARK, [-0.055, 0.15, 0.14]), part(sph(0.02, 6, 5), DARK, [0.055, 0.15, 0.14])];
+    if (cheer) head.push(part(cap(0.05, 0.22), HR, [0, 0.12, -0.19], [0.5, 0, 0]), part(sph(0.05, 8, 6), AL, [0, 0.27, -0.12]));
+    if (k === "coach" || k === "cam") head.push(part(sph(0.162, 14, 8), TP, [0, 0.2, 0], [0, 0, 0], [1, 0.7, 1]), part(box(0.2, 0.025, 0.14), TP, [0, 0.21, 0.19]));
+    if (k === "coach") head.push(part(tor(0.165, 0.014, Math.PI, 12), DARK, [0, 0.14, 0], [0, 0, 0]), part(box(0.05, 0.09, 0.07), DARK, [-0.165, 0.12, 0]), part(box(0.012, 0.012, 0.14), DARK, [-0.15, 0.06, 0.08]));
+    const chest = [part(cyl(0.2, cheer ? 0.13 : 0.165, 0.46, 14), TP, [0, 0.33, 0], [0, 0, 0], [1, 1, 0.66]), part(sph(0.085), TP, [-0.24, 0.55, 0]), part(sph(0.085), TP, [0.24, 0.55, 0]), part(cyl(0.055, 0.065, 0.1, 8), SK, [0, 0.66, 0])];
+    if (cheer) chest.push(part(box(0.34, 0.07, 0.01), AL, [0, 0.4, 0.125]));
+    if (k === "crew") chest.push(part(box(0.3, 0.05, 0.01), [0.9, 0.9, 0.2], [0, 0.36, 0.13]), part(box(0.3, 0.05, 0.01), [0.9, 0.9, 0.2], [0, 0.24, 0.125]));
+    if (k === "cam") chest.push(part(box(0.2, 0.22, 0.5), DARK, [0.27, 0.72, 0.12]), part(cyl(0.085, 0.1, 0.2, 12), [0.16, 0.17, 0.2], [0.27, 0.72, 0.46], [Math.PI / 2, 0, 0]), part(sph(0.07, 10, 8), [0.2, 0.5, 0.9], [0.27, 0.72, 0.55]), part(box(0.05, 0.05, 0.05), [1, 0.1, 0.1], [0.27, 0.86, 0.3]));
+    const geo = {
+      pelvis: merge(cheer ? [part(cyl(0.15, 0.3, 0.26, 14), BT, [0, -0.06, 0], [0, 0, 0], [1, 1, 0.8]), part(cyl(0.3, 0.31, 0.04, 14), AL, [0, -0.2, 0], [0, 0, 0], [1, 1, 0.8])] : [part(sph(0.17), BT, [0, 0, 0], [0, 0, 0], [1.05, 0.8, 0.86])]),
+      chest: merge(chest), head: merge(head),
+      uarm: merge([part(cap(0.055, 0.17), cheer ? SK : TP, [0, -0.13, 0])]),
+      farm: merge([part(cap(0.045, 0.17), SK, [0, -0.13, 0]), part(sph(0.055, 8, 6), SK, [0, -0.3, 0]), ...(cheer ? [part(sph(0.2, 10, 8), AL, [0, -0.36, 0]), part(sph(0.15, 8, 6), TP, [0.08, -0.42, 0.06]), part(sph(0.15, 8, 6), TP, [-0.07, -0.3, -0.08])] : [])]),
+      thigh: merge([part(cap(cheer ? 0.075 : 0.09, 0.27), cheer ? SK : BT, [0, -0.22, 0])]),
+      shin: merge([part(cap(0.06, 0.26), cheer ? SK : BT, [0, -0.2, 0]), part(box(0.1, 0.08, 0.25), cheer ? WHITE : DARK, [0, -0.44, 0.05])]),
+    };
+    const f = rig(geo, PD, [matBody, matBody]); f.g.scale.setScalar(o.scale || 1.28); f.seed = o.seed || 0; f.kind = k; f.dispose = () => { for (const q in geo) geo[q].dispose(); }; return f;
+  }
+  // one frame of one of them. act: cheer (the routine) | hype (arms up, jumping) | coach | cam | stand | kneel
+  function posePerson(f, act, t, amp = 1) {
+    let a, hop = 0; const s = f.seed;
+    if (act === "cheer") { const c = (t * 0.5) % 4, b = Math.abs(Math.sin(t * 6.2));
+      if (c < 1.2) { a = { lean: -0.05, head: -0.15, th: [0.04, -0.04], kn: [0.05, 0.05], sh: [-2.7 + Math.sin(t * 12.4) * 0.15, -2.7 - Math.sin(t * 12.4) * 0.15], el: [-0.1, -0.1], shz: [0.45, 0.45] }; hop = b * 0.1; }
+      else if (c < 2.2) { const k = Math.sin(t * 6.2) > 0; a = { lean: 0, twist: k ? 0.35 : -0.35, th: [0.04, -0.04], kn: [0.1, 0.1], sh: [k ? -1.55 : 0.2, k ? 0.2 : -1.55], el: [k ? -0.05 : -1.9, k ? -1.9 : -0.05], shz: [0.2, 0.2] }; }
+      else if (c < 2.9) { const k = Math.sin(((c - 2.2) / 0.7) * Math.PI); a = { lean: -0.12 * k, th: [-1.75 * k, 0.05], kn: [0.05, 0.1 * k], sh: [-1.5, -1.5], el: [-0.1, -0.1], shz: [1.3, 1.3] }; }
+      else a = { lean: 0, roll: Math.sin(t * 3.1) * 0.08, th: [0.05, -0.05], kn: [0.04, 0.04], sh: [0.15, 0.15], el: [-1.5, -1.5], shz: [0.75, 0.75] }; }
+    else if (act === "hype") { const c = cheerA(t, s); a = c; hop = c.hop; }
+    else if (act === "coach") { const pt = Math.sin(t * 0.37 + s) > 0.82; a = pt ? { lean: 0.12, head: -0.1, th: [-0.1, 0.12], kn: [0.15, 0.1], sh: [-1.45, 0.1], el: [-0.1, -0.3], shz: [0.1, 0.1], look: 0.3 } : { lean: 0.04, look: Math.sin(t * 0.5 + s) * 0.4, th: [0.04, -0.04], kn: [0.04, 0.04], sh: [-0.55, -0.55], el: [-1.75, -1.75], shz: [-0.35, -0.35] }; }
+    else if (act === "cam") a = { lean: 0.05, twist: Math.sin(t * 0.3 + s) * 0.25, th: [0.1, -0.12], kn: [0.08, 0.1], sh: [-0.4, -1.25], el: [-1.4, -1.75], shz: [0.1, 0.35] };
+    else if (act === "kneel") a = { lean: 0.25, head: -0.2, th: [-1.5, 0.1], kn: [1.55, 1.55], sh: [-1.1, -1.2], el: [-1.5, -1.5], shz: [-0.1, 0.1], drop: 0.02 };
+    else a = { lean: 0.03 + Math.sin(t * 1.6 + s) * 0.02, look: Math.sin(t * 0.45 + s) * 0.3, th: [0.03, -0.03], kn: [0.04, 0.04], sh: [0.05, -0.05], el: [-0.2, -0.2] };
+    apply(f, mixA(A, a, a, 0)); f.g.position.y = hop * amp * f.g.scale.y;
+  }
   // ---- a football player ----
   function playerGeo(K) {
     const J = K.jersey, P = K.pants, H = K.helm, AL = K.alt, SK = K.skin, SO = K.sock || J;
@@ -91,10 +133,7 @@ export function makeFigures(THREE) {
     return { K, geos, scale: K.scale || 1.36,
       player(n, i = 0) { const f = rig(geos[i % geos.length], PD, [matBody, matShine]); if (n != null) { const m = numMat(n), a = new THREE.Mesh(pg, m), b = new THREE.Mesh(pg, m); a.position.set(0, 0.34, 0.158); b.position.set(0, 0.36, -0.16); b.rotation.y = Math.PI; b.scale.setScalar(1.15); f.j.chest.add(a, b); } f.g.scale.setScalar(this.scale); f.seed = i * 1.7; return f; },
       // the bench: one standing man, drawn many times
-      standing(n) { const f = rig(geos[0], PD, [matBody, matShine]); apply(f, mixA({}, STANCE.stand, STANCE.stand, 0)); f.g.updateMatrixWorld(true); const ps = []; f.g.traverse((o) => { if (o.isMesh) { const g = o.geometry.clone(); g.applyMatrix4(o.matrixWorld); ps.push(g); } });
-        const P = [], N = [], C = []; for (const g of ps) { for (const [arr, k] of [[P, "position"], [N, "normal"], [C, "color"]]) { const a = g.attributes[k].array; for (let q = 0; q < a.length; q++) arr.push(a[q]); } g.dispose(); }
-        const o = new THREE.BufferGeometry(); o.setAttribute("position", new THREE.Float32BufferAttribute(P, 3)); o.setAttribute("normal", new THREE.Float32BufferAttribute(N, 3)); o.setAttribute("color", new THREE.Float32BufferAttribute(C, 3)); o.computeVertexNormals();
-        const m = new THREE.InstancedMesh(o, matBody, n); m.frustumCulled = false; return m; },
+      standing(n) { const f = rig(geos[0], PD, [matBody, matShine]); apply(f, mixA({}, STANCE.stand, STANCE.stand, 0)); return freeze(f, n); },
       dispose() { for (const g of geos) for (const k in g) g[k].dispose(); for (const t of tex) t.dispose(); pg.dispose(); } };
   }
   // one frame of a player: where he lines up (kind), how hard the play is moving (mv 0..1), whether the place is going off
@@ -165,5 +204,5 @@ export function makeFigures(THREE) {
   }
   // what stands a figure up in the light: sky and ground, and the floodlights from the camera side
   function lights(scene) { const h = new THREE.HemisphereLight(new THREE.Color(1, 1, 1), new THREE.Color(0.16, 0.24, 0.14), 1.25), d = new THREE.DirectionalLight(new THREE.Color(1, 0.97, 0.9), 1.5), d2 = new THREE.DirectionalLight(new THREE.Color(0.75, 0.85, 1), 0.55); d.position.set(-30, 90, 70); d2.position.set(40, 60, -80); scene.add(h, d, d2); return [h, d, d2]; }
-  return { kit, posePlayer, mascot, poseMascot, lights, STANCE };
+  return { kit, posePlayer, mascot, poseMascot, person, posePerson, freeze, lights, STANCE, part, merge };
 }

@@ -6,7 +6,7 @@
 import * as THREE from "three";
 import { CSS3DRenderer, CSS3DObject } from "three/addons/renderers/CSS3DRenderer.js";
 const VER = (window.__sb3 && window.__sb3.BUILD) || Date.now();
-const { makeWorld } = await import("./world.js?v=" + VER), { makeGlobe, spotOf } = await import("./globe.js?v=" + VER), { runAct } = await import("./acts.js?v=" + VER), { makeFigures } = await import("./figures.js?v=" + VER); window.__v3fig = makeFigures;
+const { makeWorld } = await import("./world.js?v=" + VER), { makeGlobe, spotOf } = await import("./globe.js?v=" + VER), { runAct } = await import("./acts.js?v=" + VER), { makeFigures } = await import("./figures.js?v=" + VER), { makeEnv } = await import("./env.js?v=" + VER); window.__v3fig = makeFigures; window.__v3env = makeEnv;
 
 const sb = window.__sb3, V = window.__v3, DEMO = /[?&]v3demo/.test(location.search);
 let SR = null;   // the display lives in a shadow root: none of the page's own styles reach it
