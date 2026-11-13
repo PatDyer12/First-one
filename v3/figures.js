@@ -202,7 +202,17 @@ export function makeFigures(THREE) {
     // a flip turns about the middle of the body, not the feet
     if (act === "flip") { const mid = (D.thigh + D.shin + 0.35) * s, an = f.g.rotation.x; f.g.position.y = hop * s + mid - Math.cos(an) * mid; f.off = Math.sin(an) * mid; } else { f.g.position.y = hop * s; f.off = 0; }
   }
+  // any figure, any move: the mascot's own (run, carry, dance, cheer, catch, spike, flip, sad, idle) and the dance floor's
+  function poseMove(f, style, t, k = 0) { const s = Math.sin; let a = null, hop = 0;
+    if (style === "skip") { const u = s(t * 7); a = { lean: 0.12, twist: u * 0.25, th: [u > 0 ? -1.3 * u : 0.1, u < 0 ? 1.3 * u : 0.1], kn: [u > 0 ? 1.4 * u : 0.1, u < 0 ? -1.4 * u : 0.1], sh: [u * 1.1, -u * 1.1], el: [-1.2, -1.2], shz: [0.25, 0.25] }; hop = Math.abs(u) * 0.16; }
+    else if (style === "robot") { const q = Math.floor(t * 2.6) % 4; a = { lean: 0, twist: [0.4, 0, -0.4, 0][q], look: [-0.6, 0, 0.6, 0][q], th: [0.03, -0.03], kn: [0.05, 0.05], sh: [[-1.57, 0, -1.57, -3][q], [0, -1.57, -1.57, -3][q]], el: [[-1.57, 0, -1.57, 0][q], [0, -1.57, -1.57, 0][q]], shz: [0.1, 0.1] }; }
+    else if (style === "wave") { const u = s(t * 3.2); a = { lean: 0, roll: u * 0.2, th: [0.05, -0.05], kn: [0.06, 0.06], sh: [-2.9, -2.9], el: [-0.2, -0.2], shz: [0.5 + u * 0.4, 0.5 - u * 0.4] }; }
+    else if (style === "pump") { const u = Math.abs(s(t * 8)); a = { lean: 0.1, th: [-0.2, 0.1], kn: [0.3, 0.2], sh: [-2.2 - u * 0.7, 0.2], el: [-1.6 + u * 1.4, -0.4], shz: [0.2, 0.1] }; hop = u * 0.08; }
+    else if (style === "point") a = { lean: 0.05, th: [0.03, -0.03], kn: [0.04, 0.04], sh: [0.1, -1.55], el: [-0.2, -0.05], shz: [0.1, 0.15], look: -0.2 };
+    else if (style === "throw") { const u = cl(k); a = { lean: -0.1 + u * 0.3, twist: 0.6 - u * 1.2, th: [-0.35, 0.3], kn: [0.3, 0.25], sh: [-0.9, 0.6 - u * 3.4], el: [-0.3, -1.9 + u * 1.6], shz: [0.2, 0.5] }; }
+    if (!a) return poseMascot(f, style, t, k);
+    f.g.rotation.x = 0; apply(f, mixA(A, a, a, 0)); f.g.position.y = hop * f.g.scale.y; }
   // what stands a figure up in the light: sky and ground, and the floodlights from the camera side
   function lights(scene) { const h = new THREE.HemisphereLight(new THREE.Color(1, 1, 1), new THREE.Color(0.16, 0.24, 0.14), 1.25), d = new THREE.DirectionalLight(new THREE.Color(1, 0.97, 0.9), 1.5), d2 = new THREE.DirectionalLight(new THREE.Color(0.75, 0.85, 1), 0.55); d.position.set(-30, 90, 70); d2.position.set(40, 60, -80); scene.add(h, d, d2); return [h, d, d2]; }
-  return { kit, posePlayer, mascot, poseMascot, person, posePerson, freeze, lights, STANCE, part, merge };
+  return { kit, posePlayer, mascot, poseMascot, poseMove, person, posePerson, freeze, lights, STANCE, part, merge };
 }

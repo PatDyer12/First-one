@@ -24,11 +24,11 @@ export function runAct(kind, o) {
   // sparks: one pool for trails, bursts, embers
   const NP = 1600, pos = new Float32Array(NP * 3).fill(9999), colr = new Float32Array(NP * 3), vel = new Float32Array(NP * 3), life = new Float32Array(NP), mx = new Float32Array(NP), base = new Float32Array(NP * 3), grav = new Float32Array(NP); let pi = 0;
   const pg = new THREE.BufferGeometry(); pg.setAttribute("position", new THREE.BufferAttribute(pos, 3)); pg.setAttribute("color", new THREE.BufferAttribute(colr, 3));
-  const pts = add(new THREE.Points(pg, new THREE.PointsMaterial({ size: 2.6, map: gt, vertexColors: true, transparent: true, depthWrite: false, blending: THREE.AdditiveBlending }))); pts.frustumCulled = false;
+  const pts = add(new THREE.Points(pg, new THREE.PointsMaterial({ size: 1.7, map: gt, vertexColors: true, transparent: true, depthWrite: false, blending: THREE.AdditiveBlending }))); pts.frustumCulled = false;
   const spark = (p, v, c, l, g = 0) => { const i = (pi = (pi + 1) % NP); pos[i * 3] = p[0]; pos[i * 3 + 1] = p[1]; pos[i * 3 + 2] = p[2]; vel[i * 3] = v[0]; vel[i * 3 + 1] = v[1]; vel[i * 3 + 2] = v[2]; life[i] = mx[i] = l; grav[i] = g; base[i * 3] = c[0]; base[i * 3 + 1] = c[1]; base[i * 3 + 2] = c[2]; };
   const burst = (p, c, n, sp) => { for (let k = 0; k < n; k++) { const a = Math.random() * 6.283, e = Math.acos(2 * Math.random() - 1), v = sp * (0.5 + 0.5 * Math.random()); spark(p, [Math.cos(a) * Math.sin(e) * v, Math.cos(e) * v, Math.sin(a) * Math.sin(e) * v], Math.random() < 0.25 ? [1, 1, 1] : c, 1.2 + Math.random() * 0.8, 9); } };
   const ringOn = (c, r1) => { const m = add(new THREE.Mesh(new THREE.RingGeometry(0.9, 1, 64), addv(c, 1))); m.rotation.x = -Math.PI / 2; m.position.y = 0.2; m.userData = { t: 0, r1 }; rings.push(m); return m; }, rings = [];
-  const beamUp = (c, x, z, r, h) => { const m = add(new THREE.Mesh(new THREE.CylinderGeometry(r, r * 1.6, h, 20, 1, true), addv(c, 0.2))); m.position.set(x, h / 2, z); m.userData.t = 0; beams.push(m); return m; }, beams = [];
+  const beamUp = (c, x, z, r, h) => { const m = add(new THREE.Mesh(new THREE.CylinderGeometry(r, r * 1.6, h, 20, 1, true), addv(c, 0.11))); m.position.set(x, h / 2, z); m.userData.t = 0; beams.push(m); return m; }, beams = [];
   const ticket = (w, h, big, extra) => { const tx = ticketTex(THREE, Object.assign({}, o, { col: cssCol }, extra || {}), big), m = new THREE.Mesh(new THREE.PlaneGeometry(w, h), new THREE.MeshBasicMaterial({ map: tx, side: THREE.DoubleSide, transparent: true })); m.userData.tx = tx; return m; };
   const sign = (txt, w, h, colr2, heavy) => { const cv = document.createElement("canvas"); cv.width = 2048; cv.height = Math.round(2048 * h / w); const x = cv.getContext("2d"), H = cv.height; x.textAlign = "center"; x.textBaseline = "middle"; let fs = H * (heavy ? 0.86 : 0.7); const s2 = String(txt || "").toUpperCase();
     do { x.font = `900 ${fs}px 'Big Shoulders Display', 'Barlow Condensed', Arial, sans-serif`; fs *= 0.95; } while (x.measureText(s2).width > 1960 && fs > 20);
@@ -42,7 +42,7 @@ export function runAct(kind, o) {
     const tx = new THREE.CanvasTexture(cv); tx.anisotropy = 8; const g = new THREE.Group(), pole = new THREE.Mesh(new THREE.CylinderGeometry(0.03, 0.03, 2.6, 8), basic([0.85, 0.86, 0.9])); pole.position.y = -1.3; g.add(pole);
     const cg = new THREE.PlaneGeometry(1.9, 1.0, 14, 4); cg.rotateY(-Math.PI / 2); cg.translate(0, -2.06, 0.98); const cloth = new THREE.Mesh(cg, new THREE.MeshBasicMaterial({ map: tx })), back = new THREE.Mesh(cg, new THREE.MeshBasicMaterial({ map: tx, side: THREE.BackSide })); back.scale.z = -1; back.position.z = 1.96; g.add(cloth, back); const p0 = cg.attributes.position.array.slice();
     M.f.hand.add(g); return { g, wave(t) { const a = cg.attributes.position.array; for (let i = 0; i < a.length; i += 3) { const z = p0[i + 2]; a[i] = Math.sin(z * 3.2 - t * 9) * 0.1 * z; a[i + 1] = p0[i + 1] + Math.sin(z * 2.1 - t * 7) * 0.04 * z; } cg.attributes.position.needsUpdate = true; }, off() { M.f.hand.remove(g); pole.geometry.dispose(); pole.material.dispose(); cg.dispose(); cloth.material.dispose(); back.material.dispose(); tx.dispose(); } }; };
-  let flag = null; window.__actOn = true;
+  let flag = null; const figs = []; window.__actOn = true;
   const tour = (p, l, f, ms) => { let n = 0; const go = () => { try { if (st !== SBW().st()) return; if (!SBW().tour(p, l, f, ms / KT) && n++ < 14) setTimeout(go, 140); } catch (e) {} }; go(); };
 
   if (kind === "place") {
@@ -68,6 +68,9 @@ export function runAct(kind, o) {
         tk.position.y = 0.35 + Math.max(0, Math.sin((t - 4.6) * 9)) * Math.exp(-(t - 4.6) * 4) * 2; tk.material.opacity = cl((dur / 1000 - 0.3 - t) * 2.5); st.cheer = Math.max(st.cheer || 0, cl((dur / 1000 - 0.6 - t))); }
     });
     tour(M ? [-15, 6.5, 27] : [-34, 30, 56], M ? [0, 5.5, 5] : [0, 6, 0], 46, 2400);
+  } else if (kind === "win" && M && !o.plain && window.__v3compose) {
+    const figs2 = figs, K = { THREE, st, o, top, add, fig: (f) => { scene.add(f.g); figs2.push(f); return f; }, basic, addv, C, spark, burst, ringOn, beamUp, ticket, sign, steps, cam: (at, p, l, f, ms) => setTimeout(() => tour(p, l, f, ms), Math.max(0, at) * 1000 / KT), M, mg, mPose, mAt, flagOn, GOLD, cssCol, gt };
+    const made = window.__v3compose(K); dur = made.dur; flag = made.flag; window.__lastShow = made.plan;
   } else if (kind === "win") {
     const tier = o.tier || 1; dur = tier === 3 ? 13500 : tier === 2 ? 11000 : 9200; const D = dur / 1000, J0 = 3.3; flag = flagOn(o.who, o.col); const m0 = [-44, 5];
     // the flyover: three jets, wingtip to wingtip, trailing the colours
@@ -155,13 +158,13 @@ export function runAct(kind, o) {
     let last = null, T0 = 0; const f = (now) => {
       if (st !== (SBW().st && SBW().st())) return;   // the building changed under it: it goes with the building
       const dt = last == null ? 0.016 : Math.min(0.1, now - last) * KT; if (last == null) T0 = now; last = now; T = (now - T0) * KT;
-      for (const s of steps) try { s(T, dt); } catch (e) {}
+      for (const s of steps) try { s(T, dt); } catch (e) { if (window.__actDbg && !s.__err) { s.__err = 1; console.warn("v3 act step", e && e.stack ? e.stack.split("\n").slice(0, 3).join(" < ") : e); } }
       for (let i = 0; i < NP; i++) { if (life[i] <= 0) continue; life[i] -= dt; const k = Math.max(0, life[i] / mx[i]); vel[i * 3 + 1] -= grav[i] * dt; for (let a = 0; a < 3; a++) { pos[i * 3 + a] += vel[i * 3 + a] * dt; colr[i * 3 + a] = base[i * 3 + a] * k; } if (life[i] <= 0) pos[i * 3] = 9999; }
       pg.attributes.position.needsUpdate = true; pg.attributes.color.needsUpdate = true;
       for (const m of rings) { m.userData.t += dt; const k = m.userData.t / 1.4, s = 1 + ease(k) * m.userData.r1; m.scale.set(s, s, 1); m.material.opacity = Math.max(0, 1 - k); }
-      for (const m of beams) { m.userData.t += dt; m.material.opacity = Math.max(0, 0.2 - m.userData.t * 0.16); m.scale.x = m.scale.z = 1 + m.userData.t * 0.4; }
+      for (const m of beams) { m.userData.t += dt; m.material.opacity = Math.max(0, 0.11 - m.userData.t * 0.09); m.scale.x = m.scale.z = 1 + m.userData.t * 0.4; }
     };
     (st.spin = st.spin || []).push(f);
-    setTimeout(() => { const i = st.spin.indexOf(f); if (i >= 0) st.spin.splice(i, 1); for (const m of own) { scene.remove(m); m.traverse && m.traverse((x) => { if (x.geometry) x.geometry.dispose(); if (x.material) { if (x.userData && x.userData.tx) x.userData.tx.dispose(); x.material.dispose(); } }); } gt.dispose(); if (flag) flag.off(); window.__actOn = false; if (M) { M.busy = false; mg.rotation.x = 0; } try { SBW().home && SBW().home(2600); } catch (e) {} done(true); }, dur / KT);
+    setTimeout(() => { const i = st.spin.indexOf(f); if (i >= 0) st.spin.splice(i, 1); for (const m of own) { scene.remove(m); m.traverse && m.traverse((x) => { if (x.geometry) x.geometry.dispose(); if (x.material) { if (x.userData && x.userData.tx) x.userData.tx.dispose(); x.material.dispose(); } }); } gt.dispose(); if (flag) flag.off(); for (const f of figs) { scene.remove(f.g); f.g.traverse((x) => { if (x.material && x.material.map) { x.material.map.dispose(); x.material.dispose(); } }); } window.__actOn = false; if (M) { M.busy = false; mg.rotation.x = 0; } try { SBW().home && SBW().home(2600); } catch (e) {} done(true); }, dur / KT);
   });
 }
