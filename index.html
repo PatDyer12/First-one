@@ -14936,7 +14936,7 @@ void main(){
   // ---------- sheets ----------
   function openSheet(id) { $(id).hidden = false; }
   // keep every open screen current: when a new version is up, reload it (never mid-form or mid-animation)
-  const BUILD = "20261113013212";
+  const BUILD = "20261113015729";
   function updReady() {
     if (document.getElementById("updReady")) return; const d = document.createElement("div"); d.id = "updReady"; d.textContent = "Update ready · refresh, then TV + Sound on"; document.body.append(d);
   }
@@ -19843,6 +19843,7 @@ void main(){
         if (was === "pre" && g.st === "in" && !busy) swings.push({ b, kind: "kick", pri: 2 });
         // everything that just happened in this game, for each bet riding on it
         for (const e of gameEvents(g, now)) {
+          if (V3()) v3do("event", g, e);
           if (busy && !BUSY_EVS.has(e.ev)) continue; // busy slate: touchdowns and turnovers only
           const riders = ridersOf(g); if (!riders.length) continue;
           const scored = ["td", "fg", "safety", "hr", "run", "goal"].includes(e.ev);
@@ -27041,7 +27042,7 @@ function wdPolish(st, fs) {
   const DEF = [[1.1, -3], [1.1, -1], [1.1, 1], [1.1, 3], [4.6, -4.5], [4.6, 0], [4.6, 4.5], [6, -16], [6, 16], [12, -7], [12, 7]];
   const REF = [[-7, 0], [16, -20], [16, 20], [1, -25], [1, 25]];
   // the ball, the line of scrimmage, the line to gain
-  const ball = new THREE.Mesh(new THREE.SphereGeometry(0.3, 10, 8), flat([0.5, 0.25, 0.1])); ball.scale.set(1.5, 0.9, 0.9); scene.add(ball);
+  const ball = new THREE.Mesh(new THREE.SphereGeometry(0.34, 14, 10), flat([0.55, 0.27, 0.1])); ball.scale.set(1.6, 0.95, 0.95); scene.add(ball);
   const lineM = (c, o) => new THREE.MeshBasicMaterial({ color: col(c), transparent: true, opacity: o, depthWrite: false });
   const los = new THREE.Mesh(new THREE.PlaneGeometry(0.28, 53.33), lineM([0.25, 0.55, 1], 0.85)), ltg = new THREE.Mesh(new THREE.PlaneGeometry(0.34, 53.33), lineM([1, 0.84, 0.1], 0.95));
   for (const l of [los, ltg]) { l.rotation.x = -Math.PI / 2; l.position.y = 0.05; scene.add(l); }
@@ -27076,18 +27077,72 @@ function wdPolish(st, fs) {
     FG = { F, H, Aw, Rf, sh, m4, q, e, pp, one: new THREE.Vector3(1, 1, 1) };
   } catch (e) { console.warn("figures", e); FG = { dead: true }; } };
   const place = (f, role, x, z, ry, t, mv, cheer, i) => { f.g.position.x = x; f.g.position.z = z; f.g.rotation.y = ry; FG.F.posePlayer(f, role, t, mv, cheer); FG.e.set(-Math.PI / 2, 0, 0); FG.q.setFromEuler(FG.e); FG.m4.compose(FG.pp.set(x, 0.06, z), FG.q, FG.one); FG.sh.setMatrixAt(i, FG.m4); };
+  // ---- the play, acted out: every new play in the feed is run by the 22 on the field (a run, a pass caught or dropped
+  // or picked, a sack, a punt, a kickoff, a kick at the posts), then they line up again where the ball is now ----
+  const PLAY = { on: false }, hsh = (x) => { let h = 7; for (let i = 0; i < x.length; i++) h = (h * 31 + x.charCodeAt(i)) >>> 0; return h; }, cl3 = (v, a, b) => Math.max(a, Math.min(b, v));
+  const kindOfPlay = (lp) => { const ty = String(lp.type || "").toLowerCase(), tx = String(lp.text || "").toLowerCase(), x = ty + " " + tx;
+    if (/timeout|end (of )?(period|quarter|half|game)|two-minute|penalty|coin toss|official/.test(ty) || /^(timeout|end of)/.test(tx)) return "";
+    if (/kickoff/.test(x)) return "kick"; if (/punt/.test(x)) return "punt"; if (/field goal|extra point|\bpat\b| kick\)/.test(x)) return "fg"; if (/sack/.test(x)) return "sack"; if (/intercept/.test(x)) return "int"; if (/incomplet/.test(x)) return "inc";
+    if (/pass|reception|complete|screen/.test(x)) return "pass"; if (/rush|run |scramble|up the middle|kneel|(left|right) (end|tackle|guard)/.test(x)) return "run"; return ""; };
+  const startPlay = (pe, t) => { const lp = pe.lp, k = kindOfPlay(lp); if (!k) return; const tx = String(lp.text || ""), d = lp.st != null ? (String(lp.st) === pe.aId ? 1 : -1) : pe.d0, from = S.x, toEnd = d > 0 ? 50 - from : from + 50, td = /touchdown/i.test((lp.type || "") + " " + tx);
+    const m = /for (-?\d+) y(?:ar)?ds?/i.exec(tx), ls = /loss of (\d+)/i.exec(tx); let yd = ls ? -ls[1] : typeof lp.yd === "number" ? lp.yd : m ? +m[1] : /no gain/i.test(tx) ? 0 : pe.same ? (pe.nx - from) * d : 3;
+    const gain = td && (k === "run" || k === "pass") ? toEnd + 4 : cl3(yd, -12, toEnd + 4), h = hsh(String(S.lp)), o = { on: true, k, d, from, gain, h, t0: t, td, toEnd, b: null };
+    if (k === "run") { o.T1 = cl3(1.3 + Math.abs(gain) * 0.1, 1.5, 4.4); o.T = o.T1 + 1.1; }
+    else if (k === "pass" || k === "inc" || k === "int") { o.tg = [8, 9, 10, 5][h % 4]; o.cD = k !== "pass" ? 5 + (h % 14) : gain <= 1 ? Math.max(-1, gain) : Math.max(1.5, gain * (td ? 0.82 : 0.72)); o.cz = cl3(OFF[o.tg][1] * 0.7 + (((h >> 3) % 5) - 2), -24, 24); o.cA = 1.8 + Math.abs(o.cD) * 0.028; o.T1 = o.cA + cl3((gain - o.cD) * 0.11, 0.25, 2.6); o.T = k === "pass" ? o.T1 + 1.1 : k === "inc" ? o.cA + 1.4 : o.cA + 2.2; }
+    else o.T = k === "sack" ? 3.0 : k === "fg" ? 3.1 : 4.8;
+    Object.assign(PLAY, o); for (const f of FG.H.concat(FG.Aw)) f.px = null; };
+  window.__playDbg = () => (PLAY.on ? { k: PLAY.k, from: +PLAY.from.toFixed(1), d: PLAY.d, gain: PLAY.gain, T: PLAY.T, u: +(((performance.now() / 1000) - PLAY.t0) * (window.__actK || 1)).toFixed(2) } : null);
+  const playFrame = (t) => { const p = PLAY, u = (t - p.t0) * (window.__actK || 1), d = p.d, k = p.k, g = p.gain, oF = d > 0 ? FG.Aw : FG.H, dF = d > 0 ? FG.H : FG.Aw, face = d > 0 ? Math.PI / 2 : -Math.PI / 2, E = (a) => (a < 0 ? 0 : a > 1 ? 1 : a * a * (3 - 2 * a)), L = (a, b, q) => a + (b - a) * q;
+    const O = OFF.map(([b, z], i) => ({ x: -b, z, r: ROLE_O[i], mv: 0 })), D = DEF.map(([b, z], i) => ({ x: b, z, r: ROLE_D[i], mv: 0 })); let bx = 0, by = 0.4, bz = 0;
+    const pass = k === "pass" || k === "inc" || k === "int", kickP = k === "punt" || k === "kick";
+    const chase = (ids, c, tu, dur) => { const q = E(tu / dur); for (const i of ids) { const tx = c.x + 0.9 + ((i % 3) - 1) * 1.1, tz = c.z + (((i * 7) % 5) - 2) * 0.9; D[i].x = L(D[i].x, tx, q); D[i].z = L(D[i].z, tz, q); D[i].mv = q > 0 && q < 1 ? 0.9 : D[i].mv; } };
+    // up front
+    if (!kickP) { for (let i = 0; i < 6; i++) { O[i].x += pass || k === "sack" ? -Math.min(1.6, u * 1.3) : k === "fg" ? 0 : Math.min(1.2, u * 1.6); O[i].mv = u < 1.2 ? 0.3 : 0; }
+      for (let i = 0; i < 4; i++) { D[i].x -= pass || k === "sack" ? Math.min(2.2, u * 1.5) : Math.min(0.5, u); D[i].mv = u < 1.4 ? 0.3 : 0; } }
+    if (k === "run") { const T1 = p.T1, q = E(u / T1), c = O[7], zr = ((p.h % 9) - 4) * 1.5; c.x = L(-6, g, q); c.z = L(1.8, zr, q); c.mv = u < T1 ? 1 : 0; if (u >= T1) c.r = p.td ? "cheer" : "down"; O[6].r = u > 0.7 ? "stand" : "qb";
+      for (const i of [8, 9, 10]) { const lim = Math.max(g, 2), m = Math.min(lim, u * 5.5); O[i].x += m; O[i].mv = m < lim ? 0.8 : 0; }
+      chase([4, 5, 6, 7, 8, 9, 10], c, u - 0.3, T1 - 0.1); if (u >= T1 && !p.td) D[5].r = "down"; bx = c.x + 0.2; bz = c.z + 0.35; by = c.r === "down" ? 0.5 : 1.5; }
+    else if (pass) { const tg = p.tg, cD = p.cD, cA = p.cA, cz = p.cz, thr = 1.25, T1 = p.T1, qb = O[6]; qb.x = L(-5, -8.5, E(u / 1.0)); qb.mv = u < 1 ? 0.4 : 0; qb.r = u > thr + 0.35 ? "stand" : "qb"; O[7].x = -6.8; O[7].z = 2.2; O[7].r = "lb";
+      for (const i of [8, 9, 10, 5]) if (i !== tg) { const lim = i === 5 ? 9 : 20, m = Math.min(lim, u * 6.3); O[i].x += m; O[i].mv = m < lim ? 1 : 0; }
+      const R = O[tg], qc = E(u / cA); R.x = L(R.x, cD, qc); R.z = L(R.z, cz, qc); R.mv = u < cA ? 1 : 0;
+      D[7].x = O[8].x + 1.6; D[7].z = O[8].z + 0.8; D[7].mv = O[8].mv; D[8].x = O[10].x + 1.6; D[8].z = O[10].z - 0.8; D[8].mv = O[10].mv;
+      for (const i of [4, 5, 6]) { D[i].x += Math.min(4, u * 2.2); D[i].mv = u < 1.8 ? 0.6 : 0; } for (const i of [9, 10]) { D[i].x += Math.min(5, u * 2); D[i].mv = u < 2 ? 0.5 : 0; }
+      if (k === "pass" && u > cA) { const q2 = cl3((u - cA) / Math.max(0.01, T1 - cA), 0, 1); R.x = L(cD, g, q2); R.mv = q2 < 1 ? 1 : 0; if (q2 >= 1) R.r = p.td ? "cheer" : "down"; chase([4, 5, 6, 9, 10], R, u - cA + 0.2, Math.max(0.5, T1 - cA)); if (q2 >= 1 && !p.td) D[9].r = "down"; }
+      if (k === "int") { const I = D[9], q = E(u / cA); I.x = L(DEF[9][0] + Math.min(5, u * 2), cD + 0.3, q); I.z = L(DEF[9][1], cz, q); I.mv = 1; if (u > cA) { I.x = cD - Math.min(9, (u - cA) * 6.5); I.mv = u < cA + 1.4 ? 1 : 0; if (u > cA + 1.4) I.r = "cheer"; R.r = "hips"; } }
+      if (k === "inc" && u > cA + 0.3) R.r = "hips";
+      if (u < thr) { bx = qb.x + 0.3; by = 1.9; bz = 0.4; } else if (u < cA) { const q = (u - thr) / (cA - thr); bx = L(-8.2, cD, q); bz = L(0.4, cz, q); by = 1.9 + Math.sin(q * Math.PI) * (1.5 + Math.abs(cD) * 0.2); }
+      else if (k === "pass") { bx = R.x + 0.2; bz = R.z + 0.35; by = R.r === "down" ? 0.5 : 1.5; } else if (k === "int") { bx = D[9].x; bz = D[9].z + 0.35; by = 1.5; } else { const w = u - cA; bx = cD + Math.min(6, w * 5); bz = cz; by = Math.max(0.35, 1.6 - w * 5 + Math.abs(Math.sin(w * 7)) * Math.exp(-w * 2.5) * 1.4); } }
+    else if (k === "sack") { const qb = O[6], sx = Math.min(g, -6); qb.x = u < 1.5 ? L(-5, -8.5, E(u / 1.0)) : L(-8.5, sx, E((u - 1.5) / 0.4)); qb.mv = u < 1.9 ? 0.5 : 0; if (u > 1.9) qb.r = "down"; O[7].x = -6.8; O[7].z = 2.2; O[7].r = "lb";
+      for (const i of [8, 9, 10]) { const m = Math.min(16, u * 6); O[i].x += m; O[i].mv = m < 16 ? 1 : 0; } D[7].x = O[8].x + 1.6; D[8].x = O[10].x + 1.6; D[7].mv = O[8].mv; D[8].mv = O[10].mv;
+      for (const i of [0, 1, 2, 3]) { const q = E((u - 0.5) / 1.3); D[i].x = L(D[i].x, qb.x + 0.9 + (i - 1.5) * 0.3, q); D[i].z = L(DEF[i][1], (i - 1.5) * 1.1, q); D[i].mv = q > 0 && q < 1 ? 1 : 0; if (u > 2 && i === 1) D[i].r = "down"; if (u > 2.2 && i === 2) D[i].r = "cheer"; }
+      bx = qb.x; bz = 0.3; by = u > 1.9 ? 0.5 : 1.7; }
+    else if (kickP) { const land = cl3(k === "kick" ? Math.min(p.toEnd - 2, 62) : Math.min(p.toEnd - 3, Math.max(25, g || 42)), 15, 75), K = O[6], air = 2.7, q = cl3((u - 0.7) / air, 0, 1); K.x = -13; K.r = u < 0.9 ? "stand" : "hips";
+      for (let i = 0; i < 11; i++) if (i !== 6) { const lim = land - 6, m = Math.min(lim, Math.max(0, u - 0.8) * 8.5); O[i].x += m; O[i].mv = u > 0.8 && m < lim ? 1 : 0; }
+      for (let i = 0; i < 10; i++) { const m = Math.min(12, u * 4); D[i].x += m; D[i].mv = m < 12 ? 0.7 : 0; }
+      const Rr = D[10]; Rr.x = L(DEF[10][0], land, E(u / 2.8)); Rr.z = L(DEF[10][1], 0, E(u / 2.8)); Rr.mv = u < p.T - 0.5 ? 0.9 : 0; if (u > 0.7 + air) Rr.x = land - Math.min(8, (u - 0.7 - air) * 7);
+      if (u < 0.7) { bx = -12.4; by = 1.2; } else if (q < 1) { bx = L(-12.4, land, q); by = 1 + Math.sin(q * Math.PI) * 24; } else { bx = Rr.x; bz = Rr.z + 0.35; by = 1.5; } }
+    else { const K = O[6], dist = p.toEnd + 10, q = cl3((u - 0.8) / 1.9, 0, 1); K.x = -7.9; K.z = -1; K.r = u > 0.5 && u < 1.1 ? "wr" : "stand"; O[7].x = -7; O[7].z = 0.5; O[7].r = "rb"; for (const i of [8, 9, 10]) { O[i].x = -0.9; O[i].z = (i - 9) * 5.5; O[i].r = "line"; }
+      for (const i of [7, 8, 9, 10]) { D[i].x = 1.2 + (i % 2) * 2.5; D[i].z = (i - 8.5) * 4; D[i].r = "dline"; }
+      if (u < 0.8) { bx = -7; by = 0.4; bz = 0.5; } else { bx = L(-7, dist + 8, q); by = 0.4 + Math.sin(q * Math.PI * 0.85) * (10 + dist * 0.16); bz = L(0.5, 0, q); } }
+    const put = (f, o, def, i) => { const x = cl3(p.from + d * o.x, -59, 59), z = cl3(o.z, -27, 27); let ry = def ? -face : face; if (f.px != null && o.mv > 0.2) { const ax = x - f.px, az = z - f.pz; if (ax * ax + az * az > 0.0004) ry = Math.atan2(ax, az); } f.px = x; f.pz = z; const up = o.r === "cheer"; place(f, up ? "stand" : o.r, x, z, ry, t, o.r === "down" ? 0 : o.mv, up ? 1 : 0, i); };
+    O.forEach((o, i) => put(oF[i], o, false, i)); D.forEach((o, i) => put(dF[i], o, true, i + 11)); REF.forEach(([b, z], i) => place(FG.Rf[i], "ref", p.from + d * b, z, z > 0 ? Math.PI : 0, t, 0, 0, i + 22));
+    p.b = [cl3(p.from + d * bx, -64, 64), by, bz]; };
   // the game as it stands, looked up once a second
   const S = { x: 0, tx: 0, dir: 1, has: false, togo: null, at: 0, run: 0 };
   const read = () => { let g = null; try { const f = window.__sbFeat && window.__sbFeat(); if (f && f.h && f.h.ab === T.h.ab) g = f; } catch (e) {} if (!g) g = st.R.scene && st.R.scene.game;
     const si = g && g.st === "in" ? g.sit : null; S.has = !!(si && typeof si.yl === "number" && si.pos); if (!S.has) return;
-    const awayBall = String(si.pos) === String(g.a.id); S.dir = awayBall ? 1 : -1; const nx = 50 - si.yl; if (Math.abs(nx - S.tx) > 0.4) S.run = 1; S.tx = nx; S.togo = typeof si.ds === "number" && si.ds > 0 ? si.ds : null; };
+    const awayBall = String(si.pos) === String(g.a.id), d0 = S.dir, lp = si.lp || null, lid = lp ? String(lp.id != null ? lp.id : lp.text || "") : "";
+    if (lid && lid !== S.lp) { const firstLp = S.lp === undefined; S.lp = lid; if (!firstLp && S.shown) S.pend = { lp, d0, aId: String(g.a.id), same: d0 === (awayBall ? 1 : -1), nx: 50 - si.yl }; } S.shown = true;
+    S.dir = awayBall ? 1 : -1; const nx = 50 - si.yl; if (Math.abs(nx - S.tx) > 0.4) S.run = 1; S.tx = nx; S.togo = typeof si.ds === "number" && si.ds > 0 ? si.ds : null; };
   (st.spin = st.spin || []).push((t) => {
     if (t - S.at > 1) { S.at = t; read(); }
-    S.x += (S.tx - S.x) * 0.045; S.run = Math.max(0, S.run - 0.012); const mv = Math.min(1, Math.abs(S.tx - S.x) / 3 + S.run * 0.4), d = S.dir;
+    if (S.pend && FG && !FG.dead && !PLAY.on) { startPlay(S.pend, t); S.pend = null; } if (PLAY.on && ((t - PLAY.t0) * (window.__actK || 1) > PLAY.T || !S.has)) { PLAY.on = false; S.run = 1; }
+    if (!PLAY.on) S.x += (S.tx - S.x) * 0.045; S.run = Math.max(0, S.run - 0.012); const mv = Math.min(1, Math.abs(S.tx - S.x) / 3 + S.run * 0.4), d = S.dir;
     const offT = d > 0 ? away : home, defT = d > 0 ? home : away, ph = (i) => Math.abs(Math.sin(t * (2 + mv * 9) + i * 1.7)) * (0.05 + mv * 0.3);
     if (!FG) upgrade(); st.cheer = Math.max(0, (st.cheer || 0) - 0.02);
     if (FG && !FG.dead) { const oF = d > 0 ? FG.Aw : FG.H, dF = d > 0 ? FG.H : FG.Aw, ch = st.cheer || 0, cO = d > 0 ? 0 : ch, cD = d > 0 ? ch : 0, face = d > 0 ? Math.PI / 2 : -Math.PI / 2;
-      if (S.has) { OFF.forEach(([b, z], i) => place(oF[i], ROLE_O[i], S.x - d * b, z, face, t, mv, cO, i)); DEF.forEach(([b, z], i) => place(dF[i], ROLE_D[i], S.x + d * b, z, -face, t, mv, cD, i + 11)); REF.forEach(([b, z], i) => place(FG.Rf[i], "ref", S.x + d * b, z, z > 0 ? Math.PI : 0, t, 0, 0, i + 22)); }
+      if (PLAY.on) playFrame(t);
+      else if (S.has) { OFF.forEach(([b, z], i) => place(oF[i], ROLE_O[i], S.x - d * b, z, face, t, mv, cO, i)); DEF.forEach(([b, z], i) => place(dF[i], ROLE_D[i], S.x + d * b, z, -face, t, mv, cD, i + 11)); REF.forEach(([b, z], i) => place(FG.Rf[i], "ref", S.x + d * b, z, z > 0 ? Math.PI : 0, t, 0, 0, i + 22)); }
       else { for (let i = 0; i < 11; i++) { const a = (i / 11) * Math.PI * 2, cx = Math.cos(a) * 3.4, cz = Math.sin(a) * 3.4, ry = Math.atan2(-cx, -cz); place(FG.H[i], i % 3 ? "stand" : "hips", 14 + cx, cz, ry, t, 0, ch, i); place(FG.Aw[i], i % 3 ? "stand" : "hips", -14 + cx, cz, ry, t, 0, 0, i + 11); } REF.forEach(([b, z], i) => place(FG.Rf[i], "ref", (i - 2) * 3, -24, 0, t, 0, 0, i + 22)); }
       FG.sh.instanceMatrix.needsUpdate = true;
       // the mascot works its sideline unless a set piece has borrowed it
@@ -27098,6 +27153,7 @@ function wdPolish(st, fs) {
     else { for (let i = 0; i < 11; i++) { const a = (i / 11) * Math.PI * 2 + t * 0.15; home.set(i, 14 + Math.cos(a) * 2.6, Math.sin(a) * 2.6, -a, ph(i) * 0.4); away.set(i, -14 + Math.cos(a) * 2.6, Math.sin(a) * 2.6, -a, ph(i) * 0.4); } REF.forEach(([b, z], i) => refs.set(i, (i - 2) * 3, -24, 0, 0)); } }
     home.done(); away.done(); refs.done();
     ball.visible = los.visible = S.has; ltg.visible = S.has && S.togo != null; ball.position.set(S.x, 0.35 + Math.sin(Math.min(1, mv) * Math.PI) * 1.2 * (mv > 0.05 ? 1 : 0), 0); los.position.x = S.x; if (S.togo != null) ltg.position.x = Math.max(-50, Math.min(50, S.x + d * S.togo));
+    if (PLAY.on && PLAY.b) { ball.position.set(PLAY.b[0], PLAY.b[1], PLAY.b[2]); ball.rotation.z += 0.3; }
     for (let i = 0; i < flags.length; i++) { const f = flags[i], p = f.geometry.attributes.position; f.rotation.y = 0.6 + i + Math.sin(t * 0.7 + i) * 0.25; }
   });
   read(); S.x = S.tx;
@@ -28653,7 +28709,7 @@ function wdStop() {
 }
 // the picture at the screen's own resolution (a 4K TV's 3840 x 2160 when the page is 1920 wide at 2x), stepped down only if
 // this machine can't keep up
-const wdQmax = () => Math.min(2, Math.max(1, window.devicePixelRatio || 1));
+const wdQmax = () => Math.min(2, Math.max(window.__v3 && window.__v3.on ? 1.5 : 1, window.devicePixelRatio || 1));   // (V3 draws a 1080p screen at 1.5x and scales it down: cleaner edges)
 async function wdFxInit(L, THREE) {
   let off = false; try { off = localStorage.getItem("sb-glow") === "off"; } catch (e) {} if (WD.fx || off) { WD.fxOff = off; return; }
   const { ShaderPass } = await import("three/addons/postprocessing/ShaderPass.js");

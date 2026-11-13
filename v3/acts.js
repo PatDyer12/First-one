@@ -99,16 +99,19 @@ export function runAct(kind, o) {
   } else if (kind === "score") {
     // the game scores: the word stands up out of that end zone, pyro off the posts, the ball through the air, and every
     // bet riding on it called out on the grass, green or red
-    dur = 6800; const D = dur / 1000, sd = o.side || 1, X0 = sd * 38, home = !!o.home, camP = [-sd * 8, 13, 46];
+    const call = o.call || ""; dur = call ? 5400 : 6800; const D = dur / 1000, sd = o.side || 1, X0 = call ? Math.max(-30, Math.min(30, (o.x || 0) + sd * 8)) : sd * 38, home = !!o.home, camP = [X0 - sd * 46, 13, 46], nX = X0 - sd * 16;
     const word = add(sign(o.big, 70, 17.5, cssCol, true)), sub = add(sign(o.sub, 56, 7, "#ffffff", false)); for (const m of [word, sub]) { m.position.set(X0, -20, 0); m.lookAt(camP[0], 12, camP[2]); }
-    const notes = (o.notes || []).slice(0, 3).map((nt, i, a) => { const m = add(ticket(15, 5.6, false, { who: nt.who, big: nt.pick, sub: (nt.good ? "▲ " : "▼ ") + nt.tx, odds: "", col: nt.col, bg: nt.good ? "#0f3b27" : "#3b1218", edge: nt.good ? "#36e08a" : "#ff5468", subCol: nt.good ? "#8ff5c0" : "#ff9aa5" })); const q = (i - (a.length - 1) / 2) * 16.5; m.userData.x = sd * 22 + q * 0.69; m.userData.z = 17 + q * sd * 0.72; m.userData.good = nt.good; m.position.set(m.userData.x, -8, m.userData.z); m.lookAt(camP[0], 9, camP[2]); return m; });
+    const notes = (o.notes || []).slice(0, 3).map((nt, i, a) => { const m = add(ticket(15, 5.6, false, { who: nt.who, big: nt.pick, sub: (nt.good ? "▲ " : "▼ ") + nt.tx, odds: "", col: nt.col, bg: nt.good ? "#0f3b27" : "#3b1218", edge: nt.good ? "#36e08a" : "#ff5468", subCol: nt.good ? "#8ff5c0" : "#ff9aa5" })); const q = (i - (a.length - 1) / 2) * 16.5; m.userData.x = nX + q * 0.69; m.userData.z = 17 + q * sd * 0.72; m.userData.good = nt.good; m.position.set(m.userData.x, -8, m.userData.z); m.lookAt(camP[0], 9, camP[2]); return m; });
     const ball = add(new THREE.Group()), bm = M ? new THREE.MeshPhongMaterial({ color: C([0.45, 0.2, 0.08]), shininess: 40 }) : basic([0.5, 0.25, 0.1]), bb = new THREE.Mesh(new THREE.SphereGeometry(1, 24, 16), bm); bb.scale.set(3.1, 1.75, 1.75); ball.add(bb);
     for (const bx of [-1.9, 1.9]) { const r = new THREE.Mesh(new THREE.TorusGeometry(1.32, 0.13, 6, 24), basic([0.95, 0.95, 0.95])); r.rotation.y = Math.PI / 2; r.position.x = bx; ball.add(r); } { const l = new THREE.Mesh(new THREE.BoxGeometry(1.7, 0.16, 0.3), basic([0.95, 0.95, 0.95])); l.position.y = 1.72; ball.add(l); }
+    ball.visible = !call; const zone = call === "redzone" ? add(new THREE.Mesh(new THREE.PlaneGeometry(20, 53.3), addv([1, 0.12, 0.1], 0))) : null; if (zone) { zone.rotation.x = -Math.PI / 2; zone.position.set(sd * 40, 0.12, 0); }
     const fg = o.pts === 3, m0 = M ? [mg.position.x, mg.position.z] : [0, 0]; let lastFw = 0, popped = 0;
     steps.push((t, dt) => {
       const up = ease(t / 0.7), out = cl((D - 0.5 - t) * 2.2), bounce = 1 + Math.sin(Math.min(1, t / 0.9) * Math.PI) * 0.12;
       word.position.y = lerp(-20, 15, up) - (1 - out) * 40; word.scale.set(bounce, bounce, 1); sub.position.y = lerp(-20, 3.8, ease((t - 0.35) / 0.6)) - (1 - out) * 30; word.material.opacity = sub.material.opacity = out;
       notes.forEach((m, i) => { const k = ease((t - 1.1 - i * 0.28) / 0.45); m.position.y = lerp(-8, 4.4, k) + Math.sin(t * 2.4 + i) * 0.25 - (1 - out) * 16; if (k >= 1 && popped === i) { popped++; const c = m.userData.good ? [0.2, 0.9, 0.55] : [1, 0.33, 0.41]; burst([m.userData.x, 6, m.userData.z], c, 90, 22); const r = ringOn(c, 16); r.position.set(m.userData.x, 0.2, m.userData.z); } });
+      if (zone) zone.material.opacity = (0.16 + 0.12 * Math.sin(t * 7)) * out * cl(t * 2);
+      if (call) { if (M) mPose(call === "turnover" ? (home ? "cheer" : "sad") : "idle", t); if (call === "turnover" && home && t < D - 1.5) st.cheer = 1; return; }
       if (fg) { const u = cl(t / 1.7), bx = sd * lerp(18, 80, u), by = 1 + Math.sin(u * Math.PI * 0.82) * 30; ball.position.set(bx, by, 0); ball.rotation.z = -t * 14 * sd; ball.visible = u < 1; if (u < 1) spark([bx, by, 0], [0, 0, 0], o.col, 0.8); }
       else { const dr = cl(t / 0.9); ball.position.set(X0, lerp(70, 31, dr * dr) + Math.abs(Math.sin(Math.max(0, t - 0.9) * 5)) * 3 * Math.exp(-(t - 0.9) * 1.2), 0); ball.rotation.set(Math.sin(t * 2) * 0.2, t * 2.4, 0.35); ball.scale.setScalar(out * 1.25); }
       // pyro off both posts and along the back of the end zone
@@ -117,7 +120,7 @@ export function runAct(kind, o) {
       if (t < D - 1.5) { st.wave = Math.max(st.wave, home ? 1.1 : 0.4); if (home) st.cheer = 1; }
       if (M) { if (!home) { mPose("sad", t); } else if (t < 1.3) { const u = ease(t / 1.3), tx = sd * 30, tz = 13; mAt(lerp(m0[0], tx, u), lerp(m0[1], tz, u), Math.atan2(tx - m0[0], tz - m0[1])); mPose("run", t); } else { mg.rotation.y += (-sd * 0.5 - mg.rotation.y) * 0.2; mPose(t % 3 < 1 && t < 2.4 ? "flip" : "dance", t, ((t - 1.3) % 3) / 0.9); } }
     });
-    tour(camP, [sd * 40, 10, 0], 48, 1500);
+    tour(camP, [X0, 10, 0], 48, 1500);
   } else if (kind === "swing") {
     // a bet changes sides: its ticket stands up out of the turf under an arrow, green and rising or red and falling
     dur = 4400; const D = dur / 1000, good = !!o.good, c = good ? [0.2, 0.9, 0.55] : [1, 0.33, 0.41], cam = st.cam && st.cam.position, bx = o.x || 0;

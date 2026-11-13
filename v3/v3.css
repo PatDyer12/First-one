@@ -184,3 +184,6 @@
 
 /* a clip or the DJ on the stadium's screens: the board's out of the way, the header stays */
 .v3-board.clipaway { opacity: 0 !important; } #v3.clipaway .v3-tick, #v3.clipaway .v3-top { opacity: 0; transition: opacity .6s; }
+
+/* a game's moment called out across the top: the word in the team's colour, the score after it */
+.v3-note.v3-call { top: calc(var(--u) * 84); font-size: calc(var(--u) * 30); border: calc(var(--u) * 2) solid var(--c, #fff); box-shadow: 0 0 calc(var(--u) * 40) color-mix(in srgb, var(--c, #fff) 45%, transparent), 0 calc(var(--u) * 14) calc(var(--u) * 40) rgba(0,0,0,.6); } .v3-note.v3-call b { text-transform: uppercase; letter-spacing: .04em; margin-right: .35em; }

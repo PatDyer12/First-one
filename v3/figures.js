@@ -49,6 +49,7 @@ export function makeFigures(THREE) {
     db: { lean: 0.32, head: -0.22, th: [-0.45, -0.3], kn: [0.7, 0.55], sh: [-0.15, -0.15], el: [-1.2, -1.2], shz: [0.25, 0.25] },
     stand: { lean: 0.03, head: 0, th: [0.03, -0.03], kn: [0.04, 0.04], sh: [0.05, -0.05], el: [-0.2, -0.2] },
     hips: { lean: 0.02, head: 0, th: [0.02, -0.02], kn: [0.03, 0.03], sh: [0.15, 0.15], el: [-1.5, -1.5], shz: [0.75, 0.75] },   // hands on the hips
+    down: { lean: 1.42, head: -0.35, th: [-1.45, -1.2], kn: [1.6, 1.25], sh: [-2.3, -1.9], el: [-0.5, -0.7], drop: 0.34 },                                // on the turf, under the pile
     ref: { lean: 0.04, head: 0, th: [0.03, -0.03], kn: [0.04, 0.04], sh: [0.2, 0.2], el: [-0.5, -0.5], shz: [0.05, 0.05] },
   };
   const A = {}, mixA = (o, a, b, k) => { o.lean = lerp(a.lean || 0, b.lean || 0, k); o.head = lerp(a.head || 0, b.head || 0, k); o.twist = lerp(a.twist || 0, b.twist || 0, k); o.roll = lerp(a.roll || 0, b.roll || 0, k); o.look = lerp(a.look || 0, b.look || 0, k); o.drop = lerp(a.drop || 0, b.drop || 0, k);
