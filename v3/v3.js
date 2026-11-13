@@ -80,13 +80,14 @@ let root, board, lanesEl, tickEl, pagesEl, stageEl, first = true, css3 = null, s
 const dim = (v) => { root.classList.toggle("dim", v); board.classList.toggle("dim", v); };
 // the stadium is the stage for a set piece: the board steps back so it can be seen
 const stageOut = (v) => { board.classList.toggle("away", v); root.classList.toggle("away", v); };
-const inStadium = () => { try { const W = window.SBW; return !!(W && W.live() && W.st() && !W.st().room && W.kind() === "nfl"); } catch (e) { return false; } };
+const clipUp = () => { const c = document.body.classList; return c.contains("v2w-in") || !document.getElementById("jumbo").hidden; };
+const inStadium = () => { try { const W = window.SBW; return !!(W && !clipUp() && W.live() && W.st() && !W.st().room && W.kind() === "nfl"); } catch (e) { return false; } };
 const actOf = (b, n) => ({ col: hex(X.col(b), GOLD), who: X.name(b), big: b.kind === "parlay" ? (b.legs || []).length + "-LEG PARLAY" : String(b.pick || ""), odds: fOdds(b.odds), sub: n == null ? `${fU(b.units)} to win ${fU(b.units * ppu(b.odds))}` : n >= 0 ? `Cashed +${usd(n)}` : `Lost ${fU(n, true)}` });
 const laneEls = new Map(), cardEls = new Map(), prevSc = new Map(), prevCls = new Map();
 function build() {
   const out = document.createElement("style"); out.textContent = `body.v3on { background: #04060b !important; overflow: hidden !important; }
-body.v3on > :not(#v3host):not(#v3gl):not(#v3fx):not(#v2world):not(#toast):not(#updReady):not(script):not(style) { visibility: hidden !important; pointer-events: none !important; }
-body.v3on > :not(#v3host):not(#v3gl):not(#v3fx) * { animation: none !important; transition: none !important; }
+body.v3on > :not(#v3host):not(#v3gl):not(#v3fx):not(#v2world):not(#jumbo):not(#toast):not(#updReady):not(script):not(style) { visibility: hidden !important; pointer-events: none !important; }
+body.v3on > :not(#v3host):not(#v3gl):not(#v3fx):not(#jumbo) * { animation: none !important; transition: none !important; }
 body.v3on #v2world { transform-origin: 50% 52%; transition: transform .85s cubic-bezier(.45, 0, .85, .45), opacity .85s ease-in, filter .85s ease, border-radius .85s ease !important; }
 body.v3on #v2world.v3top { z-index: 9050 !important; }
 body.v3on #v2world.v3out { transform: scale(.03) rotate(8deg) !important; opacity: 0 !important; border-radius: 50%; filter: blur(5px) brightness(1.7); }
@@ -94,7 +95,7 @@ body.v3on #v2world.v3in0 { transform: scale(.03) rotate(-8deg) !important; opaci
 body.v3on #v2world.v3in { transition: transform .95s cubic-bezier(.15, .6, .3, 1), opacity .5s ease-out, filter .9s ease, border-radius .9s ease !important; }
 #v3gl, #v3fx { position: fixed; inset: 0; width: 100vw; height: 100vh; display: block; pointer-events: none; } #v3gl { z-index: 9000; } #v3fx { z-index: 9200; }
 #v3host { position: fixed; inset: 0; z-index: 9100; }
-html.v3clips body.v3on > #jumbo, html.v3clips body.v3on > .pip { visibility: visible !important; z-index: 9300 !important; }`; document.head.append(out);
+body.v3on > #jumbo { z-index: 9300 !important; }`; document.head.append(out);
   const host = document.createElement("div"); host.id = "v3host"; SR = host.attachShadow({ mode: "open" });
   const l = document.createElement("link"); l.rel = "stylesheet"; l.href = new URL("./v3.css", import.meta.url).href.replace(/\?.*$/, "") + "?v=" + ((sb && sb.BUILD) || Date.now()); SR.append(l);
   const gl = document.createElement("canvas"); gl.id = "v3gl"; const fx = document.createElement("canvas"); fx.id = "v3fx";
@@ -528,6 +529,7 @@ V.leg = (b, i, st) => { setTimeout(() => { const el = cardEls.get(b.id), lg = el
 let last = 0, on = false, tick = 0;
 function setOn(v) { if (v === on) return; on = v; V.on = v; document.body.classList.toggle("v3on", v); for (const id of ["v3host", "v3gl", "v3fx"]) { const e = document.getElementById(id); if (e) e.style.display = v ? "" : "none"; } if (v) { first = true; render(); } }
 function frame(now) {
+  { const cu = clipUp(); if (cu !== frame.cu) { frame.cu = cu; board.classList.toggle("clipaway", cu); root.classList.toggle("clipaway", cu); } }   // a clip or the DJ is on: the board steps out of its way
   requestAnimationFrame(frame);
   const want = DEMO || (sb && sb.tv()); if (want !== on) setOn(want); if (!on || document.hidden) { last = now; return; }
   const dt = Math.min(0.05, (now - last) / 1000 || 0.016); last = now;

@@ -7670,8 +7670,8 @@ body.tv.pplg .roomtv:not([hidden]) canvas { width: 84px; height: 84px; grid-row:
   try { const q = new URLSearchParams(location.search); if (q.has("v3")) { if (q.get("v3") === "off") localStorage.removeItem("sb-v3"); else localStorage.setItem("sb-v3", "on"); } } catch (e) {}
   window.__v3 = { on: false, want: (() => { try { return localStorage.getItem("sb-v3") === "on"; } catch (e) { return false; } })() };
   const V3 = () => !!window.__v3.on;
-  // V3 with the clips and the DJ back on (asked for with ?v3clips=on, remembered; ?v3clips=off undoes it)
-  const V3Q = (() => { try { const q = new URLSearchParams(location.search).get("v3clips"); if (q) localStorage.setItem("sb-v3clips", q === "off" ? "off" : "on"); return localStorage.getItem("sb-v3clips") === "on"; } catch (e) { return false; } })(); if (V3Q) document.documentElement.classList.add("v3clips");
+  // V3 plays the clips and the DJ in the stadium like the board does (?v3clips=off turns them off there, remembered; =on back)
+  const V3Q = (() => { try { const q = new URLSearchParams(location.search).get("v3clips"); if (q) localStorage.setItem("sb-v3clips", q === "off" ? "off" : "on"); return localStorage.getItem("sb-v3clips") !== "off"; } catch (e) { return true; } })();
   const V3mute = () => V3() && !V3Q;
   const v3do = (k, ...a) => { try { if (window.__v3[k]) window.__v3[k](...a); } catch (e) { console.warn("v3", k, e); } };
   try { if (localStorage.getItem("sb-v2") !== "off") document.body.classList.add("v2b"); } catch (e) { document.body.classList.add("v2b"); }
@@ -14936,7 +14936,7 @@ void main(){
   // ---------- sheets ----------
   function openSheet(id) { $(id).hidden = false; }
   // keep every open screen current: when a new version is up, reload it (never mid-form or mid-animation)
-  const BUILD = "20261113010001";
+  const BUILD = "20261113011728";
   function updReady() {
     if (document.getElementById("updReady")) return; const d = document.createElement("div"); d.id = "updReady"; d.textContent = "Update ready · refresh, then TV + Sound on"; document.body.append(d);
   }
@@ -18323,6 +18323,8 @@ void main(){
     return true;
   }
   const newSong = (l) => { const f = l.filter((c) => !c.song || c.song !== lastSong); return f.length ? f : l; };
+  // (a test's way in: put a DJ break or a clip up now)
+  window.__sbClipDbg = (dj) => { const b = [...S.bets.values()].find((x) => x.status === "open") || { id: "dbg", status: "open", pick: "Test", units: 1, odds: -110, who: "" }, P = pickClip(dj ? newSong(CLIPS.filter((c) => c.dj)) : CLIPS.filter((c) => !c.dj && !c.ext)); if (P) react(b, dj ? "mid" : "good", P, dj ? "DJ test" : "Test"); return P ? P.base || true : false; };
   const TD_EDIT_MS = 12e3, TD_EDIT_GAP = 4 * 60e3; let tdEditAt = 0;
   function tdEditPick(sel) {
     const g = sel ? gameOf(sel) : null, t = g && (sel.s === "a" || sel.s === "h") ? g[sel.s] : null, nm = normNm(sel && sel.p && sel.p.nm);
