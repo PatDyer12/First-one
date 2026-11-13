@@ -6,7 +6,7 @@
 import * as THREE from "three";
 import { CSS3DRenderer, CSS3DObject } from "three/addons/renderers/CSS3DRenderer.js";
 const VER = (window.__sb3 && window.__sb3.BUILD) || Date.now();
-const { makeWorld } = await import("./world.js?v=" + VER), { makeGlobe, spotOf } = await import("./globe.js?v=" + VER);
+const { makeWorld } = await import("./world.js?v=" + VER), { makeGlobe, spotOf } = await import("./globe.js?v=" + VER), { runAct } = await import("./acts.js?v=" + VER), { makeFigures } = await import("./figures.js?v=" + VER); window.__v3fig = makeFigures;
 
 const sb = window.__sb3, V = window.__v3, DEMO = /[?&]v3demo/.test(location.search);
 let SR = null;   // the display lives in a shadow root: none of the page's own styles reach it
@@ -78,6 +78,10 @@ function model() {
 let primeEl = null;
 let root, board, lanesEl, tickEl, pagesEl, stageEl, first = true, css3 = null, scene3 = null, world = null, globe = null, flying = false, lastSpot = null;
 const dim = (v) => { root.classList.toggle("dim", v); board.classList.toggle("dim", v); };
+// the stadium is the stage for a set piece: the board steps back so it can be seen
+const stageOut = (v) => { board.classList.toggle("away", v); root.classList.toggle("away", v); };
+const inStadium = () => { try { const W = window.SBW; return !!(W && W.live() && W.st() && !W.st().room && W.kind() === "nfl"); } catch (e) { return false; } };
+const actOf = (b, n) => ({ col: hex(X.col(b), GOLD), who: X.name(b), big: b.kind === "parlay" ? (b.legs || []).length + "-LEG PARLAY" : String(b.pick || ""), odds: fOdds(b.odds), sub: n == null ? `${fU(b.units)} to win ${fU(b.units * ppu(b.odds))}` : n >= 0 ? `Cashed +${usd(n)}` : `Lost ${fU(n, true)}` });
 const laneEls = new Map(), cardEls = new Map(), prevSc = new Map(), prevCls = new Map();
 function build() {
   const out = document.createElement("style"); out.textContent = `body.v3on { background: #04060b !important; overflow: hidden !important; }
@@ -89,7 +93,8 @@ body.v3on #v2world.v3out { transform: scale(.03) rotate(8deg) !important; opacit
 body.v3on #v2world.v3in0 { transform: scale(.03) rotate(-8deg) !important; opacity: 0 !important; border-radius: 50%; filter: blur(5px) brightness(1.7); transition: none !important; }
 body.v3on #v2world.v3in { transition: transform .95s cubic-bezier(.15, .6, .3, 1), opacity .5s ease-out, filter .9s ease, border-radius .9s ease !important; }
 #v3gl, #v3fx { position: fixed; inset: 0; width: 100vw; height: 100vh; display: block; pointer-events: none; } #v3gl { z-index: 9000; } #v3fx { z-index: 9200; }
-#v3host { position: fixed; inset: 0; z-index: 9100; }`; document.head.append(out);
+#v3host { position: fixed; inset: 0; z-index: 9100; }
+html.v3clips body.v3on > #jumbo, html.v3clips body.v3on > .pip { visibility: visible !important; z-index: 9300 !important; }`; document.head.append(out);
   const host = document.createElement("div"); host.id = "v3host"; SR = host.attachShadow({ mode: "open" });
   const l = document.createElement("link"); l.rel = "stylesheet"; l.href = new URL("./v3.css", import.meta.url).href.replace(/\?.*$/, "") + "?v=" + ((sb && sb.BUILD) || Date.now()); SR.append(l);
   const gl = document.createElement("canvas"); gl.id = "v3gl"; const fx = document.createElement("canvas"); fx.id = "v3fx";
@@ -226,7 +231,9 @@ function card(c, host, i) {
   if (pc && side(pc) !== side(c.cls) && side(c.cls) && !first) { turned(x, side(c.cls) > 0); swing(c, side(c.cls) > 0); }
   if (host.children[i] !== x) host.insertBefore(x, host.children[i] || null); return x;
 }
-function swing(c, good) { const d = document.createElement("div"); d.className = "v3-swing " + (good ? "g" : "r"); d.style.setProperty("--c", c.col); d.innerHTML = `<b>${esc(c.who)}</b> ${esc(c.pick)} <em>${good ? "now winning" : "now losing"}</em>`; const f = primeEl.querySelector(".pm-feed"); if (!f) return; f.prepend(d); while (f.children.length > 4) f.lastChild.remove(); setTimeout(() => d.classList.add("old"), 9000); setTimeout(() => d.remove(), 30000); }
+let swingAt = 0;
+function swing(c, good) { if (inStadium() && Date.now() - swingAt > 20000 && !c.par) { swingAt = Date.now(); enqueue(async () => { await wait(7200); if (window.__actOn) return; const done = runAct("swing", { col: hex(c.col, GOLD), who: c.who, big: String(c.pick || ""), odds: fOdds(c.odds), sub: good ? "\u25B2 Now winning \u00b7 " + (c.tx || "") : "\u25BC Now losing \u00b7 " + (c.tx || ""), good }); stageOut(true); await wait(3500); stageOut(false); await done; }); }
+  const d = document.createElement("div"); d.className = "v3-swing " + (good ? "g" : "r"); d.style.setProperty("--c", c.col); d.innerHTML = `<b>${esc(c.who)}</b> ${esc(c.pick)} <em>${good ? "now winning" : "now losing"}</em>`; const f = primeEl.querySelector(".pm-feed"); if (!f) return; f.prepend(d); while (f.children.length > 4) f.lastChild.remove(); setTimeout(() => d.classList.add("old"), 9000); setTimeout(() => d.remove(), 30000); }
 function renderPrime(L) {
   const g = L.g, ca = teamCol(g.a), ch = teamCol(g.h), live = g.st !== "pre", si = g.sit || {};
   if (!prime || prime.id !== g.id) { prime = { id: g.id, at: Date.now(), shot: 0, shotAt: 0 };
@@ -257,11 +264,14 @@ function renderPrime(L) {
   const ppl = new Map(); for (const c of mine) { const k = c.who; if (!ppl.has(k)) ppl.set(k, { col: c.col, v: 0, n: 0 }); const p = ppl.get(k); p.n++; if (c.ev) p.v += c.ev.res === "W" ? c.toWin : c.ev.res === "L" ? -c.units : 0; }
   setHtml(primeEl.querySelector(".pm-room"), `<h5>${g.st === "pre" ? "Riding on it" : "If it ends now"}</h5>${[...ppl].map(([k, p]) => `<div><i style="background:${esc(p.col)}"></i><span>${esc(k)}</span><b class="num ${p.v > 0.004 ? "g" : p.v < -0.004 ? "r" : ""}">${g.st === "pre" ? p.n + (p.n === 1 ? " bet" : " bets") : fU(p.v, true)}</b></div>`).join("") || "<div><span>No bets on this one</span></div>"}`);
   // the camera works the stadium: a new angle every so often, always looking at the ball
-  const now = Date.now(); if (window.SBW && window.SBW.tour && !flying && !showing && now - prime.shotAt > 16000 && now - prime.at > 6000) { const bx = g.st === "in" && typeof si.yl === "number" ? 50 - si.yl : 0, d = si.pos && String(si.pos) === String(g.a.id) ? 1 : -1;
+  const now = Date.now(); if (window.SBW && window.SBW.tour && !flying && !showing && !window.__actOn && now - prime.shotAt > 16000 && now - prime.at > 6000) { const bx = g.st === "in" && typeof si.yl === "number" ? 50 - si.yl : 0, d = si.pos && String(si.pos) === String(g.a.id) ? 1 : -1;
     const SH = [[[bx * 0.4 - 6, 30, 62], [bx, 3, -4], 44], [[bx - d * 46, 15, 6], [bx + d * 14, 2, 0], 48], [[bx + 34, 44, 46], [bx, 0, -4], 40], [[bx, 78, 20], [bx, 0, -2], 38], [[bx - 30, 12, 40], [bx + 4, 4, -10], 52], null];
     const sh = SH[prime.shot++ % SH.length]; if (sh ? window.SBW.tour(sh[0], sh[1], sh[2], 5200) : window.SBW.home(4200)) prime.shotAt = now; }
 }
 function primeScore(g, side, col, pts) {
+  if (inStadium() && isFb(g)) { const notes = []; for (const el of cardEls.values()) { const c = el.__c; if (c && c.g && c.g.id === g.id && !c.par && (c.cls === "w" || c.cls === "l")) notes.push({ who: c.who, pick: c.pick, tx: c.tx || (c.cls === "w" ? "Winning" : "Losing"), good: c.cls === "w", col: c.col }); }
+    notes.sort((a, b) => (a.who === "You" ? -1 : 0) - (b.who === "You" ? -1 : 0));
+    enqueue(async () => { await wait(350); const done = runAct("score", { col, big: pts >= 6 ? "Touchdown" : pts === 3 ? "Field goal" : pts === 2 ? "Safety" : "Extra point", sub: `${g.a.ab} ${g.a.sc}  –  ${g.h.sc} ${g.h.ab}`, side: side === "a" ? 1 : -1, home: side === "h", pts, notes }); stageOut(true); await wait(5600); stageOut(false); await done; }); }
   const bug = primeEl.querySelector(".pm-bug"), [x, y] = mid(bug), t = g[side], fb = isFb(g), big = pts >= 6 || !fb;
   setTimeout(() => { const s = bug.querySelector(`.sc[data-s="${side}"]`); if (s) { s.classList.add("flip"); setTimeout(() => s.classList.remove("flip"), 950); } }, 0);
   ripple(x, y, col, 1.3); sparks(x, y, col, 120, 1.2); gl.surge = 1.5; flash = { c: col, a: 0.45 };
@@ -436,7 +446,7 @@ const Q = []; let showing = false;
 const wait = (ms) => new Promise((r) => setTimeout(r, ms));
 function enqueue(fn) { Q.push(fn); if (!showing) nextShow(); }
 async function nextShow() { const fn = Q.shift(); if (!fn) { showing = false; return; } showing = true; try { await fn(); } catch (e) { console.warn("v3 show", e); } cleanup(); await wait(250); nextShow(); }
-function cleanup() { dim(false); root.classList.remove("shake"); stageEl.classList.remove("on"); SR.querySelectorAll(".v3-ghost, .v3-bill").forEach((e) => e.remove()); }
+function cleanup() { dim(false); stageOut(false); root.classList.remove("shake"); stageEl.classList.remove("on"); SR.querySelectorAll(".v3-ghost, .v3-bill").forEach((e) => e.remove()); }
 // the card as it stood, lifted off the board
 function ghostOf(b, cls) {
   const el = cardEls.get(b.id); let r, g;
@@ -450,8 +460,8 @@ const bill = (pos, html, col) => { const d = document.createElement("div"); d.cl
 const usd = (n) => "$" + (Math.abs(n * X.unit()) >= 100 ? Math.round(Math.abs(n * X.unit())) : (Math.round(Math.abs(n * X.unit()) * 100) / 100).toFixed(2).replace(/\.00$/, ""));
 async function showWin(b, n) {
   const par = b.kind === "parlay", dollars = Math.abs(n * X.unit()), tier = dollars >= 150 || (par && b.odds >= 800) ? 3 : dollars >= 40 || par || b.odds >= 250 ? 2 : 1, who = X.name(b), me = X.me(b), col = hex(X.col(b), GOLD);
-  const { g, r } = ghostOf(b, "won"), cx = innerWidth / 2, cy = innerHeight * 0.5, sc = Math.min(2.1, (innerWidth * (par ? 0.44 : 0.38)) / r.width);
-  dim(true); stageEl.classList.add("on"); const gk = b.sel && b.sel.g != null ? "g" + b.sel.g : null; if (world) world.cheer(gk, GOLD); gl.surge = 1.5; ripple(r.left + r.width / 2, r.top + r.height / 2, G, 1.2);
+  const { g, r } = ghostOf(b, "won"), L3 = inStadium(), cx = innerWidth / 2, cy = innerHeight * (L3 ? 0.21 : 0.5), sc = Math.min(L3 ? 1.5 : 2.1, (innerWidth * (par ? 0.44 : 0.38) * (L3 ? 0.72 : 1)) / r.width);
+  const live3 = inStadium(); if (live3) { runAct("win", Object.assign(actOf(b, n), { tier })); stageOut(true); } else { dim(true); stageEl.classList.add("on"); } const gk = null; gl.surge = 1.5; ripple(r.left + r.width / 2, r.top + r.height / 2, G, 1.2);
   // off the board, a full turn in the air, down on centre stage
   const dx = cx - (r.left + r.width / 2), dy = cy - (r.top + r.height / 2);
   await g.animate([{ transform: "perspective(1400px) translate(0,0) rotateY(0) scale(1)" }, { transform: `perspective(1400px) translate(${dx * 0.5}px, ${dy * 0.5 - innerHeight * 0.08}px) rotateY(200deg) scale(${sc * 0.8})`, offset: 0.55 }, { transform: `perspective(1400px) translate(${dx}px, ${dy}px) rotateY(360deg) scale(${sc})` }], { duration: 850, easing: "cubic-bezier(.3,.1,.2,1)", fill: "forwards" }).finished;
@@ -463,18 +473,18 @@ async function showWin(b, n) {
   bill("top", `<div class="k">${esc(me ? (par ? "Parlay hits" : "Winner") : who + (par ? " hits the parlay" : " cashes"))}</div>`, css(col));
   bill("bot", `<div class="big num">+${usd(n)}</div><div class="sub">${fU(n, true)} · ${esc(fOdds(b.odds))}${par ? ` · ${(b.legs || []).length} legs` : ""}</div>`, css(GOLD));
   // the bigger it is, the longer the sky stays lit
-  const hold = tier === 3 ? 6200 : tier === 2 ? 4200 : 2900, t0 = Date.now(); let k = 0;
+  const hold = live3 ? (tier === 3 ? 11800 : tier === 2 ? 9400 : 7600) : tier === 3 ? 6200 : tier === 2 ? 4200 : 2900, t0 = Date.now(); let k = 0;
   while (Date.now() - t0 < hold) { await wait(tier === 3 ? 480 : 700); if (tier >= 2) { firework(innerWidth * (0.12 + 0.76 * Math.random()), innerHeight * (0.12 + 0.4 * Math.random()), [GOLD, G, col, [0.5, 0.75, 1]][k++ % 4]); } if (world && gk) { const p = world.topPx(gk, Math.random() * 6.28, 1 + Math.random() * 3); if (p) firework(p[0], p[1], [GOLD, G, col][k % 3]); world.cheer(gk, GOLD); } if (tier === 3 && k % 3 === 0) coins(innerWidth * (0.2 + 0.6 * Math.random()), innerHeight * 0.3, 60, 0.7); }
   // and it goes home to whoever's it is
   const chip = [...SR.querySelectorAll("#v3ppl .v3-p")].find((e) => e.dataset.k === String(X.key(b))), cr = chip ? chip.getBoundingClientRect() : { left: innerWidth - 200, top: 20, width: 100, height: 40 };
-  SR.querySelectorAll(".v3-bill").forEach((e) => (e.style.opacity = "0", e.style.transition = "opacity .3s")); stageEl.classList.remove("on"); dim(false);
+  SR.querySelectorAll(".v3-bill").forEach((e) => (e.style.opacity = "0", e.style.transition = "opacity .3s")); stageEl.classList.remove("on"); dim(false); stageOut(false);
   const gx = cr.left + cr.width / 2 - (r.left + r.width / 2), gy = cr.top + cr.height / 2 - (r.top + r.height / 2);
   await g.animate([{ transform: `perspective(1400px) translate(${dx}px, ${dy}px) rotateY(360deg) scale(${sc})`, opacity: 1 }, { transform: `perspective(1400px) translate(${gx}px, ${gy}px) rotateY(360deg) scale(.12)`, opacity: 0.2 }], { duration: 620, easing: "cubic-bezier(.5,0,.8,.4)", fill: "forwards" }).finished;
   if (chip) { chip.classList.remove("pop"); void chip.offsetWidth; chip.classList.add("pop"); sparks(cr.left + cr.width / 2, cr.top + cr.height / 2, hex(X.col(b), GOLD), 50, 0.6); }
 }
 async function showLoss(b, n) {
   const me = X.me(b), { g, r } = ghostOf(b, "lost"), cx = r.left + r.width / 2, cy = r.top + r.height / 2;
-  flash = { c: R, a: me ? 0.5 : 0.3 }; ripple(cx, cy, R, 1); gl.surge = 0.8;
+  flash = { c: R, a: me ? 0.5 : 0.3 }; ripple(cx, cy, R, 1); gl.surge = 0.8; if (me && inStadium()) { runAct("loss", actOf(b, n)); stageOut(true); setTimeout(() => stageOut(false), 4000); }
   const st = document.createElement("div"); st.className = "v3-stamp r"; st.textContent = "DEAD"; g.append(st); requestAnimationFrame(() => st.classList.add("in"));
   await g.animate([{ transform: "translate(0,0) rotate(0)" }, { transform: "translate(-9px,3px) rotate(-1.2deg)" }, { transform: "translate(8px,-3px) rotate(1deg)" }, { transform: "translate(-5px,2px) rotate(-.6deg)" }, { transform: "translate(0,0) scale(1.06)" }], { duration: 620 }).finished;
   await wait(me ? 650 : 300);
@@ -510,7 +520,7 @@ async function flight(to, rebuild, cv) {
 V.fly = async (rebuild) => { const to = featNow(), cv = document.getElementById("v2world"); if (!to || !globe || !on || flying) { await rebuild(); if (!to) lastSpot = null; return; } await flight(to, rebuild, cv); };
 // what the engine calls
 V.settle = (b, o, n) => { if (o === "W") enqueue(() => showWin(b, n)); else if (o === "L") enqueue(() => showLoss(b, n)); else note(b, b.status === "cashout" ? "cashed out" : "pushed"); };
-V.place = (b) => { note(b, "is on"); setTimeout(() => { const el = cardEls.get(b.id); if (el && el.offsetParent) { const [x, y] = mid(el); ripple(x, y, hex(X.col(b), A), 0.9); sparks(x, y, hex(X.col(b), A), 60, 0.8); ring(x, y, hex(X.col(b), A), 2.2, 0.8); } }, 700); };
+V.place = (b) => { note(b, "is on"); if (inStadium()) enqueue(async () => { const done = runAct("place", actOf(b)); stageOut(true); await wait(6300); stageOut(false); await done; }); setTimeout(() => { const el = cardEls.get(b.id); if (el && el.offsetParent) { const [x, y] = mid(el); ripple(x, y, hex(X.col(b), A), 0.9); sparks(x, y, hex(X.col(b), A), 60, 0.8); ring(x, y, hex(X.col(b), A), 2.2, 0.8); } }, 700); };
 V.leg = (b, i, st) => { setTimeout(() => { const el = cardEls.get(b.id), lg = el && el.querySelector(`.v3-leg[data-i="${i}"]`); if (!lg || !el.offsetParent) return; lg.classList.add("pop"); setTimeout(() => lg.classList.remove("pop"), 850);
   const [x, y] = mid(lg.querySelector(".pip")), c = st === "miss" ? R : G; sparks(x, y, c, 70, 0.8, { white: st !== "miss" }); ring(x, y, c, 1.6, 0.7); ripple(x, y, c, 0.7); turned(el, st !== "miss"); }, 600); };
 
@@ -529,7 +539,7 @@ if (demo) { const f = () => demo.feat(); window.__sbFeat = f; window.__sbScene =
   setTimeout(() => { try { if (!document.body.classList.contains("tv")) document.getElementById("tvBtn").click(); } catch (e) {} }, 600); }
 build(); setOn(DEMO || (sb && sb.tv())); if (!on) for (const id of ["v3host", "v3gl", "v3fx"]) document.getElementById(id).style.display = "none";
 requestAnimationFrame(frame);
-window.__v3dbg = { fly: (a, b) => { lastSpot = a ? { ll: spotOf(a), col: [0.2, 0.5, 1], name: a } : null; return flight({ ab: b, h: b, a: "Away", ven: b + " Stadium", col: GOLD }, null, null); }, model: () => M, win: (id) => { const b = X.bets().find((x) => x.id === id) || X.bets()[0]; if (b) V.settle(b, "W", b.units * ppu(b.odds)); }, loss: (id) => { const b = X.bets().find((x) => x.id === id) || X.bets()[0]; if (b) V.settle(b, "L", -b.units); }, demo };
+window.__v3dbg = { act: (k, tier) => runAct(k === "swingbad" ? "swing" : k, k === "score" ? { col: [0.9, 0.1, 0.2], big: "Touchdown", sub: "DET 10  \u2013  21 KC", side: -1, home: true, pts: 7, notes: [{ who: "You", pick: "Lions +3.5", tx: "Needs 7.5", good: false, col: "#ffc94d" }, { who: "Brad", pick: "Chiefs ML", tx: "Up 11", good: true, col: "#ff9a4d" }, { who: "Julian", pick: "Over 47.5", tx: "Needs 17 \u00b7 on pace", good: true, col: "#5cc8ff" }] } : k === "swing" || k === "swingbad" ? Object.assign(actOf(X.bets()[0], null), { sub: k === "swing" ? "\u25B2 Now winning \u00b7 Up 1.5" : "\u25BC Now losing \u00b7 Needs 2", good: k === "swing" }) : Object.assign(actOf(X.bets()[0], k === "place" ? null : k === "win" ? 27.27 : -2), { tier: tier || 1 })), place: () => { const b = X.bets()[0]; if (b) V.place(b); }, fly: (a, b) => { lastSpot = a ? { ll: spotOf(a), col: [0.2, 0.5, 1], name: a } : null; return flight({ ab: b, h: b, a: "Away", ven: b + " Stadium", col: GOLD }, null, null); }, model: () => M, win: (id) => { const b = X.bets().find((x) => x.id === id) || X.bets()[0]; if (b) V.settle(b, "W", b.units * ppu(b.odds)); }, loss: (id) => { const b = X.bets().find((x) => x.id === id) || X.bets()[0]; if (b) V.settle(b, "L", -b.units); }, demo };
 
 // ---------- the demo: four games that play themselves, three people's bets ----------
 function makeDemo() {

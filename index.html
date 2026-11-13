@@ -7670,6 +7670,9 @@ body.tv.pplg .roomtv:not([hidden]) canvas { width: 84px; height: 84px; grid-row:
   try { const q = new URLSearchParams(location.search); if (q.has("v3")) { if (q.get("v3") === "off") localStorage.removeItem("sb-v3"); else localStorage.setItem("sb-v3", "on"); } } catch (e) {}
   window.__v3 = { on: false, want: (() => { try { return localStorage.getItem("sb-v3") === "on"; } catch (e) { return false; } })() };
   const V3 = () => !!window.__v3.on;
+  // V3 with the clips and the DJ back on (asked for with ?v3clips=on, remembered; ?v3clips=off undoes it)
+  const V3Q = (() => { try { const q = new URLSearchParams(location.search).get("v3clips"); if (q) localStorage.setItem("sb-v3clips", q === "off" ? "off" : "on"); return localStorage.getItem("sb-v3clips") === "on"; } catch (e) { return false; } })(); if (V3Q) document.documentElement.classList.add("v3clips");
+  const V3mute = () => V3() && !V3Q;
   const v3do = (k, ...a) => { try { if (window.__v3[k]) window.__v3[k](...a); } catch (e) { console.warn("v3", k, e); } };
   try { if (localStorage.getItem("sb-v2") !== "off") document.body.classList.add("v2b"); } catch (e) { document.body.classList.add("v2b"); }
   // V2: a looping animation on the board (named v2l...) is set by the clock, not by when its element was drawn, so a redraw
@@ -14933,7 +14936,7 @@ void main(){
   // ---------- sheets ----------
   function openSheet(id) { $(id).hidden = false; }
   // keep every open screen current: when a new version is up, reload it (never mid-form or mid-animation)
-  const BUILD = "20261112235619";
+  const BUILD = "20261113010001";
   function updReady() {
     if (document.getElementById("updReady")) return; const d = document.createElement("div"); d.id = "updReady"; d.textContent = "Update ready · refresh, then TV + Sound on"; document.body.append(d);
   }
@@ -17790,7 +17793,7 @@ void main(){
   }
   function reactPre(b, kind, P, why, pre) { clipAt = Date.now(); clipClaim = null; glow(b.id, kind); render(); statusBet = b.id; showPip(b, P, moodOf(kind, P), why, pre); }
   function react(b, kind, P, why) {
-    if (V3()) return;
+    if (V3mute()) return;
     if (PHONE() || AUX.on) { render(); return; }
     { const v = vibeTake(b, kind, P); if (v) { b = v.b; P = v.P; why = v.why; } }
     { const spx = (gameFor(b) || {}).sport || sportOf(b); if (spx && !sset(spx, "clips")) { render(); return; } }
@@ -18310,7 +18313,7 @@ void main(){
   }
   let lastDj = Date.now() - 3 * 60e3; // first one about a minute after the board opens
   function djBreak(now) {
-    if (V3()) return;
+    if (V3mute()) return;
     if (PHONE() || AUX.on) return false;
     const mine = [...S.bets.values()].filter((b) => b.status === "open"), b = mine.find((x) => phase(x) === "live") || mine[0];
     const P = b && pickClip(newSong(CLIPS.filter((c) => c.dj)));
@@ -27028,8 +27031,8 @@ function wdPolish(st, fs) {
   // people: a body, a helmet, legs; drawn as three instanced meshes a group
   const HT = 2.7, gB = new THREE.CapsuleGeometry(0.52, 0.75, 3, 8), gH = new THREE.SphereGeometry(0.4, 10, 8), gL = new THREE.CapsuleGeometry(0.4, 0.55, 3, 8), _m = new THREE.Matrix4(), _q = new THREE.Quaternion(), _e = new THREE.Euler(), _p = new THREE.Vector3(), _s = new THREE.Vector3();
   const crew = (n, body, helm, legs) => { const mk = (g, c) => { const m = new THREE.InstancedMesh(g, flat(c), n); m.frustumCulled = false; scene.add(m); return m; }, Bm = mk(gB, body), Hm = mk(gH, helm), Lm = mk(gL, legs);
-    return { n, set(i, x, z, ry, hop = 0, k = 1) { _e.set(0, ry, 0); _q.setFromEuler(_e); _s.set(k, k, k); for (const [m, y] of [[Lm, 0.62], [Bm, 1.55], [Hm, 2.42]]) { _p.set(x, (y + hop) * k * (HT / 2.8), z); _m.compose(_p, _q, _s); m.setMatrixAt(i, _m); } }, done() { Bm.instanceMatrix.needsUpdate = Hm.instanceMatrix.needsUpdate = Lm.instanceMatrix.needsUpdate = true; } }; };
-  const home = crew(11, hc, hc.map((v) => v * 0.8), [0.92, 0.92, 0.95]), away = crew(11, ac, ac.map((v) => v * 0.85), [0.75, 0.76, 0.8]), refs = crew(5, [0.95, 0.95, 0.95], [0.08, 0.08, 0.1], [0.1, 0.1, 0.12]);
+    return { n, ms: [Bm, Hm, Lm], set(i, x, z, ry, hop = 0, k = 1) { _e.set(0, ry, 0); _q.setFromEuler(_e); _s.set(k, k, k); for (const [m, y] of [[Lm, 0.62], [Bm, 1.55], [Hm, 2.42]]) { _p.set(x, (y + hop) * k * (HT / 2.8), z); _m.compose(_p, _q, _s); m.setMatrixAt(i, _m); } }, done() { Bm.instanceMatrix.needsUpdate = Hm.instanceMatrix.needsUpdate = Lm.instanceMatrix.needsUpdate = true; } }; };
+  const crews = []; const home = crew(11, hc, hc.map((v) => v * 0.8), [0.92, 0.92, 0.95]), away = crew(11, ac, ac.map((v) => v * 0.85), [0.75, 0.76, 0.8]), refs = crew(5, [0.95, 0.95, 0.95], [0.08, 0.08, 0.1], [0.1, 0.1, 0.12]);
   // who stands where off the ball: [yards behind the line, yards across]
   const OFF = [[0.8, -2], [0.8, -1], [0.8, 0], [0.8, 1], [0.8, 2], [0.9, 3.3], [5, 0], [6, 1.8], [1, -16], [1.6, -9], [1, 16]];
   const DEF = [[1.1, -3], [1.1, -1], [1.1, 1], [1.1, 3], [4.6, -4.5], [4.6, 0], [4.6, 4.5], [6, -16], [6, 16], [12, -7], [12, 7]];
@@ -27040,8 +27043,8 @@ function wdPolish(st, fs) {
   const los = new THREE.Mesh(new THREE.PlaneGeometry(0.28, 53.33), lineM([0.25, 0.55, 1], 0.85)), ltg = new THREE.Mesh(new THREE.PlaneGeometry(0.34, 53.33), lineM([1, 0.84, 0.1], 0.95));
   for (const l of [los, ltg]) { l.rotation.x = -Math.PI / 2; l.position.y = 0.05; scene.add(l); }
   // along the benches: the rest of both teams and the staff
-  { const N = 26, sideH = crew(N, hc, hc.map((v) => v * 0.8), [0.92, 0.92, 0.95]), sideA = crew(N, ac, ac.map((v) => v * 0.85), [0.75, 0.76, 0.8]);
-    for (let i = 0; i < N; i++) { const x = -15.5 + (i % 13) * 2.6 + ((i * 7) % 3) * 0.3, row = i < 13 ? 0 : 1; sideH.set(i, x, -(26.67 + 3.2 + row * 1.9), 0, 0, 0.92); sideA.set(i, x, 26.67 + 3.2 + row * 1.9, Math.PI, 0, 0.92); } sideH.done(); sideA.done(); }
+  let bench = null; { const N = 26, sideH = crew(N, hc, hc.map((v) => v * 0.8), [0.92, 0.92, 0.95]), sideA = crew(N, ac, ac.map((v) => v * 0.85), [0.75, 0.76, 0.8]);
+    for (let i = 0; i < N; i++) { const x = -15.5 + (i % 13) * 2.6 + ((i * 7) % 3) * 0.3, row = i < 13 ? 0 : 1; sideH.set(i, x, -(26.67 + 3.2 + row * 1.9), 0, 0, 0.92); sideA.set(i, x, 26.67 + 3.2 + row * 1.9, Math.PI, 0, 0.92); } sideH.done(); sideA.done(); bench = [sideH, sideA]; }
   // flags on the rim, in the home colours, flying
   const flags = [], fg = new THREE.PlaneGeometry(5.2, 3, 6, 1); fg.translate(2.6, 0, 0);
   for (let i = 0; i < 26; i++) { const p = wdNorm(st.C, (i + 0.5) / 26), o = outer + 1.2, x = p[0] + p[2] * o, z = p[1] + p[3] * o; if (st.deckSpot && st.deckSpot.gap(x, z)) continue;
@@ -27051,6 +27054,25 @@ function wdPolish(st, fs) {
   if (!V.dome) for (let i = 0; i < 8; i++) { const p = wdNorm(st.C, (i + 0.5) / 8), o = outer, x = p[0] + p[2] * o, z = p[1] + p[3] * o, y = top + 6, len = Math.hypot(x, y, z) * 0.92;
     const g = new THREE.ConeGeometry(len * 0.2, len, 40, 1, true); g.translate(0, -len / 2, 0); g.rotateX(Math.PI / 2);
     const m = new THREE.Mesh(g, new THREE.MeshBasicMaterial({ color: col([1, 0.97, 0.88]), transparent: true, opacity: 0.013, blending: THREE.AdditiveBlending, depthWrite: false, side: THREE.FrontSide })); m.position.set(x, y, z); m.lookAt(x * 0.2, 0, z * 0.2); m.rotateY(Math.PI); scene.add(m); }
+  // the real people (V3): jointed players in their stances, numbered, and the home mascot; the capsules stand in until they load
+  let FG = null; const ROLE_O = ["line", "line", "line", "line", "line", "line", "qb", "rb", "wr", "wr", "wr"], ROLE_D = ["dline", "dline", "dline", "dline", "lb", "lb", "lb", "db", "db", "db", "db"], NUM_O = [71, 66, 52, 63, 77, 87, 9, 22, 11, 81, 14], NUM_D = [97, 93, 99, 91, 54, 55, 50, 21, 24, 31, 29];
+  const upgrade = () => { const mf = window.__v3fig; if (!mf || FG) return; try {
+    const F = mf(THREE), lt = F.lights(scene), altH = vis(T.h.alt || [1, 1, 1]), altA = vis(T.a.alt || [1, 1, 1]);
+    const kh = F.kit({ jersey: hc, helm: hc.map((v) => v * 0.85), pants: [0.92, 0.92, 0.95], alt: altH }), ka = F.kit({ jersey: ac, helm: ac0.map((v) => v * 0.9), pants: [0.78, 0.79, 0.83], alt: altA, sock: [0.9, 0.9, 0.92] }), kr = F.kit({ jersey: [0.95, 0.95, 0.95], helm: [0.06, 0.06, 0.08], pants: [0.06, 0.06, 0.08], alt: [0.06, 0.06, 0.08], sock: [0.06, 0.06, 0.08] });
+    const mk = (k, i, num) => { const f = k.player(num, i); scene.add(f.g); return f; };
+    const H = NUM_O.map((v, i) => mk(kh, i, v)), Aw = NUM_D.map((v, i) => mk(ka, i + 3, v)), Rf = [0, 1, 2, 3, 4].map((i) => mk(kr, i, null));
+    // the benches, standing
+    const N = 26, bh = kh.standing(N), ba = ka.standing(N), m4 = new THREE.Matrix4(), q = new THREE.Quaternion(), e = new THREE.Euler(), sc = new THREE.Vector3(kh.scale, kh.scale, kh.scale).multiplyScalar(0.95), pp = new THREE.Vector3();
+    for (let i = 0; i < N; i++) { const x = -15.5 + (i % 13) * 2.6 + ((i * 7) % 3) * 0.3, row = i < 13 ? 0 : 1; e.set(0, 0, 0); q.setFromEuler(e); m4.compose(pp.set(x, 0, -(26.67 + 3.2 + row * 1.9)), q, sc); bh.setMatrixAt(i, m4); e.set(0, Math.PI, 0); q.setFromEuler(e); m4.compose(pp.set(x, 0, 26.67 + 3.2 + row * 1.9), q, sc); ba.setMatrixAt(i, m4); } scene.add(bh, ba);
+    // a shadow under every man on the field
+    const sh = new THREE.InstancedMesh(new THREE.CircleGeometry(0.85, 16), new THREE.MeshBasicMaterial({ color: 0x000000, transparent: true, opacity: 0.3, depthWrite: false }), 28); sh.frustumCulled = false; sh.renderOrder = 2; scene.add(sh);
+    let nm = ""; try { const ft = window.__sbFeat && window.__sbFeat(); if (ft && ft.h) nm = [ft.h.nm, ft.h.name, ft.h.full].filter(Boolean).join(" "); } catch (e2) {}
+    const mf2 = F.mascot({ ab: T.h.ab, name: nm, col: hc, alt: altH, scale: 2.0 }); scene.add(mf2.g); const HOME = [-30, -(26.67 + 1.5)]; mf2.g.position.set(HOME[0], 0, HOME[1]);
+    st.mascot = { F, f: mf2, busy: false, home: HOME, kits: { kh, ka } };
+    for (const c of [home, away, refs].concat(bench || [])) for (const m of c.ms) m.visible = false;
+    FG = { F, H, Aw, Rf, sh, m4, q, e, pp, one: new THREE.Vector3(1, 1, 1) };
+  } catch (e) { console.warn("figures", e); FG = { dead: true }; } };
+  const place = (f, role, x, z, ry, t, mv, cheer, i) => { f.g.position.x = x; f.g.position.z = z; f.g.rotation.y = ry; FG.F.posePlayer(f, role, t, mv, cheer); FG.e.set(-Math.PI / 2, 0, 0); FG.q.setFromEuler(FG.e); FG.m4.compose(FG.pp.set(x, 0.06, z), FG.q, FG.one); FG.sh.setMatrixAt(i, FG.m4); };
   // the game as it stands, looked up once a second
   const S = { x: 0, tx: 0, dir: 1, has: false, togo: null, at: 0, run: 0 };
   const read = () => { let g = null; try { const f = window.__sbFeat && window.__sbFeat(); if (f && f.h && f.h.ab === T.h.ab) g = f; } catch (e) {} if (!g) g = st.R.scene && st.R.scene.game;
@@ -27060,9 +27082,17 @@ function wdPolish(st, fs) {
     if (t - S.at > 1) { S.at = t; read(); }
     S.x += (S.tx - S.x) * 0.045; S.run = Math.max(0, S.run - 0.012); const mv = Math.min(1, Math.abs(S.tx - S.x) / 3 + S.run * 0.4), d = S.dir;
     const offT = d > 0 ? away : home, defT = d > 0 ? home : away, ph = (i) => Math.abs(Math.sin(t * (2 + mv * 9) + i * 1.7)) * (0.05 + mv * 0.3);
-    if (S.has) { OFF.forEach(([b, z], i) => offT.set(i, S.x - d * b, z, d > 0 ? Math.PI / 2 : -Math.PI / 2, ph(i))); DEF.forEach(([b, z], i) => defT.set(i, S.x + d * b, z, d > 0 ? -Math.PI / 2 : Math.PI / 2, ph(i + 11)));
+    if (!FG) upgrade(); st.cheer = Math.max(0, (st.cheer || 0) - 0.02);
+    if (FG && !FG.dead) { const oF = d > 0 ? FG.Aw : FG.H, dF = d > 0 ? FG.H : FG.Aw, ch = st.cheer || 0, cO = d > 0 ? 0 : ch, cD = d > 0 ? ch : 0, face = d > 0 ? Math.PI / 2 : -Math.PI / 2;
+      if (S.has) { OFF.forEach(([b, z], i) => place(oF[i], ROLE_O[i], S.x - d * b, z, face, t, mv, cO, i)); DEF.forEach(([b, z], i) => place(dF[i], ROLE_D[i], S.x + d * b, z, -face, t, mv, cD, i + 11)); REF.forEach(([b, z], i) => place(FG.Rf[i], "ref", S.x + d * b, z, z > 0 ? Math.PI : 0, t, 0, 0, i + 22)); }
+      else { for (let i = 0; i < 11; i++) { const a = (i / 11) * Math.PI * 2, cx = Math.cos(a) * 3.4, cz = Math.sin(a) * 3.4, ry = Math.atan2(-cx, -cz); place(FG.H[i], i % 3 ? "stand" : "hips", 14 + cx, cz, ry, t, 0, ch, i); place(FG.Aw[i], i % 3 ? "stand" : "hips", -14 + cx, cz, ry, t, 0, 0, i + 11); } REF.forEach(([b, z], i) => place(FG.Rf[i], "ref", (i - 2) * 3, -24, 0, t, 0, 0, i + 22)); }
+      FG.sh.instanceMatrix.needsUpdate = true;
+      // the mascot works its sideline unless a set piece has borrowed it
+      const M = st.mascot; if (M && !M.busy) { const g = M.f.g, dx = M.home[0] + Math.sin(t * 0.21) * 9 - g.position.x, dz = M.home[1] - g.position.z, dist = Math.hypot(dx, dz), dt = Math.min(0.05, t - (M.t || t)); M.t = t;
+        if (dist > 0.6) { const sp = Math.min(dist, (dist > 6 ? 17 : 3.2) * dt); g.position.x += (dx / dist) * sp; g.position.z += (dz / dist) * sp; g.rotation.y = Math.atan2(dx, dz); FG.F.poseMascot(M.f, dist > 6 ? "run" : "run", dist > 6 ? t : t * 0.45); } else { g.rotation.y += (0 - g.rotation.y) * 0.1; FG.F.poseMascot(M.f, ch > 0.1 ? "cheer" : "idle", t); } } else if (M) M.t = t; }
+    else { if (S.has) { OFF.forEach(([b, z], i) => offT.set(i, S.x - d * b, z, d > 0 ? Math.PI / 2 : -Math.PI / 2, ph(i))); DEF.forEach(([b, z], i) => defT.set(i, S.x + d * b, z, d > 0 ? -Math.PI / 2 : Math.PI / 2, ph(i + 11)));
       REF.forEach(([b, z], i) => refs.set(i, S.x + d * b, z, 0, 0)); }
-    else { for (let i = 0; i < 11; i++) { const a = (i / 11) * Math.PI * 2 + t * 0.15; home.set(i, 14 + Math.cos(a) * 2.6, Math.sin(a) * 2.6, -a, ph(i) * 0.4); away.set(i, -14 + Math.cos(a) * 2.6, Math.sin(a) * 2.6, -a, ph(i) * 0.4); } REF.forEach(([b, z], i) => refs.set(i, (i - 2) * 3, -24, 0, 0)); }
+    else { for (let i = 0; i < 11; i++) { const a = (i / 11) * Math.PI * 2 + t * 0.15; home.set(i, 14 + Math.cos(a) * 2.6, Math.sin(a) * 2.6, -a, ph(i) * 0.4); away.set(i, -14 + Math.cos(a) * 2.6, Math.sin(a) * 2.6, -a, ph(i) * 0.4); } REF.forEach(([b, z], i) => refs.set(i, (i - 2) * 3, -24, 0, 0)); } }
     home.done(); away.done(); refs.done();
     ball.visible = los.visible = S.has; ltg.visible = S.has && S.togo != null; ball.position.set(S.x, 0.35 + Math.sin(Math.min(1, mv) * Math.PI) * 1.2 * (mv > 0.05 ? 1 : 0), 0); los.position.x = S.x; if (S.togo != null) ltg.position.x = Math.max(-50, Math.min(50, S.x + d * S.togo));
     for (let i = 0; i < flags.length; i++) { const f = flags[i], p = f.geometry.attributes.position; f.rotation.y = 0.6 + i + Math.sin(t * 0.7 + i) * 0.25; }
@@ -28624,7 +28654,7 @@ const wdQmax = () => Math.min(2, Math.max(1, window.devicePixelRatio || 1));
 async function wdFxInit(L, THREE) {
   let off = false; try { off = localStorage.getItem("sb-glow") === "off"; } catch (e) {} if (WD.fx || off) { WD.fxOff = off; return; }
   const { ShaderPass } = await import("three/addons/postprocessing/ShaderPass.js");
-  const w = WD.r.domElement.width, h = WD.r.domElement.height, comp = new L.EffectComposer(WD.r); comp.setPixelRatio(1); comp.setSize(w, h);
+  const w = WD.r.domElement.width, h = WD.r.domElement.height, rt = new THREE.WebGLRenderTarget(w, h, { type: THREE.HalfFloatType, samples: 4 }), comp = new L.EffectComposer(WD.r, rt); comp.setPixelRatio(1); comp.setSize(w, h);
   const rp = new L.RenderPass(new THREE.Scene(), new THREE.Camera()); comp.addPass(rp);
   const bloom = new L.UnrealBloomPass(new THREE.Vector2(Math.round(w / 2), Math.round(h / 2)), 0.4, 0.55, 0.74); comp.addPass(bloom);
   const grade = new ShaderPass({ uniforms: { tDiffuse: { value: null }, uT: { value: 0 } },
@@ -28727,6 +28757,7 @@ window.SBW = {
   tour(p, l, f, ms) { const st = WD.st; if (!st || st.room || WD.mode !== "board" || st.fly || !wdTv()) return false; const V = st.THREE.Vector3; wdFly(st, { p: new V(p[0], p[1], p[2]), l: new V(l[0], l[1], l[2]), f: f || 46 }, ms || 5000, 5); return true; },
   home(ms) { const st = WD.st; if (!st || WD.mode !== "board" || st.fly || !st.shots || !st.shots.board) return false; wdFly(st, st.shots.board, ms || 3000, 4); return true; },
   kind: () => (WD.st ? (WD.st.room ? "room" : WD.st.R.sport) : ""),
+  burst(p, col, n) { if (WD.st) try { wdBurst(WD.st, p, col, n || 150); } catch (e) {} },
   // a video is up: o.dj (the DJ set), o.v (the video element), o.ext (someone else's video: can't go on a texture)
   clip(o) {
     const st = WD.st; if (!st || !wdTv()) return false;

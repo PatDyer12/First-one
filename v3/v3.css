@@ -177,3 +177,7 @@
 .v3-td { position: fixed; left: 0; right: 0; top: 30%; z-index: 44; --u: calc(100vw / 1920); display: grid; justify-items: center; gap: calc(var(--u) * 6); padding: calc(var(--u) * 20) 0; background: linear-gradient(90deg, transparent, color-mix(in srgb, var(--c) 82%, #000) 18%, color-mix(in srgb, var(--c) 82%, #000) 82%, transparent); color: #fff; transform: scaleX(0); opacity: 0; transition: transform .45s cubic-bezier(.2, .9, .2, 1), opacity .3s; pointer-events: none; }
 .v3-td.in { transform: none; opacity: 1; } .v3-td b { font: 900 calc(var(--u) * 150)/0.9 "Big Shoulders Display", "Barlow Condensed", sans-serif; letter-spacing: .06em; text-transform: uppercase; text-shadow: 0 calc(var(--u) * 6) 0 rgba(0, 0, 0, .35); }
 .v3-td span { font: 800 calc(var(--u) * 36)/1 "Barlow Condensed", sans-serif; letter-spacing: .16em; text-transform: uppercase; }
+
+/* a set piece in the stadium: the board steps back */
+.v3-board { transition: filter .5s, opacity .6s ease; } .v3-board.away { opacity: .06; }
+#v3.away .v3-tick { opacity: .2; transition: opacity .6s; }
