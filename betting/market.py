@@ -231,6 +231,18 @@ def check(sport, game_teams, market, side_name, point, odds, events=None):
     return round(100 * (p * payout(odds) - (1 - p - push)), 2), src
 
 
+def plain(s):
+    """Team names without accents or apostrophes, lowercased: ESPN says San José State and Hawai'i, the Odds API doesn't."""
+    import unicodedata
+    return unicodedata.normalize("NFKD", s).encode("ascii", "ignore").decode().replace("'", "").lower()
+
+
+def same_school(odds_name, school):
+    """Odds API 'San Jose State Spartans' is ESPN's 'San José State'."""
+    o, s = plain(odds_name), plain(school)
+    return o == s or o.startswith(s + " ")
+
+
 def play_check(sport, p, events, L, name=None):
     """Sharp check for one play from final.py: (EV at our price, fair win %, source) or None."""
     away, home = p["game"].split(" @ ")
@@ -238,7 +250,7 @@ def play_check(sport, p, events, L, name=None):
         away, home = name(away), name(home)
     e = next((x for x in events if x["away_team"] == away and x["home_team"] == home), None)
     if e is None and sport == "cfb":
-        e = next((x for x in events if x["away_team"].startswith(away) and x["home_team"].startswith(home)), None)
+        e = next((x for x in events if same_school(x["away_team"], away) and same_school(x["home_team"], home)), None)
     if e is None:
         return None
     if p["market"] == "total":
@@ -283,7 +295,7 @@ def card_checks(sport, events):
             away, home = name(away), name(home)
         e = next((x for x in events if x["away_team"] == away and x["home_team"] == home), None)
         if e is None and sport == "cfb":  # college names: match on school name inside the Odds API team name
-            e = next((x for x in events if x["away_team"].startswith(away) and x["home_team"].startswith(home)), None)
+            e = next((x for x in events if same_school(x["away_team"], away) and same_school(x["home_team"], home)), None)
         if e is None:
             continue
         if p["market"] == "total":

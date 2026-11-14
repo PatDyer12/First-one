@@ -80,18 +80,31 @@ logged,tier,game_id,game,market,side,book,bet,line,odds,win_prob,ev,stake,placed
 2026-10-30 22:33,Over-streak fade,401858281,Georgia Tech @ Pittsburgh,total,under,DraftKings,Under 54.5,54.5,-105,0.0,0.0,0.005,yes,54.5,,0.0,,W,0.9523809523809523
 2026-10-30 22:33,Over-streak fade,401860924,Oregon State @ Fresno State,total,under,DraftKings,Under 58.5,58.5,-115,0.0,0.0,0.005,yes,57.5,,1.0,,L,-1.0
 2026-10-30 22:34,Rest edge,401864530,Northern Illinois @ UNLV,spread,home,DraftKings,UNLV -21.5,21.5,-112,0.0,0.0,0.005,yes,21.5,,0.0,,L,-1.0
-2026-11-03 20:03,Steady rain under,401862818,South Florida @ East Carolina,total,under,DraftKings,Under 39.5,39.5,-112,0.0,0.0,0.005,yes,,,,,,
-2026-11-03 20:03,Steady rain under,401860912,Texas State @ Oregon State,total,under,DraftKings,Under 72.5,72.5,-112,0.0,0.0,0.005,yes,71.5,-115.0,1.0,,,
-2026-11-03 20:03,Over-streak fade,401862817,UTSA @ Florida Atlantic,total,under,DraftKings,Under 72.5,72.5,-105,0.0,0.0,0.005,yes,,,,,,
-2026-11-03 20:03,Over-streak fade,401856849,BYU @ Utah,total,under,DraftKings,Under 48.5,48.5,-110,0.0,0.0,0.005,yes,49.5,-110.0,-1.0,,,
-2026-11-03 20:03,Over-streak fade,401858289,Florida State @ Boston College,total,under,DraftKings,Under 50.5,50.5,-102,0.0,0.0,0.005,yes,53.5,-112.0,-3.0,,,
-2026-11-03 20:03,Over-streak fade,401862822,Tulsa @ Tulane,total,under,DraftKings,Under 49.5,49.5,-108,0.0,0.0,0.005,yes,50.5,-112.0,-1.0,,,
-2026-11-03 20:03,Over-streak fade,401856854,Oklahoma State @ Kansas State,total,under,DraftKings,Under 61.5,61.5,-105,0.0,0.0,0.005,yes,63.5,-112.0,-2.0,,,
-2026-11-03 20:03,Over-streak fade,401862821,Rice @ North Texas,total,under,DraftKings,Under 64.5,64.5,-110,0.0,0.0,0.005,yes,64.5,-108.0,0.0,,,
-2026-11-03 20:03,Over-streak fade,401856852,Colorado @ Arizona State,total,under,DraftKings,Under 48.5,48.5,-108,0.0,0.0,0.005,yes,48.5,-118.0,0.0,,,
-2026-11-03 20:03,Over-streak fade,401858287,Louisville @ Georgia Tech,total,under,DraftKings,Under 61.5,61.5,-115,0.0,0.0,0.005,yes,62.5,-112.0,-1.0,,,
-2026-11-03 20:03,Over-streak fade,401858291,Miami @ Notre Dame,total,under,DraftKings,Under 57.5,57.5,-110,0.0,0.0,0.005,yes,54.5,-110.0,3.0,,,
-2026-11-03 20:03,Over-streak fade,401862823,Air Force @ Army,total,under,DraftKings,Under 45.5,45.5,-110,0.0,0.0,0.005,yes,43.5,-105.0,2.0,,,
-2026-11-03 20:03,Over-streak fade,401856856,West Virginia @ Texas Tech,total,under,DraftKings,Under 64.5,64.5,-105,0.0,0.0,0.005,yes,65.5,-108.0,-1.0,,,
-2026-11-03 20:03,Over-streak fade,401860912,Texas State @ Oregon State,total,under,DraftKings,Under 72.5,72.5,-112,0.0,0.0,0.005,yes,71.5,-115.0,1.0,,,
-2026-11-07 16:37,Blowout over,401858290,Merrimack @ Wake Forest,total,over,DraftKings,Over 57.5,57.5,-110,0.0,0.0,0.01,yes,57.5,-110.0,0.0,,,
+2026-11-03 20:03,Steady rain under,401862818,South Florida @ East Carolina,total,under,DraftKings,Under 39.5,39.5,-112,0.0,0.0,0.005,yes,39.5,,0.0,,W,0.8928571428571429
+2026-11-03 20:03,Steady rain under,401860912,Texas State @ Oregon State,total,under,DraftKings,Under 72.5,72.5,-112,0.0,0.0,0.005,yes,72.5,,0.0,,W,0.8928571428571429
+2026-11-03 20:03,Over-streak fade,401862817,UTSA @ Florida Atlantic,total,under,DraftKings,Under 72.5,72.5,-105,0.0,0.0,0.005,yes,72.5,,0.0,,L,-1.0
+2026-11-03 20:03,Over-streak fade,401856849,BYU @ Utah,total,under,DraftKings,Under 48.5,48.5,-110,0.0,0.0,0.005,yes,49.5,,-1.0,,W,0.9090909090909091
+2026-11-03 20:03,Over-streak fade,401858289,Florida State @ Boston College,total,under,DraftKings,Under 50.5,50.5,-102,0.0,0.0,0.005,yes,53.5,,-3.0,,L,-1.0
+2026-11-03 20:03,Over-streak fade,401862822,Tulsa @ Tulane,total,under,DraftKings,Under 49.5,49.5,-108,0.0,0.0,0.005,yes,50.5,,-1.0,,L,-1.0
+2026-11-03 20:03,Over-streak fade,401856854,Oklahoma State @ Kansas State,total,under,DraftKings,Under 61.5,61.5,-105,0.0,0.0,0.005,yes,64.5,,-3.0,,L,-1.0
+2026-11-03 20:03,Over-streak fade,401862821,Rice @ North Texas,total,under,DraftKings,Under 64.5,64.5,-110,0.0,0.0,0.005,yes,65.5,,-1.0,,L,-1.0
+2026-11-03 20:03,Over-streak fade,401856852,Colorado @ Arizona State,total,under,DraftKings,Under 48.5,48.5,-108,0.0,0.0,0.005,yes,45.5,,3.0,,W,0.9259259259259259
+2026-11-03 20:03,Over-streak fade,401858287,Louisville @ Georgia Tech,total,under,DraftKings,Under 61.5,61.5,-115,0.0,0.0,0.005,yes,62.5,,-1.0,,W,0.8695652173913043
+2026-11-03 20:03,Over-streak fade,401858291,Miami @ Notre Dame,total,under,DraftKings,Under 57.5,57.5,-110,0.0,0.0,0.005,yes,54.5,,3.0,,W,0.9090909090909091
+2026-11-03 20:03,Over-streak fade,401862823,Air Force @ Army,total,under,DraftKings,Under 45.5,45.5,-110,0.0,0.0,0.005,yes,43.5,,2.0,,W,0.9090909090909091
+2026-11-03 20:03,Over-streak fade,401856856,West Virginia @ Texas Tech,total,under,DraftKings,Under 64.5,64.5,-105,0.0,0.0,0.005,yes,68.5,,-4.0,,L,-1.0
+2026-11-03 20:03,Over-streak fade,401860912,Texas State @ Oregon State,total,under,DraftKings,Under 72.5,72.5,-112,0.0,0.0,0.005,yes,72.5,,0.0,,W,0.8928571428571429
+2026-11-07 16:37,Blowout over,401858290,Merrimack @ Wake Forest,total,over,DraftKings,Over 57.5,57.5,-110,0.0,0.0,0.01,yes,55.5,,-2.0,,W,0.9090909090909091
+2026-11-14 17:05,BET,401869937,Arkansas State @ Coastal Carolina,total,over,FanDuel,Over 52.5,52.5,-105,0.534,0.042,0.0111,yes,53.5,-108.0,1.0,,,
+2026-11-14 17:05,BET,401856882,South Carolina @ Arkansas,total,over,FanDuel,Over 51.5,51.5,-105,0.5329999999999999,0.040999999999999995,0.0108,yes,51.5,-115.0,0.0,,,
+2026-11-14 17:05,BET,401856882,South Carolina @ Arkansas,ml,away,FanDuel,South Carolina ML,,-275,0.757,0.032,0.0222,yes,,-325.0,,0.0154,,
+2026-11-14 17:05,BET,401856887,Ole Miss @ Oklahoma,total,over,FanDuel,Over 48.5,48.5,-110,0.54,0.031,0.0086,yes,49.5,-108.0,1.0,,,
+2026-11-14 17:05,Steady rain under,401864538,San José State @ Air Force,total,under,FanDuel,Under 48.5,48.5,-110,0.0,0.0,0.005,yes,48.5,-112.0,0.0,,,
+2026-11-14 17:05,Steady rain under,401856887,Ole Miss @ Oklahoma,total,under,DraftKings,Under 49.5,49.5,-112,0.0,0.0,0.005,yes,49.5,-112.0,0.0,,,
+2026-11-14 17:05,Over-streak fade,401858293,Florida State @ Pittsburgh,total,under,consensus,Under 52.5,52.5,-110,0.0,0.0,0.005,yes,52.5,,0.0,,,
+2026-11-14 17:05,Over-streak fade,401871060,Florida International @ Delaware,total,under,FanDuel,Under 54.5,54.5,-110,0.0,0.0,0.005,yes,54.5,-112.0,0.0,,,
+2026-11-14 17:05,Over-streak fade,401862828,Tulane @ Rice,total,under,DraftKings,Under 48.5,48.5,-108,0.0,0.0,0.005,yes,48.5,-108.0,0.0,,,
+2026-11-14 17:05,Over-streak fade,401858298,Louisville @ North Carolina,total,under,FanDuel,Under 57.5,57.5,-110,0.0,0.0,0.005,yes,57.5,-112.0,0.0,,,
+2026-11-14 17:05,Over-streak fade,401862826,Florida Atlantic @ Tulsa,total,under,FanDuel,Under 72.5,72.5,-105,0.0,0.0,0.005,yes,72.5,-105.0,0.0,,,
+2026-11-14 17:05,Over-streak fade,401862827,North Texas @ UTSA,total,under,FanDuel,Under 76.5,76.5,-110,0.0,0.0,0.005,yes,76.5,-115.0,0.0,,,
+2026-11-14 17:05,Over-streak fade,401856863,Texas Tech @ Oklahoma State,total,under,FanDuel,Under 74.5,74.5,-115,0.0,0.0,0.005,yes,73.5,-110.0,1.0,,,

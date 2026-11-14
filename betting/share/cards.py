@@ -399,6 +399,8 @@ def oddball_block(S, sport):
     if not os.path.exists(p):
         return []
     o = json.load(open(p))
+    if not S.upcoming(o["game"]):   # hand-written: skip a stale one from an earlier week
+        return []
     return ["<h2>Oddball Matchup of the Week</h2>",
             f"<div class='odd'><div style='display:flex;gap:10px;align-items:center'>{S.logos(o['game'], 32)}"
             f"<div><div class='t'>{E(o['title'])}</div><div class='meta'>{E(o['sub'])}</div></div></div>"
