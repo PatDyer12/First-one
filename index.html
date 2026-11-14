@@ -9145,6 +9145,9 @@ body.tv.pplg .roomtv:not([hidden]) canvas { width: 84px; height: 84px; grid-row:
   }
   // standings: who's best today. Three straight wins (or up 3u+) is on fire, three straight losses (or down 3u+) is ice cold
   let roomPrev = null;
+  // three straight losses today, and again each time the streak grows: the "almost, almost" clip, after the loss has had its moment
+  const coldSeen = new Map(); let coldInit = false;
+  function coldClip(b, p, st) { const go = (n) => { try { const P = CLIPS.find((c) => c.base === "sounds/clips/cold1"); if (!P || !b || !clipsOn()) return; if (clipBusy()) { if (n < 8) setTimeout(() => go(n + 1), 15000); return; } clipClaim = b.id; react(b, "bad", P, `${p.name} \u00b7 ${st} straight losses`); } catch (e) {} }; setTimeout(() => go(0), 9000); }
   function renderRoom() {
     const panel = $("#roomPanel"), box = $("#room");
     if (!S.ready) return;
@@ -9157,6 +9160,7 @@ body.tv.pplg .roomtv:not([hidden]) canvas { width: 84px; height: 84px; grid-row:
     }
     if (!ppl.has("me")) ppl.set("me", { k: "me", name: meName(), col: meCol(), me: true, done: [], open: 0 });
     const rows = [...ppl.values()].filter((p) => p.me || p.open || p.done.length);
+    { const first = !coldInit; coldInit = true; for (const p of rows) { const d = p.done.slice().sort((x, y) => x.settledAt - y.settledAt); let st = 0; for (let i = d.length - 1; i >= 0; i--) { const o = outcome(d[i]); if (o !== "W" && o !== "L") continue; if (o !== "L") break; st++; } const was = coldSeen.get(p.k) || 0; coldSeen.set(p.k, st); if (!first && st >= 3 && st > was) coldClip(d[d.length - 1], p, st); } }
     panel.hidden = rows.length < 2;
     if (rows.length < 2) { box.innerHTML = ""; roomPrev = null; return; }
     for (const p of rows) {
@@ -14938,7 +14942,7 @@ void main(){
   // ---------- sheets ----------
   function openSheet(id) { $(id).hidden = false; }
   // keep every open screen current: when a new version is up, reload it (never mid-form or mid-animation)
-  const BUILD = "20261114025241";
+  const BUILD = "20261114041320";
   function updReady() {
     if (document.getElementById("updReady")) return; const d = document.createElement("div"); d.id = "updReady"; d.textContent = "Update ready · refresh, then TV + Sound on"; document.body.append(d);
   }
@@ -16699,6 +16703,7 @@ void main(){
     clip("clips/l04", "Brutal loss", "down", 16.55),
     clip("clips/l05", "Brewers pain", "down", 24.85),
     clip("clips/l06", "Vols heartbreak", "down", 18.85, { college: true }),
+    clip("clips/cold1", "Ahhh, almost, almost", "cold", 47.9),   // only for a losing streak: three straight (see coldClip)
     clip("clips/l07", "Streamer losses", "down", 30),
     clip("cfb/cfb05", "I don't lose", "down comeback", 28),
     clip("cfb/cfb07", "Brick by brick", "down comeback", 25.8),
@@ -18327,7 +18332,7 @@ void main(){
   }
   const newSong = (l) => { const f = l.filter((c) => !c.song || c.song !== lastSong); return f.length ? f : l; };
   // (a test's way in: put a DJ break or a clip up now)
-  window.__sbClipDbg = (dj) => { const b = [...S.bets.values()].find((x) => x.status === "open") || { id: "dbg", status: "open", pick: "Test", units: 1, odds: -110, who: "" }, P = pickClip(dj ? newSong(CLIPS.filter((c) => c.dj)) : CLIPS.filter((c) => !c.dj && !c.ext)); if (P) react(b, dj ? "mid" : "good", P, dj ? "DJ test" : "Test"); return P ? P.base || true : false; };
+  window.__sbClipDbg = (dj) => { const b = [...S.bets.values()].find((x) => x.status === "open") || { id: "dbg", status: "open", pick: "Test", units: 1, odds: -110, who: "" }, P = typeof dj === "string" ? CLIPS.find((c) => c.base === dj) : pickClip(dj ? newSong(CLIPS.filter((c) => c.dj)) : CLIPS.filter((c) => !c.dj && !c.ext && c.mood !== "cold")); if (P) react(b, typeof dj === "string" ? "bad" : dj ? "mid" : "good", P, dj === true ? "DJ test" : "Test"); return P ? P.base || true : false; };
   const TD_EDIT_MS = 12e3, TD_EDIT_GAP = 4 * 60e3; let tdEditAt = 0;
   function tdEditPick(sel) {
     const g = sel ? gameOf(sel) : null, t = g && (sel.s === "a" || sel.s === "h") ? g[sel.s] : null, nm = normNm(sel && sel.p && sel.p.nm);
