@@ -14962,7 +14962,7 @@ void main(){
   // ---------- sheets ----------
   function openSheet(id) { $(id).hidden = false; }
   // keep every open screen current: when a new version is up, reload it (never mid-form or mid-animation)
-  const BUILD = "20261114231310";
+  const BUILD = "20261114231629";
   function updReady() {
     if (document.getElementById("updReady")) return; const d = document.createElement("div"); d.id = "updReady"; d.textContent = "Update ready · refresh, then TV + Sound on"; document.body.append(d);
   }
@@ -15958,6 +15958,7 @@ void main(){
       render(); renderLines();
       autoReact();
       autoSettle();
+      try { ufcLink(); } catch (e) {}
       if (!$("#addSheet").hidden) renderGames();
     };
     // the first look shows right away; after that every update waits out the TV delay,
@@ -15969,8 +15970,58 @@ void main(){
   // ESPN's feed runs ahead of the broadcast; hold it back this many seconds (set per screen in Settings)
   function tvDelay() { try { const v = localStorage.getItem("sb-delay"); return v == null || !Number.isFinite(Number(v)) ? 30 : Number(v); } catch (e) { return 30; } }
   // every 30s: refresh the scoreboards your open bets live on
+  // ---- UFC bets that came in with no fight: before the card was in the form, or scanned as "other". Matched to the night's
+  // card by the fighters they name and what they say (KO, submission, decision, a round, a rounds total, the distance), then
+  // saved with their fight so they track and grade like the rest. A bet naming both fighters and no outcome is left alone ----
+  const UF_TRIED = new Map();
+  const UF_WORDS = /\b(ufc|mma|ko|tko|knock ?out|submission|decision|round|rounds|rd|distance|itd|stoppage)\b/i;
+  const ufLooseLeg = (b, txt, sel) => !(sel && sel.g != null) && (b.sport === "UFC" || UF_WORDS.test(String(txt || "")) || (!b.sport || b.sport === "Other" || b.sport === "OTHER"));
+  function ufcLoose() {
+    const now = Date.now(), out = [];
+    for (const b of S.bets.values()) {
+      if (b.status !== "open" || (b.placedAt && b.placedAt < now - 4 * 864e5) || (UF_TRIED.get(b.id) || 0) > now - 120e3) continue;
+      if (b.kind === "parlay") { const legs = Array.isArray(b.legs) ? b.legs : [], ls = Array.isArray(b.legSel) ? b.legSel : []; if (legs.some((t, i) => ufLooseLeg(b, t, ls[i]) && (b.sport === "UFC" || UF_WORDS.test(String(t))))) out.push(b); }
+      else if (ufLooseLeg(b, b.pick, b.sel)) out.push(b);
+    }
+    return out;
+  }
+  function ufParse(t) {
+    t = String(t || ""); const tot = /\b(over|under|o|u)\s*(\d+(?:\.5)?)\s*(?:rounds?|rds?)\b/i.exec(t), rd = /(?:\bround|\brd\.?|\br)\s*([1-5])\b/i.exec(t), dist = /\b(?:go(?:es|ing)?|went) (?:the )?distance\b|\bto (?:a )?decision\b/i.test(t);
+    const method = /inside the distance|\bitd\b|by finish|stoppage/i.test(t) ? "itd" : /\bt?ko\b|knock ?out|ko\/tko/i.test(t) ? "ko" : /submission|\bsub\b/i.test(t) ? "sub" : /decision|\bdec\b/i.test(t) && !dist ? "dec" : null;
+    return { method, round: rd ? Number(rd[1]) : null, side: tot ? (/^o/i.test(tot[1]) ? "over" : "under") : null, line: tot ? Number(tot[2]) : null, distance: dist ? (/\b(no|not|won'?t|doesn'?t|does not|will not)\b/i.test(t) ? "no" : "yes") : null };
+  }
+  function ufMatch(txt, b, fights) {
+    const t = String(txt || ""), ufc = b.sport === "UFC" || UF_WORDS.test(t), at = b.placedAt || Date.now(); let best = null;
+    for (const g of fights) {
+      const ha = nameHit(t, g.a), hh = nameHit(t, g.h), sc = Math.max(ha, hh) + (ha && hh ? 2 : 0);
+      if (!sc || (sc < 2 && !ufc) || g.t < at - 36 * 36e5) continue;
+      if (!best || sc > best.sc || (sc === best.sc && Math.abs(g.t - at) < Math.abs(best.g.t - at))) best = { g, sc, ha, hh };
+    }
+    if (!best) return null;
+    const P = ufParse(t), props = !!(P.method || P.round || P.side || P.distance), g = best.g;
+    const side = best.ha && !best.hh ? "a" : best.hh && !best.ha ? "h" : best.ha > best.hh ? "a" : best.hh > best.ha ? "h" : null;
+    if (!side && (!props || P.method && !/^ends|^fight/i.test(t) || P.round)) return null;   // both fighters named and nothing says which: leave it
+    const r = ufcSel(Object.assign({ market: props ? "fight" : "ml", fighter: side ? g[side].nm : null, sport: "UFC" }, P), g, { ta: side === "a" ? 1 : 0, th: side === "h" ? 1 : 0 });
+    if (!r) return null;
+    const out = { g: g.id, m: r.m, s: r.s == null ? null : r.s, l: r.l == null ? null : r.l, sp: "UFC", t: g.t }; if (r.p) out.p = r.p; return out;
+  }
+  function ufcLink() {
+    if (GUEST || !S.canWrite) return;
+    const fights = [...S.games.values()].filter((g) => g.sport === "UFC"); if (!fights.length) return;
+    let n = 0;
+    for (const b of ufcLoose()) {
+      UF_TRIED.set(b.id, Date.now());
+      if (b.kind === "parlay") {
+        const legs = Array.isArray(b.legs) ? b.legs : [], ls = legs.map((_, i) => (Array.isArray(b.legSel) && b.legSel[i]) || null); let k = 0;
+        legs.forEach((t, i) => { if (ls[i] && ls[i].g != null) return; const m = ufMatch(t, b, fights); if (m) { ls[i] = m; k++; } });
+        if (k) { patchBet(b.id, { legSel: ls }); n++; }
+      } else { const m = ufMatch(b.pick, b, fights); if (m) { patchBet(b.id, { sel: m, sport: "UFC", startAt: m.t }); n++; } }
+    }
+    if (n) toast(`Connected ${n} UFC bet${n > 1 ? "s" : ""} to ${fights[0].card || "tonight's card"}`);
+  }
   function liveKeys() {
     const keys = new Set(), now = Date.now();
+    if (ufcLoose().length) { const k = "UFC|" + etDate(bdT(now)); if (now - (boardAt.get(k) || 0) > 60e3) keys.add(k); }
     for (const b of [...S.bets.values(), ...(S.goneBets ? S.goneBets.values() : [])]) {
       if (b.status !== "open") continue;
       const sels = b.kind === "parlay" ? (Array.isArray(b.legSel) ? b.legSel : []) : [b.sel];
