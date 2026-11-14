@@ -41,7 +41,7 @@ MAX_ML_DOG = 400
 TWINS = {"Rest edge": "Rested home team"}
 # totals systems that flipped once the totals market started running low (overs 52-53% since 2024): retired
 RETIRED = {"Over-streak fade": "97-88, +0.1% since 2024", "Primetime under": "76-75, -3.3% since 2024",
-           "Division under (late season)": "57-63, -9.4% since 2024"}
+           "Division under (late season)": "57-63, -9.4% since 2024", "Wind under": "38-41, -8.2% since 2024 (NFL full game)"}
 SHARP_MODEL_MIN_EV = -1.0   # model-only plays: the sharp market has to agree (EV at our price vs Pinnacle fair)
 SHARP_SYSTEM_MIN_WIN = 48.5  # system plays: cut only when the sharp market leans the other way
 SHARP_SYSTEM_MIN_EV = -2.0   # ...or when our price is 2%+ worse than the sharp price (about all a weak system's edge is worth)

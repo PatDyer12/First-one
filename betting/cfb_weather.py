@@ -39,6 +39,8 @@ STATES = {"AL": "Alabama", "AK": "Alaska", "AZ": "Arizona", "AR": "Arkansas", "C
 # more than 0.2 mm of rain
 WET_MM = 0.2
 INDOOR = {"wind": 0.0, "temp": 70.0, "precip": 0.0, "indoor": 1, "wind8": 0.0, "wet8": 0, "source": "indoor"}
+# stadiums the city geocoder puts in the wrong place (team id -> lat, lon)
+FIX_COORDS = {"2005": (38.9967, -104.8436)}   # Air Force: Falcon Stadium, not 50 km east on the plains
 MCOLS = ["date", "hour", "temp", "dwpt", "rhum", "prcp", "snow", "wdir", "wspd", "wpgt", "pres", "tsun", "coco"]
 
 
@@ -93,6 +95,9 @@ def stadiums(team_ids):
         for (tid, s), pick in zip(need, ex.map(lambda x: geocode(x[1]), need)):
             if pick:
                 s["lat"], s["lon"] = pick["latitude"], pick["longitude"]
+    for tid, (lat, lon) in FIX_COORDS.items():
+        if tid in have:
+            have[tid]["lat"], have[tid]["lon"] = lat, lon
     json.dump(have, open(path, "w"), indent=0)
     return have
 
