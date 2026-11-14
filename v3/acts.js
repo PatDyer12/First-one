@@ -45,7 +45,10 @@ export function runAct(kind, o) {
     const cg = new THREE.PlaneGeometry(1.9, 1.0, 14, 4); cg.rotateY(-Math.PI / 2); cg.translate(0, -2.06, 0.98); const cloth = new THREE.Mesh(cg, new THREE.MeshBasicMaterial({ map: tx })), back = new THREE.Mesh(cg, new THREE.MeshBasicMaterial({ map: tx, side: THREE.BackSide })); back.scale.z = -1; back.position.z = 1.96; g.add(cloth, back); const p0 = cg.attributes.position.array.slice();
     M.f.hand.add(g); return { g, wave(t) { const a = cg.attributes.position.array; for (let i = 0; i < a.length; i += 3) { const z = p0[i + 2]; a[i] = Math.sin(z * 3.2 - t * 9) * 0.1 * z; a[i + 1] = p0[i + 1] + Math.sin(z * 2.1 - t * 7) * 0.04 * z; } cg.attributes.position.needsUpdate = true; }, off() { M.f.hand.remove(g); pole.geometry.dispose(); pole.material.dispose(); cg.dispose(); cloth.material.dispose(); back.material.dispose(); tx.dispose(); } }; };
   let flag = null; const figs = []; window.__actOn = true;
-  const tour = (p, l, f, ms) => { let n = 0; const go = () => { try { if (st !== SBW().st()) return; if (!SBW().tour(p, l, f, ms / KT) && n++ < 14) setTimeout(go, 140); } catch (e) {} }; go(); };
+  // a camera low enough to be in the seats is pulled in along its own line of sight until it's over the field
+  const inField = (p, l) => { let [x, y, z] = p; const lim = (v, lv, m) => { if (y >= 26 || Math.abs(v) <= m) return 1; return Math.max(0, (m - Math.abs(lv)) / Math.max(1e-3, Math.abs(v) - Math.abs(lv))); };
+    const k = Math.min(lim(z, l[2], 31), lim(x, l[0], 64)); if (k < 1) { x = l[0] + (x - l[0]) * k; y = l[1] + (y - l[1]) * k; z = l[2] + (z - l[2]) * k; } return [x, Math.max(1.2, y), z]; };
+  const tour = (p0, l, f, ms) => { const p = inField(p0, l); let n = 0; const go = () => { try { if (st !== SBW().st()) return; if (!SBW().tour(p, l, f, ms / KT, true) && n++ < 14) setTimeout(go, 140); } catch (e) {} }; go(); };
 
   if (kind === "place") {
     dur = 7000;
@@ -72,7 +75,7 @@ export function runAct(kind, o) {
     tour(M ? [-15, 6.5, 27] : [-34, 30, 56], M ? [0, 5.5, 5] : [0, 6, 0], 46, 2400);
   } else if (kind === "win" && M && !o.plain && window.__v3compose) {
     const figs2 = figs, K = { THREE, st, o, top, add, fig: (f) => { scene.add(f.g); figs2.push(f); return f; }, basic, addv, C, spark, burst, ringOn, beamUp, ticket, sign, steps, cam: (at, p, l, f, ms) => setTimeout(() => tour(p, l, f, ms), Math.max(0, at) * 1000 / KT), M, mg, mPose, mAt, flagOn, GOLD, cssCol, gt };
-    const made = window.__v3compose(K); dur = made.dur; flag = made.flag; window.__lastShow = made.plan;
+    const made = window.__v3compose(K); dur = made.dur; flag = made.flag; window.__lastShow = Object.assign({}, made.plan, { at: Date.now() });
   } else if (kind === "win") {
     const tier = o.tier || 1; dur = tier === 3 ? 13500 : tier === 2 ? 11000 : 9200; const D = dur / 1000, J0 = 3.3; flag = flagOn(o.who, o.col); const m0 = [-44, 5];
     // the flyover: three jets, wingtip to wingtip, trailing the colours
@@ -193,6 +196,6 @@ export function runAct(kind, o) {
       for (const m of own) safe(() => { scene.remove(m); m.traverse && m.traverse((x) => { if (x.geometry) x.geometry.dispose(); if (x.userData && x.userData.tx) x.userData.tx.dispose(); for (const q of mats(x)) q.dispose(); }); });
       safe(() => gt.dispose()); safe(() => { if (flag) flag.off(); });
       for (const fg of figs) safe(() => { scene.remove(fg.g); fg.g.traverse((x) => { for (const q of mats(x)) if (q.map && q.map.isTexture && q !== x.__keep) { q.map.dispose(); q.dispose(); } }); if (fg.dispose) fg.dispose(); else if (fg.sk) fg.sk.dispose(); });
-      window.__actOn = false; if (M) safe(() => { M.busy = false; mg.rotation.x = 0; }); safe(() => SBW().home && SBW().home(2600)); done(true); }, dur / KT);
+      window.__actOn = false; if (M) safe(() => { M.busy = false; mg.rotation.x = 0; }); safe(() => SBW().home && SBW().home(2600, true)); done(true); }, dur / KT);
   });
 }

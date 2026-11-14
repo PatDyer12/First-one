@@ -7,12 +7,14 @@ const cl = (v, a = 0, b = 1) => Math.max(a, Math.min(b, v)), lerp = (a, b, t) =>
 const hsh = (s) => { let h = 2166136261; for (let i = 0; i < s.length; i++) { h ^= s.charCodeAt(i); h = Math.imul(h, 16777619); } return h >>> 0; };
 const rng = (seed) => () => { seed = (seed + 0x6d2b79f5) | 0; let t = Math.imul(seed ^ (seed >>> 15), 1 | seed); t = (t + Math.imul(t ^ (t >>> 7), 61 | t)) ^ t; return ((t ^ (t >>> 14)) >>> 0) / 4294967296; };
 const last = {};   // what the last show used, so the next one is different
+// the stories, the teams and the finale (scenes.js), at the same version as this file; without them a show is just shorter
+let S = null; try { S = await import("./scenes.js" + new URL(import.meta.url).search); } catch (e) { console.warn("v3 scenes", e); }
 
 export const PARTS = { open: ["flagrun", "skydiver", "cannon", "truck", "liftoff", "deepball"], reveal: ["unroll", "billboard", "skybanner"], ground: ["danceline", "bath", "crowd"], air: ["jets", "coins", "confetti", "lasers", "fireworks"], close: ["stand", "turf", "lift"], dance: ["dance", "skip", "robot", "wave", "pump", "cheer"] };
 
 // K: the act's own kit (see acts.js). Returns { dur (ms), flag }
 export function composeWin(K) {
-  const { THREE, st, o, top, add, fig, basic, addv, C, spark, burst, ringOn, beamUp, ticket, sign, steps, cam, M, mg, mPose, mAt, flagOn, GOLD, cssCol, gt } = K, F = M ? M.F : null, kits = M ? M.kits : null;
+  const { THREE, st, o, top, add, fig, basic, addv, C, spark, burst, ringOn, beamUp, ticket, sign, steps, cam, M, mg, mPose: mPoseK, mAt, flagOn, GOLD, cssCol, gt } = K, F = M ? M.F : null, kits = M ? M.kits : null;
   const R = rng(hsh(String(o.id || o.big) + ":" + new Date().toDateString() + ":" + (o.n || 0))), pick = (key, list) => { const forced = o.force && o.force[key]; if (forced && list.includes(forced)) return forced; let v = list[Math.floor(R() * list.length)]; if (list.length > 1 && v === last[key]) v = list[(list.indexOf(v) + 1) % list.length]; last[key] = v; return v; };
   const type = o.type || "ml", long = (o.oddsN || 0) >= 250 && type !== "parlay", short = !!o.short, col = o.col, WHITE = [1, 1, 1], ICE = [0.55, 0.85, 1], GREEN = [0.2, 0.9, 0.55];
   const gold = () => (M ? new THREE.MeshPhongMaterial({ color: C([1, 0.72, 0.16]), shininess: 120, specular: C([1, 0.95, 0.7]), emissive: C([0.35, 0.22, 0.02]) }) : basic([1, 0.78, 0.2])), lit = (c, sh = 30) => (M ? new THREE.MeshPhongMaterial({ color: C(c), shininess: sh }) : basic(c));
@@ -22,8 +24,23 @@ export function composeWin(K) {
   const person = (opt) => { const f = F.person(opt); fig(f); f.g.visible = false; return f; };
   const fwk = (p, c, n = 150) => { burst(p, c, n, 34); st.flash = Math.max(st.flash, 0.55); st.fc = c; try { window.SBW.burst && window.SBW.burst(p, c, 110); } catch (e) {} };
   const hide = (m, u, len, fadeIn = 0.3, fadeOut = 0.4) => cl(u / fadeIn) * cl((len - u) / fadeOut);
+  const fit = (m, ref = 52) => { if (!st.cam) return 1; const d = st.cam.position.distanceTo(m.position); return cl(d / ref, 0.25, 1.15); };
+  const word = (txt, t0, len, y = 17, z = -3, w = 60, c = cssCol) => { const m = add(sign(txt, w, w * 0.25, c, true)); m.position.set(0, -30, z); m.visible = false; part(t0, len, (u) => { m.visible = true; m.position.y = lerp(-14, y, back(u / 0.6)); m.material.opacity = hide(m, u, len); const b = (1 + Math.sin(cl(u / 0.8) * Math.PI) * 0.1) * fit(m, 62); m.scale.set(b, b, 1); if (st.cam) m.lookAt(st.cam.position.x, y, st.cam.position.z); }, () => { m.visible = false; }); return m; };
   // the times: arrive, show, the bet's own scene, the party, the payout
-  const T = short ? { o: 0, r: 3.3, s: -1, p: -1, c: 6.4, end: 10 } : { o: 0, r: 3.5, s: 7.2, p: 12.4, c: 17.4, end: 20.8 }, LO = 3.6, LR = short ? 3.1 : 3.7, LS = 5.2, LP = 5.0, LC = T.end - T.c - 0.4;
+  // the times. Arrive and show; then, for a bet with a story, the story; the scene for its kind; for a side with a team
+  // behind it, the team; the party; for the biggest, the finale; the payout. A small hit runs about twenty seconds, a
+  // whale nearly forty; with others waiting, ten
+  const tier = Math.max(1, Math.min(4, o.tier || 1)), keys = o.keys || [], fs = o.force || {}, storyK = short || !S ? "" : S.storyOf(keys, o);
+  const teamOn = !short && !!S && !!o.team && (tier >= 2 || !!fs.team), finOn = !short && !!S && (tier >= 4 || !!fs.finale);
+  const LO = 3.6, LR = short ? 3.1 : 3.7, LS = 5.2, LN = 5.6, LT = 5.4, LP = 5.0, LF = 6.2, T = { o: 0, r: short ? 3.3 : 3.5 };
+  { let at = T.r + LR; if (storyK) { T.n = at; at += LN; } if (!short) { T.s = at; at += LS; } else T.s = -1; if (teamOn) { T.t = at; at += LT; } if (!short) { T.p = at; at += LP; } else T.p = -1; if (finOn) { T.f = at; at += LF; } T.c = short ? 6.4 : at; T.end = short ? 10 : T.c + 3.4; }
+  const LC = T.end - T.c - 0.4, banOut = short ? T.end - 0.7 : T.r + LR + 0.9;
+  // the mascot keeps moving between the parts that use it
+  let mT = -1, nowT = 0; const mPose = (a, t, k) => { mT = nowT; if (mPoseK) mPoseK(a, t, k); }; steps.unshift((t) => { nowT = t; });
+  // (a test can ask for one scene on its own: force.only = story | team | finale | scoreboard)
+  if (fs.only && S) { let flag2 = null; const H0 = { part: (t0, len, fn, end) => { let done = false; steps.push((t, dt) => { const u = t - t0; if (u >= 0 && u < len) fn(u, dt, u / len); else if (u >= len && !done) { done = true; if (end) end(); } }); }, word, cam, R, everyone: (v) => { st.cheer = Math.max(st.cheer || 0, v); }, fwk, hide, gold, lit, fit }, K0 = Object.assign({}, K, { mPose });
+    const L0 = fs.only === "team" ? LT : fs.only === "finale" ? LF : fs.only === "scoreboard" ? LS : LN, ok = fs.only === "team" ? S.teamScene(0.3, L0, K0, H0) : fs.only === "finale" ? S.finale(0.3, L0, K0, H0) : fs.only === "scoreboard" ? S.scoreboard(0.3, L0, K0, H0) : S.story(fs.story || storyK, 0.3, L0, K0, H0);
+    return { dur: (L0 + 0.9) * 1000, flag: flag2, plan: { only: fs.only, story: fs.story || storyK, ok: !!ok, dur: L0 + 0.9 } }; }
   let flag = null; const everyone = (v) => { st.cheer = Math.max(st.cheer || 0, v); };
   // the ticket in the hand: small, upright, carried in by whatever brings it
   const tk = add(ticket(13, 4.9, false)); tk.visible = false; const tkAt = (x, y, z, ry = 0) => { tk.visible = true; tk.position.set(x, y, z); tk.rotation.set(0, ry, 0); };
@@ -75,18 +92,19 @@ export function composeWin(K) {
   const ban = add(ticket(78, 29.25, true, { bg: "#0f3b27", edge: "#ffd66b", subCol: "#bff5d8" })); ban.rotation.x = -Math.PI / 2; ban.position.set(0, 0.4, 0); ban.scale.set(0.001, 1, 1); ban.visible = false;
   const bill = add(ticket(46, 17.25, true, { bg: "#0f3b27", edge: "#ffd66b", subCol: "#bff5d8" })); bill.position.set(0, -20, -9); bill.visible = false; const frame = add(new THREE.Mesh(new THREE.PlaneGeometry(49, 20), addv(GOLD, 0))); frame.position.set(0, -20, -9.2);
   const lightUp = (noBeam) => { ringOn(GOLD, 90); ringOn(col, 60); if (!noBeam) beamUp(GOLD, 0, 0, 3.2, 190); burst([0, 3, 0], GOLD, 300, 60); st.flash = 0.9; st.fc = GOLD; st.wave = 1.3; st.burst = 0.6; };
-  if (reveal === "unroll") { let litD = false; ban.visible = true; steps.push((t) => { const u = t - T.r, un = ease(u / 1.0); ban.scale.set(Math.max(0.001, un), 1, 1); ban.material.opacity = cl((T.end - 0.7 - t) * 2); ban.position.y = 0.4 + Math.sin(t * 2.2) * 0.1; if (un >= 1 && !litD) { litD = true; lightUp(); } }); cam(T.r - 0.2, [0, 104, 34], [0, 0, 0], 44, 2200); }
-  else if (reveal === "billboard") { let litD = false; bill.visible = true; steps.push((t) => { const u = t - T.r, y = lerp(-20, 11.5, back(u / 1.1)) - (1 - cl((T.end - 0.6 - t) * 2)) * 40; bill.position.y = y; frame.position.y = y; frame.material.opacity = (0.1 + 0.06 * Math.sin(t * 5)) * cl(u); bill.material.opacity = 1; if (u > 1.1 && !litD) { litD = true; lightUp(true); for (const x of [-26, 26]) beamUp(col, x, -9, 0.5, 120); } }); cam(T.r - 0.2, [0, 8, 46], [0, 10.5, -9], 46, 1500); }
+  if (reveal === "unroll") { let litD = false; ban.visible = true; steps.push((t) => { const u = t - T.r, un = ease(u / 1.0); ban.scale.set(Math.max(0.001, un), 1, 1); ban.material.opacity = cl((banOut - t) * 2); ban.visible = t < banOut + 0.2; ban.position.y = 0.4 + Math.sin(t * 2.2) * 0.1; if (un >= 1 && !litD) { litD = true; lightUp(); } }); cam(T.r - 0.2, [0, 104, 34], [0, 0, 0], 44, 2200); }
+  else if (reveal === "billboard") { let litD = false; bill.visible = true; steps.push((t) => { const u = t - T.r, y = lerp(-20, 11.5, back(u / 1.1)) - (1 - cl((banOut - t) * 2)) * 40; bill.visible = frame.visible = t < banOut + 0.6; bill.position.y = y; frame.position.y = y; frame.material.opacity = (0.1 + 0.06 * Math.sin(t * 5)) * cl(u); bill.material.opacity = 1; if (u > 1.1 && !litD) { litD = true; lightUp(true); for (const x of [-26, 26]) beamUp(col, x, -9, 0.5, 120); } }); cam(T.r - 0.2, [0, 8, 46], [0, 10.5, -9], 46, 1500); }
   else { const pl = add(new THREE.Group()), fz = new THREE.Mesh(new THREE.ConeGeometry(1.5, 12, 10), lit([0.9, 0.9, 0.93], 70)); fz.rotation.z = -Math.PI / 2; pl.add(fz); const wg = new THREE.Mesh(new THREE.BoxGeometry(3, 0.3, 16), lit(col)); pl.add(wg); const tl = new THREE.Mesh(new THREE.BoxGeometry(2, 3.4, 0.3), lit(col)); tl.position.set(-5, 1.6, 0); pl.add(tl); const pr = new THREE.Mesh(new THREE.CylinderGeometry(2.3, 2.3, 0.1, 12), addv(WHITE, 0.3)); pr.rotation.z = Math.PI / 2; pr.position.x = 6.1; pl.add(pr);
     const tow = add(ticket(56, 21, true, { bg: "#0f3b27", edge: "#ffd66b", subCol: "#bff5d8" })), rope = add(new THREE.Mesh(new THREE.BoxGeometry(14, 0.12, 0.12), basic(WHITE))); let litD = false; ban.visible = true;
     steps.push((t) => { const u = t - T.r, k = u / 3.5, x = lerp(-175, 215, k), y = top + 6 + Math.sin(u * 1.3) * 1.5, on = k > 0 && k < 1; pl.visible = tow.visible = rope.visible = on; pl.position.set(x, y, -12); tow.position.set(x - 46, y - 1 + Math.sin(u * 3) * 0.8, -12); tow.rotation.y = Math.sin(u * 2.4) * 0.05; rope.position.set(x - 12, y - 0.5, -12);
-      const un = ease((u - 2.3) / 1.0); ban.scale.set(Math.max(0.001, un), 1, 1); ban.material.opacity = cl((T.end - 0.7 - t) * 2); if (un >= 1 && !litD) { litD = true; lightUp(); } });
+      const un = ease((u - 2.3) / 1.0); ban.scale.set(Math.max(0.001, un), 1, 1); ban.material.opacity = cl((banOut + 1.4 - t) * 2); ban.visible = t < banOut + 1.6; if (un >= 1 && !litD) { litD = true; lightUp(); } });
     cam(T.r - 0.2, [0, 16, 74], [0, top + 2, -12], 50, 1400); cam(T.r + 2.2, [0, 104, 34], [0, 0, 0], 44, 1300); }
 
   // ================= 3. the scene that belongs to this kind of bet =================
-  const fit = (m, ref = 52) => { if (!st.cam) return 1; const d = st.cam.position.distanceTo(m.position); return cl(d / ref, 0.25, 1.15); };
-  const word = (txt, t0, len, y = 17, z = -3, w = 60, c = cssCol) => { const m = add(sign(txt, w, w * 0.25, c, true)); m.position.set(0, -30, z); m.visible = false; part(t0, len, (u) => { m.visible = true; m.position.y = lerp(-14, y, back(u / 0.6)); m.material.opacity = hide(m, u, len); const b = (1 + Math.sin(cl(u / 0.8) * Math.PI) * 0.1) * fit(m, 62); m.scale.set(b, b, 1); if (st.cam) m.lookAt(st.cam.position.x, y, st.cam.position.z); }, () => { m.visible = false; }); return m; };
-  const sig = short ? "" : long && R() < 0.75 ? "meteor" : { ml: "trophy", spread: "measure", over: "pileon", under: "lockdown", prop: "theman", parlay: "ladder" }[type] || "trophy";
+  let sig = short ? "" : long && R() < 0.75 ? "meteor" : { ml: "trophy", spread: "measure", over: "pileon", under: "lockdown", prop: "theman", parlay: "ladder" }[type] || "trophy";
+  if (!short && S && o.game && ["spread", "over", "under"].includes(type) && (fs.sig === "scoreboard" || (!fs.sig && R() < 0.45))) sig = "scoreboard";
+  const H = { part, word, cam, R, everyone, fwk, hide, gold, lit, fit }, K2 = Object.assign({}, K, { mPose });
+  if (sig === "scoreboard") S.scoreboard(T.s, LS, K2, H);
   if (sig === "trophy") { const g = add(new THREE.Group()), pts = [[0, 0], [2.2, 0], [2.3, 0.5], [0.7, 1], [0.5, 3.4], [1.1, 4.2], [2.6, 5.4], [3.1, 7.6], [3.2, 8.6], [2.9, 8.6], [2.6, 7.4], [0, 6]].map(([x, y]) => new THREE.Vector2(x, y)), cup = new THREE.Mesh(new THREE.LatheGeometry(pts, 28), gold()); cup.material.side = THREE.DoubleSide; cup.position.y = 3; g.add(cup);
     const ped = new THREE.Mesh(new THREE.CylinderGeometry(3, 3.6, 3, 24), lit([0.08, 0.08, 0.1], 90)); ped.position.y = 1.5; g.add(ped); const plq = new THREE.Mesh(new THREE.CylinderGeometry(3.05, 3.05, 0.7, 24), lit(col)); plq.position.y = 2.2; g.add(plq);
     for (const sx of [-1, 1]) { const h = new THREE.Mesh(new THREE.TorusGeometry(1.5, 0.22, 8, 16, Math.PI), gold()); h.position.set(sx * 3, 9.6, 0); h.rotation.z = sx * -Math.PI / 2; g.add(h); } g.position.set(0, -14, 8); g.visible = false;
@@ -131,6 +149,12 @@ export function composeWin(K) {
       if (u > all && !fin) { fin = true; ringOn(GOLD, 90); burst([0, 13, -2], GOLD, 400, 60); st.flash = 1.3; st.fc = GOLD; st.wave = 1.4; st.burst = 0.7; } if (u > all) everyone(1); }, () => { for (const m of cards) m.visible = false; for (const a of arcs) a.visible = false; });
     word(`${n} for ${n}`, T.s + 0.5 + n * gap, LS - 0.7 - n * gap, 22, -3, 44, "#ffd66b"); cam(T.s - 0.2, [0, 13, 60], [0, 9, -2], 50, 1500); }
 
+  // ================= the story, the team, the finale (scenes.js) =================
+  if (storyK) S.story(storyK, T.n, LN, K2, H);
+  if (teamOn) S.teamScene(T.t, LT, K2, H);
+  if (finOn) S.finale(T.f, LF, K2, H);
+  steps.push((t) => { if (M && mT !== t && t < T.end - 0.1) mPoseK("cheer", t); });
+
   // ================= 4. the party =================
   if (!short) {
     const ground = pick("ground", PARTS.ground.filter((k) => (M ? true : k === "crowd"))), air = pick("air", PARTS.air.filter((k) => !((st.V.dome || st.V.roof) && k === "jets")));
@@ -169,5 +193,5 @@ export function composeWin(K) {
       if (lift) { mAt(0, 10, 0); mPose("catch", u); tr.visible = true; tr.position.set(0, 6.3 + Math.abs(Math.sin(u * 5)) * 0.4, 10.3); tr.rotation.y = u * 2; }
       if (u > 0.6 && !lt) { lt = true; ringOn(GOLD, 90); burst([0, y, 3], GOLD, 420, 56); st.flash = 1.1; st.fc = GOLD; st.wave = 1.4; st.burst = 0.8; } if (u > 0.6 && R() < 0.25) fwk([(R() - 0.5) * 160, top + 15 + R() * 30, (R() - 0.5) * 90], [GOLD, col, WHITE][Math.floor(R() * 3)], 130); everyone(1); }, () => { m.visible = nm.visible = false; if (tr) tr.visible = false; });
     cam(T.c - 0.3, lift ? [9, 5, 34] : [0, 9, 52], lift ? [0, 9, 8] : [0, 10, 2], lift ? 50 : 46, 1400); }
-  return { dur: T.end * 1000, flag, plan: { opener, reveal, sig, close } };
+  return { dur: T.end * 1000, flag, plan: { opener, reveal, sig, close, story: storyK, team: teamOn ? o.team.ab : "", finale: finOn, tier, dur: T.end } };
 }
