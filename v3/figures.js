@@ -96,6 +96,7 @@ export function makeFigures(THREE) {
       else a = { lean: 0, roll: Math.sin(t * 3.1) * 0.08, th: [0.05, -0.05], kn: [0.04, 0.04], sh: [0.15, 0.15], el: [-1.5, -1.5], shz: [0.75, 0.75] }; }
     else if (act === "hype") { const c = cheerA(t, s); a = c; hop = c.hop; }
     else if (act === "coach") { const pt = Math.sin(t * 0.37 + s) > 0.82; a = pt ? { lean: 0.12, head: -0.1, th: [-0.1, 0.12], kn: [0.15, 0.1], sh: [-1.45, 0.1], el: [-0.1, -0.3], shz: [0.1, 0.1], look: 0.3 } : { lean: 0.04, look: Math.sin(t * 0.5 + s) * 0.4, th: [0.04, -0.04], kn: [0.04, 0.04], sh: [-0.55, -0.55], el: [-1.75, -1.75], shz: [-0.35, -0.35] }; }
+    else if (act === "mad") a = { lean: 0.16, head: 0.3, look: Math.sin(t * 2.6 + s) * 0.4, th: [-0.08, 0.05], kn: [0.15, 0.1], sh: [-2.5, -2.5], el: [-2.0, -2.0], shz: [-0.35, -0.35] };
     else if (act === "cam") a = { lean: 0.05, twist: Math.sin(t * 0.3 + s) * 0.25, th: [0.1, -0.12], kn: [0.08, 0.1], sh: [-0.4, -1.25], el: [-1.4, -1.75], shz: [0.1, 0.35] };
     else if (act === "kneel") a = { lean: 0.25, head: -0.2, th: [-1.5, 0.1], kn: [1.55, 1.55], sh: [-1.1, -1.2], el: [-1.5, -1.5], shz: [-0.1, 0.1], drop: 0.02 };
     else a = { lean: 0.03 + Math.sin(t * 1.6 + s) * 0.02, look: Math.sin(t * 0.45 + s) * 0.3, th: [0.03, -0.03], kn: [0.04, 0.04], sh: [0.05, -0.05], el: [-0.2, -0.2] };

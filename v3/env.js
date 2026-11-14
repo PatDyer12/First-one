@@ -61,14 +61,14 @@ export function makeEnv(st, F, o) {
 
   return {
     // S: { x, dir, has, togo, dn } from the field; play: is a play on; cheerK: how loud the home side is (0..1)
-    update(t, S, play, cheerK) {
+    update(t, S, play, cheerK, cheerA = 0) {
       const dt = last == null ? 0.016 : Math.min(0.1, t - last); last = t; hype = lerp(hype, cheerK > 0.2 ? 1 : 0, 0.06);
       // chains: the box on the ball, the sticks from the series' start to the line to gain
       if (S.has) { const ltg = S.togo != null ? cl(S.x + S.dir * S.togo, -50, 50) : S.x + S.dir * 10; chains.b = lerp(chains.b, ltg, 0.08); chains.a = lerp(chains.a, cl(ltg - S.dir * 10, -50, 50), 0.08); chains.x = lerp(chains.x, S.x, 0.1); setDown(S.dn || 1); }
       stA.position.set(chains.a, 0, CZ); stB.position.set(chains.b, 0, CZ); box.position.set(chains.x, 0, CZ - 0.25); chain.position.x = (chains.a + chains.b) / 2; chain.scale.x = Math.max(0.1, Math.abs(chains.b - chains.a));
       for (const g of [stA, stB, box, chain]) g.visible = !!S.has; [chains.a, chains.b, chains.x].forEach((x, i) => { const f = crew[i]; f.g.visible = !!S.has; f.g.position.x = x + (i === 2 ? 0.6 : 0); F.posePerson(f, "stand", t); });
       // coaches drift with the ball; arms up when their side has something to shout about
-      for (const f of coaches) { const tx = cl((S.has ? S.x : 0) + f.sd * 2, -22, 22); f.g.position.x = lerp(f.g.position.x, tx, 0.02); F.posePerson(f, f.sd < 0 && cheerK > 0.4 ? "hype" : "coach", t); }
+      for (const f of coaches) { const tx = cl((S.has ? S.x : 0) + f.sd * 2, -22, 22); f.g.position.x = lerp(f.g.position.x, tx, 0.02); const mine = f.sd < 0 ? cheerK : cheerA, theirs = f.sd < 0 ? cheerA : cheerK; F.posePerson(f, mine > 0.4 ? "hype" : theirs > 0.4 ? "mad" : "coach", t); }
       // cheerleaders: the routine, or all up on a score
       for (const f of cheer) F.posePerson(f, hype > 0.5 ? "hype" : "cheer", t - f.lag);
       if (blimp) { const a = t * 0.035; blimp.g.position.set(Math.cos(a) * blimp.r, top + 62 + Math.sin(t * 0.3) * 1.5, Math.sin(a) * blimp.r * 0.8); blimp.g.rotation.y = -a - Math.PI / 2; blimp.bl.visible = (t * 1.2) % 1 < 0.35; }

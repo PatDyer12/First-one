@@ -58,10 +58,12 @@ function cardOf(b) {
 }
 const when = (t) => { const d = new Date(t), n = new Date(); const tm = d.toLocaleTimeString([], { hour: "numeric", minute: "2-digit" }); return d.toDateString() === n.toDateString() ? tm : d.toLocaleDateString([], { weekday: "short" }) + " " + tm; };
 const done = (g) => { try { return demo ? demo.done(g) : sb.gameDone(g); } catch (e) { return 0; } };
+const prevSt = new Map(); let legAt = 0;
 function model() {
   const cards = X.bets().map((b) => { try { return cardOf(b); } catch (e) { return null; } }).filter(Boolean);
   const lanes = new Map(), pars = [], loose = [];
   for (const c of cards) { if (c.par) pars.push(c); else if (c.g) { if (!lanes.has(c.g.id)) lanes.set(c.g.id, { k: "g" + c.g.id, g: c.g, cards: [] }); lanes.get(c.g.id).cards.push(c); } else loose.push(c); }
+  for (const l of lanes.values()) { const g = l.g, was = prevSt.get(g.id); prevSt.set(g.id, g.st); if (was && was !== g.st && !first) { if (was === "pre" && g.st === "in") setTimeout(() => V.event(g, { ev: "kick", side: "h" }), 0); else if (was === "in" && g.st === "post") setTimeout(() => V.event(g, { ev: "final", side: (g.a.sc || 0) > (g.h.sc || 0) ? "a" : "h" }), 0); } }
   const rank = (g) => (g.st === "in" ? 0 : g.st === "pre" ? 1 : 2);
   const L = [...lanes.values()].sort((x, y) => rank(x.g) - rank(y.g) || (x.g.st === "in" ? Math.max(...y.cards.map((c) => c.heat)) - Math.max(...x.cards.map((c) => c.heat)) : 0) || x.g.t - y.g.t || (x.g.id < y.g.id ? -1 : 1));
   for (const l of L) l.cards.sort((x, y) => y.units * 1 - x.units * 1 || (x.id < y.id ? -1 : 1));
@@ -285,10 +287,10 @@ function scoreAct(g, side, pts, col) {
 }
 V.event = (g, e) => { if (!g || !e) return; const tcol = (s) => hex((g[s] || {}).col, GOLD), fb = isFb(g);
   if (e.ev === "td" || e.ev === "fg" || e.ev === "safety") { scoreAct(g, e.side, e.ev === "td" ? 7 : e.ev === "fg" ? 3 : 2, tcol(e.side)); return; }
-  const W = { turnover: ["Turnover", e.side ? g[e.side].ab + " ball" : ""], redzone: ["Red zone", e.side ? g[e.side].ab + " knocking" : ""], crunch: ["Crunch time", `${g.a.ab} ${g.a.sc} – ${g.h.sc} ${g.h.ab}`], half: ["Halftime", `${g.a.ab} ${g.a.sc} – ${g.h.sc} ${g.h.ab}`] }[e.ev]; if (!W) return;
+  const W = { turnover: ["Turnover", e.side ? g[e.side].ab + " ball" : ""], redzone: ["Red zone", e.side ? g[e.side].ab + " knocking" : ""], crunch: ["Crunch time", `${g.a.ab} ${g.a.sc} – ${g.h.sc} ${g.h.ab}`], half: ["Halftime", `${g.a.ab} ${g.a.sc} – ${g.h.sc} ${g.h.ab}`], kick: ["Kickoff", `${g.a.ab} at ${g.h.ab}`], final: ["Final", `${g.a.ab} ${g.a.sc} \u2013 ${g.h.sc} ${g.h.ab}`] }[e.ev]; if (!W) return;
   const key = e.ev + ":" + g.id, last = evSeen.get(key) || 0; if (Date.now() - last < 45000) return; evSeen.set(key, Date.now());
   const col = e.ev === "turnover" ? R : e.ev === "redzone" ? [1, 0.25, 0.2] : e.side ? tcol(e.side) : GOLD; callout(col, W[0], W[1] + (W[1] && g.a ? ` · ${g.a.ab} @ ${g.h.ab}` : ""));
-  if (fb && stadiumGame(g)) enqueue(async () => { if (!inStadium()) return; const sd = e.side === "a" ? 1 : e.side === "h" ? -1 : 1, x = g.sit && typeof g.sit.yl === "number" ? 50 - g.sit.yl : 0; const done = runAct("score", { call: e.ev, col, big: W[0], sub: W[1], side: sd, home: e.side === "h", x, notes: notesFor(g) }); stageOut(true); await wait(4300); stageOut(false); await done; });
+  if (fb && stadiumGame(g)) enqueue(async () => { if (!inStadium()) return; const sd = e.side === "a" ? 1 : e.side === "h" ? -1 : 1, x = g.sit && typeof g.sit.yl === "number" ? 50 - g.sit.yl : 0; const done = runAct("score", { call: e.ev, col, big: W[0], sub: W[1], side: sd, home: e.side === "h", x, band: g.h.ab, notes: e.ev === "kick" ? [] : notesFor(g) }); stageOut(true); await wait(e.ev === "half" ? 8600 : e.ev === "final" ? 6400 : 4300); stageOut(false); await done; });
 };
 function primeScore(g, side, col, pts) {
   scoreAct(g, side, pts, col);
@@ -541,7 +543,8 @@ V.fly = async (rebuild) => { const to = featNow(), cv = document.getElementById(
 // what the engine calls
 V.settle = (b, o, n) => { if (o === "W") enqueue(() => showWin(b, n)); else if (o === "L") enqueue(() => showLoss(b, n)); else note(b, b.status === "cashout" ? "cashed out" : "pushed"); };
 V.place = (b) => { note(b, "is on"); if (inStadium()) enqueue(async () => { const done = runAct("place", actOf(b)); stageOut(true); await wait(6300); stageOut(false); await done; }); setTimeout(() => { const el = cardEls.get(b.id); if (el && el.offsetParent) { const [x, y] = mid(el); ripple(x, y, hex(X.col(b), A), 0.9); sparks(x, y, hex(X.col(b), A), 60, 0.8); ring(x, y, hex(X.col(b), A), 2.2, 0.8); } }, 700); };
-V.leg = (b, i, st) => { setTimeout(() => { const el = cardEls.get(b.id), lg = el && el.querySelector(`.v3-leg[data-i="${i}"]`); if (!lg || !el.offsetParent) return; lg.classList.add("pop"); setTimeout(() => lg.classList.remove("pop"), 850);
+V.leg = (b, i, st) => { if (st === "hit" && inStadium() && Date.now() - legAt > 15000) { legAt = Date.now(); enqueue(async () => { if (!inStadium()) return; const L = X.legsOf(b), hit = L.filter((l) => l.st === "hit").length; if (hit >= L.length) return; const done = runAct("swing", { col: hex(X.col(b), GOLD), who: X.name(b), big: String((L[i] && L[i].t) || "Leg " + (i + 1)), odds: "", sub: `\u2713 Leg ${hit} of ${L.length} in`, good: true }); stageOut(true); await wait(3500); stageOut(false); await done; }); }
+  setTimeout(() => { const el = cardEls.get(b.id), lg = el && el.querySelector(`.v3-leg[data-i="${i}"]`); if (!lg || !el.offsetParent) return; lg.classList.add("pop"); setTimeout(() => lg.classList.remove("pop"), 850);
   const [x, y] = mid(lg.querySelector(".pip")), c = st === "miss" ? R : G; sparks(x, y, c, 70, 0.8, { white: st !== "miss" }); ring(x, y, c, 1.6, 0.7); ripple(x, y, c, 0.7); turned(el, st !== "miss"); }, 600); };
 
 // ---------- running ----------
