@@ -117,7 +117,23 @@ body.v3on > #jumbo { z-index: 9300 !important; }`; document.head.append(out);
   glInit(gl); fxInit(fx);
 }
 const isFb = (g) => g.sport === "NFL" || g.sport === "CFB";
-const playTxt = (g) => { if (g.st === "pre") return [when(g.t), g.net || g.sport].filter(Boolean).join(" · "); if (g.st === "post") return "Final"; const si = g.sit || {}, lp = si.lp && si.lp.text ? si.lp.text : ""; return [si.dd, lp].filter(Boolean).join(" · ") || g.sport; };
+// the play as a person would say it: no formation tags, no "reported in as eligible", no tacklers, a flag named, a
+// touchdown or a kick without the snapper and holder; timeouts and the end of a quarter keep the play before them
+const cleanText = (ty, tx0) => {
+  ty = String(ty || ""); let t = String(tx0 || "").replace(/\s+/g, " ").trim();
+  if (!t || /timeout|end (of )?(period|quarter|half|game)|two-minute|coin toss|end period/i.test(ty) || /^(official )?timeout|^end (of |quarter|game)|^two-minute|^end quarter/i.test(t)) return null;
+  { const rv = /(?:REVERSED|UPHELD|STANDS|CONFIRMED)\.\s*/i.exec(t); if (rv) t = t.slice(rv.index + rv[0].length); }
+  t = t.replace(/\.?\s*\*\*.*$/, "").replace(/\.?\s*[A-Z]{2,4}-[A-Z][A-Za-z]?\.\s?[A-Za-z'-]+ was injured during the play\.?/g, "").replace(/\.?\s*The [^.]*? was assisted by replay\.?/gi, "").replace(/\s*\[[^\]]*\]/g, "");
+  for (let k = 0; k < 3; k++) { const m = /reported in as eligible\.?\s*/i.exec(t); if (!m || m.index > 90) break; t = t.slice(m.index + m[0].length); }
+  t = t.replace(/^\(\d{1,2}:\d{2}\)\s*/, "").replace(/^\((?:[^)]*?(?:no huddle|shotgun|pistol|under center|punt formation|field goal formation)[^)]*)\)\s*/i, "").replace(/#\d+\s*/g, "");
+  let flag = ""; const pen = /PENALTY on ([A-Z]{2,4})(?:-[^,]*)?,\s*([^,]+?),/i.exec(t); if (pen) { const noPlay = /no play/i.test(t.slice(pen.index)); flag = `Flag: ${pen[2].trim()} (${pen[1]})${noPlay ? " · no play" : ""}`; t = noPlay ? "" : t.slice(0, pen.index); }
+  t = t.replace(/\s*\((?:[A-Z][A-Za-z]?\.\s?[A-Za-z'-]+(?:\s(?:Jr|Sr|II|III)\.?)?(?:[;,]\s*)?)+\)/g, "");
+  { const td = /TOUCHDOWN/i.exec(t); if (td) t = t.slice(0, td.index + td[0].length); }
+  t = t.replace(/,?\s*Center-.*$/i, "").replace(/\s*(?:and )?[A-Z]\.[A-Za-z'-]+ extra point.*$/i, "").replace(/\s+/g, " ").replace(/[.\s]+$/, "").trim();
+  return [t, flag].filter(Boolean).join(" · ") || null;
+};
+const LPS = new Map(), playOf = (g) => { const lp = g && g.sit && g.sit.lp; if (lp && lp.text) { const k = String(lp.id != null ? lp.id : lp.text), was = LPS.get(g.id); if (!was || was.k !== k) { const c = cleanText(lp.type, lp.text); if (c) LPS.set(g.id, { k, c }); else if (was) was.k = k; } } const w = LPS.get(g && g.id); return w ? w.c : ""; };
+const playTxt = (g) => { if (g.st === "pre") return [when(g.t), g.net || g.sport].filter(Boolean).join(" · "); if (g.st === "post") return "Final"; const si = g.sit || {}, lp = playOf(g); return [si.dd, lp].filter(Boolean).join(" · ") || g.sport; };
 // the field as it stands: the ball where it is (in the colour of who has it), the line to gain, which way they're going
 const fieldHtml = (g) => {
   const si = g.st === "in" && isFb(g) ? g.sit : null; if (!si || typeof si.yl !== "number" || !si.pos) return "";
@@ -125,17 +141,23 @@ const fieldHtml = (g) => {
   const ticks = [10, 20, 30, 40, 50, 60, 70, 80, 90].map((v) => `<i class="yl${v === 50 ? " mid" : ""}" style="left:${v}%"></i>`).join("");
   return `<div class="v3-fld${si.rz ? " rz" : ""}"><span class="ez" style="background:${css(teamCol(g.a))}">${esc(g.a.ab)}</span><div class="pf">${ticks}${to != null ? `<i class="fd" style="left:${to}%"></i><i class="need" style="left:${Math.min(x, to)}%;width:${Math.abs(to - x)}%;background:${c}"></i>` : ""}<i class="bl ${awayBall ? "r" : "l"}" style="left:${x}%;--c:${c}"></i></div><span class="ez" style="background:${css(teamCol(g.h))}">${esc(g.h.ab)}</span></div>`;
 };
+const JUST = new Map(), JUST_MS = 90000;
+const justOf = (g) => { const j = JUST.get(g.id); return j && Date.now() - j.at < JUST_MS ? j : null; };
+function noteScore(g, side, pts) { const fb = isFb(g), was = justOf(g), word = !fb ? "Score" : pts >= 6 ? "Touchdown" : pts === 3 ? "Field goal" : pts === 2 ? "Safety" : pts === 1 ? "Extra point" : "Score";
+  if (pts <= 2 && was && was.side === side && was.word === "Touchdown") return;   // the try after a touchdown keeps the touchdown up
+  JUST.set(g.id, { at: Date.now(), side, word, ab: g[side].ab, col: teamCol(g[side]) }); }
 const gameHtml = (g) => {
   const live = g.st !== "pre", fin = g.st === "post";
   const tm = (s) => { const t = g[s], o = g[s === "a" ? "h" : "a"], lead = live && t.sc > o.sc, ball = g.st === "in" && g.sit && g.sit.pos && String(g.sit.pos) === String(t.id) ? `<i class="ball${g.sit.rz ? " rz" : ""}"></i>` : "";
     const lg = t.lg ? `<img src="${esc(t.lg)}" alt="" referrerpolicy="no-referrer" onerror="this.style.visibility='hidden'">` : "<span></span>";
     return `<div class="tm ${s}${lead ? " lead" : live && t.sc < o.sc ? " trail" : ""}">${lg}<div class="nmx"><span class="ab">${esc(t.nm || t.ab)}${ball}</span>${t.rec ? `<small>${esc(t.rec)}</small>` : ""}</div><span class="sc num" data-s="${s}">${live ? esc(t.sc ?? "") : ""}</span></div>`; };
   const clk = g.st === "pre" ? when(g.t) : fin ? "Final" : g.d || "Live", si = g.sit || {};
-  const play = g.st === "in" ? [si.dd, si.lp && si.lp.text].filter(Boolean).join(" · ") : g.st === "pre" ? [g.net, g.ven && g.ven.nm].filter(Boolean).join(" · ") : "";
+  const play = g.st === "in" ? [si.dd, playOf(g)].filter(Boolean).join(" · ") : g.st === "pre" ? [g.net, g.ven && g.ven.nm].filter(Boolean).join(" · ") : "";
   const wp = g.st === "in" && typeof si.wp === "number" ? Math.round(si.wp * 100) : null;
   const wpH = wp != null ? `<div class="v3-wp"><b class="num">${100 - wp}%</b><i><u style="width:${100 - wp}%;background:${css(teamCol(g.a))}"></u><u style="width:${wp}%;background:${css(teamCol(g.h))}"></u></i><b class="num">${wp}%</b></div>` : "";
   const L = (g.ldr || []).filter((x) => /^(passing|rushing|receiving)Yards$/.test(x.n)).slice(0, 3), ldr = live && L.length ? `<div class="v3-ldr">${L.map((x) => `<span><em>${x.n[0] === "p" ? "PASS" : x.n[1] === "u" ? "RUSH" : "REC"}</em> ${esc(x.p)} <b class="num">${esc(String(x.v).split(",")[0])}</b></span>`).join("")}</div>` : "";
-  return `<div class="v3-hd"><span class="lg">${esc(g.sport)}${g.net && live ? " · " + esc(g.net) : ""}</span><span class="clk">${esc(clk)}</span></div>${tm("a")}${tm("h")}${fieldHtml(g)}${play ? `<div class="v3-play">${esc(play)}</div>` : ""}${wpH}${ldr}`;
+  const j = g.st === "in" ? justOf(g) : null, just = j ? `<span class="just" style="--c:${css(j.col)}">${esc(j.word)} ${esc(j.ab)}</span>` : "";
+  return `<div class="v3-hd"><span class="lg">${esc(g.sport)}${g.net && live ? " · " + esc(g.net) : ""}</span>${just}<span class="clk">${esc(clk)}</span></div>${tm("a")}${tm("h")}${fieldHtml(g)}${play ? `<div class="v3-play">${esc(play)}</div>` : ""}${wpH}${ldr}`;
 };
 const meter = (c) => { const p = Math.round(c.p * 1000) / 10; return c.fill ? `<div class="v3-m fill"><i style="left:0;width:${p}%"></i><b style="left:${p}%"></b></div>` : `<div class="v3-m"><i style="left:${Math.min(50, p)}%;width:${Math.abs(p - 50)}%"></i><b style="left:${p}%"></b></div>`; };
 function cardHtml(c) {
@@ -184,8 +206,9 @@ function renderGrid() {
       seenL.add(L.k); let el = laneEls.get(L.k);
       if (!el) { el = document.createElement("div"); el.className = "v3-lane" + (L.g ? "" : " plain"); el.innerHTML = `<div class="v3-g${L.g ? "" : " tag"}"></div><div class="v3-cards"></div>`; laneEls.set(L.k, el); }
       el.__L = L; const ge = el.firstChild, ce = el.lastChild;
-      if (L.g) { const g = L.g, ca = teamCol(g.a), ch = teamCol(g.h); ge.style.setProperty("--ca", css(ca)); ge.style.setProperty("--ch", css(ch)); ge.classList.toggle("live", g.st === "in"); el.classList.toggle("livep", g.st === "in"); el.style.setProperty("--ch", css(ch)); setHtml(ge, gameHtml(g)); el.__col = [ca, ch];
-        const k = g.id, was = prevSc.get(k), now = [g.a.sc, g.h.sc]; if (was && g.st !== "pre") ["a", "h"].forEach((s, j) => { if (now[j] != null && was[j] != null && now[j] > was[j]) scored(el, s, j ? ch : ca, now[j] - was[j]); }); prevSc.set(k, now);
+      if (L.g) { const g = L.g, ca = teamCol(g.a), ch = teamCol(g.h); ge.style.setProperty("--ca", css(ca)); ge.style.setProperty("--ch", css(ch)); ge.classList.toggle("live", g.st === "in"); el.classList.toggle("livep", g.st === "in"); el.style.setProperty("--ch", css(ch));
+        const k = g.id, was = prevSc.get(k), now = [g.a.sc, g.h.sc], hits = []; if (was && g.st !== "pre") ["a", "h"].forEach((s, j) => { if (now[j] != null && was[j] != null && now[j] > was[j]) { noteScore(g, s, now[j] - was[j]); hits.push([s, j ? ch : ca, now[j] - was[j]]); } }); prevSc.set(k, now);
+        setHtml(ge, gameHtml(g)); el.__col = [ca, ch]; { const j = g.st === "in" ? justOf(g) : null; el.classList.toggle("hot", !!j); if (j) { const L2 = lum(j.col), k = L2 < 0.42 ? (0.42 - L2) / Math.max(0.05, 1 - L2) : 0; el.style.setProperty("--hc", css(j.col.map((v) => clamp(v + (1 - v) * k, 0, 1)))); } } for (const h of hits) scored(el, ...h);
       } else setHtml(ge, `<b>${esc(L.tag[0])}</b><small>${esc(L.tag[1])}</small>`);
       L.el = el;
       L.cards.forEach((c, j) => {
@@ -238,6 +261,7 @@ function card(c, host, i) {
   if (pc && side(pc) !== side(c.cls) && side(c.cls) && !first) { turned(x, side(c.cls) > 0); swing(c, side(c.cls) > 0); }
   if (host.children[i] !== x) host.insertBefore(x, host.children[i] || null); return x;
 }
+setInterval(() => { for (const [id, j] of JUST) if (Date.now() - j.at > JUST_MS + 500) { JUST.delete(id); try { render(); } catch (e) {} } }, 5000);
 let swingAt = 0;
 function swing(c, good) { if (inStadium() && Date.now() - swingAt > 20000 && !c.par) { swingAt = Date.now(); enqueue(async () => { await wait(7200); if (window.__actOn) return; const done = runAct("swing", { col: hex(c.col, GOLD), who: c.who, big: String(c.pick || ""), odds: fOdds(c.odds), sub: good ? "\u25B2 Now winning \u00b7 " + (c.tx || "") : "\u25BC Now losing \u00b7 " + (c.tx || ""), good }); stageOut(true); await wait(3500); stageOut(false); await done; }); }
   const d = document.createElement("div"); d.className = "v3-swing " + (good ? "g" : "r"); d.style.setProperty("--c", c.col); d.innerHTML = `<b>${esc(c.who)}</b> ${esc(c.pick)} <em>${good ? "now winning" : "now losing"}</em>`; const f = primeEl.querySelector(".pm-feed"); if (!f) return; f.prepend(d); while (f.children.length > 4) f.lastChild.remove(); setTimeout(() => d.classList.add("old"), 9000); setTimeout(() => d.remove(), 30000); }
@@ -262,7 +286,7 @@ function renderPrime(L) {
   { const n = mine.length, h = primeEl.querySelector("#pmMine"); h.style.setProperty("--k", n <= 2 ? 1.75 : n <= 4 ? 1.5 : n <= 6 ? 1.3 : n <= 10 ? 1.12 : 0.95); h.classList.toggle("two", n > 3); const m = pars.length + other.length, pr = primeEl.querySelector(".pm-right"); pr.style.setProperty("--k", m <= 3 ? 1.2 : m <= 6 ? 1.05 : 0.9); pr.style.display = m ? "" : "none"; primeEl.classList.toggle("solo", !m); }
   primeEl.querySelector("#pmRt").style.display = pars.length ? "" : "none"; primeEl.querySelector("#pmEt").style.display = other.length ? "" : "none";
   // along the bottom: the field, the win odds through the night, the leaders, where the room stands on this game
-  setHtml(primeEl.querySelector(".pm-fld"), `<h5>${esc(g.st === "in" ? (si.lp && si.lp.text) || "The drive" : g.st === "pre" ? "Kickoff " + when(g.t) : "Final")}</h5>${fieldHtml(g) || `<div class="v3-fld idle"><span class="ez" style="background:${css(ca)}">${esc(g.a.ab)}</span><div class="pf"></div><span class="ez" style="background:${css(ch)}">${esc(g.h.ab)}</span></div>`}`);
+  setHtml(primeEl.querySelector(".pm-fld"), `<h5>${esc(g.st === "in" ? playOf(g) || "The drive" : g.st === "pre" ? "Kickoff " + when(g.t) : "Final")}</h5>${fieldHtml(g) || `<div class="v3-fld idle"><span class="ez" style="background:${css(ca)}">${esc(g.a.ab)}</span><div class="pf"></div><span class="ez" style="background:${css(ch)}">${esc(g.h.ab)}</span></div>`}`);
   const wp = g.st === "in" && typeof si.wp === "number" ? si.wp : null; if (wp != null) { const H = WPH.get(g.id) || []; if (!H.length || Math.abs(H[H.length - 1] - wp) > 0.004 || H.length < 2) { H.push(wp); if (H.length > 240) H.shift(); WPH.set(g.id, H); } }
   { const H = WPH.get(g.id) || [], n = H.length, pts = H.map((v, i) => `${n > 1 ? ((i / (n - 1)) * 300).toFixed(1) : 300},${(v * 80).toFixed(1)}`).join(" "), cur = wp != null ? Math.round(wp * 100) : null;
     setHtml(primeEl.querySelector(".pm-wp"), `<h5>Win odds${cur != null ? ` · <b style="color:${css(cur >= 50 ? ch : ca)}">${esc(cur >= 50 ? g.h.ab : g.a.ab)} ${Math.max(cur, 100 - cur)}%</b>` : ""}</h5><svg viewBox="0 0 300 80" preserveAspectRatio="none"><rect x="0" y="0" width="300" height="40" fill="${css(ca)}" opacity=".16"/><rect x="0" y="40" width="300" height="40" fill="${css(ch)}" opacity=".16"/><line x1="0" y1="40" x2="300" y2="40" stroke="rgba(255,255,255,.35)" stroke-dasharray="4 4"/>${n > 1 ? `<polyline points="${pts}" fill="none" stroke="#fff" stroke-width="2.5" vector-effect="non-scaling-stroke"/>` : ""}</svg><div class="ax"><span>${esc(g.a.ab)}</span><span>${esc(g.h.ab)}</span></div>`); }
@@ -467,7 +491,8 @@ function fxFrame(dt) {
 const Q = []; let showing = false;
 const wait = (ms) => new Promise((r) => setTimeout(r, ms));
 function enqueue(fn) { Q.push(fn); if (!showing) nextShow(); }
-async function nextShow() { const fn = Q.shift(); if (!fn) { showing = false; return; } showing = true; try { await fn(); } catch (e) { console.warn("v3 show", e); } cleanup(); await wait(250); nextShow(); }
+// one at a time; a show that never finishes is let go after 45 seconds, so the queue can never jam
+async function nextShow() { const fn = Q.shift(); if (!fn) { showing = false; return; } showing = true; try { await Promise.race([fn(), wait(45000)]); } catch (e) { console.warn("v3 show", e); } cleanup(); await wait(250); nextShow(); }
 function cleanup() { dim(false); stageOut(false); root.classList.remove("shake"); stageEl.classList.remove("on"); SR.querySelectorAll(".v3-ghost, .v3-bill").forEach((e) => e.remove()); }
 // the card as it stood, lifted off the board
 function ghostOf(b, cls) {

@@ -187,6 +187,12 @@ export function runAct(kind, o) {
       for (const m of beams) { m.userData.t += dt; m.material.opacity = Math.max(0, 0.11 - m.userData.t * 0.09); m.scale.x = m.scale.z = 1 + m.userData.t * 0.4; }
     };
     (st.spin = st.spin || []).push(f);
-    setTimeout(() => { const i = st.spin.indexOf(f); if (i >= 0) st.spin.splice(i, 1); for (const m of own) { scene.remove(m); m.traverse && m.traverse((x) => { if (x.geometry) x.geometry.dispose(); if (x.material) { if (x.userData && x.userData.tx) x.userData.tx.dispose(); x.material.dispose(); } }); } gt.dispose(); if (flag) flag.off(); for (const f of figs) { scene.remove(f.g); f.g.traverse((x) => { if (x.material && x.material.map) { x.material.map.dispose(); x.material.dispose(); } }); } window.__actOn = false; if (M) { M.busy = false; mg.rotation.x = 0; } try { SBW().home && SBW().home(2600); } catch (e) {} done(true); }, dur / KT);
+    // the end: everything it made goes, and nothing that fails on the way out can hold up the next one
+    setTimeout(() => { const safe = (fn) => { try { fn(); } catch (e) { console.warn("v3 act cleanup", e); } }, mats = (x) => (Array.isArray(x.material) ? x.material : x.material ? [x.material] : []);
+      safe(() => { const i = st.spin.indexOf(f); if (i >= 0) st.spin.splice(i, 1); });
+      for (const m of own) safe(() => { scene.remove(m); m.traverse && m.traverse((x) => { if (x.geometry) x.geometry.dispose(); if (x.userData && x.userData.tx) x.userData.tx.dispose(); for (const q of mats(x)) q.dispose(); }); });
+      safe(() => gt.dispose()); safe(() => { if (flag) flag.off(); });
+      for (const fg of figs) safe(() => { scene.remove(fg.g); fg.g.traverse((x) => { for (const q of mats(x)) if (q.map && q.map.isTexture && q !== x.__keep) { q.map.dispose(); q.dispose(); } }); if (fg.dispose) fg.dispose(); else if (fg.sk) fg.sk.dispose(); });
+      window.__actOn = false; if (M) safe(() => { M.busy = false; mg.rotation.x = 0; }); safe(() => SBW().home && SBW().home(2600)); done(true); }, dur / KT);
   });
 }

@@ -14942,7 +14942,7 @@ void main(){
   // ---------- sheets ----------
   function openSheet(id) { $(id).hidden = false; }
   // keep every open screen current: when a new version is up, reload it (never mid-form or mid-animation)
-  const BUILD = "20261114041320";
+  const BUILD = "20261114215546";
   function updReady() {
     if (document.getElementById("updReady")) return; const d = document.createElement("div"); d.id = "updReady"; d.textContent = "Update ready · refresh, then TV + Sound on"; document.body.append(d);
   }
@@ -28485,7 +28485,7 @@ function wdBuild(L, R) {
 function wdDispose(st) {
   if (!st) return;
   if (st.act) wdActEnd(st);
-  st.scene.traverse((o) => { if (o.geometry) o.geometry.dispose(); if (o.material) (Array.isArray(o.material) ? o.material : [o.material]).forEach((m) => m.dispose()); });
+  st.scene.traverse((o) => { if (o.geometry) o.geometry.dispose(); if (o.isSkinnedMesh && o.skeleton) o.skeleton.dispose(); if (o.material) (Array.isArray(o.material) ? o.material : [o.material]).forEach((m) => { if (m.map && m.map.isCanvasTexture) m.map.dispose(); m.dispose(); }); });
   st.tex.forEach((t) => t.dispose()); if (st.vid && st.vid.tex) st.vid.tex.dispose();
   const D = st.deck; if (D && D.mv) { try { D.mv.pause(); D.mv.removeAttribute("src"); D.mv.load(); } catch (e) {} if (D.mvTex) D.mvTex.dispose(); }
   if (D && D.rtA) { D.rtA.dispose(); D.rtB.dispose(); }

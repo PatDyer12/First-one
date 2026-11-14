@@ -19,18 +19,29 @@ export function makeFigures(THREE) {
   const WHITE = [0.93, 0.93, 0.95], DARK = [0.05, 0.05, 0.06], GREY = [0.55, 0.57, 0.62];
 
   // the skeleton: D holds the lengths; geo the six bone meshes (arms and legs are mirrored)
+  // the skeleton: eleven bones, and each figure one skinned mesh over them (one draw for the body, one more for a shiny
+  // helmet), so a building full of people costs a few dozen draws, not hundreds
+  const BONES = ["hips", "chest", "head", "sL", "eL", "tL", "kL", "sR", "eR", "tR", "kR"], PAR = [-1, 0, 1, 1, 3, 0, 5, 1, 7, 0, 9];
+  const PARTS = [["pelvis", 0], ["chest", 1], ["uarm", 3], ["farm", 4], ["thigh", 5], ["shin", 6], ["uarm", 7], ["farm", 8], ["thigh", 9], ["shin", 10], ["head", 2]];
+  const restOf = (D) => { const L = [-D.shW, D.shY, 0], R = [D.shW, D.shY, 0]; return [[0, 0, 0], [0, 0, 0], [0, D.neck, 0], L, [L[0], L[1] - D.uarm, 0], [-D.hipW, 0, 0], [-D.hipW, -D.thigh, 0], R, [R[0], R[1] - D.uarm, 0], [D.hipW, 0, 0], [D.hipW, -D.thigh, 0]]; };
+  const skins = new WeakMap();
+  function skinGeo(geo, D, split) {
+    let byD = skins.get(geo); if (!byD) skins.set(geo, (byD = new Map())); const key = [D.neck, D.shW, D.shY, D.uarm, D.hipW, D.thigh, split ? 1 : 0].join(":"); if (byD.has(key)) return byD.get(key);
+    const rest = restOf(D), P = [], N = [], C = [], SI = [], SW = []; let headAt = 0;
+    for (const [name, bi] of PARTS) { if (name === "head") headAt = P.length / 3; const g = geo[name], a = g.attributes.position.array, n = g.attributes.normal.array, c = g.attributes.color.array, r = rest[bi];
+      for (let q = 0; q < a.length; q += 3) { P.push(a[q] + r[0], a[q + 1] + r[1], a[q + 2] + r[2]); N.push(n[q], n[q + 1], n[q + 2]); C.push(c[q], c[q + 1], c[q + 2]); SI.push(bi, 0, 0, 0); SW.push(1, 0, 0, 0); } }
+    const o = new THREE.BufferGeometry(); o.setAttribute("position", new THREE.Float32BufferAttribute(P, 3)); o.setAttribute("normal", new THREE.Float32BufferAttribute(N, 3)); o.setAttribute("color", new THREE.Float32BufferAttribute(C, 3));
+    o.setAttribute("skinIndex", new THREE.Uint16BufferAttribute(SI, 4)); o.setAttribute("skinWeight", new THREE.Float32BufferAttribute(SW, 4));
+    if (split) { o.addGroup(0, headAt, 0); o.addGroup(headAt, P.length / 3 - headAt, 1); }
+    o.computeBoundingSphere(); byD.set(key, o); return o;
+  }
   function rig(geo, D, mats) {
-    const g = new THREE.Group(), hips = new THREE.Group(), chest = new THREE.Group(), head = new THREE.Group(); g.add(hips); hips.add(chest); chest.add(head); head.position.y = D.neck;
-    const mk = (ge, m) => { const o = new THREE.Mesh(ge, m || mats[0]); o.frustumCulled = false; return o; };
-    hips.add(mk(geo.pelvis)); chest.add(mk(geo.chest)); head.add(mk(geo.head, mats[1]));
-    const j = { hips, chest, head };
-    for (const [k, sx] of [["L", -1], ["R", 1]]) {
-      const sh = new THREE.Group(), el = new THREE.Group(), th = new THREE.Group(), kn = new THREE.Group();
-      sh.position.set(sx * D.shW, D.shY, 0); el.position.y = -D.uarm; chest.add(sh); sh.add(el); sh.add(mk(geo.uarm)); el.add(mk(geo.farm));
-      th.position.set(sx * D.hipW, 0, 0); kn.position.y = -D.thigh; hips.add(th); th.add(kn); th.add(mk(geo.thigh)); kn.add(mk(geo.shin, geo.shoe ? mats[1] : mats[0]));
-      j["s" + k] = sh; j["e" + k] = el; j["t" + k] = th; j["k" + k] = kn;
-    }
-    return { g, j, D };
+    const g = new THREE.Group(), split = !!mats[1] && mats[1] !== mats[0], rest = restOf(D), b = BONES.map(() => new THREE.Bone());
+    b.forEach((bone, i) => { const p = PAR[i], r = rest[i], q = p < 0 ? [0, 0, 0] : rest[p]; bone.position.set(r[0] - q[0], r[1] - q[1], r[2] - q[2]); if (p >= 0) b[p].add(bone); });
+    const mesh = new THREE.SkinnedMesh(skinGeo(geo, D, split), split ? [mats[0], mats[1]] : mats[0]); mesh.frustumCulled = false; mesh.add(b[0]); g.add(mesh);
+    mesh.updateMatrixWorld(true); const sk = new THREE.Skeleton(b); mesh.bind(sk);
+    const j = {}; BONES.forEach((k, i) => (j[k] = b[i]));
+    return { g, j, D, mesh, sk, geo };
   }
   // stand it: every angle in one go. a = { lean, twist, head, th:[l,r], kn:[l,r], sh:[l,r], shz:[l,r], el:[l,r], drop }
   function apply(f, a) {
@@ -61,7 +72,7 @@ export function makeFigures(THREE) {
 
   // a figure as it stands now, as one mesh drawn n times (the benches, the photographers)
   function freeze(f, n) { const sc = f.g.scale.x; f.g.scale.setScalar(1); f.g.position.set(0, 0, 0); f.g.rotation.set(0, 0, 0); f.g.updateMatrixWorld(true); const P = [], N = [], C = [];
-    f.g.traverse((o) => { if (!o.isMesh || !o.geometry.attributes.color) return; const g = o.geometry.clone(); g.applyMatrix4(o.matrixWorld); for (const [arr, k] of [[P, "position"], [N, "normal"], [C, "color"]]) { const a = g.attributes[k].array; for (let q = 0; q < a.length; q++) arr.push(a[q]); } g.dispose(); });
+    for (const [name, bi] of PARTS) { const g = f.geo[name].clone(); g.applyMatrix4(f.j[BONES[bi]].matrixWorld); for (const [arr, k] of [[P, "position"], [N, "normal"], [C, "color"]]) { const a = g.attributes[k].array; for (let q = 0; q < a.length; q++) arr.push(a[q]); } g.dispose(); }
     const o = new THREE.BufferGeometry(); o.setAttribute("position", new THREE.Float32BufferAttribute(P, 3)); o.setAttribute("normal", new THREE.Float32BufferAttribute(N, 3)); o.setAttribute("color", new THREE.Float32BufferAttribute(C, 3)); o.computeVertexNormals(); f.g.scale.setScalar(sc);
     const m = new THREE.InstancedMesh(o, matBody, n); m.frustumCulled = false; return m; }
   // ---- everyone else in the building: a cheerleader, a coach, a camera operator, the chain crew ----
@@ -84,7 +95,7 @@ export function makeFigures(THREE) {
       thigh: merge([part(cap(cheer ? 0.075 : 0.09, 0.27), cheer ? SK : BT, [0, -0.22, 0])]),
       shin: merge([part(cap(0.06, 0.26), cheer ? SK : BT, [0, -0.2, 0]), part(box(0.1, 0.08, 0.25), cheer ? WHITE : DARK, [0, -0.44, 0.05])]),
     };
-    const f = rig(geo, PD, [matBody, matBody]); f.g.scale.setScalar(o.scale || 1.28); f.seed = o.seed || 0; f.kind = k; f.dispose = () => { for (const q in geo) geo[q].dispose(); }; return f;
+    const f = rig(geo, PD, [matBody, matBody]); f.g.scale.setScalar(o.scale || 1.28); f.seed = o.seed || 0; f.kind = k; f.dispose = () => { for (const q in geo) geo[q].dispose(); f.mesh.geometry.dispose(); f.sk.dispose(); }; return f;
   }
   // one frame of one of them. act: cheer (the routine) | hype (arms up, jumping) | coach | cam | stand | kneel
   function posePerson(f, act, t, amp = 1) {
@@ -130,9 +141,10 @@ export function makeFigures(THREE) {
   function kit(K) {
     const geos = SKINS.map((sk) => playerGeo(Object.assign({}, K, { skin: sk }))), tex = [], lum = 0.3 * K.jersey[0] + 0.59 * K.jersey[1] + 0.11 * K.jersey[2], fg = lum > 0.5 ? "#101520" : "#f4f5f8", edge = css(K.alt);
     const numMat = (n) => { const t = numTex(n, fg, edge); tex.push(t); return new THREE.MeshBasicMaterial({ map: t, transparent: true, alphaTest: 0.2 }); };
-    const pg = new THREE.PlaneGeometry(0.25, 0.25);
+    const pg = (() => { const a = new THREE.PlaneGeometry(0.25, 0.25).toNonIndexed(), b = new THREE.PlaneGeometry(0.25, 0.25).toNonIndexed(); a.translate(0, 0.34, 0.158); b.scale(1.15, 1.15, 1.15); b.rotateY(Math.PI); b.translate(0, 0.36, -0.16); const o = new THREE.BufferGeometry();
+      for (const k of ["position", "normal", "uv"]) { const x = a.attributes[k], y = b.attributes[k], arr = new Float32Array(x.array.length + y.array.length); arr.set(x.array); arr.set(y.array, x.array.length); o.setAttribute(k, new THREE.BufferAttribute(arr, x.itemSize)); } a.dispose(); b.dispose(); return o; })();
     return { K, geos, scale: K.scale || 1.36,
-      player(n, i = 0) { const f = rig(geos[i % geos.length], PD, [matBody, matShine]); if (n != null) { const m = numMat(n), a = new THREE.Mesh(pg, m), b = new THREE.Mesh(pg, m); a.position.set(0, 0.34, 0.158); b.position.set(0, 0.36, -0.16); b.rotation.y = Math.PI; b.scale.setScalar(1.15); f.j.chest.add(a, b); } f.g.scale.setScalar(this.scale); f.seed = i * 1.7; return f; },
+      player(n, i = 0) { const f = rig(geos[i % geos.length], PD, [matBody, matShine]); if (n != null) { const nm = new THREE.Mesh(pg, numMat(n)); nm.frustumCulled = false; f.j.chest.add(nm); } f.g.scale.setScalar(this.scale); f.seed = i * 1.7; return f; },
       // the bench: one standing man, drawn many times
       standing(n) { const f = rig(geos[0], PD, [matBody, matShine]); apply(f, mixA({}, STANCE.stand, STANCE.stand, 0)); return freeze(f, n); },
       dispose() { for (const g of geos) for (const k in g) g[k].dispose(); for (const t of tex) t.dispose(); pg.dispose(); } };
@@ -185,7 +197,7 @@ export function makeFigures(THREE) {
     // the name on its back, the letters on its chest
     const c = document.createElement("canvas"); c.width = 256; c.height = 128; const x = c.getContext("2d"); x.font = "900 96px 'Barlow Condensed', 'Arial Narrow', Arial, sans-serif"; x.textAlign = "center"; x.textBaseline = "middle"; x.lineWidth = 10; x.strokeStyle = "#0a0d14"; x.strokeText(o.ab || "", 128, 68); x.fillStyle = css(AL); x.fillText(o.ab || "", 128, 68);
     const tx = new THREE.CanvasTexture(c), pm = new THREE.MeshBasicMaterial({ map: tx, transparent: true, alphaTest: 0.2 }), pl = new THREE.Mesh(new THREE.PlaneGeometry(0.46, 0.23), pm); pl.position.set(0, 0.42, 0.365); f.j.chest.add(pl);
-    f.hand = f.j.eR; f.dispose = () => { for (const k in geo) geo[k].dispose(); tx.dispose(); pm.dispose(); pl.geometry.dispose(); };
+    f.hand = f.j.eR; f.dispose = () => { for (const k in geo) geo[k].dispose(); f.mesh.geometry.dispose(); f.sk.dispose(); tx.dispose(); pm.dispose(); pl.geometry.dispose(); };
     return f;
   }
   // one frame of the mascot. act: idle | run | dance | cheer | catch | spike | sad | flip (k 0..1) | carry (a run with one arm up)
