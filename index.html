@@ -8776,11 +8776,29 @@ body.tv.pplg .roomtv:not([hidden]) canvas { width: 84px; height: 84px; grid-row:
     if (tds.length) { const won = tds[0].who === me; return { m: won ? 1 : -1, res: won ? "W" : "L", fin: true, txt: won ? "Scored the first TD" : `First TD: ${tds[0].name}`, g }; }
     return { m: fin ? -1 : 0, res: fin ? "L" : "P", fin, txt: fin ? "Final · no TD" : "Waiting on the first TD", g };
   }
+  // a UFC prop, graded at the end of the fight: the fighter (when it names one), how it ended (KO/TKO with a DQ, submission,
+  // decision, or inside the distance), the round it ended in, the rounds total (over 1.5 is past 2:30 of the second) and
+  // whether it went the distance. All of them have to hold; a no contest pushes, and so does a draw for anything naming a winner
+  const UF_HOW = { ko: "by KO/TKO", sub: "by submission", dec: "by decision", itd: "inside the distance", dq: "by DQ", draw: "draw", nc: "no contest" };
+  function evalUfc(sel, g) {
+    const f = g.ufc || {}, p = sel.p || {}, side = sel.s === "a" || sel.s === "h" ? sel.s : null, how = f.how;
+    if (g.st !== "post" || !how) return null;
+    const push = how === "nc" || (how === "draw" && !!(side || p.how || p.r));
+    let ok = true;
+    if (side) ok = ok && f.win === side;
+    if (p.how) ok = ok && (p.how === "itd" ? ["ko", "sub", "dq"].includes(how) : p.how === "ko" ? how === "ko" || how === "dq" : how === p.how);
+    if (p.r) ok = ok && Number(p.r) === f.rd && how !== "dec" && how !== "draw";
+    if (p.ou && sel.l != null) { const cut = Math.floor(sel.l) * 300 + (sel.l % 1 ? 150 : 0), over = (f.secs || 0) > cut; ok = ok && (p.ou === "o" ? over : !over); }
+    if (p.gtd != null) { const went = how === "dec" || how === "draw"; ok = ok && (p.gtd ? went : !went); }
+    const res = push ? "P" : ok ? "W" : "L", w = f.win ? g[f.win] : null;
+    return { m: res === "W" ? 1 : res === "L" ? -1 : 0, res, fin: true, g, txt: `Final \u00b7 ${w ? w.nm + " " : ""}${UF_HOW[how] || ""}${how === "dec" || how === "draw" || how === "nc" ? "" : `, R${f.rd} ${f.clk}`} \u00b7 ${res === "W" ? "winner" : res === "L" ? "loser" : "push"}` };
+  }
   function evalSel(sel) {
     const g = gameOf(sel);
     if (!g || g.st === "pre" || g.a.sc == null || g.h.sc == null) return null;
     if (isTd(sel.m)) return evalTd(sel, g);
     if (isPP(sel.m)) return evalPP(sel, g);
+    if (sel.m === "uf") return evalUfc(sel, g);
     const a = g.a.sc, h = g.h.sc, diff = sel.s === "a" ? a - h : h - a;
     let m;
     if (sel.m === "ml") m = diff;
@@ -10375,6 +10393,7 @@ body.tv.pplg .roomtv:not([hidden]) canvas { width: 84px; height: 84px; grid-row:
     const s = l.sel, g = s ? gameOf(s) : null;
     if (!g) return { txt: "", cls: "" };
     if (g.st === "pre") return { txt: startLabel(g.t), cls: "" };
+    if (g.sport === "UFC") { const ev = l.ev; return { txt: l.st ? (l.st === "hit" ? "Hit" : "Missed") : ev ? ev.txt.replace(/^Final \u00b7 /, "") : g.d || "Live", cls: !l.st && ev ? (ev.res === "W" ? "lw" : ev.res === "L" ? "ll" : "le") : "" }; }
     const ev = l.ev, td = isTd(s.m) || isPP(s.m), mine = s.m === "tot" || td ? null : s.s, opp = mine === "a" ? "h" : "a";
     const sc = td ? "" : mine ? `${g[mine].ab} ${g[mine].sc}–${g[opp].sc}` : `${g.a.sc + g.h.sc}/${s.l}`;
     const how = l.st ? (l.st === "hit" ? "Hit" : "Missed") : ev ? ev.txt.replace(/^Final · /, "") : "";
@@ -10991,6 +11010,7 @@ body.tv.pplg .roomtv:not([hidden]) canvas { width: 84px; height: 84px; grid-row:
   }
   // every type a bet fits, its look first
   function betTypes(b, units) {
+    if (b.btForce) return [].concat(b.btForce);   // (a test's way to see one design)
     const o = Number(b.odds) || 0, par = b.kind === "parlay", n = par ? (b.legs || []).length : 1, u = units != null ? units : Number(b.units) || 0, usd = u * S.unit, m = b.sel && b.sel.m, d = btDaily(b.placedAt);
     const t0 = !par && b.sel ? (gameOf(b.sel) || {}).t || b.startAt : null, night = !!t0 && etHr(t0) >= 19;
     const k = [];
@@ -14942,7 +14962,7 @@ void main(){
   // ---------- sheets ----------
   function openSheet(id) { $(id).hidden = false; }
   // keep every open screen current: when a new version is up, reload it (never mid-form or mid-animation)
-  const BUILD = "20261114225254";
+  const BUILD = "20261114231310";
   function updReady() {
     if (document.getElementById("updReady")) return; const d = document.createElement("div"); d.id = "updReady"; d.textContent = "Update ready · refresh, then TV + Sound on"; document.body.append(d);
   }
@@ -15015,7 +15035,17 @@ void main(){
     if (PP_OU.has(st)) return `${nm} o${trimL(l)} ${w[1]}`;
     const n = Math.floor(l) + 1; return `${nm} ${n}+ ${n === 1 ? w[0] : w[1]}`;
   }
+  function ufLabel(g, s, l, p) {
+    p = p || {}; const who = s === "a" || s === "h" ? g[s].nm || g[s].ab : "", extra = [];
+    let t = who ? who + (p.how ? " " + UF_HOW[p.how] : p.r ? "" : " to win") : p.how ? "Ends " + UF_HOW[p.how] : "";
+    if (p.r) t = (t || "Ends") + " in round " + p.r;
+    if (p.ou) extra.push((p.ou === "o" ? "over " : "under ") + (l != null ? trimL(l) + " " : "") + "rounds");
+    if (p.gtd != null) extra.push(p.gtd ? "goes the distance" : "doesn't go the distance");
+    if (!t) { const e = extra.join(" & ") || "Fight prop"; return e.charAt(0).toUpperCase() + e.slice(1) + " \u00b7 " + g.a.ab + " vs " + g.h.ab; }
+    return t + (extra.length ? " & " + extra.join(" & ") : "");
+  }
   function mkLabel(g, m, s, l, p) {
+    if (m === "uf") return ufLabel(g, s, l, p);
     if (isPP(m)) return ppLabel(p, m, s, l);
     if (isTd(m)) return (p ? p.nm : "Player") + (m === "ftd" ? " first TD" : m === "ntd" ? " next TD" : " anytime TD");
     if (m === "ml") return (s === "a" ? g.a : g.h).nm + " ML";
@@ -15066,9 +15096,12 @@ void main(){
     const g = F.openG && S.games.get(F.openG), v = g && PMK.get(g.id);
     el.textContent = !g ? "· open a game for Polymarket prices" : !v || v.then ? "· loading Polymarket…" : v.ml ? "· prices via Polymarket, live" : "· no Polymarket market for this game";
   }
+  // the bet form's UFC buttons: method for a fighter, the rounds total, the distance
+  const UF_KEY = (k) => (k === "o" || k === "u" ? { ou: k } : k === "gy" ? { gtd: true } : k === "gn" ? { gtd: false } : { how: k });
   function mkPrefill(g, m, s) {
     if (curBook() === "PM") { const p = pmPrefill(g, m, s); if (p) return p; }
     if (m === "ml") return { l: null, o: g.ml ? g.ml[s] : null };
+    if (m === "uf") return { l: null, o: null };
     if (m === "sp") return { l: g.sp && g.sp[s] ? g.sp[s].l : null, o: g.sp && g.sp[s] ? g.sp[s].o : null };
     return { l: g.tot ? g.tot.l : null, o: g.tot ? g.tot[s] : null };
   }
@@ -15104,7 +15137,9 @@ void main(){
       if (open) {
         if (curBook() === "PM") pmLoad(g);
         const btn = (m, s) => { const p = mkPrefill(g, m, s); return `<button type="button" class="mkt${isOn(g, m, s) ? " on" : ""}" data-pick="${esc(g.id)}|${m}|${s}"><span>${esc(mkLabel(g, m, s, p.l))}</span><b>${p.o ? fOdds(p.o) : "—"}${p.c ? `<i class="pmc">${Math.round(p.c * 100)}¢</i>` : ""}</b></button>`; };
-        mk = g.sport === "UFC" ? `<div class="mkts">${btn("ml", "a")}${btn("ml", "h")}</div>` : `<div class="mkts">${btn("ml", "a")}${btn("ml", "h")}${btn("sp", "a")}${btn("sp", "h")}${btn("tot", "o")}${btn("tot", "u")}</div>` + altRow(g);
+        const ufOn = (k, s2) => { const up = UF_KEY(k), ss = s2 === "-" ? null : s2, same = (x) => x.g === g.id && x.m === "uf" && (x.s || null) === ss && JSON.stringify(x.p || {}) === JSON.stringify(up); return kindNow() === "straight" ? !!(F.sel && same(F.sel)) : F.legs.some(same); };
+        const ufBtn = (k, s2, lbl) => `<button type="button" class="mkt${ufOn(k, s2) ? " on" : ""}" data-pick="${esc(g.id)}|uf.${k}|${s2}"><span>${esc(lbl)}</span><b>\u2014</b></button>`, sh = (t) => t.ab.charAt(0) + t.ab.slice(1).toLowerCase();
+        mk = g.sport === "UFC" ? `<div class="mkts">${btn("ml", "a")}${btn("ml", "h")}${["a", "h"].map((s2) => [["ko", "KO/TKO"], ["sub", "Submission"], ["dec", "Decision"]].map(([k, l2]) => ufBtn(k, s2, sh(g[s2]) + " " + l2)).join("")).join("")}${ufBtn("o", "-", "Over rounds")}${ufBtn("u", "-", "Under rounds")}${ufBtn("gy", "-", "Goes the distance")}${ufBtn("gn", "-", "Doesn't go the distance")}</div>` : `<div class="mkts">${btn("ml", "a")}${btn("ml", "h")}${btn("sp", "a")}${btn("sp", "h")}${btn("tot", "o")}${btn("tot", "u")}</div>` + altRow(g);
         if (g.sport === "NHL")
           mk += `<div class="tdmk ppmk">${PP_MK.map(([m, l]) => `<button type="button" class="mkt${F.tdG === g.id && F.tdM === m ? " on" : ""}" data-td="${esc(g.id)}|${m}"><span>${l}</span><b>${F.tdG === g.id && F.tdM === m ? "▾" : "›"}</b></button>`).join("")}</div>${F.tdG === g.id && isPP(F.tdM) ? tdPanel(g) : ""}`;
         const ppRowOf = (list) => `<div class="tdmk ppmk">${list.map(([m, l]) => `<button type="button" class="mkt${F.tdG === g.id && F.tdM === m ? " on" : ""}" data-td="${esc(g.id)}|${m}"><span>${l}</span><b>${F.tdG === g.id && F.tdM === m ? "▾" : "›"}</b></button>`).join("")}</div>`;
@@ -15363,12 +15398,12 @@ void main(){
       const g = S.games.get(F.sel.g);
       $("#selText").textContent = g ? mkLabel(g, F.sel.m, F.sel.s, F.sel.l, F.sel.p) : "";
       $("#selGame").textContent = g ? `${g.sport} · ${g.a.nm} ${g.sport === "UFC" ? "vs" : "@"} ${g.h.nm} · ${g.st === "in" ? "live now" : startLabel(g.t)}` : "";
-      $("#lineWrap").hidden = F.sel.m === "ml" || isTd(F.sel.m);
+      $("#lineWrap").hidden = F.sel.m === "ml" || isTd(F.sel.m) || (F.sel.m === "uf" && !(F.sel.p && F.sel.p.ou));
       $("#ouSeg").hidden = !isPP(F.sel.m); $("#lnFlip").hidden = F.sel.m !== "sp"; document.querySelectorAll("#ouSeg [data-ou]").forEach((x) => x.setAttribute("aria-pressed", String(x.dataset.ou === F.sel.s)));
     }
     $("#legCount").textContent = F.legs.length ? "· " + F.legs.length + " picked" : "· tap markets below or add your own";
     $("#legList").innerHTML = F.legs.map((x, i) => `<div class="legrow"><span class="lt">${esc(legText(x))}</span>
-      ${x.g && x.m !== "ml" && !isTd(x.m) ? `<span class="llw">${x.m === "sp" ? `<button type="button" data-lf="${i}" aria-label="Flip the sign of leg ${i + 1}">±</button>` : ""}<input data-ll="${i}" inputmode="decimal" autocomplete="off" value="${x.l == null ? "" : x.l}" aria-label="Line for leg ${i + 1}"></span>` : "<span></span>"}
+      ${x.g && x.m !== "ml" && !isTd(x.m) && !(x.m === "uf" && !(x.p && x.p.ou)) ? `<span class="llw">${x.m === "sp" ? `<button type="button" data-lf="${i}" aria-label="Flip the sign of leg ${i + 1}">±</button>` : ""}<input data-ll="${i}" inputmode="decimal" autocomplete="off" value="${x.l == null ? "" : x.l}" aria-label="Line for leg ${i + 1}"></span>` : "<span></span>"}
       <span class="lo">${x.o ? fOdds(x.o) : ""}</span><button type="button" class="x" data-rm="${i}" aria-label="Remove leg">×</button></div>`).join("");
     renderGames();
   }
@@ -15393,15 +15428,16 @@ void main(){
       renderPicker(); updatePreview(); $("#f-odds").focus(); return;
     }
     const pk = e.target.closest("[data-pick]"); if (!pk) return;
-    const [gid, m, s] = pk.dataset.pick.split("|"), g = S.games.get(gid); if (!g) return;
+    let [gid, m, s] = pk.dataset.pick.split("|"), up = null; const g = S.games.get(gid); if (!g) return;
+    if (m.startsWith("uf.")) { up = UF_KEY(m.slice(3)); m = "uf"; s = s === "-" ? null : s; }
     const p = mkPrefill(g, m, s);
     if (kindNow() === "straight") {
-      F.sel = { g: gid, m, s, l: p.l }; F.custom = false;
+      F.sel = { g: gid, m, s, l: p.l }; if (up) F.sel.p = up; F.custom = false;
       $("#f-line").value = p.l == null ? "" : String(p.l);
       setOdds(p.o);
     } else {
-      const i = F.legs.findIndex((x) => x.g === gid && x.m === m && x.s === s);
-      if (i >= 0) F.legs.splice(i, 1); else F.legs.push({ g: gid, m, s, l: p.l, o: p.o, sport: g.sport });
+      const i = F.legs.findIndex((x) => x.g === gid && x.m === m && x.s === s && JSON.stringify(x.p || null) === JSON.stringify(up));
+      if (i >= 0) F.legs.splice(i, 1); else F.legs.push(Object.assign({ g: gid, m, s, l: p.l, o: p.o, sport: g.sport }, up ? { p: up } : {}));
       parlayOdds();
     }
     renderPicker(); updatePreview();
@@ -15610,7 +15646,7 @@ void main(){
       if (F.sel) {
         const g = S.games.get(F.sel.g);
         if (!g) { err.textContent = "That game dropped off the list. Pick it again or type it in."; return; }
-        if (F.sel.m !== "ml" && !isTd(F.sel.m) && F.sel.l == null) { err.textContent = "Add the line from your slip, like −3.5 or 47.5."; return; }
+        if (F.sel.m === "uf" ? !!(F.sel.p && F.sel.p.ou) && F.sel.l == null : F.sel.m !== "ml" && !isTd(F.sel.m) && F.sel.l == null) { err.textContent = F.sel.m === "uf" ? "Add the rounds line from your slip, like 2.5." : "Add the line from your slip, like −3.5 or 47.5."; return; }
         data.pick = mkLabel(g, F.sel.m, F.sel.s, F.sel.l, F.sel.p); data.sport = g.sport;
         data.sel = { g: g.id, m: F.sel.m, s: F.sel.s, l: F.sel.l, sp: g.sport, t: g.t }; starts.push(g.t);
         if (isTd(F.sel.m) || isPP(F.sel.m)) data.sel.p = F.sel.p;
@@ -15740,6 +15776,10 @@ void main(){
       const g = { id: String(c.id), sport: "UFC", t: Date.parse(c.date || e.date), st: st.state || "pre", d: st.shortDetail || "", a: side(cs[0]), h: side(cs[1]), pd: (c.status && c.status.period) || 0, clk: (c.status && c.status.clock) || 0, sty: 0,
         nt: [e.shortName || e.name || "", (c.type && c.type.abbreviation) || ""].filter(Boolean).join(" \u00b7 "), card: e.name || "", evT: Date.parse(e.date) };
       g.net = ((((c.broadcasts || [])[0] || {}).names) || [])[0] || ""; g.ven = c.venue ? { nm: c.venue.fullName || "", indoor: true } : null; g.ns = true; g.city = ""; g.abroad = false;
+      { const dt = (c.details || []).map((d) => (d.type && d.type.text) || "").join(" | "), how = /\bdraw\b/i.test(dt) ? "draw" : /no contest/i.test(dt) ? "nc" : /disqual|\bdq\b/i.test(dt) ? "dq" : /kotko|ko\/tko|\btko\b|\bko\b|knock/i.test(dt) ? "ko" : /submission/i.test(dt) ? "sub" : /decision/i.test(dt) ? "dec" : null;
+        const rd = (c.status && c.status.period) || 0, clk = (c.status && c.status.displayClock) || "", mm = clk.split(":").map(Number);
+        g.ufc = { rd, clk, secs: rd ? (rd - 1) * 300 + ((mm[0] || 0) * 60 + (mm[1] || 0)) : 0, sched: ((c.format || {}).regulation || {}).periods || 3, how: fin ? how : null, win: fin ? (cs[0].winner ? "a" : cs[1].winner ? "h" : null) : null };
+        if (st.state === "in" && rd) g.d = `R${rd}${clk && clk !== "0:00" ? " " + clk : ""}`; }
       out.push(g);
     }
     return out;
@@ -22342,8 +22382,8 @@ void main(){
   }
 
   // ---------- scan a bet slip (Gemini via Firebase AI Logic) ----------
-  const SLIP_PROMPT = "You read screenshots of sportsbook bet slips and My Bets pages (usually FanDuel, DraftKings or Polymarket) and extract every bet on them, exactly as printed.\nRules:\n- One entry per bet. A parlay (\"Parlay\", \"N Leg Parlay\", \"N Pick Parlay\", a Same Game Parlay / SGP / SGP+) is ONE bet, and every selection row under it is its own leg, in order. Count the rows: never merge two selections into one leg and never drop one. A straight bet has exactly one leg.\n- odds: the American odds of the whole bet as printed (an integer, e.g. -115, 450). If the odds were boosted (\"Profit Boost\", a struck-through price next to a new one), use the new boosted odds.\n- stake: the amount wagered (\"Wager\", \"Stake\", \"Risk\", \"Bet\"). payout: the total paid back INCLUDING the stake (\"Total Payout\", \"To Pay\", \"Payout\", \"Potential Payout\", \"Returns\"). to_win: only when the slip prints the profit (\"To Win\", \"Profit\"). Copy every dollar amount digit for digit, cents included; never work them out.\n- For each leg: pick = the selection as written (team or player and line); line_text = the exact words on the slip that hold this leg's number (e.g. \"Over 27.5\", \"To Score 30+ Points\", \"40+ Pts + Reb + Ast\", \"Rebounds O 10.5\", \"-4.5\", \"Over 221.5\"), else null; team = the team name only (for a player bet, his team if shown); odds = this leg's own odds if printed;\n  market = \"ml\" (moneyline/to win), \"spread\" (point spread, run line, puck line, alt spread), \"total\" (over/under game total, alt total), \"anytime_td\" (anytime touchdown scorer, \"to score a TD\"), \"first_td\" (first touchdown scorer of the game) or \"prop\" (any player stat);\n  player = for player bets, the player's full name exactly as written, accents kept (e.g. \"Nikola Jokić\", \"Bucky Irving\"), else null;\n  side = \"over\" or \"under\" for totals and player stats, else null; line = the signed number for spreads (e.g. -6.5), the total, or the player's stat line. Never leave line null when the leg prints a number;\n  away and home = the game's two teams if shown (\"A @ B\": A away, B home); the legs of a Same Game Parlay all take the game printed on the card;\n  sport = NFL, CFB, NBA, CBB, MLB, NHL or OTHER, judged from the teams, players and market.\n- Milestones: \"N+ <stat>\" (\"30+ Points\", \"To Score 30+ Points\", \"40+ Pts + Reb + Ast\", \"3+ Made Threes\", \"10+ Rebounds\") means side over, line N - 0.5 (30+ is 29.5, 3+ is 2.5). \"Over X\" / \"O X\" is side over, line X; \"Under X\" / \"U X\" is side under, line X.\n- Basketball (NBA / college) player stats: \"points\", \"rebounds\", \"assists\", \"threes\" (made threes, 3-pointers made, 3PM), \"steals\", \"blocks\", \"pra\" (points + rebounds + assists, PRA), \"pts_reb\" (points + rebounds), \"pts_ast\" (points + assists), \"reb_ast\" (rebounds + assists), \"stl_blk\" (steals + blocks, stocks), \"turnovers\", \"double_double\", \"triple_double\" (those two: side over, line 0.5). Read a combined stat word by word: \"Rebounds + Assists\" is reb_ast, not pra.\n- Hockey player props (NHL): market = \"prop\", player = the player's full name, stat = \"goals\", \"assists\", \"points\", \"shots_on_goal\" or \"saves\", side = \"over\" or \"under\", line = the number (\"To score a goal\" / anytime goal scorer = stat goals, side over, line 0.5; \"2+ shots\" = side over, line 1.5; \"1+ point\" = stat points, over 0.5), sport = NHL.\n- Other player props: market = \"prop\", player = the player's full name, sport = MLB, NBA, CBB, NFL or CFB, side = \"over\" or \"under\", line = the number (\"2+ hits\" = over 1.5; \"to hit a home run\" = stat home_runs, over 0.5; \"25+ points\" = over 24.5), stat = MLB: \"hits\", \"home_runs\", \"rbis\", \"runs\", \"walks\", \"hits_runs_rbis\", \"strikeouts\" (pitcher), \"earned_runs\", \"hits_allowed\", \"outs\"; NBA / college basketball: see the basketball rule below; NFL / college football: \"passing_yards\", \"passing_tds\", \"completions\", \"interceptions\", \"rushing_yards\", \"rushing_attempts\", \"receiving_yards\", \"receptions\", \"rush_rec_yards\".\n- book = \"FD\" for FanDuel, \"DK\" for DraftKings, \"PM\" for Polymarket (a prediction market: prices in cents like 62¢, shares, avg price, Buy / Yes / No), null if you can't tell.\n- multiplier = the payout multiplier when the slip prints one with an x (16.88 for \"16.88x\", 1.06 for \"1.06x\"), else null; on a parlay, the whole bet's.\n- Polymarket: price = the price paid per share in cents (e.g. 62 for 62¢; the avg price if shown), and odds = null unless American odds are printed (the multiplier, if shown, goes in multiplier); stake = the amount spent (cost / total); to_win = the profit if it pays (payout minus cost) when shown. The pick is the outcome bought: a team for a moneyline market like \"Bills vs. Rams\", \"Rams -3.5\" for \"Spread: Rams (-3.5)\", \"Over 54.5\" for \"O/U 54.5\"; buying \"No\" on one team of a two-team game means the other team. Take market, line and side from the market title.\n- result (each leg) = \"won\" when the slip marks that leg as won (a green check, \"Won\", a green or filled circle), \"lost\" when it is marked lost (a red x, \"Lost\"), \"void\" when voided or pushed, \"open\" or null while it is still pending. On a parlay some legs can be settled while others are still pending: mark each leg on its own.\n- when (each leg) = the date or time the slip shows for that leg's game, copied as printed (\"Thu 8:15PM ET\", \"Nov 5\", \"11/05 1:00 PM\", \"Yesterday\", \"Final\"), else null.\n- Use null for anything not visible. Never invent numbers.";
-  const SLIP_SCHEMA = {"type": "OBJECT", "properties": {"bets": {"type": "ARRAY", "items": {"type": "OBJECT", "properties": {"book": {"type": "STRING", "enum": ["FD", "DK", "PM"], "nullable": true}, "price": {"type": "NUMBER", "nullable": true}, "kind": {"type": "STRING", "enum": ["straight", "parlay"]}, "odds": {"type": "INTEGER", "nullable": true}, "stake": {"type": "NUMBER", "nullable": true}, "to_win": {"type": "NUMBER", "nullable": true}, "legs": {"type": "ARRAY", "items": {"type": "OBJECT", "properties": {"pick": {"type": "STRING"}, "team": {"type": "STRING", "nullable": true}, "market": {"type": "STRING", "enum": ["ml", "spread", "total", "anytime_td", "first_td", "prop"]}, "player": {"type": "STRING", "nullable": true}, "stat": {"type": "STRING", "enum": ["goals", "assists", "points", "shots_on_goal", "saves", "hits", "home_runs", "rbis", "runs", "walks", "hits_runs_rbis", "strikeouts", "earned_runs", "hits_allowed", "outs", "rebounds", "threes", "steals", "blocks", "pra", "passing_yards", "passing_tds", "completions", "interceptions", "rushing_yards", "rushing_attempts", "receiving_yards", "receptions", "rush_rec_yards", "pts_reb", "pts_ast", "reb_ast", "stl_blk", "turnovers", "double_double", "triple_double"], "nullable": true}, "side": {"type": "STRING", "enum": ["over", "under"], "nullable": true}, "line": {"type": "NUMBER", "nullable": true}, "odds": {"type": "INTEGER", "nullable": true}, "price": {"type": "NUMBER", "nullable": true}, "away": {"type": "STRING", "nullable": true}, "home": {"type": "STRING", "nullable": true}, "sport": {"type": "STRING", "enum": ["NFL", "CFB", "NBA", "CBB", "MLB", "NHL", "UFC", "OTHER"]}, "line_text": {"type": "STRING", "nullable": true}, "multiplier": {"type": "NUMBER", "nullable": true}, "result": {"type": "STRING", "enum": ["won", "lost", "void", "open"], "nullable": true}, "when": {"type": "STRING", "nullable": true}}, "required": ["pick", "market", "sport"], "propertyOrdering": ["pick", "line_text", "market", "player", "team", "stat", "side", "line", "odds", "multiplier", "price", "away", "home", "sport", "result", "when"]}}, "payout": {"type": "NUMBER", "nullable": true}, "multiplier": {"type": "NUMBER", "nullable": true}}, "required": ["kind", "legs"], "propertyOrdering": ["book", "kind", "legs", "odds", "multiplier", "stake", "payout", "to_win", "price"]}}}, "required": ["bets"]};
+  const SLIP_PROMPT = "You read screenshots of sportsbook bet slips and My Bets pages (usually FanDuel, DraftKings or Polymarket) and extract every bet on them, exactly as printed.\nRules:\n- One entry per bet. A parlay (\"Parlay\", \"N Leg Parlay\", \"N Pick Parlay\", a Same Game Parlay / SGP / SGP+) is ONE bet, and every selection row under it is its own leg, in order. Count the rows: never merge two selections into one leg and never drop one. A straight bet has exactly one leg.\n- odds: the American odds of the whole bet as printed (an integer, e.g. -115, 450). If the odds were boosted (\"Profit Boost\", a struck-through price next to a new one), use the new boosted odds.\n- stake: the amount wagered (\"Wager\", \"Stake\", \"Risk\", \"Bet\"). payout: the total paid back INCLUDING the stake (\"Total Payout\", \"To Pay\", \"Payout\", \"Potential Payout\", \"Returns\"). to_win: only when the slip prints the profit (\"To Win\", \"Profit\"). Copy every dollar amount digit for digit, cents included; never work them out.\n- For each leg: pick = the selection as written (team or player and line); line_text = the exact words on the slip that hold this leg's number (e.g. \"Over 27.5\", \"To Score 30+ Points\", \"40+ Pts + Reb + Ast\", \"Rebounds O 10.5\", \"-4.5\", \"Over 221.5\"), else null; team = the team name only (for a player bet, his team if shown); odds = this leg's own odds if printed;\n  market = \"ml\" (moneyline/to win), \"spread\" (point spread, run line, puck line, alt spread), \"total\" (over/under game total, alt total), \"anytime_td\" (anytime touchdown scorer, \"to score a TD\"), \"first_td\" (first touchdown scorer of the game) or \"prop\" (any player stat);\n  player = for player bets, the player's full name exactly as written, accents kept (e.g. \"Nikola Jokić\", \"Bucky Irving\"), else null;\n  side = \"over\" or \"under\" for totals and player stats, else null; line = the signed number for spreads (e.g. -6.5), the total, or the player's stat line. Never leave line null when the leg prints a number;\n  away and home = the game's two teams if shown (\"A @ B\": A away, B home); the legs of a Same Game Parlay all take the game printed on the card;\n  sport = NFL, CFB, NBA, CBB, MLB, NHL, UFC or OTHER, judged from the teams, players and market.\n- UFC / MMA fights (sport = UFC): away and home = the two fighters' full names in the order printed (\"A vs B\": A away, B home); fighter = the fighter the bet backs, full name as printed (null when the bet backs neither, like a rounds total or goes the distance). market = \"ml\" for a fighter to win (moneyline, \"to win\"); \"total\" for total rounds (\"Over 2.5 Rounds\", \"O 1.5\"): side and line, nothing else; \"fight\" for everything else on a fight: method of victory, round betting, goes the distance and their combos. For \"fight\": method = \"ko\" (KO/TKO, KO/TKO/DQ, knockout), \"sub\" (submission), \"dec\" (decision: unanimous, split, majority or any decision), \"itd\" (inside the distance, by finish, KO or submission, wins by stoppage), else null; round = the round number when the bet names one (\"in Round 2\", \"Rd 2\", \"R2\", \"2nd round\"), else null; distance = \"yes\" for \"fight goes the distance\" / \"goes to decision\", \"no\" for \"fight doesn't go the distance\" / \"won't go the distance\", else null; side and line = a rounds total that is part of the bet (\"& Over 1.5 Rounds\"), else null. Examples: \"Ciryl Gane by KO/TKO\" = fighter Ciryl Gane, method ko; \"Gane wins in Round 2\" = fighter Gane, round 2; \"Gane by KO in Round 1\" = fighter Gane, method ko, round 1; \"Gane & Over 1.5 Rounds\" = fighter Gane, side over, line 1.5; \"Gane by Decision\" = fighter Gane, method dec; \"Fight Goes the Distance - No\" = distance no, fighter null; a same-fight parlay of these is a parlay, one leg per row.\n- Milestones: \"N+ <stat>\" (\"30+ Points\", \"To Score 30+ Points\", \"40+ Pts + Reb + Ast\", \"3+ Made Threes\", \"10+ Rebounds\") means side over, line N - 0.5 (30+ is 29.5, 3+ is 2.5). \"Over X\" / \"O X\" is side over, line X; \"Under X\" / \"U X\" is side under, line X.\n- Basketball (NBA / college) player stats: \"points\", \"rebounds\", \"assists\", \"threes\" (made threes, 3-pointers made, 3PM), \"steals\", \"blocks\", \"pra\" (points + rebounds + assists, PRA), \"pts_reb\" (points + rebounds), \"pts_ast\" (points + assists), \"reb_ast\" (rebounds + assists), \"stl_blk\" (steals + blocks, stocks), \"turnovers\", \"double_double\", \"triple_double\" (those two: side over, line 0.5). Read a combined stat word by word: \"Rebounds + Assists\" is reb_ast, not pra.\n- Hockey player props (NHL): market = \"prop\", player = the player's full name, stat = \"goals\", \"assists\", \"points\", \"shots_on_goal\" or \"saves\", side = \"over\" or \"under\", line = the number (\"To score a goal\" / anytime goal scorer = stat goals, side over, line 0.5; \"2+ shots\" = side over, line 1.5; \"1+ point\" = stat points, over 0.5), sport = NHL.\n- Other player props: market = \"prop\", player = the player's full name, sport = MLB, NBA, CBB, NFL or CFB, side = \"over\" or \"under\", line = the number (\"2+ hits\" = over 1.5; \"to hit a home run\" = stat home_runs, over 0.5; \"25+ points\" = over 24.5), stat = MLB: \"hits\", \"home_runs\", \"rbis\", \"runs\", \"walks\", \"hits_runs_rbis\", \"strikeouts\" (pitcher), \"earned_runs\", \"hits_allowed\", \"outs\"; NBA / college basketball: see the basketball rule below; NFL / college football: \"passing_yards\", \"passing_tds\", \"completions\", \"interceptions\", \"rushing_yards\", \"rushing_attempts\", \"receiving_yards\", \"receptions\", \"rush_rec_yards\".\n- book = \"FD\" for FanDuel, \"DK\" for DraftKings, \"PM\" for Polymarket (a prediction market: prices in cents like 62¢, shares, avg price, Buy / Yes / No), null if you can't tell.\n- multiplier = the payout multiplier when the slip prints one with an x (16.88 for \"16.88x\", 1.06 for \"1.06x\"), else null; on a parlay, the whole bet's.\n- Polymarket: price = the price paid per share in cents (e.g. 62 for 62¢; the avg price if shown), and odds = null unless American odds are printed (the multiplier, if shown, goes in multiplier); stake = the amount spent (cost / total); to_win = the profit if it pays (payout minus cost) when shown. The pick is the outcome bought: a team for a moneyline market like \"Bills vs. Rams\", \"Rams -3.5\" for \"Spread: Rams (-3.5)\", \"Over 54.5\" for \"O/U 54.5\"; buying \"No\" on one team of a two-team game means the other team. Take market, line and side from the market title.\n- result (each leg) = \"won\" when the slip marks that leg as won (a green check, \"Won\", a green or filled circle), \"lost\" when it is marked lost (a red x, \"Lost\"), \"void\" when voided or pushed, \"open\" or null while it is still pending. On a parlay some legs can be settled while others are still pending: mark each leg on its own.\n- when (each leg) = the date or time the slip shows for that leg's game, copied as printed (\"Thu 8:15PM ET\", \"Nov 5\", \"11/05 1:00 PM\", \"Yesterday\", \"Final\"), else null.\n- Use null for anything not visible. Never invent numbers.";
+  const SLIP_SCHEMA = {"type": "OBJECT", "properties": {"bets": {"type": "ARRAY", "items": {"type": "OBJECT", "properties": {"book": {"type": "STRING", "enum": ["FD", "DK", "PM"], "nullable": true}, "price": {"type": "NUMBER", "nullable": true}, "kind": {"type": "STRING", "enum": ["straight", "parlay"]}, "odds": {"type": "INTEGER", "nullable": true}, "stake": {"type": "NUMBER", "nullable": true}, "to_win": {"type": "NUMBER", "nullable": true}, "legs": {"type": "ARRAY", "items": {"type": "OBJECT", "properties": {"pick": {"type": "STRING"}, "team": {"type": "STRING", "nullable": true}, "market": {"type": "STRING", "enum": ["ml", "spread", "total", "anytime_td", "first_td", "prop", "fight"]}, "fighter": {"type": "STRING", "nullable": true}, "method": {"type": "STRING", "enum": ["ko", "sub", "dec", "itd"], "nullable": true}, "round": {"type": "INTEGER", "nullable": true}, "distance": {"type": "STRING", "enum": ["yes", "no"], "nullable": true}, "player": {"type": "STRING", "nullable": true}, "stat": {"type": "STRING", "enum": ["goals", "assists", "points", "shots_on_goal", "saves", "hits", "home_runs", "rbis", "runs", "walks", "hits_runs_rbis", "strikeouts", "earned_runs", "hits_allowed", "outs", "rebounds", "threes", "steals", "blocks", "pra", "passing_yards", "passing_tds", "completions", "interceptions", "rushing_yards", "rushing_attempts", "receiving_yards", "receptions", "rush_rec_yards", "pts_reb", "pts_ast", "reb_ast", "stl_blk", "turnovers", "double_double", "triple_double"], "nullable": true}, "side": {"type": "STRING", "enum": ["over", "under"], "nullable": true}, "line": {"type": "NUMBER", "nullable": true}, "odds": {"type": "INTEGER", "nullable": true}, "price": {"type": "NUMBER", "nullable": true}, "away": {"type": "STRING", "nullable": true}, "home": {"type": "STRING", "nullable": true}, "sport": {"type": "STRING", "enum": ["NFL", "CFB", "NBA", "CBB", "MLB", "NHL", "UFC", "OTHER"]}, "line_text": {"type": "STRING", "nullable": true}, "multiplier": {"type": "NUMBER", "nullable": true}, "result": {"type": "STRING", "enum": ["won", "lost", "void", "open"], "nullable": true}, "when": {"type": "STRING", "nullable": true}}, "required": ["pick", "market", "sport"], "propertyOrdering": ["pick", "line_text", "market", "player", "team", "fighter", "method", "round", "distance", "stat", "side", "line", "odds", "multiplier", "price", "away", "home", "sport", "result", "when"]}}, "payout": {"type": "NUMBER", "nullable": true}, "multiplier": {"type": "NUMBER", "nullable": true}}, "required": ["kind", "legs"], "propertyOrdering": ["book", "kind", "legs", "odds", "multiplier", "stake", "payout", "to_win", "price"]}}}, "required": ["bets"]};
   const rawB64 = (file) => new Promise((ok, bad) => { const r = new FileReader(); r.onload = () => { const v = String(r.result || ""), b = new String(v.slice(v.indexOf(",") + 1)); b.mime = file.type || "image/heic"; ok(b); }; r.onerror = () => bad(new Error("Couldn't open that picture. Try a screenshot instead.")); r.readAsDataURL(file); });
   async function shrink(file) {
     try { return await Promise.race([shrink0(file), new Promise((_, bad) => setTimeout(() => bad(new Error("slow")), 15e3))]); }
@@ -22526,6 +22566,19 @@ void main(){
     }
     return matchLeg1(leg, false);
   }
+  // a UFC leg on its fight: whose side (by the fighter's name), and the prop's parts
+  function ufcSel(leg, g, best) {
+    const fa = nameHit(leg.fighter, g.a), fh = nameHit(leg.fighter, g.h), side = leg.fighter ? (fa || fh ? (fa >= fh ? "a" : "h") : best.ta >= best.th ? "a" : "h") : leg.market === "ml" ? (best.ta >= best.th ? "a" : "h") : null;
+    const base = { g: g.id, o: leg.odds, sport: g.sport };
+    if (leg.market === "ml" && side) return Object.assign(base, { m: "ml", s: side, l: null });
+    const p = {}, ou = leg.side === "over" ? "o" : leg.side === "under" ? "u" : null;
+    if (leg.method && ["ko", "sub", "dec", "itd"].includes(leg.method)) p.how = leg.method;
+    if (Number(leg.round) > 0) p.r = Math.round(Number(leg.round));
+    if (ou && leg.line != null) p.ou = ou;
+    if (leg.distance === "yes" || leg.distance === "no") p.gtd = leg.distance === "yes";
+    if (!Object.keys(p).length) return side ? Object.assign(base, { m: "ml", s: side, l: null }) : null;
+    return Object.assign(base, { m: "uf", s: side, l: p.ou ? Math.abs(Number(leg.line)) : null, p });
+  }
   function matchLeg1(leg, strict) {
     if (leg && leg._td) return leg._td;
     if (!leg || leg.market === "prop" || leg.market === "anytime_td" || leg.market === "first_td") return null;
@@ -22534,14 +22587,15 @@ void main(){
       if (leg.sport && leg.sport !== "OTHER" && g.sport !== leg.sport) continue;
       if (strict && !legDayOk(leg, g)) continue;
       const pair = Math.max(nameHit(leg.away, g.a) + nameHit(leg.home, g.h), nameHit(leg.away, g.h) + nameHit(leg.home, g.a));
-      const ta = Math.max(nameHit(leg.team, g.a), nameHit(leg.pick, g.a)), th = Math.max(nameHit(leg.team, g.h), nameHit(leg.pick, g.h));
-      const score = pair * 2 + Math.max(ta, th);
+      const ta = Math.max(nameHit(leg.team, g.a), nameHit(leg.pick, g.a), nameHit(leg.fighter, g.a)), th = Math.max(nameHit(leg.team, g.h), nameHit(leg.pick, g.h), nameHit(leg.fighter, g.h));
+      const score = pair * 2 + Math.max(ta, th) + (g.sport === "UFC" && Math.max(ta, th) === 1 ? 1 : 0);   // (a fighter's last name is enough on one night's card)
       if (score < (leg._any ? 3 : 2)) continue;
-      if (leg.market !== "total" && !ta && !th) continue;
+      if (leg.market !== "total" && !(leg.market === "fight" && !leg.fighter && pair) && !ta && !th) continue;
       if (!best || score > best.score || (score === best.score && Math.abs(g.t - Date.now()) < Math.abs(best.g.t - Date.now()))) best = { g, score, ta, th };
     }
     if (!best) return leg.sport && leg.sport !== "OTHER" && !leg._any ? matchLeg1({ ...leg, sport: "OTHER", _any: 1 }, strict) : null;
     const g = best.g;
+    if (g.sport === "UFC") return ufcSel(leg, g, best);
     if (leg.market === "total") {
       if (leg.side !== "over" && leg.side !== "under") return null;
       return { g: g.id, m: "tot", s: leg.side === "over" ? "o" : "u", l: leg.line == null ? (g.tot ? g.tot.l : null) : Math.abs(leg.line), o: leg.odds, sport: g.sport };
@@ -22656,7 +22710,7 @@ void main(){
       else { data.pick = legs[0].pick.slice(0, 80); data.sport = legs[0].sport !== "OTHER" ? legs[0].sport : ""; }
     } else {
       data.legs = legs.map((l, i) => { const m = ms[i], g = m && S.games.get(m.g); return g && !(m.m !== "ml" && !isTd(m.m) && m.l == null) ? mkLabel(g, m.m, m.s, m.l, m.p) : l.pick.slice(0, 80); });
-      data.legSel = ms.map((m) => { const g = m && S.games.get(m.g); if (!g || (m.m !== "ml" && !isTd(m.m) && m.l == null)) return null; starts.push(g.t); const o = { g: g.id, m: m.m, s: m.s, l: m.l, sp: g.sport, t: g.t }; if (m.p) o.p = m.p; if (m.o) o.o = m.o; return o; });
+      data.legSel = ms.map((m) => { const g = m && S.games.get(m.g); if (!g || (m.m !== "ml" && m.m !== "uf" && !isTd(m.m) && m.l == null)) return null; starts.push(g.t); const o = { g: g.id, m: m.m, s: m.s, l: m.l, sp: g.sport, t: g.t }; if (m.p) o.p = m.p; if (m.o) o.o = m.o; return o; });
       const sp = [...new Set(legs.map((l, i) => (data.legSel[i] && data.legSel[i].sp) || l.sport).filter((s) => s && s !== "OTHER"))];
       data.sport = sp.length === 1 ? sp[0] : sp.length ? "Mixed" : "";
       data.pick = data.legs.length + "-leg parlay";
@@ -23147,7 +23201,7 @@ void main(){
       }, onErr));
     });
   }
-  window.__sb3 = { S, BUILD, betTypes, legsOf, evalSel, gameOf, isMe, personKey, personName, personCol, phase, fOdds, fU, fUSD, ppu, netOf, outcome, standings, startLabel, mktName, flexOf, hasBall, gameDone, bookKey, tv: () => document.body.classList.contains("tv") && !PHONE() };
+  window.__sb3 = { S, BUILD, betTypes, matchLeg, legsOf, evalSel, gameOf, isMe, personKey, personName, personCol, phase, fOdds, fU, fUSD, ppu, netOf, outcome, standings, startLabel, mktName, flexOf, hasBall, gameDone, bookKey, tv: () => document.body.classList.contains("tv") && !PHONE() };
   if (window.__v3.want || /[?&]v3demo/.test(location.search)) import("./v3/v3.js?v=" + BUILD).catch((e) => console.warn("v3", e));
 })();
 </script>
