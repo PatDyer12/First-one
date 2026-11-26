@@ -73,6 +73,38 @@ V2_CSS = """
 .gp .lean { background:var(--amberbg); color:var(--amber); border-radius:12px; padding:2px 8px; }
 """
 
+HOLIDAY_CSS = """
+.hero { background:
+          repeating-linear-gradient(90deg, rgba(255,255,255,.07) 0 1.5px, transparent 1.5px 46px),
+          radial-gradient(ellipse at 85% 0%, rgba(234,140,40,.42), transparent 55%),
+          linear-gradient(135deg, #3a1307 0%, #6a230f 55%, #3a1307 100%);
+        border-bottom-color:#d97706; }
+.hero h1 span { color:#fbbf24; }
+.kpi { background:#260c04; }
+.tg { width:100%; border-collapse:collapse; font-size:7.8pt; }
+.tg th { font-size:6.4pt; letter-spacing:.1em; text-transform:uppercase; color:var(--mute); text-align:left; padding:5px 5px;
+         border-bottom:1.5px solid var(--ink); }
+.tg td { padding:5px 5px; border-bottom:1px solid var(--line); vertical-align:top; font-variant-numeric:tabular-nums; }
+.tg td.n { white-space:nowrap; }
+.tg .why { color:var(--mute); font-size:7pt; display:block; margin-top:1px; }
+.tg tr.sec td { background:var(--soft); font-size:6.6pt; font-weight:800; letter-spacing:.12em; text-transform:uppercase; color:var(--mute); }
+.vd { display:inline-block; font-size:6.3pt; font-weight:800; letter-spacing:.08em; text-transform:uppercase; border-radius:20px;
+      padding:2px 7px; white-space:nowrap; }
+.vd.Passed { background:var(--greenbg); color:var(--green); } .vd.Weak { background:var(--amberbg); color:var(--amber); }
+.vd.Noise { background:var(--soft); color:var(--mute); border:1px solid var(--line); }
+.neg { color:var(--red); } .pos { color:var(--green); }
+.find { border-left:3px solid #d97706; background:#fff8ef; border-radius:0 10px 10px 0; padding:8px 12px; margin:10px 0;
+        font-size:8pt; break-inside:avoid; }
+.find li { margin:3px 0; }
+.se { width:100%; border-collapse:collapse; font-size:7.8pt; margin-top:4px; }
+.se td, .se th { padding:3px 6px; border-bottom:1px solid var(--line); text-align:center; font-variant-numeric:tabular-nums; }
+.se th { font-size:6.4pt; letter-spacing:.08em; text-transform:uppercase; color:var(--mute); }
+.se td:first-child, .se th:first-child { text-align:left; color:var(--ink2); width:34%; }
+.se td.win { font-weight:800; color:var(--ink); background:#f6fbf8; }
+.se .rk { color:var(--mute); font-size:6.8pt; }
+.se-sum { font-size:7.6pt; color:var(--ink2); margin-top:5px; }
+"""
+
 
 def game_of(gid):
     p = gid.split("_")
@@ -122,6 +154,8 @@ def sheet_rows(S, F):
                      "sig": f"price beats Pinnacle (fair {e['fair_odds']:+d}) · EV {e['ev']:+.1f}%", "tier": ("sharp", "Sharp price")})
     tz = json.load(open(os.path.join(DATA, "teasers.json"))) if os.path.exists(os.path.join(DATA, "teasers.json")) else {}
     for pr in tz.get("pairs", []):
+        if not all(S.upcoming(x) for x in pr["games"]):
+            continue
         rows.append({"game": pr["games"][0], "bet": " / ".join(pr["legs"]), "odds": "2-team 6-pt", "book": "−130 or better",
                      "u": pr["units"], "sig": "Wong teaser", "tier": ("tz", "Teaser")})
     pp = os.path.join(DATA, "props.json")
@@ -230,6 +264,9 @@ def sharp_block(S):
     """The sharp-market section: how prices are checked, the price edges found, and the derivative scan."""
     mk = json.load(open(os.path.join(DATA, "market_nfl.json"))) if os.path.exists(os.path.join(DATA, "market_nfl.json")) else {}
     P = json.load(open(os.path.join(DATA, "props.json"))) if os.path.exists(os.path.join(DATA, "props.json")) else {}
+    if not mk:
+        return ["<p class='empty'>Not run for this card: the sharp check needs the Odds API key (Pinnacle and FanDuel "
+                "prices). Prices here are DraftKings, from ESPN's feed.</p>"]
     h = ["<div class='propnote'><b>How the sharp check works.</b> Pinnacle takes the biggest bets at the lowest margins, so "
          "its prices with the margin removed are the best public read on the true odds. Every FanDuel and DraftKings price is "
          "checked against them; where the lines differ, half points are valued by how often games land exactly on each "
@@ -279,8 +316,9 @@ def weather_block(S):
             flags.append("rain at kickoff")
         if x["temp"] <= 32:
             flags.append("sub-freezing")
+        gust = f" (gusts {x['gust']:.0f})" if "gust" in x and pd.notna(x["gust"]) else ""
         rows.append(f"<tr><td>{W.matchup(S, g)}</td><td>{S.when(g)}</td><td class='{'hot' if x['wind'] >= 12 else ''}'>"
-                    f"{x['wind']:.0f} mph</td><td>{x['temp']:.0f}°F</td><td>{x['precip']:.1f} mm</td>"
+                    f"{x['wind']:.0f} mph{gust}</td><td>{x['temp']:.0f}°F</td><td>{x['precip']:.1f} mm</td>"
                     f"<td>{E('; '.join(flags)) or '—'}</td></tr>")
     note = ("<div class='note'>Kickoff forecasts for every outdoor game. Full-game wind unders were retired: they won 305-211 "
             "through 2023 but went 38-41 since 2024 as books started pricing wind in. First-half wind unders still hold "
@@ -303,13 +341,129 @@ def props_section(S):
             "Add the key and rerun props.py, and this page fills in with yards, receptions and their game logs.</p>"]
 
 
-def render():
+def watch_list(S, F):
+    """The model's sides within 3% of an edge on this card's games, with the price that makes them a bet. Skips the
+    other side of anything we're already betting."""
+    card = json.load(open(os.path.join(DATA, "card.json")))
+    ours = {(p["game"], p["market"]): p["side"] for p in F["plays"]}
+    out = []
+    for p in card["week"]["picks"]:
+        if not S.upcoming(p["game"]) or p["tier"] not in ("lean", "watch") or p["ev%"] < -3:
+            continue
+        mk = {"spread": "spread", "ml": "spread", "total": "total"}[p["market"]]
+        if (p["game"], mk) in ours and ours[(p["game"], mk)] != p["side"]:
+            continue
+        out.append(f"<div><b>{E(p['game'])} · {E(p['bet'])}</b> {W.fmt_odds(p['odds'])} {E(p['book'])}: model "
+                   f"{p['win%']:g}% ({p['ev%']:+.1f}% at this price). Bet it at {E(p['target'])}.</div>")
+    if not out:
+        return []
+    return ["<h3 style='margin-top:14px'>Watch list</h3><div class='note'>Close to an edge: becomes a bet at the price "
+            "shown.</div><div class='passes'>"] + out + ["</div>"]
+
+
+def holiday_block(S):
+    """Thanksgiving trends from thanksgiving.py: every holiday trend tested, what each says about today's games."""
+    path = os.path.join(DATA, "thanksgiving.json")
+    if not os.path.exists(path):
+        return []
+    TG = json.load(open(path))
+    ideas = {i["idea"]: i for i in TG["ideas"]}
+    pct = lambda v: f"<span class='{'pos' if v > 0 else 'neg'}'>{v:+.1f}%</span>"  # noqa: E731
+    h = ["<h2>Thanksgiving Trends, Tested</h2>",
+         "<div class='note'>Every holiday trend you'll hear on TV today, written down with its reason first and then graded "
+         "against closing lines: all 73 Thanksgiving games since 1999 (Detroit and Dallas every year, the night game since "
+         "2006), plus every non-opener Thursday since 2011 for a bigger sample. To count, a trend needs t ≥ 2, a profit in "
+         "both halves of the sample and no losing since 2016.</div>",
+         "<table class='tg'><tr><th>Trend</th><th>Record</th><th>ROI</th><th>t</th><th>Since 2016</th><th>Verdict</th>"
+         "<th>Points to today</th></tr>"]
+    for scope in ("Thanksgiving 1999-2025", "All Thursdays 2011-2025"):
+        h.append(f"<tr class='sec'><td colspan='7'>{E(scope.replace('-', '–'))}</td></tr>")
+        for i in TG["ideas"]:
+            if i["scope"] != scope or i["bets"] < 8:
+                continue
+            h.append(f"<tr><td><b>{E(i['idea'].replace(' (all Thursdays)', ''))}</b><span class='why'>{E(i['why'])}</span></td>"
+                     f"<td class='n'>{E(i['record'])}<br><span class='rk'>{i['win%']:g}%</span></td><td class='n'>{pct(i['roi%'])}</td>"
+                     f"<td class='n'>{i['t']:+.2f}</td><td class='n'>{E(i['recent'])}</td>"
+                     f"<td><span class='vd {i['verdict']}'>{E(i['verdict'])}</span></td>"
+                     f"<td>{E(', '.join(i['today'])) or '—'}</td></tr>")
+    h.append("</table>")
+    g = lambda k, f: ideas[k][f] if k in ideas else "?"  # noqa: E731
+    h.append("<div class='find'><b>What the holiday data actually says</b><ul>"
+             f"<li><b>Nothing clears the bar.</b> 73 games is a small sample and 14 ideas were tested, so a fluke or two "
+             f"is expected. None of these alone is a bet.</li>"
+             f"<li><b>The holiday underdog story is backwards.</b> Thanksgiving dogs went {g('Thanksgiving underdog', 'record')} "
+             f"ATS, home dogs {g('Thanksgiving home underdog', 'record')}, and dogs of 7+ {g('Thanksgiving big dog (+7 or more)', 'record')}. "
+             f"The mirror (favorites covering ~60%) was found after the fact and doesn't hold on other Thursdays "
+             f"(7+ Thursday favorites {g('Thursday favorite of 7+ (all Thursdays): fade', 'record')} for the dog), "
+             f"so don't bet it, but don't take a dog just because it's a holiday.</li>"
+             f"<li><b>Detroit on Thanksgiving:</b> {g('Lions on Thanksgiving', 'record')} ATS since 1999. "
+             f"<b>Dallas:</b> {g('Cowboys on Thanksgiving', 'record')}, a coin flip despite the public money.</li>"
+             f"<li><b>The night game under</b> is {g('Thanksgiving night-game under', 'record')} since 2006 "
+             f"({g('Thanksgiving night-game under', 'recent')} since 2016). Only 19 games (t "
+             f"{g('Thanksgiving night-game under', 't'):+.2f}), so it's a watch-list trend, but tonight it lines up with "
+             f"rain and wind in Buffalo and with our tested first-half primetime under.</li>"
+             f"<li><b>The short week is priced in.</b> Thursday home teams {g('Thursday home team (all Thursdays)', 'record')} "
+             f"ATS, Thursday unders {g('Thursday under (all Thursdays)', 'record')}.</li></ul></div>")
+    # each team's holiday history
+    h.append("<h3>Today's teams on Thanksgiving</h3><table class='tg'><tr><th>Team</th><th>Thanksgiving SU</th>"
+             "<th>ATS</th><th>Last 5 Thanksgivings</th><th>All Thursdays since 2011 (ATS)</th></tr>")
+    for t, v in sorted(TG["teams"].items(), key=lambda kv: -kv[1]["tg_games"]):
+        h.append(f"<tr><td><b>{E(t)}</b></td><td class='n'>{E(v['tg_su'])}</td><td class='n'>{E(v['tg_ats'])}</td>"
+                 f"<td>{E(' · '.join(v['tg_last5'])) or '—'}</td><td class='n'>{E(v['thu_ats'])} ({E(v['thu_su'])} SU)</td></tr>")
+    h.append("</table>")
+    return h
+
+
+def stat_edges_block(S):
+    """Side-leaning stats for each game on the slate (trends.stat_edges)."""
+    h = ["<h2>Stat Edges</h2>",
+         "<div class='note'>Season-to-date EPA (garbage time removed), success rate, pass and run splits, turnovers, form "
+         "and point differential, with each team's league rank (1 = best) and the side each stat leans. A gap of 3 ranks "
+         "or less counts as even. The model already uses these and the line prices most of them in: this is the matchup "
+         "read, not a separate signal.</div>"]
+    for gm in sorted(S.rows, key=lambda x: (S.teams(x)[2] or "", x)):
+        away, home = gm.split(" @ ")
+        rows = T.stat_edges(S.season, S.week, away, home)
+        if not rows:
+            continue
+        n = {away: sum(r["lean"] == away for r in rows), home: sum(r["lean"] == home for r in rows),
+             "even": sum(r["lean"] == "even" for r in rows)}
+        b = S.board.get(gm, {})
+        line = " · ".join(x for x in (b.get("market_spread", ""), f"O/U {b['market_total']}" if b.get("market_total") else "") if x)
+        h.append(f"<div class='gp'><div class='gp-h'><div style='display:flex;gap:10px;align-items:center'>{S.logos(gm, 26)}"
+                 f"<div class='t'>{E(gm)}</div></div><div class='ln'>{E(S.when(gm))}<br>{E(line)}</div></div>"
+                 f"<table class='se'><tr><th>Stat</th><th>{E(away)}</th><th>{E(home)}</th><th>Leans</th></tr>")
+        for r in rows:
+            ca = " class='win'" if r["lean"] == away else ""
+            ch = " class='win'" if r["lean"] == home else ""
+            h.append(f"<tr><td>{E(r['stat'])}</td><td{ca}>{E(r['away'])} <span class='rk'>#{r['away_rank']}</span></td>"
+                     f"<td{ch}>{E(r['home'])} <span class='rk'>#{r['home_rank']}</span></td><td>{E(r['lean'])}</td></tr>")
+        h.append(f"</table><div class='se-sum'>Leans: <b>{E(away)} {n[away]}</b> · <b>{E(home)} {n[home]}</b> · even {n['even']}"
+                 f"</div></div>")
+    return h
+
+
+def render(day=None, holiday=None):
     S, F = W.Sport("nfl"), K.load_final("nfl")
+    if day:  # one day's games only (e.g. Thanksgiving)
+        keep = {}
+        for gm, r in S.rows.items():
+            d = S.teams(gm)[2]
+            if d and pd.Timestamp(d).tz_convert("America/New_York").strftime("%Y-%m-%d") == day:
+                keep[gm] = r
+        S.rows = keep
     rows = sheet_rows(S, F)
     risk = sum(r["u"] for r in rows)
-    h = K.hero(S, "nfl", f"NFL · Week {S.week} · {K.date_range(S)}", "Sunday <span>Card</span>",
-               [(len(rows), "Bets"), (f"{risk:g}u", "Units"), (K.money(risk), "Risked")])
-    h.insert(0, f"<style>{V2_CSS}{K.PROP_CSS}</style>")
+    if holiday == "thanksgiving":
+        when = pd.Timestamp(day).strftime("%a %b %-d, %Y") if day else K.date_range(S)
+        h = K.hero(S, "nfl", f"NFL · Thanksgiving · {when}", "Thanksgiving <span>Card</span>",
+                   [(len(rows), "Bets"), (f"{risk:g}u", "Units"), (K.money(risk), "Risked")], accent="#6a230f")
+        h.insert(0, f"<style>{V2_CSS}{K.PROP_CSS}</style>")
+        h.append(f"<style>{HOLIDAY_CSS}</style>")   # after the hero's own style so the holiday colors win
+    else:
+        h = K.hero(S, "nfl", f"NFL · Week {S.week} · {K.date_range(S)}", "Sunday <span>Card</span>",
+                   [(len(rows), "Bets"), (f"{risk:g}u", "Units"), (K.money(risk), "Risked")])
+        h.insert(0, f"<style>{V2_CSS}{K.PROP_CSS}</style>")
     # page 1: the sheet
     h += ["<h2>The Sheet</h2>", "<div class='note'>Every bet on the card, by kickoff. Details for each are on the pages "
           "behind this one.</div>",
@@ -331,7 +485,14 @@ def render():
     h.append("</table>")
     bet_games = {r["game"] for r in rows}
     h += ["<h3 style='margin-top:14px'>Passed</h3>", "<div class='passes'>"] + pass_list(S, F, bet_games) + ["</div>"]
+    if day:
+        h += watch_list(S, F)
     h.append("<div class='pagebreak'></div>")
+    if holiday == "thanksgiving":
+        h += holiday_block(S)
+        h.append("<div class='pagebreak'></div>")
+        h += stat_edges_block(S)
+        h.append("<div class='pagebreak'></div>")
     # page 2: support for each bet
     h += ["<h2>Bet Detail</h2>", "<div class='note'>Each full-game bet with every signal behind it, its record, and the "
           "price to beat.</div>"]
@@ -339,7 +500,9 @@ def render():
     h += [K.play_card(S, p) for p in plays] or ["<p class='empty'>No full-game bets this week.</p>"]
     h += ["<h2>Sharp Prices</h2>"] + sharp_block(S)
     h += ["<h2>First Half</h2>"] + first_half_block(S)
-    h += ["<h2>Teasers</h2>"] + K.teaser_block(S)
+    tz = json.load(open(os.path.join(DATA, "teasers.json"))) if os.path.exists(os.path.join(DATA, "teasers.json")) else {}
+    if not day or any(S.upcoming(l["game"]) for l in tz.get("legs", []) + tz.get("skipped", [])):
+        h += ["<h2>Teasers</h2>"] + K.teaser_block(S)
     h += ["<h2>Player Props</h2>"] + props_section(S)
     h.append("<div class='pagebreak'></div>")
     # game by game
@@ -367,10 +530,13 @@ def render():
 
 def write():
     K.ensure_fonts()
-    S, h = render()
+    arg = lambda k: sys.argv[sys.argv.index(k) + 1] if k in sys.argv else None  # noqa: E731
+    day, holiday = arg("--date"), arg("--holiday")
+    S, h = render(day, holiday)
     page = "<!doctype html><html><head><meta charset='utf-8'></head><body>" + "".join(h) + "</body></html>"
-    html_path = os.path.join(HERE, f"nfl_v2_week{S.week}.html")
-    pdf_path = os.path.join(HERE, f"nfl_v2_week{S.week}.pdf")
+    name = f"nfl_{holiday}_{S.season}" if holiday else f"nfl_v2_week{S.week}"
+    html_path = os.path.join(HERE, f"{name}.html")
+    pdf_path = os.path.join(HERE, f"{name}.pdf")
     with open(html_path, "w") as f:
         f.write(page)
     subprocess.run([W.CHROME, "--headless=new", "--no-sandbox", "--disable-gpu", "--no-pdf-header-footer",

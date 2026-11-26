@@ -303,9 +303,9 @@ def date_range(S):
             + d1.strftime(", %Y"))
 
 
-def hero(S, sport, eyebrow, title_html, kpis):
+def hero(S, sport, eyebrow, title_html, kpis, accent=None):
     books = "FanDuel · DraftKings" if os.path.exists(os.path.join(BET, "odds_api_key.txt")) or os.environ.get("ODDS_API_KEY") else "DraftKings"
-    css = W.CSS % {"accent": "#0b1b33" if sport == "nfl" else "#14532d"}
+    css = W.CSS % {"accent": accent or ("#0b1b33" if sport == "nfl" else "#14532d")}
     h = [f"<style>{css}{BASE_CSS}{NFL_CSS if sport == 'nfl' else CFB_CSS}</style><div class='hero'><div>",
          f"<div class='eyebrow'>{eyebrow}</div><h1>{title_html}</h1>",
          f"<div class='sub'>Best price at {books} · 1 unit = {money(1)}</div></div><div class='kpis'>"]
