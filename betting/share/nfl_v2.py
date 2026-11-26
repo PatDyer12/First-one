@@ -414,6 +414,48 @@ def holiday_block(S):
     return h
 
 
+def td_block(S):
+    """Anytime-TD model and each player's Thanksgiving TD history (td_scorers.py)."""
+    path = os.path.join(DATA, "td_scorers.json")
+    if not os.path.exists(path):
+        return []
+    D = json.load(open(path))
+    t = D["test"]
+    top = t.get("top", {})
+    h = ["<h2>Touchdown Scorers</h2>",
+         f"<div class='note'>Anytime TD chance for every skill player DraftKings lists today, from a model on season-to-date "
+         f"red-zone touches (inside the 10 and the 20, and his share of the team's), carries and targets, TD rate, last "
+         f"season, position and his team's implied points. Fit on 2022–{t['season'] - 1} and checked on {t['games']:,} "
+         f"{t['season']} player-games it never saw: clearly better than a position average (log loss {t['logloss']} vs "
+         f"{t['base_logloss']}), and when it said 65%+ ({top.get('n', 0)} times, {top.get('said')}% on average) they scored "
+         f"{top.get('happened')}%. No anytime-TD prices in the free feeds: <b>bet a player only if your book pays more than "
+         f"the fair odds.</b> It doesn't know tonight's rain in Buffalo, which should tilt that game toward the run.</div>",
+         "<table class='tg'><tr><th>Player</th><th>TD chance</th><th>Fair odds</th><th>Scored in (season)</th>"
+         "<th>Inside-10 touches</th><th>Team implied</th><th>Thanksgiving</th></tr>"]
+    for r in D["model"][:16]:
+        if not S.upcoming(next((g for g in S.rows if r["team"] in g.split(" @ ")), "")):
+            continue
+        q = " <span class='vd Weak'>Q</span>" if r.get("questionable") else ""
+        h.append(f"<tr><td><b>{E(r['player'])}</b>{q}<span class='why'>{E(r['team'])} {E(r['pos'])}</span></td>"
+                 f"<td class='n'><b>{r['prob']:g}%</b></td><td class='n'>{r['fair']:+d}</td>"
+                 f"<td class='n'>{r['td_games']}/{r['games']} games ({r['tds']} TD)</td>"
+                 f"<td class='n'>{r['rz10']} ({r['rz10_share']}% of team)</td><td class='n'>{r['implied']:g}</td>"
+                 f"<td class='n'>{E(r['tg'])}</td></tr>")
+    h.append("</table>")
+    hist = [x for x in D["history"] if x["tg_games"] >= 1]
+    h += ["<h3>Best Thanksgiving touchdown records (today's players)</h3>",
+          "<div class='note'>Every Thanksgiving game since 1999, any team. Rushing, receiving or return TDs (passing TDs don't "
+          "count for anytime bets). Fun context with tiny samples: there's no reason to expect a player to score more "
+          "often on the holiday, so the model above is the number to trust.</div>",
+          "<table class='tg'><tr><th>Player</th><th>Scored</th><th>TDs</th><th>Every Thanksgiving</th></tr>"]
+    for x in hist[:14]:
+        h.append(f"<tr><td><b>{E(x['player'])}</b><span class='why'>{E(x['team'])} {E(x['pos'])}</span></td>"
+                 f"<td class='n'><b>{x['tg_td_games']} of {x['tg_games']}</b></td><td class='n'>{x['tg_tds']}</td>"
+                 f"<td>{E(' · '.join(x['log']))}</td></tr>")
+    h.append("</table>")
+    return h
+
+
 def stat_edges_block(S):
     """Side-leaning stats for each game on the slate (trends.stat_edges)."""
     h = ["<h2>Stat Edges</h2>",
@@ -492,6 +534,8 @@ def render(day=None, holiday=None):
         h += holiday_block(S)
         h.append("<div class='pagebreak'></div>")
         h += stat_edges_block(S)
+        h.append("<div class='pagebreak'></div>")
+        h += td_block(S)
         h.append("<div class='pagebreak'></div>")
     # page 2: support for each bet
     h += ["<h2>Bet Detail</h2>", "<div class='note'>Each full-game bet with every signal behind it, its record, and the "
